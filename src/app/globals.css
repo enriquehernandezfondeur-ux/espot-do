@@ -1,26 +1,110 @@
 @import "tailwindcss";
 
+/* ── BRAND ────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --brand:        #35C493;
+  --brand-dark:   #28A87C;
+  --brand-light:  #4DD9A7;
+  --brand-dim:    rgba(53, 196, 147, 0.10);
+  --brand-border: rgba(53, 196, 147, 0.25);
+}
+
+/* ── MARKETPLACE — LIGHT GREY THEME ──────────────── */
+.light-theme {
+  --bg-base:      #F4F6F5;
+  --bg-surface:   #FFFFFF;
+  --bg-card:      #FFFFFF;
+  --bg-elevated:  #EEF2F0;
+  --bg-hover:     #E8EDEB;
+  --text-primary:   #0F1A17;
+  --text-secondary: #527068;
+  --text-muted:     #93B0A8;
+  --border-subtle: #E4EDEA;
+  --border-medium: #CDDDD9;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+  --shadow-hover: 0 4px 20px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06);
+}
+
+/* ── DASHBOARD — DARK THEME ──────────────────────── */
+.dark-theme {
+  --bg-base:      #0B0F0E;
+  --bg-surface:   #111916;
+  --bg-elevated:  #182420;
+  --bg-card:      #1A2B26;
+  --bg-hover:     #1E322D;
+  --text-primary:   #F0FDF9;
+  --text-secondary: #8AADA4;
+  --text-muted:     #4A706A;
+  --border-subtle: rgba(255,255,255,0.06);
+  --border-medium: rgba(255,255,255,0.10);
+  --shadow-card: none;
+  --shadow-hover: none;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+* { box-sizing: border-box; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── HOVER UTILITIES ─────────────────────────────── */
+.card-hover {
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  box-shadow: var(--shadow-card);
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--brand-border) !important;
+}
+.cat-hover { transition: background 0.15s, border-color 0.15s; }
+.cat-hover:hover {
+  background: var(--bg-elevated) !important;
+  border-color: var(--brand-border) !important;
+}
+.btn-brand {
+  background: var(--brand);
+  color: #fff;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn-brand:hover { background: var(--brand-dark); transform: translateY(-1px); }
+.btn-outline {
+  border: 1.5px solid var(--border-medium);
+  color: var(--text-secondary);
+  background: transparent;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-outline:hover { border-color: var(--brand); color: var(--brand); }
+.link-muted { color: var(--text-secondary); transition: color 0.15s; }
+.link-muted:hover { color: var(--brand); }
+
+/* ── INPUTS ──────────────────────────────────────── */
+.input-base {
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-medium);
+  color: var(--text-primary);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input-base::placeholder { color: var(--text-muted); }
+.input-base:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-dim);
+}
+
+/* ── SCROLLBAR ───────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-medium, #ccc); border-radius: 3px; }
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  opacity: 0.5;
+  cursor: pointer;
 }
