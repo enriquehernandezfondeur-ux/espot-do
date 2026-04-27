@@ -1,233 +1,213 @@
 'use client'
 
-import { useState } from 'react'
-import { CalendarDays, Users, MessageSquare, CheckCircle, X, Send, Plus } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { CalendarDays, Users, MessageSquare, X, Send, Loader2 } from 'lucide-react'
 import { formatDate, formatCurrency } from '@/lib/utils'
+import { getHostQuotes, respondToQuote } from '@/lib/actions/host'
+import { rejectBooking } from '@/lib/actions/booking'
 import { cn } from '@/lib/utils'
 
-const quotes = [
-  {
-    id: '1', guest_name: 'Laura Jiménez', guest_phone: '+1 (809) 555-0101',
-    event_type: 'Boda', event_date: '2026-06-14', guest_count: 150,
-    message: 'Buscamos un salón para boda íntima con jardín si es posible. Necesitamos que esté disponible desde las 3pm para fotos.',
-    status: 'pending', created_at: '2026-04-23',
-  },
-  {
-    id: '2', guest_name: 'Roberto Castillo', guest_phone: '+1 (829) 555-0202',
-    event_type: 'Graduación', event_date: '2026-05-25', guest_count: 100,
-    message: 'Necesito el espacio para graduación universitaria con DJ. ¿Tienen servicio de catering o solo el espacio?',
-    status: 'pending', created_at: '2026-04-22',
-  },
-  {
-    id: '3', guest_name: 'Empresa Seguros RD', guest_phone: '+1 (849) 555-0303',
-    event_type: 'Corporativo', event_date: '2026-05-15', guest_count: 80,
-    message: 'Buscamos un espacio para reunión corporativa de todo un día con coffee break.',
-    status: 'responded', created_at: '2026-04-20',
-    host_response: 'Buenos días, con gusto les ofrezco nuestro paquete corporativo: espacio 8 horas, proyector, sonido y 2 coffee breaks incluidos.',
-    quoted_price: 85000,
-    quote_includes: ['Espacio 8 horas', 'Proyector + pantalla', 'Sonido', '2 Coffee breaks', 'WiFi empresarial'],
-  },
-]
-
-const statusConfig: Record<string, { label: string; className: string }> = {
-  pending:   { label: 'Sin responder', className: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
-  responded: { label: 'Respondida',    className: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-  accepted:  { label: 'Aceptada',      className: 'bg-green-500/10 text-green-400 border-green-500/20' },
-  declined:  { label: 'Rechazada',     className: 'bg-red-500/10 text-red-400 border-red-500/20' },
-}
+type Quote = Awaited<ReturnType<typeof getHostQuotes>>[0]
 
 export default function CotizacionesPage() {
-  const [selected, setSelected] = useState<typeof quotes[0] | null>(quotes[0])
-  const [response, setResponse] = useState('')
-  const [price, setPrice] = useState('')
-  const [includes, setIncludes] = useState<string[]>([])
-  const [newInclude, setNewInclude] = useState('')
-  const [validUntil, setValidUntil] = useState('')
+  const [quotes, setQuotes]       = useState<Quote[]>([])
+  const [loading, setLoading]     = useState(true)
+  const [selected, setSelected]   = useState<Quote | null>(null)
+  const [response, setResponse]   = useState('')
+  const [price, setPrice]         = useState('')
+  const [sending, setSending]     = useState(false)
+  const [actionId, setActionId]   = useState<string | null>(null)
+
+  useEffect(() => {
+    getHostQuotes().then(d => { setQuotes(d); setLoading(false) })
+  }, [])
+
+  async function handleRespond() {
+    if (!selected || !price) return
+    setSending(true)
+    const result = await respondToQuote(selected.id, parseFloat(price), response || undefined)
+    if (!('error' in result)) {
+      // La reserva pasa a 'pending' con el precio cotizado
+      setQuotes(prev => prev.filter(q => q.id !== selected.id))
+      setSelected(null)
+      setResponse('')
+      setPrice('')
+    }
+    setSending(false)
+  }
+
+  async function handleReject(id: string) {
+    setActionId(id + 'r')
+    await rejectBooking(id)
+    setQuotes(prev => prev.filter(q => q.id !== id))
+    if (selected?.id === id) setSelected(null)
+    setActionId(null)
+  }
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-screen" style={{ background: 'var(--bg-base)' }}>
+      <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand)' }} />
+    </div>
+  )
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Cotizaciones</h1>
-        <p className="text-slate-400 mt-1">Responde rápido — los clientes eligen el espacio que primero responde</p>
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Cotizaciones</h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
+          {quotes.length > 0
+            ? `${quotes.length} solicitud${quotes.length !== 1 ? 'es' : ''} esperando tu respuesta`
+            : 'Sin cotizaciones pendientes'}
+        </p>
       </div>
 
-      <div className="flex gap-6 h-[calc(100vh-12rem)]">
-        {/* Lista de cotizaciones */}
-        <div className="w-80 shrink-0 space-y-2 overflow-y-auto">
-          {quotes.map(quote => (
-            <button
-              key={quote.id}
-              onClick={() => setSelected(quote)}
-              className={cn(
-                'w-full text-left p-4 rounded-xl border transition-all',
-                selected?.id === quote.id
-                  ? 'bg-[rgba(53,196,147,0.12)] border-[rgba(53,196,147,0.40)]'
-                  : 'bg-white/5 border-white/10 hover:border-white/20'
-              )}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-white font-medium text-sm">{quote.guest_name}</span>
-                <span className={cn('text-xs px-2 py-0.5 rounded-full border', statusConfig[quote.status].className)}>
-                  {statusConfig[quote.status].label}
-                </span>
-              </div>
-              <div className="text-amber-400 text-xs font-medium mb-1">{quote.event_type}</div>
-              <p className="text-slate-400 text-xs line-clamp-2">{quote.message}</p>
-              <div className="flex items-center gap-3 mt-2 text-slate-500 text-xs">
-                <span className="flex items-center gap-1"><CalendarDays size={10} /> {formatDate(quote.event_date)}</span>
-                <span className="flex items-center gap-1"><Users size={10} /> {quote.guest_count}</span>
-              </div>
-            </button>
-          ))}
+      {quotes.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 rounded-3xl text-center"
+          style={{ background: 'var(--bg-card)', border: '2px dashed var(--border-medium)' }}>
+          <MessageSquare size={32} className="mb-3" style={{ color: 'var(--text-muted)' }} />
+          <p className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>Sin solicitudes pendientes</p>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            Las cotizaciones aparecen aquí cuando alguien solicita un precio personalizado para tu espacio.
+          </p>
         </div>
-
-        {/* Panel de detalle / respuesta */}
-        {selected ? (
-          <div className="flex-1 bg-white/5 border border-white/10 rounded-2xl overflow-y-auto">
-            {/* Header */}
-            <div className="p-6 border-b border-white/10">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-white font-bold text-lg">{selected.guest_name}</span>
-                    <span className={cn('text-xs px-2.5 py-1 rounded-full border', statusConfig[selected.status].className)}>
-                      {statusConfig[selected.status].label}
+      ) : (
+        <div className="flex gap-6 h-[calc(100vh-14rem)]">
+          {/* Lista */}
+          <div className="w-80 shrink-0 space-y-2 overflow-y-auto">
+            {quotes.map(q => {
+              const g = (q as any).profiles
+              return (
+                <button key={q.id} onClick={() => setSelected(q)}
+                  className={cn('w-full text-left p-4 rounded-2xl border transition-all')}
+                  style={selected?.id === q.id
+                    ? { background: 'var(--brand-dim)', borderColor: 'var(--brand)' }
+                    : { background: 'var(--bg-card)', borderColor: 'var(--border-subtle)' }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                      {g?.full_name ?? 'Cliente'}
+                    </span>
+                    <span className="text-xs px-2 py-0.5 rounded-full font-medium"
+                      style={{ background: 'rgba(8,145,178,0.1)', color: '#0891B2' }}>
+                      Cotización
                     </span>
                   </div>
-                  <div className="text-slate-400 text-sm">{selected.guest_phone}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-amber-400 font-semibold">{selected.event_type}</div>
-                  <div className="text-slate-400 text-sm">{formatDate(selected.event_date)} · {selected.guest_count} personas</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 space-y-6">
-              {/* Mensaje del cliente */}
-              <div>
-                <div className="flex items-center gap-2 mb-3 text-slate-400 text-sm font-medium">
-                  <MessageSquare size={16} /> Solicitud del cliente
-                </div>
-                <div className="bg-slate-800/50 rounded-xl p-4 text-slate-300 text-sm leading-relaxed border border-white/5">
-                  "{selected.message}"
-                </div>
-              </div>
-
-              {/* Si ya fue respondida */}
-              {selected.status === 'responded' && 'host_response' in selected && (
-                <div>
-                  <div className="text-slate-400 text-sm font-medium mb-3">Tu respuesta enviada</div>
-                  <div className="bg-[rgba(53,196,147,0.07)] border border-[rgba(53,196,147,0.20)] rounded-xl p-4">
-                    <p className="text-slate-300 text-sm mb-3">{selected.host_response}</p>
-                    <div className="border-t border-[rgba(53,196,147,0.20)] pt-3">
-                      <div className="text-[#4DD9A7] font-bold text-lg">{formatCurrency(selected.quoted_price!)}</div>
-                      <div className="text-slate-400 text-xs mt-1">Incluye:</div>
-                      <div className="flex flex-wrap gap-1 mt-1.5">
-                        {selected.quote_includes?.map(item => (
-                          <span key={item} className="bg-[rgba(53,196,147,0.12)] text-[#4DD9A7] text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
-                            <CheckCircle size={10} /> {item}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
+                  <div className="text-xs font-medium mb-1" style={{ color: 'var(--brand)' }}>
+                    {q.event_type}
                   </div>
-                </div>
-              )}
+                  <p className="text-xs line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
+                    {(q as any).event_notes ?? 'Sin descripción'}
+                  </p>
+                  <div className="flex items-center gap-3 mt-2 text-xs" style={{ color: 'var(--text-muted)' }}>
+                    {q.event_date && <span className="flex items-center gap-1"><CalendarDays size={10} /> {formatDate(q.event_date)}</span>}
+                    <span className="flex items-center gap-1"><Users size={10} /> {q.guest_count}</span>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
 
-              {/* Formulario de respuesta (solo si está pendiente) */}
-              {selected.status === 'pending' && (
-                <div className="space-y-4">
-                  <div className="text-white font-semibold">Envía tu propuesta</div>
-
+          {/* Panel de respuesta */}
+          {selected ? (
+            <div className="flex-1 rounded-2xl overflow-y-auto" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+              <div className="p-6" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                <div className="flex items-start justify-between gap-4">
                   <div>
-                    <label className="block text-slate-300 text-sm font-medium mb-1.5">Tu mensaje</label>
-                    <textarea
-                      value={response}
-                      onChange={e => setResponse(e.target.value)}
-                      placeholder="Hola, con gusto te ofrezco una propuesta para tu evento..."
-                      rows={4}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm transition-colors resize-none"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-slate-300 text-sm font-medium mb-1.5">Precio propuesto (RD$)</label>
-                      <input
-                        type="number"
-                        value={price}
-                        onChange={e => setPrice(e.target.value)}
-                        placeholder="85000"
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm transition-colors"
-                      />
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>
+                        {(selected as any).profiles?.full_name ?? 'Cliente'}
+                      </span>
                     </div>
-                    <div>
-                      <label className="block text-slate-300 text-sm font-medium mb-1.5">Válido hasta</label>
-                      <input
-                        type="date"
-                        value={validUntil}
-                        onChange={e => setValidUntil(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#35C493] text-sm transition-colors"
-                      />
+                    <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                      {(selected as any).profiles?.email}
                     </div>
                   </div>
-
-                  <div>
-                    <label className="block text-slate-300 text-sm font-medium mb-2">¿Qué incluye?</label>
-                    <div className="flex gap-2 mb-2">
-                      <input
-                        value={newInclude}
-                        onChange={e => setNewInclude(e.target.value)}
-                        onKeyDown={e => { if (e.key === 'Enter' && newInclude.trim()) { setIncludes([...includes, newInclude.trim()]); setNewInclude('') }}}
-                        placeholder="Ej: Espacio 5 horas, DJ, catering..."
-                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm transition-colors"
-                      />
-                      <button
-                        onClick={() => { if (newInclude.trim()) { setIncludes([...includes, newInclude.trim()]); setNewInclude('') }}}
-                        className="bg-white/10 hover:bg-white/15 text-white px-3 rounded-xl transition-colors"
-                      >
-                        <Plus size={16} />
-                      </button>
-                    </div>
-                    {includes.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {includes.map((item, i) => (
-                          <span key={i} className="flex items-center gap-1.5 bg-[rgba(53,196,147,0.12)] text-[#4DD9A7] px-3 py-1 rounded-full text-xs">
-                            <CheckCircle size={10} /> {item}
-                            <button onClick={() => setIncludes(includes.filter((_, j) => j !== i))}><X size={10} /></button>
-                          </span>
-                        ))}
+                  <div className="text-right">
+                    <div className="font-semibold" style={{ color: 'var(--brand)' }}>{selected.event_type}</div>
+                    {selected.event_date && (
+                      <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                        {formatDate(selected.event_date)} · {selected.guest_count} personas
                       </div>
                     )}
                   </div>
+                </div>
+              </div>
 
-                  {price && (
-                    <div className="bg-[rgba(53,196,147,0.07)] border border-[rgba(53,196,147,0.20)] rounded-xl p-4 text-sm">
-                      <div className="text-slate-400 mb-1">El cliente verá:</div>
-                      <div className="text-[#4DD9A7] font-bold text-xl">{formatCurrency(Number(price))}</div>
-                      <div className="text-slate-500 text-xs mt-1">Comisión Espot: {formatCurrency(Number(price) * 0.10)} · Tú recibes: {formatCurrency(Number(price) * 0.90)}</div>
-                    </div>
-                  )}
-
-                  <div className="flex gap-3">
-                    <button className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-[#35C493] to-[#28A87C] hover:from-violet-500 hover:to-purple-500 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-[rgba(53,196,147,0.20)]">
-                      <Send size={16} /> Enviar propuesta
-                    </button>
-                    <button className="px-4 py-3 bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/20 rounded-xl transition-colors text-sm font-medium">
-                      Rechazar
-                    </button>
+              <div className="p-6 space-y-6">
+                {/* Mensaje del cliente */}
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
+                    Solicitud del cliente
+                  </div>
+                  <div className="rounded-xl p-4 text-sm leading-relaxed"
+                    style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                    "{(selected as any).event_notes ?? 'El cliente no dejó descripción adicional.'}"
                   </div>
                 </div>
-              )}
+
+                {/* Formulario de cotización */}
+                <div className="space-y-4">
+                  <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                    Tu propuesta de precio
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                      Precio total del evento (RD$)
+                    </label>
+                    <input type="number" value={price} onChange={e => setPrice(e.target.value)}
+                      placeholder="Ej: 85000"
+                      className="input-base w-full rounded-xl px-4 py-3 text-sm" />
+                    {price && (
+                      <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
+                        Comisión Espot: {formatCurrency(parseFloat(price) * 0.10)} · Recibes: {formatCurrency(parseFloat(price) * 0.90)}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                      Mensaje al cliente (opcional)
+                    </label>
+                    <textarea value={response} onChange={e => setResponse(e.target.value)}
+                      placeholder="Ej: Buenos días, con gusto podemos atender su evento. El precio incluye..."
+                      rows={4}
+                      className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none" />
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button onClick={handleRespond}
+                      disabled={!price || sending}
+                      className="flex-1 flex items-center justify-center gap-2 text-sm font-bold py-3 rounded-xl transition-all disabled:opacity-40"
+                      style={{ background: 'var(--brand)', color: '#fff', boxShadow: price ? '0 2px 8px rgba(53,196,147,0.3)' : 'none' }}>
+                      {sending ? <><Loader2 size={16} className="animate-spin" /> Enviando...</> : <><Send size={16} /> Enviar cotización</>}
+                    </button>
+                    <button onClick={() => handleReject(selected.id)}
+                      disabled={actionId === selected.id + 'r'}
+                      className="px-4 py-3 rounded-xl text-sm font-semibold transition-all"
+                      style={{ background: 'rgba(220,38,38,0.08)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.2)' }}>
+                      {actionId === selected.id + 'r' ? '...' : <X size={16} />}
+                    </button>
+                  </div>
+
+                  <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
+                    Al enviar la cotización, el cliente recibirá un email con tu propuesta de precio.
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="flex-1 flex items-center justify-center text-slate-500">
-            Selecciona una cotización para responder
-          </div>
-        )}
-      </div>
+          ) : (
+            <div className="flex-1 flex items-center justify-center rounded-2xl"
+              style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+              <div className="text-center">
+                <MessageSquare size={28} className="mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                  Selecciona una cotización para responder
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

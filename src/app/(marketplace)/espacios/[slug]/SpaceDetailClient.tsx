@@ -1,31 +1,17 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import {
   MapPin, Users, Shield, ChevronLeft, ChevronRight,
-  Clock, CheckCircle, X, Music,
-  MessageSquare, Loader2, CreditCard, Lock,
-  ArrowLeft, Share2, Minus, Plus, Star, Ban,
-  MessageCircle,
+  Clock, CheckCircle, X, Music, Ban,
+  ArrowLeft, Share2, CreditCard, Lock,
 } from 'lucide-react'
 import { cn, formatCurrency, formatTime } from '@/lib/utils'
-import { createBooking } from '@/lib/actions/booking'
 import ChatDrawer from '@/components/marketplace/ChatDrawer'
+import BookingWidget from '@/components/marketplace/BookingWidget'
 
 const DAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
-
-const EVENT_TYPES = [
-  { label: 'Cumpleaños',  emoji: '🎂' },
-  { label: 'Boda',        emoji: '💍' },
-  { label: 'Corporativo', emoji: '💼' },
-  { label: 'Graduación',  emoji: '🎓' },
-  { label: 'Baby Shower', emoji: '👶' },
-  { label: 'Quinceañera', emoji: '👑' },
-  { label: 'Fiesta',      emoji: '🎉' },
-  { label: 'Sesión foto', emoji: '📸' },
-  { label: 'Otro',        emoji: '✨' },
-]
 
 function addonEmoji(name: string) {
   const n = name.toLowerCase()
@@ -83,20 +69,9 @@ const termLabel: Record<string, string> = {
 }
 
 export default function SpaceDetailClient({ space, similarSpaces = [] }: { space: any; similarSpaces?: any[] }) {
-  const [photoIdx, setPhotoIdx]             = useState(0)
-  const [selectedAddons, setSelectedAddons] = useState<string[]>([])
-  const [eventDate, setEventDate]           = useState('')
-  const [startTime, setStartTime]           = useState('')
-  const [endTime, setEndTime]               = useState('')
-  const [guestCount, setGuestCount]         = useState(1)
-  const [eventType, setEventType]           = useState('')
-  const [guestNote, setGuestNote]           = useState('')
-  const [showNote, setShowNote]             = useState(false)
-  const [showChat, setShowChat]             = useState(false)
-  const [bookingLoading, setBookingLoading] = useState(false)
-  const [bookingSuccess, setBookingSuccess] = useState(false)
-  const [bookingError, setBookingError]     = useState('')
-  const [activeTab, setActiveTab]           = useState<'info' | 'addons' | 'rules'>('info')
+  const [photoIdx, setPhotoIdx] = useState(0)
+  const [showChat, setShowChat] = useState(false)
+  const [activeTab, setActiveTab] = useState<'info' | 'addons' | 'rules'>('info')
 
   const images      = space.space_images ?? []
   const pricing     = space.space_pricing?.find((p: any) => p.is_active) ?? space.space_pricing?.[0]
@@ -107,54 +82,6 @@ export default function SpaceDetailClient({ space, similarSpaces = [] }: { space
   const host        = space.profiles
   const facilities  = getFacilities(space)
 
-  const selectedAddonItems = useMemo(
-    () => addons.filter((a: any) => selectedAddons.includes(a.id)),
-    [addons, selectedAddons]
-  )
-  const addonsTotal = selectedAddonItems.reduce((s: number, a: any) => s + a.price, 0)
-
-  const basePrice = useMemo(() => {
-    if (pricing?.pricing_type === 'hourly' && startTime && endTime) {
-      const s = parseInt(startTime), e = parseInt(endTime) || 24
-      return pricing.hourly_price * (e > s ? e - s : 24 - s + e)
-    }
-    if (pricing?.pricing_type === 'minimum_consumption') return pricing.minimum_consumption
-    if (pricing?.pricing_type === 'fixed_package')       return pricing.fixed_price
-    return 0
-  }, [pricing, startTime, endTime])
-
-  const subtotal    = basePrice + addonsTotal
-  const platformFee = Math.round(subtotal * 0.10)
-
-  function adjustCount(delta: number) {
-    setGuestCount(c => Math.min(space.capacity_max, Math.max(1, c + delta)))
-  }
-
-  function toggleAddon(id: string) {
-    setSelectedAddons(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id])
-  }
-
-  async function handleBook() {
-    setBookingLoading(true)
-    setBookingError('')
-    const result = await createBooking({
-      spaceId: space.id, pricingId: pricing?.id,
-      eventDate,
-      startTime: startTime || '00:00', endTime: endTime || '23:59',
-      guestCount,
-      eventType: eventType || 'Evento',
-      eventNotes: guestNote || undefined,
-      selectedAddonIds: selectedAddons,
-      basePrice, addonsTotal, platformFee, totalAmount: subtotal,
-    })
-    setBookingLoading(false)
-    if ('error' in result) setBookingError(result.error ?? 'Error al procesar')
-    else setBookingSuccess(true)
-  }
-
-  const canBook = eventDate && eventType && (
-    pricing?.pricing_type !== 'hourly' || (startTime && endTime)
-  )
 
   // Reglas de qué no se permite
   const notAllowed = [
@@ -471,7 +398,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [] }: { space
               </div>
             )}
 
-            {/* ── TAB: Adicionales ── */}
+            {/* ── TAB: Adicionales (solo lectura — selección en el widget) ── */}
             {activeTab === 'addons' && (
               <div>
                 {addons.length === 0 ? (
@@ -479,39 +406,31 @@ export default function SpaceDetailClient({ space, similarSpaces = [] }: { space
                     Este espacio no tiene servicios adicionales
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-3">
-                    {addons.map((addon: any) => {
-                      const sel = selectedAddons.includes(addon.id)
-                      return (
-                        <button key={addon.id} onClick={() => toggleAddon(addon.id)}
-                          className="flex items-center gap-4 p-4 rounded-2xl text-left transition-all duration-150"
-                          style={sel ? {
-                            background: 'rgba(53,196,147,0.06)',
-                            border: '1.5px solid var(--brand)',
-                          } : {
-                            background: '#fff',
-                            border: '1.5px solid var(--border-subtle)',
-                          }}>
+                  <>
+                    <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+                      Puedes agregar estos servicios al hacer tu reserva en el panel de la derecha.
+                    </p>
+                    <div className="grid grid-cols-2 gap-3">
+                      {addons.map((addon: any) => (
+                        <div key={addon.id}
+                          className="flex items-center gap-4 p-4 rounded-2xl"
+                          style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
                           <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
-                            style={{ background: sel ? 'var(--brand-dim)' : 'var(--bg-elevated)' }}>
+                            style={{ background: 'var(--bg-elevated)' }}>
                             {addonEmoji(addon.name)}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium text-sm" style={{ color: sel ? 'var(--brand)' : 'var(--text-primary)' }}>
+                            <div className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>
                               {addon.name}
                             </div>
                             <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
                               {formatCurrency(addon.price)} / {addon.unit}
                             </div>
                           </div>
-                          <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all"
-                            style={sel ? { background: 'var(--brand)', borderColor: 'var(--brand)' } : { borderColor: 'var(--border-medium)' }}>
-                            {sel && <CheckCircle size={12} className="text-white" />}
-                          </div>
-                        </button>
-                      )
-                    })}
-                  </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 )}
               </div>
             )}
@@ -620,298 +539,11 @@ export default function SpaceDetailClient({ space, similarSpaces = [] }: { space
           </div>
 
           {/* ── RIGHT: BOOKING WIDGET ── */}
-          <div className="sticky top-24">
-            <div className="rounded-3xl overflow-hidden"
-              style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06)' }}>
-
-              {/* Price header */}
-              {pricing && (
-                <div className="px-6 pt-6 pb-5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                  {pricing.pricing_type === 'hourly' && (
-                    <>
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="text-4xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-                          {formatCurrency(pricing.hourly_price)}
-                        </span>
-                        <span className="text-base" style={{ color: 'var(--text-muted)' }}> / hora</span>
-                      </div>
-                      {pricing.min_hours && (
-                        <div className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-                          Mín. {pricing.min_hours} hrs · {formatCurrency(pricing.hourly_price * pricing.min_hours)} mínimo
-                        </div>
-                      )}
-                    </>
-                  )}
-                  {pricing.pricing_type === 'minimum_consumption' && (
-                    <div>
-                      <div className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>Consumo mínimo</div>
-                      <span className="text-4xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-                        {formatCurrency(pricing.minimum_consumption)}
-                      </span>
-                    </div>
-                  )}
-                  {pricing.pricing_type === 'fixed_package' && (
-                    <div>
-                      <div className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>
-                        {pricing.package_name ?? 'Paquete completo'}
-                      </div>
-                      <span className="text-4xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-                        {formatCurrency(pricing.fixed_price)}
-                      </span>
-                    </div>
-                  )}
-                  {pricing.pricing_type === 'custom_quote' && (
-                    <div className="flex items-center gap-2">
-                      <MessageSquare size={22} style={{ color: 'var(--brand)' }} />
-                      <span className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Cotización personalizada</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {bookingSuccess ? (
-                <div className="p-6 text-center">
-                  <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-                    style={{ background: 'rgba(53,196,147,0.1)' }}>
-                    <CheckCircle size={32} style={{ color: 'var(--brand)' }} />
-                  </div>
-                  <div className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>¡Solicitud enviada!</div>
-                  <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>
-                    El propietario confirmará en menos de 24 horas.
-                  </p>
-                  <Link href="/buscar" className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>
-                    Explorar más espacios →
-                  </Link>
-                </div>
-              ) : (
-                <div className="p-6 space-y-5">
-
-                  {/* Fecha */}
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>Fecha del evento</label>
-                    <input type="date" value={eventDate} onChange={e => setEventDate(e.target.value)}
-                      min={new Date().toISOString().split('T')[0]}
-                      className="input-base w-full rounded-xl px-4 py-3.5 text-sm font-medium" />
-                  </div>
-
-                  {/* Horario */}
-                  {pricing?.pricing_type === 'hourly' && (
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>Desde</label>
-                        <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)}
-                          className="input-base w-full rounded-xl px-4 py-3.5 text-sm font-medium" />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>Hasta</label>
-                        <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)}
-                          className="input-base w-full rounded-xl px-4 py-3.5 text-sm font-medium" />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Personas — STEPPER */}
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
-                      Número de personas
-                    </label>
-                    <div className="flex items-center gap-0 rounded-xl overflow-hidden"
-                      style={{ border: '1.5px solid var(--border-medium)' }}>
-                      <button onClick={() => adjustCount(-1)} disabled={guestCount <= 1}
-                        className="w-12 h-12 flex items-center justify-center transition-colors disabled:opacity-30 shrink-0"
-                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)' }}>
-                        <Minus size={16} />
-                      </button>
-                      <div className="flex-1 flex flex-col items-center justify-center h-12 border-x"
-                        style={{ borderColor: 'var(--border-medium)' }}>
-                        <span className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{guestCount}</span>
-                        <span className="text-xs" style={{ color: 'var(--text-muted)', lineHeight: 1 }}>personas</span>
-                      </div>
-                      <button onClick={() => adjustCount(+1)} disabled={guestCount >= space.capacity_max}
-                        className="w-12 h-12 flex items-center justify-center transition-colors disabled:opacity-30 shrink-0"
-                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)' }}>
-                        <Plus size={16} />
-                      </button>
-                    </div>
-                    <div className="flex justify-between mt-1.5 px-1">
-                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                        {space.capacity_min ? `Mín. ${space.capacity_min}` : 'Desde 1'}
-                      </span>
-                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                        Máx. {space.capacity_max} personas
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Tipo de evento */}
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
-                      Tipo de evento
-                    </label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {EVENT_TYPES.map(et => (
-                        <button key={et.label} onClick={() => setEventType(et.label)}
-                          className="flex flex-col items-center gap-1 py-3 px-2 rounded-xl border text-xs font-medium transition-all duration-150"
-                          style={eventType === et.label ? {
-                            background: 'var(--brand-dim)',
-                            borderColor: 'var(--brand)', color: 'var(--brand)',
-                          } : {
-                            background: 'var(--bg-base)',
-                            borderColor: 'var(--border-subtle)', color: 'var(--text-secondary)',
-                          }}>
-                          <span className="text-xl">{et.emoji}</span>
-                          <span className="leading-tight text-center">{et.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Adicionales */}
-                  {addons.length > 0 && (
-                    <div>
-                      <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
-                        Adicionales
-                      </label>
-                      <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
-                        {addons.map((addon: any) => {
-                          const sel = selectedAddons.includes(addon.id)
-                          return (
-                            <button key={addon.id} onClick={() => toggleAddon(addon.id)}
-                              className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl border text-sm transition-all duration-150"
-                              style={sel ? {
-                                background: 'rgba(53,196,147,0.05)', borderColor: 'var(--brand)',
-                              } : {
-                                background: 'var(--bg-base)', borderColor: 'var(--border-subtle)',
-                              }}>
-                              <span className="text-base shrink-0">{addonEmoji(addon.name)}</span>
-                              <span className="flex-1 text-left font-medium" style={{ color: sel ? 'var(--brand)' : 'var(--text-primary)' }}>
-                                {addon.name}
-                              </span>
-                              <span className="text-xs font-semibold shrink-0" style={{ color: sel ? 'var(--brand)' : 'var(--text-muted)' }}>
-                                + {formatCurrency(addon.price)}
-                              </span>
-                              <div className="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-all"
-                                style={sel ? { background: 'var(--brand)', borderColor: 'var(--brand)' } : { borderColor: 'var(--border-medium)' }}>
-                                {sel && <X size={9} className="text-white" />}
-                              </div>
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Nota */}
-                  {!showNote ? (
-                    <button onClick={() => setShowNote(true)}
-                      className="text-sm font-medium flex items-center gap-1.5 transition-colors link-muted">
-                      <MessageSquare size={14} /> Agregar nota al propietario
-                    </button>
-                  ) : (
-                    <div>
-                      <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
-                        Nota al propietario
-                      </label>
-                      <textarea value={guestNote} onChange={e => setGuestNote(e.target.value)}
-                        placeholder="Ej: Necesitamos acceso desde las 6pm para decorar..."
-                        rows={3} className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none" />
-                    </div>
-                  )}
-
-                  {/* Subtotal */}
-                  {subtotal > 0 && (
-                    <div className="rounded-2xl p-4 space-y-2"
-                      style={{ background: 'var(--bg-base)', border: '1px solid var(--border-subtle)' }}>
-                      {basePrice > 0 && (
-                        <div className="flex justify-between text-sm" style={{ color: 'var(--text-secondary)' }}>
-                          <span>Espacio</span><span>{formatCurrency(basePrice)}</span>
-                        </div>
-                      )}
-                      {selectedAddonItems.map((a: any) => (
-                        <div key={a.id} className="flex justify-between text-sm" style={{ color: 'var(--text-secondary)' }}>
-                          <span>{addonEmoji(a.name)} {a.name}</span>
-                          <span>+ {formatCurrency(a.price)}</span>
-                        </div>
-                      ))}
-                      <div className="flex justify-between text-sm font-semibold pt-2"
-                        style={{ borderTop: '1px solid var(--border-medium)', color: 'var(--text-primary)' }}>
-                        <span>Total del evento</span><span>{formatCurrency(subtotal)}</span>
-                      </div>
-                      <div className="flex justify-between text-base font-bold" style={{ color: 'var(--brand)' }}>
-                        <span>Pagas ahora (10%)</span><span>{formatCurrency(platformFee)}</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {bookingError && (
-                    <div className="text-sm px-4 py-3 rounded-xl"
-                      style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626' }}>
-                      {bookingError}
-                    </div>
-                  )}
-
-                  <button onClick={handleBook} disabled={!canBook || bookingLoading}
-                    className="btn-brand w-full py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none transition-all duration-200"
-                    style={{ boxShadow: canBook ? '0 4px 24px rgba(53,196,147,0.35)' : 'none' }}>
-                    {bookingLoading ? (
-                      <><Loader2 size={18} className="animate-spin" /> Procesando...</>
-                    ) : pricing?.pricing_type === 'custom_quote' ? (
-                      <><MessageSquare size={18} /> Solicitar cotización</>
-                    ) : (
-                      <><CreditCard size={18} /> Reservar ahora</>
-                    )}
-                  </button>
-
-                  {!canBook && (
-                    <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
-                      Selecciona fecha y tipo de evento para continuar
-                    </p>
-                  )}
-
-                  <div className="flex items-center justify-center gap-4 pt-1">
-                    {[{ icon: Shield, text: 'Pago seguro' }, { icon: Lock, text: 'Solo el 10%' }, { icon: CheckCircle, text: 'Sin compromisos' }].map(({ icon: Icon, text }) => (
-                      <div key={text} className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
-                        <Icon size={11} /> {text}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Divider */}
-                  <div className="flex items-center gap-3 pt-2">
-                    <div className="flex-1 h-px" style={{ background: 'var(--border-subtle)' }} />
-                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>o</span>
-                    <div className="flex-1 h-px" style={{ background: 'var(--border-subtle)' }} />
-                  </div>
-
-                  {/* Chat CTA */}
-                  <button
-                    onClick={() => setShowChat(true)}
-                    className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl font-semibold text-sm transition-all"
-                    style={{
-                      background: 'var(--bg-base)',
-                      border: '1.5px solid var(--border-medium)',
-                      color: 'var(--text-primary)',
-                    }}
-                    onMouseEnter={e => {
-                      (e.currentTarget as HTMLElement).style.borderColor = 'var(--brand)'
-                      ;(e.currentTarget as HTMLElement).style.color = 'var(--brand)'
-                    }}
-                    onMouseLeave={e => {
-                      (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-medium)'
-                      ;(e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'
-                    }}
-                  >
-                    <MessageCircle size={17} />
-                    Enviarle un mensaje al dueño
-                  </button>
-                  <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
-                    Pregunta disponibilidad, precios o cualquier duda
-                  </p>
-                </div>
-              )}
-            </div>
+          <div className="sticky top-24" style={{ overflow: 'visible' }}>
+            <BookingWidget space={space} onChat={() => setShowChat(true)} />
           </div>
-        </div>
+
+        </div>{/* end grid */}
 
         {/* ── ESPACIOS SIMILARES ── */}
         {similarSpaces.length > 0 && (
