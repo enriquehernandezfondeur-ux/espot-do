@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import { Search, MapPin, SlidersHorizontal } from 'lucide-react'
 import { getPublishedSpaces } from '@/lib/actions/marketplace'
-import { formatCurrency } from '@/lib/utils'
 import BuscarClient from './BuscarClient'
+// Note: helper functions live in BuscarClient to avoid Server→Client function props
 
 const categories = [
   { value: '',            label: 'Todos',         emoji: '🔍' },
@@ -26,19 +26,6 @@ const capacityOptions = [
   { value: '500', label: 'Más de 200 personas' },
 ]
 
-function getPricingDisplay(space: any) {
-  const p = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
-  if (!p) return null
-  if (p.pricing_type === 'hourly') return `${formatCurrency(p.hourly_price)} / hora`
-  if (p.pricing_type === 'minimum_consumption') return `Consumo mín. ${formatCurrency(p.minimum_consumption)}`
-  if (p.pricing_type === 'fixed_package') return formatCurrency(p.fixed_price)
-  return 'Solicitar precio'
-}
-
-function getCoverImage(space: any) {
-  return space.space_images?.find((i: any) => i.is_cover)?.url ?? space.space_images?.[0]?.url ?? null
-}
-
 export default async function BuscarPage({
   searchParams,
 }: {
@@ -53,7 +40,6 @@ export default async function BuscarPage({
   })
 
   const activeCategory = params.categoria ?? ''
-  const catEmojis = Object.fromEntries(categories.map(c => [c.value, c.emoji]))
 
   return (
     <div style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
@@ -106,13 +92,7 @@ export default async function BuscarPage({
         </div>
 
         {/* Client component con mapa + lista */}
-        <BuscarClient
-          spaces={spaces}
-          params={params}
-          catEmojis={catEmojis}
-          getPricingDisplay={getPricingDisplay}
-          getCoverImage={getCoverImage}
-        />
+        <BuscarClient spaces={spaces} params={params} />
       </div>
     </div>
   )

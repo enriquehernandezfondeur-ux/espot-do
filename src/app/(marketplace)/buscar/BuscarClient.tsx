@@ -15,15 +15,31 @@ const SpacesMap = dynamic(() => import('@/components/map/SpacesMap'), {
   ),
 })
 
-interface Props {
-  spaces:            any[]
-  params:            Record<string, string | undefined>
-  catEmojis:         Record<string, string>
-  getPricingDisplay: (space: any) => string | null
-  getCoverImage:     (space: any) => string | null
+const CAT_EMOJIS: Record<string, string> = {
+  '': '🔍', salon: '🏛️', restaurante: '🍽️', bar: '🍸', rooftop: '🌆',
+  terraza: '🌿', estudio: '🎬', coworking: '💼', hotel: '🏨', villa: '🏡', otro: '📍',
 }
 
-export default function BuscarClient({ spaces, params, catEmojis, getPricingDisplay, getCoverImage }: Props) {
+function getPricingDisplay(space: any): string | null {
+  const p = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
+  if (!p) return null
+  if (p.pricing_type === 'hourly') return `RD$${p.hourly_price.toLocaleString()} / hora`
+  if (p.pricing_type === 'minimum_consumption') return `Desde RD$${p.minimum_consumption.toLocaleString()}`
+  if (p.pricing_type === 'fixed_package') return `RD$${p.fixed_price.toLocaleString()}`
+  return 'Cotizar'
+}
+
+function getCoverImage(space: any): string | null {
+  return space.space_images?.find((i: any) => i.is_cover)?.url ?? space.space_images?.[0]?.url ?? null
+}
+
+interface Props {
+  spaces: any[]
+  params: Record<string, string | undefined>
+}
+
+export default function BuscarClient({ spaces, params }: Props) {
+  const catEmojis = CAT_EMOJIS
   const [view, setView] = useState<'grid' | 'map'>('grid')
 
   return (
