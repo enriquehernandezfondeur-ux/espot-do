@@ -1,19 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
-import dynamic from 'next/dynamic'
-import { MapPin, Users, Star, Shield, Map, LayoutGrid } from 'lucide-react'
-
-const SpacesMap = dynamic(() => import('@/components/map/SpacesMap'), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full rounded-2xl flex items-center justify-center"
-      style={{ height: 420, background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-      <div className="text-sm" style={{ color: 'var(--text-muted)' }}>Cargando mapa...</div>
-    </div>
-  ),
-})
+import { MapPin, Users, Star, Shield } from 'lucide-react'
 
 const CAT_EMOJIS: Record<string, string> = {
   '': '🔍', salon: '🏛️', restaurante: '🍽️', bar: '🍸', rooftop: '🌆',
@@ -23,9 +11,9 @@ const CAT_EMOJIS: Record<string, string> = {
 function getPricingDisplay(space: any): string | null {
   const p = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
   if (!p) return null
-  if (p.pricing_type === 'hourly') return `RD$${p.hourly_price.toLocaleString()} / hora`
-  if (p.pricing_type === 'minimum_consumption') return `Desde RD$${p.minimum_consumption.toLocaleString()}`
-  if (p.pricing_type === 'fixed_package') return `RD$${p.fixed_price.toLocaleString()}`
+  if (p.pricing_type === 'hourly') return `RD$${Number(p.hourly_price).toLocaleString()} / hora`
+  if (p.pricing_type === 'minimum_consumption') return `Desde RD$${Number(p.minimum_consumption).toLocaleString()}`
+  if (p.pricing_type === 'fixed_package') return `RD$${Number(p.fixed_price).toLocaleString()}`
   return 'Cotizar'
 }
 
@@ -39,39 +27,18 @@ interface Props {
 }
 
 export default function BuscarClient({ spaces, params }: Props) {
-  const catEmojis = CAT_EMOJIS
-  const [view, setView] = useState<'grid' | 'map'>('grid')
-
   return (
     <>
-      {/* Header con contador y toggle vista */}
+      {/* Contador */}
       <div className="flex items-center justify-between mb-5">
         <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
           <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{spaces.length}</span>
           {' '}espacio{spaces.length !== 1 ? 's' : ''} encontrado{spaces.length !== 1 ? 's' : ''}
           {params.sector && <span> en <strong style={{ color: 'var(--text-primary)' }}>{params.sector}</strong></span>}
         </p>
-
-        {/* Toggle mapa / lista */}
-        <div className="flex gap-1 p-1 rounded-xl"
-          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
-          <button onClick={() => setView('grid')}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all"
-            style={view === 'grid'
-              ? { background: 'var(--brand)', color: '#fff' }
-              : { color: 'var(--text-secondary)' }}>
-            <LayoutGrid size={14} /> Lista
-          </button>
-          <button onClick={() => setView('map')}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all"
-            style={view === 'map'
-              ? { background: 'var(--brand)', color: '#fff' }
-              : { color: 'var(--text-secondary)' }}>
-            <Map size={14} /> Mapa
-          </button>
-        </div>
       </div>
 
+      {/* Grid */}
       {spaces.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 rounded-3xl text-center"
           style={{ background: 'var(--bg-surface)', border: '2px dashed var(--border-medium)' }}>
@@ -86,47 +53,16 @@ export default function BuscarClient({ spaces, params }: Props) {
             Ver todos los espacios →
           </Link>
         </div>
-      ) : view === 'map' ? (
-        /* ── VISTA MAPA ── */
-        <div className="space-y-4">
-          <SpacesMap spaces={spaces} />
-          {/* Mini lista debajo del mapa */}
-          <div className="grid grid-cols-3 gap-4 mt-4">
-            {spaces.slice(0, 6).map(space => {
-              const cover   = getCoverImage(space)
-              const pricing = getPricingDisplay(space)
-              return (
-                <Link key={space.id} href={`/espacios/${space.slug}`} className="group flex items-center gap-3 p-3 rounded-2xl transition-all card-hover"
-                  style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
-                  <div className="w-14 h-12 rounded-xl overflow-hidden shrink-0" style={{ background: 'var(--bg-elevated)' }}>
-                    {cover
-                      ? <img src={cover} alt={space.name} className="w-full h-full object-cover" />
-                      : <div className="w-full h-full flex items-center justify-center text-xl">
-                          {catEmojis[space.category] ?? '🏛️'}
-                        </div>}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="font-semibold text-xs truncate" style={{ color: 'var(--text-primary)' }}>{space.name}</div>
-                    <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{space.sector ?? space.city}</div>
-                    {pricing && <div className="text-xs font-bold" style={{ color: 'var(--brand)' }}>{pricing}</div>}
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
-        </div>
       ) : (
-        /* ── VISTA GRID ── */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {spaces.map(space => {
             const cover   = getCoverImage(space)
             const pricing = getPricingDisplay(space)
-            const emoji   = catEmojis[space.category] ?? '🏛️'
+            const emoji   = CAT_EMOJIS[space.category] ?? '🏛️'
             return (
               <Link key={space.id} href={`/espacios/${space.slug}`} className="group block">
                 <div className="card-hover rounded-2xl overflow-hidden"
                   style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
-                  {/* Image */}
                   <div className="relative h-52 overflow-hidden" style={{ background: 'var(--bg-elevated)' }}>
                     {cover ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -150,8 +86,6 @@ export default function BuscarClient({ spaces, params }: Props) {
                       </div>
                     )}
                   </div>
-
-                  {/* Info */}
                   <div className="p-4">
                     <h3 className="font-semibold text-base leading-tight mb-1 group-hover:text-[#35C493] transition-colors"
                       style={{ color: 'var(--text-primary)' }}>
