@@ -19,7 +19,6 @@ interface Space {
 
 interface Props {
   spaces: Space[]
-  onSpaceClick?: (slug: string) => void
 }
 
 const CATEGORY_EMOJI: Record<string, string> = {
@@ -59,7 +58,7 @@ function getPrice(space: Space): string | null {
   return 'Cotizar'
 }
 
-export default function SpacesMap({ spaces, onSpaceClick }: Props) {
+export default function SpacesMap({ spaces }: Props) {
   const mapRef      = useRef<HTMLDivElement>(null)
   const mapInstance = useRef<any>(null)
 
@@ -165,11 +164,6 @@ export default function SpacesMap({ spaces, onSpaceClick }: Props) {
   return (
     <div className="relative w-full rounded-2xl overflow-hidden"
       style={{ height: 420, border: '1px solid var(--border-subtle)', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-      {/* Leaflet CSS */}
-      <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      />
       <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
 
       {/* Badge cantidad */}
