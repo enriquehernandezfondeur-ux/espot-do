@@ -61,12 +61,43 @@ const categories = [
 ]
 
 const eventTypes = [
-  { label: 'Cumpleaños',  color: '#F59E0B', bg: 'rgba(245,158,11,0.1)',  icon: '🎂' },
-  { label: 'Bodas',       color: '#EC4899', bg: 'rgba(236,72,153,0.1)',  icon: '💍' },
-  { label: 'Corporativo', color: '#3B82F6', bg: 'rgba(59,130,246,0.1)',  icon: '💼' },
-  { label: 'Graduación',  color: '#8B5CF6', bg: 'rgba(139,92,246,0.1)',  icon: '🎓' },
-  { label: 'Quinceañeras',color: '#EF4444', bg: 'rgba(239,68,68,0.1)',   icon: '👑' },
-  { label: 'Baby Shower', color: '#06B6D4', bg: 'rgba(6,182,212,0.1)',   icon: '👶' },
+  {
+    label: 'Cumpleaños', slug: 'cumpleanos',
+    img: 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=600&q=80&fit=crop',
+    desc: 'Salones privados, terrazas y más',
+  },
+  {
+    label: 'Bodas', slug: 'bodas',
+    img: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80&fit=crop',
+    desc: 'El día más especial merece el mejor espacio',
+  },
+  {
+    label: 'Corporativo', slug: 'corporativo',
+    img: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600&q=80&fit=crop',
+    desc: 'Reuniones, lanzamientos y eventos de empresa',
+  },
+  {
+    label: 'Graduación', slug: 'graduacion',
+    img: 'https://images.unsplash.com/photo-1627556704302-624286467c65?w=600&q=80&fit=crop',
+    desc: 'Celebra este logro a lo grande',
+  },
+  {
+    label: 'Quinceañeras', slug: 'quinceaneras',
+    img: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600&q=80&fit=crop',
+    desc: 'Una celebración única e inolvidable',
+  },
+  {
+    label: 'Baby Shower', slug: 'baby-shower',
+    img: 'https://images.unsplash.com/photo-1529634806980-85c3dd6d34ac?w=600&q=80&fit=crop',
+    desc: 'Bienvenida al nuevo integrante',
+  },
+]
+
+const quickFilters = [
+  { label: 'Más de 50 invitados', href: '/buscar?capacidad=50' },
+  { label: 'Con terraza',         href: '/buscar?categoria=terraza' },
+  { label: 'Salones privados',    href: '/buscar?categoria=salon' },
+  { label: 'Con piscina',         href: '/buscar?q=piscina' },
 ]
 
 function getCover(space: any) {
@@ -178,23 +209,74 @@ export default async function HomePage() {
       </section>
 
       {/* ── TIPOS DE EVENTO ── */}
-      <section className="max-w-7xl mx-auto px-6 py-14">
-        <div className="text-center mb-10">
-          <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-            ¿Para qué tipo de evento?
+      <section className="max-w-7xl mx-auto px-6 py-16">
+
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)', letterSpacing: '-0.025em' }}>
+            ¿Qué tipo de evento estás planeando?
           </h2>
-          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Encuentra el espacio ideal para cada ocasión</p>
+          <p className="text-base" style={{ color: 'var(--text-muted)' }}>
+            Encuentra el espacio ideal según tu ocasión
+          </p>
         </div>
-        <div className="grid grid-cols-6 gap-3">
+
+        {/* Quick filter chips — sin emojis */}
+        <div className="flex items-center justify-center gap-2 mb-10 flex-wrap">
+          {quickFilters.map(f => (
+            <Link key={f.label} href={f.href}
+              className="px-4 py-2 rounded-full text-sm font-medium transition-all"
+              style={{
+                background: '#fff',
+                border: '1.5px solid var(--border-medium)',
+                color: 'var(--text-secondary)',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+              }}>
+              {f.label}
+            </Link>
+          ))}
+        </div>
+
+        {/* Grid desktop / scroll mobile */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
           {eventTypes.map(et => (
-            <Link key={et.label} href={`/buscar?q=${et.label}`}
-              className="cat-hover flex flex-col items-center gap-3 py-5 px-3 rounded-2xl text-center transition-all"
-              style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl"
-                style={{ background: et.bg, border: `1px solid ${et.color}20` }}>
-                {et.icon}
+            <Link key={et.slug} href={`/buscar?evento=${et.slug}`}
+              className="group relative block overflow-hidden rounded-2xl"
+              style={{ aspectRatio: '4/3', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
+
+              {/* Imagen de fondo */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={et.img}
+                alt={et.label}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+
+              {/* Overlay degradado */}
+              <div className="absolute inset-0 transition-opacity duration-300"
+                style={{
+                  background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.05) 100%)',
+                }} />
+
+              {/* Hover overlay adicional */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                style={{ background: 'rgba(0,0,0,0.1)' }} />
+
+              {/* Contenido */}
+              <div className="absolute bottom-0 left-0 right-0 p-5">
+                <h3 className="text-xl font-bold text-white mb-1 tracking-tight">
+                  {et.label}
+                </h3>
+                <p className="text-sm text-white/70 leading-snug">
+                  {et.desc}
+                </p>
               </div>
-              <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{et.label}</span>
+
+              {/* Flecha hover */}
+              <div className="absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-y-1 group-hover:translate-y-0"
+                style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)' }}>
+                <ArrowRight size={16} className="text-white" />
+              </div>
             </Link>
           ))}
         </div>
