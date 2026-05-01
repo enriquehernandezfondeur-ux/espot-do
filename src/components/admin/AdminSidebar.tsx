@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard, Building2, CalendarDays, Users,
   CreditCard, Settings, BarChart3, LogOut,
-  ChevronRight, Shield, Pencil,
+  ChevronRight, Shield,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -29,7 +29,6 @@ const sections = [
   {
     label: 'Plataforma',
     items: [
-      { href: '/admin/contenido',      label: '✏️ Editar Site', icon: Pencil },
       { href: '/admin/reportes',       label: 'Reportes',    icon: BarChart3 },
       { href: '/admin/configuracion',  label: 'Configuración',icon: Settings },
     ],
