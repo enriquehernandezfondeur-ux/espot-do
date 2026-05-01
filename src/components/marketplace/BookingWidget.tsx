@@ -16,15 +16,15 @@ import TimePicker from '@/components/ui/TimePicker'
 
 // ── Configuración de tipos de evento ──────────────────────
 const EVENT_TYPES = [
-  { label: 'Cumpleaños',  emoji: '🎂' },
-  { label: 'Boda',        emoji: '💍' },
-  { label: 'Corporativo', emoji: '💼' },
-  { label: 'Graduación',  emoji: '🎓' },
-  { label: 'Baby Shower', emoji: '👶' },
-  { label: 'Quinceañera', emoji: '👑' },
-  { label: 'Fiesta',      emoji: '🎉' },
-  { label: 'Sesión foto', emoji: '📸' },
-  { label: 'Otro',        emoji: '✨' },
+  { label: 'Cumpleaños',  emoji: '🎂', color: '#F59E0B', bg: 'rgba(245,158,11,0.1)' },
+  { label: 'Boda',        emoji: '💍', color: '#EC4899', bg: 'rgba(236,72,153,0.1)' },
+  { label: 'Corporativo', emoji: '💼', color: '#3B82F6', bg: 'rgba(59,130,246,0.1)' },
+  { label: 'Graduación',  emoji: '🎓', color: '#8B5CF6', bg: 'rgba(139,92,246,0.1)' },
+  { label: 'Baby Shower', emoji: '👶', color: '#06B6D4', bg: 'rgba(6,182,212,0.1)' },
+  { label: 'Quinceañera', emoji: '👑', color: '#EF4444', bg: 'rgba(239,68,68,0.1)' },
+  { label: 'Fiesta',      emoji: '🎉', color: '#35C493', bg: 'rgba(53,196,147,0.1)' },
+  { label: 'Sesión foto', emoji: '📸', color: '#F97316', bg: 'rgba(249,115,22,0.1)' },
+  { label: 'Otro',        emoji: '✨', color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },
 ]
 
 function addonEmoji(name: string) {
@@ -471,24 +471,34 @@ export default function BookingWidget({ space, onChat }: Props) {
               ¿Qué tipo de evento es?
             </h3>
             <div className="grid grid-cols-3 gap-2">
-              {EVENT_TYPES.map(et => (
-                <button key={et.label} onClick={() => setEventType(et.label)}
-                  className="flex flex-col items-center gap-1.5 py-3.5 px-2 rounded-2xl border transition-all duration-150"
-                  style={eventType === et.label ? {
-                    background: 'var(--brand-dim)',
-                    borderColor: 'var(--brand)',
-                    transform: 'scale(1.02)',
-                  } : {
-                    background: 'var(--bg-base)',
-                    borderColor: 'var(--border-subtle)',
-                  }}>
-                  <span className="text-2xl">{et.emoji}</span>
-                  <span className="text-xs font-medium leading-tight text-center"
-                    style={{ color: eventType === et.label ? 'var(--brand)' : 'var(--text-secondary)' }}>
-                    {et.label}
-                  </span>
-                </button>
-              ))}
+              {EVENT_TYPES.map(et => {
+                const isSelected = eventType === et.label
+                return (
+                  <button key={et.label} onClick={() => setEventType(et.label)}
+                    className="flex flex-col items-center gap-2 py-4 px-2 rounded-2xl border transition-all duration-150"
+                    style={isSelected ? {
+                      background: `${et.color}12`,
+                      borderColor: et.color,
+                      boxShadow: `0 0 0 2px ${et.color}20`,
+                      transform: 'scale(1.03)',
+                    } : {
+                      background: 'var(--bg-base)',
+                      borderColor: 'var(--border-subtle)',
+                    }}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
+                      style={{ background: isSelected ? et.bg : 'var(--bg-elevated)' }}>
+                      {et.emoji}
+                    </div>
+                    <span className="text-xs font-semibold leading-tight text-center"
+                      style={{ color: isSelected ? et.color : 'var(--text-secondary)' }}>
+                      {et.label}
+                    </span>
+                    {isSelected && (
+                      <div className="w-1.5 h-1.5 rounded-full" style={{ background: et.color }} />
+                    )}
+                  </button>
+                )
+              })}
             </div>
           </div>
         )}
