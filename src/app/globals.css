@@ -41,21 +41,11 @@
   --shadow-hover: 0 4px 24px rgba(0,0,0,0.08);
 }
 
-/* Override dark Tailwind backgrounds & borders — safe: no button colors affected */
-.host-theme .bg-white\/5,
-.host-theme .bg-white\/10             { background: var(--bg-elevated) !important; }
-.host-theme .bg-slate-800             { background: var(--bg-elevated) !important; }
-.host-theme .border-white\/10,
-.host-theme .border-white\/20         { border-color: var(--border-subtle) !important; }
-
-/* Override dark text on non-button/non-badge contexts (labels, headings in forms) */
-.host-theme .text-slate-300           { color: var(--text-secondary) !important; }
-.host-theme .text-slate-400:not(button),
-.host-theme .text-slate-500:not(button) { color: var(--text-muted) !important; }
-
-/* Placeholder overrides */
-.host-theme .placeholder-slate-500::placeholder,
-.host-theme .placeholder-slate-600::placeholder { color: var(--text-muted) !important; }
+/* Texto dark de Tailwind → colores del tema */
+.host-theme .text-slate-300 { color: var(--text-secondary) !important; }
+.host-theme .text-slate-400 { color: var(--text-muted) !important; }
+.host-theme .text-slate-500 { color: var(--text-muted) !important; }
+.host-theme .bg-slate-800   { background: var(--bg-elevated) !important; }
 
 /* Form elements inside host-theme — override dark input styles */
 .host-theme input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
