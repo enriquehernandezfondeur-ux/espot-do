@@ -27,15 +27,10 @@ const CATEGORIES = [
 const QUICK_CAPACITIES = [20, 50, 100, 150]
 
 const AMENITIES = [
-  { key: 'allows_external_decoration', label: 'Permite decoración' },
+  { key: 'allows_external_decoration', label: 'Permite decoración externa' },
   { key: 'allows_external_food',       label: 'Permite comida externa' },
   { key: 'allows_external_alcohol',    label: 'Permite alcohol externo' },
-  { key: 'parking',    label: 'Tiene parqueo' },
-  { key: 'ac',         label: 'Aire acondicionado' },
-  { key: 'sound',      label: 'Sistema de sonido' },
-  { key: 'kitchen',    label: 'Cocina equipada' },
-  { key: 'terrace',    label: 'Tiene terraza' },
-  { key: 'verified',   label: 'Espacio verificado' },
+  { key: 'verified',                   label: 'Espacio verificado' },
 ]
 
 function getCover(space: any) {
@@ -84,25 +79,40 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
       )
     }
     if (categoria) result = result.filter(s => s.category === categoria)
-    if (sector)    result = result.filter(s => s.sector?.toLowerCase().includes(sector.toLowerCase()) || s.city?.toLowerCase().includes(sector.toLowerCase()))
+    if (sector)    result = result.filter(s =>
+      s.sector?.toLowerCase().includes(sector.toLowerCase()) ||
+      s.city?.toLowerCase().includes(sector.toLowerCase())
+    )
     if (capacidad) result = result.filter(s => s.capacity_max >= parseInt(capacidad))
 
-    // Filtro de amenidades (basado en conditions)
-    if (selectedAmenities.includes('verified')) {
-      result = result.filter(s => s.is_verified)
-    }
-    if (selectedAmenities.includes('allows_external_decoration')) {
-      result = result.filter(s => s.space_conditions?.[0]?.allows_external_decoration)
-    }
-    if (selectedAmenities.includes('allows_external_food')) {
-      result = result.filter(s => s.space_conditions?.[0]?.allows_external_food)
-    }
-    if (selectedAmenities.includes('allows_external_alcohol')) {
-      result = result.filter(s => s.space_conditions?.[0]?.allows_external_alcohol)
+    // Filtro de precio
+    if (priceMin || priceMax) {
+      result = result.filter(s => {
+        const p = s.space_pricing?.find((x: any) => x.is_active) ?? s.space_pricing?.[0]
+        if (!p) return true
+        const price: number | null =
+          p.pricing_type === 'hourly'               ? p.hourly_price :
+          p.pricing_type === 'minimum_consumption'  ? p.minimum_consumption :
+          p.pricing_type === 'fixed_package'        ? p.fixed_price : null
+        if (price === null) return true
+        if (priceMin && price < parseInt(priceMin)) return false
+        if (priceMax && price > parseInt(priceMax)) return false
+        return true
+      })
     }
 
+    // Filtro de amenidades
+    if (selectedAmenities.includes('verified'))
+      result = result.filter(s => s.is_verified)
+    if (selectedAmenities.includes('allows_external_decoration'))
+      result = result.filter(s => s.space_conditions?.[0]?.allows_external_decoration)
+    if (selectedAmenities.includes('allows_external_food'))
+      result = result.filter(s => s.space_conditions?.[0]?.allows_external_food)
+    if (selectedAmenities.includes('allows_external_alcohol'))
+      result = result.filter(s => s.space_conditions?.[0]?.allows_external_alcohol)
+
     return result
-  }, [spaces, q, categoria, sector, capacidad, selectedAmenities])
+  }, [spaces, q, categoria, sector, capacidad, priceMin, priceMax, selectedAmenities])
 
   function applyCapacity(val: string) {
     setCapacidad(val)
@@ -116,12 +126,12 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   }
 
   const activeFiltersCount = [
-    categoria, sector, capacidad, ...selectedAmenities, priceMin, priceMax
+    categoria, sector, capacidad, dateFrom, ...selectedAmenities, priceMin, priceMax
   ].filter(Boolean).length
 
   function clearAll() {
     setQ(''); setSector(''); setCategoria(''); setCapacidad(''); setCapacidadInput('')
-    setSelectedAmenities([]); setPriceMin(''); setPriceMax('')
+    setSelectedAmenities([]); setPriceMin(''); setPriceMax(''); setDateFrom('')
   }
 
   return (
