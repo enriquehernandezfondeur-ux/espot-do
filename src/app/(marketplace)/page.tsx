@@ -1,12 +1,13 @@
 import Link from 'next/link'
 import {
-  Search, MapPin, ArrowRight, Shield, Users, CalendarDays,
-  Clock, CreditCard, CheckCircle, Star,
+  ArrowRight, Shield, Users, Search,
+  Clock, CreditCard, CheckCircle, Star, MapPin,
   Building2, UtensilsCrossed, Sunset, Wine,
-  Trees, Camera, Briefcase, Hotel, Home,
+  Trees, Camera, Briefcase, Home,
 } from 'lucide-react'
 import { getPublishedSpaces } from '@/lib/actions/marketplace'
 import { formatCurrency } from '@/lib/utils'
+import HomepageSearch from '@/components/marketplace/HomepageSearch'
 
 // Categorías con iconos SVG y fotos reales de Unsplash
 const categories = [
@@ -154,52 +155,7 @@ export default async function HomePage() {
             Reserva salones, rooftops, restaurantes y más — por hora o paquete, en minutos.
           </p>
 
-          {/* Search */}
-          <form action="/buscar"
-            className="flex items-stretch max-w-4xl mx-auto rounded-2xl overflow-hidden"
-            style={{ background: '#fff', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
-            {/* Qué buscas */}
-            <div className="flex items-center gap-3 flex-1 px-5">
-              <Search size={18} style={{ color: '#9CA3AF', flexShrink: 0 }} />
-              <input name="q" placeholder="Salón, rooftop, restaurante..."
-                className="flex-1 bg-transparent py-4 text-sm focus:outline-none"
-                style={{ color: '#0F1623' }} />
-            </div>
-            <div className="w-px my-3" style={{ background: '#E8ECF0' }} />
-            {/* Sector */}
-            <div className="flex items-center gap-2 px-4 w-40">
-              <MapPin size={15} style={{ color: '#9CA3AF', flexShrink: 0 }} />
-              <input name="sector" placeholder="Sector"
-                className="w-full bg-transparent py-4 text-sm focus:outline-none"
-                style={{ color: '#0F1623' }} />
-            </div>
-            <div className="w-px my-3" style={{ background: '#E8ECF0' }} />
-            {/* Fecha */}
-            <div className="flex items-center gap-2 px-4 w-44">
-              <CalendarDays size={15} style={{ color: '#9CA3AF', flexShrink: 0 }} />
-              <input name="dateFrom" type="date"
-                min={new Date().toISOString().split('T')[0]}
-                placeholder="¿Cuándo?"
-                className="w-full bg-transparent py-4 text-sm focus:outline-none"
-                style={{ color: '#0F1623' }} />
-            </div>
-            <button type="submit"
-              className="px-7 text-sm font-bold text-white transition-all"
-              style={{ background: 'linear-gradient(135deg, #35C493, #28A87C)' }}>
-              Buscar
-            </button>
-          </form>
-
-          {/* Quick sectors */}
-          <div className="flex items-center justify-center gap-2 mt-5 flex-wrap">
-            {['Piantini', 'Naco', 'Bella Vista', 'Arroyo Hondo', 'Santiago'].map(s => (
-              <Link key={s} href={`/buscar?sector=${s}`}
-                className="text-xs px-3.5 py-1.5 rounded-full transition-all"
-                style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                {s}
-              </Link>
-            ))}
-          </div>
+          <HomepageSearch />
         </div>
       </section>
 
