@@ -317,24 +317,6 @@ export default function HomepageSearch() {
           </button>
         </div>
 
-        {/* Quick sectors */}
-        <div className="flex items-center justify-center gap-2 mt-4 flex-wrap">
-          {['Piantini', 'Naco', 'Bella Vista', 'Arroyo Hondo', 'Zona Colonial'].map(s => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => { setCity(s); setCityQ(s) }}
-              className="text-xs px-3.5 py-1.5 rounded-full transition-all"
-              style={{
-                background: 'rgba(255,255,255,0.08)',
-                color: city === s ? '#fff' : 'rgba(255,255,255,0.6)',
-                border: city === s ? '1px solid rgba(255,255,255,0.5)' : '1px solid rgba(255,255,255,0.12)',
-              }}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* ══════════════════════════════════════════════════════
