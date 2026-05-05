@@ -71,9 +71,15 @@ function toTimeBlocks(week: WeekSchedule): TimeBlock[] {
 }
 
 function fromTimeBlocks(blocks: TimeBlock[]): WeekSchedule {
-  const week: WeekSchedule = Object.fromEntries(
-    DAYS.map(d => [d.key, { enabled: false, ranges: [] }])
-  ) as WeekSchedule
+  const week: WeekSchedule = {
+    mon: { enabled: false, ranges: [] },
+    tue: { enabled: false, ranges: [] },
+    wed: { enabled: false, ranges: [] },
+    thu: { enabled: false, ranges: [] },
+    fri: { enabled: false, ranges: [] },
+    sat: { enabled: false, ranges: [] },
+    sun: { enabled: false, ranges: [] },
+  }
   blocks.forEach(b => {
     b.days.forEach(num => {
       const day = DAYS.find(d => d.num === num)
