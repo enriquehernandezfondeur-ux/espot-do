@@ -5,6 +5,7 @@ import { Building2, Clock, DollarSign, Plus, Gift, Shield, CreditCard, CheckCirc
 import { cn, formatCurrency } from '@/lib/utils'
 import { saveSpace, publishSpace, getMySpaces, saveSpaceImages, updateSpace } from '@/lib/actions/space'
 import PhotoUploader from '@/components/dashboard/PhotoUploader'
+import WeeklySchedule from '@/components/dashboard/WeeklySchedule'
 import type { SpaceCategory, PricingType, PaymentTermType } from '@/types'
 
 const steps = [
@@ -770,184 +771,19 @@ export default function EspacioPage() {
           </div>
         )}
 
-        {/* STEP 3: Bloques de tiempo */}
+        {/* STEP 3: Disponibilidad semanal */}
         {currentStep === 3 && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-xl font-bold text-white mb-1">¿Cuándo está disponible tu espacio?</h2>
-              <p className="text-slate-400 text-sm">Crea los horarios en los que aceptas eventos. Puedes tener varios bloques.</p>
+          <div>
+            <div className="mb-5">
+              <h2 className="text-xl font-bold text-white mb-1">Horarios de disponibilidad</h2>
+              <p className="text-slate-400 text-sm">
+                Define en qué horarios aceptas reservas cada semana.
+              </p>
             </div>
-
-            {/* Presets rápidos */}
-            <div>
-              <p className="text-slate-400 text-xs font-medium uppercase tracking-wide mb-3">Horarios populares — click para agregar</p>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { emoji: '🌅', label: 'Mañana',   sub: '8:00 AM – 1:00 PM',  start: '08:00', end: '13:00', days: [1,2,3,4,5] },
-                  { emoji: '☀️', label: 'Tarde',    sub: '1:00 PM – 7:00 PM',  start: '13:00', end: '19:00', days: [1,2,3,4,5,6] },
-                  { emoji: '🌙', label: 'Noche',    sub: '7:00 PM – 12:00 AM', start: '19:00', end: '00:00', days: [5,6] },
-                  { emoji: '🎉', label: 'Full Day',  sub: '8:00 AM – 8:00 PM',  start: '08:00', end: '20:00', days: [6,0] },
-                  { emoji: '🍽️', label: 'Almuerzo', sub: '12:00 PM – 4:00 PM', start: '12:00', end: '16:00', days: [1,2,3,4,5] },
-                  { emoji: '🥂', label: 'Happy Hour',sub: '5:00 PM – 9:00 PM', start: '17:00', end: '21:00', days: [3,4,5] },
-                ].map(preset => {
-                  const already = timeBlocks.some(b => b.start_time === preset.start && b.end_time === preset.end)
-                  return (
-                    <button
-                      key={preset.label}
-                      disabled={already}
-                      onClick={() => setTimeBlocks([...timeBlocks, { block_name: preset.label, start_time: preset.start, end_time: preset.end, days: preset.days }])}
-                      className={cn(
-                        'flex items-center gap-3 p-3 rounded-xl border text-left transition-all',
-                        already
-                          ? 'bg-green-600/10 border-green-500/20 opacity-60 cursor-not-allowed'
-                          : 'bg-white/5 border-white/10 hover:border-violet-500/40 hover:bg-[#35C493]/5'
-                      )}
-                    >
-                      <span className="text-2xl shrink-0">{preset.emoji}</span>
-                      <div>
-                        <div className={cn('text-sm font-medium', already ? 'text-green-400' : 'text-white')}>
-                          {already ? '✓ ' : ''}{preset.label}
-                        </div>
-                        <div className="text-slate-500 text-xs">{preset.sub}</div>
-                      </div>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Bloques creados */}
-            {timeBlocks.length > 0 && (
-              <div>
-                <p className="text-slate-400 text-xs font-medium uppercase tracking-wide mb-3">Tus bloques activos</p>
-                <div className="space-y-2">
-                  {timeBlocks.map((block, i) => {
-                    const startH = parseInt(block.start_time)
-                    const isNight = startH >= 18
-                    const isMorning = startH < 12
-                    const color = isNight ? 'from-indigo-600/20 to-purple-700/20 border-indigo-500/20' : isMorning ? 'from-amber-600/20 to-orange-600/20 border-amber-500/20' : 'from-sky-600/20 to-cyan-600/20 border-sky-500/20'
-                    const textColor = isNight ? 'text-indigo-300' : isMorning ? 'text-amber-300' : 'text-sky-300'
-                    return (
-                      <div key={i} className={cn('bg-gradient-to-r border rounded-xl p-4', color)}>
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                            <div className={cn('text-2xl font-bold tabular-nums', textColor)}>
-                              {block.start_time} – {block.end_time}
-                            </div>
-                            <span className={cn('text-sm font-medium', textColor)}>{block.block_name}</span>
-                          </div>
-                          <button
-                            onClick={() => setTimeBlocks(timeBlocks.filter((_, j) => j !== i))}
-                            className="text-slate-500 hover:text-red-400 transition-colors p-1"
-                          >
-                            <X size={16} />
-                          </button>
-                        </div>
-                        <div className="flex gap-1.5 flex-wrap">
-                          {days.map((d, j) => (
-                            <span key={j} className={cn(
-                              'text-xs px-2.5 py-1 rounded-full font-medium transition-all',
-                              block.days.includes(j)
-                                ? isNight ? 'bg-indigo-600/40 text-indigo-200' : isMorning ? 'bg-amber-600/40 text-amber-200' : 'bg-sky-600/40 text-sky-200'
-                                : 'bg-white/5 text-slate-600'
-                            )}>
-                              {d}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Bloque personalizado */}
-            <div>
-              <p className="text-slate-400 text-xs font-medium uppercase tracking-wide mb-3">Crear bloque personalizado</p>
-              <div className="bg-white/5 border border-white/10 rounded-xl p-5 space-y-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-slate-400 text-xs mb-1.5">Nombre</label>
-                    <input
-                      value={newBlock.block_name}
-                      onChange={e => setNewBlock({...newBlock, block_name: e.target.value})}
-                      placeholder="Ej: Bloque VIP"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm transition-colors"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-slate-400 text-xs mb-1.5">Desde</label>
-                    <input
-                      type="time"
-                      value={newBlock.start_time}
-                      onChange={e => setNewBlock({...newBlock, start_time: e.target.value})}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-[#35C493] text-sm transition-colors"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-slate-400 text-xs mb-1.5">Hasta</label>
-                    <input
-                      type="time"
-                      value={newBlock.end_time}
-                      onChange={e => setNewBlock({...newBlock, end_time: e.target.value})}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-[#35C493] text-sm transition-colors"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-slate-400 text-xs mb-2">Días en que aplica</label>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setNewBlock({...newBlock, days: newBlock.days.length === 7 ? [] : [0,1,2,3,4,5,6]})}
-                      className={cn('px-3 py-2 rounded-lg text-xs font-medium transition-all border',
-                        newBlock.days.length === 7 ? 'bg-[#35C493] text-white border-violet-500' : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10'
-                      )}
-                    >
-                      Todos
-                    </button>
-                    {days.map((d, j) => (
-                      <button
-                        key={j}
-                        onClick={() => toggleDay(j)}
-                        className={cn(
-                          'w-10 h-10 rounded-lg text-xs font-medium transition-all border',
-                          newBlock.days.includes(j)
-                            ? 'bg-[#35C493] text-white border-violet-500'
-                            : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10'
-                        )}
-                      >
-                        {d}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Preview del bloque */}
-                {newBlock.start_time && newBlock.end_time && (
-                  <div className="bg-[rgba(53,196,147,0.07)] border border-[rgba(53,196,147,0.20)] rounded-lg px-4 py-2.5 text-sm text-[#4DD9A7] flex items-center gap-2">
-                    <Clock size={14} />
-                    Vista previa: <strong className="text-white">{newBlock.block_name || 'Sin nombre'}</strong> de <strong className="text-white">{newBlock.start_time}</strong> a <strong className="text-white">{newBlock.end_time}</strong>
-                    {newBlock.days.length > 0 && <span className="text-[#35C493]">· {newBlock.days.length === 7 ? 'todos los días' : `${newBlock.days.length} día${newBlock.days.length > 1 ? 's' : ''}`}</span>}
-                  </div>
-                )}
-
-                <button
-                  onClick={addTimeBlock}
-                  disabled={!newBlock.block_name || !newBlock.start_time || !newBlock.end_time}
-                  className="flex items-center gap-2 bg-[#35C493] hover:bg-[#4DD9A7] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
-                >
-                  <Plus size={16} /> Agregar este bloque
-                </button>
-              </div>
-            </div>
-
-            {timeBlocks.length === 0 && (
-              <div className="bg-blue-600/10 border border-blue-500/20 rounded-xl p-4 text-blue-300 text-sm">
-                💡 Si tu espacio se puede reservar libremente por horas (sin horarios fijos), puedes saltar este paso.
-              </div>
-            )}
+            <WeeklySchedule
+              initial={timeBlocks}
+              onChange={blocks => setTimeBlocks(blocks)}
+            />
           </div>
         )}
 
