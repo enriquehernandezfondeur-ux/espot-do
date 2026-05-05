@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/email/send'
 import { sendWhatsApp } from '@/lib/whatsapp/send'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
+import { createBookingEvent, deleteBookingEvent } from '@/lib/google-calendar'
 export type { BookingStatus } from '@/lib/bookingConfig'
 
 // ── CREAR RESERVA CON VALIDACIÓN ANTI-DOBLE ───────────────
@@ -251,7 +252,7 @@ export async function rejectBooking(bookingId: string, reason?: string) {
 
   const { data: bk } = await supabase
     .from('bookings')
-    .select(`*, spaces!space_id(name, host_id), profiles!guest_id(full_name, email)`)
+    .select(`*, spaces!space_id(name, host_id, profiles!host_id(google_refresh_token, google_calendar_connected)), profiles!guest_id(full_name, email)`)
     .eq('id', bookingId)
     .single()
 
@@ -270,6 +271,12 @@ export async function rejectBooking(bookingId: string, reason?: string) {
     .eq('id', bookingId)
 
   if (error) return { error: error.message }
+
+  // Google Calendar: eliminar evento si existe
+  const host = space?.profiles as any
+  if (host?.google_calendar_connected && host?.google_refresh_token && (bk as any).google_calendar_event_id) {
+    await deleteBookingEvent(host.google_refresh_token, (bk as any).google_calendar_event_id)
+  }
 
   const guest = bk.profiles as any
   if (guest?.email) {
@@ -302,7 +309,7 @@ export async function confirmPayment(bookingId: string) {
 
   const { data: bk } = await supabase
     .from('bookings')
-    .select(`*, spaces!space_id(name, host_id, address, city, profiles!host_id(full_name, email, phone)), profiles!guest_id(full_name, email, phone)`)
+    .select(`*, spaces!space_id(name, host_id, address, city, sector, profiles!host_id(full_name, email, phone, google_refresh_token, google_calendar_connected)), profiles!guest_id(full_name, email, phone)`)
     .eq('id', bookingId)
     .eq('guest_id', user.id)
     .single()
@@ -337,8 +344,34 @@ export async function confirmPayment(bookingId: string) {
   const space  = bk.spaces as any
   const host   = space?.profiles as any
   const guest  = bk.profiles as any
-
   const remainingAmount = formatCurrency(Number(bk.total_amount) - Number(bk.platform_fee))
+
+  // Google Calendar: crear evento en el calendario del propietario
+  if (host?.google_calendar_connected && host?.google_refresh_token) {
+    const gcalEventId = await createBookingEvent(
+      host.google_refresh_token,
+      {
+        id:          bookingId,
+        event_date:  bk.event_date,
+        start_time:  bk.start_time,
+        end_time:    bk.end_time,
+        event_type:  bk.event_type,
+        guest_count: bk.guest_count,
+      },
+      {
+        name:    space?.name    ?? '',
+        address: space?.address ?? null,
+        sector:  space?.sector  ?? null,
+        city:    space?.city    ?? null,
+      },
+      guest?.full_name ?? 'Cliente',
+    )
+    if (gcalEventId) {
+      await supabase.from('bookings')
+        .update({ google_calendar_event_id: gcalEventId })
+        .eq('id', bookingId)
+    }
+  }
 
   await Promise.all([
     // Email de confirmación al cliente
@@ -410,7 +443,7 @@ export async function cancelBooking(bookingId: string, reason?: string) {
 
   const { data: bk } = await supabase
     .from('bookings')
-    .select(`*, spaces!space_id(name, host_id, profiles!host_id(full_name, email)), profiles!guest_id(full_name, email)`)
+    .select(`*, spaces!space_id(name, host_id, profiles!host_id(full_name, email, google_refresh_token, google_calendar_connected)), profiles!guest_id(full_name, email)`)
     .eq('id', bookingId)
     .single()
 
@@ -435,6 +468,12 @@ export async function cancelBooking(bookingId: string, reason?: string) {
     .in('status', ['pending', 'accepted', 'confirmed'])
 
   if (error) return { error: error.message }
+
+  // Google Calendar: eliminar evento si existe
+  const hostProfile = space?.profiles as any
+  if (hostProfile?.google_calendar_connected && hostProfile?.google_refresh_token && (bk as any).google_calendar_event_id) {
+    await deleteBookingEvent(hostProfile.google_refresh_token, (bk as any).google_calendar_event_id)
+  }
 
   // Email de cancelación al otro participante
   const guest = bk.profiles as any

@@ -36,6 +36,35 @@ export async function regenerateIcalToken(): Promise<string | null> {
   return token
 }
 
+// ── Google Calendar — estado de conexión ─────────────────
+export async function getGoogleCalendarStatus(): Promise<{ connected: boolean }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { connected: false }
+
+  const { data } = await supabase
+    .from('profiles')
+    .select('google_calendar_connected')
+    .eq('id', user.id)
+    .single()
+
+  return { connected: data?.google_calendar_connected ?? false }
+}
+
+// ── Google Calendar — desconectar ────────────────────────
+export async function disconnectGoogleCalendar(): Promise<{ success: boolean }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false }
+
+  await supabase
+    .from('profiles')
+    .update({ google_calendar_connected: false, google_refresh_token: null })
+    .eq('id', user.id)
+
+  return { success: true }
+}
+
 // ── Todas las reservas del host ───────────────────────────
 export async function getHostBookings(statusFilter?: string) {
   const supabase = await createClient()

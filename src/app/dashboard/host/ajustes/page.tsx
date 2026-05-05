@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Save, Camera, Loader2, CheckCircle, Calendar, Copy, RefreshCw, ExternalLink } from 'lucide-react'
+import { Save, Camera, Loader2, CheckCircle, Calendar, Copy, RefreshCw, ExternalLink, Link2, Link2Off } from 'lucide-react'
 import { getClientProfile, updateClientProfile } from '@/lib/actions/client'
-import { getOrCreateIcalToken, regenerateIcalToken } from '@/lib/actions/host'
+import { getOrCreateIcalToken, regenerateIcalToken, getGoogleCalendarStatus, disconnectGoogleCalendar } from '@/lib/actions/host'
 import { createClient } from '@/lib/supabase/client'
+import { useSearchParams } from 'next/navigation'
 
 const BASE_URL = 'https://espothub.com'
 
@@ -28,10 +29,20 @@ export default function HostAjustesPage() {
   const [regenerating,   setRegenerating]   = useState(false)
   const [confirmRegen,   setConfirmRegen]   = useState(false)
 
+  // Google Calendar
+  const [gcalConnected,    setGcalConnected]    = useState(false)
+  const [gcalDisconnecting, setGcalDisconnecting] = useState(false)
+  const [gcalMessage,      setGcalMessage]      = useState('')
+
+  const searchParams = useSearchParams()
+
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    getClientProfile().then(p => {
+    Promise.all([
+      getClientProfile(),
+      getGoogleCalendarStatus(),
+    ]).then(([p, gcal]) => {
       if (p) {
         setFullName(p.full_name ?? '')
         setPhone(p.phone ?? '')
@@ -39,9 +50,20 @@ export default function HostAjustesPage() {
         setEmail(p.email ?? '')
         setAvatarUrl(p.avatar_url ?? '')
       }
+      setGcalConnected(gcal.connected)
       setLoading(false)
     })
   }, [])
+
+  // Leer mensajes del callback de OAuth
+  useEffect(() => {
+    const connected = searchParams.get('connected')
+    const errParam  = searchParams.get('error')
+    if (connected === 'google') { setGcalConnected(true); setGcalMessage('Google Calendar conectado correctamente.') }
+    if (errParam === 'google_denied') setGcalMessage('Acceso denegado. Vuelve a intentarlo.')
+    if (errParam === 'google_not_configured') setGcalMessage('Google Calendar no está configurado aún.')
+    if (errParam) setTimeout(() => setGcalMessage(''), 4000)
+  }, [searchParams])
 
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -105,6 +127,15 @@ export default function HostAjustesPage() {
   }
 
   const icalUrl = icalToken ? `${BASE_URL}/api/cal/${icalToken}` : null
+
+  async function handleDisconnectGcal() {
+    setGcalDisconnecting(true)
+    await disconnectGoogleCalendar()
+    setGcalConnected(false)
+    setGcalMessage('Google Calendar desconectado.')
+    setTimeout(() => setGcalMessage(''), 3000)
+    setGcalDisconnecting(false)
+  }
 
   if (loading) return (
     <div className="flex items-center justify-center h-screen" style={{ background: 'var(--bg-base)' }}>
@@ -192,7 +223,82 @@ export default function HostAjustesPage() {
         :          <><Save size={18} /> Guardar cambios</>}
       </button>
 
-      {/* ── Sincronizar calendario ── */}
+      {/* ── Google Calendar ── */}
+      <div className="rounded-2xl p-6 mb-5"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+            style={{ background: 'rgba(66,133,244,0.1)' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" fill="#4285F4"/>
+            </svg>
+          </div>
+          <div>
+            <h2 className="font-bold" style={{ color: 'var(--text-primary)' }}>Google Calendar</h2>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              Las reservas confirmadas se crean automáticamente en tu calendario
+            </p>
+          </div>
+          {gcalConnected && (
+            <span className="ml-auto flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
+              style={{ background: 'rgba(22,163,74,0.1)', color: '#16A34A' }}>
+              <CheckCircle size={11} /> Conectado
+            </span>
+          )}
+        </div>
+
+        {gcalMessage && (
+          <div className="mb-4 px-4 py-3 rounded-xl text-sm"
+            style={{
+              background: gcalMessage.includes('conectado') || gcalMessage.includes('Conectado')
+                ? 'rgba(22,163,74,0.06)' : 'rgba(220,38,38,0.06)',
+              border: `1px solid ${gcalMessage.includes('conectado') || gcalMessage.includes('Conectado')
+                ? 'rgba(22,163,74,0.2)' : 'rgba(220,38,38,0.2)'}`,
+              color: gcalMessage.includes('conectado') || gcalMessage.includes('Conectado')
+                ? '#166534' : '#991B1B',
+            }}>
+            {gcalMessage}
+          </div>
+        )}
+
+        {!gcalConnected ? (
+          <div>
+            <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+              Conecta tu cuenta de Google para que cada reserva confirmada aparezca automáticamente en tu Google Calendar con todos los detalles del evento.
+            </p>
+            <div className="flex items-start gap-3 mb-5">
+              {['Reservas confirmadas → evento automático', 'Reservas rechazadas/canceladas → evento eliminado', 'Nombre del cliente, personas y horario incluidos'].map(item => (
+                <div key={item} className="flex items-start gap-1.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  <span style={{ color: 'var(--brand)', marginTop: 1 }}>·</span> {item}
+                </div>
+              ))}
+            </div>
+            <a href="/api/auth/google-calendar"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
+              style={{ background: '#4285F4', color: '#fff' }}>
+              <Link2 size={15} /> Conectar Google Calendar
+            </a>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="px-4 py-3 rounded-xl text-sm"
+              style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+              Las nuevas reservas confirmadas se crearán automáticamente en tu calendario. Las canceladas y rechazadas se eliminan.
+            </div>
+            <button
+              onClick={handleDisconnectGcal}
+              disabled={gcalDisconnecting}
+              className="flex items-center gap-1.5 text-xs font-medium transition-colors disabled:opacity-50"
+              style={{ color: 'var(--text-muted)' }}>
+              {gcalDisconnecting
+                ? <><Loader2 size={12} className="animate-spin" /> Desconectando...</>
+                : <><Link2Off size={12} /> Desconectar Google Calendar</>}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* ── Sincronizar calendario (iCal) ── */}
       <div className="rounded-2xl p-6"
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
         <div className="flex items-center gap-3 mb-1">
@@ -201,9 +307,9 @@ export default function HostAjustesPage() {
             <Calendar size={18} style={{ color: 'var(--brand)' }} />
           </div>
           <div>
-            <h2 className="font-bold" style={{ color: 'var(--text-primary)' }}>Sincronizar calendario</h2>
+            <h2 className="font-bold" style={{ color: 'var(--text-primary)' }}>Enlace iCal universal</h2>
             <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              Agrega tus reservas a Google Calendar, Apple Calendar u Outlook
+              Para Apple Calendar, Outlook u otras apps de calendario
             </p>
           </div>
         </div>
