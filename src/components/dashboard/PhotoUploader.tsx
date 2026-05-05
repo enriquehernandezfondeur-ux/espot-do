@@ -16,24 +16,34 @@ export default function PhotoUploader({ spaceId, onChange }: Props) {
   const [photos, setPhotos] = useState<Photo[]>([])
   const [uploading, setUploading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
+  const [uploadError, setUploadError] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
 
   async function uploadFiles(files: FileList) {
     if (!files.length) return
     setUploading(true)
+    setUploadError('')
 
     const uploaded: Photo[] = []
+    const folder = spaceId ? `spaces/${spaceId}` : `temp/${Date.now()}`
+
     for (const file of Array.from(files)) {
       if (!file.type.startsWith('image/')) continue
+      if (file.size > 10 * 1024 * 1024) {
+        setUploadError(`"${file.name}" supera los 10MB`)
+        continue
+      }
       const ext = file.name.split('.').pop()
-      const path = `spaces/${spaceId ?? 'temp-' + Date.now()}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 
       const { error } = await supabase.storage
         .from('space-images')
         .upload(path, file, { cacheControl: '3600', upsert: false })
 
-      if (!error) {
+      if (error) {
+        setUploadError(`Error al subir ${file.name}: ${error.message}`)
+      } else {
         const { data: { publicUrl } } = supabase.storage.from('space-images').getPublicUrl(path)
         uploaded.push({ url: publicUrl, path, isCover: false })
       }
@@ -96,10 +106,17 @@ export default function PhotoUploader({ spaceId, onChange }: Props) {
             <p className="text-slate-400 text-xs">
               o <span className="text-[#35C493] underline underline-offset-2">haz click para seleccionar</span>
             </p>
-            <p className="text-slate-600 text-xs mt-1">JPG, PNG · Máximo 10 fotos · La primera es la portada</p>
+            <p className="text-slate-600 text-xs mt-1">JPG, PNG · Máximo 10MB por foto · La primera es la portada</p>
           </div>
         )}
       </div>
+
+      {uploadError && (
+        <div className="text-xs px-3 py-2 rounded-xl"
+          style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444' }}>
+          {uploadError}
+        </div>
+      )}
 
       {/* Grid de fotos */}
       {photos.length > 0 && (
