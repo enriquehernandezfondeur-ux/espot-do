@@ -157,23 +157,22 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
       // Zoom control en esquina inferior derecha
       L.control.zoom({ position: 'bottomright' }).addTo(map)
 
-      // Cluster group
+      // Sin clusters — todos los pins visibles individualmente
       const cluster = (L as any).markerClusterGroup({
-        maxClusterRadius: 60,
+        maxClusterRadius: 1,     // radio mínimo: prácticamente sin clustering
+        disableClusteringAtZoom: 10,
         showCoverageOnHover: false,
+        spiderfyOnMaxZoom: true,
         iconCreateFunction: (c: any) => {
           const count = c.getChildCount()
           return L.divIcon({
             html: `<div style="
               background:#35C493;color:#fff;border-radius:50%;
-              width:36px;height:36px;display:flex;align-items:center;
-              justify-content:center;font-size:13px;font-weight:700;
-              box-shadow:0 2px 12px rgba(53,196,147,0.45);
-              border:2px solid #fff;
+              width:32px;height:32px;display:flex;align-items:center;
+              justify-content:center;font-size:12px;font-weight:700;
+              box-shadow:0 2px 10px rgba(53,196,147,0.4);border:2px solid #fff;
             ">${count}</div>`,
-            className: '',
-            iconSize:  [36, 36],
-            iconAnchor:[18, 18],
+            className: '', iconSize: [32, 32], iconAnchor: [16, 16],
           })
         },
       })
@@ -249,27 +248,8 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
   return (
     <>
       <style>{`
-        .espot-pin {
-          background:#fff;
-          border:1.5px solid #D1D5DB;
-          border-radius:24px;
-          padding:5px 10px;
-          font-size:11px;
-          font-weight:700;
-          color:#111827;
-          white-space:nowrap;
-          box-shadow:0 2px 8px rgba(0,0,0,0.12);
-          cursor:pointer;
-          transition:transform 0.15s,background 0.15s,border-color 0.15s;
-          font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-        }
-        .espot-pin:hover,.espot-pin.active {
-          background:#35C493;
-          border-color:#35C493;
-          color:#fff;
-          transform:scale(1.1);
-          box-shadow:0 4px 16px rgba(53,196,147,0.4);
-        }
+        .espot-pin svg { overflow: visible; }
+        .espot-pin { transition: transform 0.15s ease; }
         .leaflet-popup-content-wrapper {
           border-radius:16px !important;
           padding:0 !important;
@@ -299,12 +279,26 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
 
 // ── Helpers de Leaflet ────────────────────────────────────
 
-function buildIcon(L: any, label: string, active: boolean) {
+function buildIcon(L: any, _label: string, active: boolean) {
+  const color  = active ? '#0F1623' : '#35C493'
+  const shadow = active
+    ? '0 4px 16px rgba(15,22,35,0.45)'
+    : '0 2px 10px rgba(53,196,147,0.4)'
   return L.divIcon({
-    html:       `<div class="espot-pin${active ? ' active' : ''}">${label}</div>`,
+    html: `
+      <div style="position:relative;width:28px;height:36px;cursor:pointer;
+                  transition:transform 0.15s;transform:${active ? 'scale(1.25)' : 'scale(1)'}">
+        <svg width="28" height="36" viewBox="0 0 28 36" fill="none"
+             xmlns="http://www.w3.org/2000/svg"
+             style="filter:drop-shadow(${shadow})">
+          <path d="M14 0C6.3 0 0 6.3 0 14c0 5.2 2.8 9.7 7 12.2L14 36l7-9.8C25.2 23.7 28 19.2 28 14 28 6.3 21.7 0 14 0z"
+                fill="${color}"/>
+          <circle cx="14" cy="13" r="6" fill="white"/>
+        </svg>
+      </div>`,
     className:  '',
-    iconSize:   [1, 1],
-    iconAnchor: [0, 0],
+    iconSize:   [28, 36],
+    iconAnchor: [14, 36],
   })
 }
 
