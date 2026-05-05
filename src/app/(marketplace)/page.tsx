@@ -240,20 +240,10 @@ export default async function HomePage() {
                 const Icon      = catDef?.icon ?? Building2
                 return (
                   <Link key={space.id} href={`/espacios/${space.slug}`} className="group block">
-                    <div className="rounded-2xl overflow-hidden h-full flex flex-col"
+                    <div className="card-hover rounded-2xl overflow-hidden h-full flex flex-col"
                       style={{
                         background: '#fff',
                         border: '1px solid var(--border-subtle)',
-                        boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-                        transition: 'transform 0.22s ease, box-shadow 0.22s ease',
-                      }}
-                      onMouseEnter={e => {
-                        (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'
-                        ;(e.currentTarget as HTMLElement).style.boxShadow = '0 12px 40px rgba(0,0,0,0.12)'
-                      }}
-                      onMouseLeave={e => {
-                        (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
-                        ;(e.currentTarget as HTMLElement).style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)'
                       }}>
 
                       {/* Imagen */}
@@ -346,18 +336,10 @@ export default async function HomePage() {
               const Icon = cat.icon
               return (
                 <Link key={cat.value} href={`/buscar?categoria=${cat.value}`}
-                  className="group flex flex-col items-center gap-3 p-4 rounded-2xl transition-all duration-200 text-center"
+                  className="cat-hover group flex flex-col items-center gap-3 p-4 rounded-2xl transition-all duration-200 text-center"
                   style={{
                     border: '1px solid var(--border-subtle)',
                     background: '#fff',
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = 'var(--brand)'
-                    ;(e.currentTarget as HTMLElement).style.background = 'var(--brand-dim)'
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-subtle)'
-                    ;(e.currentTarget as HTMLElement).style.background = '#fff'
                   }}>
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
                     style={{ background: 'var(--bg-elevated)' }}>
