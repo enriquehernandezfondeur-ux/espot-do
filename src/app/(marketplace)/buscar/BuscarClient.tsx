@@ -308,15 +308,6 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                                 <Shield size={10} /> Verificado
                               </span>
                             )}
-                            {/* Badge de disponibilidad (solo cuando hay filtro de fecha) */}
-                            {space._dateFiltered && (
-                              <span className="flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full"
-                                style={space._available
-                                  ? { background: 'rgba(22,163,74,0.9)', color: '#fff' }
-                                  : { background: 'rgba(220,38,38,0.85)', color: '#fff' }}>
-                                {space._available ? '✓ Disponible' : '✗ No disponible'}
-                              </span>
-                            )}
                           </div>
 
                           {/* Precio flotante */}
