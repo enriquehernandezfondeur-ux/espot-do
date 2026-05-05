@@ -305,15 +305,37 @@ export default function EspacioPage() {
         name: a.name, price: a.price, unit: a.unit, category: a.category, emoji: '✨',
       })))
     }
+    // Actividades
+    setPrimaryActivity(space.primary_activity ?? '')
+    setSecondaryActivities(space.secondary_activities ?? [])
     // Condiciones
     const c = space.space_conditions?.[0]
     if (c) {
-      setMusicCutoff(c.music_cutoff_time?.slice(0,5) ?? '00:00')
+      // Permisos
       setAllowsDecoration(c.allows_external_decoration ?? true)
       setAllowsFood(c.allows_external_food ?? false)
       setAllowsAlcohol(c.allows_external_alcohol ?? false)
+      setAllowsLiveMusic(c.allows_live_music ?? false)
+      setAllowsDJ(c.allows_dj ?? false)
+      setAllowsSmoking(c.allows_smoking ?? false)
+      setAllowsChildren(c.allows_children ?? true)
+      setAllowsPets(c.allows_pets ?? false)
+      setAllowsParties(c.allows_parties ?? true)
+      setAllowsCorporate(c.allows_corporate ?? true)
+      // Ruido
+      setMusicCutoff(c.music_cutoff_time?.slice(0,5) ?? '00:00')
+      setNoiseLevel(c.noise_level ?? 'moderado')
+      // Depósito
       setDepositRequired(c.deposit_required ?? false)
       setDepositAmount(String(c.deposit_amount ?? ''))
+      setDepositRefundable(c.deposit_refundable ?? true)
+      // Limpieza
+      setIncludesCleaning(c.cleaning_included ?? false)
+      setCleaningFee(String(c.cleaning_fee ?? ''))
+      // Horas extra
+      setAllowsExtraHours(c.overtime_allowed ?? false)
+      setExtraHourPrice(String(c.overtime_price ?? ''))
+      // Cancelación
       setCancellationPolicy(c.cancellation_policy ?? 'moderada')
       setCustomRules(c.custom_rules ?? '')
     }

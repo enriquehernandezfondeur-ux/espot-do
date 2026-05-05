@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import {
-  Search, MapPin, Users, SlidersHorizontal, X,
+  Search, MapPin, Users, SlidersHorizontal, X, CalendarDays,
   Shield, Star, Map, LayoutGrid,
   Check, Building2, UtensilsCrossed,
   Sunset, Wine, Trees, Camera, Briefcase, Home, Hotel,
@@ -63,6 +63,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   const [categoria, setCategoria]     = useState(initialParams.categoria ?? '')
   const [capacidad, setCapacidad]     = useState(initialParams.capacidad ?? '')
   const [capacidadInput, setCapacidadInput] = useState(initialParams.capacidad ?? '')
+  const [dateFrom, setDateFrom]       = useState(initialParams.dateFrom ?? '')
   const [moreOpen, setMoreOpen]       = useState(false)
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([])
   const [viewMode, setViewMode]       = useState<'list' | 'map'>('list')
@@ -147,14 +148,26 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                 </button>
               )}
             </div>
-            <div className="flex items-center gap-2 rounded-2xl px-4 py-3 input-base w-48">
+            <div className="flex items-center gap-2 rounded-2xl px-4 py-3 input-base w-40">
               <MapPin size={15} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
               <input
                 value={sector}
                 onChange={e => setSector(e.target.value)}
-                placeholder="Sector o ciudad"
+                placeholder="Sector"
                 className="w-full bg-transparent text-sm focus:outline-none"
                 style={{ color: 'var(--text-primary)' }}
+              />
+            </div>
+            {/* Fecha */}
+            <div className="flex items-center gap-2 rounded-2xl px-4 py-3 input-base w-44">
+              <CalendarDays size={15} style={{ color: dateFrom ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={e => setDateFrom(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
+                className="w-full bg-transparent text-sm focus:outline-none"
+                style={{ color: dateFrom ? 'var(--text-primary)' : 'var(--text-muted)' }}
               />
             </div>
             {/* Más filtros */}
@@ -288,11 +301,20 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                           )}
 
                           {/* Badges */}
-                          <div className="absolute top-3 left-3 flex gap-1.5">
+                          <div className="absolute top-3 left-3 flex flex-col gap-1.5">
                             {space.is_verified && (
                               <span className="flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full"
                                 style={{ background: 'rgba(53,196,147,0.9)', color: '#fff' }}>
                                 <Shield size={10} /> Verificado
+                              </span>
+                            )}
+                            {/* Badge de disponibilidad (solo cuando hay filtro de fecha) */}
+                            {space._dateFiltered && (
+                              <span className="flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full"
+                                style={space._available
+                                  ? { background: 'rgba(22,163,74,0.9)', color: '#fff' }
+                                  : { background: 'rgba(220,38,38,0.85)', color: '#fff' }}>
+                                {space._available ? '✓ Disponible' : '✗ No disponible'}
                               </span>
                             )}
                           </div>

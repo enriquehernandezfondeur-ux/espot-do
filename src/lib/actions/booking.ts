@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/email/send'
+import { sendWhatsApp } from '@/lib/whatsapp/send'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 export type { BookingStatus } from '@/lib/bookingConfig'
 
@@ -29,7 +30,7 @@ export async function createBooking(payload: CreateBookingPayload) {
   // Obtener info del espacio y host para los emails
   const { data: space } = await supabase
     .from('spaces')
-    .select('id, name, address, city, sector, host_id, profiles!host_id(id, full_name, email)')
+    .select('id, name, address, city, sector, host_id, profiles!host_id(id, full_name, email, phone)')
     .eq('id', payload.spaceId)
     .single()
 
@@ -37,7 +38,7 @@ export async function createBooking(payload: CreateBookingPayload) {
 
   // Obtener perfil del guest
   const guestProfile = user ? await supabase
-    .from('profiles').select('full_name, email').eq('id', user.id).single()
+    .from('profiles').select('full_name, email, phone').eq('id', user.id).single()
     .then(r => r.data) : null
 
   // Validar disponibilidad — solo si el espacio es por hora y hay horario real
@@ -168,6 +169,11 @@ export async function createBooking(payload: CreateBookingPayload) {
         cta: { text: 'Ver en mi panel', url: 'https://espothub.com/dashboard/host/reservas' },
       }),
     }),
+    // WhatsApp al host
+    host?.phone && sendWhatsApp({
+      to: host.phone,
+      body: `🔔 *Nueva reserva en ${spaceName}*\n\nCliente: ${guestName}\nEvento: ${payload.eventType}\n${eventInfo}\nTotal: ${formatCurrency(payload.totalAmount)}\n\nRevisa tu panel: https://espothub.com/dashboard/host/reservas`,
+    }),
   ])
 
   return { success: true, bookingId: booking.id, status: isQuote ? 'quote_requested' : 'pending' }
@@ -181,7 +187,7 @@ export async function acceptBooking(bookingId: string) {
 
   const { data: bk } = await supabase
     .from('bookings')
-    .select(`*, spaces!space_id(name, host_id, profiles!host_id(full_name, email)), profiles!guest_id(full_name, email)`)
+    .select(`*, spaces!space_id(name, host_id, profiles!host_id(full_name, email)), profiles!guest_id(full_name, email, phone)`)
     .eq('id', bookingId)
     .single()
 
@@ -198,10 +204,12 @@ export async function acceptBooking(bookingId: string) {
 
   if (error) return { error: error.message }
 
-  // Email al cliente: "Tu reserva fue aceptada, completa el pago"
   const guest = bk.profiles as any
-  if (guest?.email) {
-    await sendEmail({
+  const depositAmount = formatCurrency(Number(bk.platform_fee))
+
+  await Promise.all([
+    // Email al cliente
+    guest?.email && sendEmail({
       to: guest.email,
       subject: `🎉 Reserva aceptada — ${space?.name}`,
       html: emailTemplate({
@@ -217,15 +225,20 @@ export async function acceptBooking(bookingId: string) {
             { label: 'Fecha', value: formatDate(bk.event_date) },
             { label: 'Horario', value: `${formatTime(bk.start_time)} – ${formatTime(bk.end_time)}` },
             { label: 'Total del evento', value: formatCurrency(Number(bk.total_amount)) },
-            { label: 'Pago ahora (10%)', value: formatCurrency(Number(bk.platform_fee)) },
+            { label: 'Pago ahora (10%)', value: depositAmount },
           ])}
           <p style="color:#16A34A;font-weight:bold;">
             Para confirmar tu reserva debes completar el pago del 10%.
           </p>`,
         cta: { text: 'Completar pago', url: 'https://espothub.com/dashboard/reservas' },
       }),
-    })
-  }
+    }),
+    // WhatsApp al cliente
+    guest?.phone && sendWhatsApp({
+      to: guest.phone,
+      body: `🎉 *¡Tu reserva fue aceptada!*\n\nEspacio: ${space?.name}\nFecha: ${formatDate(bk.event_date)}\n\nPaga el 10% (${depositAmount}) para confirmar tu lugar:\nhttps://espothub.com/dashboard/reservas`,
+    }),
+  ])
 
   return { success: true }
 }
@@ -289,7 +302,7 @@ export async function confirmPayment(bookingId: string) {
 
   const { data: bk } = await supabase
     .from('bookings')
-    .select(`*, spaces!space_id(name, host_id, address, city, profiles!host_id(full_name, email)), profiles!guest_id(full_name, email)`)
+    .select(`*, spaces!space_id(name, host_id, address, city, profiles!host_id(full_name, email, phone)), profiles!guest_id(full_name, email, phone)`)
     .eq('id', bookingId)
     .eq('guest_id', user.id)
     .single()
@@ -325,6 +338,8 @@ export async function confirmPayment(bookingId: string) {
   const host   = space?.profiles as any
   const guest  = bk.profiles as any
 
+  const remainingAmount = formatCurrency(Number(bk.total_amount) - Number(bk.platform_fee))
+
   await Promise.all([
     // Email de confirmación al cliente
     guest?.email && sendEmail({
@@ -345,7 +360,7 @@ export async function confirmPayment(bookingId: string) {
             { label: 'Personas', value: String(bk.guest_count) },
             { label: 'Dirección', value: `${space?.address}, ${space?.city}` },
             { label: 'Pagaste (10%)', value: formatCurrency(Number(bk.platform_fee)) },
-            { label: 'Resta pagar en el espacio', value: formatCurrency(Number(bk.total_amount) - Number(bk.platform_fee)) },
+            { label: 'Resta pagar en el espacio', value: remainingAmount },
           ])}`,
         cta: { text: 'Ver mi reserva', url: 'https://espothub.com/dashboard/reservas' },
       }),
@@ -371,6 +386,16 @@ export async function confirmPayment(bookingId: string) {
           ])}`,
         cta: { text: 'Ver en mi panel', url: 'https://espothub.com/dashboard/host/reservas' },
       }),
+    }),
+    // WhatsApp al cliente: confirmación
+    guest?.phone && sendWhatsApp({
+      to: guest.phone,
+      body: `🎊 *¡Reserva confirmada!*\n\nEspacio: ${space?.name}\nFecha: ${formatDate(bk.event_date)}\nHorario: ${formatTime(bk.start_time)} – ${formatTime(bk.end_time)}\nDirección: ${space?.address}, ${space?.city}\n\n💰 Resta pagar en el espacio: ${remainingAmount}\n\n¡Nos vemos pronto!`,
+    }),
+    // WhatsApp al host: pago recibido
+    host?.phone && sendWhatsApp({
+      to: host.phone,
+      body: `💰 *Pago recibido — Reserva confirmada*\n\nCliente: ${guest?.full_name}\nEspacio: ${space?.name}\nFecha: ${formatDate(bk.event_date)}\nTotal del evento: ${formatCurrency(Number(bk.total_amount))}\n\nVe los detalles: https://espothub.com/dashboard/host/reservas`,
     }),
   ])
 

@@ -8,8 +8,10 @@ export async function getPublishedSpaces(filters?: {
   capacity?:    number
   sector?:      string
   search?:      string
-  activity?:    string   // sub-actividad del cliente → se mapea a base
-  baseActivity?: string  // categoría base directa
+  activity?:    string
+  baseActivity?: string
+  dateFrom?:    string   // YYYY-MM-DD — filtrar por disponibilidad
+  dateTo?:      string
 }) {
   const supabase = await createClient()
 
@@ -47,8 +49,33 @@ export async function getPublishedSpaces(filters?: {
     query = query.or(`primary_activity.eq.${filters.baseActivity},secondary_activities.cs.{${filters.baseActivity}}`)
   }
 
-  const { data } = await query.order('created_at', { ascending: false })
-  return data ?? []
+  const { data: spaces } = await query.order('created_at', { ascending: false })
+  if (!spaces) return []
+
+  // Filtrar por disponibilidad de fecha si se especificó
+  if (filters?.dateFrom) {
+    const { data: blocked } = await supabase
+      .from('bookings')
+      .select('space_id, event_date, status')
+      .gte('event_date', filters.dateFrom)
+      .lte('event_date', filters.dateTo ?? filters.dateFrom)
+      .not('status', 'in', '("cancelled_guest","cancelled_host","rejected")')
+
+    const { data: availability } = await supabase
+      .from('space_availability')
+      .select('space_id, blocked_date')
+      .gte('blocked_date', filters.dateFrom)
+      .lte('blocked_date', filters.dateTo ?? filters.dateFrom)
+
+    // Marcar espacios con disponibilidad
+    return spaces.map(space => {
+      const hasBooking = blocked?.some(b => b.space_id === space.id)
+      const isBlocked  = availability?.some(a => a.space_id === space.id)
+      return { ...space, _available: !hasBooking && !isBlocked, _dateFiltered: true }
+    })
+  }
+
+  return spaces
 }
 
 export async function getSpaceBySlug(slug: string) {

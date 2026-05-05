@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import {
-  Search, MapPin, ArrowRight, Shield, Users,
+  Search, MapPin, ArrowRight, Shield, Users, CalendarDays,
   Clock, CreditCard, CheckCircle, Star,
   Building2, UtensilsCrossed, Sunset, Wine,
   Trees, Camera, Briefcase, Hotel, Home,
@@ -156,24 +156,36 @@ export default async function HomePage() {
 
           {/* Search */}
           <form action="/buscar"
-            className="flex items-stretch max-w-3xl mx-auto rounded-2xl overflow-hidden"
+            className="flex items-stretch max-w-4xl mx-auto rounded-2xl overflow-hidden"
             style={{ background: '#fff', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+            {/* Qué buscas */}
             <div className="flex items-center gap-3 flex-1 px-5">
               <Search size={18} style={{ color: '#9CA3AF', flexShrink: 0 }} />
               <input name="q" placeholder="Salón, rooftop, restaurante..."
                 className="flex-1 bg-transparent py-4 text-sm focus:outline-none"
                 style={{ color: '#0F1623' }} />
             </div>
-            <div className="w-px my-4" style={{ background: '#E8ECF0' }} />
-            <div className="flex items-center gap-3 px-5 w-48">
-              <MapPin size={16} style={{ color: '#9CA3AF', flexShrink: 0 }} />
-              <input name="sector" placeholder="Sector / Ciudad"
+            <div className="w-px my-3" style={{ background: '#E8ECF0' }} />
+            {/* Sector */}
+            <div className="flex items-center gap-2 px-4 w-40">
+              <MapPin size={15} style={{ color: '#9CA3AF', flexShrink: 0 }} />
+              <input name="sector" placeholder="Sector"
+                className="w-full bg-transparent py-4 text-sm focus:outline-none"
+                style={{ color: '#0F1623' }} />
+            </div>
+            <div className="w-px my-3" style={{ background: '#E8ECF0' }} />
+            {/* Fecha */}
+            <div className="flex items-center gap-2 px-4 w-44">
+              <CalendarDays size={15} style={{ color: '#9CA3AF', flexShrink: 0 }} />
+              <input name="dateFrom" type="date"
+                min={new Date().toISOString().split('T')[0]}
+                placeholder="¿Cuándo?"
                 className="w-full bg-transparent py-4 text-sm focus:outline-none"
                 style={{ color: '#0F1623' }} />
             </div>
             <button type="submit"
-              className="px-7 text-sm font-bold text-white rounded-r-2xl transition-all"
-              style={{ background: 'linear-gradient(135deg, #35C493, #28A87C)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1)' }}>
+              className="px-7 text-sm font-bold text-white transition-all"
+              style={{ background: 'linear-gradient(135deg, #35C493, #28A87C)' }}>
               Buscar
             </button>
           </form>

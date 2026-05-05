@@ -153,17 +153,30 @@ export async function saveSpace(payload: SaveSpacePayload) {
       : null,
     supabase.from('space_conditions').insert({
       space_id: spaceId,
-      // Permisos
+      // Permisos generales
       allows_external_decoration: payload.allowsDecoration,
       allows_external_food:       payload.allowsFood,
       allows_external_alcohol:    payload.allowsAlcohol,
       allows_smoking:             payload.allowsSmoking,
       allows_pets:                payload.allowsPets,
+      allows_live_music:          payload.allowsLiveMusic,
+      allows_dj:                  payload.allowsDJ,
+      allows_children:            payload.allowsChildren,
+      allows_parties:             payload.allowsParties,
+      allows_corporate:           payload.allowsCorporate,
       // Ruido
       music_cutoff_time: payload.musicCutoff || null,
+      noise_level:       payload.noiseLevel || 'moderado',
       // Depósito
-      deposit_required:  payload.depositRequired,
-      deposit_amount:    num(payload.depositAmount),
+      deposit_required:    payload.depositRequired,
+      deposit_amount:      num(payload.depositAmount),
+      deposit_refundable:  payload.depositRefundable ?? true,
+      // Limpieza
+      cleaning_included: payload.includesCleaning,
+      cleaning_fee:      num(payload.cleaningFee),
+      // Horas extra
+      overtime_allowed: payload.allowsExtraHours,
+      overtime_price:   num(payload.extraHourPrice),
       // Cancelación
       cancellation_policy:         payload.cancellationPolicy,
       cancellation_hours_before:   DEFAULT_CANCELLATION_HOURS,
