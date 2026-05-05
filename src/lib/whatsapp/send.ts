@@ -1,14 +1,14 @@
 /**
- * WhatsApp via Twilio — falla silenciosamente si no hay credenciales configuradas.
- * Twilio WA format: whatsapp:+1809XXXXXXX
+ * WhatsApp via Twilio REST API — falla silenciosamente si no hay credenciales.
+ * Usa fetch directo para evitar problemas de bundling con el SDK en Vercel.
  */
 
 function formatPhone(phone: string): string {
   const digits = phone.replace(/\D/g, '')
   if (digits.startsWith('1') && digits.length === 11) return `+${digits}`
   if (digits.length === 10) return `+1${digits}`
-  if (!digits.startsWith('+')) return `+${digits}`
-  return phone
+  if (digits.startsWith('+')) return phone
+  return `+${digits}`
 }
 
 export async function sendWhatsApp({
@@ -25,12 +25,20 @@ export async function sendWhatsApp({
   if (!accountSid || !authToken || !from || accountSid.startsWith('AC_PLACEHOLDER')) return
 
   try {
-    const twilio = (await import('twilio')).default
-    const client = twilio(accountSid, authToken)
-    await client.messages.create({
-      from: from.startsWith('whatsapp:') ? from : `whatsapp:${from}`,
-      to:   `whatsapp:${formatPhone(to)}`,
-      body,
+    const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`
+    const credentials = Buffer.from(`${accountSid}:${authToken}`).toString('base64')
+
+    await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Basic ${credentials}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        From: from.startsWith('whatsapp:') ? from : `whatsapp:${from}`,
+        To:   `whatsapp:${formatPhone(to)}`,
+        Body: body,
+      }).toString(),
     })
   } catch {
     // No bloquear el flujo si WA falla
