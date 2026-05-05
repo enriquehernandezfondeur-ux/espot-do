@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import {
   Search, MapPin, Users, SlidersHorizontal, X, CalendarDays,
-  Shield, Star, LayoutList, Map,
+  Shield, LayoutList, Map, ArrowRight,
   Check, Building2, UtensilsCrossed,
   Sunset, Wine, Trees, Camera, Briefcase, Home, Hotel,
 } from 'lucide-react'
@@ -490,22 +490,23 @@ function SpaceCard({
   return (
     <Link href={`/espacios/${space.slug}`} className="group block">
       <div
-        className="rounded-2xl overflow-hidden h-full flex flex-col transition-all duration-200"
+        className="rounded-2xl overflow-hidden h-full flex flex-col"
         style={{
           background:  '#fff',
-          border:      `1.5px solid ${isHovered ? 'var(--brand)' : 'var(--border-subtle)'}`,
-          boxShadow:   isHovered ? '0 4px 20px rgba(53,196,147,0.2)' : '0 1px 4px rgba(0,0,0,0.04)',
-          transform:   isHovered ? 'translateY(-2px)' : 'none',
+          border:      `1px solid ${isHovered ? 'rgba(53,196,147,0.5)' : 'var(--border-subtle)'}`,
+          boxShadow:   isHovered ? '0 8px 32px rgba(53,196,147,0.15)' : '0 1px 4px rgba(0,0,0,0.04)',
+          transform:   isHovered ? 'translateY(-3px)' : 'none',
+          transition:  'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
         }}
         onMouseEnter={() => onHover(space.id)}
         onMouseLeave={() => onHover(null)}
       >
         {/* Imagen */}
-        <div className="relative overflow-hidden" style={{ height: 180, flexShrink: 0 }}>
+        <div className="relative overflow-hidden" style={{ height: 200, flexShrink: 0 }}>
           {cover ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={cover} alt={space.name}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
           ) : (
             <div className="w-full h-full flex items-center justify-center"
               style={{ background: 'linear-gradient(135deg,#667eea,#764ba2)' }}>
@@ -513,53 +514,47 @@ function SpaceCard({
             </div>
           )}
           {space.is_verified && (
-            <span className="absolute top-2 left-2 flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full"
-              style={{ background: 'rgba(53,196,147,0.92)', color: '#fff' }}>
+            <span className="absolute top-2.5 left-2.5 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
+              style={{ background: 'rgba(53,196,147,0.92)', color: '#fff', backdropFilter: 'blur(8px)' }}>
               <Shield size={9} /> Verificado
             </span>
           )}
           {priceInfo && (
-            <span className="absolute bottom-2 left-2 text-xs font-bold px-2.5 py-1 rounded-full"
+            <span className="absolute bottom-2.5 left-2.5 text-xs font-bold px-3 py-1.5 rounded-full"
               style={{ background: 'rgba(0,0,0,0.72)', color: '#fff', backdropFilter: 'blur(8px)' }}>
               {priceInfo.label}
             </span>
           )}
-          <span className="absolute bottom-2 right-2 flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full"
+          <span className="absolute bottom-2.5 right-2.5 flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-full"
             style={{ background: 'rgba(0,0,0,0.6)', color: '#fff', backdropFilter: 'blur(8px)' }}>
             <Users size={10} /> {space.capacity_max}
           </span>
         </div>
 
         {/* Info */}
-        <div className="p-3.5 flex flex-col flex-1">
-          <div className="flex items-start justify-between gap-2 mb-1">
-            <h3 className="font-bold text-sm leading-tight group-hover:text-[#35C493] transition-colors"
-              style={{ color: 'var(--text-primary)' }}>
+        <div className="p-4 flex flex-col flex-1">
+          <div className="flex items-start justify-between gap-2 mb-1.5">
+            <h3 className="font-semibold text-sm leading-snug"
+              style={{ color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
               {space.name}
             </h3>
-            {space.space_addons?.length > 0 && (
-              <div className="flex items-center gap-0.5 shrink-0" style={{ color: '#F59E0B' }}>
-                <Star size={11} className="fill-current" />
-                <span className="text-xs font-semibold">{space.space_addons.length}</span>
-              </div>
-            )}
           </div>
-          <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
             <MapPin size={10} />
             {space.sector ? `${space.sector}, ` : ''}{space.city}
           </div>
           <div className="mt-auto pt-2.5 flex items-center justify-between"
-            style={{ borderTop: '1px solid var(--border-subtle)', marginTop: 8 }}>
+            style={{ borderTop: '1px solid var(--border-subtle)', marginTop: 12 }}>
             <div className="flex items-center gap-1.5">
               <div className="w-5 h-5 rounded-md flex items-center justify-center"
-                style={{ background: 'var(--brand-dim)' }}>
-                <CatIcon size={11} style={{ color: 'var(--brand)' }} />
+                style={{ background: 'var(--bg-elevated)' }}>
+                <CatIcon size={11} style={{ color: 'var(--text-muted)' }} />
               </div>
               <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{catLabel}</span>
             </div>
-            <span className="text-xs font-bold" style={{ color: 'var(--brand)' }}>
-              Ver →
-            </span>
+            <ArrowRight size={14}
+              className="transition-transform duration-200 group-hover:translate-x-0.5"
+              style={{ color: 'var(--brand)' }} />
           </div>
         </div>
       </div>
