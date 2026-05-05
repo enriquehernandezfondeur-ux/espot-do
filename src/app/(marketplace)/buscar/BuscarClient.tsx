@@ -284,7 +284,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
           </div>
 
           {/* Mapa sticky */}
-          <div style={{ flex: '0 0 40%', position: 'sticky', top: 0, height: '100%', borderRadius: 16, overflow: 'hidden' }}>
+          <div style={{ flex: '0 0 40%', position: 'sticky', top: 0, height: 'calc(100vh - 226px)', borderRadius: 16, overflow: 'hidden' }}>
             <SpacesMap
               spaces={filtered}
               hoveredId={hoveredId}

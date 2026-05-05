@@ -1,12 +1,24 @@
 'use client'
 
-// CSS imports must be static — component is loaded with ssr:false so this only runs on client
-import 'leaflet/dist/leaflet.css'
-import 'leaflet.markercluster/dist/MarkerCluster.css'
-import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
-
 import { useEffect, useRef } from 'react'
 import { formatCurrency } from '@/lib/utils'
+
+// Inyectar CSS de Leaflet via link tags (más confiable en Next.js que imports estáticos)
+const LEAFLET_CSS = [
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+  'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css',
+  'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css',
+]
+
+function injectLeafletCSS() {
+  LEAFLET_CSS.forEach(href => {
+    if (document.querySelector(`link[href="${href}"]`)) return
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = href
+    document.head.appendChild(link)
+  })
+}
 
 // ── Coordenadas de sectores de Santo Domingo y otras ciudades ──
 export const SECTOR_COORDS: Record<string, [number, number]> = {
@@ -125,7 +137,8 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return
 
-    // Importar Leaflet dinámicamente para evitar SSR
+    injectLeafletCSS()
+
     Promise.all([
       import('leaflet'),
       import('leaflet.markercluster'),
@@ -180,6 +193,10 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
       clusterRef.current = cluster
       map.addLayer(cluster)
       mapRef.current = map
+
+      // Forzar recálculo de tamaño — necesario cuando el contenedor
+      // tiene height calculado por CSS en el momento del mount
+      setTimeout(() => map.invalidateSize(), 100)
 
       // Poblar marcadores
       spaces.forEach(space => {
