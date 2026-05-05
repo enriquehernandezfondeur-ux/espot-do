@@ -12,9 +12,31 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const BASE_URL = 'https://espothub.com'
+
 export const metadata: Metadata = {
-  title: "espot.do — Reserva espacios para eventos en RD",
-  description: "Reserva salones, rooftops, restaurantes y más para tu próximo evento en República Dominicana.",
+  metadataBase: new URL(BASE_URL),
+  title: {
+    default:  'espot.do — Reserva espacios para eventos en República Dominicana',
+    template: '%s | espot.do',
+  },
+  description: 'Reserva salones, rooftops, restaurantes y más para tu próximo evento en República Dominicana. Confirmación en 24h, pago del 10% para asegurar tu fecha.',
+  keywords: ['espacios para eventos', 'salones de eventos', 'reservar espacio Santo Domingo', 'rooftop RD', 'venue República Dominicana'],
+  openGraph: {
+    type:        'website',
+    locale:      'es_DO',
+    url:          BASE_URL,
+    siteName:    'espot.do',
+    title:       'espot.do — Reserva espacios para eventos en RD',
+    description: 'Salones, rooftops, restaurantes y más. Confirma en 24h, paga solo el 10% para asegurar tu fecha.',
+    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'espot.do' }],
+  },
+  twitter: {
+    card:        'summary_large_image',
+    title:       'espot.do — Reserva espacios para eventos en RD',
+    description: 'Salones, rooftops, restaurantes y más en República Dominicana.',
+    images:      ['/og-default.png'],
+  },
 };
 
 export default function RootLayout({
@@ -24,7 +46,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
