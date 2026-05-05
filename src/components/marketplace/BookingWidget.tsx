@@ -764,7 +764,7 @@ export default function BookingWidget({ space, onChat }: Props) {
         )}
 
         {/* Atrás + chat */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 pb-2">
           {step > 1 && (
             <button onClick={back}
               className="flex items-center gap-1.5 text-xs font-medium px-4 py-2.5 rounded-xl flex-1 justify-center transition-colors"
@@ -777,23 +777,6 @@ export default function BookingWidget({ space, onChat }: Props) {
             style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-medium)', background: '#fff' }}>
             <MessageCircle size={13} /> Consultar al propietario
           </button>
-        </div>
-
-        {/* Trust */}
-        <div className="flex items-center justify-center gap-4">
-          {/* Explicación de pagos */}
-                  {subtotal > 0 && (
-                    <div className="text-xs px-3 py-2.5 rounded-xl text-center"
-                      style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)', color: 'var(--brand)' }}>
-                      Pagas <strong>{formatCurrency(Math.round(subtotal * 0.10))}</strong> ahora (10%) y el resto directamente en el espacio
-                    </div>
-                  )}
-
-          {[{ icon: Lock, text: 'Primer pago bloquea tu fecha' }, { icon: CheckCircle, text: 'Sin compromisos' }].map(({ icon: Icon, text }) => (
-            <div key={text} className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
-              <Icon size={10} /> {text}
-            </div>
-          ))}
         </div>
       </div>
     </div>
