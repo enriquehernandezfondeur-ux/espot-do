@@ -282,42 +282,46 @@ export default function BookingWidget({ space, onChat }: Props) {
   }
 
   return (
-    <div className="rounded-3xl"
+    <div className="rounded-3xl overflow-hidden"
       style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 40px rgba(0,0,0,0.08)' }}>
 
       {/* Precio */}
-      <div className="px-6 pt-6 pb-0">
+      <div className="px-6 pt-6 pb-5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         <PriceHeader />
       </div>
 
-      {/* Barra de progreso */}
-      <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-        <div className="flex items-center gap-1">
+      {/* Barra de pasos — compacta, no desborda */}
+      <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-base)' }}>
+        <div className="flex items-center w-full min-w-0">
           {steps.map((s, i) => {
             const isActive   = s.id === step
             const isComplete = s.id < step
             return (
-              <div key={s.id} className="flex items-center gap-1 flex-1">
+              <div key={s.id} className="flex items-center min-w-0" style={{ flex: i < steps.length - 1 ? '1 1 0' : '0 0 auto' }}>
                 <button
                   onClick={() => isComplete && setStep(s.id)}
-                  className="flex items-center gap-1.5 shrink-0"
-                  disabled={!isComplete && !isActive}>
-                  <div className={cn('w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all')}
+                  disabled={!isComplete && !isActive}
+                  className="flex flex-col items-center gap-0.5 shrink-0 min-w-0"
+                  style={{ minWidth: 0 }}>
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all shrink-0"
                     style={isComplete
                       ? { background: 'var(--brand)', color: '#fff' }
                       : isActive
-                        ? { background: 'var(--text-primary)', color: '#fff' }
-                        : { background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                    {isComplete ? <CheckCircle size={12} /> : s.id}
+                        ? { background: '#0F1623', color: '#fff' }
+                        : { background: 'var(--border-medium)', color: 'var(--text-muted)' }}>
+                    {isComplete ? <CheckCircle size={11} /> : s.id}
                   </div>
-                  <span className={cn('text-xs font-medium hidden sm:block')}
-                    style={{ color: isActive ? 'var(--text-primary)' : isComplete ? 'var(--brand)' : 'var(--text-muted)' }}>
+                  <span className="text-xs font-medium leading-none"
+                    style={{
+                      color: isActive ? '#0F1623' : isComplete ? 'var(--brand)' : 'var(--text-muted)',
+                      maxWidth: 44, textAlign: 'center',
+                    }}>
                     {s.label}
                   </span>
                 </button>
                 {i < steps.length - 1 && (
-                  <div className="flex-1 h-px mx-1"
-                    style={{ background: s.id < step ? 'var(--brand)' : 'var(--border-subtle)' }} />
+                  <div className="flex-1 h-px mx-1.5 mt-[-10px]"
+                    style={{ background: s.id < step ? 'var(--brand)' : 'var(--border-subtle)', minWidth: 8 }} />
                 )}
               </div>
             )
@@ -326,7 +330,7 @@ export default function BookingWidget({ space, onChat }: Props) {
       </div>
 
       {/* Contenido del paso */}
-      <div className="px-6 py-5">
+      <div className="px-5 py-5">
         <MiniSummary />
 
         {/* ── PASO 1: FECHA ─────────────────────────────── */}
@@ -699,33 +703,37 @@ export default function BookingWidget({ space, onChat }: Props) {
           </button>
         ) : (
           <button onClick={next} disabled={!canGoNext()}
-            className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-base transition-all disabled:opacity-40"
-            style={{ background: 'var(--text-primary)', color: '#fff' }}>
-            Continuar <ChevronRight size={18} />
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-semibold text-sm transition-all disabled:opacity-35"
+            style={{
+              background: canGoNext() ? '#0F1623' : 'var(--bg-elevated)',
+              color: canGoNext() ? '#fff' : 'var(--text-muted)',
+              letterSpacing: '0.01em',
+            }}>
+            Continuar <ChevronRight size={16} />
           </button>
         )}
 
-        {/* Botón atrás / chat */}
+        {/* Atrás + chat */}
         <div className="flex items-center gap-2">
           {step > 1 && (
             <button onClick={back}
-              className="flex items-center gap-1.5 text-sm font-medium px-4 py-2.5 rounded-xl flex-1 justify-center transition-colors"
-              style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
-              <ChevronLeft size={15} /> Atrás
+              className="flex items-center gap-1.5 text-xs font-medium px-4 py-2.5 rounded-xl flex-1 justify-center transition-colors"
+              style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-medium)', background: '#fff' }}>
+              <ChevronLeft size={13} /> Atrás
             </button>
           )}
           <button onClick={onChat}
-            className={cn('flex items-center gap-1.5 text-sm font-medium px-4 py-2.5 rounded-xl transition-all', step > 1 ? 'flex-1 justify-center' : 'w-full justify-center')}
-            style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
-            <MessageCircle size={15} /> Preguntar al dueño
+            className={cn('flex items-center gap-1.5 text-xs font-medium px-4 py-2.5 rounded-xl transition-all', step > 1 ? 'flex-1 justify-center' : 'w-full justify-center')}
+            style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-medium)', background: '#fff' }}>
+            <MessageCircle size={13} /> Consultar al propietario
           </button>
         </div>
 
-        {/* Trust badges */}
+        {/* Trust */}
         <div className="flex items-center justify-center gap-4">
           {[{ icon: Lock, text: 'Primer pago bloquea tu fecha' }, { icon: CheckCircle, text: 'Sin compromisos' }].map(({ icon: Icon, text }) => (
             <div key={text} className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
-              <Icon size={11} /> {text}
+              <Icon size={10} /> {text}
             </div>
           ))}
         </div>
