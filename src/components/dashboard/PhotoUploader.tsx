@@ -13,12 +13,38 @@ interface Props {
 }
 
 export default function PhotoUploader({ spaceId, onChange }: Props) {
-  const [photos, setPhotos] = useState<Photo[]>([])
-  const [uploading, setUploading] = useState(false)
-  const [dragOver, setDragOver] = useState(false)
+  const [photos, setPhotos]         = useState<Photo[]>([])
+  const [uploading, setUploading]   = useState(false)
+  const [dragOver, setDragOver]     = useState(false)
   const [uploadError, setUploadError] = useState('')
+  const [dragIdx, setDragIdx]       = useState<number | null>(null)
+  const [overIdx, setOverIdx]       = useState<number | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
+
+  // ── Drag & drop reordering ─────────────────────────────
+  function onDragStart(i: number) {
+    setDragIdx(i)
+  }
+
+  function onDragEnter(i: number) {
+    setOverIdx(i)
+  }
+
+  function onDragEnd() {
+    if (dragIdx === null || overIdx === null || dragIdx === overIdx) {
+      setDragIdx(null); setOverIdx(null); return
+    }
+    const next = [...photos]
+    const [moved] = next.splice(dragIdx, 1)
+    next.splice(overIdx, 0, moved)
+    // La primera siempre es portada
+    const updated = next.map((p, i) => ({ ...p, isCover: i === 0 }))
+    setPhotos(updated)
+    onChange(updated)
+    setDragIdx(null)
+    setOverIdx(null)
+  }
 
   async function uploadFiles(files: FileList) {
     if (!files.length) return
@@ -45,6 +71,7 @@ export default function PhotoUploader({ spaceId, onChange }: Props) {
         setUploadError(`Error al subir ${file.name}: ${error.message}`)
       } else {
         const { data: { publicUrl } } = supabase.storage.from('space-images').getPublicUrl(path)
+        console.log('[PhotoUploader] URL generada:', publicUrl)
         uploaded.push({ url: publicUrl, path, isCover: false })
       }
     }
@@ -122,7 +149,20 @@ export default function PhotoUploader({ spaceId, onChange }: Props) {
       {photos.length > 0 && (
         <div className="grid grid-cols-4 gap-3">
           {photos.map((photo, i) => (
-            <div key={i} className="relative group rounded-xl overflow-hidden aspect-video bg-slate-800">
+            <div
+              key={i}
+              draggable
+              onDragStart={() => onDragStart(i)}
+              onDragEnter={() => onDragEnter(i)}
+              onDragEnd={onDragEnd}
+              onDragOver={e => e.preventDefault()}
+              className="relative group rounded-xl overflow-hidden aspect-video bg-slate-800 cursor-grab active:cursor-grabbing transition-all duration-150"
+              style={{
+                opacity: dragIdx === i ? 0.4 : 1,
+                transform: overIdx === i && dragIdx !== i ? 'scale(1.03)' : 'scale(1)',
+                outline: overIdx === i && dragIdx !== i ? '2px solid #35C493' : 'none',
+                outlineOffset: '2px',
+              }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={photo.url} alt="" className="w-full h-full object-cover" />
 
@@ -174,7 +214,7 @@ export default function PhotoUploader({ spaceId, onChange }: Props) {
 
       {photos.length > 0 && (
         <p className="text-slate-500 text-xs">
-          {photos.length}/10 fotos · Click en ⭐ para cambiar la portada · La portada es la primera imagen que verán los clientes
+          {photos.length}/10 fotos · Arrastra para reordenar · La primera foto es la portada
         </p>
       )}
     </div>
