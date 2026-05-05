@@ -5,6 +5,37 @@ import { acceptBooking, rejectBooking, confirmPayment, cancelBooking } from './b
 
 export { acceptBooking, rejectBooking, confirmPayment as confirmBooking, cancelBooking }
 
+// ── iCal — obtener o crear token ─────────────────────────
+export async function getOrCreateIcalToken(): Promise<string | null> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('ical_token')
+    .eq('id', user.id)
+    .single()
+
+  if (profile?.ical_token) return profile.ical_token
+
+  // Generar token único
+  const token = crypto.randomUUID().replace(/-/g, '')
+  await supabase.from('profiles').update({ ical_token: token }).eq('id', user.id)
+  return token
+}
+
+// ── iCal — regenerar token (invalida el anterior) ────────
+export async function regenerateIcalToken(): Promise<string | null> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const token = crypto.randomUUID().replace(/-/g, '')
+  await supabase.from('profiles').update({ ical_token: token }).eq('id', user.id)
+  return token
+}
+
 // ── Todas las reservas del host ───────────────────────────
 export async function getHostBookings(statusFilter?: string) {
   const supabase = await createClient()
