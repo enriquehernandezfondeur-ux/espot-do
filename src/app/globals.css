@@ -5,11 +5,11 @@
   --brand:        #35C493;
   --brand-dark:   #28A87C;
   --brand-light:  #4DD9A7;
-  --brand-dim:    rgba(53, 196, 147, 0.08);
-  --brand-border: rgba(53, 196, 147, 0.20);
+  --brand-dim:    rgba(53, 196, 147, 0.10);
+  --brand-border: rgba(53, 196, 147, 0.25);
 }
 
-/* ── MARKETPLACE — LIGHT THEME ───────────────────── */
+/* ── MARKETPLACE — LIGHT GREY THEME ──────────────── */
 .light-theme {
   --bg-base:      #F4F6F5;
   --bg-surface:   #FFFFFF;
@@ -19,10 +19,26 @@
   --text-primary:   #0F1A17;
   --text-secondary: #527068;
   --text-muted:     #93B0A8;
-  --border-subtle:  #E4EDEA;
-  --border-medium:  #CDDDD9;
+  --border-subtle: #E4EDEA;
+  --border-medium: #CDDDD9;
   --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
   --shadow-hover: 0 4px 20px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06);
+}
+
+/* ── DASHBOARD — DARK THEME ──────────────────────── */
+.dark-theme {
+  --bg-base:      #0B0F0E;
+  --bg-surface:   #111916;
+  --bg-elevated:  #182420;
+  --bg-card:      #1A2B26;
+  --bg-hover:     #1E322D;
+  --text-primary:   #F0FDF9;
+  --text-secondary: #8AADA4;
+  --text-muted:     #4A706A;
+  --border-subtle: rgba(255,255,255,0.06);
+  --border-medium: rgba(255,255,255,0.10);
+  --shadow-card: none;
+  --shadow-hover: none;
 }
 
 /* ── HOST DASHBOARD — CLEAN WHITE THEME ─────────── */
@@ -41,48 +57,6 @@
   --shadow-hover: 0 4px 24px rgba(0,0,0,0.08);
 }
 
-/* Texto dark de Tailwind → colores del tema */
-.host-theme .text-slate-300 { color: var(--text-secondary) !important; }
-.host-theme .text-slate-400 { color: var(--text-muted) !important; }
-.host-theme .text-slate-500 { color: var(--text-muted) !important; }
-.host-theme .bg-slate-800   { background: var(--bg-elevated) !important; }
-
-/* Form elements inside host-theme — override dark input styles */
-.host-theme input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-.host-theme textarea,
-.host-theme select {
-  background:   #fff !important;
-  border-color: var(--border-medium) !important;
-  color:        var(--text-primary) !important;
-}
-.host-theme input::placeholder,
-.host-theme textarea::placeholder {
-  color: var(--text-muted) !important;
-}
-.host-theme input:focus,
-.host-theme textarea:focus,
-.host-theme select:focus {
-  border-color: var(--brand) !important;
-  box-shadow:   0 0 0 3px rgba(53,196,147,0.12) !important;
-  outline:      none !important;
-}
-
-/* ── DARK DASHBOARD — Legacy ────────────────────── */
-.dark-theme {
-  --bg-base:      #0B0F0E;
-  --bg-surface:   #111916;
-  --bg-elevated:  #182420;
-  --bg-card:      #1A2B26;
-  --bg-hover:     #1E322D;
-  --text-primary:   #F0FDF9;
-  --text-secondary: #8AADA4;
-  --text-muted:     #4A706A;
-  --border-subtle:  rgba(255,255,255,0.06);
-  --border-medium:  rgba(255,255,255,0.10);
-  --shadow-card: none;
-  --shadow-hover: none;
-}
-
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -95,7 +69,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── UTILITIES ───────────────────────────────────── */
+/* ── HOVER UTILITIES ─────────────────────────────── */
 .card-hover {
   transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   box-shadow: var(--shadow-card);
@@ -110,16 +84,12 @@ body {
   background: var(--bg-elevated) !important;
   border-color: var(--brand-border) !important;
 }
-
-/* ── BUTTONS ─────────────────────────────────────── */
 .btn-brand {
   background: var(--brand);
   color: #fff;
   transition: background 0.15s, transform 0.1s;
-  font-weight: 600;
 }
 .btn-brand:hover { background: var(--brand-dark); transform: translateY(-1px); }
-.btn-brand:disabled { background: var(--border-medium); color: var(--text-muted); transform: none; cursor: not-allowed; }
 .btn-outline {
   border: 1.5px solid var(--border-medium);
   color: var(--text-secondary);
@@ -141,44 +111,7 @@ body {
 .input-base:focus {
   outline: none;
   border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgba(53,196,147,0.12);
-}
-.input-base:hover:not(:focus) { border-color: var(--border-medium); }
-
-/* ── FORM FIELD — standard label + input pattern ── */
-.form-field label {
-  display: block;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin-bottom: 6px;
-  letter-spacing: 0.01em;
-}
-.form-input {
-  width: 100%;
-  padding: 11px 14px;
-  border-radius: 10px;
-  border: 1.5px solid var(--border-medium);
-  background: #fff;
-  color: var(--text-primary);
-  font-size: 0.9rem;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-.form-input::placeholder { color: var(--text-muted); font-size: 0.875rem; }
-.form-input:hover:not(:focus) { border-color: #C0C5CE; }
-.form-input:focus {
-  outline: none;
-  border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgba(53,196,147,0.12);
-}
-
-/* ── SECTION CARD (used in wizards) ─────────────── */
-.section-card {
-  background: #fff;
-  border: 1px solid var(--border-subtle);
-  border-radius: 16px;
-  padding: 28px 32px;
-  margin-bottom: 24px;
+  box-shadow: 0 0 0 3px var(--brand-dim);
 }
 
 /* ── SCROLLBAR ───────────────────────────────────── */
