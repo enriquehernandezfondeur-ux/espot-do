@@ -87,10 +87,18 @@ function fromTimeBlocks(blocks: TimeBlock[]): WeekSchedule {
 
 // ── Componente ─────────────────────────────────────────────
 export default function WeeklySchedule({ onChange, initial = [] }: Props) {
-  const [week, setWeek] = useState<WeekSchedule>(() =>
-    initial.length > 0 ? fromTimeBlocks(initial)
-      : Object.fromEntries(DAYS.map(d => [d.key, { enabled: false, ranges: [] }])) as WeekSchedule
-  )
+  const [week, setWeek] = useState<WeekSchedule>(() => {
+    if (initial.length > 0) return fromTimeBlocks(initial)
+    return {
+      mon: { enabled: false, ranges: [] },
+      tue: { enabled: false, ranges: [] },
+      wed: { enabled: false, ranges: [] },
+      thu: { enabled: false, ranges: [] },
+      fri: { enabled: false, ranges: [] },
+      sat: { enabled: false, ranges: [] },
+      sun: { enabled: false, ranges: [] },
+    }
+  })
 
   // Estado de edición por día: qué rango se está editando / si está añadiendo
   const [adding,   setAdding]   = useState<Partial<Record<DayKey, boolean>>>({})
