@@ -39,13 +39,31 @@ export interface SaveSpacePayload {
   timeBlocks: { block_name: string; start_time: string; end_time: string; days: number[] }[]
   // Step 4
   addons: { name: string; price: number; unit: string; category: string }[]
-  // Step 5
-  musicCutoff: string
+  // Step 5 — Permisos
   allowsDecoration: boolean
   allowsFood: boolean
   allowsAlcohol: boolean
+  allowsLiveMusic: boolean
+  allowsDJ: boolean
+  allowsSmoking: boolean
+  allowsChildren: boolean
+  allowsPets: boolean
+  allowsParties: boolean
+  allowsCorporate: boolean
+  // Step 5 — Ruido
+  musicCutoff: string
+  noiseLevel: string
+  // Step 5 — Depósito
   depositRequired: boolean
   depositAmount: string
+  depositRefundable: boolean
+  // Step 5 — Limpieza
+  includesCleaning: boolean
+  cleaningFee: string
+  // Step 5 — Horas extra
+  allowsExtraHours: boolean
+  extraHourPrice: string
+  // Step 5 — Cancelación
   cancellationPolicy: string
   customRules: string
   // Step 6
@@ -131,17 +149,21 @@ export async function saveSpace(payload: SaveSpacePayload) {
       : null,
     supabase.from('space_conditions').insert({
       space_id: spaceId,
-      deposit_required: payload.depositRequired,
-      deposit_amount: num(payload.depositAmount),
-      music_cutoff_time: payload.musicCutoff || null,
+      // Permisos
       allows_external_decoration: payload.allowsDecoration,
-      allows_external_food: payload.allowsFood,
-      allows_external_alcohol: payload.allowsAlcohol,
-      allows_smoking: false,
-      allows_pets: false,
-      cancellation_policy: payload.cancellationPolicy,
-      cancellation_hours_before: DEFAULT_CANCELLATION_HOURS,
-      cancellation_refund_pct: DEFAULT_CANCELLATION_REFUND_PCT,
+      allows_external_food:       payload.allowsFood,
+      allows_external_alcohol:    payload.allowsAlcohol,
+      allows_smoking:             payload.allowsSmoking,
+      allows_pets:                payload.allowsPets,
+      // Ruido
+      music_cutoff_time: payload.musicCutoff || null,
+      // Depósito
+      deposit_required:  payload.depositRequired,
+      deposit_amount:    num(payload.depositAmount),
+      // Cancelación
+      cancellation_policy:         payload.cancellationPolicy,
+      cancellation_hours_before:   DEFAULT_CANCELLATION_HOURS,
+      cancellation_refund_pct:     DEFAULT_CANCELLATION_REFUND_PCT,
       custom_rules: payload.customRules || null,
     }),
     payload.paymentTerm

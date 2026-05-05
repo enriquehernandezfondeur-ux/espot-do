@@ -161,14 +161,33 @@ export default function EspacioPage() {
   const [_customAddon, _setCustomAddon] = useState<AddonItem>({ name: '', price: 0, unit: 'evento', category: 'personal', emoji: '✨' })
 
   // Step 5 - Conditions
-  const [musicCutoff, setMusicCutoff] = useState('00:00')
-  const [allowsDecoration, setAllowsDecoration] = useState(true)
-  const [allowsFood, setAllowsFood] = useState(false)
-  const [allowsAlcohol, setAllowsAlcohol] = useState(false)
-  const [depositRequired, setDepositRequired] = useState(false)
-  const [depositAmount, setDepositAmount] = useState('')
+  // Permisos
+  const [allowsDecoration, setAllowsDecoration]     = useState(true)
+  const [allowsFood, setAllowsFood]                 = useState(false)
+  const [allowsAlcohol, setAllowsAlcohol]           = useState(false)
+  const [allowsLiveMusic, setAllowsLiveMusic]       = useState(false)
+  const [allowsDJ, setAllowsDJ]                     = useState(false)
+  const [allowsSmoking, setAllowsSmoking]           = useState(false)
+  const [allowsChildren, setAllowsChildren]         = useState(true)
+  const [allowsPets, setAllowsPets]                 = useState(false)
+  const [allowsParties, setAllowsParties]           = useState(true)
+  const [allowsCorporate, setAllowsCorporate]       = useState(true)
+  // Ruido
+  const [musicCutoff, setMusicCutoff]               = useState('00:00')
+  const [noiseLevel, setNoiseLevel]                 = useState<'bajo' | 'moderado' | 'alto'>('moderado')
+  // Depósito
+  const [depositRequired, setDepositRequired]       = useState(false)
+  const [depositAmount, setDepositAmount]           = useState('')
+  const [depositRefundable, setDepositRefundable]   = useState(true)
+  // Limpieza
+  const [includesCleaning, setIncludesCleaning]     = useState(false)
+  const [cleaningFee, setCleaningFee]               = useState('')
+  // Tiempo extra
+  const [allowsExtraHours, setAllowsExtraHours]     = useState(false)
+  const [extraHourPrice, setExtraHourPrice]         = useState('')
+  // Cancelación y reglas
   const [cancellationPolicy, setCancellationPolicy] = useState('moderada')
-  const [customRules, setCustomRules] = useState('')
+  const [customRules, setCustomRules]               = useState('')
 
   // Step 6 - Payment terms
   const [paymentTerm, setPaymentTerm] = useState<PaymentTermType | ''>('')
@@ -199,8 +218,14 @@ export default function EspacioPage() {
       hourlyPrice, minHours, maxHours, minConsumption, sessionHours,
       fixedPrice, packageName, packageHours, packageIncludes,
       timeBlocks, addons,
-      musicCutoff, allowsDecoration, allowsFood, allowsAlcohol,
-      depositRequired, depositAmount, cancellationPolicy, customRules,
+      musicCutoff, noiseLevel,
+      allowsDecoration, allowsFood, allowsAlcohol,
+      allowsLiveMusic, allowsDJ, allowsSmoking,
+      allowsChildren, allowsPets, allowsParties, allowsCorporate,
+      depositRequired, depositAmount, depositRefundable,
+      includesCleaning, cleaningFee,
+      allowsExtraHours, extraHourPrice,
+      cancellationPolicy, customRules,
       paymentTerm: paymentTerm as PaymentTermType,
     }
 
@@ -874,111 +899,211 @@ export default function EspacioPage() {
 
         {/* STEP 5: Reglas y condiciones */}
         {currentStep === 5 && (
-          <div className="space-y-6">
+          <div className="space-y-7">
             <div>
               <h2 className="text-xl font-bold text-white mb-1">Reglas y condiciones</h2>
-              <p className="text-slate-400 text-sm">Esto se muestra al cliente antes de reservar — sin sorpresas</p>
+              <p className="text-slate-400 text-sm">Define las reglas de tu espacio. El cliente las verá antes de reservar.</p>
             </div>
 
-            {/* Permisos */}
+            {/* ─── 1. PERMISOS GENERALES ─── */}
             <div>
-              <h3 className="text-slate-300 text-sm font-medium mb-3">¿Qué está permitido?</h3>
-              <div className="space-y-2">
-                {[
-                  { label: 'Decoración externa', desc: 'El cliente puede traer su propia decoración', value: allowsDecoration, setter: setAllowsDecoration },
-                  { label: 'Comida externa', desc: 'El cliente puede traer su propio catering', value: allowsFood, setter: setAllowsFood },
-                  { label: 'Bebidas alcohólicas externas', desc: 'El cliente puede traer su propio alcohol', value: allowsAlcohol, setter: setAllowsAlcohol },
-                ].map(item => (
-                  <div key={item.label} className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
+              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Permisos generales</p>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  { label: 'Decoración externa',    desc: 'Globos, flores, mantelería', value: allowsDecoration,  setter: setAllowsDecoration },
+                  { label: 'Comida externa',         desc: 'Catering o comida propia',   value: allowsFood,        setter: setAllowsFood },
+                  { label: 'Alcohol externo',        desc: 'El cliente trae bebidas',    value: allowsAlcohol,     setter: setAllowsAlcohol },
+                  { label: 'Música en vivo',         desc: 'Banda, artista o tocada',    value: allowsLiveMusic,   setter: setAllowsLiveMusic },
+                  { label: 'DJ / sonido alto',       desc: 'DJ profesional o sistema',   value: allowsDJ,          setter: setAllowsDJ },
+                  { label: 'Fumar',                  desc: 'En áreas habilitadas',       value: allowsSmoking,     setter: setAllowsSmoking },
+                  { label: 'Niños',                  desc: 'Menores de edad',            value: allowsChildren,    setter: setAllowsChildren },
+                  { label: 'Mascotas',               desc: 'Animales de compañía',       value: allowsPets,        setter: setAllowsPets },
+                  { label: 'Fiestas',                desc: 'Eventos sociales',           value: allowsParties,     setter: setAllowsParties },
+                  { label: 'Eventos corporativos',   desc: 'Reuniones de empresa',       value: allowsCorporate,   setter: setAllowsCorporate },
+                ] as { label: string; desc: string; value: boolean; setter: (v: boolean) => void }[]).map(item => (
+                  <div key={item.label}
+                    className="flex items-center justify-between px-4 py-3 rounded-xl"
+                    style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${item.value ? 'rgba(53,196,147,0.25)' : 'rgba(255,255,255,0.06)'}` }}>
                     <div>
-                      <div className="text-white text-sm font-medium">{item.label}</div>
-                      <div className="text-slate-500 text-xs">{item.desc}</div>
+                      <div className="text-sm font-medium text-white">{item.label}</div>
+                      <div className="text-xs text-slate-500">{item.desc}</div>
                     </div>
                     <button
                       onClick={() => item.setter(!item.value)}
-                      className={cn(
-                        'w-12 h-6 rounded-full transition-all relative',
-                        item.value ? 'bg-[#35C493]' : 'bg-white/10'
-                      )}
-                    >
-                      <span className={cn('absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all', item.value ? 'left-6' : 'left-0.5')} />
+                      className="w-11 h-6 rounded-full relative transition-all shrink-0 ml-3"
+                      style={{ background: item.value ? '#35C493' : 'rgba(255,255,255,0.1)' }}>
+                      <span className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
+                        style={{ left: item.value ? 22 : 2 }} />
                     </button>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Hora de música */}
+            {/* ─── 2. CONTROL DE RUIDO ─── */}
             <div>
-              <label className="block text-slate-300 text-sm font-medium mb-1.5">Hora límite de música</label>
-              <input
-                type="time"
-                value={musicCutoff}
-                onChange={e => setMusicCutoff(e.target.value)}
-                className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#35C493] text-sm transition-colors"
-              />
-            </div>
-
-            {/* Depósito */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Control de ruido</p>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-slate-300 text-sm font-medium">Depósito reembolsable</div>
-                  <div className="text-slate-500 text-xs">Monto que el cliente paga para garantizar el espacio</div>
+                  <label className="block text-slate-300 text-sm font-medium mb-2">Nivel de ruido permitido</label>
+                  <div className="flex gap-2">
+                    {(['bajo', 'moderado', 'alto'] as const).map(level => (
+                      <button key={level}
+                        onClick={() => setNoiseLevel(level)}
+                        className="flex-1 py-2.5 rounded-xl text-sm font-semibold capitalize transition-all"
+                        style={noiseLevel === level ? {
+                          background: '#35C493', color: '#0B0F0E',
+                        } : {
+                          background: 'rgba(255,255,255,0.05)',
+                          color: '#94a3b8',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                        }}>
+                        {level.charAt(0).toUpperCase() + level.slice(1)}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <button
-                  onClick={() => setDepositRequired(!depositRequired)}
-                  className={cn('w-12 h-6 rounded-full transition-all relative', depositRequired ? 'bg-[#35C493]' : 'bg-white/10')}
-                >
-                  <span className={cn('absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all', depositRequired ? 'left-6' : 'left-0.5')} />
-                </button>
+                <div>
+                  <label className="block text-slate-300 text-sm font-medium mb-2">Hora límite de música</label>
+                  <input type="time" value={musicCutoff} onChange={e => setMusicCutoff(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#35C493] text-sm transition-colors" />
+                </div>
               </div>
-              {depositRequired && (
-                <input
-                  type="number"
-                  value={depositAmount}
-                  onChange={e => setDepositAmount(e.target.value)}
-                  placeholder="Monto del depósito en RD$"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm transition-colors"
-                />
-              )}
             </div>
 
-            {/* Política de cancelación */}
+            {/* ─── 3. DEPÓSITO Y PAGOS ─── */}
             <div>
-              <label className="block text-slate-300 text-sm font-medium mb-3">Política de cancelación</label>
+              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Depósito y pagos</p>
+              <div className="space-y-3">
+                {/* Depósito */}
+                <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <div className="text-sm font-medium text-white">Depósito de garantía</div>
+                      <div className="text-xs text-slate-500">Monto que el cliente paga como garantía</div>
+                    </div>
+                    <button onClick={() => setDepositRequired(!depositRequired)}
+                      className="w-11 h-6 rounded-full relative transition-all shrink-0"
+                      style={{ background: depositRequired ? '#35C493' : 'rgba(255,255,255,0.1)' }}>
+                      <span className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
+                        style={{ left: depositRequired ? 22 : 2 }} />
+                    </button>
+                  </div>
+                  {depositRequired && (
+                    <div className="grid grid-cols-2 gap-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                      <div>
+                        <label className="block text-slate-400 text-xs mb-1.5">Monto (RD$)</label>
+                        <input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)}
+                          placeholder="Ej: 5000"
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm" />
+                      </div>
+                      <div>
+                        <label className="block text-slate-400 text-xs mb-1.5">¿Es reembolsable?</label>
+                        <div className="flex gap-2">
+                          {[{ v: true, l: 'Sí' }, { v: false, l: 'No' }].map(opt => (
+                            <button key={String(opt.v)} onClick={() => setDepositRefundable(opt.v)}
+                              className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all"
+                              style={depositRefundable === opt.v ? {
+                                background: '#35C493', color: '#0B0F0E',
+                              } : {
+                                background: 'rgba(255,255,255,0.05)', color: '#94a3b8',
+                                border: '1px solid rgba(255,255,255,0.08)',
+                              }}>
+                              {opt.l}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Limpieza */}
+                <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <div className="text-sm font-medium text-white">Servicio de limpieza</div>
+                      <div className="text-xs text-slate-500">¿Incluye limpieza al finalizar el evento?</div>
+                    </div>
+                    <button onClick={() => setIncludesCleaning(!includesCleaning)}
+                      className="w-11 h-6 rounded-full relative transition-all shrink-0"
+                      style={{ background: includesCleaning ? '#35C493' : 'rgba(255,255,255,0.1)' }}>
+                      <span className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
+                        style={{ left: includesCleaning ? 22 : 2 }} />
+                    </button>
+                  </div>
+                  {!includesCleaning && (
+                    <div className="pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                      <label className="block text-slate-400 text-xs mb-1.5">Cargo de limpieza (RD$) — opcional</label>
+                      <input type="number" value={cleaningFee} onChange={e => setCleaningFee(e.target.value)}
+                        placeholder="Dejar en blanco si no aplica"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Horas extra */}
+                <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <div className="text-sm font-medium text-white">Horas extra</div>
+                      <div className="text-xs text-slate-500">¿Se pueden solicitar horas adicionales?</div>
+                    </div>
+                    <button onClick={() => setAllowsExtraHours(!allowsExtraHours)}
+                      className="w-11 h-6 rounded-full relative transition-all shrink-0"
+                      style={{ background: allowsExtraHours ? '#35C493' : 'rgba(255,255,255,0.1)' }}>
+                      <span className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
+                        style={{ left: allowsExtraHours ? 22 : 2 }} />
+                    </button>
+                  </div>
+                  {allowsExtraHours && (
+                    <div className="pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                      <label className="block text-slate-400 text-xs mb-1.5">Precio por hora extra (RD$)</label>
+                      <input type="number" value={extraHourPrice} onChange={e => setExtraHourPrice(e.target.value)}
+                        placeholder="Ej: 5000"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* ─── 4. POLÍTICA DE CANCELACIÓN ─── */}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Política de cancelación</p>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { value: 'flexible', label: 'Flexible', desc: '100% reembolso hasta 24 hrs antes', color: 'green' },
-                  { value: 'moderada', label: 'Moderada', desc: '50% reembolso hasta 72 hrs antes', color: 'amber' },
-                  { value: 'estricta', label: 'Estricta', desc: 'Sin reembolso', color: 'red' },
+                  { value: 'flexible', label: 'Flexible',  desc: '100% reembolso hasta 24h antes' },
+                  { value: 'moderada', label: 'Moderada',  desc: '50% reembolso hasta 72h antes' },
+                  { value: 'estricta', label: 'Estricta',  desc: 'Sin reembolso' },
                 ].map(policy => (
-                  <button
-                    key={policy.value}
+                  <button key={policy.value}
                     onClick={() => setCancellationPolicy(policy.value)}
-                    className={cn(
-                      'p-4 rounded-xl border text-left transition-all',
-                      cancellationPolicy === policy.value
-                        ? 'bg-[rgba(53,196,147,0.12)] border-[rgba(53,196,147,0.40)]'
-                        : 'bg-white/5 border-white/10 hover:border-white/20'
-                    )}
-                  >
-                    <div className={cn('font-semibold text-sm mb-1', cancellationPolicy === policy.value ? 'text-[#4DD9A7]' : 'text-white')}>
+                    className="p-4 rounded-xl border text-left transition-all"
+                    style={cancellationPolicy === policy.value ? {
+                      background: 'rgba(53,196,147,0.08)',
+                      border: '1.5px solid rgba(53,196,147,0.3)',
+                    } : {
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                    }}>
+                    <div className="font-semibold text-sm mb-1"
+                      style={{ color: cancellationPolicy === policy.value ? '#35C493' : 'white' }}>
                       {policy.label}
                     </div>
-                    <div className="text-slate-400 text-xs">{policy.desc}</div>
+                    <div className="text-xs text-slate-500">{policy.desc}</div>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Custom rules */}
+            {/* ─── 5. REGLAS ADICIONALES ─── */}
             <div>
-              <label className="block text-slate-300 text-sm font-medium mb-1.5">Reglas adicionales (opcional)</label>
+              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Reglas adicionales</p>
               <textarea
                 value={customRules}
                 onChange={e => setCustomRules(e.target.value)}
-                placeholder="Ej: No se permiten menores de 18 años después de las 10pm. El espacio debe quedar limpio al finalizar..."
+                placeholder="Ej: No se permiten velas. El espacio debe quedar limpio al terminar. Acceso desde las 6pm..."
                 rows={3}
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm transition-colors resize-none"
               />
