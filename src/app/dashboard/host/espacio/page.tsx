@@ -6,6 +6,8 @@ import { cn, formatCurrency } from '@/lib/utils'
 import { saveSpace, publishSpace, getMySpaces, saveSpaceImages, updateSpace } from '@/lib/actions/space'
 import PhotoUploader from '@/components/dashboard/PhotoUploader'
 import WeeklySchedule from '@/components/dashboard/WeeklySchedule'
+import ActivityPicker from '@/components/dashboard/ActivityPicker'
+import type { BaseActivity } from '@/lib/activities'
 import type { SpaceCategory, PricingType, PaymentTermType } from '@/types'
 
 const steps = [
@@ -139,6 +141,9 @@ export default function EspacioPage() {
   const [capacityMin, setCapacityMin] = useState('')
   const [capacityMax, setCapacityMax] = useState('')
 
+  const [primaryActivity, setPrimaryActivity]     = useState<BaseActivity | ''>('')
+  const [secondaryActivities, setSecondaryActivities] = useState<BaseActivity[]>([])
+
   // Step 2 - Pricing
   const [pricingType, setPricingType] = useState<PricingType | ''>('')
   const [hourlyPrice, setHourlyPrice] = useState('')
@@ -214,6 +219,7 @@ export default function EspacioPage() {
 
     const payload = {
       name, category, description, address, sector, capacityMin, capacityMax,
+      primaryActivity, secondaryActivities,
       pricingType: pricingType as PricingType,
       hourlyPrice, minHours, maxHours, minConsumption, sessionHours,
       fixedPrice, packageName, packageHours, packageIncludes,
@@ -613,6 +619,21 @@ export default function EspacioPage() {
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] focus:ring-1 focus:ring-[#35C493] transition-colors"
                 />
               </div>
+            </div>
+
+            {/* Actividades / tipos de evento */}
+            <div>
+              <label className="block text-slate-300 text-sm font-medium mb-1">
+                Tipos de evento que acepta tu espacio
+              </label>
+              <p className="text-xs text-slate-500 mb-3">
+                Selecciona los tipos de eventos que mejor describen tu espacio. Máximo 4 (1 principal + 3 secundarios).
+              </p>
+              <ActivityPicker
+                primary={primaryActivity}
+                secondary={secondaryActivities}
+                onChange={(p, s) => { setPrimaryActivity(p); setSecondaryActivities(s) }}
+              />
             </div>
 
             {/* Photo upload */}

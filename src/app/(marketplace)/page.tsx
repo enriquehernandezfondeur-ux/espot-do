@@ -240,7 +240,7 @@ export default async function HomePage() {
         {/* Grid desktop / scroll mobile */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
           {eventTypes.map(et => (
-            <Link key={et.slug} href={`/buscar?evento=${et.slug}`}
+            <Link key={et.slug} href={`/buscar?activity=${et.slug}`}
               className="group relative block overflow-hidden rounded-2xl"
               style={{ aspectRatio: '4/3', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
 

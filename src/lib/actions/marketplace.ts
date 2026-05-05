@@ -1,12 +1,15 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getBaseFromSub } from '@/lib/activities'
 
 export async function getPublishedSpaces(filters?: {
-  category?: string
-  capacity?: number
-  sector?: string
-  search?: string
+  category?:    string
+  capacity?:    number
+  sector?:      string
+  search?:      string
+  activity?:    string   // sub-actividad del cliente → se mapea a base
+  baseActivity?: string  // categoría base directa
 }) {
   const supabase = await createClient()
 
@@ -15,7 +18,7 @@ export async function getPublishedSpaces(filters?: {
     .select(`
       id, name, slug, description, category,
       capacity_min, capacity_max, address, city, sector,
-      is_verified,
+      is_verified, primary_activity, secondary_activities,
       space_images(url, is_cover, position),
       space_pricing(pricing_type, hourly_price, minimum_consumption, fixed_price, package_name, is_active),
       space_addons(id, name, price, unit),
@@ -25,10 +28,24 @@ export async function getPublishedSpaces(filters?: {
     .eq('is_published', true)
     .eq('is_active', true)
 
-  if (filters?.category) query = query.eq('category', filters.category)
-  if (filters?.capacity) query = query.gte('capacity_max', filters.capacity)
-  if (filters?.sector) query = query.ilike('sector', `%${filters.sector}%`)
-  if (filters?.search) query = query.ilike('name', `%${filters.search}%`)
+  if (filters?.category)    query = query.eq('category', filters.category)
+  if (filters?.capacity)    query = query.gte('capacity_max', filters.capacity)
+  if (filters?.sector)      query = query.ilike('sector', `%${filters.sector}%`)
+  if (filters?.search)      query = query.ilike('name', `%${filters.search}%`)
+
+  // Filtro por sub-actividad (mapea a categoría base)
+  if (filters?.activity) {
+    const base = getBaseFromSub(filters.activity)
+    if (base) {
+      // Busca espacios donde primary_activity = base OR secondary_activities contiene base
+      query = query.or(`primary_activity.eq.${base},secondary_activities.cs.{${base}}`)
+    }
+  }
+
+  // Filtro directo por categoría base
+  if (filters?.baseActivity) {
+    query = query.or(`primary_activity.eq.${filters.baseActivity},secondary_activities.cs.{${filters.baseActivity}}`)
+  }
 
   const { data } = await query.order('created_at', { ascending: false })
   return data ?? []

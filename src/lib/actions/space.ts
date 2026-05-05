@@ -24,6 +24,8 @@ export interface SaveSpacePayload {
   sector: string
   capacityMin: string
   capacityMax: string
+  primaryActivity?: string
+  secondaryActivities?: string[]
   // Step 2
   pricingType: PricingType
   hourlyPrice: string
@@ -111,6 +113,8 @@ export async function saveSpace(payload: SaveSpacePayload) {
       address: payload.address,
       city: 'Santo Domingo',
       sector: payload.sector,
+      primary_activity:     payload.primaryActivity || null,
+      secondary_activities: payload.secondaryActivities ?? [],
       is_published: false,
       is_active: true,
     })
