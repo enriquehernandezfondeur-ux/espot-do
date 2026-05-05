@@ -296,15 +296,15 @@ export default function BookingWidget({ space, onChat }: Props) {
   }
 
   return (
-    <div className="rounded-3xl overflow-hidden"
-      style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 40px rgba(0,0,0,0.08)' }}>
+    <div className="rounded-3xl"
+      style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 40px rgba(0,0,0,0.08)', overflow: 'visible' }}>
 
       {/* Precio */}
-      <div className="px-6 pt-6 pb-5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+      <div className="px-6 pt-6 pb-5" style={{ borderBottom: '1px solid var(--border-subtle)', borderRadius: '24px 24px 0 0' }}>
         <PriceHeader />
       </div>
 
-      {/* Barra de pasos — compacta, no desborda */}
+      {/* Barra de pasos */}
       <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-base)' }}>
         <div className="flex items-center w-full min-w-0">
           {steps.map((s, i) => {
@@ -343,8 +343,8 @@ export default function BookingWidget({ space, onChat }: Props) {
         </div>
       </div>
 
-      {/* Contenido del paso */}
-      <div className="px-5 py-5">
+      {/* Contenido del paso — min-height evita que el widget salte de tamaño */}
+      <div className="px-5 py-5" style={{ minHeight: 320 }}>
         <MiniSummary />
 
         {/* ── PASO 1: FECHA ─────────────────────────────── */}
@@ -730,7 +730,7 @@ export default function BookingWidget({ space, onChat }: Props) {
       </div>
 
       {/* ── Navegación ─────────────────────────────────────── */}
-      <div className="px-6 pb-6 space-y-3">
+      <div className="px-6 pb-6 space-y-3" style={{ borderRadius: '0 0 24px 24px' }}>
         {/* Botón principal */}
         {step === maxStep ? (
           <button onClick={handleBook} disabled={booking}
