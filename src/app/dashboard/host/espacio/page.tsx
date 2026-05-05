@@ -503,43 +503,63 @@ export default function EspacioPage() {
 
   // ── VISTA: Wizard de creación ─────────────────────────────
   return (
-    <div className="p-8 max-w-5xl mx-auto">
+    <div className="px-6 py-8 max-w-4xl mx-auto">
       {/* Header */}
       <div className="mb-8 flex items-center gap-4">
         <button
           onClick={() => setView('list')}
-          className="text-slate-400 hover:text-white transition-colors text-sm flex items-center gap-1"
+          className="transition-colors text-sm flex items-center gap-1.5"
+          style={{ color: 'var(--text-muted)' }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
         >
-          ← Mis Espots
+          ← Mis espacios
         </button>
+        <div className="w-px h-5" style={{ background: 'var(--border-subtle)' }} />
         <div>
-          <h1 className="text-2xl font-bold text-white">Nuevo Espot</h1>
-          <p className="text-slate-400 mt-0.5 text-sm">Completa todos los pasos para publicar tu espacio</p>
+          <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            {editingSpaceId ? 'Editar espacio' : 'Crear espacio'}
+          </h1>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+            Completa los pasos para publicar tu espacio
+          </p>
         </div>
       </div>
 
       {/* Progress Steps */}
-      <div className="flex items-center gap-1 mb-10 overflow-x-auto pb-2">
+      <div className="flex items-center gap-1 mb-8 overflow-x-auto pb-1">
         {steps.map((step, i) => {
           const Icon = step.icon
           const isActive = currentStep === step.id
-          const isDone = currentStep > step.id
+          const isDone   = currentStep > step.id
           return (
             <div key={step.id} className="flex items-center gap-1 shrink-0">
               <button
                 onClick={() => isDone && setCurrentStep(step.id)}
-                className={cn(
-                  'flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-all',
-                  isActive ? 'bg-[#35C493] text-white shadow-lg shadow-[rgba(53,196,147,0.25)]' :
-                  isDone  ? 'bg-green-600/20 text-green-400 border border-green-500/20 cursor-pointer hover:bg-green-600/30' :
-                            'bg-white/5 text-slate-500 border border-white/10 cursor-not-allowed'
-                )}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-all"
+                style={
+                  isActive ? {
+                    background: 'var(--brand)',
+                    color: '#fff',
+                    boxShadow: '0 2px 8px rgba(53,196,147,0.3)',
+                  } : isDone ? {
+                    background: 'var(--brand-dim)',
+                    color: 'var(--brand)',
+                    border: '1px solid var(--brand-border)',
+                    cursor: 'pointer',
+                  } : {
+                    background: 'var(--bg-elevated)',
+                    color: 'var(--text-muted)',
+                    border: '1px solid var(--border-subtle)',
+                    cursor: 'not-allowed',
+                  }
+                }
               >
                 {isDone ? <CheckCircle size={14} /> : <Icon size={14} />}
                 <span className="hidden sm:inline">{step.label}</span>
               </button>
               {i < steps.length - 1 && (
-                <div className={cn('w-6 h-px', isDone ? 'bg-green-500/40' : 'bg-white/10')} />
+                <div className="w-5 h-px" style={{ background: isDone ? 'var(--brand-border)' : 'var(--border-subtle)' }} />
               )}
             </div>
           )
@@ -547,18 +567,18 @@ export default function EspacioPage() {
       </div>
 
       {/* Step Content */}
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
+      <div className="rounded-2xl p-8" style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
 
         {/* STEP 1: Información básica */}
         {currentStep === 1 && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-bold text-white mb-1">Información básica</h2>
-              <p className="text-slate-400 text-sm">Cuéntanos sobre tu espacio</p>
+              <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Información básica</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Cuéntanos sobre tu espacio</p>
             </div>
 
             <div>
-              <label className="block text-slate-300 text-sm font-medium mb-1.5">Nombre del espacio</label>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Nombre del espacio</label>
               <input
                 value={name}
                 onChange={e => setName(e.target.value)}
@@ -568,7 +588,7 @@ export default function EspacioPage() {
             </div>
 
             <div>
-              <label className="block text-slate-300 text-sm font-medium mb-3">Tipo de espacio</label>
+              <label className="block text-sm font-medium mb-2.5" style={{ color: 'var(--text-secondary)' }}>Tipo de espacio</label>
               <div className="grid grid-cols-5 gap-2">
                 {categories.map(cat => (
                   <button
@@ -589,7 +609,7 @@ export default function EspacioPage() {
             </div>
 
             <div>
-              <label className="block text-slate-300 text-sm font-medium mb-1.5">Descripción</label>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Descripción</label>
               <textarea
                 value={description}
                 onChange={e => setDescription(e.target.value)}
@@ -601,7 +621,7 @@ export default function EspacioPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-slate-300 text-sm font-medium mb-1.5">Dirección</label>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Dirección</label>
                 <input
                   value={address}
                   onChange={e => setAddress(e.target.value)}
@@ -610,7 +630,7 @@ export default function EspacioPage() {
                 />
               </div>
               <div>
-                <label className="block text-slate-300 text-sm font-medium mb-1.5">Sector</label>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Sector</label>
                 <input
                   value={sector}
                   onChange={e => setSector(e.target.value)}
@@ -622,7 +642,7 @@ export default function EspacioPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-slate-300 text-sm font-medium mb-1.5">Capacidad mínima</label>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Capacidad mínima</label>
                 <input
                   type="number"
                   value={capacityMin}
@@ -632,7 +652,7 @@ export default function EspacioPage() {
                 />
               </div>
               <div>
-                <label className="block text-slate-300 text-sm font-medium mb-1.5">Capacidad máxima</label>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Capacidad máxima</label>
                 <input
                   type="number"
                   value={capacityMax}
@@ -660,7 +680,7 @@ export default function EspacioPage() {
 
             {/* Photo upload */}
             <div>
-              <label className="block text-slate-300 text-sm font-medium mb-1.5">Fotos del espacio</label>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Fotos del espacio</label>
               <PhotoUploader onChange={photos => setPendingPhotos(photos)} />
             </div>
           </div>
