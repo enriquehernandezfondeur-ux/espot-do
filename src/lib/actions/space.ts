@@ -184,9 +184,135 @@ export async function getMySpaces() {
 
   const { data } = await supabase
     .from('spaces')
-    .select('*, space_pricing(*), space_addons(*), space_conditions(*), space_payment_terms(*), space_time_blocks(*)')
+    .select('*, space_pricing(*), space_addons(*), space_conditions(*), space_payment_terms(*), space_time_blocks(*), space_images(*)')
     .eq('host_id', user.id)
     .order('created_at', { ascending: false })
 
   return data ?? []
+}
+
+// Guardar URLs de fotos ya subidas a Storage en la tabla space_images
+export async function saveSpaceImages(
+  spaceId: string,
+  photos: { url: string; path: string; isCover: boolean }[]
+) {
+  const supabase = await createClient()
+
+  // Eliminar fotos anteriores
+  await supabase.from('space_images').delete().eq('space_id', spaceId)
+
+  if (photos.length === 0) return { success: true }
+
+  const { error } = await supabase.from('space_images').insert(
+    photos.map((p, i) => ({
+      space_id: spaceId,
+      url: p.url,
+      is_cover: p.isCover,
+      position: i,
+    }))
+  )
+
+  return error ? { error: error.message } : { success: true }
+}
+
+// Obtener un espacio completo para editar
+export async function getSpaceForEdit(spaceId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data } = await supabase
+    .from('spaces')
+    .select(`
+      *,
+      space_pricing(*),
+      space_addons(*),
+      space_conditions(*),
+      space_payment_terms(*),
+      space_time_blocks(*),
+      space_images(*)
+    `)
+    .eq('id', spaceId)
+    .eq('host_id', user.id)
+    .single()
+
+  return data
+}
+
+// Actualizar espacio existente
+export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayload, never>) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+
+  // Verificar que el espacio pertenece al usuario
+  const { data: space } = await supabase.from('spaces').select('host_id').eq('id', spaceId).single()
+  if (!space || space.host_id !== user.id) return { error: 'No autorizado' }
+
+  // Actualizar info básica
+  const { error: spaceError } = await supabase.from('spaces').update({
+    name: payload.name,
+    description: payload.description,
+    category: payload.category,
+    capacity_min: payload.capacityMin ? int(payload.capacityMin) : null,
+    capacity_max: int(payload.capacityMax)!,
+    address: payload.address,
+    city: 'Santo Domingo',
+    sector: payload.sector,
+  }).eq('id', spaceId)
+
+  if (spaceError) return { error: spaceError.message }
+
+  // Actualizar pricing
+  const pricingData: Record<string, unknown> = {
+    pricing_type: payload.pricingType,
+    is_active: true,
+  }
+  if (payload.pricingType === 'hourly') {
+    pricingData.hourly_price = parseFloat(payload.hourlyPrice)
+    pricingData.min_hours = parseInt(payload.minHours) || 1
+    if (payload.maxHours) pricingData.max_hours = parseInt(payload.maxHours)
+  }
+  if (payload.pricingType === 'minimum_consumption') {
+    pricingData.minimum_consumption = parseFloat(payload.minConsumption)
+    if (payload.sessionHours) pricingData.session_hours = parseInt(payload.sessionHours)
+  }
+  if (payload.pricingType === 'fixed_package') {
+    pricingData.fixed_price = parseFloat(payload.fixedPrice)
+    pricingData.package_name = payload.packageName
+    pricingData.package_includes = payload.packageIncludes
+  }
+
+  const existingPricing = await supabase.from('space_pricing').select('id').eq('space_id', spaceId).limit(1)
+  if (existingPricing.data?.length) {
+    await supabase.from('space_pricing').update(pricingData).eq('space_id', spaceId)
+  } else {
+    await supabase.from('space_pricing').insert({ ...pricingData, space_id: spaceId })
+  }
+
+  // Actualizar condiciones
+  const condData = {
+    space_id: spaceId,
+    music_cutoff_time: payload.musicCutoff || null,
+    allows_external_decoration: payload.allowsDecoration,
+    allows_external_food: payload.allowsFood,
+    allows_external_alcohol: payload.allowsAlcohol,
+    allows_smoking: false,
+    allows_pets: false,
+    cancellation_policy: payload.cancellationPolicy,
+    cancellation_hours_before: DEFAULT_CANCELLATION_HOURS,
+    cancellation_refund_pct: DEFAULT_CANCELLATION_REFUND_PCT,
+    custom_rules: payload.customRules || null,
+    deposit_required: payload.depositRequired,
+    deposit_amount: payload.depositAmount ? parseFloat(payload.depositAmount) : null,
+  }
+
+  const existingCond = await supabase.from('space_conditions').select('id').eq('space_id', spaceId).limit(1)
+  if (existingCond.data?.length) {
+    await supabase.from('space_conditions').update(condData).eq('space_id', spaceId)
+  } else {
+    await supabase.from('space_conditions').insert(condData)
+  }
+
+  return { success: true, spaceId }
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Building2, Clock, DollarSign, Plus, Gift, Shield, CreditCard, CheckCircle, ChevronRight, ChevronLeft, X, Loader2, Eye, EyeOff, MapPin, Users, Pencil, PlusCircle } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
-import { saveSpace, publishSpace, getMySpaces } from '@/lib/actions/space'
+import { saveSpace, publishSpace, getMySpaces, saveSpaceImages, updateSpace } from '@/lib/actions/space'
 import PhotoUploader from '@/components/dashboard/PhotoUploader'
 import type { SpaceCategory, PricingType, PaymentTermType } from '@/types'
 
@@ -126,6 +126,8 @@ export default function EspacioPage() {
   const [currentStep, setCurrentStep] = useState(1)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
+  const [pendingPhotos, setPendingPhotos] = useState<{ url: string; path: string; isCover: boolean }[]>([])
+  const [editingSpaceId, setEditingSpaceId] = useState<string | null>(null)
 
   // Step 1 - Basic info
   const [name, setName] = useState('')
@@ -189,31 +191,112 @@ export default function EspacioPage() {
   async function handlePublish() {
     setSaving(true)
     setSaveError('')
-    const result = await saveSpace({
+
+    const payload = {
       name, category, description, address, sector, capacityMin, capacityMax,
       pricingType: pricingType as PricingType,
       hourlyPrice, minHours, maxHours, minConsumption, sessionHours,
       fixedPrice, packageName, packageHours, packageIncludes,
-      timeBlocks,
-      addons,
+      timeBlocks, addons,
       musicCutoff, allowsDecoration, allowsFood, allowsAlcohol,
       depositRequired, depositAmount, cancellationPolicy, customRules,
       paymentTerm: paymentTerm as PaymentTermType,
-    })
-    if ('error' in result) {
-      setSaveError(result.error ?? 'Error desconocido')
-      setSaving(false)
-      return
     }
-    const pub = await publishSpace(result.spaceId)
-    setSaving(false)
-    if ('error' in pub) {
-      setSaveError(pub.error ?? 'Error al publicar')
+
+    let spaceId: string
+
+    if (editingSpaceId) {
+      // MODO EDICIÓN: actualizar espacio existente
+      const result = await updateSpace(editingSpaceId, payload)
+      if ('error' in result) {
+        setSaveError(result.error ?? 'Error al actualizar')
+        setSaving(false)
+        return
+      }
+      spaceId = editingSpaceId
     } else {
-      const updated = await getMySpaces()
-      setSpaces(updated)
-      setView('list')
+      // MODO CREACIÓN: crear nuevo espacio
+      const result = await saveSpace(payload)
+      if ('error' in result) {
+        setSaveError(result.error ?? 'Error desconocido')
+        setSaving(false)
+        return
+      }
+      spaceId = result.spaceId
+      // Publicar automáticamente solo en creación
+      const pub = await publishSpace(spaceId)
+      if ('error' in pub) {
+        setSaveError(pub.error ?? 'Error al publicar')
+        setSaving(false)
+        return
+      }
     }
+
+    // Guardar fotos si hay pendientes
+    if (pendingPhotos.length > 0) {
+      await saveSpaceImages(spaceId, pendingPhotos)
+    }
+
+    setSaving(false)
+    setEditingSpaceId(null)
+    const updated = await getMySpaces()
+    setSpaces(updated)
+    setView('list')
+  }
+
+  function loadSpaceForEdit(space: any) {
+    setEditingSpaceId(space.id)
+    // Cargar info básica
+    setName(space.name ?? '')
+    setCategory(space.category ?? '')
+    setDescription(space.description ?? '')
+    setAddress(space.address ?? '')
+    setSector(space.sector ?? '')
+    setCapacityMin(String(space.capacity_min ?? ''))
+    setCapacityMax(String(space.capacity_max ?? ''))
+    // Pricing
+    const p = space.space_pricing?.[0]
+    if (p) {
+      setPricingType(p.pricing_type ?? '')
+      setHourlyPrice(String(p.hourly_price ?? ''))
+      setMinHours(String(p.min_hours ?? ''))
+      setMaxHours(String(p.max_hours ?? ''))
+      setMinConsumption(String(p.minimum_consumption ?? ''))
+      setSessionHours(String(p.session_hours ?? ''))
+      setFixedPrice(String(p.fixed_price ?? ''))
+      setPackageName(p.package_name ?? '')
+      setPackageIncludes(p.package_includes ?? [])
+    }
+    // Addons
+    if (space.space_addons?.length) {
+      setAddons(space.space_addons.map((a: any) => ({
+        name: a.name, price: a.price, unit: a.unit, category: a.category, emoji: '✨',
+      })))
+    }
+    // Condiciones
+    const c = space.space_conditions?.[0]
+    if (c) {
+      setMusicCutoff(c.music_cutoff_time?.slice(0,5) ?? '00:00')
+      setAllowsDecoration(c.allows_external_decoration ?? true)
+      setAllowsFood(c.allows_external_food ?? false)
+      setAllowsAlcohol(c.allows_external_alcohol ?? false)
+      setDepositRequired(c.deposit_required ?? false)
+      setDepositAmount(String(c.deposit_amount ?? ''))
+      setCancellationPolicy(c.cancellation_policy ?? 'moderada')
+      setCustomRules(c.custom_rules ?? '')
+    }
+    // Payment terms
+    const pt = space.space_payment_terms?.[0]
+    if (pt) setPaymentTerm(pt.term_type ?? '')
+    // Time blocks
+    if (space.space_time_blocks?.length) {
+      setTimeBlocks(space.space_time_blocks.map((b: any) => ({
+        block_name: b.block_name, start_time: b.start_time, end_time: b.end_time,
+        days: b.days_of_week ?? [0,1,2,3,4,5,6],
+      })))
+    }
+    setCurrentStep(1)
+    setView('create')
   }
 
   function toggleAddon(addon: AddonItem) {
@@ -337,7 +420,9 @@ export default function EspacioPage() {
                     )}
 
                     <div className="flex gap-2">
-                      <button className="flex-1 flex items-center justify-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-medium py-2 rounded-xl transition-colors">
+                      <button
+                        onClick={() => loadSpaceForEdit(space)}
+                        className="flex-1 flex items-center justify-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-medium py-2 rounded-xl transition-colors">
                         <Pencil size={14} /> Editar
                       </button>
                       {!space.is_published && (
@@ -507,7 +592,7 @@ export default function EspacioPage() {
             {/* Photo upload */}
             <div>
               <label className="block text-slate-300 text-sm font-medium mb-1.5">Fotos del espacio</label>
-              <PhotoUploader onChange={photos => console.log('photos', photos)} />
+              <PhotoUploader onChange={photos => setPendingPhotos(photos)} />
             </div>
           </div>
         )}

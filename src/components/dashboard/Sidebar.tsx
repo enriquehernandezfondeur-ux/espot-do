@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard, Building2, CalendarDays, ClipboardList,
   MessageSquareQuote, MessageCircle, BarChart3, Settings,
-  LogOut, Sparkles,
+  LogOut, Sparkles, CreditCard,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -17,6 +17,7 @@ const navItems = [
   { href: '/dashboard/host/reservas',      label: 'Reservas',      icon: ClipboardList,        badge: 'pending' },
   { href: '/dashboard/host/cotizaciones',  label: 'Cotizaciones',  icon: MessageSquareQuote,   badge: 'quotes' },
   { href: '/dashboard/host/mensajes',      label: 'Mensajes',      icon: MessageCircle },
+  { href: '/dashboard/host/finanzas',      label: 'Finanzas',      icon: CreditCard },
   { href: '/dashboard/host/analytics',     label: 'Analytics',     icon: BarChart3 },
   { href: '/dashboard/host/ajustes',       label: 'Ajustes',       icon: Settings },
 ]

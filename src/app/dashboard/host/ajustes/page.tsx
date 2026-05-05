@@ -1,94 +1,117 @@
 'use client'
 
-import { useState } from 'react'
-import { Save, Camera } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Save, Camera, Loader2, CheckCircle } from 'lucide-react'
+import { getClientProfile, updateClientProfile } from '@/lib/actions/client'
 
-export default function AjustesPage() {
-  const [fullName, setFullName] = useState('Enrique Hernández')
-  const [phone, setPhone] = useState('+1 (809) 555-0101')
-  const [whatsapp, setWhatsapp] = useState('+1 (809) 555-0101')
-  const [saved, setSaved] = useState(false)
+export default function HostAjustesPage() {
+  const [loading, setLoading]   = useState(true)
+  const [saving, setSaving]     = useState(false)
+  const [saved, setSaved]       = useState(false)
+  const [error, setError]       = useState('')
+  const [fullName, setFullName] = useState('')
+  const [phone, setPhone]       = useState('')
+  const [whatsapp, setWhatsapp] = useState('')
+  const [email, setEmail]       = useState('')
 
-  function handleSave() {
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
+  useEffect(() => {
+    getClientProfile().then(p => {
+      if (p) {
+        setFullName(p.full_name ?? '')
+        setPhone(p.phone ?? '')
+        setWhatsapp(p.whatsapp ?? '')
+        setEmail(p.email ?? '')
+      }
+      setLoading(false)
+    })
+  }, [])
+
+  async function handleSave() {
+    setSaving(true)
+    setError('')
+    const result = await updateClientProfile({ full_name: fullName, phone, whatsapp })
+    if ('error' in result) {
+      setError(result.error ?? 'Error al guardar')
+    } else {
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2500)
+    }
+    setSaving(false)
   }
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-screen" style={{ background: 'var(--bg-base)' }}>
+      <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand)' }} />
+    </div>
+  )
 
   return (
     <div className="p-8 max-w-2xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Ajustes de cuenta</h1>
-        <p className="text-slate-400 mt-1">Administra tu perfil de propietario</p>
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Ajustes de cuenta</h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>Tu información como propietario</p>
       </div>
 
-      <div className="space-y-6">
-        {/* Avatar */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-          <h2 className="text-white font-semibold mb-4">Foto de perfil</h2>
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-[#28A87C] rounded-full flex items-center justify-center">
-                <span className="text-white text-2xl font-bold">E</span>
-              </div>
-              <button className="absolute -bottom-1 -right-1 w-6 h-6 bg-[#35C493] rounded-full flex items-center justify-center">
-                <Camera size={12} className="text-white" />
-              </button>
+      {/* Avatar */}
+      <div className="rounded-2xl p-6 mb-5"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+        <div className="flex items-center gap-5">
+          <div className="relative">
+            <div className="w-20 h-20 rounded-3xl flex items-center justify-center text-3xl font-bold text-white"
+              style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-dark))' }}>
+              {fullName?.charAt(0)?.toUpperCase() ?? 'H'}
             </div>
-            <div>
-              <button className="text-[#35C493] text-sm hover:text-[#4DD9A7] transition-colors">Cambiar foto</button>
-              <p className="text-slate-500 text-xs mt-0.5">JPG o PNG, máximo 2MB</p>
-            </div>
+            <button className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-xl flex items-center justify-center text-white"
+              style={{ background: 'var(--brand)' }}>
+              <Camera size={13} />
+            </button>
+          </div>
+          <div>
+            <div className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>{fullName || 'Tu nombre'}</div>
+            <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{email}</div>
           </div>
         </div>
-
-        {/* Personal info */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4">
-          <h2 className="text-white font-semibold">Información personal</h2>
-          {[
-            { label: 'Nombre completo', value: fullName, setter: setFullName, placeholder: 'Tu nombre' },
-            { label: 'Teléfono', value: phone, setter: setPhone, placeholder: '+1 (809)...' },
-            { label: 'WhatsApp', value: whatsapp, setter: setWhatsapp, placeholder: '+1 (809)...' },
-          ].map(field => (
-            <div key={field.label}>
-              <label className="block text-slate-300 text-sm font-medium mb-1.5">{field.label}</label>
-              <input
-                value={field.value}
-                onChange={e => field.setter(e.target.value)}
-                placeholder={field.placeholder}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm transition-colors"
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Notifications */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-3">
-          <h2 className="text-white font-semibold">Notificaciones</h2>
-          {[
-            { label: 'Nueva reserva', desc: 'Recibir email cuando alguien haga una reserva' },
-            { label: 'Nueva cotización', desc: 'Recibir email cuando alguien solicite precio' },
-            { label: 'Mensaje nuevo', desc: 'Notificación de mensajes de clientes' },
-          ].map(notif => (
-            <div key={notif.label} className="flex items-center justify-between py-1">
-              <div>
-                <div className="text-white text-sm">{notif.label}</div>
-                <div className="text-slate-500 text-xs">{notif.desc}</div>
-              </div>
-              <div className="w-12 h-6 bg-[#35C493] rounded-full relative cursor-pointer">
-                <span className="absolute right-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow" />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <button
-          onClick={handleSave}
-          className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#35C493] to-[#28A87C] hover:from-violet-500 hover:to-purple-500 text-white font-semibold py-3 rounded-xl transition-all"
-        >
-          <Save size={18} />
-          {saved ? '¡Guardado!' : 'Guardar cambios'}
-        </button>
       </div>
+
+      {/* Formulario */}
+      <div className="rounded-2xl p-6 mb-5 space-y-5"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+        <h2 className="font-bold" style={{ color: 'var(--text-primary)' }}>Información personal</h2>
+        {[
+          { label: 'Nombre completo', value: fullName,  setter: setFullName,  placeholder: 'Tu nombre' },
+          { label: 'Teléfono',        value: phone,     setter: setPhone,     placeholder: '+1 (809) 000-0000' },
+          { label: 'WhatsApp',        value: whatsapp,  setter: setWhatsapp,  placeholder: '+1 (829) 000-0000' },
+        ].map(field => (
+          <div key={field.label}>
+            <label className="block text-xs font-semibold uppercase tracking-widest mb-2"
+              style={{ color: 'var(--text-muted)' }}>{field.label}</label>
+            <input value={field.value} onChange={e => field.setter(e.target.value)}
+              placeholder={field.placeholder}
+              className="input-base w-full rounded-xl px-4 py-3.5 text-sm" />
+          </div>
+        ))}
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-widest mb-2"
+            style={{ color: 'var(--text-muted)' }}>Correo electrónico</label>
+          <input value={email} disabled
+            className="w-full rounded-xl px-4 py-3.5 text-sm cursor-not-allowed"
+            style={{ background: 'var(--bg-elevated)', border: '1.5px solid var(--border-subtle)', color: 'var(--text-muted)' }} />
+          <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>El email no se puede cambiar</p>
+        </div>
+      </div>
+
+      {error && (
+        <div className="text-sm px-4 py-3 rounded-xl mb-4"
+          style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626' }}>{error}</div>
+      )}
+
+      <button onClick={handleSave} disabled={saving}
+        className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm transition-all disabled:opacity-50"
+        style={{ background: saved ? 'rgba(22,163,74,0.1)' : 'var(--brand)', color: saved ? '#16A34A' : '#fff' }}>
+        {saving  ? <><Loader2 size={18} className="animate-spin" /> Guardando...</>
+        : saved   ? <><CheckCircle size={18} /> ¡Guardado!</>
+        :           <><Save size={18} /> Guardar cambios</>}
+      </button>
     </div>
   )
 }
