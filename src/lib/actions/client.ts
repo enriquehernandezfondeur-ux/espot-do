@@ -83,7 +83,7 @@ export async function getClientProfile() {
   return data
 }
 
-export async function updateClientProfile(updates: { full_name?: string; phone?: string; whatsapp?: string }) {
+export async function updateClientProfile(updates: { full_name?: string; phone?: string; whatsapp?: string; avatar_url?: string }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }

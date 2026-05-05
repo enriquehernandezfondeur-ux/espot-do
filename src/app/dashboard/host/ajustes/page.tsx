@@ -1,18 +1,24 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Save, Camera, Loader2, CheckCircle } from 'lucide-react'
 import { getClientProfile, updateClientProfile } from '@/lib/actions/client'
+import { createClient } from '@/lib/supabase/client'
 
 export default function HostAjustesPage() {
-  const [loading, setLoading]   = useState(true)
-  const [saving, setSaving]     = useState(false)
-  const [saved, setSaved]       = useState(false)
-  const [error, setError]       = useState('')
-  const [fullName, setFullName] = useState('')
-  const [phone, setPhone]       = useState('')
-  const [whatsapp, setWhatsapp] = useState('')
-  const [email, setEmail]       = useState('')
+  const [loading,   setLoading]   = useState(true)
+  const [saving,    setSaving]    = useState(false)
+  const [saved,     setSaved]     = useState(false)
+  const [error,     setError]     = useState('')
+  const [uploading, setUploading] = useState(false)
+
+  const [fullName,  setFullName]  = useState('')
+  const [phone,     setPhone]     = useState('')
+  const [whatsapp,  setWhatsapp]  = useState('')
+  const [email,     setEmail]     = useState('')
+  const [avatarUrl, setAvatarUrl] = useState('')
+
+  const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     getClientProfile().then(p => {
@@ -21,10 +27,43 @@ export default function HostAjustesPage() {
         setPhone(p.phone ?? '')
         setWhatsapp(p.whatsapp ?? '')
         setEmail(p.email ?? '')
+        setAvatarUrl(p.avatar_url ?? '')
       }
       setLoading(false)
     })
   }, [])
+
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setError('')
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('No autenticado')
+
+      const ext  = file.name.split('.').pop() ?? 'jpg'
+      const path = `avatars/${user.id}.${ext}`
+
+      const { error: upErr } = await supabase.storage
+        .from('space-images')
+        .upload(path, file, { upsert: true, contentType: file.type })
+      if (upErr) throw upErr
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('space-images')
+        .getPublicUrl(path)
+
+      setAvatarUrl(publicUrl)
+      await updateClientProfile({ avatar_url: publicUrl })
+    } catch {
+      setError('No se pudo subir la foto. Intenta de nuevo.')
+    } finally {
+      setUploading(false)
+      if (fileRef.current) fileRef.current.value = ''
+    }
+  }
 
   async function handleSave() {
     setSaving(true)
@@ -57,18 +96,47 @@ export default function HostAjustesPage() {
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
         <div className="flex items-center gap-5">
           <div className="relative">
-            <div className="w-20 h-20 rounded-3xl flex items-center justify-center text-3xl font-bold text-white"
-              style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-dark))' }}>
-              {fullName?.charAt(0)?.toUpperCase() ?? 'H'}
-            </div>
-            <button className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-xl flex items-center justify-center text-white"
-              style={{ background: 'var(--brand)' }}>
-              <Camera size={13} />
+            {avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={avatarUrl}
+                alt={fullName}
+                className="w-20 h-20 rounded-3xl object-cover"
+                style={{ border: '2px solid var(--border-subtle)' }}
+              />
+            ) : (
+              <div className="w-20 h-20 rounded-3xl flex items-center justify-center text-3xl font-bold text-white"
+                style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-dark))' }}>
+                {fullName?.charAt(0)?.toUpperCase() || 'H'}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              title="Cambiar foto de perfil"
+              className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-xl flex items-center justify-center text-white transition-opacity hover:opacity-80 disabled:opacity-50"
+              style={{ background: 'var(--brand)' }}
+            >
+              {uploading
+                ? <Loader2 size={11} className="animate-spin" />
+                : <Camera size={13} />
+              }
             </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarChange}
+            />
           </div>
           <div>
             <div className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>{fullName || 'Tu nombre'}</div>
             <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{email}</div>
+            <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
+              {uploading ? 'Subiendo foto...' : 'Click en la cámara para cambiar tu foto'}
+            </p>
           </div>
         </div>
       </div>
