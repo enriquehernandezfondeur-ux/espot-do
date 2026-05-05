@@ -63,7 +63,9 @@ export default function CalendarioPage() {
   const [blockReason, setBlockReason] = useState('')
   const [blockSaving, setBlockSaving] = useState(false)
   const [blockError, setBlockError] = useState('')
-  const [spaceId, setSpaceId] = useState<string | null>(null)
+  const [spaceId, setSpaceId]   = useState<string | null>(null)
+  const [spaceList, setSpaceList] = useState<{ id: string; name: string }[]>([])
+  const [spaceName, setSpaceName] = useState<string>('')
 
   const supabase = createClient()
 
@@ -71,13 +73,15 @@ export default function CalendarioPage() {
     async function load() {
       const [bk, spaces] = await Promise.all([
         getHostCalendarBookings(),
-        supabase.from('spaces').select('id').limit(1),
+        supabase.from('spaces').select('id, name').eq('is_active', true).order('created_at'),
       ])
       setBookings(bk)
+      setSpaceList(spaces.data ?? [])
 
       if (spaces.data?.length) {
         const sid = spaces.data[0].id
         setSpaceId(sid)
+        setSpaceName(spaces.data[0].name)
         const { data: avail } = await supabase
           .from('space_availability')
           .select('*')
@@ -209,11 +213,52 @@ export default function CalendarioPage() {
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Calendario</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
           Gestiona la disponibilidad de tu espacio por día y por horas
         </p>
+      </div>
+
+      {/* ── Contexto del espacio ── */}
+      <div className="flex items-center gap-3 mb-6 px-4 py-3 rounded-2xl"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+        <div className="w-2 h-2 rounded-full shrink-0" style={{ background: 'var(--brand)' }} />
+        <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+          Espacio activo:
+        </span>
+        {spaceList.length > 1 ? (
+          <select
+            value={spaceId ?? ''}
+            onChange={async e => {
+              const sid  = e.target.value
+              const name = spaceList.find(s => s.id === sid)?.name ?? ''
+              setSpaceId(sid)
+              setSpaceName(name)
+              setSelected(null)
+              // Recargar disponibilidad del espacio seleccionado
+              const { data: avail } = await supabase
+                .from('space_availability').select('*').eq('space_id', sid)
+              if (avail) {
+                const grouped: Record<string, any[]> = {}
+                avail.forEach((a: any) => {
+                  if (!grouped[a.blocked_date]) grouped[a.blocked_date] = []
+                  grouped[a.blocked_date].push(a)
+                })
+                setBlockedSlots(grouped)
+              }
+            }}
+            className="text-sm font-semibold bg-transparent focus:outline-none flex-1"
+            style={{ color: 'var(--text-primary)' }}>
+            {spaceList.map(s => (
+              <option key={s.id} value={s.id} style={{ background: 'var(--bg-base)' }}>{s.name}</option>
+            ))}
+          </select>
+        ) : (
+          <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+            {spaceName || 'Cargando...'}
+          </span>
+        )}
       </div>
 
       <div className="flex gap-6">
@@ -366,6 +411,16 @@ export default function CalendarioPage() {
                     <div className="text-xs px-3 py-2 rounded-lg mb-2"
                       style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)' }}>
                       {blockError}
+                    </div>
+                  )}
+                  {/* Resumen del bloqueo */}
+                  {blockStart && blockEnd && selected && (
+                    <div className="text-xs px-3 py-2 rounded-lg mb-2"
+                      style={{ background: 'rgba(239,68,68,0.06)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(239,68,68,0.15)' }}>
+                      Bloquearás <strong style={{ color: 'rgba(255,255,255,0.8)' }}>
+                        {new Date(selected + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
+                        {' de '}{blockStart}{' a '}{blockEnd}
+                      </strong> en <strong style={{ color: 'rgba(255,255,255,0.8)' }}>{spaceName}</strong>
                     </div>
                   )}
                   <button

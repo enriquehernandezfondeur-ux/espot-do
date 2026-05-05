@@ -838,11 +838,24 @@ export default function EspacioPage() {
           <div className="space-y-6">
             <div>
               <h2 className="text-xl font-bold text-white mb-1">Adicionales y extras</h2>
-              <p className="text-slate-400 text-sm">El cliente podrá agregarlos al momento de reservar</p>
+              <p className="text-slate-400 text-sm">
+                Activa los servicios que ofreces. El cliente podrá agregarlos al reservar.
+              </p>
             </div>
 
+            {/* ─ Sección 1: Selección ─ */}
             <div>
-              <h3 className="text-slate-300 text-sm font-medium mb-3">Selecciona los que ofreces</h3>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+                  ¿Qué ofreces?
+                </p>
+                {addons.length > 0 && (
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
+                    style={{ background: 'rgba(53,196,147,0.1)', color: '#35C493' }}>
+                    {addons.length} seleccionado{addons.length !== 1 ? 's' : ''}
+                  </span>
+                )}
+              </div>
               <div className="grid grid-cols-3 gap-2">
                 {addonSuggestions.map(addon => {
                   const selected = addons.find(a => a.name === addon.name)
@@ -850,39 +863,50 @@ export default function EspacioPage() {
                     <button
                       key={addon.name}
                       onClick={() => toggleAddon(addon)}
-                      className={cn(
-                        'flex items-center gap-3 p-3 rounded-xl border text-left transition-all',
-                        selected
-                          ? 'bg-[rgba(53,196,147,0.12)] border-[rgba(53,196,147,0.40)]'
-                          : 'bg-white/5 border-white/10 hover:border-white/20'
-                      )}
+                      className="flex items-center gap-3 p-3 rounded-xl border text-left transition-all"
+                      style={selected ? {
+                        background: 'rgba(53,196,147,0.10)',
+                        border:     '1.5px solid rgba(53,196,147,0.35)',
+                      } : {
+                        background: 'rgba(255,255,255,0.03)',
+                        border:     '1px solid rgba(255,255,255,0.08)',
+                      }}
                     >
-                      <span className="text-xl shrink-0">{addon.emoji}</span>
+                      <span className="text-xl shrink-0 opacity-80">{addon.emoji}</span>
                       <div className="flex-1 min-w-0">
-                        <div className={cn('text-sm font-medium truncate', selected ? 'text-[#4DD9A7]' : 'text-white')}>
+                        <div className="text-sm font-medium truncate"
+                          style={{ color: selected ? '#4DD9A7' : 'rgba(255,255,255,0.7)' }}>
                           {addon.name}
                         </div>
-                        <div className="text-slate-500 text-xs">
+                        <div className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>
                           {addon.price > 0 ? formatCurrency(addon.price) : 'Precio variable'} / {addon.unit}
                         </div>
                       </div>
-                      {selected && <CheckCircle size={14} className="text-[#35C493] shrink-0" />}
+                      <div className="shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all"
+                        style={selected ? { background: '#35C493', borderColor: '#35C493' } : { borderColor: 'rgba(255,255,255,0.15)' }}>
+                        {selected && <CheckCircle size={10} className="text-white" />}
+                      </div>
                     </button>
                   )
                 })}
               </div>
             </div>
 
+            {/* ─ Sección 2: Configurar precios (solo si hay seleccionados) ─ */}
             {addons.length > 0 && (
-              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                <h3 className="text-slate-300 text-sm font-medium mb-3">Ajusta los precios de tus adicionales</h3>
-                <div className="space-y-2">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
+                  Configura precios de los seleccionados
+                </p>
+                <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
                   {addons.map((addon, i) => (
-                    <div key={i} className="flex items-center gap-4">
-                      <span className="text-lg shrink-0">{addon.emoji}</span>
-                      <span className="text-white text-sm flex-1">{addon.name}</span>
+                    <div key={i}
+                      className="flex items-center gap-4 px-4 py-3"
+                      style={{ borderBottom: i < addons.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none', background: 'rgba(255,255,255,0.02)' }}>
+                      <span className="text-base shrink-0">{addon.emoji}</span>
+                      <span className="text-sm font-medium flex-1" style={{ color: 'rgba(255,255,255,0.8)' }}>{addon.name}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-slate-500 text-xs">RD$</span>
+                        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>RD$</span>
                         <input
                           type="number"
                           value={addon.price}
@@ -891,7 +915,8 @@ export default function EspacioPage() {
                             updated[i] = { ...addon, price: Number(e.target.value) }
                             setAddons(updated)
                           }}
-                          className="w-24 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-[#35C493] transition-colors"
+                          className="w-24 rounded-lg px-3 py-1.5 text-sm focus:outline-none transition-colors"
+                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
                         />
                         <select
                           value={addon.unit}
@@ -900,19 +925,31 @@ export default function EspacioPage() {
                             updated[i] = { ...addon, unit: e.target.value }
                             setAddons(updated)
                           }}
-                          className="bg-white/5 border border-white/10 rounded-lg px-2 py-1.5 text-slate-300 text-xs focus:outline-none"
+                          className="rounded-lg px-2 py-1.5 text-xs focus:outline-none"
+                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}
                         >
                           <option value="evento">/ evento</option>
                           <option value="hora">/ hora</option>
                           <option value="persona">/ persona</option>
                         </select>
                       </div>
-                      <button onClick={() => toggleAddon(addon)} className="text-red-400 hover:text-red-300">
-                        <X size={16} />
+                      <button onClick={() => toggleAddon(addon)}
+                        className="w-7 h-7 flex items-center justify-center rounded-lg transition-all"
+                        style={{ color: 'rgba(248,113,113,0.6)', background: 'rgba(248,113,113,0.08)' }}>
+                        <X size={13} />
                       </button>
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {addons.length === 0 && (
+              <div className="text-center py-6 rounded-xl"
+                style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)' }}>
+                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                  Ningún adicional seleccionado aún
+                </p>
               </div>
             )}
           </div>

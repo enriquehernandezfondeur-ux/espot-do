@@ -280,9 +280,9 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
             <div key={key}
               className="rounded-2xl transition-all overflow-hidden"
               style={{
-                background: day.enabled ? '#fff' : 'rgba(255,255,255,0.02)',
+                background: day.enabled ? 'rgba(53,196,147,0.06)' : 'rgba(255,255,255,0.02)',
                 border: day.enabled
-                  ? '1.5px solid rgba(53,196,147,0.2)'
+                  ? '1.5px solid rgba(53,196,147,0.25)'
                   : '1px solid rgba(255,255,255,0.06)',
               }}>
 
@@ -331,7 +331,7 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
 
               {/* ── Contenido del día (solo si activo) ── */}
               {day.enabled && (
-                <div className="px-5 pb-4 space-y-2" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                <div className="px-5 pb-4 space-y-2" style={{ borderTop: '1px solid rgba(53,196,147,0.1)' }}>
 
                   {/* Bloques existentes */}
                   {day.ranges.map(range => {
