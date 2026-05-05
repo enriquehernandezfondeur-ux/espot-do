@@ -98,14 +98,6 @@ export default function SpaceDetailClient({ space, similarSpaces = [] }: { space
   function getCover(s: any) {
     return s.space_images?.find((i: any) => i.is_cover)?.url ?? s.space_images?.[0]?.url ?? null
   }
-  function getSimilarPrice(s: any) {
-    const p = s.space_pricing?.find((x: any) => x.is_active) ?? s.space_pricing?.[0]
-    if (!p) return null
-    if (p.pricing_type === 'hourly') return `${formatCurrency(p.hourly_price)} / hr`
-    if (p.pricing_type === 'minimum_consumption') return `Desde ${formatCurrency(p.minimum_consumption)}`
-    if (p.pricing_type === 'fixed_package') return formatCurrency(p.fixed_price)
-    return 'Cotizar'
-  }
 
   const hostProfile = space.profiles as any
 
@@ -546,53 +538,98 @@ export default function SpaceDetailClient({ space, similarSpaces = [] }: { space
         </div>{/* end grid */}
 
         {/* ── ESPACIOS SIMILARES ── */}
-        {similarSpaces.length > 0 && (
-          <div className="mt-16 pt-12" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                Espacios similares
-              </h2>
-              <Link href="/buscar" className="text-sm font-medium link-muted">
-                Ver todos →
-              </Link>
-            </div>
-            <div className="grid grid-cols-4 gap-4">
-              {similarSpaces.map((s: any) => {
-                const cover = getCover(s)
-                const price = getSimilarPrice(s)
-                return (
-                  <Link key={s.id} href={`/espacios/${s.slug}`} className="group block">
-                    <div className="card-hover rounded-2xl overflow-hidden"
-                      style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
-                      <div className="h-36 overflow-hidden" style={{ background: 'var(--bg-elevated)' }}>
-                        {cover ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={cover} alt={s.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-4xl opacity-30">🏛️</div>
-                        )}
-                      </div>
-                      <div className="p-3.5">
-                        <h4 className="font-semibold text-sm leading-tight mb-1 group-hover:text-[#35C493] transition-colors"
-                          style={{ color: 'var(--text-primary)' }}>{s.name}</h4>
-                        <div className="flex items-center gap-1 text-xs mb-2" style={{ color: 'var(--text-muted)' }}>
-                          <MapPin size={10} /> {s.sector ?? s.city}
+        {similarSpaces.length > 0 && (() => {
+          const hasExact = similarSpaces.some((s: any) => s._isExact)
+          return (
+            <div className="mt-16 pt-12" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+
+              {/* Encabezado */}
+              <div className="flex items-start justify-between gap-4 mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                    Espacios similares
+                  </h2>
+                  {!hasExact && (
+                    <p className="text-sm mt-1.5" style={{ color: 'var(--text-secondary)' }}>
+                      No encontramos una coincidencia exacta, pero estos espacios pueden funcionar para tu evento.
+                    </p>
+                  )}
+                </div>
+                <Link href="/buscar" className="text-sm font-medium link-muted shrink-0 mt-1">
+                  Ver todos →
+                </Link>
+              </div>
+
+              {/* Cards */}
+              <div className="grid grid-cols-4 gap-4">
+                {similarSpaces.map((s: any) => {
+                  const cover   = getCover(s)
+                  const display = s._pricingDisplay ?? {}
+                  return (
+                    <Link key={s.id} href={`/espacios/${s.slug}`} className="group block">
+                      <div className="card-hover rounded-2xl overflow-hidden h-full flex flex-col"
+                        style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+
+                        {/* Imagen */}
+                        <div className="relative h-36 overflow-hidden shrink-0"
+                          style={{ background: 'var(--bg-elevated)' }}>
+                          {cover ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={cover} alt={s.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center"
+                              style={{ color: 'var(--border-medium)', fontSize: 32 }}>■</div>
+                          )}
+                          {/* Badge tipo de precio */}
+                          {display.badge && (
+                            <span className="absolute top-2 left-2 text-xs font-semibold px-2 py-0.5 rounded-full"
+                              style={{
+                                background: display.isAltModel
+                                  ? 'rgba(59,130,246,0.9)'
+                                  : 'rgba(0,0,0,0.65)',
+                                color: '#fff',
+                                backdropFilter: 'blur(4px)',
+                              }}>
+                              {display.badge}
+                            </span>
+                          )}
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+
+                        {/* Info */}
+                        <div className="p-3.5 flex flex-col flex-1">
+                          <h4 className="font-semibold text-sm leading-tight mb-1 group-hover:text-[#35C493] transition-colors"
+                            style={{ color: 'var(--text-primary)' }}>
+                            {s.name}
+                          </h4>
+                          <div className="flex items-center gap-1 text-xs mb-2" style={{ color: 'var(--text-muted)' }}>
+                            <MapPin size={10} /> {s.sector ?? s.city}
+                            <span className="mx-1" style={{ color: 'var(--border-medium)' }}>·</span>
                             <Users size={10} /> {s.capacity_max}
-                          </span>
-                          {price && <span className="text-xs font-bold" style={{ color: 'var(--brand)' }}>{price}</span>}
+                          </div>
+
+                          {/* Precio */}
+                          <div className="mt-auto pt-2" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                            {display.main && (
+                              <div className="text-xs font-bold" style={{ color: 'var(--brand)' }}>
+                                {display.main}
+                              </div>
+                            )}
+                            {display.sub && (
+                              <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                                {display.sub}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </Link>
-                )
-              })}
+                    </Link>
+                  )
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          )
+        })()}
       </div>
     </div>
   )
