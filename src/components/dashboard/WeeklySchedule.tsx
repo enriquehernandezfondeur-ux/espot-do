@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, X, Copy, ChevronDown } from 'lucide-react'
+import { Plus, X, Pencil, Copy, Check } from 'lucide-react'
 
-// ── Tipos ──────────────────────────────────────────────────
+// ── Tipos (sin cambios) ────────────────────────────────────
 interface TimeRange {
   id:    string
-  start: string  // "08:00"
-  end:   string  // "12:00"
+  start: string
+  end:   string
 }
 
 interface DaySchedule {
@@ -16,15 +16,13 @@ interface DaySchedule {
 }
 
 type DayKey = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
-
 type WeekSchedule = Record<DayKey, DaySchedule>
 
-// Formato de salida compatible con el wizard existente
 export interface TimeBlock {
   block_name: string
   start_time: string
   end_time:   string
-  days:       number[]  // 0=Dom, 1=Lun … 6=Sáb
+  days:       number[]
 }
 
 interface Props {
@@ -32,33 +30,25 @@ interface Props {
   initial?: TimeBlock[]
 }
 
-// ── Constantes ─────────────────────────────────────────────
-const DAYS: { key: DayKey; label: string; short: string; num: number }[] = [
-  { key: 'mon', label: 'Lunes',     short: 'Lu', num: 1 },
-  { key: 'tue', label: 'Martes',    short: 'Ma', num: 2 },
-  { key: 'wed', label: 'Miércoles', short: 'Mi', num: 3 },
-  { key: 'thu', label: 'Jueves',    short: 'Ju', num: 4 },
-  { key: 'fri', label: 'Viernes',   short: 'Vi', num: 5 },
-  { key: 'sat', label: 'Sábado',    short: 'Sa', num: 6 },
-  { key: 'sun', label: 'Domingo',   short: 'Do', num: 0 },
+// ── Constantes (sin cambios) ───────────────────────────────
+const DAYS: { key: DayKey; label: string; num: number }[] = [
+  { key: 'mon', label: 'Lunes',     num: 1 },
+  { key: 'tue', label: 'Martes',    num: 2 },
+  { key: 'wed', label: 'Miércoles', num: 3 },
+  { key: 'thu', label: 'Jueves',    num: 4 },
+  { key: 'fri', label: 'Viernes',   num: 5 },
+  { key: 'sat', label: 'Sábado',    num: 6 },
+  { key: 'sun', label: 'Domingo',   num: 0 },
 ]
 
-const PRESETS = [
-  { label: 'Mañana',  start: '08:00', end: '12:00' },
-  { label: 'Tarde',   start: '12:00', end: '18:00' },
-  { label: 'Noche',   start: '18:00', end: '00:00' },
-]
+function makeId()    { return Math.random().toString(36).slice(2, 9) }
 
-const DEFAULT_EMPTY: DaySchedule = { enabled: false, ranges: [] }
-
-function makeId() { return Math.random().toString(36).slice(2, 9) }
-
-function timeToMinutes(t: string): number {
+function timeToMin(t: string): number {
   const [h, m] = t.split(':').map(Number)
   return h * 60 + m
 }
 
-function formatDisplay(t: string): string {
+function fmt(t: string): string {
   if (!t) return '—'
   const [h, m] = t.split(':').map(Number)
   const ampm = h >= 12 ? 'PM' : 'AM'
@@ -66,7 +56,7 @@ function formatDisplay(t: string): string {
   return `${h12}:${String(m).padStart(2, '0')} ${ampm}`
 }
 
-// Convierte WeekSchedule → TimeBlock[] para el wizard
+// ── Conversiones (sin cambios) ─────────────────────────────
 function toTimeBlocks(week: WeekSchedule): TimeBlock[] {
   const blocks: TimeBlock[] = []
   DAYS.forEach(({ key, num, label }) => {
@@ -74,28 +64,16 @@ function toTimeBlocks(week: WeekSchedule): TimeBlock[] {
     if (!day.enabled) return
     day.ranges.forEach(r => {
       if (!r.start || !r.end) return
-      blocks.push({
-        block_name: label,
-        start_time: r.start,
-        end_time:   r.end,
-        days:       [num],
-      })
+      blocks.push({ block_name: label, start_time: r.start, end_time: r.end, days: [num] })
     })
   })
   return blocks
 }
 
-// Construye WeekSchedule inicial desde TimeBlock[]
 function fromTimeBlocks(blocks: TimeBlock[]): WeekSchedule {
-  const week: WeekSchedule = {
-    mon: { enabled: false, ranges: [] },
-    tue: { enabled: false, ranges: [] },
-    wed: { enabled: false, ranges: [] },
-    thu: { enabled: false, ranges: [] },
-    fri: { enabled: false, ranges: [] },
-    sat: { enabled: false, ranges: [] },
-    sun: { enabled: false, ranges: [] },
-  }
+  const week: WeekSchedule = Object.fromEntries(
+    DAYS.map(d => [d.key, { enabled: false, ranges: [] }])
+  ) as WeekSchedule
   blocks.forEach(b => {
     b.days.forEach(num => {
       const day = DAYS.find(d => d.num === num)
@@ -110,31 +88,23 @@ function fromTimeBlocks(blocks: TimeBlock[]): WeekSchedule {
 // ── Componente ─────────────────────────────────────────────
 export default function WeeklySchedule({ onChange, initial = [] }: Props) {
   const [week, setWeek] = useState<WeekSchedule>(() =>
-    initial.length > 0
-      ? fromTimeBlocks(initial)
-      : {
-          mon: { enabled: false, ranges: [] },
-          tue: { enabled: false, ranges: [] },
-          wed: { enabled: false, ranges: [] },
-          thu: { enabled: false, ranges: [] },
-          fri: { enabled: false, ranges: [] },
-          sat: { enabled: false, ranges: [] },
-          sun: { enabled: false, ranges: [] },
-        }
+    initial.length > 0 ? fromTimeBlocks(initial)
+      : Object.fromEntries(DAYS.map(d => [d.key, { enabled: false, ranges: [] }])) as WeekSchedule
   )
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [quickOpen, setQuickOpen] = useState<DayKey | null>(null)
 
-  // Notificar al padre cuando cambia
-  useEffect(() => {
-    onChange(toTimeBlocks(week))
-  }, [week])
+  // Estado de edición por día: qué rango se está editando / si está añadiendo
+  const [adding,   setAdding]   = useState<Partial<Record<DayKey, boolean>>>({})
+  const [editing,  setEditing]  = useState<Partial<Record<string, string>>>({}) // rangeId → dayKey
+  const [draft,    setDraft]    = useState<Partial<Record<DayKey, { start: string; end: string }>>>({})
+  const [errors,   setErrors]   = useState<Record<string, string>>({})
 
-  // ── Helpers ────────────────────────────────────────────
-  function update(updater: (prev: WeekSchedule) => WeekSchedule) {
-    setWeek(prev => updater(prev))
+  useEffect(() => { onChange(toTimeBlocks(week)) }, [week])
+
+  function update(fn: (prev: WeekSchedule) => WeekSchedule) {
+    setWeek(prev => fn(prev))
   }
 
+  // Toggle día
   function toggleDay(key: DayKey) {
     update(prev => ({
       ...prev,
@@ -142,88 +112,93 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
         ...prev[key],
         enabled: !prev[key].enabled,
         ranges: !prev[key].enabled && prev[key].ranges.length === 0
-          ? [{ id: makeId(), start: '09:00', end: '18:00' }]
-          : prev[key].ranges,
+          ? [{ id: makeId(), start: '09:00', end: '18:00' }] : prev[key].ranges,
       },
     }))
+    setAdding(p => ({ ...p, [key]: false }))
   }
 
-  function addRange(key: DayKey) {
+  // Abrir formulario de nuevo horario
+  function openAdd(key: DayKey) {
+    if ((week[key].ranges.length) >= 4) return
+    setDraft(p => ({ ...p, [key]: { start: '', end: '' } }))
+    setAdding(p => ({ ...p, [key]: true }))
+    setErrors({})
+  }
+
+  // Confirmar nuevo horario
+  function confirmAdd(key: DayKey) {
+    const d = draft[key] ?? { start: '', end: '' }
+    if (!d.start || !d.end) { setErrors({ [`add-${key}`]: 'Completa ambas horas' }); return }
+    if (timeToMin(d.start) >= timeToMin(d.end) && d.end !== '00:00') {
+      setErrors({ [`add-${key}`]: 'La hora de fin debe ser después del inicio' }); return
+    }
+    // Validar solapamiento
+    const conflict = week[key].ranges.some(r => {
+      const aS = timeToMin(r.start), aE = timeToMin(r.end) || 1440
+      const bS = timeToMin(d.start), bE = timeToMin(d.end) || 1440
+      return bS < aE && bE > aS
+    })
+    if (conflict) { setErrors({ [`add-${key}`]: 'Este horario se superpone con uno existente' }); return }
     update(prev => ({
       ...prev,
-      [key]: {
-        ...prev[key],
-        ranges: [...prev[key].ranges, { id: makeId(), start: '', end: '' }],
-      },
+      [key]: { ...prev[key], ranges: [...prev[key].ranges, { id: makeId(), start: d.start, end: d.end }] },
     }))
+    setAdding(p => ({ ...p, [key]: false }))
+    setDraft(p => ({ ...p, [key]: { start: '', end: '' } }))
+    setErrors({})
   }
 
+  function cancelAdd(key: DayKey) {
+    setAdding(p => ({ ...p, [key]: false }))
+    setErrors({})
+  }
+
+  // Eliminar rango
   function removeRange(key: DayKey, id: string) {
     update(prev => ({
       ...prev,
       [key]: { ...prev[key], ranges: prev[key].ranges.filter(r => r.id !== id) },
     }))
+    setEditing(p => { const n = { ...p }; delete n[id]; return n })
   }
 
-  function updateRange(key: DayKey, id: string, field: 'start' | 'end', value: string) {
-    setErrors(prev => ({ ...prev, [`${key}-${id}`]: '' }))
+  // Editar rango existente
+  function startEdit(key: DayKey, range: TimeRange) {
+    setEditing(p => ({ ...p, [range.id]: key }))
+    setDraft(p => ({ ...p, [`edit-${range.id}`]: { start: range.start, end: range.end } }))
+    setAdding(p => ({ ...p, [key]: false }))
+    setErrors({})
+  }
+
+  function confirmEdit(key: DayKey, id: string) {
+    const d = (draft as any)[`edit-${id}`] ?? { start: '', end: '' }
+    if (!d.start || !d.end) { setErrors({ [`edit-${id}`]: 'Completa ambas horas' }); return }
+    if (timeToMin(d.start) >= timeToMin(d.end) && d.end !== '00:00') {
+      setErrors({ [`edit-${id}`]: 'La hora de fin debe ser después del inicio' }); return
+    }
     update(prev => ({
       ...prev,
-      [key]: {
-        ...prev[key],
-        ranges: prev[key].ranges.map(r => r.id === id ? { ...r, [field]: value } : r),
-      },
+      [key]: { ...prev[key], ranges: prev[key].ranges.map(r => r.id === id ? { ...r, start: d.start, end: d.end } : r) },
     }))
-
-    // Validar solapamientos
-    setTimeout(() => validateDay(key), 100)
+    setEditing(p => { const n = { ...p }; delete n[id]; return n })
+    setErrors({})
   }
 
-  function validateDay(key: DayKey) {
-    const ranges = week[key].ranges.filter(r => r.start && r.end)
-    const newErrors: Record<string, string> = {}
-
-    ranges.forEach((r, i) => {
-      if (timeToMinutes(r.start) >= timeToMinutes(r.end) && r.end !== '00:00') {
-        newErrors[`${key}-${r.id}`] = 'La hora de fin debe ser después del inicio'
-        return
-      }
-      ranges.forEach((r2, j) => {
-        if (i >= j) return
-        const aStart = timeToMinutes(r.start), aEnd = timeToMinutes(r.end) || 1440
-        const bStart = timeToMinutes(r2.start), bEnd = timeToMinutes(r2.end) || 1440
-        if (aStart < bEnd && aEnd > bStart) {
-          newErrors[`${key}-${r.id}`]  = 'Los horarios se superponen'
-          newErrors[`${key}-${r2.id}`] = 'Los horarios se superponen'
-        }
-      })
-    })
-    setErrors(prev => ({ ...prev, ...newErrors }))
+  function cancelEdit(id: string) {
+    setEditing(p => { const n = { ...p }; delete n[id]; return n })
+    setErrors({})
   }
 
-  function applyPreset(key: DayKey, preset: typeof PRESETS[0]) {
-    update(prev => ({
-      ...prev,
-      [key]: {
-        enabled: true,
-        ranges: [...prev[key].ranges, { id: makeId(), start: preset.start, end: preset.end }],
-      },
-    }))
-    setQuickOpen(null)
-  }
-
-  // ── Acciones rápidas globales ───────────────────────────
+  // Copiar a todos
   function copyToAll(fromKey: DayKey) {
-    const source = week[fromKey]
-    if (!source.enabled || !source.ranges.length) return
+    const src = week[fromKey]
+    if (!src.enabled || !src.ranges.length) return
     update(prev => {
       const next = { ...prev }
       DAYS.forEach(({ key }) => {
         if (key === fromKey) return
-        next[key] = {
-          enabled: true,
-          ranges:  source.ranges.map(r => ({ ...r, id: makeId() })),
-        }
+        next[key] = { enabled: true, ranges: src.ranges.map(r => ({ ...r, id: makeId() })) }
       })
       return next
     })
@@ -255,192 +230,196 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
 
   // ── Render ─────────────────────────────────────────────
   return (
-    <div className="space-y-5">
-      {/* Header */}
-      <div>
+    <div className="space-y-4">
+
+      {/* Resumen + acciones rápidas */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-          Define en qué horarios aceptas reservas. Los clientes solo podrán elegir dentro de estos rangos.
+          {enabledCount === 0
+            ? 'Activa los días en los que aceptas reservas'
+            : <span>Has configurado horarios en <strong style={{ color: 'var(--text-primary)' }}>{enabledCount} {enabledCount === 1 ? 'día' : 'días'}</strong></span>}
         </p>
+        {enabledCount > 0 && week.mon.enabled && week.mon.ranges.length > 0 && (
+          <div className="flex gap-2">
+            <button onClick={copyWeekdays}
+              className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
+              style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+              <Copy size={11} /> Lun – Vie
+            </button>
+            <button onClick={copyWeekend}
+              className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
+              style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+              <Copy size={11} /> Fin de semana
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Acciones rápidas globales */}
-      {enabledCount > 0 && (
-        <div className="flex flex-wrap gap-2 pb-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-          <span className="text-xs font-semibold self-center" style={{ color: 'var(--text-muted)' }}>
-            Acciones rápidas:
-          </span>
-          {week.mon.enabled && week.mon.ranges.length > 0 && (
-            <>
-              <button onClick={copyWeekdays}
-                className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
-                style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
-                <Copy size={11} /> Copiar lunes a viernes
-              </button>
-              <button onClick={copyWeekend}
-                className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
-                style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
-                <Copy size={11} /> Copiar a fin de semana
-              </button>
-            </>
-          )}
-        </div>
-      )}
-
       {/* Lista de días */}
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         {DAYS.map(({ key, label }) => {
           const day     = week[key]
-          const hasError = day.ranges.some(r => errors[`${key}-${r.id}`])
+          const isAdding = !!adding[key]
+          const draftDay = draft[key] ?? { start: '', end: '' }
 
           return (
             <div key={key}
-              className="rounded-2xl overflow-hidden transition-all"
+              className="rounded-2xl transition-all overflow-hidden"
               style={{
-                background: '#fff',
-                border: `1px solid ${day.enabled ? (hasError ? 'rgba(239,68,68,0.3)' : 'var(--brand-border)') : 'var(--border-subtle)'}`,
-                boxShadow: day.enabled ? '0 1px 6px rgba(53,196,147,0.08)' : 'none',
+                background: day.enabled ? '#fff' : 'rgba(255,255,255,0.02)',
+                border: day.enabled
+                  ? '1.5px solid rgba(53,196,147,0.2)'
+                  : '1px solid rgba(255,255,255,0.06)',
               }}>
 
-              {/* Cabecera del día */}
+              {/* ── Cabecera del día ── */}
               <div className="flex items-center gap-4 px-5 py-4">
-                {/* Toggle ON/OFF */}
-                <button
-                  onClick={() => toggleDay(key)}
-                  className="relative w-12 h-6 rounded-full transition-all shrink-0"
-                  style={{ background: day.enabled ? 'var(--brand)' : 'var(--border-medium)' }}>
+                {/* Toggle */}
+                <button onClick={() => toggleDay(key)}
+                  className="relative w-11 h-6 rounded-full transition-all shrink-0"
+                  style={{ background: day.enabled ? '#35C493' : 'rgba(255,255,255,0.1)' }}>
                   <span className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
-                    style={{ left: day.enabled ? 26 : 2 }} />
+                    style={{ left: day.enabled ? 22 : 2 }} />
                 </button>
 
-                {/* Nombre del día */}
+                {/* Nombre */}
                 <span className="text-sm font-semibold w-24 shrink-0"
-                  style={{ color: day.enabled ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                  style={{ color: day.enabled ? 'white' : 'rgba(255,255,255,0.3)' }}>
                   {label}
                 </span>
 
-                {/* Resumen cuando está activo y colapsado */}
-                {day.enabled && day.ranges.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 flex-1 min-w-0">
-                    {day.ranges.filter(r => r.start && r.end).map(r => (
-                      <span key={r.id}
-                        className="text-xs px-2.5 py-1 rounded-lg font-medium"
-                        style={{ background: 'var(--brand-dim)', color: 'var(--brand)' }}>
-                        {formatDisplay(r.start)} – {formatDisplay(r.end)}
+                {/* Resumen o "No disponible" */}
+                {!day.enabled ? (
+                  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>No disponible</span>
+                ) : day.ranges.length > 0 ? (
+                  <div className="flex gap-2 flex-wrap flex-1">
+                    {day.ranges.filter(r => r.start && r.end && !editing[r.id]).map(r => (
+                      <span key={r.id} className="text-xs font-medium px-2.5 py-1 rounded-lg"
+                        style={{ background: 'rgba(53,196,147,0.1)', color: '#35C493', border: '1px solid rgba(53,196,147,0.2)' }}>
+                        {fmt(r.start)} – {fmt(r.end)}
                       </span>
                     ))}
                   </div>
+                ) : (
+                  <span className="text-xs italic" style={{ color: 'rgba(255,255,255,0.25)' }}>Sin horarios</span>
                 )}
 
-                {!day.enabled && (
-                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>No disponible</span>
-                )}
-
-                {/* Acción: copiar a todos */}
-                {day.enabled && day.ranges.length > 0 && (
+                {/* Copiar a todos */}
+                {day.enabled && day.ranges.length > 0 && !isAdding && (
                   <button onClick={() => copyToAll(key)}
-                    className="ml-auto text-xs flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition-all shrink-0"
-                    style={{ color: 'var(--text-muted)', background: 'var(--bg-elevated)' }}
+                    className="ml-auto text-xs px-2.5 py-1.5 rounded-lg transition-all shrink-0"
+                    style={{ color: 'rgba(255,255,255,0.3)', background: 'transparent' }}
                     title="Aplicar a todos los días">
-                    <Copy size={11} /> A todos
+                    <Copy size={12} />
                   </button>
                 )}
               </div>
 
-              {/* Rangos de horario */}
+              {/* ── Contenido del día (solo si activo) ── */}
               {day.enabled && (
-                <div className="px-5 pb-4 space-y-2.5" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-                  <div className="pt-3 space-y-2">
-                    {day.ranges.map((range, ri) => {
-                      const errKey = `${key}-${range.id}`
-                      const hasErr = !!errors[errKey]
-                      return (
-                        <div key={range.id}>
-                          <div className="flex items-center gap-2">
-                            {/* Hora inicio */}
-                            <div className="flex items-center gap-1.5 flex-1">
-                              <input
-                                type="time"
-                                value={range.start}
-                                onChange={e => updateRange(key, range.id, 'start', e.target.value)}
-                                className="flex-1 px-3 py-2 rounded-xl text-sm font-medium focus:outline-none transition-all"
-                                style={{
-                                  background: 'var(--bg-base)',
-                                  border: `1.5px solid ${hasErr ? 'rgba(239,68,68,0.5)' : 'var(--border-medium)'}`,
-                                  color: 'var(--text-primary)',
-                                }}
-                              />
-                              <span className="text-sm font-medium shrink-0" style={{ color: 'var(--text-muted)' }}>—</span>
-                              <input
-                                type="time"
-                                value={range.end}
-                                onChange={e => updateRange(key, range.id, 'end', e.target.value)}
-                                className="flex-1 px-3 py-2 rounded-xl text-sm font-medium focus:outline-none transition-all"
-                                style={{
-                                  background: 'var(--bg-base)',
-                                  border: `1.5px solid ${hasErr ? 'rgba(239,68,68,0.5)' : 'var(--border-medium)'}`,
-                                  color: 'var(--text-primary)',
-                                }}
-                              />
-                            </div>
+                <div className="px-5 pb-4 space-y-2" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
 
-                            {/* Shortcuts de preset */}
-                            <div className="relative shrink-0">
-                              <button
-                                onClick={() => setQuickOpen(quickOpen === key ? null : key)}
-                                className="flex items-center gap-1 text-xs px-2.5 py-2 rounded-xl transition-all"
-                                style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
-                                Rápido <ChevronDown size={12} />
+                  {/* Bloques existentes */}
+                  {day.ranges.map(range => {
+                    const isEditingThis = !!editing[range.id]
+                    const editDraft = (draft as any)[`edit-${range.id}`] ?? { start: range.start, end: range.end }
+                    const editErr   = errors[`edit-${range.id}`]
+                    return (
+                      <div key={range.id} className="pt-3">
+                        {isEditingThis ? (
+                          /* Modo edición */
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <input type="time" value={editDraft.start}
+                                onChange={e => setDraft(p => ({ ...p, [`edit-${range.id}`]: { ...editDraft, start: e.target.value } }))}
+                                className="flex-1 px-3 py-2.5 rounded-xl text-sm font-medium focus:outline-none"
+                                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'white' }} />
+                              <span className="text-slate-500 text-sm shrink-0">–</span>
+                              <input type="time" value={editDraft.end}
+                                onChange={e => setDraft(p => ({ ...p, [`edit-${range.id}`]: { ...editDraft, end: e.target.value } }))}
+                                className="flex-1 px-3 py-2.5 rounded-xl text-sm font-medium focus:outline-none"
+                                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'white' }} />
+                              <button onClick={() => confirmEdit(key, range.id)}
+                                className="w-9 h-9 flex items-center justify-center rounded-xl transition-all shrink-0"
+                                style={{ background: '#35C493', color: '#0B0F0E' }}>
+                                <Check size={15} />
                               </button>
-                              {quickOpen === key && (
-                                <div className="absolute right-0 top-9 z-30 rounded-xl overflow-hidden shadow-xl"
-                                  style={{ background: '#fff', border: '1px solid var(--border-medium)', minWidth: 130 }}>
-                                  {PRESETS.map(p => (
-                                    <button key={p.label}
-                                      onClick={() => {
-                                        updateRange(key, range.id, 'start', p.start)
-                                        updateRange(key, range.id, 'end', p.end)
-                                        setQuickOpen(null)
-                                      }}
-                                      className="w-full text-left px-4 py-2.5 text-xs font-medium transition-colors hover:bg-[var(--bg-elevated)]"
-                                      style={{ color: 'var(--text-primary)' }}>
-                                      <div>{p.label}</div>
-                                      <div style={{ color: 'var(--text-muted)' }}>
-                                        {formatDisplay(p.start)} – {formatDisplay(p.end)}
-                                      </div>
-                                    </button>
-                                  ))}
-                                </div>
-                              )}
+                              <button onClick={() => cancelEdit(range.id)}
+                                className="w-9 h-9 flex items-center justify-center rounded-xl transition-all shrink-0"
+                                style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>
+                                <X size={15} />
+                              </button>
                             </div>
-
-                            {/* Eliminar rango */}
-                            {day.ranges.length > 1 && (
-                              <button onClick={() => removeRange(key, range.id)}
-                                className="w-8 h-8 flex items-center justify-center rounded-xl transition-colors shrink-0"
-                                style={{ color: 'var(--text-muted)', background: 'var(--bg-elevated)' }}>
-                                <X size={14} />
-                              </button>
-                            )}
+                            {editErr && <p className="text-xs" style={{ color: '#f87171' }}>{editErr}</p>}
                           </div>
+                        ) : (
+                          /* Modo lectura — bloque visual */
+                          <div className="flex items-center justify-between group">
+                            <div className="flex items-center gap-3">
+                              <div className="w-2 h-2 rounded-full shrink-0" style={{ background: '#35C493' }} />
+                              <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.85)' }}>
+                                {fmt(range.start)} – {fmt(range.end)}
+                              </span>
+                            </div>
+                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button onClick={() => startEdit(key, range)}
+                                className="w-8 h-8 flex items-center justify-center rounded-lg transition-all"
+                                style={{ color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.05)' }}>
+                                <Pencil size={13} />
+                              </button>
+                              <button onClick={() => removeRange(key, range.id)}
+                                className="w-8 h-8 flex items-center justify-center rounded-lg transition-all"
+                                style={{ color: 'rgba(248,113,113,0.7)', background: 'rgba(248,113,113,0.08)' }}>
+                                <X size={13} />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
 
-                          {/* Error del rango */}
-                          {hasErr && (
-                            <p className="text-xs mt-1 ml-1" style={{ color: '#DC2626' }}>
-                              {errors[errKey]}
-                            </p>
-                          )}
-                        </div>
-                      )
-                    })}
-                  </div>
-
-                  {/* Agregar rango */}
-                  {day.ranges.length < 4 && (
-                    <button onClick={() => addRange(key)}
-                      className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl transition-all"
-                      style={{ color: 'var(--brand)', background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
-                      <Plus size={13} /> Agregar horario
-                    </button>
+                  {/* Formulario: nuevo horario */}
+                  {isAdding ? (
+                    <div className="pt-3 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <input type="time" value={draftDay.start}
+                          onChange={e => setDraft(p => ({ ...p, [key]: { ...draftDay, start: e.target.value } }))}
+                          placeholder="Inicio"
+                          className="flex-1 px-3 py-2.5 rounded-xl text-sm font-medium focus:outline-none"
+                          style={{ background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(53,196,147,0.4)', color: 'white' }} />
+                        <span className="text-slate-500 text-sm shrink-0">–</span>
+                        <input type="time" value={draftDay.end}
+                          onChange={e => setDraft(p => ({ ...p, [key]: { ...draftDay, end: e.target.value } }))}
+                          placeholder="Fin"
+                          className="flex-1 px-3 py-2.5 rounded-xl text-sm font-medium focus:outline-none"
+                          style={{ background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(53,196,147,0.4)', color: 'white' }} />
+                        <button onClick={() => confirmAdd(key)}
+                          className="w-9 h-9 flex items-center justify-center rounded-xl shrink-0"
+                          style={{ background: '#35C493', color: '#0B0F0E' }}>
+                          <Check size={15} />
+                        </button>
+                        <button onClick={() => cancelAdd(key)}
+                          className="w-9 h-9 flex items-center justify-center rounded-xl shrink-0"
+                          style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)' }}>
+                          <X size={15} />
+                        </button>
+                      </div>
+                      {errors[`add-${key}`] && (
+                        <p className="text-xs" style={{ color: '#f87171' }}>{errors[`add-${key}`]}</p>
+                      )}
+                    </div>
+                  ) : (
+                    /* Botón agregar */
+                    day.ranges.length < 4 && !Object.values(editing).includes(key as any) && (
+                      <div className="pt-2">
+                        <button onClick={() => openAdd(key)}
+                          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl transition-all"
+                          style={{ color: '#35C493', background: 'rgba(53,196,147,0.07)', border: '1px dashed rgba(53,196,147,0.25)' }}>
+                          <Plus size={13} /> Agregar horario
+                        </button>
+                      </div>
+                    )
                   )}
                 </div>
               )}
@@ -451,21 +430,11 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
 
       {/* Estado vacío */}
       {enabledCount === 0 && (
-        <div className="text-center py-6 rounded-2xl"
-          style={{ background: 'var(--bg-elevated)', border: '1px dashed var(--border-medium)' }}>
-          <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
-            Aún no has definido horarios disponibles
+        <div className="text-center py-8 rounded-2xl"
+          style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)' }}>
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            Activa los días para configurar tus horarios
           </p>
-          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-            Activa los días en los que aceptas reservas
-          </p>
-        </div>
-      )}
-
-      {/* Resumen */}
-      {enabledCount > 0 && (
-        <div className="text-xs px-1" style={{ color: 'var(--text-muted)' }}>
-          {enabledCount} día{enabledCount !== 1 ? 's' : ''} con disponibilidad configurada
         </div>
       )}
     </div>
