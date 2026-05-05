@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronDown, CalendarDays, MapPin, X, ChevronLeft, ChevronRight, Search } from 'lucide-react'
+import { CalendarDays, MapPin, X, ChevronLeft, ChevronRight, Search } from 'lucide-react'
 
 // ── Actividades ────────────────────────────────────────────
 const ACTIVITIES = [
@@ -55,14 +55,15 @@ export default function HomepageSearch() {
   const router = useRouter()
 
   const [activity, setActivity] = useState('')
+  const [actQ,     setActQ]     = useState('')
   const [city,     setCity]     = useState('')
   const [cityQ,    setCityQ]    = useState('')
   const [dateFrom, setDateFrom] = useState('')
 
-  const [panel, setPanel]     = useState<Panel>(null)
+  const [panel, setPanel]       = useState<Panel>(null)
   const [panelPos, setPanelPos] = useState({ top: 0, left: 0 })
 
-  const actRef  = useRef<HTMLButtonElement>(null)
+  const actRef  = useRef<HTMLDivElement>(null)
   const cityRef = useRef<HTMLDivElement>(null)
   const dateRef = useRef<HTMLButtonElement>(null)
 
@@ -75,6 +76,11 @@ export default function HomepageSearch() {
   const daysInMonth = new Date(view.year, view.month + 1, 0).getDate()
   const prevMonth   = useCallback(() => setView(v => v.month === 0 ? { year: v.year-1, month: 11 } : { ...v, month: v.month-1 }), [])
   const nextMonth   = useCallback(() => setView(v => v.month === 11 ? { year: v.year+1, month: 0 } : { ...v, month: v.month+1 }), [])
+
+  // Actividades filtradas por lo que escribió el usuario
+  const filteredActivities = ACTIVITIES.filter(a =>
+    !actQ || a.label.toLowerCase().includes(actQ.toLowerCase())
+  )
 
   // Sectores filtrados por lo que escribió el usuario
   const filteredSectors = SECTORS.filter(s =>
@@ -117,8 +123,9 @@ export default function HomepageSearch() {
     }
   }, [panel])
 
-  function pickActivity(key: string) {
-    setActivity(prev => prev === key ? '' : key)
+  function pickActivity(key: string, label: string) {
+    setActivity(key)
+    setActQ(label)
     setPanel(null)
   }
 
@@ -142,8 +149,6 @@ export default function HomepageSearch() {
     if (dateFrom) p.set('dateFrom', dateFrom)
     router.push(`/buscar${p.toString() ? '?' + p.toString() : ''}`)
   }
-
-  const selActivity = ACTIVITIES.find(a => a.key === activity)
 
   const dropBase: React.CSSProperties = {
     position: 'fixed',
@@ -185,11 +190,9 @@ export default function HomepageSearch() {
         >
 
           {/* 1. Actividad */}
-          <button
+          <div
             ref={actRef}
-            type="button"
-            onClick={() => openPanel('activity', actRef.current, 260)}
-            className="ep-seg flex items-center gap-3 px-5 text-left focus:outline-none"
+            className="ep-seg flex items-center gap-3 px-5"
             style={{
               width: 210,
               minHeight: 64,
@@ -201,34 +204,30 @@ export default function HomepageSearch() {
               <div className="text-xs font-semibold uppercase tracking-wide mb-0.5" style={{ color: '#9CA3AF' }}>
                 Actividad
               </div>
-              <div
-                className="text-sm truncate"
-                style={{ color: selActivity ? '#111827' : '#9CA3AF', fontWeight: selActivity ? 500 : 400 }}
-              >
-                {selActivity?.label ?? 'Cualquier evento'}
-              </div>
+              <input
+                value={actQ}
+                onChange={e => {
+                  setActQ(e.target.value)
+                  setActivity('')
+                  openPanel('activity', actRef.current, 260)
+                }}
+                onFocus={() => openPanel('activity', actRef.current, 260)}
+                placeholder="Cualquier evento"
+                className="w-full bg-transparent text-sm focus:outline-none"
+                style={{ color: '#111827', fontWeight: activity ? 500 : 400 }}
+              />
             </div>
-            {selActivity ? (
+            {(activity || actQ) && (
               <span
                 role="button"
-                onClick={e => { e.stopPropagation(); setActivity('') }}
+                onClick={() => { setActivity(''); setActQ('') }}
                 className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 cursor-pointer"
                 style={{ background: '#F3F4F6' }}
               >
                 <X size={10} strokeWidth={2.5} style={{ color: '#6B7280' }} />
               </span>
-            ) : (
-              <ChevronDown
-                size={14}
-                style={{
-                  color: '#9CA3AF',
-                  flexShrink: 0,
-                  transition: 'transform 0.2s',
-                  transform: panel === 'activity' ? 'rotate(180deg)' : 'rotate(0)',
-                }}
-              />
             )}
-          </button>
+          </div>
 
           <div className="ep-div w-px my-4" style={{ background: '#E5E7EB' }} />
 
@@ -343,14 +342,14 @@ export default function HomepageSearch() {
           ══════════════════════════════════════════════════════ */}
 
       {/* Actividad */}
-      {panel === 'activity' && (
+      {panel === 'activity' && filteredActivities.length > 0 && (
         <div data-ep-panel className="ep-drop" style={{ ...dropBase, width: 260 }}>
-          <div className="py-1.5">
-            {ACTIVITIES.map(act => (
+          <div className="py-1.5" style={{ maxHeight: 280, overflowY: 'auto' }}>
+            {filteredActivities.map(act => (
               <button
                 key={act.key}
                 type="button"
-                onClick={() => pickActivity(act.key)}
+                onClick={() => pickActivity(act.key, act.label)}
                 className="w-full text-left px-4 py-2.5 text-sm flex items-center justify-between"
                 style={{ color: activity === act.key ? '#35C493' : '#374151', fontWeight: activity === act.key ? 600 : 400, background: 'transparent' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#F9FAFB' }}
