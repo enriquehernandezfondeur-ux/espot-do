@@ -63,8 +63,11 @@ interface Props {
 export default function BookingWidget({ space, onChat }: Props) {
   const pricing    = space.space_pricing?.find((p: any) => p.is_active) ?? space.space_pricing?.[0]
   const addons     = space.space_addons ?? []
-  const isHourly   = pricing?.pricing_type === 'hourly'
-  const isQuote    = pricing?.pricing_type === 'custom_quote'
+  const isHourly      = pricing?.pricing_type === 'hourly'
+  const isConsumption = pricing?.pricing_type === 'minimum_consumption'
+  const isQuote       = pricing?.pricing_type === 'custom_quote'
+  // Ambos modelos requieren selección de hora (por hora: para calcular; consumo: para disponibilidad)
+  const needsTime     = isHourly || isConsumption
 
   // Steps — skip step 4 if no addons
   const steps = addons.length > 0 ? STEPS : STEPS.filter(s => s.id !== 4)
@@ -130,7 +133,10 @@ export default function BookingWidget({ space, onChat }: Props) {
   const minHoursOk = !isHourly || !pricing?.min_hours || selectedHours >= pricing.min_hours
 
   function canGoNext(): boolean {
-    if (step === 1) return !!eventDate && (!isHourly || (!!startTime && !!endTime && minHoursOk))
+    if (step === 1) {
+      const timeOk = !needsTime || (!!startTime && !!endTime)
+      return !!eventDate && timeOk && minHoursOk
+    }
     if (step === 2) return guestCount >= 1
     if (step === 3) return !!eventType
     return true
@@ -194,7 +200,7 @@ export default function BookingWidget({ space, onChat }: Props) {
           <span className="flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
             <CalendarDays size={11} />
             {new Date(eventDate + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
-            {isHourly && startTime && ` · ${formatTime(startTime)}`}
+            {needsTime && startTime && ` · ${formatTime(startTime)}`}
           </span>
         )}
         {step > 2 && guestCount > 0 && (
@@ -352,14 +358,28 @@ export default function BookingWidget({ space, onChat }: Props) {
               />
             </div>
 
-            {/* Time pickers con restricciones del espacio */}
-            {isHourly && (
+            {/* Aviso de consumo mínimo */}
+            {isConsumption && (
+              <div className="px-4 py-3 rounded-xl text-sm"
+                style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.15)' }}>
+                <div className="font-semibold mb-0.5" style={{ color: '#1D4ED8' }}>
+                  Consumo mínimo requerido
+                </div>
+                <div style={{ color: '#3B82F6' }}>
+                  Para reservar este espacio, el grupo debe consumir al menos{' '}
+                  <strong>{formatCurrency(pricing.minimum_consumption)}</strong> en comida y bebidas durante el evento.
+                </div>
+              </div>
+            )}
+
+            {/* Time pickers — aparecen para por hora (cálculo) y consumo mínimo (disponibilidad) */}
+            {needsTime && (
               <div className="space-y-3">
-                {/* Info de restricciones */}
-                {(pricing.min_hours || pricing.max_hours) && (
+                {/* Restricción de horas (solo modelo por hora) */}
+                {isHourly && (pricing.min_hours || pricing.max_hours) && (
                   <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
                     style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                    <span style={{ color: 'var(--brand)' }}>⏱</span>
+                    <Clock size={13} style={{ color: 'var(--brand)', flexShrink: 0 }} />
                     <span style={{ color: 'var(--text-secondary)' }}>
                       {pricing.min_hours && pricing.max_hours
                         ? `Entre ${pricing.min_hours} y ${pricing.max_hours} horas`
@@ -369,13 +389,23 @@ export default function BookingWidget({ space, onChat }: Props) {
                     </span>
                   </div>
                 )}
+                {/* Aviso de disponibilidad para consumo mínimo */}
+                {isConsumption && (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
+                    style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                    <Clock size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                    <span style={{ color: 'var(--text-secondary)' }}>
+                      Indica el horario para verificar disponibilidad
+                    </span>
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <div className="text-xs font-semibold uppercase tracking-widest mb-2"
                       style={{ color: 'var(--text-muted)' }}>Desde</div>
                     <TimePicker
                       value={startTime}
-                      onChange={v => { setStartTime(v); setEndTime('') }} // reset end al cambiar inicio
+                      onChange={v => { setStartTime(v); setEndTime('') }}
                       placeholder="Hora de inicio"
                     />
                   </div>
@@ -387,15 +417,15 @@ export default function BookingWidget({ space, onChat }: Props) {
                       onChange={setEndTime}
                       placeholder={startTime ? 'Hora de fin' : 'Primero elige inicio'}
                       afterValue={startTime || undefined}
-                      minMinutesAfter={pricing.min_hours ? pricing.min_hours * 60 : undefined}
-                      maxMinutesAfter={pricing.max_hours ? pricing.max_hours * 60 : undefined}
+                      minMinutesAfter={isHourly && pricing.min_hours ? pricing.min_hours * 60 : undefined}
+                      maxMinutesAfter={isHourly && pricing.max_hours ? pricing.max_hours * 60 : undefined}
                     />
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Preview del precio — válido */}
+            {/* Preview — modelo por hora: muestra total calculado */}
             {isHourly && startTime && endTime && selectedHours > 0 && minHoursOk && (
               <div className="flex items-center justify-between px-4 py-3 rounded-2xl"
                 style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
@@ -411,11 +441,23 @@ export default function BookingWidget({ space, onChat }: Props) {
               </div>
             )}
 
-            {/* Advertencia si no cumple el mínimo */}
+            {/* Preview — modelo consumo mínimo: muestra el mínimo, no multiplica */}
+            {isConsumption && startTime && endTime && (
+              <div className="flex items-center justify-between px-4 py-3 rounded-2xl"
+                style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.15)' }}>
+                <span className="text-sm" style={{ color: '#3B82F6' }}>
+                  {formatTime(startTime)} – {formatTime(endTime)}
+                </span>
+                <span className="font-bold text-sm" style={{ color: '#1D4ED8' }}>
+                  Desde {formatCurrency(pricing.minimum_consumption)}
+                </span>
+              </div>
+            )}
+
+            {/* Advertencia si no cumple el mínimo de horas */}
             {isHourly && startTime && endTime && selectedHours > 0 && !minHoursOk && (
               <div className="flex items-center gap-2 px-4 py-3 rounded-2xl text-sm"
                 style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.2)', color: '#DC2626' }}>
-                <span>⚠️</span>
                 <span>
                   Este espacio requiere mínimo <strong>{pricing.min_hours} hora{pricing.min_hours !== 1 ? 's' : ''}</strong>.
                   {' '}Seleccionaste {selectedHours.toFixed(1)}h.
@@ -566,7 +608,7 @@ export default function BookingWidget({ space, onChat }: Props) {
               style={{ border: '1px solid var(--border-subtle)' }}>
               {[
                 { icon: CalendarDays, label: 'Fecha', value: new Date(eventDate + 'T12:00').toLocaleDateString('es-DO', { weekday: 'long', day: 'numeric', month: 'long' }) },
-                ...(isHourly && startTime ? [{ icon: Clock, label: 'Horario', value: `${formatTime(startTime)} – ${formatTime(endTime)}` }] : []),
+                ...(needsTime && startTime ? [{ icon: Clock, label: 'Horario', value: `${formatTime(startTime)} – ${formatTime(endTime)}` }] : []),
                 { icon: Users, label: 'Personas', value: `${guestCount} personas` },
                 { icon: Sparkles, label: 'Evento', value: eventType },
               ].map(({ icon: Icon, label, value }, i, arr) => (
