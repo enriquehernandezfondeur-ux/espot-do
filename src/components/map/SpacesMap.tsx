@@ -1,5 +1,10 @@
 'use client'
 
+// CSS imports must be static — component is loaded with ssr:false so this only runs on client
+import 'leaflet/dist/leaflet.css'
+import 'leaflet.markercluster/dist/MarkerCluster.css'
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
+
 import { useEffect, useRef } from 'react'
 import { formatCurrency } from '@/lib/utils'
 
@@ -124,9 +129,6 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
     Promise.all([
       import('leaflet'),
       import('leaflet.markercluster'),
-      import('leaflet/dist/leaflet.css' as any),
-      import('leaflet.markercluster/dist/MarkerCluster.css' as any),
-      import('leaflet.markercluster/dist/MarkerCluster.Default.css' as any),
     ]).then(([LModule]) => {
       const L = LModule.default
 
