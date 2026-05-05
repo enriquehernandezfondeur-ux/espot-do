@@ -36,6 +36,95 @@ export async function regenerateIcalToken(): Promise<string | null> {
   return token
 }
 
+// ── Espacios del host (solo los propios) ─────────────────
+export async function getHostSpaces() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+  const { data } = await supabase
+    .from('spaces')
+    .select('id, name')
+    .eq('host_id', user.id)
+    .eq('is_active', true)
+    .order('created_at')
+  return data ?? []
+}
+
+// ── Bloquear fecha/horario ────────────────────────────────
+export async function createAvailabilityBlock(payload: {
+  spaceId:     string
+  blockedDate: string
+  startTime?:  string
+  endTime?:    string
+  blockType?:  string
+  reason?:     string
+}) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+
+  // Verificar que el espacio pertenece al propietario
+  const { data: space } = await supabase
+    .from('spaces')
+    .select('id')
+    .eq('id', payload.spaceId)
+    .eq('host_id', user.id)
+    .single()
+  if (!space) return { error: 'No autorizado' }
+
+  const { data, error } = await supabase
+    .from('space_availability')
+    .insert({
+      space_id:     payload.spaceId,
+      blocked_date: payload.blockedDate,
+      start_time:   payload.startTime   ?? null,
+      end_time:     payload.endTime     ?? null,
+      block_type:   payload.blockType   ?? 'time_range',
+      reason:       payload.reason      ?? null,
+    })
+    .select()
+    .single()
+
+  if (error) return { error: error.message }
+  return { success: true, data }
+}
+
+// ── Eliminar bloqueo ──────────────────────────────────────
+export async function deleteAvailabilityBlock(blockId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+
+  // Verificar ownership a través del espacio
+  const { data: block } = await supabase
+    .from('space_availability')
+    .select('space_id, spaces!space_id(host_id)')
+    .eq('id', blockId)
+    .single()
+
+  if (!block || (block.spaces as any)?.host_id !== user.id) return { error: 'No autorizado' }
+
+  const { error } = await supabase.from('space_availability').delete().eq('id', blockId)
+  return error ? { error: error.message } : { success: true }
+}
+
+// ── Obtener bloqueos de un espacio ───────────────────────
+export async function getSpaceAvailability(spaceId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { data: space } = await supabase
+    .from('spaces').select('id').eq('id', spaceId).eq('host_id', user.id).single()
+  if (!space) return []
+
+  const { data } = await supabase
+    .from('space_availability')
+    .select('*')
+    .eq('space_id', spaceId)
+  return data ?? []
+}
+
 // ── Google Calendar — estado de conexión ─────────────────
 export async function getGoogleCalendarStatus(): Promise<{ connected: boolean }> {
   const supabase = await createClient()

@@ -3,8 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { ChevronLeft, ChevronRight, Lock, Loader2, Plus, X, Clock, Users, CheckCircle } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
-import { getHostCalendarBookings } from '@/lib/actions/host'
-import { createClient } from '@/lib/supabase/client'
+import { getHostCalendarBookings, getHostSpaces, getSpaceAvailability, createAvailabilityBlock, deleteAvailabilityBlock } from '@/lib/actions/host'
 
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 const DAYS   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
@@ -67,33 +66,26 @@ export default function CalendarioPage() {
   const [spaceList, setSpaceList] = useState<{ id: string; name: string }[]>([])
   const [spaceName, setSpaceName] = useState<string>('')
 
-  const supabase = createClient()
-
   useEffect(() => {
     async function load() {
       const [bk, spaces] = await Promise.all([
         getHostCalendarBookings(),
-        supabase.from('spaces').select('id, name').eq('is_active', true).order('created_at'),
+        getHostSpaces(),
       ])
       setBookings(bk)
-      setSpaceList(spaces.data ?? [])
+      setSpaceList(spaces)
 
-      if (spaces.data?.length) {
-        const sid = spaces.data[0].id
+      if (spaces.length) {
+        const sid = spaces[0].id
         setSpaceId(sid)
-        setSpaceName(spaces.data[0].name)
-        const { data: avail } = await supabase
-          .from('space_availability')
-          .select('*')
-          .eq('space_id', sid)
-        if (avail) {
-          const grouped: Record<string, BlockedSlot[]> = {}
-          avail.forEach((a: any) => {
-            if (!grouped[a.blocked_date]) grouped[a.blocked_date] = []
-            grouped[a.blocked_date].push(a)
-          })
-          setBlockedSlots(grouped)
-        }
+        setSpaceName(spaces[0].name)
+        const avail = await getSpaceAvailability(sid)
+        const grouped: Record<string, BlockedSlot[]> = {}
+        avail.forEach((a: any) => {
+          if (!grouped[a.blocked_date]) grouped[a.blocked_date] = []
+          grouped[a.blocked_date].push(a)
+        })
+        setBlockedSlots(grouped)
       }
       setLoading(false)
     }
@@ -130,42 +122,30 @@ export default function CalendarioPage() {
   ).length
 
   async function handleBlockTime() {
-    if (!selected) return
+    if (!selected || !spaceId) return
     if (!blockStart || !blockEnd) { setBlockError('Selecciona hora de inicio y fin'); return }
     setBlockSaving(true)
     setBlockError('')
 
-    const sid = spaceId ?? (await supabase.from('spaces').select('id').limit(1)).data?.[0]?.id
-    if (!sid) { setBlockError('No se encontró tu espacio'); setBlockSaving(false); return }
+    const result = await createAvailabilityBlock({
+      spaceId:     spaceId,
+      blockedDate: selected,
+      startTime:   blockStart,
+      endTime:     blockEnd,
+      blockType:   'time_range',
+      reason:      blockReason || undefined,
+    })
 
-    const { data, error } = await supabase
-      .from('space_availability')
-      .insert({
-        space_id: sid,
-        blocked_date: selected,
-        start_time: blockStart,
-        end_time: blockEnd,
-        block_type: 'time_range',
-        reason: blockReason || null,
-      })
-      .select()
-      .single()
-
-    if (error) {
-      // Si falla por columnas faltantes, sugerir correr la migración
-      if (error.message.includes('column') || error.message.includes('schema')) {
-        setBlockError('Debes correr la migración SQL 006 en Supabase primero.')
-      } else {
-        setBlockError(error.message)
-      }
+    if ('error' in result) {
+      setBlockError(result.error ?? 'Error al bloquear')
       setBlockSaving(false)
       return
     }
 
-    if (data) {
+    if (result.data) {
       setBlockedSlots(prev => ({
         ...prev,
-        [selected]: [...(prev[selected] ?? []), data as BlockedSlot],
+        [selected]: [...(prev[selected] ?? []), result.data as BlockedSlot],
       }))
       setBlocking(false)
       setBlockReason('')
@@ -176,7 +156,7 @@ export default function CalendarioPage() {
   }
 
   async function handleRemoveBlock(dateStr: string, blockId: string) {
-    await supabase.from('space_availability').delete().eq('id', blockId)
+    await deleteAvailabilityBlock(blockId)
     setBlockedSlots(prev => ({
       ...prev,
       [dateStr]: (prev[dateStr] ?? []).filter(b => b.id !== blockId),
@@ -237,16 +217,13 @@ export default function CalendarioPage() {
               setSpaceName(name)
               setSelected(null)
               // Recargar disponibilidad del espacio seleccionado
-              const { data: avail } = await supabase
-                .from('space_availability').select('*').eq('space_id', sid)
-              if (avail) {
-                const grouped: Record<string, any[]> = {}
-                avail.forEach((a: any) => {
-                  if (!grouped[a.blocked_date]) grouped[a.blocked_date] = []
-                  grouped[a.blocked_date].push(a)
-                })
-                setBlockedSlots(grouped)
-              }
+              const avail = await getSpaceAvailability(sid)
+              const grouped: Record<string, any[]> = {}
+              avail.forEach((a: any) => {
+                if (!grouped[a.blocked_date]) grouped[a.blocked_date] = []
+                grouped[a.blocked_date].push(a)
+              })
+              setBlockedSlots(grouped)
             }}
             className="text-sm font-semibold bg-transparent focus:outline-none flex-1"
             style={{ color: 'var(--text-primary)' }}>
