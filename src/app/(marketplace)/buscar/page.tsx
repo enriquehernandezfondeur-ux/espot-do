@@ -1,5 +1,15 @@
+import { type Metadata } from 'next'
 import { getPublishedSpaces } from '@/lib/actions/marketplace'
 import BuscarClient from './BuscarClient'
+
+export const metadata: Metadata = {
+  title: 'Explorar espacios para eventos en República Dominicana',
+  description: 'Encuentra salones, rooftops, restaurantes, villas y más para tu próximo evento en Santo Domingo y toda la RD. Filtra por sector, capacidad, fecha y tipo de evento.',
+  openGraph: {
+    title: 'Explorar espacios — espot.do',
+    description: 'Salones, rooftops, villas y más para eventos en RD. Confirma en 24 horas.',
+  },
+}
 
 export default async function BuscarPage({
   searchParams,

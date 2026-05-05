@@ -241,23 +241,23 @@ export default function MisReservasPage() {
                       <div className="rounded-2xl p-4 space-y-2" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                         <div className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>Resumen de pago</div>
                         <div className="flex justify-between text-xs" style={{ color: 'var(--text-secondary)' }}>
-                          <span>Espacio + extras</span>
-                          <span>{formatCurrency(Number(bk.total_amount) - Number(bk.platform_fee))}</span>
+                          <span>Precio del evento</span>
+                          <span>{formatCurrency(Number(bk.total_amount))}</span>
                         </div>
                         <div className="flex justify-between text-xs" style={{ color: 'var(--text-secondary)' }}>
-                          <span>Plataforma (10%)</span>
+                          <span>Pago inicial (10%) · ahora</span>
                           <span>{formatCurrency(Number(bk.platform_fee))}</span>
                         </div>
                         <div className="flex justify-between font-bold text-sm pt-2"
                           style={{ borderTop: '1px solid var(--border-medium)', color: 'var(--text-primary)' }}>
-                          <span>Total</span>
-                          <span>{formatCurrency(Number(bk.total_amount))}</span>
+                          <span>Balance en el espacio</span>
+                          <span>{formatCurrency(Number(bk.total_amount) - Number(bk.platform_fee))}</span>
                         </div>
                         <div className="flex items-center gap-1 text-xs font-semibold mt-1"
                           style={{ color: bk.payment_status === 'partial' || bk.payment_status === 'paid' ? '#16A34A' : '#D97706' }}>
                           {bk.payment_status === 'partial' || bk.payment_status === 'paid'
-                            ? <><CheckCircle size={11} /> 10% pagado — Reserva confirmada</>
-                            : '⏳ Pendiente de pago'}
+                            ? <><CheckCircle size={11} /> Pago inicial confirmado</>
+                            : '⏳ Pago inicial pendiente'}
                         </div>
                       </div>
                     </div>
@@ -266,20 +266,50 @@ export default function MisReservasPage() {
                     {bk.status === 'pending' && (
                       <div className="mt-4 px-4 py-3 rounded-xl text-sm"
                         style={{ background: 'rgba(217,119,6,0.05)', border: '1px solid rgba(217,119,6,0.15)', color: '#92400E' }}>
-                        ⏳ El propietario tiene 24 horas para aceptar o rechazar tu solicitud.
+                        El propietario tiene 24 horas para aceptar o rechazar tu solicitud.
                       </div>
                     )}
                     {bk.status === 'confirmed' && (
                       <div className="mt-4 px-4 py-3 rounded-xl text-sm"
                         style={{ background: 'rgba(22,163,74,0.05)', border: '1px solid rgba(22,163,74,0.15)', color: '#166534' }}>
-                        ✅ Reserva confirmada. El balance de {formatCurrency(Number(bk.total_amount) - Number(bk.platform_fee))} lo pagas directamente en el espacio el día del evento.
+                        Reserva confirmada. El balance de {formatCurrency(Number(bk.total_amount) - Number(bk.platform_fee))} lo pagas directamente en el espacio el día del evento.
                       </div>
                     )}
-                    {(bk.status === 'rejected' || bk.status.startsWith('cancelled')) && bk.status !== 'cancelled_guest' && (
-                      <div className="mt-4">
+                    {bk.status === 'rejected' && (
+                      <div className="mt-4 space-y-3">
+                        <div className="px-4 py-3 rounded-xl text-sm"
+                          style={{ background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)', color: '#991B1B' }}>
+                          El propietario no pudo aceptar tu solicitud para esta fecha.
+                          {bk.rejection_reason && (
+                            <p className="mt-1 font-medium">Motivo: {bk.rejection_reason}</p>
+                          )}
+                        </div>
                         <Link href="/buscar" className="btn-brand text-sm font-semibold px-5 py-2.5 rounded-xl inline-block">
                           Buscar otro espacio
                         </Link>
+                      </div>
+                    )}
+                    {bk.status === 'cancelled_host' && (
+                      <div className="mt-4 space-y-3">
+                        <div className="px-4 py-3 rounded-xl text-sm"
+                          style={{ background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)', color: '#991B1B' }}>
+                          El propietario canceló esta reserva.
+                          {bk.cancellation_reason && (
+                            <p className="mt-1 font-medium">Motivo: {bk.cancellation_reason}</p>
+                          )}
+                        </div>
+                        <Link href="/buscar" className="btn-brand text-sm font-semibold px-5 py-2.5 rounded-xl inline-block">
+                          Buscar otro espacio
+                        </Link>
+                      </div>
+                    )}
+                    {bk.status === 'cancelled_guest' && (
+                      <div className="mt-4 px-4 py-3 rounded-xl text-sm"
+                        style={{ background: 'rgba(107,114,128,0.05)', border: '1px solid rgba(107,114,128,0.15)', color: '#6B7280' }}>
+                        Cancelaste esta reserva.
+                        {bk.cancellation_reason && (
+                          <p className="mt-1">Motivo: {bk.cancellation_reason}</p>
+                        )}
                       </div>
                     )}
                   </div>

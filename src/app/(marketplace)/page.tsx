@@ -1,3 +1,4 @@
+import { type Metadata } from 'next'
 import Link from 'next/link'
 import {
   ArrowRight, Shield, Users, Search,
@@ -8,6 +9,16 @@ import {
 import { getPublishedSpaces } from '@/lib/actions/marketplace'
 import { formatCurrency } from '@/lib/utils'
 import HomepageSearch from '@/components/marketplace/HomepageSearch'
+
+export const metadata: Metadata = {
+  title: 'Reserva el espacio perfecto para tu evento en República Dominicana',
+  description: 'Encuentra y reserva salones, rooftops, restaurantes, villas y más para cumpleaños, bodas, eventos corporativos y celebraciones en RD. Confirmación en 24h, paga solo el 10% para asegurar tu fecha.',
+  openGraph: {
+    title: 'espot.do — Espacios para eventos en República Dominicana',
+    description: 'Salones, rooftops, restaurantes y más. Confirma en 24h, paga solo el 10% para asegurar tu fecha.',
+    type: 'website',
+  },
+}
 
 // Categorías con iconos SVG y fotos reales de Unsplash
 const categories = [
