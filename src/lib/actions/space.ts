@@ -209,6 +209,12 @@ export async function saveSpace(payload: SaveSpacePayload) {
 
 export async function publishSpace(spaceId: string) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+
+  const { data: space } = await supabase.from('spaces').select('host_id').eq('id', spaceId).single()
+  if (!space || space.host_id !== user.id) return { error: 'No autorizado' }
+
   const { error } = await supabase
     .from('spaces')
     .update({ is_published: true })
@@ -298,6 +304,8 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
     address: payload.address,
     city: 'Santo Domingo',
     sector: payload.sector,
+    primary_activity:     payload.primaryActivity || null,
+    secondary_activities: payload.secondaryActivities ?? [],
   }).eq('id', spaceId)
 
   if (spaceError) return { error: spaceError.message }
@@ -332,18 +340,29 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
   // Actualizar condiciones
   const condData = {
     space_id: spaceId,
-    music_cutoff_time: payload.musicCutoff || null,
     allows_external_decoration: payload.allowsDecoration,
-    allows_external_food: payload.allowsFood,
-    allows_external_alcohol: payload.allowsAlcohol,
-    allows_smoking: false,
-    allows_pets: false,
-    cancellation_policy: payload.cancellationPolicy,
-    cancellation_hours_before: DEFAULT_CANCELLATION_HOURS,
-    cancellation_refund_pct: DEFAULT_CANCELLATION_REFUND_PCT,
-    custom_rules: payload.customRules || null,
-    deposit_required: payload.depositRequired,
-    deposit_amount: payload.depositAmount ? parseFloat(payload.depositAmount) : null,
+    allows_external_food:       payload.allowsFood,
+    allows_external_alcohol:    payload.allowsAlcohol,
+    allows_smoking:             payload.allowsSmoking,
+    allows_pets:                payload.allowsPets,
+    allows_live_music:          payload.allowsLiveMusic,
+    allows_dj:                  payload.allowsDJ,
+    allows_children:            payload.allowsChildren,
+    allows_parties:             payload.allowsParties,
+    allows_corporate:           payload.allowsCorporate,
+    music_cutoff_time:          payload.musicCutoff || null,
+    noise_level:                payload.noiseLevel || 'moderado',
+    deposit_required:           payload.depositRequired,
+    deposit_amount:             num(payload.depositAmount),
+    deposit_refundable:         payload.depositRefundable ?? true,
+    cleaning_included:          payload.includesCleaning,
+    cleaning_fee:               num(payload.cleaningFee),
+    overtime_allowed:           payload.allowsExtraHours,
+    overtime_price:             num(payload.extraHourPrice),
+    cancellation_policy:        payload.cancellationPolicy,
+    cancellation_hours_before:  DEFAULT_CANCELLATION_HOURS,
+    cancellation_refund_pct:    DEFAULT_CANCELLATION_REFUND_PCT,
+    custom_rules:               payload.customRules || null,
   }
 
   const existingCond = await supabase.from('space_conditions').select('id').eq('space_id', spaceId).limit(1)

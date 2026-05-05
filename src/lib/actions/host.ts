@@ -153,6 +153,13 @@ export async function respondToQuote(bookingId: string, quotedPrice: number, mes
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
+  const { data: bk } = await supabase
+    .from('bookings')
+    .select('space_id, spaces!space_id(host_id)')
+    .eq('id', bookingId)
+    .single()
+  if (!bk || (bk.spaces as any)?.host_id !== user.id) return { error: 'No autorizado' }
+
   const { error } = await supabase
     .from('bookings')
     .update({
@@ -173,6 +180,13 @@ export async function completeBooking(bookingId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
+
+  const { data: bk } = await supabase
+    .from('bookings')
+    .select('space_id, spaces!space_id(host_id)')
+    .eq('id', bookingId)
+    .single()
+  if (!bk || (bk.spaces as any)?.host_id !== user.id) return { error: 'No autorizado' }
 
   const { error } = await supabase
     .from('bookings')

@@ -96,8 +96,6 @@ export default function BookingWidget({ space, onChat }: Props) {
     () => addons.filter((a: any) => selectedAddons.includes(a.id)),
     [addons, selectedAddons]
   )
-  const addonsTotal = selectedAddonItems.reduce((s: number, a: any) => s + a.price, 0)
-
   // Calcular horas seleccionadas respetando media noche
   function calcHours(start: string, end: string): number {
     if (!start || !end) return 0
@@ -109,6 +107,16 @@ export default function BookingWidget({ space, onChat }: Props) {
   }
 
   const selectedHours = isHourly ? calcHours(startTime, endTime) : 0
+
+  // Respetar la unidad del addon: por persona, por hora o precio fijo por evento
+  const addonsTotal = useMemo(() =>
+    selectedAddonItems.reduce((s: number, a: any) => {
+      if (a.unit === 'persona') return s + a.price * guestCount
+      if (a.unit === 'hora')    return s + a.price * (selectedHours || 1)
+      return s + a.price
+    }, 0),
+    [selectedAddonItems, guestCount, selectedHours]
+  )
 
   const basePrice = useMemo(() => {
     if (isHourly && startTime && endTime) {
