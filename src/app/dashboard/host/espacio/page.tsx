@@ -64,26 +64,24 @@ const pricingOptions: { value: PricingType; label: string; desc: string; emoji: 
   },
 ]
 
-const paymentTermOptions: { value: PaymentTermType; label: string; desc: string }[] = [
-  {
-    value: 'platform_guarantee',
-    label: '10% en Espot + 90% en el espacio',
-    desc: 'El cliente paga solo el 10% para garantizar la fecha. El resto lo cobras tú el día del evento.',
-  },
-  {
-    value: 'split_advance',
-    label: '10% + 40% antes + 50% el día',
-    desc: 'Reparte el pago: garantía, anticipo y balance el día del evento.',
-  },
+const paymentTermOptions: { value: PaymentTermType; label: string; desc: string; ideal: string }[] = [
   {
     value: 'full_prepaid',
-    label: 'Pago completo por Espot',
-    desc: 'El cliente paga todo antes del evento a través de la plataforma.',
+    label: 'Pago completo',
+    desc: 'El cliente paga el 100% al confirmar la reserva. Todo pasa por Espot.',
+    ideal: 'Reuniones · Coworking · Estudios · Reservas rápidas',
+  },
+  {
+    value: 'platform_guarantee',
+    label: 'Pago dividido',
+    desc: 'El cliente paga en etapas: 10% al reservar, 40% antes del evento y 50% el día. Todo por Espot.',
+    ideal: 'Cumpleaños · Rooftops · Restaurantes · Eventos grandes',
   },
   {
     value: 'quote_only',
-    label: 'Solo cotización (sin pago online)',
-    desc: 'El cliente solicita precio, tú coordinas el pago directamente.',
+    label: 'Cotización personalizada',
+    desc: 'El cliente solicita propuesta. Tú envías el precio. Al aceptar, paga por Espot.',
+    ideal: 'Bodas · Corporativos · Producciones · Eventos especiales',
   },
 ]
 
@@ -1212,37 +1210,77 @@ export default function EspacioPage() {
         {currentStep === 6 && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>¿Cómo quieres cobrar?</h2>
-              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Elige cómo se estructura el pago entre el cliente, Espot y tú</p>
+              <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Modelo de pagos</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Elige cómo el cliente realizará los pagos a través de Espot.</p>
             </div>
 
             <div className="space-y-3">
-              {paymentTermOptions.map(option => (
-                <button
-                  key={option.value}
-                  onClick={() => setPaymentTerm(option.value)}
-                  className="w-full text-left p-5 rounded-xl border transition-all"
-                  style={paymentTerm === option.value ? {
-                    background: 'var(--brand-dim)',
-                    border: '1.5px solid var(--brand-border)',
-                  } : {
-                    background: '#fff',
-                    border: '1px solid var(--border-subtle)',
-                  }}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-                      {option.label}
-                    </span>
-                    {paymentTerm === option.value && <CheckCircle size={18} className="text-[#35C493]" />}
-                  </div>
-                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{option.desc}</p>
-                </button>
-              ))}
+              {paymentTermOptions.map((option, i) => {
+                const isSel = paymentTerm === option.value
+                const isRec = i === 0 // Primero = Recomendado
+                return (
+                  <button
+                    key={option.value}
+                    onClick={() => setPaymentTerm(option.value)}
+                    className="w-full text-left rounded-2xl transition-all"
+                    style={isSel ? {
+                      background: '#03313C',
+                      border: '2px solid #03313C',
+                      boxShadow: '0 4px 16px rgba(3,49,60,0.15)',
+                    } : {
+                      background: '#fff',
+                      border: '1.5px solid var(--border-medium)',
+                    }}>
+                    <div className="p-4">
+                      <div className="flex items-start justify-between gap-3 mb-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm"
+                            style={{ color: isSel ? '#fff' : 'var(--text-primary)' }}>
+                            {option.label}
+                          </span>
+                          {isRec && (
+                            <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                              style={{ background: isSel ? 'rgba(53,196,147,0.25)' : 'rgba(53,196,147,0.1)', color: '#35C493' }}>
+                              Recomendado
+                            </span>
+                          )}
+                        </div>
+                        {isSel && (
+                          <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                            style={{ background: '#35C493' }}>
+                            <CheckCircle size={13} color="#fff" />
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-xs leading-relaxed mb-2"
+                        style={{ color: isSel ? 'rgba(255,255,255,0.65)' : 'var(--text-secondary)' }}>
+                        {option.desc}
+                      </p>
+                      <p className="text-xs font-medium"
+                        style={{ color: isSel ? 'rgba(255,255,255,0.4)' : 'var(--text-muted)' }}>
+                        Ideal: {option.ideal}
+                      </p>
+                    </div>
+                  </button>
+                )
+              })}
             </div>
 
-            <div className="rounded-xl p-4 text-sm" style={{ background: 'rgba(37,99,235,0.07)', border: '1px solid rgba(37,99,235,0.18)', color: '#1D4ED8' }}>
-              💡 Espot cobra siempre el 10% de comisión sobre el total de la reserva. Este porcentaje cubre procesamiento de pagos, soporte y visibilidad en la plataforma.
+            {/* Nota sobre payouts */}
+            <div className="rounded-2xl p-4 flex items-start gap-3"
+              style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.18)' }}>
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: 'rgba(53,196,147,0.12)' }}>
+                <CreditCard size={14} style={{ color: '#35C493' }} />
+              </div>
+              <div>
+                <p className="text-xs font-semibold mb-0.5" style={{ color: '#0A7A50' }}>
+                  Todos los pagos pasan por Espot
+                </p>
+                <p className="text-xs" style={{ color: '#166534' }}>
+                  Luego del evento recibes el monto neto en tu cuenta. Espot descuenta automáticamente la comisión del 10%.
+                </p>
+              </div>
             </div>
           </div>
         )}

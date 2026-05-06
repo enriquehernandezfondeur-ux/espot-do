@@ -62,10 +62,10 @@ const pricingTypeLabel: Record<string, string> = {
 }
 
 const termLabel: Record<string, string> = {
-  platform_guarantee: '10% ahora · 90% en el espacio el día del evento',
-  split_advance:      '10% ahora · 40% antes · 50% el día del evento',
-  full_prepaid:       'Pago completo al reservar',
-  quote_only:         'Sin pago online — coordinado con el propietario',
+  platform_guarantee: '10% al reservar · Resto en etapas por Espot',
+  split_advance:      'Pago dividido en etapas · Todo por Espot',
+  full_prepaid:       '100% al reservar por Espot',
+  quote_only:         'Cotización · Pago por Espot al aceptar',
 }
 
 export default function SpaceDetailClient({ space, similarSpaces = [] }: { space: any; similarSpaces?: any[] }) {

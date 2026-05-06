@@ -376,7 +376,7 @@ export default async function HomePage() {
             {[
               { num: '01', icon: Search,     title: 'Busca tu espacio',      desc: 'Filtra por tipo de evento, sector y capacidad. Compara y elige.' },
               { num: '02', icon: Clock,      title: 'Elige fecha y horario',  desc: 'Selecciona la fecha, el horario y los servicios adicionales.' },
-              { num: '03', icon: CreditCard, title: 'Reserva con el 10%',    desc: 'Garantiza tu fecha pagando solo el 10%. El resto en el espacio.' },
+              { num: '03', icon: CreditCard, title: 'Reserva con el 10%',    desc: 'Garantiza tu fecha con el 10%. El resto se gestiona por Espot.' },
             ].map((step, i) => {
               const Icon = step.icon
               return (

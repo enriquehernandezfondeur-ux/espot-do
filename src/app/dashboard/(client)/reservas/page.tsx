@@ -250,7 +250,7 @@ export default function MisReservasPage() {
                         </div>
                         <div className="flex justify-between font-bold text-sm pt-2"
                           style={{ borderTop: '1px solid var(--border-medium)', color: 'var(--text-primary)' }}>
-                          <span>Balance en el espacio</span>
+                          <span>Balance pendiente</span>
                           <span>{formatCurrency(Number(bk.total_amount) - Number(bk.platform_fee))}</span>
                         </div>
                         <div className="flex items-center gap-1 text-xs font-semibold mt-1"
@@ -272,7 +272,7 @@ export default function MisReservasPage() {
                     {bk.status === 'confirmed' && (
                       <div className="mt-4 px-4 py-3 rounded-xl text-sm"
                         style={{ background: 'rgba(22,163,74,0.05)', border: '1px solid rgba(22,163,74,0.15)', color: '#166534' }}>
-                        Reserva confirmada. El balance de {formatCurrency(Number(bk.total_amount) - Number(bk.platform_fee))} lo pagas directamente en el espacio el día del evento.
+                        Reserva confirmada. El balance restante de {formatCurrency(Number(bk.total_amount) - Number(bk.platform_fee))} será procesado por Espot próximamente.
                       </div>
                     )}
                     {bk.status === 'rejected' && (
