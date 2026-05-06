@@ -21,7 +21,7 @@ const navItems = [
   { href: '/dashboard/host/ajustes',      label: 'Ajustes',      icon: Settings },
 ]
 
-export default function Sidebar() {
+export default function Sidebar({ userName, avatarUrl }: { userName?: string; avatarUrl?: string }) {
   const pathname = usePathname()
   const router   = useRouter()
   const supabase = createClient()
@@ -46,13 +46,20 @@ export default function Sidebar() {
       <div className="px-4 pt-4 pb-2">
         <div className="flex items-center gap-3 px-3 py-3 rounded-2xl"
           style={{ background: 'var(--brand-navy)', color: '#fff' }}>
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: 'rgba(255,255,255,0.12)' }}>
-            <Building2 size={16} color="#fff" />
-          </div>
+          {avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={avatarUrl} alt={userName ?? 'Avatar'}
+              className="w-9 h-9 rounded-xl object-cover shrink-0"
+              style={{ border: '1.5px solid rgba(53,196,147,0.4)' }} />
+          ) : (
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-white text-sm font-bold"
+              style={{ background: 'rgba(255,255,255,0.12)' }}>
+              {userName?.charAt(0)?.toUpperCase() ?? <Building2 size={16} color="#fff" />}
+            </div>
+          )}
           <div className="flex-1 min-w-0">
-            <div className="text-xs font-bold text-white">Panel de Negocio</div>
-            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>Propietario</div>
+            <div className="text-xs font-bold text-white truncate">{userName ?? 'Propietario'}</div>
+            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>Panel de Negocio</div>
           </div>
           <div className="px-2 py-0.5 rounded-full text-xs font-bold shrink-0"
             style={{ background: 'var(--brand)', color: '#fff' }}>

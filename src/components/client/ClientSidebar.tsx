@@ -18,7 +18,7 @@ const navItems = [
   { href: '/dashboard/perfil',    label: 'Mi perfil',    icon: User },
 ]
 
-export default function ClientSidebar({ userName }: { userName?: string }) {
+export default function ClientSidebar({ userName, avatarUrl }: { userName?: string; avatarUrl?: string }) {
   const pathname = usePathname()
   const router   = useRouter()
   const supabase = createClient()
@@ -43,10 +43,17 @@ export default function ClientSidebar({ userName }: { userName?: string }) {
       <div className="px-4 pt-4 pb-2">
         <div className="flex items-center gap-3 px-3 py-3 rounded-2xl"
           style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-white text-sm font-bold"
-            style={{ background: 'var(--brand)' }}>
-            {userName?.charAt(0)?.toUpperCase() ?? 'U'}
-          </div>
+          {avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={avatarUrl} alt={userName ?? 'Avatar'}
+              className="w-9 h-9 rounded-xl object-cover shrink-0"
+              style={{ border: '1.5px solid var(--brand-border)' }} />
+          ) : (
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-white text-sm font-bold"
+              style={{ background: 'var(--brand)' }}>
+              {userName?.charAt(0)?.toUpperCase() ?? 'U'}
+            </div>
+          )}
           <div className="min-w-0 flex-1">
             <div className="text-xs font-bold truncate" style={{ color: 'var(--brand)' }}>
               Panel de Cliente
