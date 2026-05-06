@@ -108,6 +108,28 @@ export default function BookingWidget({ space, onChat }: Props) {
 
   const selectedHours = isHourly ? calcHours(startTime, endTime) : 0
 
+  // ── Rango horario permitido por los time_blocks del propietario ──
+  // undefined = sin restricción | null = este día no tiene horario | {start,end} = rango
+  const allowedTimeRange = useMemo(() => {
+    const blocks: any[] = space.space_time_blocks ?? []
+    if (!blocks.length || !eventDate) return undefined
+
+    const dow = new Date(eventDate + 'T12:00').getDay() // 0=Dom...6=Sáb
+    const active = blocks.filter(b =>
+      b.is_active !== false && (b.days_of_week ?? []).includes(dow)
+    )
+
+    if (!active.length) return null // día configurado pero sin horario
+
+    // Si hay múltiples bloques, tomar el que cubra más horas
+    const sorted = active.sort((a: any, b: any) => {
+      const aLen = (b.end_time === '00:00' ? 24 : parseInt(b.end_time)) - parseInt(a.start_time)
+      const bLen = (b.end_time === '00:00' ? 24 : parseInt(b.end_time)) - parseInt(b.start_time)
+      return bLen - aLen
+    })
+    return { start: sorted[0].start_time as string, end: sorted[0].end_time as string }
+  }, [eventDate, space.space_time_blocks])
+
   // Respetar la unidad del addon: por persona, por hora o precio fijo por evento
   const addonsTotal = useMemo(() =>
     selectedAddonItems.reduce((s: number, a: any) => {
@@ -410,23 +432,26 @@ export default function BookingWidget({ space, onChat }: Props) {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <div className="text-xs font-semibold uppercase tracking-widest mb-2"
-                      style={{ color: 'var(--text-muted)' }}>Desde</div>
+                      style={{ color: 'var(--text-muted)' }}>Hora de inicio</div>
                     <TimePicker
                       value={startTime}
                       onChange={v => { setStartTime(v); setEndTime('') }}
-                      placeholder="Hora de inicio"
+                      placeholder="Selecciona hora de inicio"
+                      allowedRange={allowedTimeRange}
                     />
                   </div>
                   <div>
                     <div className="text-xs font-semibold uppercase tracking-widest mb-2"
-                      style={{ color: 'var(--text-muted)' }}>Hasta</div>
+                      style={{ color: 'var(--text-muted)' }}>Hora de salida</div>
                     <TimePicker
                       value={endTime}
                       onChange={setEndTime}
-                      placeholder={startTime ? 'Hora de fin' : 'Primero elige inicio'}
+                      placeholder={startTime ? 'Selecciona hora de salida' : 'Primero elige inicio'}
+                      disabled={!startTime}
                       afterValue={startTime || undefined}
                       minMinutesAfter={isHourly && pricing.min_hours ? pricing.min_hours * 60 : undefined}
                       maxMinutesAfter={isHourly && pricing.max_hours ? pricing.max_hours * 60 : undefined}
+                      allowedRange={allowedTimeRange}
                     />
                   </div>
                 </div>
