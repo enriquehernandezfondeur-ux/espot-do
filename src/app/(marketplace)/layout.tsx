@@ -57,15 +57,8 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-sm shadow-md"
-              style={{ background: 'var(--brand)', color: '#fff', boxShadow: '0 2px 8px rgba(53,196,147,0.35)' }}>
-              E
-            </div>
-            <div className="flex items-baseline gap-0.5">
-              <span className="font-bold text-lg leading-none" style={{ color: 'var(--text-primary)' }}>espot</span>
-              <span className="font-light text-lg leading-none" style={{ color: 'var(--brand)' }}>.do</span>
-            </div>
+          <Link href="/" className="shrink-0">
+            <img src="/logo-dark.svg" alt="espot.do" style={{ height: 30, width: "auto" }} />
           </Link>
 
           {/* Search */}
@@ -178,12 +171,8 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
       <footer style={{ borderTop: '1px solid var(--border-subtle)', background: '#fff' }} className="py-10 px-6 mt-16">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white"
-                style={{ background: 'var(--brand)' }}>E</div>
-              <span className="font-bold" style={{ color: 'var(--text-primary)' }}>
-                espot<span style={{ color: 'var(--brand)', fontWeight: 400 }}>.do</span>
-              </span>
+            <Link href="/">
+              <img src="/logo-dark.svg" alt="espot.do" style={{ height: 22, width: 'auto' }} />
             </Link>
             <div className="flex items-center gap-6 text-sm" style={{ color: 'var(--text-muted)' }}>
               <Link href="/buscar" className="link-muted">Explorar espacios</Link>

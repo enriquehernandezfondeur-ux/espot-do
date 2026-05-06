@@ -37,15 +37,8 @@ export default function Sidebar() {
 
       {/* Logo */}
       <div className="px-5 pt-5 pb-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-sm text-white"
-            style={{ background: 'var(--brand)', boxShadow: '0 2px 8px rgba(53,196,147,0.3)' }}>
-            E
-          </div>
-          <div className="flex items-baseline gap-0.5">
-            <span className="font-bold text-lg leading-none" style={{ color: 'var(--text-primary)' }}>espot</span>
-            <span className="font-light text-lg leading-none" style={{ color: 'var(--brand)' }}>.do</span>
-          </div>
+        <Link href="/">
+          <img src="/logo-dark.svg" alt="espot.do" style={{ height: 28, width: 'auto' }} />
         </Link>
       </div>
 
