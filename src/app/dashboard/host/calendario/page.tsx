@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { ChevronLeft, ChevronRight, Lock, Loader2, Plus, X, Clock, Users, CheckCircle } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Lock, Loader2, Plus, X, Clock, Users, CheckCircle, Calendar, Copy, Link2, Link2Off } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
-import { getHostCalendarBookings, getHostSpaces, getSpaceAvailability, createAvailabilityBlock, deleteAvailabilityBlock } from '@/lib/actions/host'
+import { getHostCalendarBookings, getHostSpaces, getSpaceAvailability, createAvailabilityBlock, deleteAvailabilityBlock, getOrCreateIcalToken, getGoogleCalendarStatus, disconnectGoogleCalendar } from '@/lib/actions/host'
+
+const BASE_URL = 'https://espothub.com'
 
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 const DAYS   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
@@ -55,6 +57,13 @@ export default function CalendarioPage() {
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<string | null>(null)
 
+  // Sync de calendarios
+  const [icalToken,      setIcalToken]      = useState<string | null>(null)
+  const [icalCopied,     setIcalCopied]     = useState(false)
+  const [gcalConnected,  setGcalConnected]  = useState(false)
+  const [gcalDisconnecting, setGcalDisconnecting] = useState(false)
+  const [syncOpen,       setSyncOpen]       = useState(false)
+
   // Block form state
   const [blocking, setBlocking] = useState(false)
   const [blockStart, setBlockStart] = useState('20:00')
@@ -68,12 +77,16 @@ export default function CalendarioPage() {
 
   useEffect(() => {
     async function load() {
-      const [bk, spaces] = await Promise.all([
+      const [bk, spaces, token, gcal] = await Promise.all([
         getHostCalendarBookings(),
         getHostSpaces(),
+        getOrCreateIcalToken(),
+        getGoogleCalendarStatus(),
       ])
       setBookings(bk)
       setSpaceList(spaces)
+      setIcalToken(token)
+      setGcalConnected(gcal.connected)
 
       if (spaces.length) {
         const sid = spaces[0].id
@@ -94,6 +107,20 @@ export default function CalendarioPage() {
 
   function prevMonth() { setCurrent(c => c.month === 0 ? { year: c.year-1, month: 11 } : {...c, month: c.month-1}) }
   function nextMonth() { setCurrent(c => c.month === 11 ? { year: c.year+1, month: 0 } : {...c, month: c.month+1}) }
+
+  function copyIcal() {
+    if (!icalToken) return
+    navigator.clipboard.writeText(`${BASE_URL}/api/cal/${icalToken}`)
+    setIcalCopied(true)
+    setTimeout(() => setIcalCopied(false), 2000)
+  }
+
+  async function handleDisconnectGcal() {
+    setGcalDisconnecting(true)
+    await disconnectGoogleCalendar()
+    setGcalConnected(false)
+    setGcalDisconnecting(false)
+  }
 
   const firstDay    = new Date(current.year, current.month, 1).getDay()
   const daysInMonth = new Date(current.year, current.month+1, 0).getDate()
@@ -193,11 +220,52 @@ export default function CalendarioPage() {
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Calendario</h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
-          Gestiona la disponibilidad de tu espacio por día y por horas
-        </p>
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Calendario</h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+            Gestiona la disponibilidad de tu espacio
+          </p>
+        </div>
+
+        {/* Sync de calendarios */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Google Calendar */}
+          {gcalConnected ? (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium"
+              style={{ background: 'rgba(22,163,74,0.08)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)' }}>
+              <CheckCircle size={13} />
+              Google Calendar
+              <button
+                onClick={handleDisconnectGcal}
+                disabled={gcalDisconnecting}
+                title="Desconectar"
+                className="ml-1 opacity-50 hover:opacity-100 transition-opacity"
+                style={{ color: '#16A34A' }}>
+                <Link2Off size={11} />
+              </button>
+            </div>
+          ) : (
+            <a href="/api/auth/google-calendar"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all"
+              style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+              <Link2 size={13} />
+              Google Calendar
+            </a>
+          )}
+
+          {/* iCal */}
+          <button
+            onClick={copyIcal}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all"
+            style={icalCopied
+              ? { background: 'rgba(22,163,74,0.08)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)' }
+              : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }
+            }>
+            {icalCopied ? <><CheckCircle size={13} /> Copiado</> : <><Calendar size={13} /> Copiar iCal</>}
+          </button>
+        </div>
       </div>
 
       {/* ── Contexto del espacio ── */}
