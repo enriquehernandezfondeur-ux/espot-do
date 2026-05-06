@@ -843,8 +843,8 @@ export default function EspacioPage() {
             )}
 
             {pricingType === 'custom_quote' && (
-              <div className="bg-amber-600/10 border border-amber-500/20 rounded-xl p-5">
-                <p className="text-amber-300 text-sm">
+              <div className="rounded-xl p-5" style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)' }}>
+                <p className="text-sm" style={{ color: '#92400E' }}>
                   💬 Con esta modalidad, los clientes te enviarán una solicitud describiendo su evento. Tú recibirás una notificación y podrás responder con un precio personalizado.
                 </p>
               </div>
@@ -903,22 +903,22 @@ export default function EspacioPage() {
                         background: 'rgba(53,196,147,0.10)',
                         border:     '1.5px solid rgba(53,196,147,0.35)',
                       } : {
-                        background: 'rgba(255,255,255,0.03)',
-                        border:     '1px solid rgba(255,255,255,0.08)',
+                        background: 'var(--bg-elevated)',
+                        border:     '1px solid var(--border-subtle)',
                       }}
                     >
                       <span className="text-xl shrink-0 opacity-80">{addon.emoji}</span>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium truncate"
-                          style={{ color: selected ? '#4DD9A7' : 'rgba(255,255,255,0.7)' }}>
+                          style={{ color: selected ? 'var(--brand)' : 'var(--text-primary)' }}>
                           {addon.name}
                         </div>
-                        <div className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                        <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
                           {addon.price > 0 ? formatCurrency(addon.price) : 'Precio variable'} / {addon.unit}
                         </div>
                       </div>
                       <div className="shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all"
-                        style={selected ? { background: '#35C493', borderColor: '#35C493' } : { borderColor: 'rgba(255,255,255,0.15)' }}>
+                        style={selected ? { background: '#35C493', borderColor: '#35C493' } : { borderColor: 'var(--border-medium)' }}>
                         {selected && <CheckCircle size={10} className="text-white" />}
                       </div>
                     </button>
@@ -933,15 +933,15 @@ export default function EspacioPage() {
                 <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
                   Configura precios de los seleccionados
                 </p>
-                <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
                   {addons.map((addon, i) => (
                     <div key={i}
                       className="flex items-center gap-4 px-4 py-3"
-                      style={{ borderBottom: i < addons.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none', background: 'rgba(255,255,255,0.02)' }}>
+                      style={{ borderBottom: i < addons.length - 1 ? '1px solid var(--border-subtle)' : 'none', background: 'var(--bg-elevated)' }}>
                       <span className="text-base shrink-0">{addon.emoji}</span>
-                      <span className="text-sm font-medium flex-1" style={{ color: 'rgba(255,255,255,0.8)' }}>{addon.name}</span>
+                      <span className="text-sm font-medium flex-1" style={{ color: 'var(--text-primary)' }}>{addon.name}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>RD$</span>
+                        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>RD$</span>
                         <input
                           type="number"
                           value={addon.price}
@@ -951,7 +951,7 @@ export default function EspacioPage() {
                             setAddons(updated)
                           }}
                           className="w-24 rounded-lg px-3 py-1.5 text-sm focus:outline-none transition-colors"
-                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
+                          style={{ background: '#fff', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)' }}
                         />
                         <select
                           value={addon.unit}
@@ -961,7 +961,7 @@ export default function EspacioPage() {
                             setAddons(updated)
                           }}
                           className="rounded-lg px-2 py-1.5 text-xs focus:outline-none"
-                          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}
+                          style={{ background: '#fff', border: '1.5px solid var(--border-medium)', color: 'var(--text-secondary)' }}
                         >
                           <option value="evento">/ evento</option>
                           <option value="hora">/ hora</option>
@@ -981,8 +981,8 @@ export default function EspacioPage() {
 
             {addons.length === 0 && (
               <div className="text-center py-6 rounded-xl"
-                style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)' }}>
-                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                style={{ background: 'var(--bg-elevated)', border: '1px dashed var(--border-medium)' }}>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                   Ningún adicional seleccionado aún
                 </p>
               </div>
@@ -1016,7 +1016,7 @@ export default function EspacioPage() {
                 ] as { label: string; desc: string; value: boolean; setter: (v: boolean) => void }[]).map(item => (
                   <div key={item.label}
                     className="flex items-center justify-between px-4 py-3 rounded-xl"
-                    style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${item.value ? 'rgba(53,196,147,0.25)' : 'rgba(255,255,255,0.06)'}` }}>
+                    style={{ background: 'var(--bg-elevated)', border: `1px solid ${item.value ? 'var(--brand-border)' : 'var(--border-subtle)'}` }}>
                     <div>
                       <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{item.label}</div>
                       <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{item.desc}</div>
@@ -1024,7 +1024,7 @@ export default function EspacioPage() {
                     <button
                       onClick={() => item.setter(!item.value)}
                       className="w-11 h-6 rounded-full relative transition-all shrink-0 ml-3"
-                      style={{ background: item.value ? '#35C493' : 'rgba(255,255,255,0.1)' }}>
+                      style={{ background: item.value ? '#35C493' : 'var(--border-medium)' }}>
                       <span className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
                         style={{ left: item.value ? 22 : 2 }} />
                     </button>
@@ -1047,9 +1047,9 @@ export default function EspacioPage() {
                         style={noiseLevel === level ? {
                           background: '#35C493', color: '#0B0F0E',
                         } : {
-                          background: 'rgba(255,255,255,0.05)',
-                          color: '#94a3b8',
-                          border: '1px solid rgba(255,255,255,0.08)',
+                          background: 'var(--bg-elevated)',
+                          color: 'var(--text-muted)',
+                          border: '1px solid var(--border-subtle)',
                         }}>
                         {level.charAt(0).toUpperCase() + level.slice(1)}
                       </button>
@@ -1069,7 +1069,7 @@ export default function EspacioPage() {
               <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Depósito y pagos</p>
               <div className="space-y-3">
                 {/* Depósito */}
-                <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Depósito de garantía</div>
@@ -1077,13 +1077,13 @@ export default function EspacioPage() {
                     </div>
                     <button onClick={() => setDepositRequired(!depositRequired)}
                       className="w-11 h-6 rounded-full relative transition-all shrink-0"
-                      style={{ background: depositRequired ? '#35C493' : 'rgba(255,255,255,0.1)' }}>
+                      style={{ background: depositRequired ? '#35C493' : 'var(--border-medium)' }}>
                       <span className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
                         style={{ left: depositRequired ? 22 : 2 }} />
                     </button>
                   </div>
                   {depositRequired && (
-                    <div className="grid grid-cols-2 gap-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div className="grid grid-cols-2 gap-3 pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
                       <div>
                         <label className="block text-xs mb-1.5" style={{ color: 'var(--text-muted)' }}>Monto (RD$)</label>
                         <input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)}
@@ -1099,8 +1099,8 @@ export default function EspacioPage() {
                               style={depositRefundable === opt.v ? {
                                 background: '#35C493', color: '#0B0F0E',
                               } : {
-                                background: 'rgba(255,255,255,0.05)', color: '#94a3b8',
-                                border: '1px solid rgba(255,255,255,0.08)',
+                                background: 'var(--bg-elevated)', color: 'var(--text-muted)',
+                                border: '1px solid var(--border-subtle)',
                               }}>
                               {opt.l}
                             </button>
@@ -1112,7 +1112,7 @@ export default function EspacioPage() {
                 </div>
 
                 {/* Limpieza */}
-                <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Servicio de limpieza</div>
@@ -1120,13 +1120,13 @@ export default function EspacioPage() {
                     </div>
                     <button onClick={() => setIncludesCleaning(!includesCleaning)}
                       className="w-11 h-6 rounded-full relative transition-all shrink-0"
-                      style={{ background: includesCleaning ? '#35C493' : 'rgba(255,255,255,0.1)' }}>
+                      style={{ background: includesCleaning ? '#35C493' : 'var(--border-medium)' }}>
                       <span className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
                         style={{ left: includesCleaning ? 22 : 2 }} />
                     </button>
                   </div>
                   {!includesCleaning && (
-                    <div className="pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div className="pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
                       <label className="block text-xs mb-1.5" style={{ color: 'var(--text-muted)' }}>Cargo de limpieza (RD$) — opcional</label>
                       <input type="number" value={cleaningFee} onChange={e => setCleaningFee(e.target.value)}
                         placeholder="Dejar en blanco si no aplica"
@@ -1136,7 +1136,7 @@ export default function EspacioPage() {
                 </div>
 
                 {/* Horas extra */}
-                <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Horas extra</div>
@@ -1144,13 +1144,13 @@ export default function EspacioPage() {
                     </div>
                     <button onClick={() => setAllowsExtraHours(!allowsExtraHours)}
                       className="w-11 h-6 rounded-full relative transition-all shrink-0"
-                      style={{ background: allowsExtraHours ? '#35C493' : 'rgba(255,255,255,0.1)' }}>
+                      style={{ background: allowsExtraHours ? '#35C493' : 'var(--border-medium)' }}>
                       <span className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
                         style={{ left: allowsExtraHours ? 22 : 2 }} />
                     </button>
                   </div>
                   {allowsExtraHours && (
-                    <div className="pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div className="pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
                       <label className="block text-xs mb-1.5" style={{ color: 'var(--text-muted)' }}>Precio por hora extra (RD$)</label>
                       <input type="number" value={extraHourPrice} onChange={e => setExtraHourPrice(e.target.value)}
                         placeholder="Ej: 5000"
@@ -1177,8 +1177,8 @@ export default function EspacioPage() {
                       background: 'rgba(53,196,147,0.08)',
                       border: '1.5px solid rgba(53,196,147,0.3)',
                     } : {
-                      background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.08)',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
                     }}>
                     <div className="font-semibold text-sm mb-1"
                       style={{ color: cancellationPolicy === policy.value ? '#35C493' : 'white' }}>

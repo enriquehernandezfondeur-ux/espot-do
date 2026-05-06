@@ -70,13 +70,13 @@ export default function ActivityPicker({ primary, secondary, onChange }: Props) 
                 background: `${act.color}08`,
                 border:     `1.5px solid ${act.color}50`,
               } : isDisabled ? {
-                background: 'rgba(255,255,255,0.02)',
-                border:     '1px solid rgba(255,255,255,0.05)',
+                background: 'var(--bg-elevated)',
+                border:     '1px solid var(--border-subtle)',
                 opacity:    0.4,
                 cursor:     'not-allowed',
               } : {
-                background: 'rgba(255,255,255,0.04)',
-                border:     '1px solid rgba(255,255,255,0.1)',
+                background: 'var(--bg-hover)',
+                border:     '1px solid var(--border-medium)',
               }}
             >
               {/* Icono */}
@@ -86,8 +86,8 @@ export default function ActivityPicker({ primary, secondary, onChange }: Props) 
               </div>
 
               {/* Texto */}
-              <div className="font-semibold text-sm text-white mb-0.5">{act.label}</div>
-              <div className="text-xs text-slate-500 leading-snug">{act.description}</div>
+              <div className="font-semibold text-sm mb-0.5" style={{ color: 'var(--text-primary)' }}>{act.label}</div>
+              <div className="text-xs leading-snug" style={{ color: 'var(--text-muted)' }}>{act.description}</div>
 
               {/* Badge */}
               {isPrimary && (

@@ -280,10 +280,10 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
             <div key={key}
               className="rounded-2xl transition-all overflow-hidden"
               style={{
-                background: day.enabled ? 'rgba(53,196,147,0.06)' : 'rgba(255,255,255,0.02)',
+                background: day.enabled ? 'rgba(53,196,147,0.06)' : 'var(--bg-elevated)',
                 border: day.enabled
                   ? '1.5px solid rgba(53,196,147,0.25)'
-                  : '1px solid rgba(255,255,255,0.06)',
+                  : '1px solid var(--border-subtle)',
               }}>
 
               {/* ── Cabecera del día ── */}
@@ -291,20 +291,20 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
                 {/* Toggle */}
                 <button onClick={() => toggleDay(key)}
                   className="relative w-11 h-6 rounded-full transition-all shrink-0"
-                  style={{ background: day.enabled ? '#35C493' : 'rgba(255,255,255,0.1)' }}>
+                  style={{ background: day.enabled ? '#35C493' : 'var(--border-medium)' }}>
                   <span className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
                     style={{ left: day.enabled ? 22 : 2 }} />
                 </button>
 
                 {/* Nombre */}
                 <span className="text-sm font-semibold w-24 shrink-0"
-                  style={{ color: day.enabled ? 'white' : 'rgba(255,255,255,0.3)' }}>
+                  style={{ color: day.enabled ? '#fff' : 'var(--text-muted)' }}>
                   {label}
                 </span>
 
                 {/* Resumen o "No disponible" */}
                 {!day.enabled ? (
-                  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>No disponible</span>
+                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>No disponible</span>
                 ) : day.ranges.length > 0 ? (
                   <div className="flex gap-2 flex-wrap flex-1">
                     {day.ranges.filter(r => r.start && r.end && !editing[r.id]).map(r => (
@@ -315,14 +315,14 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
                     ))}
                   </div>
                 ) : (
-                  <span className="text-xs italic" style={{ color: 'rgba(255,255,255,0.25)' }}>Sin horarios</span>
+                  <span className="text-xs italic" style={{ color: 'var(--text-muted)' }}>Sin horarios</span>
                 )}
 
                 {/* Copiar a todos */}
                 {day.enabled && day.ranges.length > 0 && !isAdding && (
                   <button onClick={() => copyToAll(key)}
                     className="ml-auto text-xs px-2.5 py-1.5 rounded-lg transition-all shrink-0"
-                    style={{ color: 'rgba(255,255,255,0.3)', background: 'transparent' }}
+                    style={{ color: 'var(--text-muted)', background: 'transparent' }}
                     title="Aplicar a todos los días">
                     <Copy size={12} />
                   </button>
@@ -346,13 +346,11 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
                             <div className="flex items-center gap-2">
                               <input type="time" value={editDraft.start}
                                 onChange={e => setDraft(p => ({ ...p, [`edit-${range.id}`]: { ...editDraft, start: e.target.value } }))}
-                                className="flex-1 px-3 py-2.5 rounded-xl text-sm font-medium focus:outline-none"
-                                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'white' }} />
-                              <span className="text-slate-500 text-sm shrink-0">–</span>
+                                className='input-base w-full rounded-xl px-3 py-2 text-sm font-medium' />
+                              <span className="text-sm shrink-0" style={{ color: 'var(--text-muted)' }}>–</span>
                               <input type="time" value={editDraft.end}
                                 onChange={e => setDraft(p => ({ ...p, [`edit-${range.id}`]: { ...editDraft, end: e.target.value } }))}
-                                className="flex-1 px-3 py-2.5 rounded-xl text-sm font-medium focus:outline-none"
-                                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'white' }} />
+                                className='input-base w-full rounded-xl px-3 py-2 text-sm font-medium' />
                               <button onClick={() => confirmEdit(key, range.id)}
                                 className="w-9 h-9 flex items-center justify-center rounded-xl transition-all shrink-0"
                                 style={{ background: '#35C493', color: '#0B0F0E' }}>
@@ -360,7 +358,7 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
                               </button>
                               <button onClick={() => cancelEdit(range.id)}
                                 className="w-9 h-9 flex items-center justify-center rounded-xl transition-all shrink-0"
-                                style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>
+                                style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
                                 <X size={15} />
                               </button>
                             </div>
@@ -371,14 +369,14 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
                           <div className="flex items-center justify-between group">
                             <div className="flex items-center gap-3">
                               <div className="w-2 h-2 rounded-full shrink-0" style={{ background: '#35C493' }} />
-                              <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.85)' }}>
+                              <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                                 {fmt(range.start)} – {fmt(range.end)}
                               </span>
                             </div>
                             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                               <button onClick={() => startEdit(key, range)}
                                 className="w-8 h-8 flex items-center justify-center rounded-lg transition-all"
-                                style={{ color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.05)' }}>
+                                style={{ color: 'var(--text-muted)', background: 'var(--bg-elevated)' }}>
                                 <Pencil size={13} />
                               </button>
                               <button onClick={() => removeRange(key, range.id)}
@@ -400,14 +398,12 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
                         <input type="time" value={draftDay.start}
                           onChange={e => setDraft(p => ({ ...p, [key]: { ...draftDay, start: e.target.value } }))}
                           placeholder="Inicio"
-                          className="flex-1 px-3 py-2.5 rounded-xl text-sm font-medium focus:outline-none"
-                          style={{ background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(53,196,147,0.4)', color: 'white' }} />
-                        <span className="text-slate-500 text-sm shrink-0">–</span>
+                          className='input-base w-full rounded-xl px-3 py-2 text-sm font-medium' />
+                        <span className="text-sm shrink-0" style={{ color: 'var(--text-muted)' }}>–</span>
                         <input type="time" value={draftDay.end}
                           onChange={e => setDraft(p => ({ ...p, [key]: { ...draftDay, end: e.target.value } }))}
                           placeholder="Fin"
-                          className="flex-1 px-3 py-2.5 rounded-xl text-sm font-medium focus:outline-none"
-                          style={{ background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(53,196,147,0.4)', color: 'white' }} />
+                          className='input-base w-full rounded-xl px-3 py-2 text-sm font-medium' />
                         <button onClick={() => confirmAdd(key)}
                           className="w-9 h-9 flex items-center justify-center rounded-xl shrink-0"
                           style={{ background: '#35C493', color: '#0B0F0E' }}>
@@ -415,7 +411,7 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
                         </button>
                         <button onClick={() => cancelAdd(key)}
                           className="w-9 h-9 flex items-center justify-center rounded-xl shrink-0"
-                          style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)' }}>
+                          style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
                           <X size={15} />
                         </button>
                       </div>
@@ -445,8 +441,8 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
       {/* Estado vacío */}
       {enabledCount === 0 && (
         <div className="text-center py-8 rounded-2xl"
-          style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)' }}>
-          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>
+          style={{ background: 'var(--bg-elevated)', border: '1px dashed var(--border-medium)' }}>
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
             Activa los días para configurar tus horarios
           </p>
         </div>
