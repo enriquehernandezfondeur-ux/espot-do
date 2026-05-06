@@ -58,22 +58,22 @@ export default function ClientDashboard() {
                   {daysUntilNext === 0 ? '¡Hoy!' : daysUntilNext === 1 ? 'Mañana' : `En ${daysUntilNext} días`}
                 </span>
               </div>
-              <h2 className="text-2xl font-bold  mb-1">{(next.spaces as any)?.name}</h2>
+              <h2 className="text-2xl font-bold mb-1" style={{ color: '#fff' }}>{(next.spaces as any)?.name}</h2>
               <p className="text-sm mb-4" style={{ color: 'rgba(255,255,255,0.65)' }}>{next.event_type}</p>
               <div className="flex items-center gap-5">
-                <span className="flex items-center gap-2 text-sm /80" style={{ color: 'var(--text-primary)' }}>
+                <span className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.8)' }}>
                   <CalendarDays size={14} /> {formatDate(next.event_date)}
                 </span>
-                <span className="flex items-center gap-2 text-sm /80" style={{ color: 'var(--text-primary)' }}>
+                <span className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.8)' }}>
                   <Clock size={14} /> {formatTime(next.start_time)} – {formatTime(next.end_time)}
                 </span>
-                <span className="flex items-center gap-2 text-sm /80" style={{ color: 'var(--text-primary)' }}>
+                <span className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.8)' }}>
                   <Users size={14} /> {next.guest_count} personas
                 </span>
               </div>
             </div>
             <div className="shrink-0 text-right">
-              <div className="text-3xl font-bold text-gray-900 mb-1">{formatCurrency(Number(next.total_amount))}</div>
+              <div className="text-3xl font-bold mb-1" style={{ color: '#fff' }}>{formatCurrency(Number(next.total_amount))}</div>
               <div className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>total del evento</div>
               <Link href={`/dashboard/reservas`}
                 className="inline-flex items-center gap-2 mt-4 text-sm font-semibold px-4 py-2 rounded-xl transition-colors"

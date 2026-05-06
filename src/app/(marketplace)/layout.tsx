@@ -103,7 +103,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
               </Link>
             )}
 
-            <Link href="/auth" className="btn-brand text-sm font-semibold px-5 py-2.5 rounded-full">
+            <Link href="/auth?mode=register&redirect=/dashboard/host" className="btn-brand text-sm font-semibold px-5 py-2.5 rounded-full">
               Publicar espacio
             </Link>
           </div>
@@ -156,7 +156,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
             )}
 
             <div className="pt-2">
-              <Link href="/auth"
+              <Link href="/auth?mode=register&redirect=/dashboard/host"
                 className="btn-brand block text-center text-sm font-semibold px-5 py-2.5 rounded-full">
                 Publicar espacio
               </Link>
@@ -176,7 +176,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
             </Link>
             <div className="flex items-center gap-5 text-sm flex-wrap justify-center" style={{ color: 'var(--text-muted)' }}>
               <Link href="/buscar"    className="link-muted">Explorar</Link>
-              <Link href="/auth"      className="link-muted">Para propietarios</Link>
+              <Link href="/auth?mode=register&redirect=/dashboard/host" className="link-muted">Para propietarios</Link>
               <Link href="/terminos"  className="link-muted">Términos</Link>
               <Link href="/reembolso" className="link-muted">Reembolso</Link>
               <Link href="/cookies"   className="link-muted">Cookies</Link>

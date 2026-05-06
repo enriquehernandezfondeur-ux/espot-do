@@ -227,7 +227,7 @@ export default async function HomePage() {
               </div>
               <h3 className="font-bold text-lg mb-2" style={{ color: 'var(--text-primary)' }}>Próximamente más espacios</h3>
               <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>Sé el primero en publicar tu espacio</p>
-              <Link href="/auth" className="btn-brand inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-xl">
+              <Link href="/auth?mode=register&redirect=/dashboard/host" className="btn-brand inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-xl">
                 Publicar espacio gratis
               </Link>
             </div>
