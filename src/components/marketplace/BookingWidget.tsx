@@ -5,17 +5,15 @@ import { useRouter } from 'next/navigation'
 import {
   CalendarDays, Users, Sparkles, CreditCard,
   ChevronRight, ChevronLeft, Loader2, CheckCircle,
-  Minus, Plus, MessageCircle, Clock, ShieldCheck,
+  Minus, Plus, MessageCircle, Clock, ShieldCheck, Info,
 } from 'lucide-react'
 import { formatCurrency, formatTime } from '@/lib/utils'
 import { createBooking } from '@/lib/actions/booking'
 import { cn } from '@/lib/utils'
-
 import Link from 'next/link'
 import DatePicker from '@/components/ui/DatePicker'
 import TimePicker from '@/components/ui/TimePicker'
 
-// ── Configuración de tipos de evento ──────────────────────
 const EVENT_TYPES = [
   'Cumpleaños', 'Boda', 'Corporativo', 'Graduación',
   'Baby Shower', 'Quinceañera', 'Fiesta', 'Sesión foto', 'Otro',
@@ -40,13 +38,12 @@ function addonEmoji(name: string) {
   return '✨'
 }
 
-// ── Pasos ─────────────────────────────────────────────────
 const STEPS = [
-  { id: 1, label: 'Fecha',     icon: CalendarDays },
-  { id: 2, label: 'Personas',  icon: Users },
-  { id: 3, label: 'Evento',    icon: Sparkles },
-  { id: 4, label: 'Extras',    icon: Sparkles },
-  { id: 5, label: 'Pago',      icon: CreditCard },
+  { id: 1, label: 'Fecha',    icon: CalendarDays },
+  { id: 2, label: 'Personas', icon: Users },
+  { id: 3, label: 'Evento',   icon: Sparkles },
+  { id: 4, label: 'Extras',   icon: Sparkles },
+  { id: 5, label: 'Pago',     icon: CreditCard },
 ]
 
 interface Props {
@@ -56,48 +53,37 @@ interface Props {
 }
 
 export default function BookingWidget({ space, onChat, initialDate }: Props) {
-  const router = useRouter()
-  const pricing    = space.space_pricing?.find((p: any) => p.is_active) ?? space.space_pricing?.[0]
-  const addons     = space.space_addons ?? []
+  const router   = useRouter()
+  const pricing  = space.space_pricing?.find((p: any) => p.is_active) ?? space.space_pricing?.[0]
+  const addons   = space.space_addons ?? []
+
   const isHourly      = pricing?.pricing_type === 'hourly'
   const isConsumption = pricing?.pricing_type === 'minimum_consumption'
+  const isPackage     = pricing?.pricing_type === 'fixed_package'
   const isQuote       = pricing?.pricing_type === 'custom_quote'
-  // Ambos modelos requieren selección de hora (por hora: para calcular; consumo: para disponibilidad)
-  const needsTime     = isHourly || isConsumption
 
-  // Steps — skip step 4 if no addons
-  const steps = addons.length > 0 ? STEPS : STEPS.filter(s => s.id !== 4)
+  const steps   = addons.length > 0 ? STEPS : STEPS.filter(s => s.id !== 4)
   const maxStep = steps[steps.length - 1].id
 
-  // ── State ───────────────────────────────────────────────
-  const [step, setStep]           = useState(initialDate ? 2 : 1)
-  const [eventDate, setEventDate] = useState(initialDate ?? '')
-  const [startTime, setStartTime] = useState('')
-  const [endTime, setEndTime]     = useState('')
-  const [guestCount, setGuestCount] = useState(
-    space.capacity_min ? Math.max(space.capacity_min, 1) : 1
-  )
-  const [countInput, setCountInput] = useState(String(space.capacity_min ?? 1))
-  const [eventType,       setEventType]       = useState('')
-  const [customEventType, setCustomEventType] = useState('')
-  const [selectedAddons, setSelectedAddons]   = useState<string[]>([])
-  const [guestNote, setGuestNote] = useState('')
-  const [showNote, setShowNote]   = useState(false)
+  // ── State ──────────────────────────────────────────────
+  const [step,           setStep]           = useState(initialDate ? 2 : 1)
+  const [eventDate,      setEventDate]      = useState(initialDate ?? '')
+  const [startTime,      setStartTime]      = useState('')
+  const [endTime,        setEndTime]        = useState('')
+  const [guestCount,     setGuestCount]     = useState(space.capacity_min ? Math.max(space.capacity_min, 1) : 1)
+  const [countInput,     setCountInput]     = useState(String(space.capacity_min ?? 1))
+  const [eventType,      setEventType]      = useState('')
+  const [customEventType,setCustomEventType]= useState('')
+  const [selectedAddons, setSelectedAddons] = useState<string[]>([])
+  const [guestNote,      setGuestNote]      = useState('')
+  const [showNote,       setShowNote]       = useState(false)
+  const [booking,        setBooking]        = useState(false)
+  const [success,        setSuccess]        = useState(false)
+  const [error,          setError]          = useState('')
 
-  // El tipo de evento real que se envía: si es "Otro" usa el texto personalizado
-  const finalEventType = eventType === 'Otro'
-    ? (customEventType.trim() || 'Otro')
-    : eventType
-  const [booking, setBooking]     = useState(false)
-  const [success, setSuccess]     = useState(false)
-  const [error, setError]         = useState('')
+  const finalEventType = eventType === 'Otro' ? (customEventType.trim() || 'Otro') : eventType
 
-  // ── Price calculation ────────────────────────────────────
-  const selectedAddonItems = useMemo(
-    () => addons.filter((a: any) => selectedAddons.includes(a.id)),
-    [addons, selectedAddons]
-  )
-  // Calcular horas seleccionadas respetando media noche
+  // ── Cálculo de horas — válido para TODOS los modelos ──
   function calcHours(start: string, end: string): number {
     if (!start || !end) return 0
     const sh = parseInt(start.split(':')[0]), sm = parseInt(start.split(':')[1] || '0')
@@ -107,22 +93,15 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     return Math.max(0, (en - sn) / 60)
   }
 
-  const selectedHours = isHourly ? calcHours(startTime, endTime) : 0
+  const selectedHours = useMemo(() => calcHours(startTime, endTime), [startTime, endTime])
 
-  // ── Rango horario permitido por los time_blocks del propietario ──
-  // undefined = sin restricción | null = este día no tiene horario | {start,end} = rango
+  // ── Rango horario del propietario ──────────────────────
   const allowedTimeRange = useMemo(() => {
     const blocks: any[] = space.space_time_blocks ?? []
     if (!blocks.length || !eventDate) return undefined
-
-    const dow = new Date(eventDate + 'T12:00').getDay() // 0=Dom...6=Sáb
-    const active = blocks.filter(b =>
-      b.is_active !== false && (b.days_of_week ?? []).includes(dow)
-    )
-
-    if (!active.length) return null // día configurado pero sin horario
-
-    // Si hay múltiples bloques, tomar el que cubra más horas
+    const dow = new Date(eventDate + 'T12:00').getDay()
+    const active = blocks.filter(b => b.is_active !== false && (b.days_of_week ?? []).includes(dow))
+    if (!active.length) return null
     const sorted = active.sort((a: any, b: any) => {
       const aLen = (b.end_time === '00:00' ? 24 : parseInt(b.end_time)) - parseInt(a.start_time)
       const bLen = (b.end_time === '00:00' ? 24 : parseInt(b.end_time)) - parseInt(b.start_time)
@@ -131,7 +110,45 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     return { start: sorted[0].start_time as string, end: sorted[0].end_time as string }
   }, [eventDate, space.space_time_blocks])
 
-  // Respetar la unidad del addon: por persona, por hora o precio fijo por evento
+  // ── Validación de horas (aplica a todos los modelos con límites) ──
+  const minHours     = pricing?.min_hours ?? 0
+  const maxHours     = pricing?.max_hours ?? 0
+  const packageHours = pricing?.package_hours ?? 0
+
+  const hoursError = useMemo((): string | null => {
+    if (!startTime || !endTime || selectedHours === 0) return null
+    if (minHours && selectedHours < minHours)
+      return `Mínimo ${minHours} hora${minHours > 1 ? 's' : ''} · Seleccionaste ${selectedHours.toFixed(1)}h`
+    if (maxHours && selectedHours > maxHours)
+      return `Máximo ${maxHours} hora${maxHours > 1 ? 's' : ''} · Seleccionaste ${selectedHours.toFixed(1)}h`
+    return null
+  }, [selectedHours, minHours, maxHours, startTime, endTime])
+
+  // ── Cálculo de precio por modelo ───────────────────────
+  const selectedAddonItems = useMemo(
+    () => addons.filter((a: any) => selectedAddons.includes(a.id)),
+    [addons, selectedAddons]
+  )
+
+  const basePrice = useMemo(() => {
+    if (!startTime || !endTime || selectedHours === 0) return 0
+
+    if (isHourly) {
+      return (pricing?.hourly_price ?? 0) * selectedHours
+    }
+    if (isConsumption) {
+      // El consumo mínimo es fijo — las horas definen el slot, no el precio
+      return pricing?.minimum_consumption ?? 0
+    }
+    if (isPackage) {
+      const base  = pricing?.fixed_price ?? 0
+      const extra = Math.max(0, selectedHours - packageHours)
+      const extraRate = pricing?.extra_hour_price ?? 0
+      return base + extra * extraRate
+    }
+    return 0 // quote
+  }, [pricing, startTime, endTime, selectedHours, isHourly, isConsumption, isPackage, packageHours])
+
   const addonsTotal = useMemo(() =>
     selectedAddonItems.reduce((s: number, a: any) => {
       if (a.unit === 'persona') return s + a.price * guestCount
@@ -141,25 +158,16 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     [selectedAddonItems, guestCount, selectedHours]
   )
 
-  const basePrice = useMemo(() => {
-    if (isHourly && startTime && endTime) {
-      return pricing.hourly_price * calcHours(startTime, endTime)
-    }
-    if (pricing?.pricing_type === 'minimum_consumption') return pricing.minimum_consumption
-    if (pricing?.pricing_type === 'fixed_package')       return pricing.fixed_price
-    return 0
-  }, [pricing, startTime, endTime, isHourly])
-
   const subtotal    = basePrice + addonsTotal
   const platformFee = Math.round(subtotal * 0.10)
 
-  // ── Navigation ───────────────────────────────────────────
-  const minHoursOk = !isHourly || !pricing?.min_hours || selectedHours >= pricing.min_hours
-
+  // ── Navegación ─────────────────────────────────────────
   function canGoNext(): boolean {
     if (step === 1) {
-      const timeOk = !needsTime || (!!startTime && !!endTime)
-      return !!eventDate && timeOk && minHoursOk
+      if (!eventDate) return false
+      if (!startTime || !endTime) return false  // siempre requerido
+      if (hoursError) return false
+      return true
     }
     if (step === 2) return guestCount >= 1
     if (step === 3) return !!eventType && (eventType !== 'Otro' || customEventType.trim().length > 0)
@@ -172,23 +180,17 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   function adjustCount(delta: number) {
     const min = space.capacity_min ?? 1
     const max = space.capacity_max ?? 9999
-    const newVal = Math.min(max, Math.max(min, guestCount + delta))
-    setGuestCount(newVal)
-    setCountInput(String(newVal))
+    const v = Math.min(max, Math.max(min, guestCount + delta))
+    setGuestCount(v); setCountInput(String(v))
   }
 
   function handleCountInput(val: string) {
     setCountInput(val)
     const n = parseInt(val)
     if (!isNaN(n)) {
-      const min = space.capacity_min ?? 1
-      const max = space.capacity_max ?? 9999
+      const min = space.capacity_min ?? 1; const max = space.capacity_max ?? 9999
       setGuestCount(Math.min(max, Math.max(min, n)))
     }
-  }
-
-  function handleCountBlur() {
-    setCountInput(String(guestCount))
   }
 
   function toggleAddon(id: string) {
@@ -196,13 +198,10 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   }
 
   async function handleBook() {
-    setBooking(true)
-    setError('')
+    setBooking(true); setError('')
     const result = await createBooking({
       spaceId: space.id, pricingId: pricing?.id,
-      eventDate,
-      startTime: startTime || '00:00',
-      endTime:   endTime   || '23:59',
+      eventDate, startTime, endTime,
       guestCount, eventType: finalEventType,
       eventNotes: guestNote || undefined,
       selectedAddonIds: selectedAddons,
@@ -215,25 +214,32 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     } else if (result.status === 'quote_requested') {
       setSuccess(true)
     } else {
-      // Redirigir a la página de pago con Azul
       router.push(`/pago/${result.bookingId}`)
     }
   }
 
-  // ── Mini summary (visible en pasos 2+) ───────────────────
+  // ── Mini resumen (pasos 2+) ────────────────────────────
   function MiniSummary() {
     if (step === 1) return null
     return (
-      <div className="flex items-center gap-2 px-4 py-2.5 mb-4 rounded-xl text-xs"
+      <div className="flex items-center gap-2 px-4 py-2.5 mb-4 rounded-xl text-xs flex-wrap"
         style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
         {eventDate && (
           <span className="flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
             <CalendarDays size={11} />
             {new Date(eventDate + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
-            {needsTime && startTime && ` · ${formatTime(startTime)}`}
           </span>
         )}
-        {step > 2 && guestCount > 0 && (
+        {startTime && endTime && (
+          <>
+            <span style={{ color: 'var(--border-medium)' }}>·</span>
+            <span className="flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
+              <Clock size={11} /> {formatTime(startTime)} – {formatTime(endTime)}
+              {selectedHours > 0 && ` (${selectedHours % 1 === 0 ? selectedHours : selectedHours.toFixed(1)}h)`}
+            </span>
+          </>
+        )}
+        {step > 2 && (
           <>
             <span style={{ color: 'var(--border-medium)' }}>·</span>
             <span className="flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
@@ -251,7 +257,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     )
   }
 
-  // ── Éxito ────────────────────────────────────────────────
+  // ── Éxito (cotización enviada) ────────────────────────
   if (success) return (
     <div className="rounded-3xl p-7 text-center"
       style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 40px rgba(0,0,0,0.08)' }}>
@@ -259,21 +265,19 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         style={{ background: 'rgba(53,196,147,0.1)' }}>
         <CheckCircle size={32} style={{ color: 'var(--brand)' }} />
       </div>
-      <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-        ¡Solicitud enviada!
-      </h3>
+      <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>¡Solicitud enviada!</h3>
       <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>
-        El propietario confirmará en menos de 24 horas. Revisa tu email.
+        El propietario te responderá con un precio personalizado. Revisa tu email.
       </p>
       <Link href="/dashboard/reservas"
         className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-3 rounded-xl"
         style={{ background: 'var(--brand)', color: '#fff' }}>
-        Ver mis reservas <ChevronRight size={15} />
+        Ver mis solicitudes <ChevronRight size={15} />
       </Link>
     </div>
   )
 
-  // ── Precio ───────────────────────────────────────────────
+  // ── Cabecera de precio ────────────────────────────────
   function PriceHeader() {
     if (!pricing) return null
     if (isQuote) return (
@@ -284,33 +288,61 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     )
     return (
       <div className="pb-4 mb-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-        {pricing.pricing_type === 'hourly' && (
-          <div className="flex items-baseline gap-1">
-            <span className="text-3xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-              {formatCurrency(pricing.hourly_price)}
-            </span>
-            <span className="text-sm" style={{ color: 'var(--text-muted)' }}> / hora</span>
-            {pricing.min_hours && (
-              <span className="text-xs ml-1" style={{ color: 'var(--text-muted)' }}>· mín. {pricing.min_hours}h</span>
-            )}
-          </div>
-        )}
-        {pricing.pricing_type === 'minimum_consumption' && (
+        {isHourly && (
           <div>
-            <div className="text-xs font-semibold uppercase tracking-widest mb-0.5" style={{ color: 'var(--text-muted)' }}>Consumo mínimo</div>
-            <span className="text-3xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-              {formatCurrency(pricing.minimum_consumption)}
-            </span>
-          </div>
-        )}
-        {pricing.pricing_type === 'fixed_package' && (
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-widest mb-0.5" style={{ color: 'var(--text-muted)' }}>
-              {pricing.package_name ?? 'Paquete completo'}
+            <div className="flex items-baseline gap-1 mb-1">
+              <span className="text-3xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+                {formatCurrency(pricing.hourly_price)}
+              </span>
+              <span className="text-sm" style={{ color: 'var(--text-muted)' }}> / hora</span>
             </div>
-            <span className="text-3xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-              {formatCurrency(pricing.fixed_price)}
-            </span>
+            <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-muted)' }}>
+              {minHours > 0 && <span>Mín. {minHours}h</span>}
+              {minHours > 0 && maxHours > 0 && <span>·</span>}
+              {maxHours > 0 && <span>Máx. {maxHours}h</span>}
+              {minHours > 0 && <span>· Mínimo {formatCurrency(pricing.hourly_price * minHours)}</span>}
+            </div>
+          </div>
+        )}
+        {isConsumption && (
+          <div>
+            <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>
+              Consumo mínimo garantizado
+            </div>
+            <div className="flex items-baseline gap-1 mb-1">
+              <span className="text-3xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+                {formatCurrency(pricing.minimum_consumption)}
+              </span>
+            </div>
+            <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              {minHours > 0 && maxHours > 0
+                ? `Entre ${minHours} y ${maxHours} horas`
+                : minHours > 0 ? `Mínimo ${minHours} horas`
+                : maxHours > 0 ? `Máximo ${maxHours} horas`
+                : 'Elige tu horario'}
+            </div>
+          </div>
+        )}
+        {isPackage && (
+          <div>
+            <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>
+              {pricing.package_name ?? 'Paquete'}
+            </div>
+            <div className="flex items-baseline gap-1 mb-1">
+              <span className="text-3xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+                {formatCurrency(pricing.fixed_price)}
+              </span>
+              {packageHours > 0 && (
+                <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  · {packageHours}h incluidas
+                </span>
+              )}
+            </div>
+            {pricing.extra_hour_price > 0 && (
+              <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                Hora adicional: {formatCurrency(pricing.extra_hour_price)}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -326,32 +358,27 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         <PriceHeader />
       </div>
 
-      {/* Barra de pasos */}
+      {/* Pasos */}
       <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-base)' }}>
         <div className="flex items-center w-full min-w-0">
           {steps.map((s, i) => {
             const isActive   = s.id === step
             const isComplete = s.id < step
             return (
-              <div key={s.id} className="flex items-center min-w-0" style={{ flex: i < steps.length - 1 ? '1 1 0' : '0 0 auto' }}>
-                <button
-                  onClick={() => isComplete && setStep(s.id)}
+              <div key={s.id} className="flex items-center min-w-0"
+                style={{ flex: i < steps.length - 1 ? '1 1 0' : '0 0 auto' }}>
+                <button onClick={() => isComplete && setStep(s.id)}
                   disabled={!isComplete && !isActive}
-                  className="flex flex-col items-center gap-0.5 shrink-0 min-w-0"
-                  style={{ minWidth: 0 }}>
+                  className="flex flex-col items-center gap-0.5 shrink-0 min-w-0">
                   <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all shrink-0"
                     style={isComplete
                       ? { background: 'var(--brand)', color: '#fff' }
-                      : isActive
-                        ? { background: '#0F1623', color: '#fff' }
-                        : { background: 'var(--border-medium)', color: 'var(--text-muted)' }}>
+                      : isActive ? { background: '#0F1623', color: '#fff' }
+                      : { background: 'var(--border-medium)', color: 'var(--text-muted)' }}>
                     {isComplete ? <CheckCircle size={11} /> : s.id}
                   </div>
                   <span className="text-xs font-medium leading-none"
-                    style={{
-                      color: isActive ? '#0F1623' : isComplete ? 'var(--brand)' : 'var(--text-muted)',
-                      maxWidth: 44, textAlign: 'center',
-                    }}>
+                    style={{ color: isActive ? '#0F1623' : isComplete ? 'var(--brand)' : 'var(--text-muted)', maxWidth: 44, textAlign: 'center' }}>
                     {s.label}
                   </span>
                 </button>
@@ -365,67 +392,76 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         </div>
       </div>
 
-      {/* Contenido del paso — min-height evita que el widget salte de tamaño */}
+      {/* Contenido */}
       <div className="px-5 py-5" style={{ minHeight: 320 }}>
         <MiniSummary />
 
-        {/* ── PASO 1: FECHA ─────────────────────────────── */}
+        {/* ── PASO 1: FECHA Y HORA ────────────────────────── */}
         {step === 1 && (
           <div className="space-y-4">
-            <h3 className="font-bold text-base mb-2" style={{ color: 'var(--text-primary)' }}>
-              ¿Cuándo es tu evento?
-            </h3>
+            <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>¿Cuándo es tu evento?</h3>
 
-            {/* Calendario visual */}
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-widest mb-2"
-                style={{ color: 'var(--text-muted)' }}>Fecha del evento</div>
-              <DatePicker
-                value={eventDate}
-                onChange={setEventDate}
-                minDate={new Date().toISOString().split('T')[0]}
-                placeholder="Elige una fecha"
-              />
-            </div>
+            <DatePicker
+              value={eventDate}
+              onChange={setEventDate}
+              minDate={new Date().toISOString().split('T')[0]}
+              placeholder="Elige una fecha"
+            />
 
-            {/* Aviso de consumo mínimo */}
+            {/* Mensaje informativo por modelo */}
             {isConsumption && (
-              <div className="px-4 py-3 rounded-xl text-sm"
+              <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl"
                 style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.15)' }}>
-                <div className="font-semibold mb-0.5" style={{ color: '#1D4ED8' }}>
-                  Consumo mínimo requerido
-                </div>
-                <div style={{ color: '#3B82F6' }}>
-                  Para reservar este espacio, el grupo debe consumir al menos{' '}
-                  <strong>{formatCurrency(pricing.minimum_consumption)}</strong> en comida y bebidas durante el evento.
+                <Info size={14} style={{ color: '#2563EB', flexShrink: 0, marginTop: 1 }} />
+                <div className="text-xs" style={{ color: '#1D4ED8', lineHeight: 1.6 }}>
+                  <strong>Consumo mínimo garantizado: {formatCurrency(pricing.minimum_consumption)}</strong><br />
+                  Tu grupo debe consumir ese monto en comida y bebidas. Lo que exceda ese mínimo lo pagas directo en el lugar.
+                  {(minHours > 0 || maxHours > 0) && (
+                    <span> · Duración: {minHours > 0 && maxHours > 0
+                      ? `${minHours}–${maxHours} horas`
+                      : minHours > 0 ? `mín. ${minHours}h` : `máx. ${maxHours}h`}
+                    </span>
+                  )}
                 </div>
               </div>
             )}
 
-            {/* Time pickers — aparecen para por hora (cálculo) y consumo mínimo (disponibilidad) */}
-            {needsTime && (
+            {isPackage && (
+              <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl"
+                style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid rgba(53,196,147,0.15)' }}>
+                <Info size={14} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: 1 }} />
+                <div className="text-xs" style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                  <strong>Paquete: {formatCurrency(pricing.fixed_price)}</strong>
+                  {packageHours > 0 && <span> · {packageHours} horas incluidas</span>}
+                  {pricing.extra_hour_price > 0 && (
+                    <span> · Hora adicional: {formatCurrency(pricing.extra_hour_price)}</span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {isQuote && (
+              <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl"
+                style={{ background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)' }}>
+                <Info size={14} style={{ color: '#D97706', flexShrink: 0, marginTop: 1 }} />
+                <div className="text-xs" style={{ color: '#92400E', lineHeight: 1.6 }}>
+                  El propietario te enviará un precio personalizado basado en tu horario y evento.
+                </div>
+              </div>
+            )}
+
+            {/* Selectores de hora — siempre visibles */}
+            {eventDate && (
               <div className="space-y-3">
-                {/* Restricción de horas (solo modelo por hora) */}
-                {isHourly && (pricing.min_hours || pricing.max_hours) && (
+                {isHourly && (minHours > 0 || maxHours > 0) && (
                   <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
                     style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                    <Clock size={13} style={{ color: 'var(--brand)', flexShrink: 0 }} />
+                    <Clock size={12} style={{ color: 'var(--brand)' }} />
                     <span style={{ color: 'var(--text-secondary)' }}>
-                      {pricing.min_hours && pricing.max_hours
-                        ? `Entre ${pricing.min_hours} y ${pricing.max_hours} horas`
-                        : pricing.min_hours
-                          ? `Mínimo ${pricing.min_hours} hora${pricing.min_hours > 1 ? 's' : ''}`
-                          : `Máximo ${pricing.max_hours} horas`}
-                    </span>
-                  </div>
-                )}
-                {/* Aviso de disponibilidad para consumo mínimo */}
-                {isConsumption && (
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
-                    style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                    <Clock size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-                    <span style={{ color: 'var(--text-secondary)' }}>
-                      Indica el horario para verificar disponibilidad
+                      {minHours > 0 && maxHours > 0
+                        ? `Reserva entre ${minHours} y ${maxHours} horas`
+                        : minHours > 0 ? `Mínimo ${minHours} hora${minHours > 1 ? 's' : ''}`
+                        : `Máximo ${maxHours} horas`}
                     </span>
                   </div>
                 )}
@@ -433,60 +469,57 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                   <TimePicker
                     value={startTime}
                     onChange={v => { setStartTime(v); setEndTime('') }}
-                    placeholder="Selecciona hora de inicio"
+                    placeholder="Hora de inicio"
                     allowedRange={allowedTimeRange}
                   />
                   <TimePicker
                     value={endTime}
                     onChange={setEndTime}
-                    placeholder={startTime ? 'Selecciona hora de salida' : 'Primero elige inicio'}
+                    placeholder={startTime ? 'Hora de salida' : 'Elige inicio primero'}
                     disabled={!startTime}
                     afterValue={startTime || undefined}
-                    minMinutesAfter={isHourly && pricing.min_hours ? pricing.min_hours * 60 : undefined}
-                    maxMinutesAfter={isHourly && pricing.max_hours ? pricing.max_hours * 60 : undefined}
+                    minMinutesAfter={minHours ? minHours * 60 : undefined}
+                    maxMinutesAfter={maxHours ? maxHours * 60 : undefined}
                     allowedRange={allowedTimeRange}
                   />
                 </div>
               </div>
             )}
 
-            {/* Preview — modelo por hora: muestra total calculado */}
-            {isHourly && startTime && endTime && selectedHours > 0 && minHoursOk && (
-              <div className="flex items-center justify-between px-4 py-3 rounded-2xl"
-                style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
-                <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
-                  {selectedHours % 1 === 0
-                    ? `${selectedHours} hora${selectedHours !== 1 ? 's' : ''}`
-                    : `${selectedHours.toFixed(1)} horas`}
-                  {' · '}{formatTime(startTime)} – {formatTime(endTime)}
-                </span>
-                <span className="font-bold text-base" style={{ color: 'var(--brand)' }}>
-                  {formatCurrency(basePrice)}
-                </span>
-              </div>
-            )}
-
-            {/* Preview — modelo consumo mínimo: muestra el mínimo, no multiplica */}
-            {isConsumption && startTime && endTime && (
-              <div className="flex items-center justify-between px-4 py-3 rounded-2xl"
-                style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.15)' }}>
-                <span className="text-sm" style={{ color: '#3B82F6' }}>
-                  {formatTime(startTime)} – {formatTime(endTime)}
-                </span>
-                <span className="font-bold text-sm" style={{ color: '#1D4ED8' }}>
-                  Desde {formatCurrency(pricing.minimum_consumption)}
-                </span>
-              </div>
-            )}
-
-            {/* Advertencia si no cumple el mínimo de horas */}
-            {isHourly && startTime && endTime && selectedHours > 0 && !minHoursOk && (
-              <div className="flex items-center gap-2 px-4 py-3 rounded-2xl text-sm"
+            {/* Error de horas */}
+            {hoursError && (
+              <div className="px-4 py-3 rounded-xl text-sm"
                 style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.2)', color: '#DC2626' }}>
-                <span>
-                  Este espacio requiere mínimo <strong>{pricing.min_hours} hora{pricing.min_hours !== 1 ? 's' : ''}</strong>.
-                  {' '}Seleccionaste {selectedHours.toFixed(1)}h.
-                </span>
+                {hoursError}
+              </div>
+            )}
+
+            {/* Preview de precio cuando hay horario válido */}
+            {startTime && endTime && selectedHours > 0 && !hoursError && (
+              <div className="flex items-center justify-between px-4 py-3.5 rounded-2xl"
+                style={{ background: isConsumption ? 'rgba(37,99,235,0.05)' : 'var(--brand-dim)', border: `1px solid ${isConsumption ? 'rgba(37,99,235,0.15)' : 'var(--brand-border)'}` }}>
+                <div>
+                  <div className="text-sm font-medium" style={{ color: isConsumption ? '#1D4ED8' : 'var(--text-secondary)' }}>
+                    {formatTime(startTime)} – {formatTime(endTime)}
+                    <span className="ml-1.5 text-xs opacity-70">
+                      ({selectedHours % 1 === 0 ? selectedHours : selectedHours.toFixed(1)} horas)
+                    </span>
+                  </div>
+                  {isPackage && selectedHours > packageHours && packageHours > 0 && (
+                    <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                      {packageHours}h incluidas + {(selectedHours - packageHours).toFixed(1)}h adicionales
+                    </div>
+                  )}
+                </div>
+                <div>
+                  {isQuote ? (
+                    <span className="text-sm font-semibold" style={{ color: '#D97706' }}>Cotización</span>
+                  ) : (
+                    <span className="font-bold text-base" style={{ color: isConsumption ? '#1D4ED8' : 'var(--brand)' }}>
+                      {formatCurrency(basePrice)}
+                    </span>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -495,80 +528,55 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         {/* ── PASO 2: PERSONAS ──────────────────────────── */}
         {step === 2 && (
           <div>
-            <h3 className="font-bold text-base mb-4" style={{ color: 'var(--text-primary)' }}>
-              ¿Cuántas personas asistirán?
-            </h3>
+            <h3 className="font-bold text-base mb-4" style={{ color: 'var(--text-primary)' }}>¿Cuántas personas asistirán?</h3>
             <div className="flex items-stretch gap-0 rounded-2xl overflow-hidden"
               style={{ border: '1.5px solid var(--border-medium)' }}>
-              <button onClick={() => adjustCount(-1)}
-                disabled={guestCount <= (space.capacity_min ?? 1)}
+              <button onClick={() => adjustCount(-1)} disabled={guestCount <= (space.capacity_min ?? 1)}
                 className="w-14 flex items-center justify-center transition-colors disabled:opacity-30 shrink-0"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)' }}>
                 <Minus size={18} />
               </button>
               <div className="flex-1 flex flex-col items-center justify-center py-4 border-x"
                 style={{ borderColor: 'var(--border-medium)' }}>
-                <input
-                  type="number"
-                  value={countInput}
+                <input type="number" value={countInput}
                   onChange={e => handleCountInput(e.target.value)}
-                  onBlur={handleCountBlur}
+                  onBlur={() => setCountInput(String(guestCount))}
                   className="text-3xl font-bold text-center bg-transparent focus:outline-none w-24 tabular-nums"
                   style={{ color: 'var(--text-primary)' }}
-                  min={space.capacity_min ?? 1}
-                  max={space.capacity_max}
-                />
+                  min={space.capacity_min ?? 1} max={space.capacity_max} />
                 <span className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>personas</span>
               </div>
-              <button onClick={() => adjustCount(+1)}
-                disabled={guestCount >= space.capacity_max}
+              <button onClick={() => adjustCount(+1)} disabled={guestCount >= space.capacity_max}
                 className="w-14 flex items-center justify-center transition-colors disabled:opacity-30 shrink-0"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)' }}>
                 <Plus size={18} />
               </button>
             </div>
-            <div className="flex justify-between mt-2 text-xs px-1"
-              style={{ color: 'var(--text-muted)' }}>
+            <div className="flex justify-between mt-2 text-xs px-1" style={{ color: 'var(--text-muted)' }}>
               <span>{space.capacity_min ? `Mínimo ${space.capacity_min}` : 'Desde 1'}</span>
               <span>Máximo {space.capacity_max}</span>
             </div>
           </div>
         )}
 
-        {/* ── PASO 3: TIPO DE EVENTO ─────────────────────── */}
+        {/* ── PASO 3: TIPO DE EVENTO ────────────────────── */}
         {step === 3 && (
           <div className="space-y-4">
             <div>
-              <h3 className="font-bold text-base mb-1" style={{ color: 'var(--text-primary)' }}>
-                ¿Qué tipo de evento es?
-              </h3>
+              <h3 className="font-bold text-base mb-1" style={{ color: 'var(--text-primary)' }}>¿Qué tipo de evento es?</h3>
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                Ayuda al propietario a preparar el espacio para tu celebración.
+                Ayuda al propietario a preparar el espacio.
               </p>
             </div>
-
-            {/* Grid 2 columnas */}
             <div className="grid grid-cols-2 gap-2">
               {EVENT_TYPES.map(et => {
                 const isSelected = eventType === et
-                const isOtro = et === 'Otro'
                 return (
-                  <button
-                    key={et}
-                    onClick={() => {
-                      setEventType(et)
-                      if (!isOtro) setCustomEventType('')
-                    }}
+                  <button key={et} onClick={() => { setEventType(et); if (et !== 'Otro') setCustomEventType('') }}
                     className="flex items-center gap-2.5 px-3.5 py-3 rounded-2xl text-left transition-all"
-                    style={isSelected ? {
-                      background: '#03313C',
-                      color: '#fff',
-                      boxShadow: '0 2px 12px rgba(3,49,60,0.2)',
-                    } : {
-                      background: '#fff',
-                      color: 'var(--text-primary)',
-                      border: '1.5px solid var(--border-medium)',
-                    }}>
+                    style={isSelected
+                      ? { background: '#03313C', color: '#fff', boxShadow: '0 2px 12px rgba(3,49,60,0.2)' }
+                      : { background: '#fff', color: 'var(--text-primary)', border: '1.5px solid var(--border-medium)' }}>
                     <span className="w-2 h-2 rounded-full shrink-0"
                       style={{ background: isSelected ? '#35C493' : 'var(--border-medium)' }} />
                     <span className="text-sm font-medium leading-tight">{et}</span>
@@ -576,98 +584,44 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                 )
               })}
             </div>
-
-            {/* Campo abierto cuando eligen "Otro" */}
             {eventType === 'Otro' && (
               <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2"
-                    style={{ color: 'var(--text-muted)' }}>
-                    Describe tu evento
-                  </label>
-                  <input
-                    value={customEventType}
-                    onChange={e => setCustomEventType(e.target.value)}
-                    placeholder="Ej: Reunión de empresa, Lanzamiento de producto, Ensayo musical..."
-                    className="input-base w-full rounded-xl px-4 py-3 text-sm"
-                    autoFocus
-                  />
-                  {!customEventType.trim() && (
-                    <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
-                      Requerido para continuar
-                    </p>
-                  )}
-                </div>
-
-                {/* Nota automática cuando es "Otro" */}
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2"
-                    style={{ color: 'var(--text-muted)' }}>
-                    Mensaje al propietario <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(opcional)</span>
-                  </label>
-                  <textarea
-                    value={guestNote}
-                    onChange={e => setGuestNote(e.target.value)}
-                    placeholder="Cuéntale más sobre tu evento: cuántas personas, qué necesitas, si traes equipo propio..."
-                    rows={3}
-                    className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none"
-                  />
-                </div>
+                <input value={customEventType} onChange={e => setCustomEventType(e.target.value)}
+                  placeholder="Describe tu evento..." className="input-base w-full rounded-xl px-4 py-3 text-sm" autoFocus />
+                <textarea value={guestNote} onChange={e => setGuestNote(e.target.value)}
+                  placeholder="Cuéntale más al propietario (opcional)..."
+                  rows={2} className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none" />
               </div>
             )}
-
-            {/* Nota opcional para otros tipos también */}
             {eventType && eventType !== 'Otro' && (
-              <div>
-                {!showNote ? (
-                  <button
-                    onClick={() => setShowNote(true)}
-                    className="text-xs font-medium flex items-center gap-1.5 transition-colors"
-                    style={{ color: 'var(--text-muted)' }}>
-                    <MessageCircle size={13} /> Añadir nota al propietario (opcional)
-                  </button>
-                ) : (
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-widest mb-2"
-                      style={{ color: 'var(--text-muted)' }}>
-                      Mensaje al propietario
-                    </label>
-                    <textarea
-                      value={guestNote}
-                      onChange={e => setGuestNote(e.target.value)}
-                      placeholder="Ej: Llegaremos 2 horas antes para decorar, traemos nuestro DJ..."
-                      rows={2}
-                      className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none"
-                    />
-                  </div>
-                )}
-              </div>
+              !showNote ? (
+                <button onClick={() => setShowNote(true)}
+                  className="text-xs font-medium flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
+                  <MessageCircle size={13} /> Añadir nota al propietario (opcional)
+                </button>
+              ) : (
+                <textarea value={guestNote} onChange={e => setGuestNote(e.target.value)}
+                  placeholder="Ej: Llegaremos 2 horas antes para decorar..."
+                  rows={2} className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none" />
+              )
             )}
           </div>
         )}
 
-        {/* ── PASO 4: ADICIONALES ───────────────────────── */}
+        {/* ── PASO 4: ADICIONALES ──────────────────────── */}
         {step === 4 && addons.length > 0 && (
           <div>
-            <h3 className="font-bold text-base mb-1" style={{ color: 'var(--text-primary)' }}>
-              Servicios adicionales
-            </h3>
-            <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-              Opcional · Puedes agregarlos o continuar sin ellos.
-            </p>
+            <h3 className="font-bold text-base mb-1" style={{ color: 'var(--text-primary)' }}>Servicios adicionales</h3>
+            <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>Opcional · Puedes continuar sin ellos.</p>
             <div className="space-y-2">
               {addons.map((addon: any) => {
                 const sel = selectedAddons.includes(addon.id)
                 return (
                   <button key={addon.id} onClick={() => toggleAddon(addon.id)}
-                    className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl border transition-all duration-150"
-                    style={sel ? {
-                      background: 'rgba(53,196,147,0.05)',
-                      borderColor: 'var(--brand)',
-                    } : {
-                      background: 'var(--bg-base)',
-                      borderColor: 'var(--border-subtle)',
-                    }}>
+                    className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-2xl border transition-all"
+                    style={sel
+                      ? { background: 'rgba(53,196,147,0.05)', borderColor: 'var(--brand)' }
+                      : { background: 'var(--bg-base)', borderColor: 'var(--border-subtle)' }}>
                     <span className="text-xl shrink-0">{addonEmoji(addon.name)}</span>
                     <div className="flex-1 text-left">
                       <div className="text-sm font-semibold" style={{ color: sel ? 'var(--brand)' : 'var(--text-primary)' }}>
@@ -693,19 +647,16 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
           </div>
         )}
 
-        {/* ── PASO 5: RESUMEN Y PAGO ─────────────────────── */}
+        {/* ── PASO 5: RESUMEN Y PAGO ────────────────────── */}
         {step === maxStep && (
           <div className="space-y-5">
-            <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>
-              Resumen de tu reserva
-            </h3>
+            <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>Resumen de tu reserva</h3>
 
-            {/* Resumen del evento */}
-            <div className="rounded-2xl overflow-hidden"
-              style={{ border: '1px solid var(--border-subtle)' }}>
+            {/* Evento */}
+            <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
               {[
                 { icon: CalendarDays, label: 'Fecha', value: new Date(eventDate + 'T12:00').toLocaleDateString('es-DO', { weekday: 'long', day: 'numeric', month: 'long' }) },
-                ...(needsTime && startTime ? [{ icon: Clock, label: 'Horario', value: `${formatTime(startTime)} – ${formatTime(endTime)}` }] : []),
+                { icon: Clock, label: 'Horario', value: `${formatTime(startTime)} – ${formatTime(endTime)} · ${selectedHours % 1 === 0 ? selectedHours : selectedHours.toFixed(1)} horas` },
                 { icon: Users, label: 'Personas', value: `${guestCount} personas` },
                 { icon: Sparkles, label: 'Evento', value: finalEventType },
               ].map(({ icon: Icon, label, value }, i, arr) => (
@@ -720,8 +671,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
 
             {/* Desglose de precio */}
             {subtotal > 0 && (
-              <div className="rounded-2xl overflow-hidden"
-                style={{ border: '1px solid var(--border-subtle)' }}>
+              <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
                 <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)' }}>
                   <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
                     Desglose del precio
@@ -730,35 +680,53 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                 <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
                   {basePrice > 0 && (
                     <div className="flex justify-between px-4 py-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      <span>Espacio</span><span>{formatCurrency(basePrice)}</span>
+                      <span>
+                        {isHourly && `${selectedHours % 1 === 0 ? selectedHours : selectedHours.toFixed(1)}h × ${formatCurrency(pricing?.hourly_price)}/hr`}
+                        {isConsumption && 'Consumo mínimo garantizado'}
+                        {isPackage && (() => {
+                          const extra = Math.max(0, selectedHours - packageHours)
+                          return extra > 0
+                            ? `Paquete (${packageHours}h) + ${extra.toFixed(1)}h adicionales`
+                            : `Paquete ${packageHours}h incluidas`
+                        })()}
+                      </span>
+                      <span>{formatCurrency(basePrice)}</span>
                     </div>
                   )}
                   {selectedAddonItems.map((a: any) => (
                     <div key={a.id} className="flex justify-between px-4 py-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
                       <span>{addonEmoji(a.name)} {a.name}</span>
-                      <span>+ {formatCurrency(a.price)}</span>
+                      <span>+ {formatCurrency(a.unit === 'persona' ? a.price * guestCount : a.unit === 'hora' ? a.price * selectedHours : a.price)}</span>
                     </div>
                   ))}
-                  <div className="flex justify-between px-4 py-3 text-sm font-bold"
-                    style={{ color: 'var(--text-primary)' }}>
-                    <span>Total del evento</span><span>{formatCurrency(subtotal)}</span>
+                  <div className="flex justify-between px-4 py-3 text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                    <span>Total</span><span>{formatCurrency(subtotal)}</span>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Garantía de pago seguro */}
+            {/* Nota del consumo mínimo en paso 5 */}
+            {isConsumption && (
+              <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl"
+                style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.15)' }}>
+                <Info size={13} style={{ color: '#2563EB', flexShrink: 0, marginTop: 1 }} />
+                <p className="text-xs" style={{ color: '#1D4ED8', lineHeight: 1.6 }}>
+                  EspotHub cobra el consumo mínimo como garantía. Si tu grupo consume más en el evento, lo pagas directo al lugar.
+                </p>
+              </div>
+            )}
+
             {!isQuote && (
               <div className="flex items-center gap-3 px-4 py-3 rounded-2xl"
                 style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.15)' }}>
                 <ShieldCheck size={16} style={{ color: 'var(--brand)', flexShrink: 0 }} />
                 <p className="text-xs" style={{ color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                  Pago 100% seguro con tarjeta de crédito/débito. Tu reserva queda confirmada inmediatamente al pagar.
+                  Pago 100% seguro. Tu reserva queda confirmada inmediatamente al pagar.
                 </p>
               </div>
             )}
 
-            {/* Nota — solo visible si fue añadida en el paso 3 */}
             {guestNote && (
               <div className="px-4 py-3 rounded-xl text-sm italic"
                 style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
@@ -776,25 +744,21 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         )}
       </div>
 
-      {/* ── Navegación ─────────────────────────────────────── */}
-      <div className="px-6 pb-6 space-y-3" style={{ borderRadius: '0 0 24px 24px' }}>
-        {/* Botón principal */}
+      {/* Navegación */}
+      <div className="px-6 pb-6 space-y-3">
         {step === maxStep ? (
           <button onClick={handleBook} disabled={booking}
             className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl font-bold text-base transition-all disabled:opacity-50"
             style={{
-              background: isQuote ? '#0891B2' : 'var(--brand)',
-              color: '#fff',
+              background: isQuote ? '#0891B2' : 'var(--brand)', color: '#fff',
               boxShadow: `0 4px 24px ${isQuote ? 'rgba(8,145,178,0.3)' : 'rgba(53,196,147,0.35)'}`,
-              fontSize: 15,
             }}>
-            {booking ? (
-              <><Loader2 size={18} className="animate-spin" /> Procesando...</>
-            ) : isQuote ? (
-              <><MessageCircle size={18} /> Solicitar cotización</>
-            ) : (
-              <><CreditCard size={18} /> Continuar al pago · {formatCurrency(subtotal)}</>
-            )}
+            {booking
+              ? <><Loader2 size={18} className="animate-spin" /> Procesando...</>
+              : isQuote
+                ? <><MessageCircle size={18} /> Solicitar cotización</>
+                : <><CreditCard size={18} /> Continuar al pago · {formatCurrency(subtotal)}</>
+            }
           </button>
         ) : (
           <button onClick={next} disabled={!canGoNext()}
@@ -802,17 +766,14 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             style={{
               background: canGoNext() ? '#0F1623' : 'var(--bg-elevated)',
               color: canGoNext() ? '#fff' : 'var(--text-muted)',
-              letterSpacing: '0.01em',
             }}>
             Continuar <ChevronRight size={16} />
           </button>
         )}
-
-        {/* Atrás + chat */}
         <div className="flex items-center gap-2 pb-2">
           {step > 1 && (
             <button onClick={back}
-              className="flex items-center gap-1.5 text-xs font-medium px-4 py-2.5 rounded-xl flex-1 justify-center transition-colors"
+              className="flex items-center gap-1.5 text-xs font-medium px-4 py-2.5 rounded-xl flex-1 justify-center"
               style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-medium)', background: '#fff' }}>
               <ChevronLeft size={13} /> Atrás
             </button>

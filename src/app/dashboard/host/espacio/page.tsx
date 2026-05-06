@@ -760,30 +760,26 @@ export default function EspacioPage() {
             {pricingType === 'minimum_consumption' && (
               <div className="bg-[rgba(53,196,147,0.07)] border border-[rgba(53,196,147,0.20)] rounded-xl p-5 space-y-4">
                 <h3 className="font-semibold text-sm" style={{ color: 'var(--brand)' }}>Configuración de consumo mínimo</h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Consumo mínimo (RD$)</label>
-                    <input
-                      type="number"
-                      value={minConsumption}
-                      onChange={e => setMinConsumption(e.target.value)}
-                      placeholder="60000"
-                      className="w-full input-base rounded-xl px-4 py-2.5 text-sm"
-                    />
+                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Consumo mínimo (RD$) *</label>
+                    <input type="number" value={minConsumption} onChange={e => setMinConsumption(e.target.value)}
+                      placeholder="60000" className="w-full input-base rounded-xl px-4 py-2.5 text-sm" />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Duración de la sesión (horas)</label>
-                    <input
-                      type="number"
-                      value={sessionHours}
-                      onChange={e => setSessionHours(e.target.value)}
-                      placeholder="4"
-                      className="w-full input-base rounded-xl px-4 py-2.5 text-sm"
-                    />
+                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Mínimo de horas</label>
+                    <input type="number" value={minHours} onChange={e => setMinHours(e.target.value)}
+                      placeholder="3" className="w-full input-base rounded-xl px-4 py-2.5 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Máximo de horas</label>
+                    <input type="number" value={maxHours} onChange={e => setMaxHours(e.target.value)}
+                      placeholder="8" className="w-full input-base rounded-xl px-4 py-2.5 text-sm" />
                   </div>
                 </div>
                 <div className="rounded-lg p-3 text-xs" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
-                  El cliente reserva el espacio comprometiéndose a consumir al menos <strong style={{ color: 'var(--text-primary)' }}>{minConsumption ? formatCurrency(Number(minConsumption)) : 'ese monto'}</strong> en comida y bebidas durante el evento.
+                  💡 El cliente reserva el horario y se compromete a consumir mínimo <strong style={{ color: 'var(--text-primary)' }}>{minConsumption ? formatCurrency(Number(minConsumption)) : 'ese monto'}</strong> en comida y bebidas.
+                  Si consumen más, lo pagan directo en tu local. EspotHub cobra el mínimo como garantía.
                 </div>
               </div>
             )}
@@ -794,46 +790,50 @@ export default function EspacioPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Nombre del paquete</label>
-                    <input
-                      value={packageName}
-                      onChange={e => setPackageName(e.target.value)}
+                    <input value={packageName} onChange={e => setPackageName(e.target.value)}
                       placeholder="Paquete Cumpleaños Premium"
-                      className="w-full input-base rounded-xl px-4 py-2.5 text-sm"
-                    />
+                      className="w-full input-base rounded-xl px-4 py-2.5 text-sm" />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Precio del paquete (RD$)</label>
-                    <input
-                      type="number"
-                      value={fixedPrice}
-                      onChange={e => setFixedPrice(e.target.value)}
-                      placeholder="35000"
-                      className="w-full input-base rounded-xl px-4 py-2.5 text-sm"
-                    />
+                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Precio del paquete (RD$) *</label>
+                    <input type="number" value={fixedPrice} onChange={e => setFixedPrice(e.target.value)}
+                      placeholder="35000" className="w-full input-base rounded-xl px-4 py-2.5 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Horas incluidas *</label>
+                    <input type="number" value={sessionHours} onChange={e => setSessionHours(e.target.value)}
+                      placeholder="6" className="w-full input-base rounded-xl px-4 py-2.5 text-sm" />
+                    <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>El cliente puede reservar esas horas exactas</p>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Precio hora adicional (RD$)</label>
+                    <input type="number" value={maxHours} onChange={e => setMaxHours(e.target.value)}
+                      placeholder="5000" className="w-full input-base rounded-xl px-4 py-2.5 text-sm" />
+                    <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Si quiere más horas que las incluidas</p>
                   </div>
                 </div>
+                {fixedPrice && sessionHours && (
+                  <div className="rounded-lg p-3 text-xs" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+                    💡 El cliente paga <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(Number(fixedPrice))}</strong> por {sessionHours} horas.
+                    {maxHours && ` Hora adicional: ${formatCurrency(Number(maxHours))}.`}
+                  </div>
+                )}
                 <div>
                   <label className="block text-xs font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>¿Qué incluye el paquete?</label>
                   <div className="flex gap-2 mb-2">
-                    <input
-                      value={newInclude}
-                      onChange={e => setNewInclude(e.target.value)}
+                    <input value={newInclude} onChange={e => setNewInclude(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter' && newInclude.trim()) { setPackageIncludes([...packageIncludes, newInclude.trim()]); setNewInclude('') }}}
-                      placeholder="Ej: Espacio 4 horas, música, bartender..."
-                      className="flex-1 input-base rounded-xl px-4 py-2.5 text-sm"
-                    />
-                    <button
-                      onClick={() => { if (newInclude.trim()) { setPackageIncludes([...packageIncludes, newInclude.trim()]); setNewInclude('') }}}
-                      className="bg-[#35C493] hover:bg-[#4DD9A7] text-white px-4 py-2.5 rounded-xl transition-colors text-sm"
-                    >
+                      placeholder="Ej: Música, bartender, decoración básica..."
+                      className="flex-1 input-base rounded-xl px-4 py-2.5 text-sm" />
+                    <button onClick={() => { if (newInclude.trim()) { setPackageIncludes([...packageIncludes, newInclude.trim()]); setNewInclude('') }}}
+                      className="bg-[#35C493] hover:bg-[#4DD9A7] text-white px-4 py-2.5 rounded-xl transition-colors text-sm">
                       Agregar
                     </button>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {packageIncludes.map((item, i) => (
                       <div key={i} className="flex items-center gap-1.5 bg-[rgba(53,196,147,0.12)] text-[#4DD9A7] px-3 py-1 rounded-full text-xs">
-                        <CheckCircle size={12} />
-                        {item}
+                        <CheckCircle size={12} /> {item}
                         <button onClick={() => setPackageIncludes(packageIncludes.filter((_, j) => j !== i))} className="hover:text-red-400 ml-0.5">
                           <X size={11} />
                         </button>
