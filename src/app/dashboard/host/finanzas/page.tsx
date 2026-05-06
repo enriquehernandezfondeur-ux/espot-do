@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { getHostBookings, getHostStats } from '@/lib/actions/host'
 import { Loader2, TrendingUp, CreditCard, DollarSign, Download, ArrowUpRight, Clock, CheckCircle, Building2, Banknote } from 'lucide-react'
+import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 // ── Estados de pago unificados ─────────────────────────────
 const paymentLabel: Record<string, { label: string; color: string; bg: string }> = {
@@ -152,6 +153,55 @@ export default function FinanzasPage() {
             <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{sub}</div>
           </div>
         ))}
+      </div>
+
+      {/* ── Gráfica de ingresos mensuales ── */}
+      <div className="rounded-2xl p-6 mb-6"
+        style={{ background: '#fff', border: '1px solid #E5E7EB', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="font-bold text-sm" style={{ color: '#03313C' }}>Ingresos por mes</h2>
+            <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>Últimos 6 meses · Ingresos brutos confirmados</p>
+          </div>
+          <div className="text-right">
+            <div className="font-bold text-lg" style={{ color: '#35C493', letterSpacing: '-0.02em' }}>
+              {formatCurrency(thisMonth)}
+            </div>
+            <div className="text-xs" style={{ color: '#9CA3AF' }}>este mes</div>
+          </div>
+        </div>
+
+        {stats?.monthlyRevenue?.some((m: any) => m.ingresos > 0) ? (
+          <ResponsiveContainer width="100%" height={180}>
+            <AreaChart data={stats.monthlyRevenue}>
+              <defs>
+                <linearGradient id="gradFinanzas" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%"  stopColor="#35C493" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="#35C493" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="mes" stroke="#F3F4F6"
+                tick={{ fill: '#9CA3AF', fontSize: 11 }}
+                axisLine={false} tickLine={false} />
+              <Tooltip
+                contentStyle={{
+                  background: '#fff', border: '1px solid #E5E7EB',
+                  borderRadius: 12, color: '#03313C', fontSize: 12,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                }}
+                formatter={(v: any) => [formatCurrency(Number(v)), 'Ingresos']}
+              />
+              <Area type="monotone" dataKey="ingresos"
+                stroke="#35C493" strokeWidth={2.5}
+                fill="url(#gradFinanzas)" dot={false} />
+            </AreaChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="flex items-center justify-center h-44 rounded-2xl text-sm"
+            style={{ background: '#F9FAFB', border: '1px dashed #E5E7EB', color: '#9CA3AF' }}>
+            La gráfica aparece cuando tengas reservas confirmadas
+          </div>
+        )}
       </div>
 
       {/* Cómo funciona */}
