@@ -5,10 +5,9 @@ import Link from 'next/link'
 import {
   MapPin, Users, Shield, ChevronLeft, ChevronRight,
   Clock, CheckCircle, X, Music, Ban,
-  ArrowLeft, Share2, CreditCard, Lock, ChevronDown,
+  ArrowLeft, Share2, CreditCard, Lock, ChevronDown, Play, Images,
 } from 'lucide-react'
 import { cn, formatCurrency, formatTime } from '@/lib/utils'
-import { Play } from 'lucide-react'
 import ChatDrawer from '@/components/marketplace/ChatDrawer'
 import BookingWidget from '@/components/marketplace/BookingWidget'
 
@@ -71,6 +70,7 @@ const termLabel: Record<string, string> = {
 
 export default function SpaceDetailClient({ space, similarSpaces = [], initialDate }: { space: any; similarSpaces?: any[]; initialDate?: string }) {
   const [photoIdx,        setPhotoIdx]        = useState(0)
+  const [showLightbox,    setShowLightbox]    = useState(false)
   const [showChat,        setShowChat]        = useState(false)
   const [activeTab,       setActiveTab]       = useState<'info' | 'addons' | 'rules'>('info')
   const [showMobileWidget,setShowMobileWidget]= useState(false)
@@ -207,82 +207,212 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
           </button>
         </div>
 
-        {/* Photos */}
+        {/* ── Galería de medios ── */}
         <div className="mb-6 md:mb-10">
-          <div className="relative rounded-2xl md:rounded-3xl overflow-hidden"
-            style={{ aspectRatio: '16/9', background: 'var(--bg-elevated)' }}>
+
+          {/* ────────────────────── DESKTOP: Grid 5 celdas ── */}
+          <div className="hidden md:grid gap-2 rounded-3xl overflow-hidden relative"
+            style={{ gridTemplateColumns: '1.65fr 1fr 1fr', gridTemplateRows: '224px 224px' }}>
+
+            {/* Celda 1: foto principal (span 2 filas) */}
+            <button
+              onClick={() => { setPhotoIdx(0); setShowLightbox(true) }}
+              className="relative row-span-2 overflow-hidden group cursor-zoom-in"
+              style={{ background: 'var(--bg-elevated)' }}>
+              {images[0] ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={images[0].url} alt={space.name}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-8xl opacity-20">🏛️</span>
+                </div>
+              )}
+            </button>
+
+            {/* Celdas 2-5 */}
+            {[1, 2, 3, 4].map(slot => {
+              const img = images[slot]
+              const totalMedia = images.length + (space.video_url ? 1 : 0)
+              const isLastCell = slot === 4
+              const hiddenCount = totalMedia - 5
+
+              // Slot 4 → video si no hay 5ª foto
+              if (!img && slot === 4 && space.video_url) {
+                return (
+                  <button key="video-cell"
+                    onClick={() => setShowVideoModal(true)}
+                    className="relative overflow-hidden group cursor-pointer"
+                    style={{ background: '#080808' }}>
+                    <video src={`${space.video_url}#t=0.5`} muted preload="metadata"
+                      className="w-full h-full object-cover opacity-70" />
+                    <div className="absolute inset-0 flex items-center justify-center"
+                      style={{ background: 'rgba(0,0,0,0.38)' }}>
+                      <div className="w-11 h-11 rounded-full flex items-center justify-center shadow-xl transition-transform duration-200 group-hover:scale-110"
+                        style={{ background: 'rgba(255,255,255,0.95)' }}>
+                        <Play size={18} className="ml-0.5" style={{ color: '#111' }} />
+                      </div>
+                    </div>
+                    <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+                      style={{ background: 'rgba(0,0,0,0.6)', color: '#fff', backdropFilter: 'blur(6px)' }}>
+                      <Play size={10} /> Ver video
+                    </div>
+                  </button>
+                )
+              }
+
+              if (!img) return (
+                <div key={slot} style={{ background: 'var(--bg-elevated)' }} />
+              )
+
+              return (
+                <button key={slot}
+                  onClick={() => { setPhotoIdx(slot); setShowLightbox(true) }}
+                  className="relative overflow-hidden group cursor-zoom-in"
+                  style={{ background: 'var(--bg-elevated)' }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={img.url} alt=""
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+                  {/* Overlay "+N más" en la última celda si hay más fotos */}
+                  {isLastCell && hiddenCount > 0 && (
+                    <div className="absolute inset-0 flex items-center justify-center"
+                      style={{ background: 'rgba(3,49,60,0.65)', backdropFilter: 'blur(2px)' }}>
+                      <div className="text-white text-center">
+                        <div className="text-2xl font-bold tracking-tight">+{hiddenCount}</div>
+                        <div className="text-xs font-medium opacity-80 mt-0.5">
+                          {hiddenCount === 1 ? 'foto más' : 'fotos más'}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </button>
+              )
+            })}
+
+            {/* Botón "Ver todas las fotos" */}
+            {images.length > 0 && (
+              <button
+                onClick={() => { setPhotoIdx(0); setShowLightbox(true) }}
+                className="absolute bottom-4 right-4 flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl shadow-lg transition-all hover:shadow-xl hover:-translate-y-px"
+                style={{ background: '#fff', color: 'var(--text-primary)', border: '1px solid rgba(0,0,0,0.08)' }}>
+                <Images size={15} />
+                Ver fotos{images.length > 1 ? ` (${images.length})` : ''}
+              </button>
+            )}
+          </div>
+
+          {/* ────────────────────── MÓVIL: Carousel ── */}
+          <div className="md:hidden relative rounded-2xl overflow-hidden"
+            style={{ aspectRatio: '4/3', background: 'var(--bg-elevated)' }}>
             {images.length > 0 ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={images[photoIdx]?.url} alt={space.name} className="w-full h-full object-cover" />
+              <img src={images[photoIdx]?.url} alt={space.name}
+                className="w-full h-full object-cover"
+                onClick={() => setShowLightbox(true)} />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <span className="text-6xl md:text-8xl opacity-20">🏛️</span>
+                <span className="text-6xl opacity-20">🏛️</span>
               </div>
             )}
+
             {images.length > 1 && (
               <>
-                <button onClick={() => setPhotoIdx(i => (i-1+images.length)%images.length)}
-                  className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-lg transition-all"
+                <button onClick={() => setPhotoIdx(i => (i - 1 + images.length) % images.length)}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 flex items-center justify-center shadow-lg transition-all active:scale-95"
                   style={{ color: 'var(--text-primary)' }}>
                   <ChevronLeft size={18} />
                 </button>
-                <button onClick={() => setPhotoIdx(i => (i+1)%images.length)}
-                  className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-lg transition-all"
+                <button onClick={() => setPhotoIdx(i => (i + 1) % images.length)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 flex items-center justify-center shadow-lg transition-all active:scale-95"
                   style={{ color: 'var(--text-primary)' }}>
                   <ChevronRight size={18} />
                 </button>
-                <div className="absolute bottom-3 md:bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
-                  {images.map((_: any, i: number) => (
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {images.slice(0, 8).map((_: any, i: number) => (
                     <button key={i} onClick={() => setPhotoIdx(i)}
-                      className={cn('h-1.5 rounded-full bg-white transition-all', photoIdx===i ? 'w-6 opacity-100' : 'w-1.5 opacity-50')} />
+                      className={cn('h-1.5 rounded-full bg-white transition-all', photoIdx === i ? 'w-5 opacity-100' : 'w-1.5 opacity-40')} />
                   ))}
                 </div>
-                <div className="absolute top-3 md:top-4 right-3 md:right-4 bg-black/40 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full font-medium">
-                  {photoIdx+1} / {images.length}
+                <div className="absolute top-3 right-3 bg-black/45 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full font-medium">
+                  {photoIdx + 1}/{images.length}
                 </div>
               </>
             )}
+
+            {/* Botón ver video en móvil */}
+            {space.video_url && (
+              <button onClick={() => setShowVideoModal(true)}
+                className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
+                style={{ background: 'rgba(0,0,0,0.6)', color: '#fff', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.15)' }}>
+                <Play size={11} /> Ver video
+              </button>
+            )}
           </div>
-          {/* Tira de thumbnails — fotos + video thumbnail si existe */}
-          {(images.length > 1 || (images.length > 0 && space.video_url)) && (
-            <div className="flex gap-2 mt-2">
-              {images.slice(0, space.video_url ? 4 : 5).map((img: any, i: number) => (
-                <button key={i} onClick={() => setPhotoIdx(i)}
-                  className={cn('h-14 md:h-16 flex-1 rounded-xl overflow-hidden transition-all', photoIdx===i ? 'ring-2 opacity-100' : 'opacity-50 hover:opacity-80')}
-                  style={{ ['--tw-ring-color' as any]: 'var(--brand)' }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={img.url} alt="" className="w-full h-full object-cover" />
-                </button>
-              ))}
-              {space.video_url && (
-                <button
-                  onClick={() => setShowVideoModal(true)}
-                  className="relative h-14 md:h-16 flex-1 rounded-xl overflow-hidden transition-all opacity-80 hover:opacity-100 group"
-                  style={{ background: '#0a0a0a', minWidth: 56 }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <video
-                    src={`${space.video_url}#t=0.5`}
-                    muted preload="metadata"
-                    className="w-full h-full object-cover"
-                  />
-                  {/* Overlay oscuro + botón play */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-1"
-                    style={{ background: 'rgba(0,0,0,0.45)' }}>
-                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:scale-110"
-                      style={{ background: 'rgba(255,255,255,0.95)' }}>
-                      <Play size={13} className="ml-0.5" style={{ color: '#111' }} />
-                    </div>
-                  </div>
-                  {/* Badge VIDEO */}
-                  <div className="absolute bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded font-bold tracking-wide"
-                    style={{ background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: 8, letterSpacing: '0.08em' }}>
-                    VIDEO
-                  </div>
-                </button>
+        </div>
+
+        {/* ── Lightbox de fotos ── */}
+        {showLightbox && images.length > 0 && (
+          <div
+            className="fixed inset-0 z-[60] flex flex-col items-center justify-center"
+            style={{ background: 'rgba(0,0,0,0.96)', backdropFilter: 'blur(4px)' }}
+            onClick={() => setShowLightbox(false)}>
+
+            {/* Foto principal */}
+            <div className="relative w-full flex items-center justify-center px-12 md:px-20"
+              style={{ maxHeight: '78vh' }}
+              onClick={e => e.stopPropagation()}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={images[photoIdx]?.url}
+                alt={space.name}
+                className="max-w-full max-h-[78vh] rounded-2xl object-contain shadow-2xl"
+              />
+
+              {/* Flechas */}
+              {images.length > 1 && (
+                <>
+                  <button onClick={() => setPhotoIdx(i => (i - 1 + images.length) % images.length)}
+                    className="absolute left-2 md:left-6 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110"
+                    style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>
+                    <ChevronLeft size={20} />
+                  </button>
+                  <button onClick={() => setPhotoIdx(i => (i + 1) % images.length)}
+                    className="absolute right-2 md:right-6 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110"
+                    style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>
+                    <ChevronRight size={20} />
+                  </button>
+                </>
               )}
             </div>
-          )}
-        </div>
+
+            {/* Contador */}
+            <div className="mt-3 text-xs font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              {photoIdx + 1} / {images.length}
+            </div>
+
+            {/* Tira de thumbnails */}
+            {images.length > 1 && (
+              <div className="flex gap-2 mt-3 px-4 overflow-x-auto scrollbar-hide max-w-full"
+                onClick={e => e.stopPropagation()}>
+                {images.map((img: any, i: number) => (
+                  <button key={i} onClick={() => setPhotoIdx(i)}
+                    className={cn('h-14 w-20 rounded-lg overflow-hidden shrink-0 transition-all', i === photoIdx ? 'ring-2 opacity-100 scale-105' : 'opacity-35 hover:opacity-65')}
+                    style={{ ['--tw-ring-color' as any]: 'var(--brand)' }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={img.url} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Cerrar */}
+            <button onClick={() => setShowLightbox(false)}
+              className="absolute top-5 right-5 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110"
+              style={{ background: 'rgba(255,255,255,0.12)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>
+              <X size={18} />
+            </button>
+          </div>
+        )}
 
         {/* ── Modal de video ── */}
         {showVideoModal && space.video_url && (
