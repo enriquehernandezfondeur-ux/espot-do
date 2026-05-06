@@ -101,8 +101,10 @@ export default function PagoPage({ params }: { params: Promise<{ bookingId: stri
 
   function handleExpiry(val: string) {
     const digits = val.replace(/\D/g, '').slice(0, 4)
-    if (digits.length >= 3) {
-      setExpiry(`${digits.slice(0, 2)}/${digits.slice(2)}`)
+    if (digits.length >= 2) {
+      const mm = digits.slice(0, 2)
+      if (Number(mm) > 12) return // mes inválido
+      setExpiry(digits.length >= 3 ? `${mm}/${digits.slice(2)}` : mm)
     } else {
       setExpiry(digits)
     }
@@ -110,9 +112,18 @@ export default function PagoPage({ params }: { params: Promise<{ bookingId: stri
 
   function getAzulExpiry(): string {
     const [mm, yy] = expiry.split('/')
-    if (!mm || !yy) return ''
+    if (!mm || !yy || yy.length < 2) return ''
     const year = yy.length === 2 ? `20${yy}` : yy
     return `${year}${mm.padStart(2, '0')}`
+  }
+
+  function isCardExpired(): boolean {
+    const [mm, yy] = expiry.split('/')
+    if (!mm || !yy || yy.length < 2) return false
+    const year = Number(yy.length === 2 ? `20${yy}` : yy)
+    const month = Number(mm)
+    const now = new Date()
+    return year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth() + 1)
   }
 
   async function handlePay(e: React.FormEvent) {
@@ -122,7 +133,8 @@ export default function PagoPage({ params }: { params: Promise<{ bookingId: stri
     const cleanCard = cardNum.replace(/\s/g, '')
     if (cleanCard.length < 15) { setError('Número de tarjeta inválido'); return }
     const azulExpiry = getAzulExpiry()
-    if (!azulExpiry || azulExpiry.length !== 6) { setError('Fecha de vencimiento inválida'); return }
+    if (!azulExpiry || azulExpiry.length !== 6) { setError('Fecha de vencimiento inválida (MM/AA)'); return }
+    if (isCardExpired()) { setError('La tarjeta está vencida'); return }
     if (cvv.length < 3) { setError('CVV inválido'); return }
     if (!name.trim()) { setError('Ingresa el nombre del titular'); return }
 

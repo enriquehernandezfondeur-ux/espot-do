@@ -50,17 +50,11 @@ export async function POST(req: NextRequest) {
     .update({ payment_attempts: (booking.payment_attempts ?? 0) + 1 })
     .eq('id', bookingId)
 
-  // Obtener comisión configurable (default 10%)
-  const { data: configRow } = await supabase
-    .from('marketplace_config')
-    .select('value')
-    .eq('key', 'commission_pct')
-    .single()
-  const commissionPct = parseFloat(configRow?.value ?? '10')
-
-  const totalAmount    = Number(booking.total_amount)
-  const commissionAmt  = Math.round(totalAmount * (commissionPct / 100) * 100) / 100
-  const netToHost      = Math.round((totalAmount - commissionAmt) * 100) / 100
+  const totalAmount   = Number(booking.total_amount)
+  // Use the platform_fee already calculated when booking was created (what the user saw)
+  const commissionAmt = Number(booking.platform_fee) || Math.round(totalAmount * 0.10 * 100) / 100
+  const commissionPct = totalAmount > 0 ? Math.round((commissionAmt / totalAmount) * 100) : 10
+  const netToHost     = Math.round((totalAmount - commissionAmt) * 100) / 100
 
   // Procesar pago con Azul
   const customOrderId = `ESP-${bookingId.slice(0, 8).toUpperCase()}-${Date.now()}`
@@ -107,7 +101,7 @@ export async function POST(req: NextRequest) {
   }).eq('id', bookingId)
 
   // Crear registro de liquidación
-  await supabase.from('liquidaciones').upsert({
+  const { error: liqError } = await supabase.from('liquidaciones').upsert({
     booking_id:       bookingId,
     host_id:          host?.id ?? space?.host_id,
     space_id:         space?.id,
@@ -117,6 +111,7 @@ export async function POST(req: NextRequest) {
     neto_propietario: netToHost,
     estado:           'pendiente',
   }, { onConflict: 'booking_id' })
+  if (liqError) console.error('[Liquidaciones] Error al crear registro:', liqError.message)
 
   // Registrar pago en tabla payments
   await supabase.from('payments').insert({

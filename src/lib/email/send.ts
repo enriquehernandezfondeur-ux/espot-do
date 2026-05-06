@@ -13,7 +13,6 @@ export async function sendEmail({
   html: string
 }) {
   if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 'TU_RESEND_API_KEY_AQUI') {
-    console.log(`[EMAIL SIMULADO] Para: ${to} | Asunto: ${subject}`)
     return { success: true, simulated: true }
   }
 

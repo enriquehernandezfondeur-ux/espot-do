@@ -71,7 +71,6 @@ export default function PhotoUploader({ spaceId, onChange }: Props) {
         setUploadError(`Error al subir ${file.name}: ${error.message}`)
       } else {
         const { data: { publicUrl } } = supabase.storage.from('space-images').getPublicUrl(path)
-        console.log('[PhotoUploader] URL generada:', publicUrl)
         uploaded.push({ url: publicUrl, path, isCover: false })
       }
     }

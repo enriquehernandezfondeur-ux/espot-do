@@ -151,9 +151,10 @@ export default function EspacioPage() {
   const [sessionHours, setSessionHours] = useState('')
   const [fixedPrice, setFixedPrice] = useState('')
   const [packageName, setPackageName] = useState('')
-  const [packageHours, _setPackageHours] = useState('')
-  const [packageIncludes, setPackageIncludes] = useState<string[]>([])
-  const [newInclude, setNewInclude] = useState('')
+  const [packageHours, setPackageHours]           = useState('')
+  const [pkgExtraHourPrice, setPkgExtraHourPrice] = useState('')
+  const [packageIncludes, setPackageIncludes]     = useState<string[]>([])
+  const [newInclude, setNewInclude]               = useState('')
 
   // Step 3 - Time blocks
   const [timeBlocks, setTimeBlocks] = useState<TimeBlock[]>([])
@@ -219,7 +220,7 @@ export default function EspacioPage() {
       primaryActivity, secondaryActivities,
       pricingType: pricingType as PricingType,
       hourlyPrice, minHours, maxHours, minConsumption, sessionHours,
-      fixedPrice, packageName, packageHours, packageIncludes,
+      fixedPrice, packageName, packageHours, pkgExtraHourPrice, packageIncludes,
       timeBlocks, addons,
       musicCutoff, noiseLevel,
       allowsDecoration, allowsFood, allowsAlcohol,
@@ -294,6 +295,8 @@ export default function EspacioPage() {
       setSessionHours(String(p.session_hours ?? ''))
       setFixedPrice(String(p.fixed_price ?? ''))
       setPackageName(p.package_name ?? '')
+      setPackageHours(String(p.package_hours ?? ''))
+      setPkgExtraHourPrice(String(p.extra_hour_price ?? ''))
       setPackageIncludes(p.package_includes ?? [])
     }
     // Addons
@@ -801,21 +804,21 @@ export default function EspacioPage() {
                   </div>
                   <div>
                     <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Horas incluidas *</label>
-                    <input type="number" value={sessionHours} onChange={e => setSessionHours(e.target.value)}
+                    <input type="number" value={packageHours} onChange={e => setPackageHours(e.target.value)}
                       placeholder="6" className="w-full input-base rounded-xl px-4 py-2.5 text-sm" />
-                    <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>El cliente puede reservar esas horas exactas</p>
+                    <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>El cliente reserva esas horas exactas</p>
                   </div>
                   <div>
                     <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Precio hora adicional (RD$)</label>
-                    <input type="number" value={maxHours} onChange={e => setMaxHours(e.target.value)}
+                    <input type="number" value={pkgExtraHourPrice} onChange={e => setPkgExtraHourPrice(e.target.value)}
                       placeholder="5000" className="w-full input-base rounded-xl px-4 py-2.5 text-sm" />
                     <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Si quiere más horas que las incluidas</p>
                   </div>
                 </div>
-                {fixedPrice && sessionHours && (
+                {fixedPrice && packageHours && (
                   <div className="rounded-lg p-3 text-xs" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
-                    💡 El cliente paga <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(Number(fixedPrice))}</strong> por {sessionHours} horas.
-                    {maxHours && ` Hora adicional: ${formatCurrency(Number(maxHours))}.`}
+                    💡 El cliente paga <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(Number(fixedPrice))}</strong> por {packageHours} horas.
+                    {pkgExtraHourPrice && ` Hora adicional: ${formatCurrency(Number(pkgExtraHourPrice))}.`}
                   </div>
                 )}
                 <div>

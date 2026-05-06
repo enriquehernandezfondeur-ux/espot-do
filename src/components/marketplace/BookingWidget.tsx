@@ -152,7 +152,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   const addonsTotal = useMemo(() =>
     selectedAddonItems.reduce((s: number, a: any) => {
       if (a.unit === 'persona') return s + a.price * guestCount
-      if (a.unit === 'hora')    return s + a.price * (selectedHours || 1)
+      if (a.unit === 'hora')    return s + a.price * (selectedHours > 0 ? selectedHours : 0)
       return s + a.price
     }, 0),
     [selectedAddonItems, guestCount, selectedHours]
@@ -165,7 +165,9 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   function canGoNext(): boolean {
     if (step === 1) {
       if (!eventDate) return false
-      if (!startTime || !endTime) return false  // siempre requerido
+      // Cotización: solo fecha requerida (el host definirá horario)
+      if (isQuote) return true
+      if (!startTime || !endTime) return false
       if (hoursError) return false
       return true
     }
@@ -450,8 +452,16 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               </div>
             )}
 
-            {/* Selectores de hora — siempre visibles */}
-            {eventDate && (
+            {/* Sin horario disponible este día */}
+            {allowedTimeRange === null && eventDate && (
+              <div className="px-4 py-3 rounded-xl text-sm"
+                style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)', color: '#DC2626' }}>
+                No hay horarios disponibles para esta fecha. Elige otro día o consulta al propietario.
+              </div>
+            )}
+
+            {/* Selectores de hora — visibles cuando hay fecha y horario disponible */}
+            {eventDate && allowedTimeRange !== null && !isQuote && (
               <div className="space-y-3">
                 {isHourly && (minHours > 0 || maxHours > 0) && (
                   <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"

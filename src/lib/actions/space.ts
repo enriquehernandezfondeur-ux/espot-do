@@ -36,6 +36,7 @@ export interface SaveSpacePayload {
   fixedPrice: string
   packageName: string
   packageHours: string
+  pkgExtraHourPrice: string
   packageIncludes: string[]
   // Step 3
   timeBlocks: { block_name: string; start_time: string; end_time: string; days: number[] }[]
@@ -87,10 +88,11 @@ function buildPricingData(spaceId: string, p: SaveSpacePayload) {
   }
   if (p.pricingType === 'fixed_package') return {
     ...base,
-    fixed_price: num(p.fixedPrice),
-    package_name: p.packageName,
-    package_hours: int(p.packageHours),
-    package_includes: p.packageIncludes,
+    fixed_price:       num(p.fixedPrice),
+    package_name:      p.packageName,
+    package_hours:     int(p.packageHours),
+    extra_hour_price:  num(p.pkgExtraHourPrice),
+    package_includes:  p.packageIncludes,
   }
   return base
 }
@@ -325,9 +327,11 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
     if (payload.sessionHours) pricingData.session_hours = parseInt(payload.sessionHours)
   }
   if (payload.pricingType === 'fixed_package') {
-    pricingData.fixed_price = parseFloat(payload.fixedPrice)
-    pricingData.package_name = payload.packageName
+    pricingData.fixed_price      = parseFloat(payload.fixedPrice)
+    pricingData.package_name     = payload.packageName
     pricingData.package_includes = payload.packageIncludes
+    if (payload.packageHours)      pricingData.package_hours    = parseInt(payload.packageHours)
+    if (payload.pkgExtraHourPrice) pricingData.extra_hour_price = parseFloat(payload.pkgExtraHourPrice)
   }
 
   const existingPricing = await supabase.from('space_pricing').select('id').eq('space_id', spaceId).limit(1)
