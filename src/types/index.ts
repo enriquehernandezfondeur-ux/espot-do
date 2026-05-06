@@ -1,5 +1,5 @@
 export type PricingType = 'hourly' | 'minimum_consumption' | 'fixed_package' | 'custom_quote'
-export type BookingStatus = 'pending' | 'confirmed' | 'cancelled_guest' | 'cancelled_host' | 'completed' | 'quote_requested'
+export type BookingStatus = 'pending' | 'accepted' | 'rejected' | 'confirmed' | 'cancelled_guest' | 'cancelled_host' | 'completed' | 'quote_requested'
 export type PaymentStatus = 'unpaid' | 'partial' | 'advance' | 'paid'
 export type PaymentTermType = 'platform_guarantee' | 'split_advance' | 'full_prepaid' | 'quote_only'
 export type SpaceCategory = 'salon' | 'restaurante' | 'bar' | 'rooftop' | 'estudio' | 'coworking' | 'hotel' | 'terraza' | 'lounge' | 'villa' | 'otro'

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { CalendarDays, Clock, Users, CheckCircle, XCircle, Eye, Search, Loader2 } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
-import { getHostBookings, acceptBooking, rejectBooking, confirmBooking, completeBooking } from '@/lib/actions/host'
+import { getHostBookings, acceptBooking, rejectBooking, completeBooking } from '@/lib/actions/host'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
 
 type Booking = Awaited<ReturnType<typeof getHostBookings>>[0]
@@ -77,9 +77,9 @@ export default function HostReservasPage() {
   )
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Reservas</h1>
+    <div className="p-4 md:p-8 max-w-7xl mx-auto">
+      <div className="mb-5 md:mb-6">
+        <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Reservas</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
           {bookings.length} en total
           {pending > 0 && <span className="ml-2 font-semibold" style={{ color: '#D97706' }}>· {pending} por aceptar</span>}
@@ -88,12 +88,12 @@ export default function HostReservasPage() {
       </div>
 
       {/* Métricas rápidas */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-5 md:mb-6">
         {[
           { l: 'Por aceptar',    v: pending,   c: '#D97706' },
           { l: 'Esperan pago',   v: accepted,  c: '#2563EB' },
           { l: 'Confirmadas',    v: bookings.filter(b => b.status === 'confirmed').length, c: '#16A34A' },
-          { l: 'Ingresos confirmados', v: formatCurrency(bookings.filter(b => b.status === 'confirmed').reduce((s, b) => s + Number(b.total_amount), 0)), c: 'var(--brand)' },
+          { l: 'Ingresos conf.', v: formatCurrency(bookings.filter(b => b.status === 'confirmed').reduce((s, b) => s + Number(b.total_amount), 0)), c: 'var(--brand)' },
         ].map(m => (
           <div key={m.l} className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
             <div className="text-xl font-bold" style={{ color: m.c }}>{m.v}</div>
@@ -102,28 +102,29 @@ export default function HostReservasPage() {
         ))}
       </div>
 
-      {/* Filtros */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+      {/* Filtros — scrollable en móvil */}
+      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 mb-4">
+        <div className="flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide"
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
           {FILTERS.map(f => (
             <button key={f.key} onClick={() => setFilter(f.key)}
-              className="px-3 py-2 rounded-lg text-xs font-medium transition-all"
+              className="px-3 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap shrink-0"
               style={filter === f.key ? { background: 'var(--brand)', color: '#fff' } : { color: 'var(--text-secondary)' }}>
               {f.label}
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-2 px-3 py-2 rounded-xl flex-1"
+        <div className="flex items-center gap-2 px-3 py-3 rounded-xl flex-1"
           style={{ background: 'var(--bg-card)', border: '1.5px solid var(--border-medium)' }}>
           <Search size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar..."
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar reserva..."
             className="bg-transparent text-sm flex-1 focus:outline-none" style={{ color: 'var(--text-primary)' }} />
         </div>
       </div>
 
-      <div className="flex gap-5 items-start">
+      <div className="flex flex-col md:flex-row gap-5 items-start">
         {/* Lista */}
-        <div className="flex-1 rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+        <div className="flex-1 min-w-0 rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
           {filtered.length === 0 ? (
             <div className="text-center py-16" style={{ color: 'var(--text-muted)' }}>Sin reservas</div>
           ) : (
@@ -135,56 +136,73 @@ export default function HostReservasPage() {
                 const isSelected = selected?.id === bk.id
                 return (
                   <div key={bk.id} onClick={() => setSelected(isSelected ? null : bk)}
-                    className="flex items-center gap-4 px-5 py-4 cursor-pointer transition-colors"
+                    className="px-4 md:px-5 py-4 cursor-pointer transition-colors"
                     style={{ background: isSelected ? 'var(--brand-dim)' : 'transparent' }}>
 
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold text-white shrink-0"
-                      style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-dark))' }}>
-                      {g?.full_name?.charAt(0) ?? '?'}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                        {g?.full_name ?? 'Cliente'} <span className="font-normal text-xs" style={{ color: 'var(--text-muted)' }}>· {bk.event_type}</span>
+                    <div className="flex items-start gap-3">
+                      {/* Avatar */}
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold text-white shrink-0"
+                        style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-dark))' }}>
+                        {g?.full_name?.charAt(0) ?? '?'}
                       </div>
-                      <div className="flex gap-3 mt-0.5 text-xs" style={{ color: 'var(--text-muted)' }}>
-                        <span className="flex items-center gap-1"><CalendarDays size={10} />{formatDate(bk.event_date)}</span>
-                        <span className="flex items-center gap-1"><Clock size={10} />{formatTime(bk.start_time)}–{formatTime(bk.end_time)}</span>
-                        <span className="flex items-center gap-1"><Users size={10} />{bk.guest_count}</span>
+
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        {/* Fila: nombre + monto */}
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <span className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                            {g?.full_name ?? 'Cliente'}
+                          </span>
+                          <span className="font-bold text-sm shrink-0" style={{ color: 'var(--text-primary)' }}>
+                            {formatCurrency(Number(bk.total_amount))}
+                          </span>
+                        </div>
+
+                        {/* Fila: evento + estado */}
+                        <div className="flex items-center justify-between gap-2 mb-1.5">
+                          <span className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
+                            {bk.event_type}
+                          </span>
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0"
+                            style={{ background: sc.bg, color: sc.color }}>{sl}</span>
+                        </div>
+
+                        {/* Meta: fecha/hora/personas — wrap en móvil */}
+                        <div className="flex gap-2 md:gap-3 flex-wrap text-xs" style={{ color: 'var(--text-muted)' }}>
+                          <span className="flex items-center gap-1"><CalendarDays size={10} />{formatDate(bk.event_date)}</span>
+                          <span className="flex items-center gap-1"><Clock size={10} />{formatTime(bk.start_time)}–{formatTime(bk.end_time)}</span>
+                          <span className="flex items-center gap-1"><Users size={10} />{bk.guest_count}</span>
+                        </div>
+
+                        {/* Acciones para pendientes */}
+                        {bk.status === 'pending' && (
+                          <div className="flex gap-2 mt-3" onClick={e => e.stopPropagation()}>
+                            <button onClick={() => doAccept(bk.id)} disabled={!!actionId}
+                              className="flex-1 text-xs font-semibold py-2.5 rounded-xl transition-colors"
+                              style={{ background: 'rgba(22,163,74,0.1)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)' }}>
+                              {actionId === bk.id + 'a' ? '...' : '✓ Aceptar'}
+                            </button>
+                            <button onClick={() => { setSelected(bk); setShowRejectForm(true) }} disabled={!!actionId}
+                              className="flex-1 text-xs font-semibold py-2.5 rounded-xl transition-colors"
+                              style={{ background: 'rgba(220,38,38,0.08)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }}>
+                              ✕ Rechazar
+                            </button>
+                          </div>
+                        )}
+                        {bk.status === 'confirmed' && (
+                          <div className="mt-2.5" onClick={e => e.stopPropagation()}>
+                            <button onClick={() => doComplete(bk.id)} disabled={!!actionId}
+                              className="text-xs font-semibold px-4 py-2 rounded-xl"
+                              style={{ background: 'rgba(124,58,237,0.1)', color: '#7C3AED', border: '1px solid rgba(124,58,237,0.2)' }}>
+                              {actionId === bk.id + 'c' ? '...' : 'Marcar completado'}
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    </div>
 
-                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full shrink-0"
-                      style={{ background: sc.bg, color: sc.color }}>{sl}</span>
-
-                    <div className="font-bold text-sm shrink-0" style={{ color: 'var(--text-primary)' }}>
-                      {formatCurrency(Number(bk.total_amount))}
-                    </div>
-
-                    <div className="flex gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                      {bk.status === 'pending' && (
-                        <>
-                          <button onClick={() => doAccept(bk.id)} disabled={!!actionId}
-                            className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
-                            style={{ background: 'rgba(22,163,74,0.1)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)' }}>
-                            {actionId === bk.id + 'a' ? '...' : '✓ Aceptar'}
-                          </button>
-                          <button onClick={() => { setSelected(bk); setShowRejectForm(true) }} disabled={!!actionId}
-                            className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
-                            style={{ background: 'rgba(220,38,38,0.08)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }}>
-                            ✕ Rechazar
-                          </button>
-                        </>
-                      )}
-                      {bk.status === 'confirmed' && (
-                        <button onClick={() => doComplete(bk.id)} disabled={!!actionId}
-                          className="text-xs font-semibold px-3 py-1.5 rounded-lg"
-                          style={{ background: 'rgba(124,58,237,0.1)', color: '#7C3AED', border: '1px solid rgba(124,58,237,0.2)' }}>
-                          {actionId === bk.id + 'c' ? '...' : 'Completar'}
-                        </button>
-                      )}
-                      <button onClick={() => setSelected(isSelected ? null : bk)}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg"
+                      {/* Ver detalle — solo desktop */}
+                      <button onClick={e => { e.stopPropagation(); setSelected(isSelected ? null : bk) }}
+                        className="hidden md:flex w-8 h-8 items-center justify-center rounded-lg shrink-0"
                         style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
                         <Eye size={13} />
                       </button>

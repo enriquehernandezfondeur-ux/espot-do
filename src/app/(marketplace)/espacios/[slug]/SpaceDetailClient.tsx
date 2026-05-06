@@ -5,7 +5,7 @@ import Link from 'next/link'
 import {
   MapPin, Users, Shield, ChevronLeft, ChevronRight,
   Clock, CheckCircle, X, Music, Ban,
-  ArrowLeft, Share2, CreditCard, Lock,
+  ArrowLeft, Share2, CreditCard, Lock, ChevronDown,
 } from 'lucide-react'
 import { cn, formatCurrency, formatTime } from '@/lib/utils'
 import ChatDrawer from '@/components/marketplace/ChatDrawer'
@@ -72,6 +72,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
   const [photoIdx, setPhotoIdx] = useState(0)
   const [showChat, setShowChat] = useState(false)
   const [activeTab, setActiveTab] = useState<'info' | 'addons' | 'rules'>('info')
+  const [showMobileWidget, setShowMobileWidget] = useState(false)
 
   const images      = space.space_images ?? []
   const pricing     = space.space_pricing?.find((p: any) => p.is_active) ?? space.space_pricing?.[0]
@@ -82,8 +83,16 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
   const host        = space.profiles
   const facilities  = getFacilities(space)
 
+  // Precio display para el sticky CTA móvil
+  function getPriceDisplay() {
+    if (!pricing) return null
+    if (pricing.pricing_type === 'hourly') return `${formatCurrency(pricing.hourly_price)} / hr`
+    if (pricing.pricing_type === 'minimum_consumption') return `Desde ${formatCurrency(pricing.minimum_consumption)}`
+    if (pricing.pricing_type === 'fixed_package') return formatCurrency(pricing.fixed_price)
+    return 'Cotizar'
+  }
+  const priceDisplay = getPriceDisplay()
 
-  // Reglas de qué no se permite
   const notAllowed = [
     ...(conditions?.allows_external_food    === false ? ['Comida externa']              : []),
     ...(conditions?.allows_external_alcohol === false ? ['Alcohol externo']             : []),
@@ -94,7 +103,6 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
     'Eventos no autorizados',
   ]
 
-  // Cover helper
   function getCover(s: any) {
     return s.space_images?.find((i: any) => i.is_cover)?.url ?? s.space_images?.[0]?.url ?? null
   }
@@ -115,90 +123,120 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
         />
       )}
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      {/* ── MODAL BOOKING WIDGET EN MÓVIL ── */}
+      {showMobileWidget && (
+        <>
+          <div className="lg:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowMobileWidget(false)} />
+          <div className="lg:hidden fixed inset-x-0 bottom-0 z-50 rounded-t-3xl overflow-hidden slide-in-bottom"
+            style={{ background: 'var(--bg-base)', maxHeight: '92dvh', overflowY: 'auto' }}>
+            <div className="flex items-center justify-between px-5 pt-4 pb-3 sticky top-0"
+              style={{ background: 'var(--bg-base)', borderBottom: '1px solid var(--border-subtle)', zIndex: 1 }}>
+              <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>
+                Reservar espacio
+              </h3>
+              <button onClick={() => setShowMobileWidget(false)}
+                className="w-9 h-9 flex items-center justify-center rounded-full"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+                <X size={18} />
+              </button>
+            </div>
+            <div className="px-4 pb-8">
+              <BookingWidget space={space} onChat={() => { setShowMobileWidget(false); setShowChat(true) }} initialDate={initialDate} />
+            </div>
+          </div>
+        </>
+      )}
+
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-5 md:py-8">
 
         {/* Breadcrumb */}
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-2 mb-4 md:mb-6">
           <Link href="/buscar" className="flex items-center gap-1.5 text-sm font-medium link-muted">
-            <ArrowLeft size={15} /> Explorar
+            <ArrowLeft size={14} /> Explorar
           </Link>
           <span style={{ color: 'var(--border-medium)' }}>/</span>
-          <span className="text-sm" style={{ color: 'var(--text-muted)' }}>{space.name}</span>
+          <span className="text-sm truncate max-w-[180px] md:max-w-none" style={{ color: 'var(--text-muted)' }}>{space.name}</span>
         </div>
 
         {/* Title */}
-        <div className="flex items-start justify-between gap-6 mb-6">
-          <div>
-            <h1 className="text-4xl font-bold leading-tight mb-3"
-              style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+        <div className="flex items-start justify-between gap-4 mb-5 md:mb-6">
+          <div className="flex-1 min-w-0">
+            <h1 className="font-bold leading-tight mb-2 md:mb-3"
+              style={{
+                color: 'var(--text-primary)',
+                letterSpacing: '-0.02em',
+                fontSize: 'clamp(1.5rem, 4vw, 2.25rem)',
+              }}>
               {space.name}
             </h1>
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2 md:gap-3 flex-wrap">
               <span className="flex items-center gap-1.5 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
-                <MapPin size={14} style={{ color: 'var(--brand)' }} />
+                <MapPin size={13} style={{ color: 'var(--brand)' }} />
                 {space.sector ? `${space.sector}, ` : ''}{space.city}
               </span>
               <span style={{ color: 'var(--border-medium)' }}>·</span>
               <span className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                <Users size={14} /> {space.capacity_min ? `${space.capacity_min}–` : 'hasta '}{space.capacity_max} personas
+                <Users size={13} /> {space.capacity_min ? `${space.capacity_min}–` : 'hasta '}{space.capacity_max} personas
               </span>
               {space.is_verified && (
-                <span className="flex items-center gap-1.5 text-sm font-semibold px-3 py-1 rounded-full"
+                <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
                   style={{ background: 'rgba(53,196,147,0.1)', color: 'var(--brand)', border: '1px solid rgba(53,196,147,0.2)' }}>
-                  <Shield size={12} /> Verificado
+                  <Shield size={11} /> Verificado
                 </span>
               )}
-              <span className="text-sm px-3 py-1 rounded-full capitalize font-medium"
+              <span className="hidden sm:inline text-sm px-2.5 py-1 rounded-full capitalize font-medium"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
                 {space.category}
               </span>
             </div>
           </div>
-          <button className="btn-outline flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl shrink-0">
-            <Share2 size={15} /> Compartir
+          <button className="btn-outline hidden sm:flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl shrink-0">
+            <Share2 size={14} /> Compartir
           </button>
         </div>
 
         {/* Photos */}
-        <div className="mb-10">
-          <div className="relative rounded-3xl overflow-hidden" style={{ aspectRatio: '16/7', background: 'var(--bg-elevated)' }}>
+        <div className="mb-6 md:mb-10">
+          <div className="relative rounded-2xl md:rounded-3xl overflow-hidden"
+            style={{ aspectRatio: '16/9', background: 'var(--bg-elevated)' }}>
             {images.length > 0 ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={images[photoIdx]?.url} alt={space.name} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <span className="text-8xl opacity-20">🏛️</span>
+                <span className="text-6xl md:text-8xl opacity-20">🏛️</span>
               </div>
             )}
             {images.length > 1 && (
               <>
                 <button onClick={() => setPhotoIdx(i => (i-1+images.length)%images.length)}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-lg transition-all"
+                  className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-lg transition-all"
                   style={{ color: 'var(--text-primary)' }}>
-                  <ChevronLeft size={20} />
+                  <ChevronLeft size={18} />
                 </button>
                 <button onClick={() => setPhotoIdx(i => (i+1)%images.length)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-lg transition-all"
+                  className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-lg transition-all"
                   style={{ color: 'var(--text-primary)' }}>
-                  <ChevronRight size={20} />
+                  <ChevronRight size={18} />
                 </button>
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+                <div className="absolute bottom-3 md:bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
                   {images.map((_: any, i: number) => (
                     <button key={i} onClick={() => setPhotoIdx(i)}
                       className={cn('h-1.5 rounded-full bg-white transition-all', photoIdx===i ? 'w-6 opacity-100' : 'w-1.5 opacity-50')} />
                   ))}
                 </div>
-                <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full font-medium">
+                <div className="absolute top-3 md:top-4 right-3 md:right-4 bg-black/40 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full font-medium">
                   {photoIdx+1} / {images.length}
                 </div>
               </>
             )}
           </div>
           {images.length > 1 && (
-            <div className="flex gap-2 mt-2.5">
+            <div className="flex gap-2 mt-2">
               {images.slice(0,5).map((img: any, i: number) => (
                 <button key={i} onClick={() => setPhotoIdx(i)}
-                  className={cn('h-16 flex-1 rounded-xl overflow-hidden transition-all', photoIdx===i ? 'ring-2 opacity-100' : 'opacity-55 hover:opacity-80')}
+                  className={cn('h-14 md:h-16 flex-1 rounded-xl overflow-hidden transition-all', photoIdx===i ? 'ring-2 opacity-100' : 'opacity-50 hover:opacity-80')}
                   style={{ ['--tw-ring-color' as any]: 'var(--brand)' }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={img.url} alt="" className="w-full h-full object-cover" />
@@ -208,25 +246,25 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
           )}
         </div>
 
-        {/* Main grid */}
-        <div className="grid grid-cols-[1fr_400px] gap-12 items-start">
+        {/* Main grid — widget primero en móvil (order-1), contenido segundo (order-2) */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6 lg:gap-12 items-start">
 
-          {/* ── LEFT ── */}
-          <div>
+          {/* ── IZQUIERDA: Contenido (order-2 en móvil, order-1 en desktop) ── */}
+          <div className="order-2 lg:order-1">
 
             {/* Host */}
             {host && (
-              <div className="flex items-center gap-4 pb-7 mb-7" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-bold shrink-0"
+              <div className="flex items-center gap-4 pb-6 mb-6" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center text-white text-xl font-bold shrink-0"
                   style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-dark))' }}>
                   {host.full_name?.charAt(0) ?? 'H'}
                 </div>
                 <div className="flex-1">
-                  <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>{host.full_name}</div>
-                  <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>Propietario del espacio</div>
+                  <div className="font-semibold text-sm md:text-base" style={{ color: 'var(--text-primary)' }}>{host.full_name}</div>
+                  <div className="text-xs md:text-sm" style={{ color: 'var(--text-secondary)' }}>Propietario del espacio</div>
                 </div>
                 {host.id_verified && (
-                  <div className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full"
+                  <div className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full"
                     style={{ background: 'rgba(34,197,94,0.08)', color: '#16A34A', border: '1px solid rgba(34,197,94,0.15)' }}>
                     <CheckCircle size={12} /> Identidad verificada
                   </div>
@@ -235,42 +273,43 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
             )}
 
             {/* Tabs */}
-            <div className="flex gap-1 mb-8 p-1 rounded-2xl w-fit" style={{ background: 'var(--bg-elevated)' }}>
-              {([
-                { id: 'info',   label: 'Descripción' },
-                { id: 'addons', label: `Adicionales${addons.length ? ` (${addons.length})` : ''}` },
-                { id: 'rules',  label: 'Reglas' },
-              ] as const).map(tab => (
-                <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                  className="px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
-                  style={activeTab === tab.id ? {
-                    background: '#fff', color: 'var(--text-primary)',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                  } : { color: 'var(--text-secondary)' }}>
-                  {tab.label}
-                </button>
-              ))}
+            <div className="mb-6 md:mb-8">
+              <div className="flex gap-1 p-1 rounded-2xl w-full md:w-fit" style={{ background: 'var(--bg-elevated)' }}>
+                {([
+                  { id: 'info',   label: 'Descripción' },
+                  { id: 'addons', label: `Adicionales${addons.length ? ` (${addons.length})` : ''}` },
+                  { id: 'rules',  label: 'Reglas' },
+                ] as const).map(tab => (
+                  <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                    className="flex-1 md:flex-none px-4 md:px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+                    style={activeTab === tab.id ? {
+                      background: '#fff', color: 'var(--text-primary)',
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                    } : { color: 'var(--text-secondary)' }}>
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* ── TAB: Descripción ── */}
             {activeTab === 'info' && (
-              <div className="space-y-10">
+              <div className="space-y-8 md:space-y-10">
 
-                {/* Descripción */}
                 {space.description && (
                   <div>
-                    <p className="text-base leading-8" style={{ color: 'var(--text-secondary)' }}>
+                    <p className="text-sm md:text-base leading-7 md:leading-8" style={{ color: 'var(--text-secondary)' }}>
                       {space.description}
                     </p>
                   </div>
                 )}
 
-                {/* Detalles del espacio */}
+                {/* Detalles */}
                 <div>
-                  <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+                  <h3 className="text-base md:text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
                     Detalles del espacio
                   </h3>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {[
                       { label: 'Tipo de espacio', value: space.category?.charAt(0).toUpperCase() + space.category?.slice(1), icon: '🏛️' },
                       { label: 'Capacidad', value: `${space.capacity_min ? space.capacity_min + '–' : 'Hasta '}${space.capacity_max} personas`, icon: '👥' },
@@ -294,28 +333,28 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
 
                 {/* Facilidades */}
                 <div>
-                  <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+                  <h3 className="text-base md:text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
                     Facilidades
                   </h3>
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-4 sm:grid-cols-4 gap-3">
                     {facilities.map(({ icon, label }) => (
-                      <div key={label} className="flex flex-col items-center gap-2 p-4 rounded-xl text-center"
+                      <div key={label} className="flex flex-col items-center gap-2 p-3 md:p-4 rounded-xl text-center"
                         style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
-                        <span className="text-2xl">{icon}</span>
+                        <span className="text-xl md:text-2xl">{icon}</span>
                         <span className="text-xs font-medium leading-tight" style={{ color: 'var(--text-secondary)' }}>{label}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Amenidades (addons incluidos o package_includes) */}
+                {/* Amenidades */}
                 {(pricing?.package_includes?.length > 0 || addons.length > 0) && (
                   <div>
-                    <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+                    <h3 className="text-base md:text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
                       Amenidades
                     </h3>
                     {pricing?.package_includes?.length > 0 ? (
-                      <div className="grid grid-cols-2 gap-2.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         {pricing.package_includes.map((item: string) => (
                           <div key={item} className="flex items-center gap-2.5 p-3 rounded-xl"
                             style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid rgba(53,196,147,0.15)' }}>
@@ -325,7 +364,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                         ))}
                       </div>
                     ) : (
-                      <div className="grid grid-cols-2 gap-2.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         {addons.slice(0, 6).map((addon: any) => (
                           <div key={addon.id} className="flex items-center gap-2.5 p-3 rounded-xl"
                             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
@@ -341,18 +380,18 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   </div>
                 )}
 
-                {/* Horarios */}
+                {/* Horarios disponibles */}
                 {timeBlocks.length > 0 && (
                   <div>
-                    <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+                    <h3 className="text-base md:text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
                       Horarios disponibles
                     </h3>
                     <div className="space-y-2.5">
                       {timeBlocks.map((block: any, i: number) => (
-                        <div key={i} className="flex items-center justify-between p-4 rounded-xl"
+                        <div key={i} className="p-4 rounded-xl"
                           style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
-                          <div className="flex items-center gap-3">
-                            <Clock size={16} style={{ color: 'var(--brand)' }} />
+                          <div className="flex items-center gap-3 mb-3">
+                            <Clock size={15} style={{ color: 'var(--brand)' }} />
                             <div>
                               <div className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>{block.block_name}</div>
                               <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
@@ -360,9 +399,11 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                               </div>
                             </div>
                           </div>
-                          <div className="flex gap-1">
+                          {/* Días: en móvil se wrap mejor */}
+                          <div className="flex gap-1 flex-wrap">
                             {DAYS.map((d, j) => (
-                              <span key={j} className="text-xs px-1.5 py-0.5 rounded font-medium"
+                              <span key={j}
+                                className="text-xs px-2 py-1 rounded-lg font-semibold"
                                 style={block.days_of_week?.includes(j)
                                   ? { background: 'var(--brand-dim)', color: 'var(--brand)' }
                                   : { background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
@@ -378,7 +419,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
 
                 {/* Forma de pago */}
                 {paymentTerms && (
-                  <div className="flex items-start gap-3 p-5 rounded-2xl"
+                  <div className="flex items-start gap-3 p-4 md:p-5 rounded-2xl"
                     style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
                     <CreditCard size={18} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: 2 }} />
                     <div>
@@ -390,7 +431,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
               </div>
             )}
 
-            {/* ── TAB: Adicionales (solo lectura — selección en el widget) ── */}
+            {/* ── TAB: Adicionales ── */}
             {activeTab === 'addons' && (
               <div>
                 {addons.length === 0 ? (
@@ -400,9 +441,9 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                 ) : (
                   <>
                     <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-                      Puedes agregar estos servicios al hacer tu reserva en el panel de la derecha.
+                      Puedes agregar estos servicios al hacer tu reserva.
                     </p>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {addons.map((addon: any) => (
                         <div key={addon.id}
                           className="flex items-center gap-4 p-4 rounded-2xl"
@@ -429,16 +470,14 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
 
             {/* ── TAB: Reglas ── */}
             {activeTab === 'rules' && (
-              <div className="space-y-8">
-
+              <div className="space-y-6 md:space-y-8">
                 {conditions && (
                   <>
-                    {/* Qué está permitido */}
                     <div>
-                      <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+                      <h3 className="text-base md:text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
                         Qué está permitido
                       </h3>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {[
                           { ok: conditions.allows_external_decoration, label: 'Decoración externa' },
                           { ok: conditions.allows_external_food,       label: 'Comida externa' },
@@ -469,12 +508,11 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                       </div>
                     </div>
 
-                    {/* Qué NO se permite */}
                     <div>
-                      <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+                      <h3 className="text-base md:text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
                         Qué no se permite
                       </h3>
-                      <div className="grid grid-cols-2 gap-2.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         {notAllowed.map(item => (
                           <div key={item} className="flex items-center gap-2.5 p-3.5 rounded-xl"
                             style={{ background: 'rgba(239,68,68,0.04)', border: '1px solid rgba(239,68,68,0.1)' }}>
@@ -485,9 +523,8 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                       </div>
                     </div>
 
-                    {/* Política de cancelación */}
                     <div>
-                      <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+                      <h3 className="text-base md:text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
                         Política de cancelación
                       </h3>
                       <div className="p-5 rounded-2xl" style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
@@ -502,7 +539,6 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                       </div>
                     </div>
 
-                    {/* Depósito */}
                     {conditions.deposit_required && (
                       <div className="flex items-start gap-3 p-5 rounded-2xl"
                         style={{ background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.15)' }}>
@@ -530,8 +566,9 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
             )}
           </div>
 
-          {/* ── RIGHT: BOOKING WIDGET ── */}
-          <div className="sticky top-24" style={{ overflow: 'visible' }}>
+          {/* ── DERECHA: BOOKING WIDGET (order-1 en móvil, order-2 en desktop) ── */}
+          {/* En desktop aparece como sticky column. En móvil está hidden (se usa el bottom sheet). */}
+          <div className="order-1 lg:order-2 lg:sticky lg:top-24 hidden lg:block" style={{ overflow: 'visible' }}>
             <BookingWidget space={space} onChat={() => setShowChat(true)} initialDate={initialDate} />
           </div>
 
@@ -541,17 +578,15 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
         {similarSpaces.length > 0 && (() => {
           const hasExact = similarSpaces.some((s: any) => s._isExact)
           return (
-            <div className="mt-16 pt-12" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-
-              {/* Encabezado */}
-              <div className="flex items-start justify-between gap-4 mb-6">
+            <div className="mt-12 md:mt-16 pt-8 md:pt-12" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+              <div className="flex items-start justify-between gap-4 mb-5 md:mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                  <h2 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
                     Espacios similares
                   </h2>
                   {!hasExact && (
                     <p className="text-sm mt-1.5" style={{ color: 'var(--text-secondary)' }}>
-                      No encontramos una coincidencia exacta, pero estos espacios pueden funcionar para tu evento.
+                      Otros espacios que pueden funcionar para tu evento.
                     </p>
                   )}
                 </div>
@@ -560,8 +595,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                 </Link>
               </div>
 
-              {/* Cards */}
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                 {similarSpaces.map((s: any) => {
                   const cover   = getCover(s)
                   const display = s._pricingDisplay ?? {}
@@ -569,35 +603,27 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                     <Link key={s.id} href={`/espacios/${s.slug}`} className="group block">
                       <div className="card-hover rounded-2xl overflow-hidden h-full flex flex-col"
                         style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
-
-                        {/* Imagen */}
-                        <div className="relative h-36 overflow-hidden shrink-0"
-                          style={{ background: 'var(--bg-elevated)' }}>
+                        <div className="relative overflow-hidden shrink-0"
+                          style={{ aspectRatio: '4/3', background: 'var(--bg-elevated)' }}>
                           {cover ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={cover} alt={s.name}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center"
-                              style={{ color: 'var(--border-medium)', fontSize: 32 }}>■</div>
+                              style={{ color: 'var(--border-medium)', fontSize: 28 }}>■</div>
                           )}
-                          {/* Badge tipo de precio */}
                           {display.badge && (
                             <span className="absolute top-2 left-2 text-xs font-semibold px-2 py-0.5 rounded-full"
                               style={{
-                                background: display.isAltModel
-                                  ? 'rgba(59,130,246,0.9)'
-                                  : 'rgba(0,0,0,0.65)',
-                                color: '#fff',
-                                backdropFilter: 'blur(4px)',
+                                background: display.isAltModel ? 'rgba(59,130,246,0.9)' : 'rgba(0,0,0,0.65)',
+                                color: '#fff', backdropFilter: 'blur(4px)',
                               }}>
                               {display.badge}
                             </span>
                           )}
                         </div>
-
-                        {/* Info */}
-                        <div className="p-3.5 flex flex-col flex-1">
+                        <div className="p-3 md:p-3.5 flex flex-col flex-1">
                           <h4 className="font-semibold text-sm leading-tight mb-1 group-hover:text-[#35C493] transition-colors"
                             style={{ color: 'var(--text-primary)' }}>
                             {s.name}
@@ -607,8 +633,6 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                             <span className="mx-1" style={{ color: 'var(--border-medium)' }}>·</span>
                             <Users size={10} /> {s.capacity_max}
                           </div>
-
-                          {/* Precio */}
                           <div className="mt-auto pt-2" style={{ borderTop: '1px solid var(--border-subtle)' }}>
                             {display.main && (
                               <div className="text-xs font-bold" style={{ color: 'var(--brand)' }}>
@@ -630,6 +654,38 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
             </div>
           )
         })()}
+
+        {/* Espacio extra al fondo para el sticky CTA móvil */}
+        <div className="h-24 lg:hidden" />
+      </div>
+
+      {/* ── MÓVIL: Sticky CTA de reserva ── */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 px-4 py-3 pb-safe"
+        style={{
+          background: 'rgba(255,255,255,0.97)',
+          backdropFilter: 'blur(20px)',
+          borderTop: '1px solid var(--border-subtle)',
+          boxShadow: '0 -4px 24px rgba(0,0,0,0.10)',
+        }}>
+        <div className="flex items-center gap-4">
+          <div className="flex-1 min-w-0">
+            {priceDisplay && (
+              <div className="font-bold text-base leading-tight" style={{ color: 'var(--text-primary)' }}>
+                {priceDisplay}
+              </div>
+            )}
+            <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+              {space.capacity_min ? `${space.capacity_min}–` : 'hasta '}{space.capacity_max} personas
+            </div>
+          </div>
+          <button
+            onClick={() => setShowMobileWidget(true)}
+            className="btn-brand flex items-center gap-2 px-6 py-3.5 rounded-2xl text-sm font-bold shrink-0"
+            style={{ boxShadow: '0 4px 16px rgba(53,196,147,0.35)' }}>
+            Reservar
+            <ChevronDown size={16} style={{ transform: 'rotate(-90deg)' }} />
+          </button>
+        </div>
       </div>
     </div>
   )

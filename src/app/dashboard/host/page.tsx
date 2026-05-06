@@ -10,7 +10,7 @@ import {
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import Link from 'next/link'
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts'
-import { getHostStats, getHostBookings, confirmBooking, rejectBooking } from '@/lib/actions/host'
+import { getHostStats, getHostBookings, acceptBooking, rejectBooking } from '@/lib/actions/host'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
 
 // ── Sistema de colores de estado unificado ────────────────
@@ -99,8 +99,8 @@ export default function DashboardPage() {
   }, [])
 
   async function handleConfirm(id: string) {
-    await confirmBooking(id)
-    setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'confirmed' } : b))
+    await acceptBooking(id)
+    setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'accepted' } : b))
     setStats(prev => prev ? { ...prev, pendingCount: Math.max(0, prev.pendingCount - 1), confirmedCount: prev.confirmedCount + 1 } : prev)
   }
   async function handleReject(id: string) {
@@ -126,12 +126,12 @@ export default function DashboardPage() {
   )
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto">
       <Suspense fallback={null}><PublishedToast /></Suspense>
 
       {/* ── Encabezado ── */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
           Panel de control
         </h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
@@ -140,7 +140,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Métricas principales ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
         <StatCard
           label="Ingresos del mes"
           value={formatCurrency(stats?.revenueThisMonth ?? 0)}
@@ -173,7 +173,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Gráfica + Próximo evento ── */}
-      <div className="grid lg:grid-cols-3 gap-5 mb-8">
+      <div className="grid lg:grid-cols-3 gap-4 md:gap-5 mb-6 md:mb-8">
 
         {/* Gráfica */}
         <div className="lg:col-span-2 rounded-2xl p-6"
@@ -306,79 +306,67 @@ export default function DashboardPage() {
           <div>
             {upcomingBookings.map((booking: any, i) => (
               <div key={booking.id}
-                className="flex items-center gap-4 px-6 py-4 transition-colors"
-                style={{
-                  borderTop: i > 0 ? '1px solid var(--border-subtle)' : undefined,
-                }}>
+                className="px-4 md:px-6 py-4 transition-colors"
+                style={{ borderTop: i > 0 ? '1px solid var(--border-subtle)' : undefined }}>
 
-                {/* Avatar inicial */}
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-xs font-bold"
-                  style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
-                  {booking.profiles?.full_name?.charAt(0)?.toUpperCase() ?? '?'}
+                {/* ── Layout móvil: card compacta ── */}
+                <div className="flex items-start gap-3">
+                  {/* Avatar */}
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-xs font-bold mt-0.5"
+                    style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+                    {booking.profiles?.full_name?.charAt(0)?.toUpperCase() ?? '?'}
+                  </div>
+
+                  {/* Info + acciones */}
+                  <div className="flex-1 min-w-0">
+                    {/* Fila superior: nombre + monto */}
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                        {booking.profiles?.full_name ?? 'Cliente'}
+                      </span>
+                      <span className="text-sm font-bold shrink-0" style={{ color: 'var(--text-primary)' }}>
+                        {formatCurrency(Number(booking.total_amount))}
+                      </span>
+                    </div>
+
+                    {/* Fila media: evento + status */}
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <span className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
+                        {booking.event_type}
+                      </span>
+                      <StatusBadge status={booking.status} />
+                    </div>
+
+                    {/* Meta: fecha + hora + personas */}
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+                        <CalendarDays size={10} /> {formatDate(booking.event_date)}
+                      </span>
+                      <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+                        <Clock size={10} /> {formatTime(booking.start_time)} – {formatTime(booking.end_time)}
+                      </span>
+                      <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+                        <Users size={10} /> {booking.guest_count}
+                      </span>
+                    </div>
+
+                    {/* Acciones para pendientes */}
+                    {booking.status === 'pending' && (
+                      <div className="flex gap-2 mt-3">
+                        <button onClick={() => handleConfirm(booking.id)}
+                          className="flex-1 text-xs font-semibold py-2 rounded-xl transition-all"
+                          style={{ background: 'rgba(22,163,74,0.08)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)' }}>
+                          Aceptar
+                        </button>
+                        <button onClick={() => handleReject(booking.id)}
+                          className="flex-1 text-xs font-semibold py-2 rounded-xl transition-all"
+                          style={{ background: 'rgba(220,38,38,0.06)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }}>
+                          Rechazar
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-
-                {/* Info principal */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                      {booking.profiles?.full_name ?? 'Cliente'}
-                    </span>
-                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                      · {booking.event_type}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 mt-0.5">
-                    <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
-                      <CalendarDays size={10} /> {formatDate(booking.event_date)}
-                    </span>
-                    <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
-                      <Clock size={10} /> {formatTime(booking.start_time)} – {formatTime(booking.end_time)}
-                    </span>
-                    <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
-                      <Users size={10} /> {booking.guest_count}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Estado */}
-                <StatusBadge status={booking.status} />
-
-                {/* Monto */}
-                <div className="text-right shrink-0">
-                  <div className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                    {formatCurrency(Number(booking.total_amount))}
-                  </div>
-                  <div className="text-xs mt-0.5"
-                    style={{
-                      color: booking.payment_status === 'paid' || booking.payment_status === 'partial'
-                        ? '#16A34A' : booking.payment_status === 'unpaid'
-                        ? '#D97706' : 'var(--text-muted)',
-                    }}>
-                    {booking.payment_status === 'unpaid'  ? 'Sin pago'   :
-                     booking.payment_status === 'partial' ? '10% pagado' :
-                     booking.payment_status === 'paid'    ? 'Pagado'     : '—'}
-                  </div>
-                </div>
-
-                {/* Acciones rápidas para pendientes */}
-                {booking.status === 'pending' && (
-                  <div className="flex gap-2 shrink-0">
-                    <button onClick={() => handleConfirm(booking.id)}
-                      className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all"
-                      style={{ background: 'rgba(22,163,74,0.08)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)' }}
-                      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(22,163,74,0.14)')}
-                      onMouseLeave={e => (e.currentTarget.style.background = 'rgba(22,163,74,0.08)')}>
-                      Aceptar
-                    </button>
-                    <button onClick={() => handleReject(booking.id)}
-                      className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all"
-                      style={{ background: 'rgba(220,38,38,0.06)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }}
-                      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(220,38,38,0.12)')}
-                      onMouseLeave={e => (e.currentTarget.style.background = 'rgba(220,38,38,0.06)')}>
-                      Rechazar
-                    </button>
-                  </div>
-                )}
               </div>
             ))}
           </div>

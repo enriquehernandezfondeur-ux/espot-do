@@ -12,11 +12,11 @@ import {
 type FilterType = 'pending' | 'paid' | 'all'
 
 const STATUS_COLORS: Record<string, { label: string; color: string; bg: string }> = {
-  pendiente:    { label: 'Pendiente',   color: '#D97706', bg: 'rgba(217,119,6,0.08)'  },
-  en_revision:  { label: 'En revisión', color: '#2563EB', bg: 'rgba(37,99,235,0.08)'  },
-  liquidado:    { label: 'Liquidado',   color: '#16A34A', bg: 'rgba(22,163,74,0.08)'  },
-  retenido:     { label: 'Retenido',    color: '#DC2626', bg: 'rgba(220,38,38,0.08)'  },
-  reembolsado:  { label: 'Reembolsado', color: '#6B7280', bg: 'rgba(107,114,128,0.08)'},
+  pending:      { label: 'Pendiente',   color: '#D97706', bg: 'rgba(217,119,6,0.08)'  },
+  in_review:    { label: 'En revisión', color: '#2563EB', bg: 'rgba(37,99,235,0.08)'  },
+  paid:         { label: 'Liquidado',   color: '#16A34A', bg: 'rgba(22,163,74,0.08)'  },
+  retained:     { label: 'Retenido',    color: '#DC2626', bg: 'rgba(220,38,38,0.08)'  },
+  refunded:     { label: 'Reembolsado', color: '#6B7280', bg: 'rgba(107,114,128,0.08)'},
 }
 
 function CopyBtn({ text }: { text: string }) {
@@ -74,7 +74,7 @@ export default function AdminLiquidacionesPage() {
   const [paying,  setPaying]    = useState<string | null>(null)
   const [notes,   setNotes]     = useState<Record<string, string>>({})
   const [showNote, setShowNote] = useState<string | null>(null)
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
 
   async function load() {
     setLoading(true)
@@ -227,8 +227,19 @@ export default function AdminLiquidacionesPage() {
                       <div className="text-xs" style={{ color: '#94A3B8' }}>Fee: {formatCurrency(Number(bk.platform_fee))}</div>
                     </div>
 
-                    {/* Net */}
-                    <div className="text-base font-bold" style={{ color: '#35C493' }}>{formatCurrency(hostAmt)}</div>
+                    {/* Net + status */}
+                    <div>
+                      <div className="text-base font-bold mb-1" style={{ color: '#35C493' }}>{formatCurrency(hostAmt)}</div>
+                      {(() => {
+                        const sc = STATUS_COLORS[bk.payout_status]
+                        return sc ? (
+                          <span className="inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                            style={{ background: sc.bg, color: sc.color }}>
+                            {sc.label}
+                          </span>
+                        ) : null
+                      })()}
+                    </div>
 
                     {/* Bank */}
                     <BankInfo hostId={host?.id} />

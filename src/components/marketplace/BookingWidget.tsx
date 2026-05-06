@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import {
   CalendarDays, Users, Sparkles, CreditCard,
   ChevronRight, ChevronLeft, Loader2, CheckCircle,
@@ -201,6 +202,12 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
 
   async function handleBook() {
     setBooking(true); setError('')
+    const { data: { user } } = await createClient().auth.getUser()
+    if (!user) {
+      setBooking(false)
+      router.push(`/auth?redirect=${encodeURIComponent(window.location.pathname)}`)
+      return
+    }
     const result = await createBooking({
       spaceId: space.id, pricingId: pricing?.id,
       eventDate, startTime, endTime,

@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 
-const SUPERADMIN_EMAIL = 'enriquehernandezfondeur@gmail.com'
+const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
 
 async function requireAdmin() {
   const supabase = await createClient()

@@ -38,9 +38,9 @@ export default function FavoritosPage() {
   )
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Favoritos</h1>
+    <div className="p-4 md:p-8 max-w-5xl mx-auto">
+      <div className="mb-5 md:mb-8">
+        <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Favoritos</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
           {favorites.length} espacio{favorites.length !== 1 ? 's' : ''} guardado{favorites.length !== 1 ? 's' : ''}
         </p>
@@ -59,7 +59,7 @@ export default function FavoritosPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
           {favorites.map((fav: any) => {
             const space = fav.spaces
             const cover = space?.space_images?.find((i: any) => i.is_cover)?.url ?? space?.space_images?.[0]?.url

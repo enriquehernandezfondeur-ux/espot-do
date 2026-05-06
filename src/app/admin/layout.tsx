@@ -11,7 +11,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const { data: profile } = await supabase
     .from('profiles').select('role').eq('id', user.id).single()
 
-  const isSuperAdmin = user.email === 'enriquehernandezfondeur@gmail.com'
+  const isSuperAdmin = user.email === (process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com')
   if (!isSuperAdmin && profile?.role !== 'admin') redirect('/')
 
   return (

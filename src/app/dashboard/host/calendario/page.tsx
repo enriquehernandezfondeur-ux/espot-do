@@ -222,18 +222,18 @@ export default function CalendarioPage() {
   }
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-5 md:mb-6">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Calendario</h1>
+          <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Calendario</h1>
           <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
             Gestiona la disponibilidad de tu espacio
           </p>
         </div>
 
         {/* Sync de calendarios */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 flex-wrap">
           {/* Google Calendar */}
           {gcalConnected ? (
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium"
@@ -331,9 +331,9 @@ export default function CalendarioPage() {
         )}
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col lg:flex-row gap-5 lg:gap-6">
         {/* ── CALENDARIO MENSUAL ─────────────────────────── */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           {/* Nav */}
           <div className="flex items-center justify-between mb-5">
             <button onClick={prevMonth}
@@ -424,7 +424,7 @@ export default function CalendarioPage() {
         </div>
 
         {/* ── PANEL LATERAL ──────────────────────────────── */}
-        <div className="w-80 shrink-0">
+        <div className="w-full lg:w-80 lg:shrink-0">
           {selected ? (
             <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
 

@@ -83,9 +83,9 @@ export default function PerfilPage() {
   )
 
   return (
-    <div className="p-8 max-w-2xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Mi perfil</h1>
+    <div className="p-4 md:p-8 max-w-2xl mx-auto">
+      <div className="mb-5 md:mb-8">
+        <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Mi perfil</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>Administra tu información personal</p>
       </div>
 

@@ -53,9 +53,9 @@ export default function CotizacionesPage() {
   )
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Cotizaciones</h1>
+    <div className="p-4 md:p-8 max-w-7xl mx-auto">
+      <div className="mb-5 md:mb-8">
+        <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Cotizaciones</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
           {quotes.length > 0
             ? `${quotes.length} solicitud${quotes.length !== 1 ? 'es' : ''} esperando tu respuesta`
@@ -73,9 +73,9 @@ export default function CotizacionesPage() {
           </p>
         </div>
       ) : (
-        <div className="flex gap-6 h-[calc(100vh-14rem)]">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 lg:h-[calc(100vh-14rem)]">
           {/* Lista */}
-          <div className="w-80 shrink-0 space-y-2 overflow-y-auto">
+          <div className="w-full lg:w-80 lg:shrink-0 space-y-2 lg:overflow-y-auto">
             {quotes.map(q => {
               const g = (q as any).profiles
               return (

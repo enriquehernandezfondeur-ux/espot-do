@@ -30,8 +30,8 @@ export default function PagosPage() {
   )
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <div className="mb-8">
+    <div className="p-4 md:p-8 max-w-4xl mx-auto">
+      <div className="mb-5 md:mb-8">
         <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Pagos</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
           Historial de pagos de tus reservas
@@ -39,7 +39,7 @@ export default function PagosPage() {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
         {[
           { label: 'Total pagado',   value: formatCurrency(totalPaid),    color: '#16A34A' },
           { label: 'Pendiente',      value: formatCurrency(totalPending), color: '#D97706' },
@@ -60,42 +60,41 @@ export default function PagosPage() {
           <p className="font-medium" style={{ color: 'var(--text-primary)' }}>Sin pagos registrados</p>
         </div>
       ) : (
-        <div className="rounded-3xl overflow-hidden"
+        <div className="rounded-2xl md:rounded-3xl overflow-hidden"
           style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-          <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 px-6 py-3 text-xs font-semibold uppercase tracking-widest"
-            style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}>
-            <span>Reserva</span><span>Fecha</span><span>Monto</span><span>Estado</span>
-          </div>
-          {bookings.map((bk: any) => {
+          {bookings.map((bk: any, i) => {
             const ps = paymentStatusConfig[bk.payment_status] ?? paymentStatusConfig.unpaid
             const Icon = ps.icon
             return (
-              <div key={bk.id} className="grid grid-cols-[1fr_auto_auto_auto] gap-4 items-center px-6 py-4"
-                style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                <div>
-                  <div className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>
-                    {bk.spaces?.name}
-                  </div>
-                  <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                    {bk.event_type} · {bk.guest_count} personas
-                  </div>
+              <div key={bk.id} className="flex items-start gap-3 px-4 md:px-6 py-4"
+                style={{ borderTop: i > 0 ? '1px solid var(--border-subtle)' : undefined }}>
+                {/* Icono estado */}
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
+                  style={{ background: ps.bg }}>
+                  <Icon size={15} style={{ color: ps.color }} />
                 </div>
-                <div className="text-sm text-right" style={{ color: 'var(--text-secondary)' }}>
-                  {formatDate(bk.event_date)}
-                </div>
-                <div className="text-right">
-                  <div className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
-                    {formatCurrency(Number(bk.platform_fee))}
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <div className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>
+                      {bk.spaces?.name}
+                    </div>
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0"
+                      style={{ background: ps.bg, color: ps.color }}>
+                      {ps.label}
+                    </span>
                   </div>
-                  <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                    de {formatCurrency(Number(bk.total_amount))} total
+                  <div className="text-xs mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                    {bk.event_type} · {bk.guest_count} personas · {formatDate(bk.event_date)}
                   </div>
-                </div>
-                <div>
-                  <span className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full"
-                    style={{ background: ps.bg, color: ps.color }}>
-                    <Icon size={11} /> {ps.label}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
+                      {formatCurrency(Number(bk.platform_fee))}
+                    </span>
+                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                      de {formatCurrency(Number(bk.total_amount))} total
+                    </span>
+                  </div>
                 </div>
               </div>
             )

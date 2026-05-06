@@ -61,7 +61,7 @@ export default function HostPagosPage() {
   const totalFee      = paid.reduce((s, b) => s + Number(b.platform_fee), 0)
   const totalNet      = totalGross - totalFee
   const pendingPayout = paid.filter(b => b.payout_status === 'pending').reduce((s, b) => s + (Number(b.total_amount) - Number(b.platform_fee)), 0)
-  const liquidated    = paid.filter(b => b.payout_status === 'liquidado').reduce((s, b) => s + (Number(b.total_amount) - Number(b.platform_fee)), 0)
+  const liquidated    = paid.filter(b => b.payout_status === 'paid').reduce((s, b) => s + (Number(b.total_amount) - Number(b.platform_fee)), 0)
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
@@ -87,7 +87,7 @@ export default function HostPagosPage() {
   const ver = verConfig[bankStatus] ?? verConfig.pending
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-8">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-8">
 
       {/* Header */}
       <div>
@@ -149,36 +149,39 @@ export default function HostPagosPage() {
             <p className="text-xs mt-1" style={{ color: '#94A3B8' }}>Cuando un cliente pague, aparecerá aquí.</p>
           </div>
         ) : (
-          <>
-            <div className="grid gap-3 px-6 py-3 text-[11px] font-bold uppercase tracking-widest"
-              style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', background: '#FAFBFC', borderBottom: '1px solid #F0F2F5', color: '#94A3B8' }}>
-              <span>Cliente · Evento</span><span>Fecha</span><span>Total pagado</span><span>Comisión</span><span>Tu neto</span><span>Liquidación</span>
-            </div>
-            <div className="divide-y divide-[#F8FAFC]">
-              {paid.map((bk: any) => {
-                const net = Number(bk.total_amount) - Number(bk.platform_fee)
-                const ps  = PAYOUT_STATUS[bk.payout_status ?? 'pending']
-                const guest = bk.profiles as any
-                return (
-                  <div key={bk.id} className="grid gap-3 items-center px-6 py-4 hover:bg-slate-50 transition-colors"
-                    style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr' }}>
-                    <div>
-                      <div className="text-sm font-semibold" style={{ color: '#0F1623' }}>{guest?.full_name ?? 'Cliente'}</div>
-                      <div className="text-xs" style={{ color: '#94A3B8' }}>{bk.event_type}</div>
+          /* overflow-x-auto para que en móvil haga scroll horizontal en lugar de romper */
+          <div className="overflow-x-auto">
+            <div style={{ minWidth: 680 }}>
+              <div className="grid gap-3 px-6 py-3 text-[11px] font-bold uppercase tracking-widest"
+                style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', background: '#FAFBFC', borderBottom: '1px solid #F0F2F5', color: '#94A3B8' }}>
+                <span>Cliente · Evento</span><span>Fecha</span><span>Total pagado</span><span>Comisión</span><span>Tu neto</span><span>Liquidación</span>
+              </div>
+              <div className="divide-y divide-[#F8FAFC]">
+                {paid.map((bk: any) => {
+                  const net = Number(bk.total_amount) - Number(bk.platform_fee)
+                  const ps  = PAYOUT_STATUS[bk.payout_status ?? 'pending']
+                  const guest = bk.profiles as any
+                  return (
+                    <div key={bk.id} className="grid gap-3 items-center px-6 py-4 hover:bg-slate-50 transition-colors"
+                      style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr' }}>
+                      <div>
+                        <div className="text-sm font-semibold" style={{ color: '#0F1623' }}>{guest?.full_name ?? 'Cliente'}</div>
+                        <div className="text-xs" style={{ color: '#94A3B8' }}>{bk.event_type}</div>
+                      </div>
+                      <div className="text-sm" style={{ color: '#374151' }}>{formatDate(bk.event_date)}</div>
+                      <div className="text-sm font-bold" style={{ color: '#0F1623' }}>{formatCurrency(Number(bk.total_amount))}</div>
+                      <div className="text-sm" style={{ color: '#7C3AED' }}>−{formatCurrency(Number(bk.platform_fee))}</div>
+                      <div className="text-sm font-bold" style={{ color: '#35C493' }}>{formatCurrency(net)}</div>
+                      <span className="text-xs font-semibold px-2.5 py-1.5 rounded-full w-fit"
+                        style={{ background: ps?.bg, color: ps?.color }}>
+                        {ps?.label ?? 'Pendiente'}
+                      </span>
                     </div>
-                    <div className="text-sm" style={{ color: '#374151' }}>{formatDate(bk.event_date)}</div>
-                    <div className="text-sm font-bold" style={{ color: '#0F1623' }}>{formatCurrency(Number(bk.total_amount))}</div>
-                    <div className="text-sm" style={{ color: '#7C3AED' }}>−{formatCurrency(Number(bk.platform_fee))}</div>
-                    <div className="text-sm font-bold" style={{ color: '#35C493' }}>{formatCurrency(net)}</div>
-                    <span className="text-xs font-semibold px-2.5 py-1.5 rounded-full w-fit"
-                      style={{ background: ps?.bg, color: ps?.color }}>
-                      {ps?.label ?? 'Pendiente'}
-                    </span>
-                  </div>
-                )
-              })}
+                  )
+                })}
+              </div>
             </div>
-          </>
+          </div>
         )}
       </div>
 

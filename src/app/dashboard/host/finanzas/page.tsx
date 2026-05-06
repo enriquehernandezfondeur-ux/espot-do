@@ -85,12 +85,12 @@ export default function FinanzasPage() {
   )
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto">
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-8">
+      <div className="flex items-start justify-between gap-4 mb-5 md:mb-8">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+          <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
             Finanzas
           </h1>
           <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
@@ -98,43 +98,45 @@ export default function FinanzasPage() {
           </p>
         </div>
         <button onClick={exportCSV}
-          className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl transition-all"
+          className="flex items-center gap-1.5 text-xs md:text-sm font-semibold px-3 md:px-4 py-2 md:py-2.5 rounded-xl shrink-0 transition-all"
           style={{ background: '#fff', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <Download size={14} /> Exportar CSV
+          <Download size={13} /> <span className="hidden sm:inline">Exportar</span> CSV
         </button>
       </div>
 
       {/* Banner de payout pendiente */}
       {pendingPayout > 0 && (
-        <div className="rounded-2xl p-6 mb-6 flex items-center justify-between gap-4"
+        <div className="rounded-2xl p-5 mb-5 md:mb-6"
           style={{ background: 'linear-gradient(135deg, #03313C 0%, #0A4A3A 100%)', boxShadow: '0 4px 20px rgba(3,49,60,0.15)' }}>
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
               style={{ background: 'rgba(53,196,147,0.15)', border: '1px solid rgba(53,196,147,0.25)' }}>
-              <Banknote size={22} color="#35C493" />
+              <Banknote size={18} color="#35C493" />
             </div>
+            <p className="text-xs font-semibold uppercase tracking-widest"
+              style={{ color: 'rgba(255,255,255,0.5)' }}>
+              Payout pendiente
+            </p>
+          </div>
+          <div className="flex items-end justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest mb-0.5"
-                style={{ color: 'rgba(255,255,255,0.5)' }}>
-                Payout pendiente
-              </p>
-              <p className="text-2xl font-bold" style={{ color: '#fff', letterSpacing: '-0.03em' }}>
+              <p className="text-2xl md:text-3xl font-bold" style={{ color: '#fff', letterSpacing: '-0.03em' }}>
                 {formatCurrency(pendingPayout)}
               </p>
-              <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
                 Se libera automáticamente luego de cada evento confirmado
               </p>
             </div>
-          </div>
-          <div className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold shrink-0"
-            style={{ background: 'rgba(53,196,147,0.15)', color: '#35C493', border: '1px solid rgba(53,196,147,0.2)' }}>
-            <Clock size={12} /> En proceso
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0"
+              style={{ background: 'rgba(53,196,147,0.15)', color: '#35C493', border: '1px solid rgba(53,196,147,0.2)' }}>
+              <Clock size={11} /> En proceso
+            </div>
           </div>
         </div>
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-5 md:mb-8">
         {[
           { label: 'Ingresos brutos',   value: formatCurrency(totalBruto),    icon: TrendingUp,  color: '#35C493', sub: 'cobrado a clientes' },
           { label: 'Comisión Espot',    value: formatCurrency(totalComision),  icon: Building2,   color: '#D97706', sub: '10% por transacción' },
@@ -223,7 +225,7 @@ export default function FinanzasPage() {
       </div>
 
       {/* Filtros */}
-      <div className="flex gap-2 mb-5">
+      <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
         {[
           { key: 'all',       label: 'Todas' },
           { key: 'confirmed', label: 'Confirmadas' },
@@ -231,7 +233,7 @@ export default function FinanzasPage() {
           { key: 'pending',   label: 'Pendientes' },
         ].map(f => (
           <button key={f.key} onClick={() => setFilter(f.key as any)}
-            className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
+            className="px-4 py-2.5 rounded-xl text-sm font-medium transition-all shrink-0"
             style={filter === f.key
               ? { background: 'var(--brand)', color: '#fff' }
               : { background: '#fff', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
@@ -243,7 +245,8 @@ export default function FinanzasPage() {
       {/* Tabla de reservas */}
       <div className="rounded-2xl overflow-hidden"
         style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-
+        <div className="overflow-x-auto">
+        <div style={{ minWidth: 580 }}>
         {/* Header de tabla */}
         <div className="grid gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-widest"
           style={{
@@ -326,6 +329,8 @@ export default function FinanzasPage() {
             </div>
           </>
         )}
+        </div>{/* minWidth wrapper */}
+        </div>{/* overflow-x-auto */}
       </div>
 
       {/* Nota de cuenta bancaria */}

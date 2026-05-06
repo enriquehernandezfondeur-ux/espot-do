@@ -78,10 +78,11 @@ export default function ClientMensajesPage() {
   if (loading) return <div className="flex items-center justify-center h-screen"><Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand)' }} /></div>
 
   return (
-    <div className="flex h-screen" style={{ background: 'var(--bg-base)' }}>
+    <div className="flex flex-col md:flex-row md:h-screen" style={{ background: 'var(--bg-base)', minHeight: '100dvh' }}>
 
       {/* Conversation list */}
-      <div className="w-72 flex flex-col shrink-0" style={{ background: '#fff', borderRight: '1px solid var(--border-subtle)' }}>
+      <div className={`w-full md:w-72 md:flex-col md:shrink-0 flex flex-col ${active ? 'hidden md:flex' : 'flex'}`}
+        style={{ background: '#fff', borderRight: '1px solid var(--border-subtle)', maxHeight: '100dvh' }}>
         <div className="px-5 pt-6 pb-4">
           <h1 className="text-lg font-bold mb-3" style={{ color: 'var(--text-primary)' }}>Mensajes</h1>
           <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl"
@@ -135,10 +136,16 @@ export default function ClientMensajesPage() {
 
       {/* Chat area */}
       {active ? (
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-h-0">
           {/* Header */}
-          <div className="flex items-center gap-3 px-5 py-4 shrink-0"
+          <div className="flex items-center gap-3 px-4 md:px-5 py-3.5 md:py-4 shrink-0"
             style={{ background: '#fff', borderBottom: '1px solid var(--border-subtle)' }}>
+            {/* Botón volver — solo móvil */}
+            <button onClick={() => setActive(null)}
+              className="md:hidden w-8 h-8 flex items-center justify-center rounded-xl shrink-0 text-lg"
+              style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+              ←
+            </button>
             <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0" style={{ background: 'var(--bg-elevated)' }}>
               {active.cover ? <img src={active.cover} alt="" className="w-full h-full object-cover" /> : <div className="text-center text-xl leading-9">🏛️</div>}
             </div>

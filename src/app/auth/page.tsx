@@ -340,7 +340,7 @@ function AuthShell({ children, isHost, redirectTo }: {
       <div className="w-full max-w-[400px] relative">
 
         {/* Logo + badge */}
-        <div className="flex flex-col items-center gap-3 mb-8">
+        <div className="flex flex-col items-center gap-3 mb-6 md:mb-8">
           <Link href="/" className="inline-flex">
             <img src="/logo-green.svg" alt="espot.do" style={{ height: 32, width: 'auto' }} />
           </Link>
@@ -357,7 +357,7 @@ function AuthShell({ children, isHost, redirectTo }: {
         </div>
 
         {/* Card */}
-        <div className="rounded-2xl p-7"
+        <div className="rounded-2xl p-5 md:p-7"
           style={{
             background: 'rgba(255,255,255,0.035)',
             border: '1px solid rgba(255,255,255,0.08)',

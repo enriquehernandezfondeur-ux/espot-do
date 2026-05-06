@@ -63,16 +63,16 @@ export default function AnalyticsPage() {
   const maxDay = Math.max(...popularDays.map(d => d.eventos), 1)
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Analytics</h1>
+    <div className="p-4 md:p-8 max-w-6xl mx-auto">
+      <div className="mb-5 md:mb-8">
+        <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Analytics</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
           Rendimiento real de tu espacio
         </p>
       </div>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
         {[
           { label: 'Ingresos confirmados',  value: formatCurrency(totalRevenue),       color: 'var(--brand)', icon: TrendingUp },
           { label: 'Total de eventos',       value: confirmed.length,                  color: '#3B82F6',       icon: CalendarDays },
@@ -88,12 +88,12 @@ export default function AnalyticsPage() {
                 <Icon size={15} style={{ color }} />
               </div>
             </div>
-            <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>{value}</div>
+            <div className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>{value}</div>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-5 md:mb-6">
         {/* Ingresos mensuales */}
         <div className="rounded-2xl p-6"
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>

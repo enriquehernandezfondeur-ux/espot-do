@@ -100,10 +100,10 @@ export default function PagoPage({ params }: { params: Promise<{ bookingId: stri
   }
 
   function handleExpiry(val: string) {
-    const digits = val.replace(/\D/g, '').slice(0, 4)
+    const digits = val.replace(/\D/g, '').slice(0, 6) // soporta MM/AA y MM/AAAA
     if (digits.length >= 2) {
       const mm = digits.slice(0, 2)
-      if (Number(mm) > 12) return // mes inválido
+      if (Number(mm) > 12) return
       setExpiry(digits.length >= 3 ? `${mm}/${digits.slice(2)}` : mm)
     } else {
       setExpiry(digits)
@@ -177,31 +177,32 @@ export default function PagoPage({ params }: { params: Promise<{ bookingId: stri
   const space   = booking.spaces as any
   const addons  = booking.booking_addons ?? []
   const cover   = space?.space_images?.find((i: any) => i.is_cover)?.url ?? space?.space_images?.[0]?.url
-  const total   = Number(booking.total_amount)
-  const fee     = Number(booking.platform_fee)
-  const netHost = total - fee
+  const total = Number(booking.total_amount)
+  const fee   = Number(booking.platform_fee)
 
   return (
     <div className="min-h-screen" style={{ background: '#F4F6F8' }}>
 
       {/* Top bar */}
-      <div className="sticky top-0 z-50 px-6 py-4 flex items-center justify-between"
+      <div className="sticky top-0 z-50 px-4 md:px-6 py-3.5 flex items-center justify-between"
         style={{ background: '#fff', borderBottom: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
         <Link href={`/espacios/${booking.spaces?.slug ?? ''}`}
-          className="flex items-center gap-2 text-sm font-medium"
+          className="flex items-center gap-1.5 text-sm font-medium"
           style={{ color: '#6B7280' }}>
-          <ChevronLeft size={16} /> Volver al espacio
+          <ChevronLeft size={16} />
+          <span className="hidden sm:inline">Volver al espacio</span>
+          <span className="sm:hidden">Volver</span>
         </Link>
-        <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: '#0F1623' }}>
-          <img src="/logo-dark.svg" alt="espot.do" style={{ height: 22, width: 'auto' }} />
-        </div>
+        <img src="/logo-dark.svg" alt="espot.do" style={{ height: 22, width: 'auto' }} />
         <div className="flex items-center gap-1.5 text-xs font-medium" style={{ color: '#6B7280' }}>
-          <Lock size={12} style={{ color: '#35C493' }} /> Pago seguro SSL
+          <Lock size={12} style={{ color: '#35C493' }} />
+          <span className="hidden sm:inline">Pago seguro SSL</span>
+          <span className="sm:hidden">SSL</span>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-10">
-        <h1 className="text-2xl font-bold mb-8" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>
+      <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-10">
+        <h1 className="text-xl md:text-2xl font-bold mb-6 md:mb-8" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>
           Completar pago
         </h1>
 
@@ -273,8 +274,8 @@ export default function PagoPage({ params }: { params: Promise<{ bookingId: stri
                     <input
                       type="text" inputMode="numeric" autoComplete="cc-exp"
                       value={expiry} onChange={e => handleExpiry(e.target.value)}
-                      placeholder="MM/AA"
-                      maxLength={5}
+                      placeholder="MM/AA o MM/AAAA"
+                      maxLength={7}
                       className="w-full rounded-xl px-4 py-3.5 text-sm focus:outline-none transition-all"
                       style={{ background: '#F8FAFC', border: '1.5px solid #E2E8F0', color: '#0F1623', fontFamily: 'monospace' }}
                       onFocus={e => (e.target.style.borderColor = '#35C493')}
@@ -305,7 +306,7 @@ export default function PagoPage({ params }: { params: Promise<{ bookingId: stri
                   {paying ? (
                     <><Loader2 size={20} className="animate-spin" /> Procesando pago...</>
                   ) : (
-                    <><Lock size={16} /> Pagar {formatCurrency(total)}</>
+                    <><Lock size={16} /> Pagar depósito {formatCurrency(fee)}</>
                   )}
                 </button>
               </form>

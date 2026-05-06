@@ -70,9 +70,15 @@
 
 * { box-sizing: border-box; }
 
+html {
+  overflow-x: clip;
+}
+
 body {
   font-family: var(--font-poppins), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 /* ── HOVER UTILITIES ─────────────────────────────── */
@@ -166,4 +172,84 @@ input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="time"]::-webkit-calendar-picker-indicator {
   opacity: 0.5;
   cursor: pointer;
+}
+
+/* ── MOBILE UTILITIES ────────────────────────────── */
+
+/* Ocultar scrollbar visualmente pero mantener funcionalidad */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+
+/* Safe area padding para dispositivos con notch */
+.pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+.pt-safe { padding-top: max(0px, env(safe-area-inset-top)); }
+
+/* Touch targets mínimos (44px) */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Prevenir zoom en inputs en iOS */
+@media (max-width: 767px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Card hover — desactivar lift en touch (no hay hover en móvil) */
+@media (hover: none) {
+  .card-hover:hover {
+    transform: none;
+    box-shadow: var(--shadow-card);
+    border-color: var(--border-subtle) !important;
+  }
+}
+
+/* Animación suave para drawers y modales */
+.slide-in-left {
+  animation: slideInLeft 0.25s ease-out;
+}
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+
+.slide-in-bottom {
+  animation: slideInBottom 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes slideInBottom {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* Gradiente texto para el hero */
+.gradient-text-brand {
+  background: linear-gradient(95deg, #35C493 0%, #5CE8BC 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Input flotante tipo Airbnb */
+.input-float {
+  position: relative;
+}
+.input-float input:focus + label,
+.input-float input:not(:placeholder-shown) + label {
+  transform: translateY(-1.2rem) scale(0.75);
+  color: var(--brand);
 }

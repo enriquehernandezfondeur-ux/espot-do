@@ -51,22 +51,22 @@ export async function POST(req: NextRequest) {
     .eq('id', bookingId)
 
   const totalAmount   = Number(booking.total_amount)
-  // Use the platform_fee already calculated when booking was created (what the user saw)
+  // Cobrar solo el depósito del 10% (platform_fee), no el total del evento
   const commissionAmt = Number(booking.platform_fee) || Math.round(totalAmount * 0.10 * 100) / 100
   const commissionPct = totalAmount > 0 ? Math.round((commissionAmt / totalAmount) * 100) : 10
   const netToHost     = Math.round((totalAmount - commissionAmt) * 100) / 100
 
-  // Procesar pago con Azul
+  // Procesar pago con Azul — solo el depósito
   const customOrderId = `ESP-${bookingId.slice(0, 8).toUpperCase()}-${Date.now()}`
 
   const azulResult = await azulSale({
     cardNumber:   cardNumber.replace(/\s/g, ''),
     expiration,
     cvv,
-    amount:       totalAmount,
-    itbis:        Number(booking.itbis_amount ?? 0),
+    amount:       commissionAmt,
+    itbis:        0,
     customOrderId,
-    orderDesc:    `Reserva ${space?.name ?? ''} - ${formatDate(booking.event_date)}`,
+    orderDesc:    `Depósito 10% - ${space?.name ?? ''} - ${formatDate(booking.event_date)}`,
   })
 
   if (!azulResult.success) {
@@ -87,8 +87,8 @@ export async function POST(req: NextRequest) {
   // ── Pago aprobado ─────────────────────────────────────
   await supabase.from('bookings').update({
     status:             'confirmed',
-    payment_status:     'paid',
-    paid_amount:        totalAmount,
+    payment_status:     'advance',
+    paid_amount:        commissionAmt,
     paid_at:            new Date().toISOString(),
     confirmed_at:       new Date().toISOString(),
     platform_fee:       commissionAmt,
@@ -116,9 +116,9 @@ export async function POST(req: NextRequest) {
   // Registrar pago en tabla payments
   await supabase.from('payments').insert({
     booking_id:     bookingId,
-    amount:         totalAmount,
+    amount:         commissionAmt,
     currency:       'DOP',
-    payment_type:   'full_payment',
+    payment_type:   'deposit',
     payment_method: 'azul',
     status:         'completed',
     paid_at:        new Date().toISOString(),
@@ -143,12 +143,13 @@ export async function POST(req: NextRequest) {
         color:    '#16A34A',
         emoji:    '🎊',
         rows: [
-          { label: 'Espacio',        value: spaceName },
-          { label: 'Evento',         value: booking.event_type },
-          { label: 'Fecha y horario',value: eventInfo },
-          { label: 'Total pagado',   value: formatCurrency(totalAmount) },
-          { label: 'Dirección',      value: [space?.address, space?.city].filter(Boolean).join(', ') },
-          { label: 'ID de transacción', value: azulResult.azulOrderId ?? customOrderId },
+          { label: 'Espacio',          value: spaceName },
+          { label: 'Evento',           value: booking.event_type },
+          { label: 'Fecha y horario',  value: eventInfo },
+          { label: 'Depósito pagado',  value: formatCurrency(commissionAmt) },
+          { label: 'Total del evento', value: formatCurrency(totalAmount) },
+          { label: 'Dirección',        value: [space?.address, space?.city].filter(Boolean).join(', ') },
+          { label: 'ID de transacción',value: azulResult.azulOrderId ?? customOrderId },
         ],
         cta: { text: 'Ver mi reserva', url: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/reservas` },
       }),
@@ -160,7 +161,7 @@ export async function POST(req: NextRequest) {
       subject: `💰 Pago recibido — Nueva reserva confirmada en ${spaceName}`,
       html:    buildEmail({
         title:    '¡Pago recibido! Reserva confirmada',
-        subtitle: `${guestName} pagó el 100% de la reserva.`,
+        subtitle: `${guestName} pagó el depósito del ${commissionPct}% para asegurar la fecha.`,
         color:    '#35C493',
         emoji:    '💰',
         rows: [
@@ -168,8 +169,8 @@ export async function POST(req: NextRequest) {
           { label: 'Espacio',              value: spaceName },
           { label: 'Evento',               value: booking.event_type },
           { label: 'Fecha y horario',      value: eventInfo },
-          { label: 'Total pagado',         value: formatCurrency(totalAmount) },
-          { label: 'Comisión EspotHub',    value: `${formatCurrency(commissionAmt)} (${commissionPct}%)` },
+          { label: 'Depósito recibido',    value: formatCurrency(commissionAmt) },
+          { label: 'Total del evento',     value: formatCurrency(totalAmount) },
           { label: 'Neto a recibir',       value: formatCurrency(netToHost) },
           { label: 'Estado de liquidación',value: '⏳ Pendiente de transferencia' },
         ],
@@ -180,7 +181,7 @@ export async function POST(req: NextRequest) {
 
     // Email al admin
     sendEmail({
-      to:      'enriquehernandezfondeur@gmail.com',
+      to:      process.env.ADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com',
       subject: `🔔 Nueva reserva pagada — ${spaceName} | ${formatCurrency(totalAmount)}`,
       html:    buildEmail({
         title:    'Nueva reserva pagada',

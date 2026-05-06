@@ -29,6 +29,7 @@ export interface CreateBookingPayload {
 export async function createBooking(payload: CreateBookingPayload) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Debes iniciar sesión para hacer una reserva' }
 
   // Obtener info del espacio y host para los emails
   const { data: space } = await supabase
@@ -222,7 +223,7 @@ export async function acceptBooking(bookingId: string) {
       subject: `🎉 Reserva aceptada — ${space?.name}`,
       html: emailTemplate({
         title: '¡Tu reserva fue aceptada!',
-        subtitle: 'Completa el pago para confirmar tu fecha.',
+        subtitle: 'Completa el pago del depósito para confirmar tu fecha.',
         color: '#16A34A',
         emoji: '🎉',
         body: `
@@ -232,10 +233,11 @@ export async function acceptBooking(bookingId: string) {
             { label: 'Evento', value: bk.event_type },
             { label: 'Fecha', value: formatDate(bk.event_date) },
             { label: 'Horario', value: `${formatTime(bk.start_time)} – ${formatTime(bk.end_time)}` },
+            { label: 'Depósito a pagar (10%)', value: depositAmount },
             { label: 'Total del evento', value: formatCurrency(Number(bk.total_amount)) },
           ])}
           <p style="color:#16A34A;font-weight:bold;">
-            Completa el pago para confirmar tu reserva.
+            Paga el depósito del 10% para asegurar tu fecha.
           </p>`,
         cta: { text: 'Completar pago', url: `${SITE}/dashboard/reservas` },
       }),

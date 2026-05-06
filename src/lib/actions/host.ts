@@ -371,11 +371,14 @@ export async function completeBooking(bookingId: string) {
     .single()
   if (!bk || (bk.spaces as any)?.host_id !== user.id) return { error: 'No autorizado' }
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from('bookings')
     .update({ status: 'completed', updated_at: new Date().toISOString() })
     .eq('id', bookingId)
     .eq('status', 'confirmed')
+    .select('id')
 
-  return error ? { error: error.message } : { success: true }
+  if (error) return { error: error.message }
+  if (!updated || updated.length === 0) return { error: 'La reserva no está en estado confirmado' }
+  return { success: true }
 }

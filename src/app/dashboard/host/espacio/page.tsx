@@ -365,8 +365,8 @@ export default function EspacioPage() {
   // ── VISTA: Lista de espacios ──────────────────────────────
   if (view === 'list') {
     return (
-      <div className="p-8 max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+      <div className="p-4 md:p-8 max-w-5xl mx-auto">
+        <div className="flex items-center justify-between mb-5 md:mb-8">
           <div>
             <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
               Mis espacios
@@ -499,7 +499,7 @@ export default function EspacioPage() {
   return (
     <div className="px-6 py-8 max-w-4xl mx-auto">
       {/* Header */}
-      <div className="mb-8 flex items-center gap-4">
+      <div className="mb-5 md:mb-8 flex items-center gap-4">
         <button
           onClick={() => setView('list')}
           className="transition-colors text-sm flex items-center gap-1.5"
@@ -561,7 +561,7 @@ export default function EspacioPage() {
       </div>
 
       {/* Step Content */}
-      <div className="rounded-2xl p-8" style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+      <div className="rounded-2xl p-4 md:p-8" style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
 
         {/* STEP 1: Información básica */}
         {currentStep === 1 && (
@@ -583,7 +583,7 @@ export default function EspacioPage() {
 
             <div>
               <label className="block text-sm font-medium mb-2.5" style={{ color: 'var(--text-secondary)' }}>Tipo de espacio</label>
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
                 {categories.map(cat => (
                   <button
                     key={cat.value}
@@ -720,7 +720,7 @@ export default function EspacioPage() {
             {pricingType === 'hourly' && (
               <div className="bg-[rgba(53,196,147,0.07)] border border-[rgba(53,196,147,0.20)] rounded-xl p-5 space-y-4">
                 <h3 className="font-semibold text-sm" style={{ color: 'var(--brand)' }}>Configuración de precio por hora</h3>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
                   <div>
                     <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Precio por hora (RD$)</label>
                     <input
@@ -763,7 +763,7 @@ export default function EspacioPage() {
             {pricingType === 'minimum_consumption' && (
               <div className="bg-[rgba(53,196,147,0.07)] border border-[rgba(53,196,147,0.20)] rounded-xl p-5 space-y-4">
                 <h3 className="font-semibold text-sm" style={{ color: 'var(--brand)' }}>Configuración de consumo mínimo</h3>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
                   <div>
                     <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Consumo mínimo (RD$) *</label>
                     <input type="number" value={minConsumption} onChange={e => setMinConsumption(e.target.value)}
@@ -896,7 +896,7 @@ export default function EspacioPage() {
                   </span>
                 )}
               </div>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {addonSuggestions.map(addon => {
                   const selected = addons.find(a => a.name === addon.name)
                   return (
@@ -1169,7 +1169,7 @@ export default function EspacioPage() {
             {/* ─── 4. POLÍTICA DE CANCELACIÓN ─── */}
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Política de cancelación</p>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {[
                   { value: 'flexible', label: 'Flexible',  desc: '100% reembolso hasta 24h antes' },
                   { value: 'moderada', label: 'Moderada',  desc: '50% reembolso hasta 72h antes' },

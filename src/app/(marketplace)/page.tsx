@@ -40,7 +40,6 @@ const eventTypes = [
   { label: 'Baby Shower',  slug: 'baby-shower',   img: 'https://images.unsplash.com/photo-1529634806980-85c3dd6d34ac?w=700&q=85&fit=crop' },
 ]
 
-// Fotos del mosaico en el hero
 const HERO_FALLBACK = [
   'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=500&q=85&fit=crop',
   'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&q=85&fit=crop',
@@ -63,38 +62,34 @@ function getPriceLabel(space: any) {
 export default async function HomePage() {
   const spaces = await getPublishedSpaces()
 
-  // Mosaico del hero: fotos reales de espacios o fallback
   const heroCovers = spaces.slice(0, 4).map(getCover).filter(Boolean)
-  const mosaicImgs = heroCovers.length >= 4
-    ? heroCovers.slice(0, 4)
-    : HERO_FALLBACK
+  const mosaicImgs = heroCovers.length >= 4 ? heroCovers.slice(0, 4) : HERO_FALLBACK
 
   return (
-    <div style={{ background: 'var(--bg-base)' }}>
+    <div style={{ background: '#fff' }}>
 
       {/* ─────────────────────────────────────────────
           HERO
           ───────────────────────────────────────── */}
       <section className="relative overflow-hidden"
-        style={{ background: 'linear-gradient(155deg, #0A1A14 0%, #0D2318 55%, #0A0E0D 100%)', minHeight: 580 }}>
+        style={{ background: 'linear-gradient(155deg, #0A1A14 0%, #0D2318 55%, #0A0E0D 100%)' }}>
 
-        {/* Orbes de ambiente */}
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full pointer-events-none"
           style={{ background: 'radial-gradient(circle, rgba(53,196,147,0.08) 0%, transparent 70%)', transform: 'translate(-50%,-50%)' }} />
 
-        <div className="max-w-7xl mx-auto px-6 py-20 lg:py-24">
-          <div className="grid lg:grid-cols-[1fr_420px] gap-16 items-center">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-10 md:py-12 lg:py-14">
+          <div className="grid lg:grid-cols-[1fr_420px] gap-8 lg:gap-10 items-center">
 
             {/* Contenido izquierdo */}
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-8 text-xs font-semibold tracking-wide"
+              <div className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 mb-5 md:mb-6 text-xs font-semibold tracking-wide"
                 style={{ background: 'rgba(53,196,147,0.1)', border: '1px solid rgba(53,196,147,0.2)', color: '#6EE7C7' }}>
                 <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#35C493' }} />
                 Espacios para eventos en República Dominicana
               </div>
 
-              <h1 className="font-bold text-white mb-5"
-                style={{ fontSize: 'clamp(2.4rem, 5vw, 3.6rem)', lineHeight: 1.08, letterSpacing: '-0.04em' }}>
+              <h1 className="font-bold text-white mb-4"
+                style={{ fontSize: 'clamp(2rem, 6vw, 3.6rem)', lineHeight: 1.08, letterSpacing: '-0.04em' }}>
                 El espacio perfecto
                 <br />
                 <span style={{
@@ -105,23 +100,23 @@ export default async function HomePage() {
                 </span>
               </h1>
 
-              <p className="mb-10 max-w-md" style={{ color: 'rgba(255,255,255,0.55)', fontSize: '1.05rem', lineHeight: 1.75 }}>
+              <p className="mb-7 md:mb-8 max-w-md text-sm md:text-base" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.75 }}>
                 Reserva salones, rooftops, restaurantes y más — por hora o paquete, confirmación en 24&nbsp;horas.
               </p>
 
               <HomepageSearch />
 
               {/* Métricas inline */}
-              <div className="flex items-center gap-6 mt-8">
+              <div className="flex items-center gap-5 md:gap-6 mt-6">
                 {[
                   { value: spaces.length + '+', label: 'espacios' },
                   { value: '24h',  label: 'respuesta' },
                   { value: '10%',  label: 'para reservar' },
                 ].map((s, i) => (
                   <div key={s.label} className="flex items-center gap-2.5">
-                    {i > 0 && <div className="w-px h-7" style={{ background: 'rgba(255,255,255,0.1)' }} />}
+                    {i > 0 && <div className="w-px h-6 md:h-7" style={{ background: 'rgba(255,255,255,0.1)' }} />}
                     <div>
-                      <div className="font-bold text-white" style={{ fontSize: '1.25rem', letterSpacing: '-0.03em' }}>{s.value}</div>
+                      <div className="font-bold text-white" style={{ fontSize: 'clamp(1rem, 3vw, 1.25rem)', letterSpacing: '-0.03em' }}>{s.value}</div>
                       <div className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{s.label}</div>
                     </div>
                   </div>
@@ -129,7 +124,7 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Mosaico derecho — oculto en móvil */}
+            {/* Mosaico derecho — solo en lg+ */}
             <div className="hidden lg:grid grid-cols-2 gap-3">
               {mosaicImgs.map((src, i) => (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -155,14 +150,14 @@ export default async function HomePage() {
       {/* ─────────────────────────────────────────────
           TIPOS DE EVENTO
           ───────────────────────────────────────── */}
-      <section style={{ background: '#fff' }} className="py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-end justify-between mb-10">
+      <section style={{ background: '#fff', borderTop: '1px solid var(--border-subtle)' }} className="py-10 md:py-12">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="flex items-end justify-between mb-6 md:mb-7">
             <div>
-              <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: '#35C493' }}>
+              <p className="text-xs font-semibold tracking-widest uppercase mb-1.5" style={{ color: '#35C493' }}>
                 Por tipo de evento
               </p>
-              <h2 className="font-bold" style={{ color: 'var(--text-primary)', fontSize: '1.75rem', letterSpacing: '-0.03em' }}>
+              <h2 className="font-bold" style={{ color: 'var(--text-primary)', fontSize: 'clamp(1.4rem, 4vw, 1.75rem)', letterSpacing: '-0.03em' }}>
                 ¿Qué estás celebrando?
               </h2>
             </div>
@@ -172,27 +167,35 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
             {eventTypes.map(et => (
               <Link key={et.slug} href={`/buscar?activity=${et.slug}`}
                 className="group relative block overflow-hidden"
-                style={{ borderRadius: 18, aspectRatio: '16/10', boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+                style={{ borderRadius: 16, aspectRatio: '4/3', boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={et.img} alt={et.label}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
                 <div className="absolute inset-0"
-                  style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.15) 50%, transparent 100%)' }} />
-                <div className="absolute bottom-0 left-0 right-0 p-5 flex items-end justify-between">
-                  <span className="text-white font-bold text-lg" style={{ letterSpacing: '-0.02em' }}>
+                  style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.1) 55%, transparent 100%)' }} />
+                <div className="absolute bottom-0 left-0 right-0 p-3.5 md:p-5 flex items-end justify-between">
+                  <span className="text-white font-bold text-base md:text-lg" style={{ letterSpacing: '-0.02em' }}>
                     {et.label}
                   </span>
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0"
+                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full hidden md:flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0"
                     style={{ background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)' }}>
-                    <ArrowRight size={14} className="text-white" />
+                    <ArrowRight size={13} className="text-white" />
                   </div>
                 </div>
               </Link>
             ))}
+          </div>
+
+          {/* Ver todos — solo móvil */}
+          <div className="md:hidden mt-5 text-center">
+            <Link href="/buscar" className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-3 rounded-xl"
+              style={{ border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)' }}>
+              Ver todos los eventos <ArrowRight size={14} />
+            </Link>
           </div>
         </div>
       </section>
@@ -200,14 +203,14 @@ export default async function HomePage() {
       {/* ─────────────────────────────────────────────
           ESPACIOS DESTACADOS
           ───────────────────────────────────────── */}
-      <section style={{ background: 'var(--bg-surface)' }} className="py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-end justify-between mb-10">
+      <section style={{ background: 'var(--bg-elevated)', borderTop: '1px solid var(--border-subtle)' }} className="py-10 md:py-12">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="flex items-end justify-between mb-6 md:mb-7">
             <div>
-              <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: '#35C493' }}>
+              <p className="text-xs font-semibold tracking-widest uppercase mb-1.5" style={{ color: '#35C493' }}>
                 Espacios disponibles
               </p>
-              <h2 className="font-bold" style={{ color: 'var(--text-primary)', fontSize: '1.75rem', letterSpacing: '-0.03em' }}>
+              <h2 className="font-bold" style={{ color: 'var(--text-primary)', fontSize: 'clamp(1.4rem, 4vw, 1.75rem)', letterSpacing: '-0.03em' }}>
                 {spaces.length > 0
                   ? `${spaces.length} espacio${spaces.length !== 1 ? 's' : ''} en República Dominicana`
                   : 'Próximamente más espacios'}
@@ -220,7 +223,7 @@ export default async function HomePage() {
           </div>
 
           {spaces.length === 0 ? (
-            <div className="py-20 text-center rounded-2xl" style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+            <div className="py-16 md:py-20 text-center rounded-2xl" style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
               <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
                 style={{ background: 'var(--brand-dim)' }}>
                 <Building2 size={24} style={{ color: 'var(--brand)' }} />
@@ -232,7 +235,7 @@ export default async function HomePage() {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {spaces.slice(0, 6).map((space: any) => {
                 const priceInfo = getPriceLabel(space)
                 const cover     = getCover(space)
@@ -247,7 +250,7 @@ export default async function HomePage() {
                       }}>
 
                       {/* Imagen */}
-                      <div className="relative overflow-hidden" style={{ height: 240, flexShrink: 0 }}>
+                      <div className="relative overflow-hidden" style={{ aspectRatio: '16/10', flexShrink: 0 }}>
                         {cover ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={cover} alt={space.name}
@@ -307,7 +310,7 @@ export default async function HomePage() {
             </div>
           )}
 
-          <div className="text-center mt-10 md:hidden">
+          <div className="text-center mt-6 md:hidden">
             <Link href="/buscar" className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-xl"
               style={{ border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)' }}>
               Ver todos los espacios <ArrowRight size={14} />
@@ -319,33 +322,34 @@ export default async function HomePage() {
       {/* ─────────────────────────────────────────────
           CATEGORÍAS
           ───────────────────────────────────────── */}
-      <section style={{ background: '#fff' }} className="py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-end justify-between mb-10">
+      <section style={{ background: '#fff', borderTop: '1px solid var(--border-subtle)' }} className="py-10 md:py-12">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="flex items-end justify-between mb-5 md:mb-6">
             <div>
-              <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: '#35C493' }}>
+              <p className="text-xs font-semibold tracking-widest uppercase mb-1.5" style={{ color: '#35C493' }}>
                 Por tipo de espacio
               </p>
-              <h2 className="font-bold" style={{ color: 'var(--text-primary)', fontSize: '1.75rem', letterSpacing: '-0.03em' }}>
+              <h2 className="font-bold" style={{ color: 'var(--text-primary)', fontSize: 'clamp(1.4rem, 4vw, 1.75rem)', letterSpacing: '-0.03em' }}>
                 Explora tu opción
               </h2>
             </div>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+          {/* En móvil: 4 columnas; en desktop: 8 columnas */}
+          <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 md:gap-3">
             {categories.map(cat => {
               const Icon = cat.icon
               return (
                 <Link key={cat.value} href={`/buscar?categoria=${cat.value}`}
-                  className="cat-hover group flex flex-col items-center gap-3 p-4 rounded-2xl transition-all duration-200 text-center"
+                  className="cat-hover group flex flex-col items-center gap-2 md:gap-3 p-3 md:p-4 rounded-2xl transition-all duration-200 text-center"
                   style={{
                     border: '1px solid var(--border-subtle)',
                     background: '#fff',
                   }}>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
+                  <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-colors"
                     style={{ background: 'var(--bg-elevated)' }}>
-                    <Icon size={18} style={{ color: 'var(--text-secondary)' }} />
+                    <Icon size={16} style={{ color: 'var(--text-secondary)' }} />
                   </div>
-                  <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
+                  <span className="text-[10px] md:text-xs font-semibold leading-tight" style={{ color: 'var(--text-secondary)' }}>
                     {cat.label}
                   </span>
                 </Link>
@@ -358,21 +362,21 @@ export default async function HomePage() {
       {/* ─────────────────────────────────────────────
           CÓMO FUNCIONA
           ───────────────────────────────────────── */}
-      <section style={{ background: 'var(--bg-surface)' }} className="py-20">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-14">
+      <section style={{ background: 'var(--bg-elevated)', borderTop: '1px solid var(--border-subtle)' }} className="py-10 md:py-12">
+        <div className="max-w-5xl mx-auto px-4 md:px-6">
+          <div className="text-center mb-8 md:mb-10">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: '#35C493' }}>
               Proceso simple
             </p>
-            <h2 className="font-bold" style={{ color: 'var(--text-primary)', fontSize: '1.75rem', letterSpacing: '-0.03em' }}>
+            <h2 className="font-bold" style={{ color: 'var(--text-primary)', fontSize: 'clamp(1.4rem, 4vw, 1.75rem)', letterSpacing: '-0.03em' }}>
               Reserva en tres pasos
             </h2>
-            <p className="mt-3 text-sm" style={{ color: 'var(--text-muted)' }}>
+            <p className="mt-2.5 text-sm" style={{ color: 'var(--text-muted)' }}>
               Sin llamadas, sin complicaciones, sin sorpresas
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-4">
             {[
               { num: '01', icon: Search,     title: 'Busca tu espacio',      desc: 'Filtra por tipo de evento, sector y capacidad. Compara y elige.' },
               { num: '02', icon: Clock,      title: 'Elige fecha y horario',  desc: 'Selecciona la fecha, el horario y los servicios adicionales.' },
@@ -380,25 +384,25 @@ export default async function HomePage() {
             ].map((step, i) => {
               const Icon = step.icon
               return (
-                <div key={step.num} className="relative rounded-2xl p-7"
+                <div key={step.num} className="relative rounded-2xl p-5 md:p-7"
                   style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
-                  <div className="flex items-center gap-4 mb-5">
-                    <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+                  <div className="flex items-center gap-4 mb-4 md:mb-5">
+                    <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shrink-0"
                       style={{ background: 'var(--brand-dim)' }}>
-                      <Icon size={20} style={{ color: 'var(--brand)' }} />
+                      <Icon size={18} style={{ color: 'var(--brand)' }} />
                     </div>
                     <span className="text-xs font-bold tracking-widest" style={{ color: 'var(--border-medium)' }}>
                       PASO {step.num}
                     </span>
                   </div>
-                  <h3 className="font-bold mb-2 text-base" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+                  <h3 className="font-bold mb-2 text-sm md:text-base" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
                     {step.title}
                   </h3>
                   <p className="text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>
                     {step.desc}
                   </p>
                   {i < 2 && (
-                    <div className="hidden md:block absolute top-1/2 -right-3 w-6 h-6 rounded-full flex items-center justify-center z-10"
+                    <div className="hidden md:flex absolute top-1/2 -right-3 w-6 h-6 rounded-full items-center justify-center z-10"
                       style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
                       <ArrowRight size={12} style={{ color: 'var(--text-muted)' }} />
                     </div>
@@ -414,16 +418,16 @@ export default async function HomePage() {
           TRUST
           ───────────────────────────────────────── */}
       <section style={{ background: '#fff', borderTop: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)' }}>
-        <div className="max-w-4xl mx-auto px-6 py-14 grid md:grid-cols-3 gap-10">
+        <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 md:py-10 grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
           {[
-            { icon: Shield,      color: '#35C493', title: 'Espacios verificados',    desc: 'Revisamos cada espacio antes de publicarlo en la plataforma.' },
-            { icon: CheckCircle, color: '#3B82F6', title: 'Confirmación en 24 horas', desc: 'Los propietarios responden rápido. Máximo 24 horas.' },
+            { icon: Shield,      color: '#35C493', title: 'Espacios verificados',      desc: 'Revisamos cada espacio antes de publicarlo en la plataforma.' },
+            { icon: CheckCircle, color: '#3B82F6', title: 'Confirmación en 24 horas',  desc: 'Los propietarios responden rápido. Máximo 24 horas.' },
             { icon: CreditCard,  color: '#8B5CF6', title: 'Solo el 10% por adelantado', desc: 'Bloquea tu fecha sin pagar el total. Sin sorpresas.' },
           ].map(({ icon: Icon, color, title, desc }) => (
-            <div key={title} className="flex flex-col items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
+            <div key={title} className="flex items-start gap-4">
+              <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
                 style={{ background: `${color}10` }}>
-                <Icon size={22} style={{ color }} />
+                <Icon size={20} style={{ color }} />
               </div>
               <div>
                 <h4 className="font-semibold text-sm mb-1.5" style={{ color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>{title}</h4>
@@ -437,8 +441,8 @@ export default async function HomePage() {
       {/* ─────────────────────────────────────────────
           CTA PROPIETARIOS
           ───────────────────────────────────────── */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-6">
+      <section className="py-8 md:py-10" style={{ background: '#fff', borderTop: '1px solid var(--border-subtle)' }}>
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="relative overflow-hidden rounded-3xl"
             style={{ background: 'linear-gradient(140deg, #0D2318 0%, #1A4D38 100%)' }}>
 
@@ -449,28 +453,28 @@ export default async function HomePage() {
                 style={{ background: '#35C493', transform: 'translateY(30%)' }} />
             </div>
 
-            <div className="relative grid md:grid-cols-[1fr_auto] items-center gap-8 px-10 py-14 md:px-14">
+            <div className="relative grid md:grid-cols-[1fr_auto] items-center gap-6 md:gap-8 px-6 py-8 md:px-12 md:py-10">
               <div>
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-5 text-xs font-semibold"
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-4 md:mb-5 text-xs font-semibold"
                   style={{ background: 'rgba(53,196,147,0.15)', color: '#6EE7C7', border: '1px solid rgba(53,196,147,0.2)' }}>
                   Para propietarios
                 </div>
                 <h2 className="font-bold text-white mb-3"
-                  style={{ fontSize: 'clamp(1.5rem,3vw,2.25rem)', letterSpacing: '-0.03em', lineHeight: 1.15 }}>
+                  style={{ fontSize: 'clamp(1.3rem, 4vw, 2.25rem)', letterSpacing: '-0.03em', lineHeight: 1.15 }}>
                   ¿Tienes un espacio para eventos?
                 </h2>
-                <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.95rem', lineHeight: 1.7, maxWidth: 480 }}>
+                <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.9rem', lineHeight: 1.7, maxWidth: 480 }}>
                   Publica tu salón, restaurante, rooftop o villa. Recibe reservas online y gestiona todo desde tu panel.
                 </p>
               </div>
-              <div className="flex flex-col gap-3 shrink-0">
+              <div className="flex flex-col sm:flex-row md:flex-col gap-3 shrink-0">
                 <Link href="/auth"
-                  className="inline-flex items-center justify-center gap-2 font-bold px-8 py-4 rounded-2xl text-sm whitespace-nowrap"
+                  className="inline-flex items-center justify-center gap-2 font-bold px-6 md:px-8 py-3.5 md:py-4 rounded-2xl text-sm whitespace-nowrap"
                   style={{ background: '#35C493', color: '#fff', boxShadow: '0 4px 20px rgba(53,196,147,0.35)' }}>
                   Publicar espacio gratis <ArrowRight size={15} />
                 </Link>
                 <Link href="/buscar"
-                  className="inline-flex items-center justify-center gap-2 font-medium px-8 py-4 rounded-2xl text-sm whitespace-nowrap"
+                  className="inline-flex items-center justify-center gap-2 font-medium px-6 md:px-8 py-3.5 md:py-4 rounded-2xl text-sm whitespace-nowrap"
                   style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.12)' }}>
                   Explorar espacios
                 </Link>

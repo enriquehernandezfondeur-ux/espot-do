@@ -54,8 +54,8 @@ export default function MisReservasPage() {
   )
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
-      <div className="mb-8">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto">
+      <div className="mb-5 md:mb-8">
         <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Mis reservas</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
           {bookings.length} reserva{bookings.length !== 1 ? 's' : ''} en total
@@ -88,11 +88,11 @@ export default function MisReservasPage() {
       )}
 
       {/* Filtros */}
-      <div className="flex items-center justify-between gap-4 mb-6">
-        <div className="flex gap-1 p-1 rounded-2xl overflow-x-auto" style={{ background: 'var(--bg-elevated)' }}>
+      <div className="flex flex-col md:flex-row gap-3 mb-5 md:mb-6">
+        <div className="flex gap-1 p-1 rounded-2xl overflow-x-auto scrollbar-hide" style={{ background: 'var(--bg-elevated)' }}>
           {FILTERS.map(f => (
             <button key={f} onClick={() => setFilter(f)}
-              className="px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap"
+              className="px-3 py-2.5 rounded-xl text-xs md:text-sm font-medium transition-all whitespace-nowrap shrink-0"
               style={filter === f
                 ? { background: '#fff', color: 'var(--text-primary)', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }
                 : { color: 'var(--text-secondary)' }}>
@@ -100,11 +100,11 @@ export default function MisReservasPage() {
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-2 rounded-xl px-4 py-2.5 input-base shrink-0">
+        <div className="flex items-center gap-2 rounded-xl px-4 py-3 input-base md:w-48">
           <Search size={15} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Buscar..."
-            className="bg-transparent text-sm focus:outline-none w-36"
+            className="bg-transparent text-sm focus:outline-none flex-1"
             style={{ color: 'var(--text-primary)' }} />
         </div>
       </div>
@@ -135,44 +135,46 @@ export default function MisReservasPage() {
                 style={{ background: '#fff', border: `1.5px solid ${isSelected ? 'var(--brand)' : bk.status === 'accepted' ? 'rgba(37,99,235,0.3)' : 'var(--border-subtle)'}` }}>
 
                 <button className="w-full text-left" onClick={() => setSelected(isSelected ? null : bk)}>
-                  <div className="flex items-center gap-4 p-5">
+                  <div className="flex items-center gap-3 p-4">
                     {/* Imagen */}
-                    <div className="w-20 h-16 rounded-xl overflow-hidden shrink-0" style={{ background: 'var(--bg-elevated)' }}>
+                    <div className="w-16 h-14 md:w-20 md:h-16 rounded-xl overflow-hidden shrink-0" style={{ background: 'var(--bg-elevated)' }}>
                       {cover
                         ? <img src={cover} alt="" className="w-full h-full object-cover" />
-                        : <div className="w-full h-full flex items-center justify-center text-2xl">🏛️</div>}
+                        : <div className="w-full h-full flex items-center justify-center text-xl">🏛️</div>}
                     </div>
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>{space?.name}</div>
-                          <div className="flex items-center gap-1.5 text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                            <MapPin size={10} /> {space?.sector ? `${space.sector}, ` : ''}{space?.city}
-                          </div>
+                      {/* Nombre + estado */}
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <div className="font-semibold text-sm leading-tight truncate" style={{ color: 'var(--text-primary)' }}>
+                          {space?.name}
                         </div>
-                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full shrink-0"
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0"
                           style={{ background: sc.bg, color: sc.color }}>
                           {sl}
                         </span>
                       </div>
-                      <div className="flex items-center gap-4 mt-2">
-                        <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
-                          <CalendarDays size={11} /> {formatDate(bk.event_date)}
-                        </span>
-                        <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
-                          <Clock size={11} /> {formatTime(bk.start_time)} – {formatTime(bk.end_time)}
-                        </span>
-                        <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
-                          <Users size={11} /> {bk.guest_count}
-                        </span>
-                        <span className="ml-auto font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
+                      {/* Ubicación */}
+                      <div className="flex items-center gap-1 text-xs mb-2" style={{ color: 'var(--text-muted)' }}>
+                        <MapPin size={10} /> {space?.sector ? `${space.sector}, ` : ''}{space?.city}
+                      </div>
+                      {/* Meta: fecha + monto en fila */}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                            <CalendarDays size={10} /> {formatDate(bk.event_date)}
+                          </span>
+                          <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                            <Users size={10} /> {bk.guest_count}
+                          </span>
+                        </div>
+                        <span className="font-bold text-sm shrink-0" style={{ color: 'var(--text-primary)' }}>
                           {formatCurrency(Number(bk.total_amount))}
                         </span>
                       </div>
                     </div>
-                    <ChevronRight size={16}
+                    <ChevronRight size={15}
                       className={cn('shrink-0 transition-transform', isSelected && 'rotate-90')}
                       style={{ color: 'var(--text-muted)' }} />
                   </div>
@@ -180,21 +182,21 @@ export default function MisReservasPage() {
 
                 {/* ── CTA de pago cuando está aceptada ── */}
                 {bk.status === 'accepted' && (
-                  <div className="mx-5 mb-4 px-4 py-3.5 rounded-2xl flex items-center justify-between"
+                  <div className="mx-4 mb-4 px-4 py-4 rounded-2xl"
                     style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.2)' }}>
-                    <div>
+                    <div className="mb-3">
                       <div className="text-sm font-semibold" style={{ color: '#1D4ED8' }}>
                         🎉 ¡El propietario aceptó tu reserva!
                       </div>
                       <div className="text-xs mt-0.5" style={{ color: '#3B82F6' }}>
-                        Completa el pago para confirmar tu reserva
+                        Completa el pago para confirmar tu fecha
                       </div>
                     </div>
                     <button
                       onClick={() => handlePay(bk.id)}
-                      className="flex items-center gap-1.5 text-sm font-bold px-4 py-2.5 rounded-xl shrink-0 transition-all"
+                      className="w-full flex items-center justify-center gap-1.5 text-sm font-bold px-4 py-3 rounded-xl transition-all"
                       style={{ background: '#2563EB', color: '#fff', boxShadow: '0 2px 8px rgba(37,99,235,0.3)' }}>
-                      <CreditCard size={15} /> Pagar {formatCurrency(Number(bk.total_amount))}
+                      <CreditCard size={15} /> Pagar ahora — {formatCurrency(Number(bk.total_amount))}
                     </button>
                   </div>
                 )}
@@ -202,7 +204,7 @@ export default function MisReservasPage() {
                 {/* ── Detalle expandido ── */}
                 {isSelected && (
                   <div className="px-5 pb-5 pt-2" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-                    <div className="grid grid-cols-2 gap-4 mt-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
                       <div className="space-y-3">
                         <div>
                           <div className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>Tipo de evento</div>
