@@ -368,126 +368,120 @@ export default function EspacioPage() {
       <div className="p-8 max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-white">Mis Espots</h1>
-            <p className="text-slate-400 mt-1">Gestiona tus espacios publicados</p>
+            <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+              Mis espacios
+            </h1>
+            <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+              Gestiona tus espacios publicados en espot.do
+            </p>
           </div>
           <button
             onClick={() => setView('create')}
-            className="flex items-center gap-2 bg-[#35C493] hover:bg-[#4DD9A7] text-white font-semibold px-5 py-2.5 rounded-xl transition-colors"
+            className="btn-brand flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold"
           >
-            <PlusCircle size={18} /> Nuevo Espot
+            <PlusCircle size={16} /> Nuevo espacio
           </button>
         </div>
 
         {loadingSpaces ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-[#35C493] animate-spin" />
+            <Loader2 size={28} className="animate-spin" style={{ color: 'var(--brand)' }} />
           </div>
         ) : spaces.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-16 h-16 bg-[rgba(53,196,147,0.12)] rounded-2xl flex items-center justify-center mb-4">
-              <Building2 className="w-8 h-8 text-[#35C493]" />
+          <div className="flex flex-col items-center justify-center py-24 text-center rounded-2xl"
+            style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
+              style={{ background: 'var(--brand-dim)' }}>
+              <Building2 size={24} style={{ color: 'var(--brand)' }} />
             </div>
-            <h2 className="text-white font-semibold text-lg mb-2">Aún no tienes espacios</h2>
-            <p className="text-slate-400 text-sm mb-6 max-w-xs">Crea tu primer Espot para empezar a recibir reservas en la plataforma.</p>
-            <button
-              onClick={() => setView('create')}
-              className="flex items-center gap-2 bg-[#35C493] hover:bg-[#4DD9A7] text-white font-semibold px-6 py-3 rounded-xl transition-colors"
-            >
-              <PlusCircle size={18} /> Crear mi primer Espot
+            <h2 className="font-semibold text-base mb-1" style={{ color: 'var(--text-primary)' }}>
+              Aún no tienes espacios
+            </h2>
+            <p className="text-sm mb-6" style={{ color: 'var(--text-muted)', maxWidth: 300 }}>
+              Crea tu primer espacio para empezar a recibir reservas en la plataforma.
+            </p>
+            <button onClick={() => setView('create')}
+              className="btn-brand flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold">
+              <PlusCircle size={16} /> Crear mi primer espacio
             </button>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-5">
             {spaces.map((space: any) => {
-              const pricing = space.space_pricing?.[0]
-              const cover = space.space_images?.[0]?.url
+              const pricing = space.space_pricing?.find((p: any) => p.is_active) ?? space.space_pricing?.[0]
+              const cover   = space.space_images?.find((i: any) => i.is_cover)?.url ?? space.space_images?.[0]?.url
               return (
-                <div key={space.id} className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-[rgba(53,196,147,0.25)] transition-all group">
-                  {/* Cover image */}
-                  <div className="relative h-44 bg-slate-800">
+                <div key={space.id} className="rounded-2xl overflow-hidden transition-all"
+                  style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                  <div className="relative h-48 overflow-hidden" style={{ background: 'var(--bg-elevated)' }}>
                     {cover ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={cover} alt={space.name} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <Building2 className="w-10 h-10 text-slate-600" />
+                        <Building2 size={32} style={{ color: 'var(--text-muted)' }} />
                       </div>
                     )}
-                    {/* Status badge */}
-                    <div className={cn(
-                      'absolute top-3 right-3 flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border',
-                      space.is_published
-                        ? 'bg-green-600/20 text-green-400 border-green-500/30'
-                        : 'bg-amber-600/20 text-amber-400 border-amber-500/30'
-                    )}>
-                      {space.is_published ? <><Eye size={11} /> Publicado</> : <><EyeOff size={11} /> Borrador</>}
+                    <div className="absolute top-3 right-3 flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
+                      style={space.is_published
+                        ? { background: 'rgba(22,163,74,0.9)', color: '#fff' }
+                        : { background: 'rgba(0,0,0,0.6)', color: '#fff' }}>
+                      {space.is_published ? <><Eye size={10} /> Publicado</> : <><EyeOff size={10} /> Borrador</>}
                     </div>
                   </div>
-
-                  {/* Info */}
                   <div className="p-5">
                     <div className="flex items-start justify-between gap-2 mb-3">
-                      <div>
-                        <h3 className="text-white font-semibold text-base leading-tight">{space.name}</h3>
-                        <div className="flex items-center gap-1.5 mt-1 text-slate-400 text-xs">
-                          <MapPin size={11} />
-                          <span>{space.sector ? `${space.sector}, ` : ''}{space.city}</span>
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{space.name}</h3>
+                        <div className="flex items-center gap-1 mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+                          <MapPin size={10} />{space.sector ? `${space.sector}, ` : ''}{space.city}
                         </div>
                       </div>
-                      <span className="shrink-0 bg-[rgba(53,196,147,0.12)] text-[#4DD9A7] text-xs px-2 py-1 rounded-lg border border-[rgba(53,196,147,0.20)] capitalize">
+                      <span className="text-xs font-medium px-2 py-1 rounded-lg shrink-0 capitalize"
+                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
                         {space.category}
                       </span>
                     </div>
-
-                    {/* Stats row */}
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="flex items-center gap-1.5 text-slate-400 text-xs">
-                        <Users size={12} />
-                        <span>Hasta {space.capacity_max} personas</span>
-                      </div>
+                    <div className="flex items-center gap-3 mb-4 text-xs" style={{ color: 'var(--text-muted)' }}>
+                      <span className="flex items-center gap-1"><Users size={11} /> {space.capacity_max} personas máx.</span>
                       {pricing && (
-                        <div className="flex items-center gap-1.5 text-slate-400 text-xs">
-                          <DollarSign size={12} />
-                          <span>
-                            {pricing.pricing_type === 'hourly' && `${formatCurrency(pricing.hourly_price)} / hr`}
-                            {pricing.pricing_type === 'minimum_consumption' && `Min. ${formatCurrency(pricing.minimum_consumption)}`}
-                            {pricing.pricing_type === 'fixed_package' && formatCurrency(pricing.fixed_price)}
-                            {pricing.pricing_type === 'custom_quote' && 'Cotización'}
-                          </span>
-                        </div>
+                        <span className="flex items-center gap-1">
+                          <DollarSign size={11} />
+                          {pricing.pricing_type === 'hourly' && `${formatCurrency(pricing.hourly_price)}/hr`}
+                          {pricing.pricing_type === 'minimum_consumption' && `Min. ${formatCurrency(pricing.minimum_consumption)}`}
+                          {pricing.pricing_type === 'fixed_package' && formatCurrency(pricing.fixed_price)}
+                          {pricing.pricing_type === 'custom_quote' && 'Cotización'}
+                        </span>
                       )}
                     </div>
-
-                    {/* Pricing type pill */}
                     {pricing && (
                       <div className="flex items-center gap-2 mb-4">
-                        <span className="text-xs bg-white/5 text-slate-400 px-2 py-1 rounded-lg border border-white/10">
+                        <span className="text-xs px-2.5 py-1 rounded-lg"
+                          style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
                           {pricingLabel[pricing.pricing_type] ?? pricing.pricing_type}
                         </span>
                         {space.space_addons?.length > 0 && (
-                          <span className="text-xs bg-white/5 text-slate-400 px-2 py-1 rounded-lg border border-white/10">
+                          <span className="text-xs px-2.5 py-1 rounded-lg"
+                            style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
                             {space.space_addons.length} adicionales
                           </span>
                         )}
                       </div>
                     )}
-
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => loadSpaceForEdit(space)}
-                        className="flex-1 flex items-center justify-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-medium py-2 rounded-xl transition-colors">
-                        <Pencil size={14} /> Editar
+                      <button onClick={() => loadSpaceForEdit(space)}
+                        className="flex-1 flex items-center justify-center gap-1.5 text-sm font-medium py-2 rounded-xl transition-colors"
+                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+                        <Pencil size={13} /> Editar
                       </button>
                       {!space.is_published && (
                         <button
                           onClick={async () => {
                             await publishSpace(space.id)
-                            setSpaces(prev => prev.map((s: any) => s.id === space.id ? {...s, is_published: true} : s))
+                            setSpaces(prev => prev.map((s: any) => s.id === space.id ? { ...s, is_published: true } : s))
                           }}
-                          className="flex-1 flex items-center justify-center gap-1.5 bg-[#35C493] hover:bg-[#4DD9A7] text-white text-sm font-medium py-2 rounded-xl transition-colors"
-                        >
-                          <Eye size={14} /> Publicar
+                          className="btn-brand flex-1 flex items-center justify-center gap-1.5 text-sm font-medium py-2 rounded-xl">
+                          <Eye size={13} /> Publicar
                         </button>
                       )}
                     </div>
@@ -583,7 +577,7 @@ export default function EspacioPage() {
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="Ej: Salón Imperial Santo Domingo"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] focus:ring-1 focus:ring-[#35C493] transition-colors"
+                className="w-full input-base rounded-xl px-4 py-3"
               />
             </div>
 
@@ -597,8 +591,8 @@ export default function EspacioPage() {
                     className={cn(
                       'flex flex-col items-center gap-1.5 p-3 rounded-xl border text-xs font-medium transition-all',
                       category === cat.value
-                        ? 'bg-[rgba(53,196,147,0.12)] border-[rgba(53,196,147,0.40)] text-[#4DD9A7]'
-                        : 'bg-white/5 border-white/10 text-slate-400 hover:border-white/20 hover:text-white'
+                        ? 'border-[rgba(53,196,147,0.4)]'
+                        : ''
                     )}
                   >
                     <span className="text-xl">{cat.emoji}</span>
@@ -615,7 +609,7 @@ export default function EspacioPage() {
                 onChange={e => setDescription(e.target.value)}
                 placeholder="Describe tu espacio: ambiente, equipos incluidos, qué hace especial tu Espot..."
                 rows={4}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] focus:ring-1 focus:ring-[#35C493] transition-colors resize-none"
+                className="w-full input-base rounded-xl px-4 py-3 resize-none"
               />
             </div>
 
@@ -626,7 +620,7 @@ export default function EspacioPage() {
                   value={address}
                   onChange={e => setAddress(e.target.value)}
                   placeholder="Av. Winston Churchill #123"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] focus:ring-1 focus:ring-[#35C493] transition-colors"
+                  className="w-full input-base rounded-xl px-4 py-3"
                 />
               </div>
               <div>
@@ -635,7 +629,7 @@ export default function EspacioPage() {
                   value={sector}
                   onChange={e => setSector(e.target.value)}
                   placeholder="Piantini, Naco, Bella Vista..."
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] focus:ring-1 focus:ring-[#35C493] transition-colors"
+                  className="w-full input-base rounded-xl px-4 py-3"
                 />
               </div>
             </div>
@@ -648,7 +642,7 @@ export default function EspacioPage() {
                   value={capacityMin}
                   onChange={e => setCapacityMin(e.target.value)}
                   placeholder="20"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] focus:ring-1 focus:ring-[#35C493] transition-colors"
+                  className="w-full input-base rounded-xl px-4 py-3"
                 />
               </div>
               <div>
@@ -658,18 +652,18 @@ export default function EspacioPage() {
                   value={capacityMax}
                   onChange={e => setCapacityMax(e.target.value)}
                   placeholder="200"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] focus:ring-1 focus:ring-[#35C493] transition-colors"
+                  className="w-full input-base rounded-xl px-4 py-3"
                 />
               </div>
             </div>
 
             {/* Actividades / tipos de evento */}
             <div>
-              <label className="block text-slate-300 text-sm font-medium mb-1">
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
                 Tipos de evento que acepta tu espacio
               </label>
-              <p className="text-xs text-slate-500 mb-3">
-                Selecciona los tipos de eventos que mejor describen tu espacio. Máximo 4 (1 principal + 3 secundarios).
+              <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
+                Selecciona los tipos de eventos que mejor describen tu espacio.
               </p>
               <ActivityPicker
                 primary={primaryActivity}
@@ -690,8 +684,8 @@ export default function EspacioPage() {
         {currentStep === 2 && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-bold text-white mb-1">Modalidad de precio</h2>
-              <p className="text-slate-400 text-sm">¿Cómo quieres vender tu espacio?</p>
+              <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Modalidad de precio</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>¿Cómo quieres vender tu espacio?</p>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -702,18 +696,18 @@ export default function EspacioPage() {
                   className={cn(
                     'text-left p-4 rounded-xl border transition-all',
                     pricingType === option.value
-                      ? 'bg-[rgba(53,196,147,0.12)] border-[rgba(53,196,147,0.40)]'
-                      : 'bg-white/5 border-white/10 hover:border-white/20'
+                      ? 'border-[rgba(53,196,147,0.40)]'
+                      : 'hover:border-[rgba(53,196,147,0.3)]'
                   )}
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-xl">{option.emoji}</span>
-                    <span className={cn('font-semibold text-sm', pricingType === option.value ? 'text-[#4DD9A7]' : 'text-white')}>
+                    <span className="font-semibold text-sm" style={{ color: pricingType === option.value ? 'var(--brand)' : 'var(--text-primary)' }}>
                       {option.label}
                     </span>
                   </div>
-                  <p className="text-slate-400 text-xs mb-2">{option.desc}</p>
-                  <p className="text-slate-500 text-xs">Ideal: {option.ideal}</p>
+                  <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>{option.desc}</p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Ideal: {option.ideal}</p>
                 </button>
               ))}
             </div>
@@ -730,7 +724,7 @@ export default function EspacioPage() {
                       value={hourlyPrice}
                       onChange={e => setHourlyPrice(e.target.value)}
                       placeholder="5000"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm transition-colors"
+                      className="w-full input-base rounded-xl px-4 py-2.5 text-sm"
                     />
                   </div>
                   <div>
@@ -740,7 +734,7 @@ export default function EspacioPage() {
                       value={minHours}
                       onChange={e => setMinHours(e.target.value)}
                       placeholder="3"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm transition-colors"
+                      className="w-full input-base rounded-xl px-4 py-2.5 text-sm"
                     />
                   </div>
                   <div>
@@ -750,13 +744,13 @@ export default function EspacioPage() {
                       value={maxHours}
                       onChange={e => setMaxHours(e.target.value)}
                       placeholder="8"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm transition-colors"
+                      className="w-full input-base rounded-xl px-4 py-2.5 text-sm"
                     />
                   </div>
                 </div>
                 {hourlyPrice && minHours && (
-                  <div className="bg-white/5 rounded-lg p-3 text-sm text-slate-300">
-                    💡 El cliente pagaría mínimo <strong className="text-white">{formatCurrency(Number(hourlyPrice) * Number(minHours))}</strong> por {minHours} horas
+                  <div className="rounded-lg p-3 text-sm" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+                    💡 El cliente pagaría mínimo <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(Number(hourlyPrice) * Number(minHours))}</strong> por {minHours} horas
                   </div>
                 )}
               </div>
@@ -773,7 +767,7 @@ export default function EspacioPage() {
                       value={minConsumption}
                       onChange={e => setMinConsumption(e.target.value)}
                       placeholder="60000"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm transition-colors"
+                      className="w-full input-base rounded-xl px-4 py-2.5 text-sm"
                     />
                   </div>
                   <div>
@@ -783,12 +777,12 @@ export default function EspacioPage() {
                       value={sessionHours}
                       onChange={e => setSessionHours(e.target.value)}
                       placeholder="4"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm transition-colors"
+                      className="w-full input-base rounded-xl px-4 py-2.5 text-sm"
                     />
                   </div>
                 </div>
-                <div className="bg-white/5 rounded-lg p-3 text-xs text-slate-400">
-                  El cliente reserva el espacio comprometiéndose a consumir al menos <strong className="text-white">{minConsumption ? formatCurrency(Number(minConsumption)) : 'ese monto'}</strong> en comida y bebidas durante el evento.
+                <div className="rounded-lg p-3 text-xs" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+                  El cliente reserva el espacio comprometiéndose a consumir al menos <strong style={{ color: 'var(--text-primary)' }}>{minConsumption ? formatCurrency(Number(minConsumption)) : 'ese monto'}</strong> en comida y bebidas durante el evento.
                 </div>
               </div>
             )}
@@ -803,7 +797,7 @@ export default function EspacioPage() {
                       value={packageName}
                       onChange={e => setPackageName(e.target.value)}
                       placeholder="Paquete Cumpleaños Premium"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm transition-colors"
+                      className="w-full input-base rounded-xl px-4 py-2.5 text-sm"
                     />
                   </div>
                   <div>
@@ -813,7 +807,7 @@ export default function EspacioPage() {
                       value={fixedPrice}
                       onChange={e => setFixedPrice(e.target.value)}
                       placeholder="35000"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm transition-colors"
+                      className="w-full input-base rounded-xl px-4 py-2.5 text-sm"
                     />
                   </div>
                 </div>
@@ -825,7 +819,7 @@ export default function EspacioPage() {
                       onChange={e => setNewInclude(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter' && newInclude.trim()) { setPackageIncludes([...packageIncludes, newInclude.trim()]); setNewInclude('') }}}
                       placeholder="Ej: Espacio 4 horas, música, bartender..."
-                      className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm transition-colors"
+                      className="flex-1 input-base rounded-xl px-4 py-2.5 text-sm"
                     />
                     <button
                       onClick={() => { if (newInclude.trim()) { setPackageIncludes([...packageIncludes, newInclude.trim()]); setNewInclude('') }}}
@@ -1227,8 +1221,8 @@ export default function EspacioPage() {
                   className={cn(
                     'w-full text-left p-5 rounded-xl border transition-all',
                     paymentTerm === option.value
-                      ? 'bg-[rgba(53,196,147,0.12)] border-[rgba(53,196,147,0.40)]'
-                      : 'bg-white/5 border-white/10 hover:border-white/20'
+                      ? 'border-[rgba(53,196,147,0.40)]'
+                      : 'hover:border-[rgba(53,196,147,0.3)]'
                   )}
                 >
                   <div className="flex items-center justify-between mb-1">
