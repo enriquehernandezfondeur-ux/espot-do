@@ -174,12 +174,15 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
             <Link href="/">
               <img src="/logo-dark.svg" alt="espot.do" style={{ height: 22, width: 'auto' }} />
             </Link>
-            <div className="flex items-center gap-6 text-sm" style={{ color: 'var(--text-muted)' }}>
-              <Link href="/buscar" className="link-muted">Explorar espacios</Link>
-              <Link href="/auth"   className="link-muted">Para propietarios</Link>
-              <span>contacto@espot.do</span>
+            <div className="flex items-center gap-5 text-sm flex-wrap justify-center" style={{ color: 'var(--text-muted)' }}>
+              <Link href="/buscar"    className="link-muted">Explorar</Link>
+              <Link href="/auth"      className="link-muted">Para propietarios</Link>
+              <Link href="/terminos"  className="link-muted">Términos</Link>
+              <Link href="/reembolso" className="link-muted">Reembolso</Link>
+              <Link href="/cookies"   className="link-muted">Cookies</Link>
+              <a href="mailto:contacto@espot.do" className="link-muted">contacto@espot.do</a>
             </div>
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>© 2026 espot.do · República Dominicana</p>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>© 2026 ESPOT, S.R.L. · República Dominicana</p>
           </div>
         </div>
       </footer>
