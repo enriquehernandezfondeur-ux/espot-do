@@ -2,26 +2,76 @@
 
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { TrendingUp, TrendingDown, Clock, CheckCircle, CalendarDays, MessageSquareQuote, ArrowRight, Users, Loader2 } from 'lucide-react'
+import {
+  TrendingUp, TrendingDown, Clock, CheckCircle,
+  CalendarDays, MessageSquareQuote, ArrowRight,
+  Users, Loader2, DollarSign,
+} from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import Link from 'next/link'
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { getHostStats, getHostBookings, confirmBooking, rejectBooking } from '@/lib/actions/host'
-import { cn } from '@/lib/utils'
+import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
 
-const statusConfig: Record<string, { label: string; className: string; dot: string }> = {
-  pending:         { label: 'Pendiente',  className: 'bg-amber-500/10 text-amber-400 border-amber-500/20',  dot: 'bg-amber-400' },
-  confirmed:       { label: 'Confirmada', className: 'bg-green-500/10 text-green-400 border-green-500/20',  dot: 'bg-green-400' },
-  completed:       { label: 'Completada', className: 'bg-blue-500/10 text-blue-400 border-blue-500/20',    dot: 'bg-blue-400' },
-  cancelled_guest: { label: 'Cancelada',  className: 'bg-red-500/10 text-red-400 border-red-500/20',       dot: 'bg-red-400' },
-  cancelled_host:  { label: 'Cancelada',  className: 'bg-red-500/10 text-red-400 border-red-500/20',       dot: 'bg-red-400' },
+// ── Sistema de colores de estado unificado ────────────────
+// Verde = confirmado / completado
+// Naranja = pendiente / por pagar
+// Azul = aceptado / cotización
+// Rojo = cancelado / rechazado
+// Gris = neutral
+
+function StatusBadge({ status }: { status: string }) {
+  const sc = STATUS_COLORS[status as keyof typeof STATUS_COLORS]
+  const label = STATUS_LABELS[status as keyof typeof STATUS_LABELS] ?? status
+  if (!sc) return null
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full"
+      style={{ background: sc.bg, color: sc.color }}>
+      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: sc.color }} />
+      {label}
+    </span>
+  )
 }
 
-const paymentConfig: Record<string, { label: string; className: string }> = {
-  unpaid:  { label: 'Sin pago',    className: 'text-red-400' },
-  partial: { label: '10% pagado',  className: 'text-amber-400' },
-  advance: { label: 'Anticipo OK', className: 'text-blue-400' },
-  paid:    { label: 'Pagado',      className: 'text-green-400' },
+// ── Card base — todos los stats siguen este patrón ────────
+function StatCard({
+  label, value, sub, icon: Icon, iconColor, trend,
+}: {
+  label:       string
+  value:       string | number
+  sub?:        string
+  icon:        React.ElementType
+  iconColor:   string
+  trend?:      { value: string; positive: boolean } | null
+}) {
+  return (
+    <div className="rounded-2xl p-5 flex flex-col gap-3"
+      style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>{label}</span>
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+          style={{ background: `${iconColor}12` }}>
+          <Icon size={15} style={{ color: iconColor }} />
+        </div>
+      </div>
+      <div className="font-bold text-2xl" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+        {value}
+      </div>
+      <div className="flex items-center justify-between">
+        {sub && <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{sub}</span>}
+        {trend && (
+          <div className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
+            style={{
+              background: trend.positive ? 'rgba(22,163,74,0.08)' : 'rgba(220,38,38,0.08)',
+              color:      trend.positive ? '#16A34A' : '#DC2626',
+            }}>
+            {trend.positive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+            {trend.value}
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }
 
 function PublishedToast() {
@@ -30,22 +80,21 @@ function PublishedToast() {
   useEffect(() => { if (show) setTimeout(() => setShow(false), 4000) }, [show])
   if (!show) return null
   return (
-    <div className="fixed top-6 right-6 z-50 bg-green-600 text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-2">
-      <CheckCircle size={18} /> ¡Tu Espot fue publicado exitosamente!
+    <div className="fixed top-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg flex items-center gap-2 text-sm font-medium text-white"
+      style={{ background: '#35C493' }}>
+      <CheckCircle size={16} /> Espacio publicado correctamente
     </div>
   )
 }
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<Awaited<ReturnType<typeof getHostStats>>>(null)
+  const [stats,    setStats]    = useState<Awaited<ReturnType<typeof getHostStats>>>(null)
   const [bookings, setBookings] = useState<Awaited<ReturnType<typeof getHostBookings>>>([])
-  const [loading, setLoading] = useState(true)
+  const [loading,  setLoading]  = useState(true)
 
   useEffect(() => {
     Promise.all([getHostStats(), getHostBookings()]).then(([s, b]) => {
-      setStats(s)
-      setBookings(b)
-      setLoading(false)
+      setStats(s); setBookings(b); setLoading(false)
     })
   }, [])
 
@@ -54,7 +103,6 @@ export default function DashboardPage() {
     setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'confirmed' } : b))
     setStats(prev => prev ? { ...prev, pendingCount: Math.max(0, prev.pendingCount - 1), confirmedCount: prev.confirmedCount + 1 } : prev)
   }
-
   async function handleReject(id: string) {
     await rejectBooking(id)
     setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'cancelled_host' } : b))
@@ -67,226 +115,266 @@ export default function DashboardPage() {
   const isPositive = (stats?.revenueThisMonth ?? 0) >= (stats?.revenuePrevMonth ?? 0)
 
   const upcomingBookings = bookings
-    .filter(b => b.event_date >= new Date().toISOString().split('T')[0] && !['cancelled_guest', 'cancelled_host'].includes(b.status))
-    .slice(0, 5)
+    .filter(b => b.event_date >= new Date().toISOString().split('T')[0]
+      && !['cancelled_guest', 'cancelled_host', 'rejected'].includes(b.status))
+    .slice(0, 6)
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="w-8 h-8 text-[#35C493] animate-spin" />
-      </div>
-    )
-  }
+  if (loading) return (
+    <div className="flex items-center justify-center h-screen">
+      <Loader2 size={28} className="animate-spin" style={{ color: 'var(--brand)' }} />
+    </div>
+  )
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-8 max-w-6xl mx-auto">
       <Suspense fallback={null}><PublishedToast /></Suspense>
 
+      {/* ── Encabezado ── */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Buenos días 👋</h1>
-        <p className="text-slate-400 mt-1">Aquí está el resumen de tu espacio en espot.do</p>
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+          Panel de control
+        </h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+          Resumen de tu actividad en espot.do
+        </p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
-        <div className="bg-gradient-to-br from-[#35C493]/20 to-purple-700/20 border border-[rgba(53,196,147,0.20)] rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-slate-400 text-sm">Ingresos del mes</span>
-            {growth !== null && (
-              <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${isPositive ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
-                {isPositive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                {growth}%
-              </div>
-            )}
-          </div>
-          <div className="text-2xl font-bold text-white">{formatCurrency(stats?.revenueThisMonth ?? 0)}</div>
-          <div className="text-slate-500 text-xs mt-1">
-            {stats?.revenuePrevMonth ? `vs ${formatCurrency(stats.revenuePrevMonth)} el mes pasado` : 'Sin eventos aún'}
-          </div>
-        </div>
-
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-slate-400 text-sm">Pendientes de confirmar</span>
-            <div className="w-8 h-8 bg-amber-500/10 rounded-lg flex items-center justify-center">
-              <Clock size={16} className="text-amber-400" />
-            </div>
-          </div>
-          <div className="text-2xl font-bold text-white">{stats?.pendingCount ?? 0}</div>
-          <div className="text-slate-500 text-xs mt-1">
-            {stats?.pendingCount ? 'Requieren tu respuesta' : 'Todo al día ✓'}
-          </div>
-        </div>
-
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-slate-400 text-sm">Confirmadas este mes</span>
-            <div className="w-8 h-8 bg-green-500/10 rounded-lg flex items-center justify-center">
-              <CheckCircle size={16} className="text-green-400" />
-            </div>
-          </div>
-          <div className="text-2xl font-bold text-white">{stats?.confirmedCount ?? 0}</div>
-          <div className="text-slate-500 text-xs mt-1">eventos este mes</div>
-        </div>
-
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-slate-400 text-sm">Cotizaciones pendientes</span>
-            <div className="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center">
-              <MessageSquareQuote size={16} className="text-blue-400" />
-            </div>
-          </div>
-          <div className="text-2xl font-bold text-white">{stats?.pendingQuotes ?? 0}</div>
-          <div className="text-slate-500 text-xs mt-1">sin responder</div>
-        </div>
+      {/* ── Métricas principales ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <StatCard
+          label="Ingresos del mes"
+          value={formatCurrency(stats?.revenueThisMonth ?? 0)}
+          sub={stats?.revenuePrevMonth ? `vs ${formatCurrency(stats.revenuePrevMonth)} anterior` : 'Sin eventos aún'}
+          icon={DollarSign}
+          iconColor="#35C493"
+          trend={growth ? { value: `${growth}%`, positive: isPositive } : null}
+        />
+        <StatCard
+          label="Reservas pendientes"
+          value={stats?.pendingCount ?? 0}
+          sub={stats?.pendingCount ? 'Requieren respuesta' : 'Sin pendientes'}
+          icon={Clock}
+          iconColor="#D97706"
+        />
+        <StatCard
+          label="Confirmadas este mes"
+          value={stats?.confirmedCount ?? 0}
+          sub="eventos confirmados"
+          icon={CheckCircle}
+          iconColor="#16A34A"
+        />
+        <StatCard
+          label="Cotizaciones abiertas"
+          value={stats?.pendingQuotes ?? 0}
+          sub="sin responder"
+          icon={MessageSquareQuote}
+          iconColor="#2563EB"
+        />
       </div>
 
-      {/* Chart + Next booking */}
-      <div className="grid grid-cols-3 gap-6 mb-8">
-        <div className="col-span-2 bg-white/5 border border-white/10 rounded-2xl p-6">
+      {/* ── Gráfica + Próximo evento ── */}
+      <div className="grid lg:grid-cols-3 gap-5 mb-8">
+
+        {/* Gráfica */}
+        <div className="lg:col-span-2 rounded-2xl p-6"
+          style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-white font-semibold">Ingresos por mes</h2>
-              <p className="text-slate-500 text-sm">Últimos 6 meses</p>
+              <h2 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>Ingresos por mes</h2>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Últimos 6 meses</p>
             </div>
-            <div className="text-right">
-              <div className="text-[#35C493] font-bold text-lg">{formatCurrency(stats?.revenueThisMonth ?? 0)}</div>
-              <div className="text-slate-500 text-xs">este mes</div>
-            </div>
+            <span className="font-bold text-lg" style={{ color: 'var(--brand)', letterSpacing: '-0.02em' }}>
+              {formatCurrency(stats?.revenueThisMonth ?? 0)}
+            </span>
           </div>
-          {(stats?.monthlyRevenue?.some(m => m.ingresos > 0)) ? (
-            <ResponsiveContainer width="100%" height={180}>
-              <AreaChart data={stats?.monthlyRevenue ?? []}>
+          {stats?.monthlyRevenue?.some(m => m.ingresos > 0) ? (
+            <ResponsiveContainer width="100%" height={160}>
+              <AreaChart data={stats.monthlyRevenue}>
                 <defs>
-                  <linearGradient id="colorIngresos" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
+                  <linearGradient id="gradIngresos" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%"  stopColor="#35C493" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#35C493" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="mes" stroke="#475569" tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis hide />
+                <XAxis dataKey="mes" stroke="#E5E7EB" tick={{ fill: '#9CA3AF', fontSize: 11 }}
+                  axisLine={false} tickLine={false} />
                 <Tooltip
-                  contentStyle={{ background: '#1e1b4b', border: '1px solid #4c1d95', borderRadius: 12, color: '#fff' }}
-                  formatter={(value) => [formatCurrency(Number(value)), 'Ingresos']}
+                  contentStyle={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 10, color: '#111827', fontSize: 12 }}
+                  formatter={(v) => [formatCurrency(Number(v)), 'Ingresos']}
                 />
-                <Area type="monotone" dataKey="ingresos" stroke="#7c3aed" strokeWidth={2} fill="url(#colorIngresos)" />
+                <Area type="monotone" dataKey="ingresos"
+                  stroke="#35C493" strokeWidth={2} fill="url(#gradIngresos)" />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-44 text-slate-600 text-sm">
-              Aquí aparecerá tu gráfica cuando tengas reservas confirmadas
+            <div className="flex items-center justify-center h-40 text-sm rounded-xl"
+              style={{ color: 'var(--text-muted)', background: 'var(--bg-elevated)', border: '1px dashed var(--border-medium)' }}>
+              Aquí aparecerá la gráfica cuando tengas reservas confirmadas
             </div>
           )}
         </div>
 
-        {/* Next booking */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-          <h2 className="text-white font-semibold mb-4">Próximo evento</h2>
+        {/* Próximo evento */}
+        <div className="rounded-2xl p-6"
+          style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+          <h2 className="font-semibold text-sm mb-4" style={{ color: 'var(--text-primary)' }}>Próximo evento</h2>
           {stats?.nextBooking ? (
-            <div className="bg-[rgba(53,196,147,0.07)] border border-[rgba(53,196,147,0.20)] rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <div className={cn('w-2 h-2 rounded-full', stats.nextBooking.status === 'confirmed' ? 'bg-green-400 animate-pulse' : 'bg-amber-400')} />
-                <span className={cn('text-xs font-medium', stats.nextBooking.status === 'confirmed' ? 'text-green-400' : 'text-amber-400')}>
-                  {statusConfig[stats.nextBooking.status]?.label}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <StatusBadge status={stats.nextBooking.status} />
+              </div>
+              <div>
+                <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                  {(stats.nextBooking as any).profiles?.full_name ?? 'Cliente'}
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                  {stats.nextBooking.event_type}
+                </p>
+              </div>
+              <div className="space-y-2">
+                {[
+                  { icon: CalendarDays, text: formatDate(stats.nextBooking.event_date) },
+                  { icon: Clock, text: `${formatTime(stats.nextBooking.start_time)} – ${formatTime(stats.nextBooking.end_time)}` },
+                  { icon: Users, text: `${stats.nextBooking.guest_count} personas` },
+                ].map(({ icon: Icon, text }) => (
+                  <div key={text} className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                    <Icon size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                    {text}
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center justify-between pt-3"
+                style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Total del evento</span>
+                <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
+                  {formatCurrency(Number(stats.nextBooking.total_amount))}
                 </span>
-              </div>
-              <p className="text-white font-semibold">{(stats.nextBooking as any).profiles?.full_name ?? 'Cliente'}</p>
-              <p className="text-[#4DD9A7] text-sm">🎊 {stats.nextBooking.event_type}</p>
-              <div className="mt-3 space-y-1.5">
-                <div className="flex items-center gap-2 text-slate-400 text-xs">
-                  <CalendarDays size={12} />{formatDate(stats.nextBooking.event_date)}
-                </div>
-                <div className="flex items-center gap-2 text-slate-400 text-xs">
-                  <Clock size={12} />{formatTime(stats.nextBooking.start_time)} – {formatTime(stats.nextBooking.end_time)}
-                </div>
-                <div className="flex items-center gap-2 text-slate-400 text-xs">
-                  <Users size={12} />{stats.nextBooking.guest_count} personas
-                </div>
-              </div>
-              <div className="mt-3 pt-3 border-t border-[rgba(53,196,147,0.20)] flex items-center justify-between">
-                <span className="text-slate-400 text-xs">Total</span>
-                <span className="text-white font-bold">{formatCurrency(Number(stats.nextBooking.total_amount))}</span>
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-40 text-center">
-              <CalendarDays className="w-8 h-8 text-slate-600 mb-2" />
-              <p className="text-slate-500 text-sm">Sin eventos próximos</p>
-              <Link href="/" className="text-[#35C493] text-xs mt-2 hover:text-[#4DD9A7]">Ver marketplace →</Link>
+            <div className="flex flex-col items-center justify-center h-44 text-center gap-3">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                style={{ background: 'var(--bg-elevated)' }}>
+                <CalendarDays size={20} style={{ color: 'var(--text-muted)' }} />
+              </div>
+              <div>
+                <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Sin eventos próximos</p>
+                <Link href="/" className="text-xs mt-1 inline-block" style={{ color: 'var(--brand)' }}>
+                  Ver marketplace
+                </Link>
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Bookings table */}
-      <div className="bg-white/5 border border-white/10 rounded-2xl">
-        <div className="flex items-center justify-between p-6 border-b border-white/10">
-          <div className="flex items-center gap-2">
-            <h2 className="text-white font-semibold">Reservas próximas</h2>
-            {stats?.pendingCount ? (
-              <span className="bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full">{stats.pendingCount} pendientes</span>
-            ) : null}
+      {/* ── Tabla de reservas ── */}
+      <div className="rounded-2xl overflow-hidden"
+        style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4"
+          style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+          <div className="flex items-center gap-3">
+            <h2 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+              Reservas próximas
+            </h2>
+            {(stats?.pendingCount ?? 0) > 0 && (
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                style={{ background: 'rgba(217,119,6,0.1)', color: '#D97706' }}>
+                {stats?.pendingCount} pendiente{stats?.pendingCount !== 1 ? 's' : ''}
+              </span>
+            )}
           </div>
-          <Link href="/dashboard/reservas" className="flex items-center gap-1 text-[#35C493] text-sm hover:text-[#4DD9A7] transition-colors">
-            Ver todas <ArrowRight size={14} />
+          <Link href="/dashboard/host/reservas"
+            className="flex items-center gap-1 text-xs font-medium transition-colors"
+            style={{ color: 'var(--brand)' }}>
+            Ver todas <ArrowRight size={13} />
           </Link>
         </div>
 
+        {/* Filas */}
         {upcomingBookings.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <CalendarDays className="w-8 h-8 text-slate-600 mb-2" />
-            <p className="text-slate-500 text-sm">No hay reservas próximas</p>
+          <div className="flex flex-col items-center justify-center py-14 gap-3">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
+              style={{ background: 'var(--bg-elevated)' }}>
+              <CalendarDays size={20} style={{ color: 'var(--text-muted)' }} />
+            </div>
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No hay reservas próximas</p>
           </div>
         ) : (
-          <div className="divide-y divide-white/5">
-            {upcomingBookings.map((booking: any) => (
-              <div key={booking.id} className="flex items-center gap-4 p-5 hover:bg-white/2 transition-colors">
-                <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-[#28A87C] rounded-full flex items-center justify-center shrink-0">
-                  <span className="text-white font-bold text-sm">
-                    {booking.profiles?.full_name?.charAt(0) ?? '?'}
-                  </span>
+          <div>
+            {upcomingBookings.map((booking: any, i) => (
+              <div key={booking.id}
+                className="flex items-center gap-4 px-6 py-4 transition-colors"
+                style={{
+                  borderTop: i > 0 ? '1px solid var(--border-subtle)' : undefined,
+                }}>
+
+                {/* Avatar inicial */}
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-xs font-bold"
+                  style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+                  {booking.profiles?.full_name?.charAt(0)?.toUpperCase() ?? '?'}
                 </div>
+
+                {/* Info principal */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-white font-medium text-sm">{booking.profiles?.full_name ?? 'Cliente'}</span>
-                    <span className="text-slate-500 text-xs">· {booking.event_type}</span>
+                    <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                      {booking.profiles?.full_name ?? 'Cliente'}
+                    </span>
+                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                      · {booking.event_type}
+                    </span>
                   </div>
                   <div className="flex items-center gap-3 mt-0.5">
-                    <span className="text-slate-500 text-xs flex items-center gap-1">
+                    <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
                       <CalendarDays size={10} /> {formatDate(booking.event_date)}
                     </span>
-                    <span className="text-slate-500 text-xs flex items-center gap-1">
+                    <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
                       <Clock size={10} /> {formatTime(booking.start_time)} – {formatTime(booking.end_time)}
                     </span>
-                    <span className="text-slate-500 text-xs flex items-center gap-1">
+                    <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
                       <Users size={10} /> {booking.guest_count}
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className={cn('text-xs px-2.5 py-1 rounded-full border flex items-center gap-1.5', statusConfig[booking.status]?.className)}>
-                    <span className={cn('w-1.5 h-1.5 rounded-full', statusConfig[booking.status]?.dot)} />
-                    {statusConfig[booking.status]?.label}
-                  </span>
-                </div>
+
+                {/* Estado */}
+                <StatusBadge status={booking.status} />
+
+                {/* Monto */}
                 <div className="text-right shrink-0">
-                  <div className="text-white font-bold">{formatCurrency(Number(booking.total_amount))}</div>
-                  <div className={cn('text-xs', paymentConfig[booking.payment_status]?.className)}>
-                    {paymentConfig[booking.payment_status]?.label}
+                  <div className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                    {formatCurrency(Number(booking.total_amount))}
+                  </div>
+                  <div className="text-xs mt-0.5"
+                    style={{
+                      color: booking.payment_status === 'paid' || booking.payment_status === 'partial'
+                        ? '#16A34A' : booking.payment_status === 'unpaid'
+                        ? '#D97706' : 'var(--text-muted)',
+                    }}>
+                    {booking.payment_status === 'unpaid'  ? 'Sin pago'   :
+                     booking.payment_status === 'partial' ? '10% pagado' :
+                     booking.payment_status === 'paid'    ? 'Pagado'     : '—'}
                   </div>
                 </div>
+
+                {/* Acciones rápidas para pendientes */}
                 {booking.status === 'pending' && (
                   <div className="flex gap-2 shrink-0">
-                    <button
-                      onClick={() => handleConfirm(booking.id)}
-                      className="bg-green-600/20 hover:bg-green-600/30 text-green-400 text-xs px-3 py-1.5 rounded-lg transition-colors border border-green-500/20"
-                    >
-                      Confirmar
+                    <button onClick={() => handleConfirm(booking.id)}
+                      className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all"
+                      style={{ background: 'rgba(22,163,74,0.08)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(22,163,74,0.14)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'rgba(22,163,74,0.08)')}>
+                      Aceptar
                     </button>
-                    <button
-                      onClick={() => handleReject(booking.id)}
-                      className="bg-red-600/20 hover:bg-red-600/30 text-red-400 text-xs px-3 py-1.5 rounded-lg transition-colors border border-red-500/20"
-                    >
+                    <button onClick={() => handleReject(booking.id)}
+                      className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all"
+                      style={{ background: 'rgba(220,38,38,0.06)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(220,38,38,0.12)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'rgba(220,38,38,0.06)')}>
                       Rechazar
                     </button>
                   </div>
