@@ -106,7 +106,7 @@ export default function PhotoUploader({ spaceId, onChange }: Props) {
         onClick={() => inputRef.current?.click()}
         className={cn(
           'border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all',
-          dragOver ? 'border-violet-500 bg-[rgba(53,196,147,0.07)]' : 'border-white/10 hover:border-violet-500/40 hover:bg-[#35C493]/5'
+          dragOver ? 'border-[#35C493] bg-[rgba(53,196,147,0.05)]' : 'border-gray-200 hover:border-[#35C493] hover:bg-[rgba(53,196,147,0.03)]'
         )}
       >
         <input
@@ -120,20 +120,20 @@ export default function PhotoUploader({ spaceId, onChange }: Props) {
         {uploading ? (
           <div className="flex flex-col items-center gap-2">
             <Loader2 className="w-8 h-8 text-[#35C493] animate-spin" />
-            <p className="text-slate-400 text-sm">Subiendo fotos...</p>
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Subiendo fotos...</p>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2">
             <div className="w-12 h-12 bg-[rgba(53,196,147,0.12)] rounded-xl flex items-center justify-center">
               <ImagePlus className="w-6 h-6 text-[#35C493]" />
             </div>
-            <p className="text-white text-sm font-medium">
+            <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
               Arrastra tus fotos aquí
             </p>
-            <p className="text-slate-400 text-xs">
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
               o <span className="text-[#35C493] underline underline-offset-2">haz click para seleccionar</span>
             </p>
-            <p className="text-slate-600 text-xs mt-1">JPG, PNG · Máximo 10MB por foto · La primera es la portada</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>JPG, PNG · Máximo 10MB por foto · La primera es la portada</p>
           </div>
         )}
       </div>
@@ -156,8 +156,9 @@ export default function PhotoUploader({ spaceId, onChange }: Props) {
               onDragEnter={() => onDragEnter(i)}
               onDragEnd={onDragEnd}
               onDragOver={e => e.preventDefault()}
-              className="relative group rounded-xl overflow-hidden aspect-video bg-slate-800 cursor-grab active:cursor-grabbing transition-all duration-150"
+              className="relative group rounded-xl overflow-hidden aspect-video cursor-grab active:cursor-grabbing transition-all duration-150"
               style={{
+                background: 'var(--bg-elevated)',
                 opacity: dragIdx === i ? 0.4 : 1,
                 transform: overIdx === i && dragIdx !== i ? 'scale(1.03)' : 'scale(1)',
                 outline: overIdx === i && dragIdx !== i ? '2px solid #35C493' : 'none',
@@ -204,7 +205,7 @@ export default function PhotoUploader({ spaceId, onChange }: Props) {
           {photos.length < 10 && (
             <button
               onClick={() => inputRef.current?.click()}
-              className="aspect-video rounded-xl border-2 border-dashed border-white/10 hover:border-violet-500/40 flex items-center justify-center text-slate-500 hover:text-[#35C493] transition-all"
+              className="aspect-video rounded-xl border-2 border-dashed border-gray-200 hover:border-[#35C493] flex items-center justify-center transition-all" style={{ color: 'var(--text-muted)' }}
             >
               <Upload size={20} />
             </button>

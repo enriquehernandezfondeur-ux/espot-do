@@ -587,12 +587,16 @@ export default function EspacioPage() {
                   <button
                     key={cat.value}
                     onClick={() => setCategory(cat.value)}
-                    className={cn(
-                      'flex flex-col items-center gap-1.5 p-3 rounded-xl border text-xs font-medium transition-all',
-                      category === cat.value
-                        ? 'border-[rgba(53,196,147,0.4)]'
-                        : ''
-                    )}
+                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl text-xs font-medium transition-all"
+                    style={category === cat.value ? {
+                      background: 'var(--brand-dim)',
+                      border: '1.5px solid var(--brand-border)',
+                      color: 'var(--brand)',
+                    } : {
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
+                      color: 'var(--text-secondary)',
+                    }}
                   >
                     <span className="text-xl">{cat.emoji}</span>
                     <span>{cat.label}</span>
@@ -1262,7 +1266,7 @@ export default function EspacioPage() {
                 <div className="text-sm" style={{ color: 'var(--text-muted)' }}>{category || 'Sin categoría'} · {capacityMax || '?'} personas máx.</div>
               </div>
               <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                <div className="text-slate-500 text-xs mb-2 uppercase tracking-wide">Pricing</div>
+                <div className="text-xs mb-2 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Pricing</div>
                 <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                   {pricingType === 'hourly' && `${formatCurrency(Number(hourlyPrice))} / hora`}
                   {pricingType === 'minimum_consumption' && `Consumo mín. ${formatCurrency(Number(minConsumption))}`}
@@ -1272,12 +1276,12 @@ export default function EspacioPage() {
                 </div>
               </div>
               <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                <div className="text-slate-500 text-xs mb-2 uppercase tracking-wide">Adicionales</div>
+                <div className="text-xs mb-2 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Adicionales</div>
                 <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>{addons.length} servicios</div>
                 <div className="text-sm truncate" style={{ color: 'var(--text-muted)' }}>{addons.map(a => a.name).join(', ') || 'Ninguno'}</div>
               </div>
               <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                <div className="text-slate-500 text-xs mb-2 uppercase tracking-wide">Cobros</div>
+                <div className="text-xs mb-2 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Cobros</div>
                 <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{paymentTermOptions.find(p => p.value === paymentTerm)?.label || 'No configurado'}</div>
               </div>
             </div>
@@ -1298,7 +1302,7 @@ export default function EspacioPage() {
               </button>
             </div>
 
-            <p className="text-slate-600 text-xs text-center">
+            <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
               Tu espacio será revisado por el equipo de espot.do antes de aparecer en el marketplace.
             </p>
           </div>
@@ -1314,7 +1318,7 @@ export default function EspacioPage() {
             <ChevronLeft size={18} /> Anterior
           </button>
 
-          <span className="text-slate-600 text-sm">Paso {currentStep} de {steps.length}</span>
+          <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Paso {currentStep} de {steps.length}</span>
 
           {currentStep < 7 && (
             <button
