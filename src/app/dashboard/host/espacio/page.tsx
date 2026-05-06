@@ -7,6 +7,8 @@ import { saveSpace, publishSpace, getMySpaces, saveSpaceImages, updateSpace } fr
 import PhotoUploader from '@/components/dashboard/PhotoUploader'
 import WeeklySchedule from '@/components/dashboard/WeeklySchedule'
 import ActivityPicker from '@/components/dashboard/ActivityPicker'
+import dynamic from 'next/dynamic'
+const LocationPicker = dynamic(() => import('@/components/dashboard/LocationPicker'), { ssr: false })
 import type { BaseActivity } from '@/lib/activities'
 import type { SpaceCategory, PricingType, PaymentTermType } from '@/types'
 
@@ -136,6 +138,8 @@ export default function EspacioPage() {
   const [description, setDescription] = useState('')
   const [address, setAddress] = useState('')
   const [sector, setSector] = useState('')
+  const [lat, setLat] = useState('')
+  const [lng, setLng] = useState('')
   const [capacityMin, setCapacityMin] = useState('')
   const [capacityMax, setCapacityMax] = useState('')
 
@@ -216,7 +220,7 @@ export default function EspacioPage() {
     setSaveError('')
 
     const payload = {
-      name, category, description, address, sector, capacityMin, capacityMax,
+      name, category, description, address, sector, lat, lng, capacityMin, capacityMax,
       primaryActivity, secondaryActivities,
       pricingType: pricingType as PricingType,
       hourlyPrice, minHours, maxHours, minConsumption, sessionHours,
@@ -282,6 +286,8 @@ export default function EspacioPage() {
     setDescription(space.description ?? '')
     setAddress(space.address ?? '')
     setSector(space.sector ?? '')
+    setLat(space.lat ? String(space.lat) : '')
+    setLng(space.lng ? String(space.lng) : '')
     setCapacityMin(String(space.capacity_min ?? ''))
     setCapacityMax(String(space.capacity_max ?? ''))
     // Pricing
@@ -617,26 +623,11 @@ export default function EspacioPage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Dirección</label>
-                <input
-                  value={address}
-                  onChange={e => setAddress(e.target.value)}
-                  placeholder="Av. Winston Churchill #123"
-                  className="w-full input-base rounded-xl px-4 py-3"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Sector</label>
-                <input
-                  value={sector}
-                  onChange={e => setSector(e.target.value)}
-                  placeholder="Piantini, Naco, Bella Vista..."
-                  className="w-full input-base rounded-xl px-4 py-3"
-                />
-              </div>
-            </div>
+            <LocationPicker
+              address={address} sector={sector} lat={lat} lng={lng}
+              onAddress={setAddress} onSector={setSector}
+              onCoords={(la, lo) => { setLat(la); setLng(lo) }}
+            />
 
             <div className="grid grid-cols-2 gap-4">
               <div>

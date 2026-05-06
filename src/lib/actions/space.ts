@@ -22,6 +22,8 @@ export interface SaveSpacePayload {
   description: string
   address: string
   sector: string
+  lat?: string
+  lng?: string
   capacityMin: string
   capacityMax: string
   primaryActivity?: string
@@ -115,6 +117,8 @@ export async function saveSpace(payload: SaveSpacePayload) {
       address: payload.address,
       city: 'Santo Domingo',
       sector: payload.sector,
+      lat: payload.lat ? num(payload.lat) : null,
+      lng: payload.lng ? num(payload.lng) : null,
       primary_activity:     payload.primaryActivity || null,
       secondary_activities: payload.secondaryActivities ?? [],
       is_published: false,
@@ -306,6 +310,8 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
     address: payload.address,
     city: 'Santo Domingo',
     sector: payload.sector,
+    lat: payload.lat ? num(payload.lat) : null,
+    lng: payload.lng ? num(payload.lng) : null,
     primary_activity:     payload.primaryActivity || null,
     secondary_activities: payload.secondaryActivities ?? [],
   }).eq('id', spaceId)
