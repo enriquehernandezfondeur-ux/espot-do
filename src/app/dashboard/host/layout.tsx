@@ -13,9 +13,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
     avatarUrl = data?.avatar_url ?? undefined
   }
 
+  const isAdmin = user?.email === 'enriquehernandezfondeur@gmail.com'
+
   return (
     <div className="host-theme flex min-h-screen" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
-      <Sidebar userName={userName} avatarUrl={avatarUrl} />
+      <Sidebar userName={userName} avatarUrl={avatarUrl} isAdmin={isAdmin} />
       <main className="flex-1 overflow-auto" style={{ background: 'var(--bg-base)' }}>
         {children}
       </main>

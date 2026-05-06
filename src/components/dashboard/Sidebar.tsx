@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard, Building2, CalendarDays, ClipboardList,
   MessageSquareQuote, MessageCircle, BarChart3, Settings,
-  LogOut, User, ArrowRight, Banknote,
+  LogOut, User, ArrowRight, Banknote, Shield,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -22,7 +22,7 @@ const navItems = [
   { href: '/dashboard/host/ajustes',      label: 'Ajustes',      icon: Settings },
 ]
 
-export default function Sidebar({ userName, avatarUrl }: { userName?: string; avatarUrl?: string }) {
+export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: string; avatarUrl?: string; isAdmin?: boolean }) {
   const pathname = usePathname()
   const router   = useRouter()
   const supabase = createClient()
@@ -112,6 +112,29 @@ export default function Sidebar({ userName, avatarUrl }: { userName?: string; av
           <ArrowRight size={14} style={{ color: 'var(--text-muted)' }} />
         </Link>
       </div>
+
+      {/* Admin Console — solo visible para superadmin */}
+      {isAdmin && (
+        <div className="px-4 pb-3">
+          <Link href="/admin"
+            className="flex items-center gap-3 w-full px-4 py-3 rounded-2xl transition-all"
+            style={{
+              background: 'rgba(3,49,60,0.06)',
+              border: '1.5px solid rgba(3,49,60,0.12)',
+              color: 'var(--brand-navy)',
+            }}>
+            <div className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: 'var(--brand-navy)' }}>
+              <Shield size={13} color="#fff" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-bold" style={{ color: 'var(--brand-navy)' }}>Admin Console</div>
+              <div className="text-xs" style={{ color: 'var(--text-muted)' }}>Panel de administrador</div>
+            </div>
+            <ArrowRight size={13} style={{ color: 'var(--text-muted)' }} />
+          </Link>
+        </div>
+      )}
 
       {/* Logout */}
       <div className="px-3 pb-5">
