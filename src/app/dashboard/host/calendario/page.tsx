@@ -462,51 +462,84 @@ export default function CalendarioPage() {
 
               {/* Formulario de bloqueo */}
               {blocking && (
-                <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--border-subtle)', background: 'rgba(239,68,68,0.04)' }}>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Bloquear horario</span>
-                    <button onClick={() => setBlocking(false)} style={{ color: 'var(--text-muted)' }}><X size={16} /></button>
+                <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                      Bloquear horario
+                    </span>
+                    <button onClick={() => { setBlocking(false); setBlockError('') }}
+                      style={{ color: 'var(--text-muted)' }}>
+                      <X size={15} />
+                    </button>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 mb-2">
+
+                  {/* Selector de horas con selects limpios */}
+                  <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
-                      <label className="block text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Desde</label>
-                      <input type="time" value={blockStart} onChange={e => setBlockStart(e.target.value)}
-                        className="input-base w-full rounded-lg px-3 py-2 text-sm" />
+                      <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                        Desde
+                      </label>
+                      <select
+                        value={blockStart}
+                        onChange={e => setBlockStart(e.target.value)}
+                        className="input-base w-full rounded-xl px-3 py-2.5 text-sm font-medium"
+                        style={{ color: 'var(--text-primary)' }}>
+                        {HOURS.map(h => (
+                          <option key={h} value={h}>{toLabel(h)}</option>
+                        ))}
+                      </select>
                     </div>
                     <div>
-                      <label className="block text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Hasta</label>
-                      <input type="time" value={blockEnd} onChange={e => setBlockEnd(e.target.value)}
-                        className="input-base w-full rounded-lg px-3 py-2 text-sm" />
+                      <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                        Hasta
+                      </label>
+                      <select
+                        value={blockEnd}
+                        onChange={e => setBlockEnd(e.target.value)}
+                        className="input-base w-full rounded-xl px-3 py-2.5 text-sm font-medium"
+                        style={{ color: 'var(--text-primary)' }}>
+                        {HOURS.map(h => (
+                          <option key={h} value={h}>{toLabel(h)}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
+
                   <input
                     value={blockReason}
                     onChange={e => setBlockReason(e.target.value)}
-                    placeholder="Razón (opcional)"
-                    className="input-base w-full rounded-lg px-3 py-2 text-sm mb-3"
+                    placeholder="Motivo (opcional, ej: mantenimiento)"
+                    className="input-base w-full rounded-xl px-3 py-2.5 text-sm mb-3"
                   />
+
                   {blockError && (
-                    <div className="text-xs px-3 py-2 rounded-lg mb-2"
-                      style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)' }}>
+                    <div className="text-xs px-3 py-2 rounded-lg mb-3"
+                      style={{ background: 'rgba(239,68,68,0.06)', color: '#DC2626', border: '1px solid rgba(239,68,68,0.15)' }}>
                       {blockError}
                     </div>
                   )}
-                  {/* Resumen del bloqueo */}
+
+                  {/* Resumen visual */}
                   {blockStart && blockEnd && selected && (
-                    <div className="text-xs px-3 py-2 rounded-lg mb-2"
-                      style={{ background: 'rgba(239,68,68,0.06)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(239,68,68,0.15)' }}>
-                      Bloquearás <strong style={{ color: 'rgba(255,255,255,0.8)' }}>
+                    <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl mb-3 text-xs"
+                      style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
+                      <Clock size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                      <span>
                         {new Date(selected + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
-                        {' de '}{blockStart}{' a '}{blockEnd}
-                      </strong> en <strong style={{ color: 'rgba(255,255,255,0.8)' }}>{spaceName}</strong>
+                        {' · '}
+                        <strong style={{ color: 'var(--text-primary)' }}>{toLabel(blockStart)}</strong>
+                        {' — '}
+                        <strong style={{ color: 'var(--text-primary)' }}>{toLabel(blockEnd)}</strong>
+                      </span>
                     </div>
                   )}
+
                   <button
                     onClick={handleBlockTime}
                     disabled={blockSaving}
-                    className="w-full text-sm font-semibold py-2 rounded-lg transition-colors"
-                    style={{ background: '#EF4444', color: '#fff' }}>
-                    {blockSaving ? 'Guardando...' : 'Confirmar bloqueo'}
+                    className="w-full text-sm font-semibold py-2.5 rounded-xl transition-colors disabled:opacity-50"
+                    style={{ background: '#DC2626', color: '#fff' }}>
+                    {blockSaving ? 'Guardando...' : 'Bloquear horario'}
                   </button>
                 </div>
               )}
