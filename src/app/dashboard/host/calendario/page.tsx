@@ -77,16 +77,19 @@ export default function CalendarioPage() {
 
   useEffect(() => {
     async function load() {
-      const [bk, spaces, token, gcal] = await Promise.all([
+      // Cargamos calendario y sync por separado para que un fallo en sync
+      // no deje la página en loading infinito
+      const [bk, spaces] = await Promise.all([
         getHostCalendarBookings(),
         getHostSpaces(),
-        getOrCreateIcalToken(),
-        getGoogleCalendarStatus(),
       ])
       setBookings(bk)
       setSpaceList(spaces)
-      setIcalToken(token)
-      setGcalConnected(gcal.connected)
+
+      // Sync de calendarios — opcional, falla silenciosamente si la
+      // migración 014/015 aún no se corrió en Supabase
+      getOrCreateIcalToken().then(t => setIcalToken(t)).catch(() => {})
+      getGoogleCalendarStatus().then(g => setGcalConnected(g.connected)).catch(() => {})
 
       if (spaces.length) {
         const sid = spaces[0].id
