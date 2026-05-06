@@ -907,7 +907,7 @@ export default function EspacioPage() {
                         border:     '1px solid var(--border-subtle)',
                       }}
                     >
-                      <span className="text-xl shrink-0 opacity-80">{addon.emoji}</span>
+                      <span className="text-xl shrink-0">{addon.emoji}</span>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium truncate"
                           style={{ color: selected ? 'var(--brand)' : 'var(--text-primary)' }}>
@@ -1181,7 +1181,7 @@ export default function EspacioPage() {
                       border: '1px solid var(--border-subtle)',
                     }}>
                     <div className="font-semibold text-sm mb-1"
-                      style={{ color: cancellationPolicy === policy.value ? '#35C493' : 'white' }}>
+                      style={{ color: cancellationPolicy === policy.value ? 'var(--brand)' : 'var(--text-primary)' }}>
                       {policy.label}
                     </div>
                     <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{policy.desc}</div>
@@ -1217,12 +1217,14 @@ export default function EspacioPage() {
                 <button
                   key={option.value}
                   onClick={() => setPaymentTerm(option.value)}
-                  className={cn(
-                    'w-full text-left p-5 rounded-xl border transition-all',
-                    paymentTerm === option.value
-                      ? 'border-[rgba(53,196,147,0.40)]'
-                      : 'hover:border-[rgba(53,196,147,0.3)]'
-                  )}
+                  className="w-full text-left p-5 rounded-xl border transition-all"
+                  style={paymentTerm === option.value ? {
+                    background: 'var(--brand-dim)',
+                    border: '1.5px solid var(--brand-border)',
+                  } : {
+                    background: '#fff',
+                    border: '1px solid var(--border-subtle)',
+                  }}
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -1235,7 +1237,7 @@ export default function EspacioPage() {
               ))}
             </div>
 
-            <div className="bg-blue-600/10 border border-blue-500/20 rounded-xl p-4 text-blue-300 text-sm">
+            <div className="rounded-xl p-4 text-sm" style={{ background: 'rgba(37,99,235,0.07)', border: '1px solid rgba(37,99,235,0.18)', color: '#1D4ED8' }}>
               💡 Espot cobra siempre el 10% de comisión sobre el total de la reserva. Este porcentaje cubre procesamiento de pagos, soporte y visibilidad en la plataforma.
             </div>
           </div>
@@ -1245,7 +1247,7 @@ export default function EspacioPage() {
         {currentStep === 7 && (
           <div className="space-y-6">
             <div className="text-center py-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-[#28A87C] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[rgba(53,196,147,0.25)]">
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
                 <CheckCircle className="w-8 h-8" style={{ color: 'var(--brand)' }} />
               </div>
               <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>¡Todo listo para publicar!</h2>
