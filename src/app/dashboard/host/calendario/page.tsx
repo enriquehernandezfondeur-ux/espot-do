@@ -272,30 +272,35 @@ export default function CalendarioPage() {
       </div>
 
       {/* ── Selector de espacio ── */}
-      <div className="relative mb-6"
-        style={{ background: 'var(--bg-elevated)', borderRadius: 14, border: '1px solid var(--border-subtle)' }}>
+      <div className="relative mb-6 rounded-2xl overflow-hidden"
+        style={{
+          background: 'linear-gradient(135deg, #03313C 0%, #0A4A3A 100%)',
+          boxShadow: '0 4px 16px rgba(3,49,60,0.18)',
+        }}>
 
-        <div className="flex items-center gap-3 px-4 py-3">
+        <div className="flex items-center gap-4 px-5 py-4">
           {/* Ícono */}
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: 'var(--brand-dim)' }}>
-            <Building2 size={15} style={{ color: 'var(--brand)' }} />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: 'rgba(53,196,147,0.18)', border: '1px solid rgba(53,196,147,0.25)' }}>
+            <Building2 size={18} style={{ color: '#35C493' }} />
           </div>
 
           {/* Nombre + label */}
           <div className="flex-1 min-w-0">
-            <div className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-muted)' }}>
+            <div className="text-xs font-semibold uppercase tracking-widest mb-0.5"
+              style={{ color: 'rgba(255,255,255,0.45)' }}>
               Espacio activo
             </div>
-            <div className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>
+            <div className="font-bold text-base truncate" style={{ color: '#fff', letterSpacing: '-0.01em' }}>
               {spaceName || 'Sin espacio'}
             </div>
           </div>
 
-          {/* Chevron si hay múltiples */}
+          {/* Cambiar */}
           {spaceList.length > 1 && (
-            <div className="flex items-center gap-1 shrink-0">
-              <ChevronRight size={15} style={{ color: 'var(--text-muted)' }} />
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl shrink-0 text-xs font-semibold"
+              style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.12)' }}>
+              Cambiar <ChevronRight size={12} />
             </div>
           )}
         </div>
