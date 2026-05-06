@@ -18,7 +18,6 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
   const [imgError,      setImgError]      = useState(false)
   const searchRef    = useRef<HTMLInputElement>(null)
   const dropdownRef  = useRef<HTMLDivElement>(null)
-  const dropdownPanelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => { setMenuOpen(false); setDropdownOpen(false) }, [pathname])
 
@@ -29,16 +28,6 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
     }
     setDropdownOpen(o => !o)
   }
-
-  useEffect(() => {
-    function onClickOutside(e: MouseEvent) {
-      const inBtn   = dropdownRef.current?.contains(e.target as Node)
-      const inPanel = dropdownPanelRef.current?.contains(e.target as Node)
-      if (!inBtn && !inPanel) setDropdownOpen(false)
-    }
-    document.addEventListener('mousedown', onClickOutside)
-    return () => document.removeEventListener('mousedown', onClickOutside)
-  }, [])
 
   // Bloquear scroll del body cuando el menú móvil está abierto
   useEffect(() => {
@@ -180,8 +169,9 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                 </button>
 
                 {dropdownOpen && (
-                  <div ref={dropdownPanelRef}
-                    style={{
+                  <>
+                    <div className="fixed inset-0 z-[9998]" onClick={() => setDropdownOpen(false)} />
+                    <div style={{
                       position: 'fixed',
                       top: dropdownPos.top,
                       right: dropdownPos.right,
@@ -193,32 +183,33 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                       zIndex: 9999,
                       overflow: 'hidden',
                     }}>
-                    <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                      <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
-                        {user.fullName ?? displayName}
-                      </p>
-                      <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--text-muted)' }}>{user.email}</p>
+                      <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                        <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                          {user.fullName ?? displayName}
+                        </p>
+                        <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--text-muted)' }}>{user.email}</p>
+                      </div>
+                      <div className="py-1">
+                        <Link href={dashboardHref} onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-gray-50"
+                          style={{ color: 'var(--text-secondary)' }}>
+                          <LayoutDashboard size={15} /> Mi panel
+                        </Link>
+                        <Link href={settingsHref} onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-gray-50"
+                          style={{ color: 'var(--text-secondary)' }}>
+                          <Settings size={15} /> {user.role === 'host' ? 'Ajustes' : 'Mi perfil'}
+                        </Link>
+                      </div>
+                      <div style={{ borderTop: '1px solid var(--border-subtle)' }} className="py-1">
+                        <button onClick={handleSignOut}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-red-50"
+                          style={{ color: '#ef4444' }}>
+                          <LogOut size={15} /> Cerrar sesión
+                        </button>
+                      </div>
                     </div>
-                    <div className="py-1">
-                      <Link href={dashboardHref} onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-gray-50"
-                        style={{ color: 'var(--text-secondary)' }}>
-                        <LayoutDashboard size={15} /> Mi panel
-                      </Link>
-                      <Link href={settingsHref} onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-gray-50"
-                        style={{ color: 'var(--text-secondary)' }}>
-                        <Settings size={15} /> {user.role === 'host' ? 'Ajustes' : 'Mi perfil'}
-                      </Link>
-                    </div>
-                    <div style={{ borderTop: '1px solid var(--border-subtle)' }} className="py-1">
-                      <button onClick={handleSignOut}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-red-50"
-                        style={{ color: '#ef4444' }}>
-                        <LogOut size={15} /> Cerrar sesión
-                      </button>
-                    </div>
-                  </div>
+                  </>
                 )}
               </div>
             ) : (

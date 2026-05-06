@@ -102,7 +102,6 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   const [datePickerOpen, setDatePickerOpen] = useState(false)
   const [pickerPos,      setPickerPos]      = useState({ top: 0, left: 0 })
   const datePickerRef  = useRef<HTMLDivElement>(null)
-  const pickerPanelRef = useRef<HTMLDivElement>(null)
   const [priceMin,       setPriceMin]       = useState('')
   const [priceMax,       setPriceMax]       = useState('')
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([])
@@ -126,13 +125,9 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   }, [dateFrom, timeFrom])
 
   useEffect(() => {
-    function onOutside(e: MouseEvent) {
-      const inBtn   = datePickerRef.current?.contains(e.target as Node)
-      const inPanel = pickerPanelRef.current?.contains(e.target as Node)
-      if (!inBtn && !inPanel) setDatePickerOpen(false)
-    }
-    if (datePickerOpen) document.addEventListener('mousedown', onOutside)
-    return () => document.removeEventListener('mousedown', onOutside)
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setDatePickerOpen(false) }
+    if (datePickerOpen) document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
   }, [datePickerOpen])
 
   function openDatePicker() {
@@ -304,28 +299,34 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                 )}
               </button>
               {datePickerOpen && (
-                <div
-                  ref={pickerPanelRef}
-                  style={{
-                    position: 'fixed',
-                    top: pickerPos.top,
-                    left: pickerPos.left,
-                    zIndex: 9999,
-                    background: '#fff',
-                    borderRadius: 16,
-                    border: '1px solid var(--border-subtle)',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.14)',
-                    maxHeight: `calc(100dvh - ${pickerPos.top + 16}px)`,
-                    overflowY: 'auto',
-                    overscrollBehavior: 'contain',
-                  }}>
-                  <DateTimePicker
-                    date={dateFrom} time={timeFrom}
-                    onDate={setDateFrom}
-                    onTime={t => { setTimeFrom(t); if (t) setTimeout(() => setDatePickerOpen(false), 200) }}
-                    loading={availLoading}
+                <>
+                  {/* Backdrop — cierra al hacer click fuera sin importar scrollbar ni drag */}
+                  <div
+                    className="fixed inset-0 z-[9998]"
+                    onClick={() => setDatePickerOpen(false)}
                   />
-                </div>
+                  <div
+                    style={{
+                      position: 'fixed',
+                      top: pickerPos.top,
+                      left: pickerPos.left,
+                      zIndex: 9999,
+                      background: '#fff',
+                      borderRadius: 16,
+                      border: '1px solid var(--border-subtle)',
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.14)',
+                      maxHeight: `calc(100dvh - ${pickerPos.top + 16}px)`,
+                      overflowY: 'auto',
+                      overscrollBehavior: 'contain',
+                    }}>
+                    <DateTimePicker
+                      date={dateFrom} time={timeFrom}
+                      onDate={setDateFrom}
+                      onTime={t => { setTimeFrom(t); if (t) setTimeout(() => setDatePickerOpen(false), 200) }}
+                      loading={availLoading}
+                    />
+                  </div>
+                </>
               )}
             </div>
             <button onClick={() => setMoreOpen(true)}
