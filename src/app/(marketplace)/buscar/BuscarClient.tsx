@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useMemo, useCallback, useEffect } from 'react'
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import {
-  Search, MapPin, Users, SlidersHorizontal, X, CalendarDays,
-  Shield, LayoutList, Map, ArrowRight,
+  Search, MapPin, Users, SlidersHorizontal, X, CalendarDays, Clock,
+  ChevronLeft, ChevronRight, Shield, LayoutList, Map, ArrowRight,
   Check, Building2, UtensilsCrossed,
   Sunset, Wine, Trees, Camera, Briefcase, Home, Hotel,
 } from 'lucide-react'
@@ -33,6 +33,15 @@ const CATEGORIES = [
 ]
 
 const QUICK_CAPACITIES = [20, 50, 100, 150]
+
+const TIME_SLOTS = [
+  {v:'08:00',l:'8am'},{v:'09:00',l:'9am'},{v:'10:00',l:'10am'},{v:'11:00',l:'11am'},
+  {v:'12:00',l:'12pm'},{v:'13:00',l:'1pm'},{v:'14:00',l:'2pm'},{v:'15:00',l:'3pm'},
+  {v:'16:00',l:'4pm'},{v:'17:00',l:'5pm'},{v:'18:00',l:'6pm'},{v:'19:00',l:'7pm'},
+  {v:'20:00',l:'8pm'},{v:'21:00',l:'9pm'},{v:'22:00',l:'10pm'},{v:'23:00',l:'11pm'},
+]
+const MONTH_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+const DAY_NAMES = ['Lu','Ma','Mi','Ju','Vi','Sá','Do']
 
 const AMENITIES = [
   { key: 'allows_external_decoration', label: 'Permite decoración externa' },
@@ -70,6 +79,12 @@ function fmtDateShort(v: string) {
   return new Date(v + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })
 }
 
+function fmtTime(t: string) {
+  if (!t) return ''
+  const h = parseInt(t.split(':')[0])
+  return `${h % 12 || 12}${h >= 12 ? 'pm' : 'am'}`
+}
+
 interface Props {
   spaces:        any[]
   initialParams: Record<string, string | undefined>
@@ -83,6 +98,9 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   const [capacidad,      setCapacidad]      = useState(initialParams.capacidad ?? '')
   const [capacidadInput, setCapacidadInput] = useState(initialParams.capacidad ?? '')
   const [dateFrom,       setDateFrom]       = useState(initialParams.dateFrom ?? '')
+  const [timeFrom,       setTimeFrom]       = useState(initialParams.timeFrom ?? '')
+  const [datePickerOpen, setDatePickerOpen] = useState(false)
+  const datePickerRef = useRef<HTMLDivElement>(null)
   const [priceMin,       setPriceMin]       = useState('')
   const [priceMax,       setPriceMax]       = useState('')
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([])
@@ -96,12 +114,23 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
     if (!dateFrom) { setBlockedIds(new Set()); return }
     setAvailLoading(true)
     const controller = new AbortController()
-    fetch(`/api/availability?date=${dateFrom}`, { signal: controller.signal })
+    const params = new URLSearchParams({ date: dateFrom })
+    if (timeFrom) params.set('time', timeFrom)
+    fetch(`/api/availability?${params}`, { signal: controller.signal })
       .then(r => r.json())
       .then(({ blockedSpaceIds }) => { setBlockedIds(new Set(blockedSpaceIds)); setAvailLoading(false) })
       .catch(() => { setAvailLoading(false) })
     return () => controller.abort()
-  }, [dateFrom])
+  }, [dateFrom, timeFrom])
+
+  useEffect(() => {
+    function onOutside(e: MouseEvent) {
+      if (datePickerRef.current && !datePickerRef.current.contains(e.target as Node))
+        setDatePickerOpen(false)
+    }
+    if (datePickerOpen) document.addEventListener('mousedown', onOutside)
+    return () => document.removeEventListener('mousedown', onOutside)
+  }, [datePickerOpen])
 
   // Bloquear scroll cuando el drawer de filtros está abierto
   useEffect(() => {
@@ -176,21 +205,21 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   }
 
   const activeFiltersCount = [
-    categoria, sector, capacidad, dateFrom, ...selectedAmenities, priceMin, priceMax,
+    categoria, sector, capacidad, dateFrom, timeFrom, ...selectedAmenities, priceMin, priceMax,
   ].filter(Boolean).length
 
   function clearAll() {
     setQ(''); setSector(''); setSectorQ(''); setCategoria(''); setCapacidad(''); setCapacidadInput('')
-    setSelectedAmenities([]); setPriceMin(''); setPriceMax(''); setDateFrom('')
+    setSelectedAmenities([]); setPriceMin(''); setPriceMax(''); setDateFrom(''); setTimeFrom('')
   }
 
   const handleCardHover = useCallback((id: string | null) => setHoveredId(id), [])
 
   // Chips de filtros activos (para móvil)
   const activeChips = [
-    sector    && { key: 'sector',    label: sector,                    onRemove: () => clearSector() },
-    dateFrom  && { key: 'date',      label: fmtDateShort(dateFrom),   onRemove: () => setDateFrom('') },
-    capacidad && { key: 'cap',       label: `${capacidad}+ personas`,  onRemove: () => applyCapacity('') },
+    sector    && { key: 'sector', label: sector, onRemove: () => clearSector() },
+    dateFrom  && { key: 'date',   label: timeFrom ? `${fmtDateShort(dateFrom)} · ${fmtTime(timeFrom)}` : fmtDateShort(dateFrom), onRemove: () => { setDateFrom(''); setTimeFrom('') } },
+    capacidad && { key: 'cap',    label: `${capacidad}+ personas`, onRemove: () => applyCapacity('') },
     priceMin  && { key: 'priceMin',  label: `Desde RD$${priceMin}`,   onRemove: () => setPriceMin('') },
     priceMax  && { key: 'priceMax',  label: `Hasta RD$${priceMax}`,   onRemove: () => setPriceMax('') },
     ...selectedAmenities.map(k => ({
@@ -234,18 +263,44 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                 style={{ color: 'var(--text-primary)' }}
               />
             </div>
-            <div className="flex items-center gap-2 rounded-2xl px-4 py-2.5 input-base w-44">
-              {availLoading
-                ? <div className="w-[15px] h-[15px] rounded-full border-2 border-t-transparent animate-spin shrink-0" style={{ borderColor: 'var(--brand)', borderTopColor: 'transparent' }} />
-                : <CalendarDays size={15} style={{ color: dateFrom ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
-              }
-              <input
-                type="date" value={dateFrom}
-                onChange={e => setDateFrom(e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
-                className="w-full bg-transparent text-sm focus:outline-none"
-                style={{ color: dateFrom ? 'var(--text-primary)' : 'var(--text-muted)' }}
-              />
+            <div className="relative" ref={datePickerRef}>
+              <button
+                onClick={() => setDatePickerOpen(o => !o)}
+                className="flex items-center gap-2 rounded-2xl px-4 py-2.5 input-base transition-all"
+                style={{
+                  minWidth: 186,
+                  background: '#fff',
+                  borderColor: datePickerOpen ? 'var(--brand)' : undefined,
+                  boxShadow: datePickerOpen ? '0 0 0 3px var(--brand-dim)' : undefined,
+                }}>
+                {availLoading
+                  ? <div className="w-[15px] h-[15px] rounded-full border-2 border-t-transparent animate-spin shrink-0" style={{ borderColor: 'var(--brand)', borderTopColor: 'transparent' }} />
+                  : <CalendarDays size={15} style={{ color: dateFrom ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
+                }
+                <span className="text-sm flex-1 text-left whitespace-nowrap"
+                  style={{ color: dateFrom ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                  {dateFrom
+                    ? (timeFrom ? `${fmtDateShort(dateFrom)} · ${fmtTime(timeFrom)}` : fmtDateShort(dateFrom))
+                    : 'Fecha y hora'}
+                </span>
+                {dateFrom && (
+                  <button onClick={e => { e.stopPropagation(); setDateFrom(''); setTimeFrom('') }}
+                    className="shrink-0" style={{ color: 'var(--text-muted)' }}>
+                    <X size={13} />
+                  </button>
+                )}
+              </button>
+              {datePickerOpen && (
+                <div className="absolute top-full left-0 mt-2 z-[60] rounded-2xl overflow-hidden"
+                  style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
+                  <DateTimePicker
+                    date={dateFrom} time={timeFrom}
+                    onDate={setDateFrom}
+                    onTime={t => { setTimeFrom(t); if (t) setTimeout(() => setDatePickerOpen(false), 200) }}
+                    loading={availLoading}
+                  />
+                </div>
+              )}
             </div>
             <button onClick={() => setMoreOpen(true)}
               className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-semibold transition-all shrink-0"
@@ -389,7 +444,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                 <div className="grid grid-cols-2 gap-4 pb-6">
                   {filtered.map(space => (
                     <SpaceCard key={space.id} space={space} isHovered={hoveredId === space.id}
-                      onHover={handleCardHover} dateFilter={dateFrom || undefined}
+                      onHover={handleCardHover} dateFilter={dateFrom || undefined} timeFilter={timeFrom || undefined}
                       isAvailable={dateFrom ? !blockedIds.has(space.id) : undefined} />
                   ))}
                 </div>
@@ -411,7 +466,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                   style={{ paddingBottom: 'calc(7rem + env(safe-area-inset-bottom, 0px))' }}>
                   {filtered.map(space => (
                     <SpaceCard key={space.id} space={space} isHovered={false} onHover={() => {}}
-                      dateFilter={dateFrom || undefined}
+                      dateFilter={dateFrom || undefined} timeFilter={timeFrom || undefined}
                       isAvailable={dateFrom ? !blockedIds.has(space.id) : undefined} />
                   ))}
                 </div>
@@ -504,31 +559,24 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                 </div>
               </div>
 
-              {/* ── FECHA ── */}
+              {/* ── FECHA Y HORA ── */}
               <div>
                 <h3 className="font-bold text-sm mb-3" style={{ color: 'var(--text-primary)' }}>
-                  Fecha del evento
+                  Fecha y hora del evento
                 </h3>
-                <div className="relative">
-                  {availLoading
-                    ? <div className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-t-transparent animate-spin"
-                        style={{ borderColor: 'var(--brand)', borderTopColor: 'transparent' }} />
-                    : <CalendarDays size={15} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
-                        style={{ color: dateFrom ? 'var(--brand)' : 'var(--text-muted)' }} />
-                  }
-                  <input
-                    type="date" value={dateFrom}
-                    onChange={e => setDateFrom(e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
-                    className="input-base w-full rounded-xl pl-10 pr-4 py-3.5 text-sm"
-                    style={{ color: dateFrom ? 'var(--text-primary)' : 'var(--text-muted)' }}
+                <div className="rounded-2xl overflow-hidden"
+                  style={{ border: '1.5px solid var(--border-medium)' }}>
+                  <DateTimePicker
+                    date={dateFrom} time={timeFrom}
+                    onDate={setDateFrom} onTime={setTimeFrom}
+                    loading={availLoading}
                   />
                 </div>
-                {dateFrom && (
-                  <button onClick={() => setDateFrom('')}
-                    className="flex items-center gap-1.5 mt-2 text-xs font-medium"
+                {(dateFrom || timeFrom) && (
+                  <button onClick={() => { setDateFrom(''); setTimeFrom('') }}
+                    className="flex items-center gap-1.5 mt-2.5 text-xs font-medium"
                     style={{ color: '#DC2626' }}>
-                    <X size={11} /> Quitar fecha
+                    <X size={11} /> Quitar fecha y hora
                   </button>
                 )}
               </div>
@@ -663,19 +711,22 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
 
 // ── SpaceCard ─────────────────────────────────────────────
 function SpaceCard({
-  space, isHovered, onHover, dateFilter, isAvailable,
+  space, isHovered, onHover, dateFilter, timeFilter, isAvailable,
 }: {
   space: any
   isHovered: boolean
   onHover: (id: string | null) => void
   dateFilter?: string
+  timeFilter?: string
   isAvailable?: boolean
 }) {
   const cover     = getCover(space)
   const priceInfo = getPriceInfo(space)
   const catLabel  = CATEGORIES.find(c => c.value === space.category)?.label ?? space.category
   const CatIcon   = CATEGORIES.find(c => c.value === space.category)?.icon ?? Building2
-  const href      = dateFilter ? `/espacios/${space.slug}?fecha=${dateFilter}` : `/espacios/${space.slug}`
+  const href      = dateFilter
+    ? `/espacios/${space.slug}?fecha=${dateFilter}${timeFilter ? `&hora=${timeFilter}` : ''}`
+    : `/espacios/${space.slug}`
 
   return (
     <Link href={href} className="group block">
@@ -762,6 +813,133 @@ function SpaceCard({
         </div>
       </div>
     </Link>
+  )
+}
+
+// ── DateTimePicker ────────────────────────────────────────
+function DateTimePicker({
+  date, time, onDate, onTime, loading,
+}: {
+  date: string; time: string
+  onDate: (d: string) => void; onTime: (t: string) => void
+  loading?: boolean
+}) {
+  const today = useMemo(() => { const d = new Date(); d.setHours(0,0,0,0); return d }, [])
+  const initD = date ? new Date(date + 'T12:00') : new Date()
+  const [yr, setYr] = useState(initD.getFullYear())
+  const [mo, setMo] = useState(initD.getMonth())
+
+  const cells = useMemo(() => {
+    const startOffset = (new Date(yr, mo, 1).getDay() + 6) % 7
+    const totalDays = new Date(yr, mo + 1, 0).getDate()
+    const arr: (number | null)[] = Array(startOffset).fill(null)
+    for (let d = 1; d <= totalDays; d++) arr.push(d)
+    return arr
+  }, [yr, mo])
+
+  function iso(d: number) {
+    return `${yr}-${String(mo + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+  }
+  function prevMo() { mo === 0 ? (setYr(y => y - 1), setMo(11)) : setMo(m => m - 1) }
+  function nextMo() { mo === 11 ? (setYr(y => y + 1), setMo(0)) : setMo(m => m + 1) }
+
+  return (
+    <div className="p-4 select-none" style={{ minWidth: 288 }}>
+
+      {/* Navegación de mes */}
+      <div className="flex items-center justify-between mb-4">
+        <button onClick={prevMo}
+          className="w-8 h-8 flex items-center justify-center rounded-xl transition-all"
+          style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+          <ChevronLeft size={16} />
+        </button>
+        <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+          {MONTH_NAMES[mo]} {yr}
+        </span>
+        <button onClick={nextMo}
+          className="w-8 h-8 flex items-center justify-center rounded-xl transition-all"
+          style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+          <ChevronRight size={16} />
+        </button>
+      </div>
+
+      {/* Nombres de día */}
+      <div className="grid grid-cols-7 mb-1">
+        {DAY_NAMES.map(d => (
+          <span key={d} className="text-center text-xs font-semibold py-1"
+            style={{ color: 'var(--text-muted)' }}>{d}</span>
+        ))}
+      </div>
+
+      {/* Grid de días */}
+      <div className="grid grid-cols-7 gap-0.5">
+        {cells.map((day, i) => {
+          if (!day) return <div key={i} />
+          const cellDate = new Date(yr, mo, day)
+          const isPast = cellDate < today
+          const isoStr = iso(day)
+          const isSelected = date === isoStr
+          const isToday = cellDate.toDateString() === today.toDateString()
+          return (
+            <button key={i} disabled={isPast}
+              onClick={() => !isPast && onDate(isSelected ? '' : isoStr)}
+              className="aspect-square flex items-center justify-center rounded-xl text-xs font-semibold transition-all"
+              style={{
+                background: isSelected ? 'var(--brand)' : 'transparent',
+                color: isSelected ? '#fff' : isPast ? 'var(--text-muted)' : 'var(--text-primary)',
+                cursor: isPast ? 'default' : 'pointer',
+                fontWeight: isToday && !isSelected ? 800 : undefined,
+                outline: isToday && !isSelected ? '2px solid var(--brand)' : undefined,
+                outlineOffset: isToday && !isSelected ? '-2px' : undefined,
+              }}>
+              {day}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Selector de hora — solo si hay fecha seleccionada */}
+      {date && (
+        <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+          <div className="flex items-center gap-2 mb-3">
+            {loading
+              ? <div className="w-3.5 h-3.5 rounded-full border-2 border-t-transparent animate-spin shrink-0"
+                  style={{ borderColor: 'var(--brand)', borderTopColor: 'transparent' }} />
+              : <Clock size={13} style={{ color: 'var(--text-muted)' }} />
+            }
+            <span className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>
+              Hora del evento
+            </span>
+            {time && (
+              <span className="ml-auto text-xs font-semibold px-2 py-0.5 rounded-full"
+                style={{ background: 'var(--brand-dim)', color: 'var(--brand)' }}>
+                {fmtTime(time)}
+              </span>
+            )}
+          </div>
+          <div className="grid grid-cols-4 gap-1.5">
+            {TIME_SLOTS.map(slot => {
+              const isActive = time === slot.v
+              return (
+                <button key={slot.v} onClick={() => onTime(isActive ? '' : slot.v)}
+                  className="py-2 rounded-xl text-xs font-semibold transition-all"
+                  style={isActive
+                    ? { background: 'var(--brand)', color: '#fff', boxShadow: '0 2px 8px rgba(53,196,147,0.3)' }
+                    : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }
+                  }>
+                  {slot.l}
+                </button>
+              )
+            })}
+          </div>
+          {!time && (
+            <p className="text-xs mt-2 text-center" style={{ color: 'var(--text-muted)' }}>
+              Selecciona una hora para ver disponibilidad exacta
+            </p>
+          )}
+        </div>
+      )}
+    </div>
   )
 }
 
