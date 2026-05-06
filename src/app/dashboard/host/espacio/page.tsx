@@ -163,7 +163,6 @@ export default function EspacioPage() {
 
   // Step 4 - Addons
   const [addons, setAddons] = useState<AddonItem[]>([])
-  const [_customAddon, _setCustomAddon] = useState<AddonItem>({ name: '', price: 0, unit: 'evento', category: 'personal', emoji: '✨' })
 
   // Step 5 - Conditions
   // Permisos

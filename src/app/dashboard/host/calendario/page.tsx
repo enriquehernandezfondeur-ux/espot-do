@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { ChevronLeft, ChevronRight, Lock, Loader2, Plus, X, Clock, Users, CheckCircle, Calendar, Copy, Link2, Link2Off } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Lock, Loader2, Plus, X, Clock, Users, CheckCircle, Calendar, Link2, Link2Off } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
 import { getHostCalendarBookings, getHostSpaces, getSpaceAvailability, createAvailabilityBlock, deleteAvailabilityBlock, getOrCreateIcalToken, getGoogleCalendarStatus, disconnectGoogleCalendar } from '@/lib/actions/host'
 
