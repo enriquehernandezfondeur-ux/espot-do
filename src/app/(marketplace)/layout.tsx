@@ -14,17 +14,27 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
   const [user,          setUser]          = useState<{ email: string; role?: string; avatarUrl?: string; fullName?: string } | null>(null)
   const [authReady,     setAuthReady]     = useState(false)
   const [dropdownOpen,  setDropdownOpen]  = useState(false)
+  const [dropdownPos,   setDropdownPos]   = useState({ top: 0, right: 0 })
   const [imgError,      setImgError]      = useState(false)
-  const searchRef  = useRef<HTMLInputElement>(null)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  const searchRef    = useRef<HTMLInputElement>(null)
+  const dropdownRef  = useRef<HTMLDivElement>(null)
+  const dropdownPanelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => { setMenuOpen(false); setDropdownOpen(false) }, [pathname])
 
+  function openDropdown() {
+    if (!dropdownOpen && dropdownRef.current) {
+      const rect = dropdownRef.current.getBoundingClientRect()
+      setDropdownPos({ top: rect.bottom + 8, right: window.innerWidth - rect.right })
+    }
+    setDropdownOpen(o => !o)
+  }
+
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false)
-      }
+      const inBtn   = dropdownRef.current?.contains(e.target as Node)
+      const inPanel = dropdownPanelRef.current?.contains(e.target as Node)
+      if (!inBtn && !inPanel) setDropdownOpen(false)
     }
     document.addEventListener('mousedown', onClickOutside)
     return () => document.removeEventListener('mousedown', onClickOutside)
@@ -144,7 +154,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
             ) : user ? (
               <div className="relative" ref={dropdownRef}>
                 <button
-                  onClick={() => setDropdownOpen(o => !o)}
+                  onClick={openDropdown}
                   className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl transition-colors"
                   style={{
                     background: dropdownOpen ? 'var(--bg-elevated)' : 'transparent',
@@ -170,12 +180,18 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                 </button>
 
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-2xl overflow-hidden"
+                  <div ref={dropdownPanelRef}
                     style={{
+                      position: 'fixed',
+                      top: dropdownPos.top,
+                      right: dropdownPos.right,
+                      width: 224,
                       background: '#fff',
+                      borderRadius: 16,
                       border: '1px solid var(--border-subtle)',
                       boxShadow: '0 8px 24px rgba(0,0,0,0.10)',
-                      zIndex: 100,
+                      zIndex: 9999,
+                      overflow: 'hidden',
                     }}>
                     <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                       <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
