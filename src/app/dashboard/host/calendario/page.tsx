@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { ChevronLeft, ChevronRight, Lock, Loader2, Plus, X, Clock, Users, CheckCircle, Calendar, Link2, Link2Off } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Building2, Loader2, Plus, X, Clock, Users, CheckCircle, Calendar, Link2, Link2Off } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
 import { getHostCalendarBookings, getHostSpaces, getSpaceAvailability, createAvailabilityBlock, deleteAvailabilityBlock, getOrCreateIcalToken, getGoogleCalendarStatus, disconnectGoogleCalendar } from '@/lib/actions/host'
 
@@ -272,43 +272,30 @@ export default function CalendarioPage() {
       </div>
 
       {/* ── Selector de espacio ── */}
-      <div className="relative mb-6 rounded-2xl overflow-hidden"
-        style={{
-          background: '#fff',
-          border: '1.5px solid var(--border-medium)',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
-        }}>
+      <div className="relative mb-6"
+        style={{ background: 'var(--bg-elevated)', borderRadius: 14, border: '1px solid var(--border-subtle)' }}>
 
-        {/* Label */}
-        <div className="px-5 pt-4 pb-2">
-          <span className="text-xs font-semibold uppercase tracking-widest"
-            style={{ color: 'var(--text-muted)' }}>
-            Espacio activo
-          </span>
-        </div>
-
-        {/* Espacio seleccionado */}
-        <div className="flex items-center gap-4 px-5 pb-4">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+        <div className="flex items-center gap-3 px-4 py-3">
+          {/* Ícono */}
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
             style={{ background: 'var(--brand-dim)' }}>
-            <Lock size={18} style={{ color: 'var(--brand)' }} />
+            <Building2 size={15} style={{ color: 'var(--brand)' }} />
           </div>
+
+          {/* Nombre + label */}
           <div className="flex-1 min-w-0">
-            <div className="font-bold text-base truncate"
-              style={{ color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+            <div className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-muted)' }}>
+              Espacio activo
+            </div>
+            <div className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>
               {spaceName || 'Sin espacio'}
             </div>
-            {spaceList.length > 1 && (
-              <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                Toca para cambiar espacio
-              </div>
-            )}
           </div>
+
+          {/* Chevron si hay múltiples */}
           {spaceList.length > 1 && (
-            <div className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-xl shrink-0"
-              style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
-              <ChevronRight size={13} />
-              Cambiar
+            <div className="flex items-center gap-1 shrink-0">
+              <ChevronRight size={15} style={{ color: 'var(--text-muted)' }} />
             </div>
           )}
         </div>
