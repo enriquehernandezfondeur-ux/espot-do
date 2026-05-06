@@ -30,8 +30,9 @@ const sections: { label: string; items: NavItem[] }[] = [
       { href: '/admin/espacios',  label: 'Espacios',  icon: Building2 },
       { href: '/admin/reservas',  label: 'Reservas',  icon: CalendarDays },
       { href: '/admin/usuarios',  label: 'Usuarios',  icon: Users },
-      { href: '/admin/pagos',     label: 'Comisiones',icon: CreditCard },
-      { href: '/admin/payouts',   label: 'Payouts',   icon: Banknote },
+      { href: '/admin/pagos',          label: 'Comisiones',    icon: CreditCard },
+      { href: '/admin/payouts',        label: 'Payouts',       icon: Banknote },
+      { href: '/admin/liquidaciones',  label: 'Liquidaciones', icon: Banknote },
     ],
   },
   {

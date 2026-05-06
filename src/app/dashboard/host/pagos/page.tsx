@@ -1,395 +1,288 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import {
-  Banknote, CreditCard, TrendingUp, CheckCircle2,
-  Clock, Send, ShieldCheck, AlertCircle, ChevronDown,
-  Loader2, Save, ArrowUpRight,
-} from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { getHostBookings, getBankAccount, saveBankAccount } from '@/lib/actions/host'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { getHostBookings, getHostStats, getBankAccount, saveBankAccount } from '@/lib/actions/host'
+import {
+  Banknote, TrendingUp, Clock, CheckCircle, CreditCard,
+  Save, Loader2, AlertCircle, Info, ChevronDown,
+} from 'lucide-react'
 
-// ── Bancos dominicanos ────────────────────────────────────
 const BANKS = [
-  { name: 'Banco Popular Dominicano',  abbr: 'BPD',  color: '#E31837' },
-  { name: 'Banreservas',               abbr: 'BHD',  color: '#006D3B' },
-  { name: 'Banco BHD León',            abbr: 'BHD',  color: '#003087' },
-  { name: 'Banco Santa Cruz',          abbr: 'BSC',  color: '#C8102E' },
-  { name: 'Promerica',                 abbr: 'PRO',  color: '#F4A71D' },
-  { name: 'Banco Caribe',              abbr: 'CAR',  color: '#0071BC' },
-  { name: 'Banco López de Haro',       abbr: 'LDH',  color: '#1A237E' },
-  { name: 'APAP',                      abbr: 'APA',  color: '#E63946' },
-  { name: 'Asociación Cibao',          abbr: 'CIB',  color: '#2E7D32' },
-  { name: 'Vimenca',                   abbr: 'VIM',  color: '#6A1B9A' },
-  { name: 'Scotiabank',                abbr: 'SCO',  color: '#EC0000' },
-  { name: 'Citibank',                  abbr: 'CTI',  color: '#003B70' },
-  { name: 'Otro',                      abbr: 'OTR',  color: '#6B7280' },
+  'Banco Popular Dominicano','BanReservas','Scotiabank RD','Banco BHD',
+  'Banco Santa Cruz','Banco Caribe','Banco Lafise','Banco Promerica',
+  'Citibank RD','Banco Ademi','Banco Lopez de Haro','Banco Múltiple Qik','Otro',
 ]
 
-// ── Estado de payout por reserva ─────────────────────────
-function getPayoutLabel(b: any) {
-  if (b.status === 'completed')
-    return { label: 'Completado', color: '#16A34A', bg: 'rgba(22,163,74,0.08)' }
-  if (b.status === 'confirmed')
-    return { label: 'Pendiente',  color: '#D97706', bg: 'rgba(217,119,6,0.08)' }
-  return { label: 'En proceso',   color: '#6B7280', bg: 'rgba(107,114,128,0.08)' }
+const PAYOUT_STATUS: Record<string, { label: string; color: string; bg: string }> = {
+  pending:     { label: 'Pendiente',   color: '#D97706', bg: 'rgba(217,119,6,0.08)'  },
+  en_revision: { label: 'En revisión', color: '#2563EB', bg: 'rgba(37,99,235,0.08)'  },
+  liquidado:   { label: 'Liquidado',   color: '#16A34A', bg: 'rgba(22,163,74,0.08)'  },
+  retenido:    { label: 'Retenido',    color: '#DC2626', bg: 'rgba(220,38,38,0.08)'  },
+  reembolsado: { label: 'Reembolsado', color: '#6B7280', bg: 'rgba(107,114,128,0.08)'},
 }
 
-export default function PagosPage() {
-  const [bookings, setBookings] = useState<any[]>([])
-  const [stats,    setStats]    = useState<any>(null)
-  const [account,  setAccount]  = useState<any>(null)
-  const [loading,  setLoading]  = useState(true)
-  const [saving,   setSaving]   = useState(false)
-  const [saved,    setSaved]    = useState(false)
-  const [formErr,  setFormErr]  = useState('')
+const inputCls = "w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-all"
+const inputStyle: React.CSSProperties = { background: '#F8FAFC', border: '1.5px solid #E2E8F0', color: '#0F1623' }
 
-  // Form state
-  const [holder,  setHolder]  = useState('')
-  const [bank,    setBank]    = useState('')
-  const [accType, setAccType] = useState<'ahorro' | 'corriente'>('ahorro')
-  const [currency,setCurrency]= useState<'DOP' | 'USD'>('DOP')
-  const [accNum,  setAccNum]  = useState('')
-  const [cedula,  setCedula]  = useState('')
+export default function HostPagosPage() {
+  const [bookings,   setBookings]   = useState<any[]>([])
+  const [loading,    setLoading]    = useState(true)
+  const [saving,     setSaving]     = useState(false)
+  const [saved,      setSaved]      = useState(false)
+  const [saveError,  setSaveError]  = useState('')
+
+  const [bankName,    setBankName]   = useState('')
+  const [accountType, setAccountType]= useState<'ahorro'|'corriente'>('ahorro')
+  const [currency,    setCurrency]   = useState<'DOP'|'USD'>('DOP')
+  const [accountNum,  setAccountNum] = useState('')
+  const [holder,      setHolder]     = useState('')
+  const [cedula,      setCedula]     = useState('')
+  const [bankStatus,  setBankStatus] = useState<string>('pending')
 
   useEffect(() => {
-    Promise.all([getHostBookings(), getHostStats(), getBankAccount()]).then(([b, s, acc]) => {
-      setBookings(b)
-      setStats(s)
-      if (acc) {
-        setAccount(acc)
-        setHolder(acc.account_holder)
-        setBank(acc.bank_name)
-        setAccType(acc.account_type)
-        setCurrency(acc.currency)
-        setAccNum(acc.account_number)
-        setCedula(acc.cedula_or_rnc)
+    Promise.all([getHostBookings(), getBankAccount()]).then(([bks, bank]) => {
+      setBookings(bks)
+      if (bank) {
+        setBankName(bank.bank_name ?? '')
+        setAccountType((bank.account_type as 'ahorro'|'corriente') ?? 'ahorro')
+        setCurrency((bank.currency as 'DOP'|'USD') ?? 'DOP')
+        setAccountNum(bank.account_number ?? '')
+        setHolder(bank.account_holder ?? '')
+        setCedula(bank.cedula_or_rnc ?? '')
+        setBankStatus(bank.status ?? 'pending')
       }
       setLoading(false)
     })
   }, [])
 
-  const activeBookings = bookings.filter(b =>
-    !['cancelled_guest', 'cancelled_host', 'rejected'].includes(b.status)
-  )
-  const totalBruto    = activeBookings.reduce((s, b) => s + Number(b.total_amount), 0)
-  const totalComision = activeBookings.reduce((s, b) => s + Number(b.platform_fee), 0)
-  const totalNeto     = totalBruto - totalComision
-  const pendingPayout = activeBookings
-    .filter(b => b.status === 'confirmed')
-    .reduce((s, b) => s + Number(b.total_amount) - Number(b.platform_fee), 0)
-  const sentPayout = activeBookings
-    .filter(b => b.status === 'completed')
-    .reduce((s, b) => s + Number(b.total_amount) - Number(b.platform_fee), 0)
+  const paid    = bookings.filter(b => b.payment_status === 'paid' && ['confirmed','completed'].includes(b.status))
+  const totalGross    = paid.reduce((s, b) => s + Number(b.total_amount), 0)
+  const totalFee      = paid.reduce((s, b) => s + Number(b.platform_fee), 0)
+  const totalNet      = totalGross - totalFee
+  const pendingPayout = paid.filter(b => b.payout_status === 'pending').reduce((s, b) => s + (Number(b.total_amount) - Number(b.platform_fee)), 0)
+  const liquidated    = paid.filter(b => b.payout_status === 'liquidado').reduce((s, b) => s + (Number(b.total_amount) - Number(b.platform_fee)), 0)
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
-    if (!holder || !bank || !accNum || !cedula) {
-      setFormErr('Completa todos los campos requeridos.')
-      return
-    }
-    setSaving(true)
-    setFormErr('')
-    const result = await saveBankAccount({
-      account_holder: holder, bank_name: bank,
-      account_type: accType, currency, account_number: accNum,
-      cedula_or_rnc: cedula,
-    })
+    if (!bankName || !accountNum || !holder || !cedula) { setSaveError('Completa los campos obligatorios'); return }
+    setSaving(true); setSaveError(''); setSaved(false)
+    const result = await saveBankAccount({ account_holder: holder, bank_name: bankName, account_type: accountType, currency, account_number: accountNum, cedula_or_rnc: cedula })
     setSaving(false)
-    if ('error' in result) {
-      setFormErr(result.error ?? 'Error al guardar')
-    } else {
-      setSaved(true)
-      setAccount({ account_holder: holder, bank_name: bank, account_type: accType, currency, account_number: accNum, cedula_or_rnc: cedula, status: 'pending' })
-      setTimeout(() => setSaved(false), 3000)
-    }
+    if ('error' in result) setSaveError(result.error ?? 'Error al guardar')
+    else { setSaved(true); setTimeout(() => setSaved(false), 3000) }
   }
 
-  const selectedBank = BANKS.find(b => b.name === bank)
-
   if (loading) return (
-    <div className="flex items-center justify-center h-screen">
-      <Loader2 size={28} className="animate-spin" style={{ color: 'var(--brand)' }} />
+    <div className="flex items-center justify-center h-screen" style={{ background: '#F4F6F8' }}>
+      <Loader2 size={28} className="animate-spin" style={{ color: '#35C493' }} />
     </div>
   )
 
-  return (
-    <div className="p-8 max-w-5xl mx-auto space-y-8">
+  const verConfig: Record<string, { label: string; color: string; bg: string }> = {
+    pending:  { label: 'Verificación pendiente', color: '#D97706', bg: 'rgba(217,119,6,0.06)' },
+    verified: { label: 'Cuenta verificada',      color: '#16A34A', bg: 'rgba(22,163,74,0.06)'  },
+    rejected: { label: 'Cuenta rechazada',       color: '#DC2626', bg: 'rgba(220,38,38,0.06)'  },
+  }
+  const ver = verConfig[bankStatus] ?? verConfig.pending
 
-      {/* ── Header ── */}
+  return (
+    <div className="p-8 max-w-6xl mx-auto space-y-8">
+
+      {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold" style={{ color: '#03313C', letterSpacing: '-0.02em' }}>
-          Pagos y payouts
-        </h1>
-        <p className="text-sm mt-1" style={{ color: '#6B7280' }}>
-          Espot gestiona todos los cobros. Aquí recibes tus ingresos netos.
+        <div className="flex items-center gap-2 mb-1">
+          <Banknote size={15} style={{ color: '#35C493' }} />
+          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#35C493' }}>Finanzas</span>
+        </div>
+        <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Pagos y liquidaciones</h1>
+        <p className="text-sm mt-0.5" style={{ color: '#94A3B8' }}>
+          Historial de reservas pagadas y estado de tus liquidaciones
         </p>
       </div>
 
-      {/* ── Balance banner ── */}
-      <div className="rounded-3xl overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #03313C 0%, #0A4A3A 100%)', boxShadow: '0 8px 32px rgba(3,49,60,0.2)' }}>
-        <div className="p-8">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-2"
-            style={{ color: 'rgba(255,255,255,0.5)' }}>
-            Balance pendiente de payout
-          </p>
-          <div className="text-5xl font-bold mb-1" style={{ color: '#fff', letterSpacing: '-0.04em' }}>
-            {formatCurrency(pendingPayout)}
+      {/* Summary cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: 'Balance pendiente', value: pendingPayout, icon: Clock,       color: '#F59E0B', sub: 'Por liquidar' },
+          { label: 'Total generado',    value: totalNet,      icon: TrendingUp,  color: '#35C493', sub: 'Neto de comisiones' },
+          { label: 'Total liquidado',   value: liquidated,    icon: CheckCircle, color: '#16A34A', sub: 'Ya transferido' },
+          { label: 'Comisión Espot',    value: totalFee,      icon: CreditCard,  color: '#7C3AED', sub: `${paid.length} reservas` },
+        ].map(({ label, value, icon: Icon, color, sub }) => (
+          <div key={label} className="rounded-2xl p-5"
+            style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: `${color}12` }}>
+              <Icon size={16} style={{ color }} />
+            </div>
+            <div className="text-xl font-bold mb-0.5" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>
+              {formatCurrency(value)}
+            </div>
+            <div className="text-xs font-semibold" style={{ color: '#374151' }}>{label}</div>
+            <div className="text-xs mt-0.5" style={{ color: '#94A3B8' }}>{sub}</div>
           </div>
-          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
-            Se transfiere a tu cuenta luego de cada evento confirmado
-          </p>
-
-          <div className="grid grid-cols-3 gap-4 mt-8 pt-6"
-            style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-            {[
-              { label: 'Ingresos brutos',  value: formatCurrency(totalBruto),    icon: TrendingUp  },
-              { label: 'Comisión Espot',   value: formatCurrency(totalComision),  icon: CreditCard  },
-              { label: 'Payouts enviados', value: formatCurrency(sentPayout),     icon: Send        },
-            ].map(({ label, value, icon: Icon }) => (
-              <div key={label}>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <Icon size={12} style={{ color: 'rgba(255,255,255,0.4)' }} />
-                  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{label}</span>
-                </div>
-                <div className="font-bold text-base" style={{ color: '#fff', letterSpacing: '-0.02em' }}>
-                  {value}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* ── Layout: cuenta + historial ── */}
-      <div className="grid lg:grid-cols-[1fr_380px] gap-6 items-start">
+      {/* Info */}
+      <div className="flex items-start gap-3 px-5 py-4 rounded-2xl"
+        style={{ background: 'rgba(37,99,235,0.04)', border: '1px solid rgba(37,99,235,0.12)' }}>
+        <Info size={15} style={{ color: '#2563EB', flexShrink: 0, marginTop: 1 }} />
+        <p className="text-sm" style={{ color: '#1E40AF', lineHeight: 1.6 }}>
+          EspotHub cobra el 100% de cada reserva al cliente y te transfiere el neto después de descontar la comisión de la plataforma. Las liquidaciones se procesan manualmente y recibirás una notificación por email cuando se complete la transferencia.
+        </p>
+      </div>
 
-        {/* ── Historial de payouts ── */}
-        <div className="rounded-2xl overflow-hidden"
-          style={{ background: '#fff', border: '1px solid #E5E7EB', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-          <div className="px-6 py-5" style={{ borderBottom: '1px solid #F3F4F6' }}>
-            <h2 className="font-bold text-sm" style={{ color: '#03313C' }}>Historial de payouts</h2>
-            <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>
-              Reservas procesadas por Espot
-            </p>
-          </div>
-
-          {activeBookings.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-14 gap-3">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: '#F9FAFB' }}>
-                <Banknote size={20} style={{ color: '#D1D5DB' }} />
-              </div>
-              <p className="text-sm" style={{ color: '#9CA3AF' }}>Sin transacciones aún</p>
-            </div>
-          ) : (
-            <div>
-              {/* Header */}
-              <div className="grid px-6 py-3 text-xs font-semibold uppercase tracking-widest"
-                style={{ gridTemplateColumns: '1fr auto auto auto', gap: 16, background: '#F9FAFB', color: '#9CA3AF', borderBottom: '1px solid #F3F4F6' }}>
-                <span>Reserva</span>
-                <span>Fecha</span>
-                <span className="text-right">Neto</span>
-                <span>Estado</span>
-              </div>
-              <div className="divide-y" style={{ borderColor: '#F3F4F6' }}>
-                {activeBookings.slice(0, 8).map(b => {
-                  const guest = (b as any).profiles as any
-                  const neto  = Number(b.total_amount) - Number(b.platform_fee)
-                  const ps    = getPayoutLabel(b)
-                  return (
-                    <div key={b.id} className="grid px-6 py-4 items-center"
-                      style={{ gridTemplateColumns: '1fr auto auto auto', gap: 16 }}>
-                      <div>
-                        <div className="font-medium text-sm" style={{ color: '#03313C' }}>
-                          {guest?.full_name ?? 'Cliente'}
-                        </div>
-                        <div className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>
-                          {b.event_type} · {(b as any).spaces?.name}
-                        </div>
-                      </div>
-                      <div className="text-sm" style={{ color: '#6B7280' }}>
-                        {formatDate(b.event_date)}
-                      </div>
-                      <div className="font-bold text-sm text-right" style={{ color: '#16A34A' }}>
-                        {formatCurrency(neto)}
-                      </div>
-                      <div>
-                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
-                          style={{ background: ps.bg, color: ps.color }}>
-                          {ps.label}
-                        </span>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
+      {/* Historial */}
+      <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+        <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid #F0F2F5' }}>
+          <h2 className="font-bold text-sm" style={{ color: '#0F1623' }}>Historial de reservas</h2>
+          <span className="text-xs px-2.5 py-1 rounded-full font-semibold"
+            style={{ background: 'rgba(53,196,147,0.1)', color: '#35C493' }}>
+            {paid.length} reservas pagadas
+          </span>
         </div>
 
-        {/* ── Cuenta bancaria ── */}
-        <div className="rounded-2xl overflow-hidden"
-          style={{ background: '#fff', border: '1px solid #E5E7EB', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-
-          {/* Header */}
-          <div className="px-6 py-5" style={{ borderBottom: '1px solid #F3F4F6' }}>
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="font-bold text-sm" style={{ color: '#03313C' }}>Cuenta bancaria</h2>
-                <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>Para recibir tus payouts</p>
-              </div>
-              {account && (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
-                  style={account.status === 'verified'
-                    ? { background: 'rgba(22,163,74,0.08)', color: '#16A34A' }
-                    : { background: 'rgba(217,119,6,0.08)', color: '#D97706' }}>
-                  {account.status === 'verified'
-                    ? <><ShieldCheck size={11} /> Verificada</>
-                    : <><Clock size={11} /> En revisión</>}
-                </div>
-              )}
-            </div>
+        {paid.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-14 text-center">
+            <Banknote size={28} className="mb-3" style={{ color: '#CBD5E1' }} />
+            <p className="font-semibold text-sm" style={{ color: '#374151' }}>Sin reservas pagadas aún</p>
+            <p className="text-xs mt-1" style={{ color: '#94A3B8' }}>Cuando un cliente pague, aparecerá aquí.</p>
           </div>
+        ) : (
+          <>
+            <div className="grid gap-3 px-6 py-3 text-[11px] font-bold uppercase tracking-widest"
+              style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', background: '#FAFBFC', borderBottom: '1px solid #F0F2F5', color: '#94A3B8' }}>
+              <span>Cliente · Evento</span><span>Fecha</span><span>Total pagado</span><span>Comisión</span><span>Tu neto</span><span>Liquidación</span>
+            </div>
+            <div className="divide-y divide-[#F8FAFC]">
+              {paid.map((bk: any) => {
+                const net = Number(bk.total_amount) - Number(bk.platform_fee)
+                const ps  = PAYOUT_STATUS[bk.payout_status ?? 'pending']
+                const guest = bk.profiles as any
+                return (
+                  <div key={bk.id} className="grid gap-3 items-center px-6 py-4 hover:bg-slate-50 transition-colors"
+                    style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr' }}>
+                    <div>
+                      <div className="text-sm font-semibold" style={{ color: '#0F1623' }}>{guest?.full_name ?? 'Cliente'}</div>
+                      <div className="text-xs" style={{ color: '#94A3B8' }}>{bk.event_type}</div>
+                    </div>
+                    <div className="text-sm" style={{ color: '#374151' }}>{formatDate(bk.event_date)}</div>
+                    <div className="text-sm font-bold" style={{ color: '#0F1623' }}>{formatCurrency(Number(bk.total_amount))}</div>
+                    <div className="text-sm" style={{ color: '#7C3AED' }}>−{formatCurrency(Number(bk.platform_fee))}</div>
+                    <div className="text-sm font-bold" style={{ color: '#35C493' }}>{formatCurrency(net)}</div>
+                    <span className="text-xs font-semibold px-2.5 py-1.5 rounded-full w-fit"
+                      style={{ background: ps?.bg, color: ps?.color }}>
+                      {ps?.label ?? 'Pendiente'}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          </>
+        )}
+      </div>
 
-          <form onSubmit={handleSave} className="p-6 space-y-5">
+      {/* Cuenta bancaria */}
+      <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+        <div className="px-6 py-5 flex items-center justify-between" style={{ borderBottom: '1px solid #F0F2F5' }}>
+          <div>
+            <h2 className="font-bold text-sm" style={{ color: '#0F1623' }}>Cuenta bancaria</h2>
+            <p className="text-xs mt-0.5" style={{ color: '#94A3B8' }}>Para recibir tus liquidaciones</p>
+          </div>
+          <span className="text-xs font-semibold px-3 py-1.5 rounded-full" style={{ background: ver.bg, color: ver.color }}>
+            {ver.label}
+          </span>
+        </div>
 
-            {/* Banco selector */}
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest mb-2"
-                style={{ color: '#9CA3AF' }}>
-                Banco *
+        <form onSubmit={handleSave} className="p-6 space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+            <div className="md:col-span-2">
+              <label className="block text-xs font-semibold mb-1.5" style={{ color: '#6B7280' }}>
+                Banco <span style={{ color: '#DC2626' }}>*</span>
               </label>
               <div className="relative">
-                {selectedBank && (
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white z-10"
-                    style={{ background: selectedBank.color }}>
-                    {selectedBank.abbr.slice(0, 2)}
-                  </div>
-                )}
-                <select value={bank} onChange={e => setBank(e.target.value)} required
-                  className="w-full rounded-xl text-sm font-medium focus:outline-none appearance-none cursor-pointer"
-                  style={{
-                    padding: '12px 40px 12px',
-                    paddingLeft: selectedBank ? '48px' : '14px',
-                    background: '#F9FAFB',
-                    border: '1.5px solid #E5E7EB',
-                    color: bank ? '#03313C' : '#9CA3AF',
-                  }}>
-                  <option value="" disabled>Selecciona tu banco</option>
-                  {BANKS.map(b => (
-                    <option key={b.name} value={b.name}>{b.name}</option>
-                  ))}
+                <select value={bankName} onChange={e => setBankName(e.target.value)}
+                  className={inputCls} style={{ ...inputStyle, appearance: 'none', paddingRight: 36 } as React.CSSProperties}>
+                  <option value="">Seleccionar banco...</option>
+                  {BANKS.map(b => <option key={b} value={b}>{b}</option>)}
                 </select>
-                <ChevronDown size={14} style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', pointerEvents: 'none' }} />
+                <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: '#94A3B8' }} />
               </div>
             </div>
 
-            {/* Tipo + Moneda */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-widest mb-2"
-                  style={{ color: '#9CA3AF' }}>
-                  Tipo de cuenta *
-                </label>
-                <div className="flex gap-2">
-                  {(['ahorro', 'corriente'] as const).map(t => (
-                    <button key={t} type="button" onClick={() => setAccType(t)}
-                      className="flex-1 py-2.5 rounded-xl text-xs font-semibold capitalize transition-all"
-                      style={accType === t
-                        ? { background: '#03313C', color: '#fff' }
-                        : { background: '#F9FAFB', color: '#6B7280', border: '1.5px solid #E5E7EB' }}>
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-widest mb-2"
-                  style={{ color: '#9CA3AF' }}>
-                  Moneda *
-                </label>
-                <div className="flex gap-2">
-                  {(['DOP', 'USD'] as const).map(c => (
-                    <button key={c} type="button" onClick={() => setCurrency(c)}
-                      className="flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all"
-                      style={currency === c
-                        ? { background: '#03313C', color: '#fff' }
-                        : { background: '#F9FAFB', color: '#6B7280', border: '1.5px solid #E5E7EB' }}>
-                      {c}
-                    </button>
-                  ))}
-                </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1.5" style={{ color: '#6B7280' }}>Tipo de cuenta</label>
+              <div className="flex gap-2">
+                {(['ahorro','corriente'] as const).map(t => (
+                  <button key={t} type="button" onClick={() => setAccountType(t)}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all capitalize"
+                    style={accountType === t ? { background: '#0F1623', color: '#fff' } : { background: '#F8FAFC', color: '#6B7280', border: '1.5px solid #E2E8F0' }}>
+                    {t}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Titular */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest mb-2"
-                style={{ color: '#9CA3AF' }}>
-                Nombre del titular *
-              </label>
-              <input value={holder} onChange={e => setHolder(e.target.value)} required
-                placeholder="Ej: María González"
-                className="w-full rounded-xl text-sm font-medium focus:outline-none transition-colors"
-                style={{ padding: '12px 14px', background: '#F9FAFB', border: '1.5px solid #E5E7EB', color: '#03313C' }}
-                onFocus={e => (e.target.style.borderColor = '#35C493')}
-                onBlur={e => (e.target.style.borderColor = '#E5E7EB')}
-              />
+              <label className="block text-xs font-semibold mb-1.5" style={{ color: '#6B7280' }}>Moneda</label>
+              <div className="flex gap-2">
+                {(['DOP','USD'] as const).map(c => (
+                  <button key={c} type="button" onClick={() => setCurrency(c)}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all"
+                    style={currency === c ? { background: '#35C493', color: '#fff' } : { background: '#F8FAFC', color: '#6B7280', border: '1.5px solid #E2E8F0' }}>
+                    {c}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Número de cuenta */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest mb-2"
-                style={{ color: '#9CA3AF' }}>
-                Número de cuenta *
+              <label className="block text-xs font-semibold mb-1.5" style={{ color: '#6B7280' }}>
+                Número de cuenta <span style={{ color: '#DC2626' }}>*</span>
               </label>
-              <input value={accNum} onChange={e => setAccNum(e.target.value)} required
-                placeholder="Ej: 2100123456789"
-                className="w-full rounded-xl text-sm font-medium focus:outline-none transition-colors"
-                style={{ padding: '12px 14px', background: '#F9FAFB', border: '1.5px solid #E5E7EB', color: '#03313C', fontFamily: 'monospace', letterSpacing: '0.05em' }}
-                onFocus={e => (e.target.style.borderColor = '#35C493')}
-                onBlur={e => (e.target.style.borderColor = '#E5E7EB')}
-              />
+              <input value={accountNum} onChange={e => setAccountNum(e.target.value)} placeholder="012345678901"
+                className={inputCls} style={inputStyle} />
             </div>
 
-            {/* Cédula / RNC */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest mb-2"
-                style={{ color: '#9CA3AF' }}>
-                Cédula o RNC *
+              <label className="block text-xs font-semibold mb-1.5" style={{ color: '#6B7280' }}>
+                Nombre del titular <span style={{ color: '#DC2626' }}>*</span>
               </label>
-              <input value={cedula} onChange={e => setCedula(e.target.value)} required
-                placeholder="Ej: 001-1234567-8"
-                className="w-full rounded-xl text-sm font-medium focus:outline-none transition-colors"
-                style={{ padding: '12px 14px', background: '#F9FAFB', border: '1.5px solid #E5E7EB', color: '#03313C', fontFamily: 'monospace', letterSpacing: '0.05em' }}
-                onFocus={e => (e.target.style.borderColor = '#35C493')}
-                onBlur={e => (e.target.style.borderColor = '#E5E7EB')}
-              />
+              <input value={holder} onChange={e => setHolder(e.target.value)} placeholder="Nombre completo"
+                className={inputCls} style={inputStyle} />
             </div>
 
-            {formErr && (
-              <div className="flex items-center gap-2 px-4 py-3 rounded-xl text-xs"
-                style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)', color: '#DC2626' }}>
-                <AlertCircle size={13} /> {formErr}
+            <div className="md:col-span-2">
+              <label className="block text-xs font-semibold mb-1.5" style={{ color: '#6B7280' }}>
+                Cédula o RNC <span style={{ color: '#DC2626' }}>*</span>
+              </label>
+              <input value={cedula} onChange={e => setCedula(e.target.value)} placeholder="000-0000000-0"
+                className={inputCls} style={inputStyle} />
+            </div>
+          </div>
+
+          {saveError && (
+            <div className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm"
+              style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)', color: '#DC2626' }}>
+              <AlertCircle size={14} /> {saveError}
+            </div>
+          )}
+
+          <div className="flex items-center gap-3 pt-1">
+            <button type="submit" disabled={saving}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-50"
+              style={{ background: '#0F1623', color: '#fff' }}>
+              {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
+              {saving ? 'Guardando...' : 'Guardar cuenta bancaria'}
+            </button>
+            {saved && (
+              <div className="flex items-center gap-1.5 text-sm font-medium" style={{ color: '#16A34A' }}>
+                <CheckCircle size={15} /> Guardado
               </div>
             )}
-
-            <button type="submit" disabled={saving}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold transition-all disabled:opacity-50"
-              style={{ background: '#03313C', color: '#fff', boxShadow: '0 2px 12px rgba(3,49,60,0.2)' }}>
-              {saving ? <><Loader2 size={16} className="animate-spin" /> Guardando...</> :
-               saved  ? <><CheckCircle2 size={16} style={{ color: '#35C493' }} /> Guardada correctamente</> :
-                        <><Save size={16} /> Guardar cuenta bancaria</>}
-            </button>
-
-            {/* Nota de seguridad */}
-            <div className="flex items-start gap-2 text-xs" style={{ color: '#9CA3AF' }}>
-              <ShieldCheck size={13} className="shrink-0 mt-0.5" style={{ color: '#35C493' }} />
-              <span>Tu información bancaria se almacena de forma segura y se usa únicamente para procesar tus payouts de Espot.</span>
-            </div>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
     </div>
   )

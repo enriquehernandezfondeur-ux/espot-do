@@ -1,15 +1,16 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   CalendarDays, Users, Sparkles, CreditCard,
-  ChevronRight, ChevronLeft, CheckCircle, Loader2,
-  Minus, Plus, MessageCircle, Clock, Building2, Lock,
+  ChevronRight, ChevronLeft, Loader2, CheckCircle,
+  Minus, Plus, MessageCircle, Clock, ShieldCheck,
 } from 'lucide-react'
 import { formatCurrency, formatTime } from '@/lib/utils'
 import { createBooking } from '@/lib/actions/booking'
-import { buildPaymentSchedule, DEFAULT_PLANS, type PaymentPlanConfig } from '@/lib/payments/engine'
 import { cn } from '@/lib/utils'
+
 import Link from 'next/link'
 import DatePicker from '@/components/ui/DatePicker'
 import TimePicker from '@/components/ui/TimePicker'
@@ -55,6 +56,7 @@ interface Props {
 }
 
 export default function BookingWidget({ space, onChat, initialDate }: Props) {
+  const router = useRouter()
   const pricing    = space.space_pricing?.find((p: any) => p.is_active) ?? space.space_pricing?.[0]
   const addons     = space.space_addons ?? []
   const isHourly      = pricing?.pricing_type === 'hourly'
@@ -79,7 +81,6 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   const [eventType,       setEventType]       = useState('')
   const [customEventType, setCustomEventType] = useState('')
   const [selectedAddons, setSelectedAddons]   = useState<string[]>([])
-  const [paymentPlan] = useState<PaymentPlanConfig>(DEFAULT_PLANS[2])
   const [guestNote, setGuestNote] = useState('')
   const [showNote, setShowNote]   = useState(false)
 
@@ -152,13 +153,6 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   const subtotal    = basePrice + addonsTotal
   const platformFee = Math.round(subtotal * 0.10)
 
-  const schedule = useMemo(() => {
-    if (!eventDate || !subtotal) return null
-    return buildPaymentSchedule(paymentPlan, subtotal, new Date(eventDate + 'T12:00'))
-  }, [paymentPlan, subtotal, eventDate])
-
-  const firstPayment = schedule?.payments[0]
-
   // ── Navigation ───────────────────────────────────────────
   const minHoursOk = !isHourly || !pricing?.min_hours || selectedHours >= pricing.min_hours
 
@@ -216,8 +210,14 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
       totalAmount: subtotal,
     })
     setBooking(false)
-    if ('error' in result) setError(result.error ?? 'Error al procesar')
-    else setSuccess(true)
+    if ('error' in result) {
+      setError(result.error ?? 'Error al procesar')
+    } else if (result.status === 'quote_requested') {
+      setSuccess(true)
+    } else {
+      // Redirigir a la página de pago con Azul
+      router.push(`/pago/${result.bookingId}`)
+    }
   }
 
   // ── Mini summary (visible en pasos 2+) ───────────────────
@@ -747,47 +747,14 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               </div>
             )}
 
-            {/* Calendario de pagos */}
-            {schedule && schedule.payments.length > 0 && (
-              <div className="rounded-2xl overflow-hidden"
-                style={{ border: '1.5px solid var(--brand-border)', background: 'rgba(53,196,147,0.02)' }}>
-                <div className="px-4 py-3 flex items-center gap-2"
-                  style={{ borderBottom: '1px solid var(--brand-border)' }}>
-                  <CalendarDays size={13} style={{ color: 'var(--brand)' }} />
-                  <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--brand)' }}>
-                    Calendario de pagos
-                  </span>
-                </div>
-                <div className="divide-y" style={{ borderColor: 'var(--brand-border)' }}>
-                  {schedule.payments.map(p => (
-                    <div key={p.payment_number} className="flex items-center gap-3 px-4 py-3.5">
-                      <div className={cn('w-7 h-7 rounded-xl flex items-center justify-center text-xs font-bold shrink-0')}
-                        style={p.is_first
-                          ? { background: 'var(--brand)', color: '#fff' }
-                          : p.is_final_onsite
-                            ? { background: '#E0F2FE', color: '#0369A1' }
-                            : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
-                        {p.is_final_onsite ? <Building2 size={12} /> : p.payment_number}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
-                          {p.due_label}
-                          {p.is_first && (
-                            <span className="ml-1.5 text-xs font-medium px-1.5 py-0.5 rounded-full"
-                              style={{ background: 'rgba(53,196,147,0.12)', color: 'var(--brand)' }}>
-                              <Lock size={8} className="inline mr-0.5" />Bloquea tu fecha
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{p.description}</div>
-                      </div>
-                      <div className="text-sm font-bold shrink-0"
-                        style={{ color: p.is_first ? 'var(--brand)' : 'var(--text-primary)' }}>
-                        {formatCurrency(p.total)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+            {/* Garantía de pago seguro */}
+            {!isQuote && (
+              <div className="flex items-center gap-3 px-4 py-3 rounded-2xl"
+                style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.15)' }}>
+                <ShieldCheck size={16} style={{ color: 'var(--brand)', flexShrink: 0 }} />
+                <p className="text-xs" style={{ color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                  Pago 100% seguro con tarjeta de crédito/débito. Tu reserva queda confirmada inmediatamente al pagar.
+                </p>
               </div>
             )}
 
@@ -825,10 +792,8 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               <><Loader2 size={18} className="animate-spin" /> Procesando...</>
             ) : isQuote ? (
               <><MessageCircle size={18} /> Solicitar cotización</>
-            ) : firstPayment ? (
-              <><CreditCard size={18} /> Reservar fecha · {formatCurrency(firstPayment.total)}</>
             ) : (
-              <><CreditCard size={18} /> Reservar fecha</>
+              <><CreditCard size={18} /> Continuar al pago · {formatCurrency(subtotal)}</>
             )}
           </button>
         ) : (
