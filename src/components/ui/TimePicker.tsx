@@ -1,79 +1,67 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Clock, ChevronDown, X } from 'lucide-react'
+import { Clock, ChevronDown, Check } from 'lucide-react'
 
-// Slots de media hora, 6am → 3am
 const ALL_SLOTS = [
-  { value: '06:00', label: '6:00 AM',  group: 'Mañana' },
-  { value: '06:30', label: '6:30 AM',  group: 'Mañana' },
-  { value: '07:00', label: '7:00 AM',  group: 'Mañana' },
-  { value: '07:30', label: '7:30 AM',  group: 'Mañana' },
-  { value: '08:00', label: '8:00 AM',  group: 'Mañana' },
-  { value: '08:30', label: '8:30 AM',  group: 'Mañana' },
-  { value: '09:00', label: '9:00 AM',  group: 'Mañana' },
-  { value: '09:30', label: '9:30 AM',  group: 'Mañana' },
-  { value: '10:00', label: '10:00 AM', group: 'Mañana' },
-  { value: '10:30', label: '10:30 AM', group: 'Mañana' },
-  { value: '11:00', label: '11:00 AM', group: 'Mañana' },
-  { value: '11:30', label: '11:30 AM', group: 'Mañana' },
-  { value: '12:00', label: '12:00 PM', group: 'Tarde' },
-  { value: '12:30', label: '12:30 PM', group: 'Tarde' },
-  { value: '13:00', label: '1:00 PM',  group: 'Tarde' },
-  { value: '13:30', label: '1:30 PM',  group: 'Tarde' },
-  { value: '14:00', label: '2:00 PM',  group: 'Tarde' },
-  { value: '14:30', label: '2:30 PM',  group: 'Tarde' },
-  { value: '15:00', label: '3:00 PM',  group: 'Tarde' },
-  { value: '15:30', label: '3:30 PM',  group: 'Tarde' },
-  { value: '16:00', label: '4:00 PM',  group: 'Tarde' },
-  { value: '16:30', label: '4:30 PM',  group: 'Tarde' },
-  { value: '17:00', label: '5:00 PM',  group: 'Tarde' },
-  { value: '17:30', label: '5:30 PM',  group: 'Tarde' },
-  { value: '18:00', label: '6:00 PM',  group: 'Noche' },
-  { value: '18:30', label: '6:30 PM',  group: 'Noche' },
-  { value: '19:00', label: '7:00 PM',  group: 'Noche' },
-  { value: '19:30', label: '7:30 PM',  group: 'Noche' },
-  { value: '20:00', label: '8:00 PM',  group: 'Noche' },
-  { value: '20:30', label: '8:30 PM',  group: 'Noche' },
-  { value: '21:00', label: '9:00 PM',  group: 'Noche' },
-  { value: '21:30', label: '9:30 PM',  group: 'Noche' },
-  { value: '22:00', label: '10:00 PM', group: 'Noche' },
-  { value: '22:30', label: '10:30 PM', group: 'Noche' },
-  { value: '23:00', label: '11:00 PM', group: 'Noche' },
-  { value: '23:30', label: '11:30 PM', group: 'Noche' },
-  { value: '00:00', label: '12:00 AM', group: 'Madrugada' },
-  { value: '00:30', label: '12:30 AM', group: 'Madrugada' },
-  { value: '01:00', label: '1:00 AM',  group: 'Madrugada' },
-  { value: '01:30', label: '1:30 AM',  group: 'Madrugada' },
-  { value: '02:00', label: '2:00 AM',  group: 'Madrugada' },
-  { value: '03:00', label: '3:00 AM',  group: 'Madrugada' },
+  { v: '06:00', l: '6:00 AM',  g: 'Mañana' },
+  { v: '06:30', l: '6:30 AM',  g: 'Mañana' },
+  { v: '07:00', l: '7:00 AM',  g: 'Mañana' },
+  { v: '07:30', l: '7:30 AM',  g: 'Mañana' },
+  { v: '08:00', l: '8:00 AM',  g: 'Mañana' },
+  { v: '08:30', l: '8:30 AM',  g: 'Mañana' },
+  { v: '09:00', l: '9:00 AM',  g: 'Mañana' },
+  { v: '09:30', l: '9:30 AM',  g: 'Mañana' },
+  { v: '10:00', l: '10:00 AM', g: 'Mañana' },
+  { v: '10:30', l: '10:30 AM', g: 'Mañana' },
+  { v: '11:00', l: '11:00 AM', g: 'Mañana' },
+  { v: '11:30', l: '11:30 AM', g: 'Mañana' },
+  { v: '12:00', l: '12:00 PM', g: 'Tarde' },
+  { v: '12:30', l: '12:30 PM', g: 'Tarde' },
+  { v: '13:00', l: '1:00 PM',  g: 'Tarde' },
+  { v: '13:30', l: '1:30 PM',  g: 'Tarde' },
+  { v: '14:00', l: '2:00 PM',  g: 'Tarde' },
+  { v: '14:30', l: '2:30 PM',  g: 'Tarde' },
+  { v: '15:00', l: '3:00 PM',  g: 'Tarde' },
+  { v: '15:30', l: '3:30 PM',  g: 'Tarde' },
+  { v: '16:00', l: '4:00 PM',  g: 'Tarde' },
+  { v: '16:30', l: '4:30 PM',  g: 'Tarde' },
+  { v: '17:00', l: '5:00 PM',  g: 'Tarde' },
+  { v: '17:30', l: '5:30 PM',  g: 'Tarde' },
+  { v: '18:00', l: '6:00 PM',  g: 'Noche' },
+  { v: '18:30', l: '6:30 PM',  g: 'Noche' },
+  { v: '19:00', l: '7:00 PM',  g: 'Noche' },
+  { v: '19:30', l: '7:30 PM',  g: 'Noche' },
+  { v: '20:00', l: '8:00 PM',  g: 'Noche' },
+  { v: '20:30', l: '8:30 PM',  g: 'Noche' },
+  { v: '21:00', l: '9:00 PM',  g: 'Noche' },
+  { v: '21:30', l: '9:30 PM',  g: 'Noche' },
+  { v: '22:00', l: '10:00 PM', g: 'Noche' },
+  { v: '22:30', l: '10:30 PM', g: 'Noche' },
+  { v: '23:00', l: '11:00 PM', g: 'Noche' },
+  { v: '23:30', l: '11:30 PM', g: 'Noche' },
+  { v: '00:00', l: '12:00 AM', g: 'Madrugada' },
+  { v: '00:30', l: '12:30 AM', g: 'Madrugada' },
+  { v: '01:00', l: '1:00 AM',  g: 'Madrugada' },
+  { v: '01:30', l: '1:30 AM',  g: 'Madrugada' },
+  { v: '02:00', l: '2:00 AM',  g: 'Madrugada' },
+  { v: '03:00', l: '3:00 AM',  g: 'Madrugada' },
 ]
-
-const GROUPS = ['Mañana', 'Tarde', 'Noche', 'Madrugada']
-
-interface Props {
-  value:            string
-  onChange:         (v: string) => void
-  placeholder?:     string
-  // Filtro por hora anterior (selector "Hasta")
-  afterValue?:      string
-  minMinutesAfter?: number
-  maxMinutesAfter?: number
-  // Rango permitido por el propietario (de time_blocks)
-  // undefined = sin restricción | null = día sin disponibilidad | {start,end} = rango específico
-  allowedRange?: { start: string; end: string } | null
-  disabled?:        boolean
-}
 
 export function hourToNum(h: string) {
   const n = parseInt(h.split(':')[0])
   return n < 6 ? n + 24 : n
 }
 
-function minutesDiff(from: string, to: string): number {
-  const f = hourToNum(from) * 60 + parseInt(from.split(':')[1] ?? '0')
-  const t = hourToNum(to)   * 60 + parseInt(to.split(':')[1]  ?? '0')
-  return t - f
+interface Props {
+  value:            string
+  onChange:         (v: string) => void
+  placeholder?:     string
+  afterValue?:      string
+  minMinutesAfter?: number
+  maxMinutesAfter?: number
+  allowedRange?:    { start: string; end: string } | null
+  disabled?:        boolean
 }
 
 export default function TimePicker({
@@ -81,164 +69,196 @@ export default function TimePicker({
   afterValue, minMinutesAfter, maxMinutesAfter,
   allowedRange, disabled,
 }: Props) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const [open, setOpen]   = useState(false)
+  const ref               = useRef<HTMLDivElement>(null)
+  const listRef           = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    function handle(e: MouseEvent) {
+    function h(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
     }
-    document.addEventListener('mousedown', handle)
-    return () => document.removeEventListener('mousedown', handle)
+    document.addEventListener('mousedown', h)
+    return () => document.removeEventListener('mousedown', h)
   }, [])
 
-  // ── Filtrar slots disponibles ─────────────────────────────
-  const available = ALL_SLOTS.filter(s => {
-    // Día sin disponibilidad configurada por el propietario
-    if (allowedRange === null) return false
-
-    // Rango del propietario (time_blocks)
-    if (allowedRange) {
-      const slotN  = hourToNum(s.value)
-      const startN = hourToNum(allowedRange.start)
-      // end_time "00:00" o "24:00" = medianoche = número 24
-      const endRaw = allowedRange.end
-      const endN   = (endRaw === '00:00' || endRaw === '24:00') ? 24 : hourToNum(endRaw)
-      if (slotN < startN || slotN >= endN) return false
+  // Auto-scroll al elemento seleccionado
+  useEffect(() => {
+    if (open && value && listRef.current) {
+      setTimeout(() => {
+        const el = listRef.current?.querySelector(`[data-v="${value}"]`) as HTMLElement
+        el?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      }, 60)
     }
+  }, [open, value])
 
-    // Filtro por hora anterior (selector "Hasta")
+  // Filtrar slots disponibles
+  const available = ALL_SLOTS.filter(s => {
+    if (allowedRange === null) return false
+    if (allowedRange) {
+      const n  = hourToNum(s.v)
+      const sn = hourToNum(allowedRange.start)
+      const en = (allowedRange.end === '00:00' || allowedRange.end === '24:00') ? 24 : hourToNum(allowedRange.end)
+      if (n < sn || n >= en) return false
+    }
     if (afterValue) {
-      const diff = minutesDiff(afterValue, s.value)
+      const fa = hourToNum(afterValue) * 60 + parseInt(afterValue.split(':')[1] ?? '0')
+      const fs = hourToNum(s.v)       * 60 + parseInt(s.v.split(':')[1]       ?? '0')
+      const diff = fs - fa
       if (diff <= 0) return false
       if (minMinutesAfter && diff < minMinutesAfter) return false
       if (maxMinutesAfter && diff > maxMinutesAfter) return false
     }
-
     return true
   })
 
-  // Agrupar por momento del día
-  const grouped: Record<string, typeof ALL_SLOTS> = {}
+  // Agrupar por momento
+  const groups: Record<string, typeof ALL_SLOTS> = {}
   for (const s of available) {
-    if (!grouped[s.group]) grouped[s.group] = []
-    grouped[s.group].push(s)
+    if (!groups[s.g]) groups[s.g] = []
+    groups[s.g].push(s)
   }
 
-  const hasSlots   = available.length > 0
-  const displayLabel = ALL_SLOTS.find(s => s.value === value)?.label ?? null
-
-  // Mensaje cuando no hay opciones
-  function emptyMessage() {
-    if (allowedRange === null)
-      return { title: 'Sin horario disponible', sub: 'El propietario no tiene este día habilitado. Selecciona otra fecha.' }
-    if (afterValue && minMinutesAfter)
-      return { title: 'Sin opciones válidas', sub: `Este espacio requiere mínimo ${Math.round(minMinutesAfter / 60)}h. Elige una hora de inicio más temprana.` }
-    return { title: 'Sin opciones', sub: 'Selecciona primero la hora de inicio.' }
-  }
+  const label = ALL_SLOTS.find(s => s.v === value)?.l ?? null
 
   return (
-    <div className="relative" ref={ref}>
+    <div ref={ref} style={{ position: 'relative' }}>
 
       {/* ── Trigger ── */}
       <button
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setOpen(o => !o)}
-        className="w-full flex items-center gap-2.5 px-4 py-3.5 rounded-2xl text-left transition-all"
         style={{
-          background:  disabled ? 'var(--bg-elevated)' : 'var(--bg-surface)',
-          border:      `1.5px solid ${open ? 'var(--brand)' : value ? 'var(--border-medium)' : 'var(--border-subtle)'}`,
-          boxShadow:   open ? '0 0 0 3px var(--brand-dim)' : 'none',
+          width:       '100%',
+          display:     'flex',
+          alignItems:  'center',
+          gap:         10,
+          padding:     '14px 16px',
+          borderRadius: 14,
+          border:      `1.5px solid ${open ? '#35C493' : value ? '#D1D5DB' : '#E5E7EB'}`,
+          background:  disabled ? '#F9FAFB' : '#fff',
+          boxShadow:   open ? '0 0 0 3px rgba(53,196,147,0.12)' : '0 1px 3px rgba(0,0,0,0.05)',
           cursor:      disabled ? 'not-allowed' : 'pointer',
-          opacity:     disabled ? 0.6 : 1,
+          opacity:     disabled ? 0.55 : 1,
+          transition:  'border-color 0.15s, box-shadow 0.15s',
+          textAlign:   'left',
         }}>
-        <Clock size={15} style={{ color: value ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
-        <span className="flex-1 text-sm font-medium truncate"
-          style={{ color: value ? 'var(--text-primary)' : 'var(--text-muted)' }}>
-          {displayLabel ?? placeholder}
-        </span>
-        {value ? (
-          <span
-            role="button"
-            onClick={e => { e.stopPropagation(); onChange(''); setOpen(false) }}
-            className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-colors"
-            style={{ background: 'var(--bg-elevated)' }}>
-            <X size={10} strokeWidth={2.5} style={{ color: 'var(--text-muted)' }} />
-          </span>
-        ) : (
-          <ChevronDown size={14} style={{
-            color:     'var(--text-muted)',
-            flexShrink: 0,
-            transition: 'transform 0.15s',
-            transform:  open ? 'rotate(180deg)' : 'none',
-          }} />
-        )}
+        <div style={{
+          width: 32, height: 32, borderRadius: 8, display: 'flex',
+          alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          background: value ? 'rgba(53,196,147,0.1)' : '#F3F4F6',
+        }}>
+          <Clock size={15} color={value ? '#35C493' : '#9CA3AF'} />
+        </div>
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            fontSize:   11, fontWeight: 600, textTransform: 'uppercase',
+            letterSpacing: '0.07em', color: '#9CA3AF', marginBottom: 2,
+          }}>
+            {placeholder.includes('inicio') ? 'Hora de inicio' : placeholder.includes('salida') ? 'Hora de salida' : 'Hora'}
+          </div>
+          <div style={{
+            fontSize: 14, fontWeight: value ? 600 : 400,
+            color:    value ? '#111827' : '#9CA3AF',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {label ?? placeholder}
+          </div>
+        </div>
+
+        <ChevronDown
+          size={16}
+          color="#9CA3AF"
+          style={{ flexShrink: 0, transition: 'transform 0.18s', transform: open ? 'rotate(180deg)' : 'none' }}
+        />
       </button>
 
       {/* ── Dropdown ── */}
       {open && (
-        <div className="absolute left-0 right-0 mt-1.5 rounded-2xl overflow-hidden"
-          style={{
-            background: '#fff',
-            border:     '1px solid var(--border-medium)',
-            boxShadow:  '0 12px 40px rgba(0,0,0,0.14)',
-            zIndex:     9999,
-          }}>
+        <div style={{
+          position:    'absolute',
+          top:         'calc(100% + 6px)',
+          left:         0,
+          right:        0,
+          background:  '#fff',
+          border:      '1px solid #E5E7EB',
+          borderRadius: 16,
+          boxShadow:   '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)',
+          zIndex:       9999,
+          overflow:    'hidden',
+          animation:   'tpIn 0.14s ease-out',
+        }}>
+          <style>{`@keyframes tpIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}`}</style>
 
-          {!hasSlots ? (
-            // Sin opciones disponibles
-            <div className="px-5 py-6 text-center">
-              <div className="w-10 h-10 rounded-2xl flex items-center justify-center mx-auto mb-3"
-                style={{ background: 'var(--bg-elevated)' }}>
-                <Clock size={18} style={{ color: 'var(--text-muted)' }} />
-              </div>
-              <p className="text-sm font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
-                {emptyMessage().title}
+          {available.length === 0 ? (
+            <div style={{ padding: '24px 20px', textAlign: 'center' }}>
+              <Clock size={24} color="#D1D5DB" style={{ margin: '0 auto 10px' }} />
+              <p style={{ fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 4 }}>
+                Sin horarios disponibles
               </p>
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                {emptyMessage().sub}
+              <p style={{ fontSize: 12, color: '#9CA3AF', lineHeight: 1.5 }}>
+                {allowedRange === null
+                  ? 'Este día no tiene horario habilitado. Prueba con otra fecha.'
+                  : minMinutesAfter
+                  ? `Se requieren mínimo ${Math.round(minMinutesAfter / 60)}h. Elige una hora de inicio más temprana.`
+                  : 'Selecciona primero la hora de inicio.'}
               </p>
             </div>
           ) : (
-            // Grid de horas disponibles
-            <div style={{ maxHeight: 320, overflowY: 'auto' }}>
-              {GROUPS.filter(g => grouped[g]?.length).map(group => (
+            <div ref={listRef} style={{ maxHeight: 280, overflowY: 'auto' }}>
+              {Object.entries(groups).map(([group, slots]) => (
                 <div key={group}>
-                  <div className="px-4 py-2 text-xs font-semibold sticky top-0"
-                    style={{
-                      background:    'var(--bg-base)',
-                      color:         'var(--text-muted)',
-                      borderBottom:  '1px solid var(--border-subtle)',
-                      letterSpacing: '0.06em',
-                      textTransform: 'uppercase',
-                    }}>
+                  {/* Cabecera de grupo */}
+                  <div style={{
+                    padding:       '8px 16px 6px',
+                    fontSize:      10,
+                    fontWeight:    700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.08em',
+                    color:         '#9CA3AF',
+                    background:    '#F9FAFB',
+                    borderBottom:  '1px solid #F3F4F6',
+                    position:      'sticky',
+                    top:           0,
+                  }}>
                     {group}
                   </div>
-                  <div className="grid grid-cols-4 gap-1.5 p-3">
-                    {grouped[group].map(slot => {
-                      const isSel = slot.value === value
-                      return (
-                        <button
-                          key={slot.value}
-                          type="button"
-                          onClick={() => { onChange(slot.value); setOpen(false) }}
-                          className="py-2 px-1 rounded-xl text-xs font-semibold text-center transition-all"
-                          style={isSel ? {
-                            background: 'var(--brand)',
-                            color:      '#fff',
-                            boxShadow:  '0 2px 8px rgba(53,196,147,0.3)',
-                          } : {
-                            background: 'var(--bg-elevated)',
-                            color:      'var(--text-primary)',
-                          }}
-                          onMouseEnter={e => { if (!isSel) (e.currentTarget as HTMLElement).style.background = 'var(--brand-dim)' }}
-                          onMouseLeave={e => { if (!isSel) (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}>
-                          {slot.label}
-                        </button>
-                      )
-                    })}
-                  </div>
+
+                  {/* Slots */}
+                  {slots.map(slot => {
+                    const isSel = slot.v === value
+                    return (
+                      <button
+                        key={slot.v}
+                        data-v={slot.v}
+                        type="button"
+                        onClick={() => { onChange(slot.v); setOpen(false) }}
+                        style={{
+                          width:       '100%',
+                          display:     'flex',
+                          alignItems:  'center',
+                          justifyContent: 'space-between',
+                          padding:     '10px 16px',
+                          border:      'none',
+                          background:  isSel ? 'rgba(53,196,147,0.08)' : 'transparent',
+                          cursor:      'pointer',
+                          transition:  'background 0.1s',
+                          borderLeft:  isSel ? '3px solid #35C493' : '3px solid transparent',
+                        }}
+                        onMouseEnter={e => { if (!isSel) (e.currentTarget as HTMLElement).style.background = '#F9FAFB' }}
+                        onMouseLeave={e => { if (!isSel) (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
+                        <span style={{
+                          fontSize:   14,
+                          fontWeight: isSel ? 700 : 400,
+                          color:      isSel ? '#35C493' : '#374151',
+                        }}>
+                          {slot.l}
+                        </span>
+                        {isSel && <Check size={15} color="#35C493" />}
+                      </button>
+                    )
+                  })}
                 </div>
               ))}
             </div>
