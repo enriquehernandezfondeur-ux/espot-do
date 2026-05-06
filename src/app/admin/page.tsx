@@ -1,177 +1,262 @@
-import { getAdminStats } from '@/lib/actions/admin'
-import { formatCurrency } from '@/lib/utils'
+import { getAdminStats, getAdminActivity, getAdminPayouts } from '@/lib/actions/admin'
+import { formatCurrency, formatDate } from '@/lib/utils'
 import {
   Building2, CalendarDays, Users, CreditCard,
-  TrendingUp, Clock, CheckCircle, AlertCircle,
-  ArrowRight, Shield,
+  TrendingUp, Clock, CheckCircle, AlertTriangle,
+  ArrowRight, Shield, Banknote, Activity,
+  Star, UserCheck, BarChart3,
 } from 'lucide-react'
 import Link from 'next/link'
 
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string }> = {
+  pending:          { label: 'Pendiente',   color: '#D97706', bg: 'rgba(217,119,6,0.1)',    dot: '#D97706' },
+  accepted:         { label: 'Aceptada',    color: '#2563EB', bg: 'rgba(37,99,235,0.1)',    dot: '#2563EB' },
+  confirmed:        { label: 'Confirmada',  color: '#16A34A', bg: 'rgba(22,163,74,0.1)',    dot: '#16A34A' },
+  completed:        { label: 'Completada',  color: '#35C493', bg: 'rgba(53,196,147,0.1)',   dot: '#35C493' },
+  rejected:         { label: 'Rechazada',   color: '#DC2626', bg: 'rgba(220,38,38,0.08)',   dot: '#DC2626' },
+  cancelled_guest:  { label: 'Cancelada',   color: '#6B7280', bg: 'rgba(107,114,128,0.08)', dot: '#6B7280' },
+  cancelled_host:   { label: 'Cancelada',   color: '#6B7280', bg: 'rgba(107,114,128,0.08)', dot: '#6B7280' },
+  quote_requested:  { label: 'Cotización',  color: '#7C3AED', bg: 'rgba(124,58,237,0.08)', dot: '#7C3AED' },
+}
+
+function timeAgo(date: string) {
+  const diff = Date.now() - new Date(date).getTime()
+  const mins  = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days  = Math.floor(diff / 86400000)
+  if (mins < 60)  return `hace ${mins}m`
+  if (hours < 24) return `hace ${hours}h`
+  return `hace ${days}d`
+}
+
 export default async function AdminDashboard() {
-  const stats = await getAdminStats()
+  const [stats, activity, pendingPayouts] = await Promise.all([
+    getAdminStats(),
+    getAdminActivity(),
+    getAdminPayouts('pending'),
+  ])
 
-  const metrics = [
-    {
-      label: 'Total espacios',
-      value: stats?.totalSpaces ?? 0,
-      sub: `${stats?.pendingSpaces ?? 0} pendientes de aprobación`,
-      icon: Building2,
-      color: '#7C3AED',
-      alert: (stats?.pendingSpaces ?? 0) > 0,
-      href: '/admin/espacios?status=pending',
-    },
-    {
-      label: 'Reservas',
-      value: stats?.totalBookings ?? 0,
-      sub: `${stats?.pendingBookings ?? 0} pendientes de confirmar`,
-      icon: CalendarDays,
-      color: '#2563EB',
-      alert: (stats?.pendingBookings ?? 0) > 0,
-      href: '/admin/reservas?status=pending',
-    },
-    {
-      label: 'Usuarios',
-      value: stats?.totalUsers ?? 0,
-      sub: `${stats?.totalHosts ?? 0} propietarios registrados`,
-      icon: Users,
-      color: '#16A34A',
-      alert: false,
-      href: '/admin/usuarios',
-    },
-    {
-      label: 'Comisión total',
-      value: formatCurrency(stats?.totalRevenue ?? 0),
-      sub: `${formatCurrency(stats?.monthlyRevenue ?? 0)} este mes`,
-      icon: CreditCard,
-      color: '#35C493',
-      alert: false,
-      href: '/admin/pagos',
-    },
-  ]
+  const pendingPayoutTotal = pendingPayouts.reduce(
+    (s, b: any) => s + (Number(b.total_amount) - Number(b.platform_fee)), 0
+  )
 
-  const quickActions = [
-    { label: 'Espacios por aprobar',  count: stats?.pendingSpaces ?? 0,   href: '/admin/espacios?status=pending', color: '#7C3AED', urgent: true },
-    { label: 'Reservas pendientes',   count: stats?.pendingBookings ?? 0,  href: '/admin/reservas?status=pending', color: '#2563EB', urgent: true },
-    { label: 'Propietarios',          count: stats?.totalHosts ?? 0,      href: '/admin/usuarios?role=host',      color: '#16A34A', urgent: false },
-  ]
+  const now = new Date()
+  const hour = now.getHours()
+  const greeting = hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches'
+  const dateLabel = now.toLocaleDateString('es-DO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+
+  const alerts = [
+    stats?.pendingSpaces  && stats.pendingSpaces  > 0 && { label: `${stats.pendingSpaces} espacio${stats.pendingSpaces > 1 ? 's' : ''} por aprobar`,   href: '/admin/espacios?status=pending', color: '#F59E0B', icon: Building2 },
+    stats?.pendingBookings && stats.pendingBookings > 0 && { label: `${stats.pendingBookings} reserva${stats.pendingBookings > 1 ? 's' : ''} pendiente${stats.pendingBookings > 1 ? 's' : ''}`, href: '/admin/reservas?status=pending', color: '#3B82F6', icon: CalendarDays },
+    pendingPayouts.length  > 0 && { label: `${pendingPayouts.length} payout${pendingPayouts.length > 1 ? 's' : ''} pendiente${pendingPayouts.length > 1 ? 's' : ''} — ${formatCurrency(pendingPayoutTotal)}`, href: '/admin/payouts', color: '#35C493', icon: Banknote },
+  ].filter(Boolean) as { label: string; href: string; color: string; icon: React.ElementType }[]
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
+    <div className="p-8 max-w-7xl mx-auto space-y-8">
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-start justify-between">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Shield size={18} style={{ color: 'var(--brand)' }} />
-            <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--brand)' }}>
-              Admin Panel
+          <div className="flex items-center gap-2 mb-0.5">
+            <Shield size={14} style={{ color: '#35C493' }} />
+            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#35C493' }}>
+              Admin Console
             </span>
           </div>
           <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>
-            Dashboard
+            {greeting}, Enrique 👋
           </h1>
-          <p className="text-sm mt-0.5 text-slate-500">
-            {new Date().toLocaleDateString('es-DO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-          </p>
+          <p className="text-sm mt-0.5 capitalize" style={{ color: '#94A3B8' }}>{dateLabel}</p>
         </div>
-        <Link href="/admin/espacios?status=pending"
-          className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl transition-all"
-          style={{ background: 'var(--brand)', color: '#fff', boxShadow: '0 2px 8px rgba(53,196,147,0.3)' }}>
-          Ver pendientes <ArrowRight size={15} />
-        </Link>
-      </div>
-
-      {/* Metric cards */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
-        {metrics.map(({ label, value, sub, icon: Icon, color, alert, href }) => (
-          <Link key={label} href={href}
-            className="group relative rounded-2xl p-5 transition-all hover:-translate-y-0.5"
-            style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ background: `${color}12` }}>
-                <Icon size={18} style={{ color }} />
-              </div>
-              {alert && (
-                <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
-              )}
-            </div>
-            <div className="text-2xl font-bold mb-1" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>
-              {value}
-            </div>
-            <div className="text-xs font-medium text-slate-400 mb-0.5">{label}</div>
-            <div className="text-xs text-slate-400">{sub}</div>
+        <div className="flex items-center gap-3">
+          <Link href="/admin/espacios?status=pending"
+            className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl transition-all"
+            style={{ background: '#0F1623', color: '#fff' }}>
+            <Building2 size={14} /> Aprobar espacios
           </Link>
-        ))}
+          <Link href="/admin/payouts"
+            className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl transition-all"
+            style={{ background: '#35C493', color: '#0B0F0E', boxShadow: '0 2px 8px rgba(53,196,147,0.3)' }}>
+            <Banknote size={14} /> Gestionar payouts
+          </Link>
+        </div>
       </div>
 
-      {/* Two column layout */}
-      <div className="grid grid-cols-[1fr_320px] gap-6">
-
-        {/* Acciones rápidas */}
+      {/* Alerts banner */}
+      {alerts.length > 0 && (
         <div className="rounded-2xl overflow-hidden"
           style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-          <div className="px-6 py-4" style={{ borderBottom: '1px solid #F0F2F5' }}>
-            <h2 className="font-bold text-sm" style={{ color: '#0F1623' }}>Requieren atención</h2>
+          <div className="px-5 py-3 flex items-center gap-2"
+            style={{ background: 'rgba(245,158,11,0.04)', borderBottom: '1px solid #FEF3C7' }}>
+            <AlertTriangle size={14} style={{ color: '#F59E0B' }} />
+            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#92400E' }}>
+              Requieren atención
+            </span>
           </div>
-          <div className="divide-y divide-[#F0F2F5]">
-            {quickActions.map(({ label, count, href, color, urgent }) => (
-              <Link key={label} href={href}
-                className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors">
+          <div className="divide-y divide-[#F8FAFC]">
+            {alerts.map(({ label, href, color, icon: Icon }) => (
+              <Link key={href} href={href}
+                className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50 transition-colors group">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
                     style={{ background: `${color}12` }}>
-                    {urgent && count > 0
-                      ? <AlertCircle size={15} style={{ color }} />
-                      : <CheckCircle size={15} style={{ color }} />}
+                    <Icon size={13} style={{ color }} />
                   </div>
                   <span className="text-sm font-medium" style={{ color: '#0F1623' }}>{label}</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-bold px-2.5 py-1 rounded-full"
-                    style={{ background: urgent && count > 0 ? `${color}12` : '#F4F6F8', color: urgent && count > 0 ? color : '#6B7280' }}>
-                    {count}
-                  </span>
-                  <ArrowRight size={14} className="text-slate-400" />
-                </div>
+                <ArrowRight size={14} className="text-slate-300 group-hover:text-slate-500 transition-colors" />
               </Link>
             ))}
           </div>
         </div>
+      )}
 
-        {/* Accesos directos */}
-        <div className="space-y-3">
+      {/* Metric cards */}
+      <div className="grid grid-cols-3 lg:grid-cols-6 gap-4">
+        {[
+          { label: 'Espacios',      value: stats?.totalSpaces ?? 0,                  sub: `${stats?.pendingSpaces ?? 0} por aprobar`,      icon: Building2,  color: '#7C3AED', href: '/admin/espacios',      format: 'num' },
+          { label: 'Reservas',      value: stats?.totalBookings ?? 0,                sub: `${stats?.pendingBookings ?? 0} pendientes`,      icon: CalendarDays,color: '#2563EB', href: '/admin/reservas',      format: 'num' },
+          { label: 'Usuarios',      value: stats?.totalUsers ?? 0,                   sub: `${stats?.totalHosts ?? 0} propietarios`,        icon: Users,      color: '#16A34A', href: '/admin/usuarios',      format: 'num' },
+          { label: 'Ingresos mes',  value: stats?.monthlyRevenue ?? 0,               sub: 'comisión este mes',                              icon: TrendingUp, color: '#35C493', href: '/admin/pagos',          format: 'currency' },
+          { label: 'Total comisión',value: stats?.totalRevenue ?? 0,                 sub: 'histórico acumulado',                            icon: CreditCard, color: '#0EA5E9', href: '/admin/pagos',          format: 'currency' },
+          { label: 'Payouts pend.', value: pendingPayoutTotal,                       sub: `${pendingPayouts.length} propietarios`,          icon: Banknote,   color: '#F59E0B', href: '/admin/payouts',        format: 'currency' },
+        ].map(({ label, value, sub, icon: Icon, color, href, format }) => (
+          <Link key={label} href={href}
+            className="group rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
+            style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-3"
+              style={{ background: `${color}12` }}>
+              <Icon size={15} style={{ color }} />
+            </div>
+            <div className="text-xl font-bold mb-0.5" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>
+              {format === 'currency' ? formatCurrency(value as number) : value}
+            </div>
+            <div className="text-xs font-semibold mb-0.5" style={{ color: '#374151' }}>{label}</div>
+            <div className="text-xs" style={{ color: '#94A3B8' }}>{sub}</div>
+          </Link>
+        ))}
+      </div>
+
+      {/* Main content — 2 columns */}
+      <div className="grid grid-cols-[1fr_340px] gap-6">
+
+        {/* Activity feed */}
+        <div className="rounded-2xl overflow-hidden"
+          style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+          <div className="flex items-center justify-between px-6 py-4"
+            style={{ borderBottom: '1px solid #F0F2F5' }}>
+            <div className="flex items-center gap-2">
+              <Activity size={15} style={{ color: '#35C493' }} />
+              <h2 className="font-bold text-sm" style={{ color: '#0F1623' }}>Actividad reciente</h2>
+            </div>
+            <Link href="/admin/reservas"
+              className="text-xs font-semibold" style={{ color: '#35C493' }}>
+              Ver todas →
+            </Link>
+          </div>
+          <div className="divide-y divide-[#F8FAFC]">
+            {activity.length === 0 ? (
+              <div className="px-6 py-10 text-center text-sm" style={{ color: '#94A3B8' }}>
+                Sin actividad reciente
+              </div>
+            ) : activity.map((bk: any) => {
+              const sc = STATUS_CONFIG[bk.status] ?? STATUS_CONFIG.pending
+              const space   = bk.spaces as any
+              const guest   = bk.profiles as any
+              const hostAmt = Number(bk.total_amount) - Number(bk.platform_fee)
+              return (
+                <Link key={bk.id} href={`/admin/reservas`}
+                  className="flex items-center gap-4 px-6 py-3.5 hover:bg-slate-50 transition-colors">
+                  <div className="w-2 h-2 rounded-full shrink-0" style={{ background: sc.dot }} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold truncate" style={{ color: '#0F1623' }}>
+                        {space?.name ?? '—'}
+                      </span>
+                      <span className="text-xs px-2 py-0.5 rounded-full shrink-0 font-medium"
+                        style={{ background: sc.bg, color: sc.color }}>
+                        {sc.label}
+                      </span>
+                    </div>
+                    <div className="text-xs mt-0.5" style={{ color: '#94A3B8' }}>
+                      {guest?.full_name ?? 'Cliente'} · {bk.event_type} · {formatDate(bk.event_date)}
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-sm font-bold" style={{ color: '#0F1623' }}>
+                      {formatCurrency(Number(bk.total_amount))}
+                    </div>
+                    <div className="text-xs" style={{ color: '#94A3B8' }}>
+                      {timeAgo(bk.updated_at)}
+                    </div>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Right column */}
+        <div className="space-y-4">
+
+          {/* Revenue card */}
           <div className="rounded-2xl p-5"
-            style={{ background: 'linear-gradient(135deg, #0F2A22 0%, #1A4D38 100%)', boxShadow: '0 4px 16px rgba(53,196,147,0.15)' }}>
-            <div className="flex items-center gap-2 mb-3">
-              <TrendingUp size={16} style={{ color: 'var(--brand)' }} />
-              <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                Este mes
+            style={{ background: 'linear-gradient(135deg, #0A1019 0%, #0F2A22 100%)', boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}>
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp size={14} style={{ color: '#35C493' }} />
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                Comisión este mes
               </span>
             </div>
-            <div className="text-3xl font-bold text-gray-900 mb-1" style={{ letterSpacing: '-0.02em' }}>
+            <div className="text-3xl font-bold text-white mb-0.5" style={{ letterSpacing: '-0.03em' }}>
               {formatCurrency(stats?.monthlyRevenue ?? 0)}
             </div>
-            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
-              Comisión de plataforma
+            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+              Total acumulado: {formatCurrency(stats?.totalRevenue ?? 0)}
+            </div>
+            <div className="mt-4 pt-4 flex items-center justify-between" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+              <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                {stats?.totalBookings ?? 0} reservas en total
+              </span>
+              <Link href="/admin/reportes"
+                className="text-xs font-semibold" style={{ color: '#35C493' }}>
+                Ver reportes →
+              </Link>
             </div>
           </div>
 
-          {[
-            { label: 'Gestionar espacios',  href: '/admin/espacios',      icon: Building2  },
-            { label: 'Ver reservas',         href: '/admin/reservas',      icon: CalendarDays },
-            { label: 'Usuarios',             href: '/admin/usuarios',      icon: Users },
-            { label: 'Reportes',             href: '/admin/reportes',      icon: TrendingUp },
-            { label: 'Configuración',        href: '/admin/configuracion', icon: Clock },
-          ].map(({ label, href, icon: Icon }) => (
-            <Link key={href} href={href}
-              className="flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all hover:bg-white group"
-              style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
-              <Icon size={15} style={{ color: 'var(--brand)' }} />
-              <span className="text-sm font-medium flex-1" style={{ color: '#374151' }}>{label}</span>
-              <ArrowRight size={13} className="text-slate-300 group-hover:text-slate-500 transition-colors" />
-            </Link>
-          ))}
+          {/* Quick nav */}
+          <div className="rounded-2xl overflow-hidden"
+            style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+            <div className="px-5 py-3" style={{ borderBottom: '1px solid #F0F2F5' }}>
+              <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: '#94A3B8' }}>
+                Acceso rápido
+              </h3>
+            </div>
+            {[
+              { label: 'Gestionar espacios',  href: '/admin/espacios',      icon: Building2,   badge: stats?.pendingSpaces ?? 0,   badgeColor: '#7C3AED' },
+              { label: 'Ver reservas',         href: '/admin/reservas',      icon: CalendarDays, badge: stats?.pendingBookings ?? 0, badgeColor: '#2563EB' },
+              { label: 'Payouts pendientes',   href: '/admin/payouts',       icon: Banknote,    badge: pendingPayouts.length,       badgeColor: '#F59E0B' },
+              { label: 'Gestionar usuarios',   href: '/admin/usuarios',      icon: UserCheck,   badge: 0, badgeColor: '' },
+              { label: 'Reportes y analytics', href: '/admin/reportes',      icon: BarChart3,   badge: 0, badgeColor: '' },
+              { label: 'Configuración',        href: '/admin/configuracion', icon: Star,        badge: 0, badgeColor: '' },
+            ].map(({ label, href, icon: Icon, badge, badgeColor }) => (
+              <Link key={href} href={href}
+                className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 transition-colors group"
+                style={{ borderBottom: '1px solid #F8FAFC' }}>
+                <Icon size={14} style={{ color: '#35C493' }} />
+                <span className="text-sm font-medium flex-1" style={{ color: '#374151' }}>{label}</span>
+                {badge > 0 ? (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center"
+                    style={{ background: badgeColor, color: '#fff' }}>
+                    {badge}
+                  </span>
+                ) : (
+                  <ArrowRight size={13} className="text-slate-300 group-hover:text-slate-500 transition-colors" />
+                )}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </div>

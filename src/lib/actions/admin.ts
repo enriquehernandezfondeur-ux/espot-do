@@ -2,12 +2,17 @@
 
 import { createClient } from '@/lib/supabase/server'
 
+const SUPERADMIN_EMAIL = 'enriquehernandezfondeur@gmail.com'
+
 async function requireAdmin() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
-  const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (data?.role !== 'admin') return null
+  // Acceso por email de superadmin o por rol admin en profiles
+  if (user.email !== SUPERADMIN_EMAIL) {
+    const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+    if (data?.role !== 'admin') return null
+  }
   return supabase
 }
 
@@ -279,6 +284,69 @@ export async function getAdminReports() {
   })
 
   return { topSpaces: topSpacesList, byCategory: catMap, monthly }
+}
+
+// ── PAYOUTS A PROPIETARIOS ───────────────────────────────
+export async function getAdminPayouts(filter?: 'pending' | 'paid' | 'all') {
+  const supabase = await requireAdmin()
+  if (!supabase) return []
+
+  let q = supabase.from('bookings')
+    .select(`
+      id, total_amount, platform_fee, payment_status, payout_status,
+      event_date, event_type, status, created_at,
+      spaces!space_id(
+        id, name, city,
+        profiles!host_id(id, full_name, email, phone)
+      ),
+      profiles!guest_id(full_name)
+    `)
+    .in('status', ['confirmed', 'completed'])
+    .order('event_date', { ascending: false })
+
+  if (!filter || filter === 'pending') q = q.eq('payout_status', 'pending')
+  if (filter === 'paid')   q = q.eq('payout_status', 'paid')
+
+  const { data } = await q
+  return data ?? []
+}
+
+export async function markPayoutPaid(bookingId: string) {
+  const supabase = await requireAdmin()
+  if (!supabase) return { error: 'No autorizado' }
+  const { error } = await supabase
+    .from('bookings')
+    .update({ payout_status: 'paid', updated_at: new Date().toISOString() })
+    .eq('id', bookingId)
+  return error ? { error: error.message } : { success: true }
+}
+
+export async function getHostBankAccount(hostId: string) {
+  const supabase = await requireAdmin()
+  if (!supabase) return null
+  const { data } = await supabase
+    .from('host_bank_accounts')
+    .select('*')
+    .eq('host_id', hostId)
+    .single()
+  return data ?? null
+}
+
+// ── ACTIVIDAD RECIENTE ───────────────────────────────────
+export async function getAdminActivity() {
+  const supabase = await requireAdmin()
+  if (!supabase) return []
+
+  const { data } = await supabase.from('bookings')
+    .select(`
+      id, status, total_amount, event_type, event_date, created_at, updated_at,
+      spaces!space_id(name),
+      profiles!guest_id(full_name)
+    `)
+    .order('updated_at', { ascending: false })
+    .limit(12)
+
+  return data ?? []
 }
 
 // ── CONFIG ────────────────────────────────────────────────
