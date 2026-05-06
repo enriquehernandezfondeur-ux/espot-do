@@ -1,12 +1,18 @@
 @import "tailwindcss";
 
-/* ── BRAND ────────────────────────────────────────── */
+/* ── BRAND — Paleta oficial Espot (Manual de Marca) ─
+   #03313C  Navy principal (color oscuro del logo)
+   #35C493  Verde marca
+   #D4FF58  Lima acento
+   ─────────────────────────────────────────────────── */
 :root {
   --brand:        #35C493;
   --brand-dark:   #28A87C;
   --brand-light:  #4DD9A7;
   --brand-dim:    rgba(53, 196, 147, 0.10);
   --brand-border: rgba(53, 196, 147, 0.25);
+  --brand-navy:   #03313C;
+  --brand-lime:   #D4FF58;
 }
 
 /* ── MARKETPLACE — LIGHT GREY THEME ──────────────── */
@@ -16,7 +22,7 @@
   --bg-card:      #FFFFFF;
   --bg-elevated:  #EEF2F0;
   --bg-hover:     #E8EDEB;
-  --text-primary:   #0F1A17;
+  --text-primary:   #03313C;
   --text-secondary: #527068;
   --text-muted:     #93B0A8;
   --border-subtle: #E4EDEA;
@@ -48,7 +54,7 @@
   --bg-card:      #FFFFFF;
   --bg-elevated:  #F3F4F6;
   --bg-hover:     #ECEEF1;
-  --text-primary:   #111827;
+  --text-primary:   #03313C;
   --text-secondary: #6B7280;
   --text-muted:     #9CA3AF;
   --border-subtle:  #E5E7EB;
@@ -65,7 +71,7 @@
 * { box-sizing: border-box; }
 
 body {
-  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-poppins), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
