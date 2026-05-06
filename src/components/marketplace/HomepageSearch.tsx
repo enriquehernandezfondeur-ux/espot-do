@@ -123,11 +123,18 @@ export default function HomepageSearch() {
     setPanel(p)
   }
 
-  // Cerrar con Escape
+  // Cerrar con Escape o al hacer scroll (el buscador no es sticky)
   useEffect(() => {
     function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setPanel(null) }
-    if (panel) document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
+    function onScroll() { setPanel(null) }
+    if (panel) {
+      document.addEventListener('keydown', onKey)
+      window.addEventListener('scroll', onScroll, { passive: true })
+    }
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      window.removeEventListener('scroll', onScroll)
+    }
   }, [panel])
 
   function pickActivity(key: string, label: string) {
