@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard, Building2, CalendarDays, ClipboardList,
   MessageSquareQuote, MessageCircle, BarChart3, Settings,
-  LogOut, User,
+  LogOut, User, ArrowRight,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -32,50 +32,37 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-56 min-h-screen flex flex-col shrink-0"
+    <aside className="w-60 min-h-screen flex flex-col shrink-0"
       style={{ background: 'var(--bg-surface)', borderRight: '1px solid var(--border-subtle)' }}>
 
       {/* Logo */}
       <div className="px-5 pt-5 pb-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         <Link href="/">
-          <img src="/logo-dark.svg" alt="espot.do" style={{ height: 28, width: 'auto' }} />
+          <img src="/logo-dark.svg" alt="espot.do" style={{ height: 26, width: 'auto' }} />
         </Link>
       </div>
 
-      {/* ── SWITCH DE MODO ── */}
-      <div className="px-3 py-3" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-        <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'var(--bg-elevated)' }}>
-          {/* Cambiar a Cliente */}
-          <Link href="/dashboard"
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors"
-            style={{ color: 'var(--text-muted)' }}>
-            <User size={12} /> Cliente
-          </Link>
-          {/* Modo activo: Negocio */}
-          <div className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
-            style={{ background: 'var(--bg-surface)', color: 'var(--brand)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-            <Building2 size={12} /> Negocio
+      {/* ── Indicador de modo actual ── */}
+      <div className="px-4 pt-4 pb-2">
+        <div className="flex items-center gap-3 px-3 py-3 rounded-2xl"
+          style={{ background: 'var(--brand-navy)', color: '#fff' }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: 'rgba(255,255,255,0.12)' }}>
+            <Building2 size={16} color="#fff" />
           </div>
-        </div>
-      </div>
-
-      {/* Indicador de modo */}
-      <div className="px-3 py-3">
-        <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl"
-          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-            style={{ background: 'var(--brand-dim)' }}>
-            <Building2 size={14} style={{ color: 'var(--brand)' }} />
+          <div className="flex-1 min-w-0">
+            <div className="text-xs font-bold text-white">Panel de Negocio</div>
+            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>Propietario</div>
           </div>
-          <div className="min-w-0">
-            <div className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>Panel de negocio</div>
-            <div className="text-xs" style={{ color: 'var(--text-muted)' }}>Modo propietario</div>
+          <div className="px-2 py-0.5 rounded-full text-xs font-bold shrink-0"
+            style={{ background: 'var(--brand)', color: '#fff' }}>
+            Negocio
           </div>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 pb-4 space-y-0.5">
+      <nav className="flex-1 px-3 py-2 space-y-0.5">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href || (href !== '/dashboard/host' && pathname.startsWith(href))
           return (
@@ -97,8 +84,29 @@ export default function Sidebar() {
         })}
       </nav>
 
+      {/* ── Cambiar a modo Cliente ── */}
+      <div className="px-4 pb-3" style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 16 }}>
+        <Link href="/dashboard"
+          className="flex items-center gap-3 w-full px-4 py-3.5 rounded-2xl transition-all"
+          style={{
+            background: 'var(--bg-elevated)',
+            border: '1.5px solid var(--border-medium)',
+            color: 'var(--text-secondary)',
+          }}>
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: 'var(--bg-hover)' }}>
+            <User size={15} style={{ color: 'var(--text-secondary)' }} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Panel de Cliente</div>
+            <div className="text-xs" style={{ color: 'var(--text-muted)' }}>Ver mis reservas</div>
+          </div>
+          <ArrowRight size={14} style={{ color: 'var(--text-muted)' }} />
+        </Link>
+      </div>
+
       {/* Logout */}
-      <div className="px-3 pb-5 pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+      <div className="px-3 pb-5">
         <button onClick={handleLogout}
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm w-full text-left transition-all"
           style={{ color: 'var(--text-muted)' }}
