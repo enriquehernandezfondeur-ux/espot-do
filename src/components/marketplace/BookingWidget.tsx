@@ -542,32 +542,35 @@ export default function BookingWidget({ space, onChat }: Props) {
                 ¿Qué tipo de evento es?
               </h3>
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                Esta información ayuda al propietario a preparar el espacio.
+                Ayuda al propietario a preparar el espacio para tu celebración.
               </p>
             </div>
 
-            {/* Pills de tipo de evento */}
-            <div className="flex flex-wrap gap-2">
+            {/* Grid 2 columnas */}
+            <div className="grid grid-cols-2 gap-2">
               {EVENT_TYPES.map(et => {
                 const isSelected = eventType === et
+                const isOtro = et === 'Otro'
                 return (
                   <button
                     key={et}
                     onClick={() => {
                       setEventType(et)
-                      if (et !== 'Otro') setCustomEventType('')
+                      if (!isOtro) setCustomEventType('')
                     }}
-                    className="px-4 py-2.5 rounded-xl text-sm font-medium transition-all"
+                    className="flex items-center gap-2.5 px-3.5 py-3 rounded-2xl text-left transition-all"
                     style={isSelected ? {
-                      background: 'var(--brand)',
+                      background: '#03313C',
                       color: '#fff',
-                      boxShadow: '0 2px 8px rgba(53,196,147,0.3)',
+                      boxShadow: '0 2px 12px rgba(3,49,60,0.2)',
                     } : {
-                      background: 'var(--bg-elevated)',
-                      color: 'var(--text-secondary)',
-                      border: '1px solid var(--border-subtle)',
+                      background: '#fff',
+                      color: 'var(--text-primary)',
+                      border: '1.5px solid var(--border-medium)',
                     }}>
-                    {et}
+                    <span className="w-2 h-2 rounded-full shrink-0"
+                      style={{ background: isSelected ? '#35C493' : 'var(--border-medium)' }} />
+                    <span className="text-sm font-medium leading-tight">{et}</span>
                   </button>
                 )
               })}
