@@ -11,6 +11,8 @@ import {
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 
+const FavoriteButton = dynamic(() => import('@/components/marketplace/FavoriteButton'), { ssr: false })
+
 const SpacesMap = dynamic(() => import('@/components/map/SpacesMap'), {
   ssr:     false,
   loading: () => (
@@ -781,6 +783,11 @@ function SpaceCard({
               <CatIcon size={36} className="text-white opacity-60" />
             </div>
           )}
+
+          {/* Favorito — esquina superior derecha */}
+          <div className="absolute top-2.5 right-2.5 z-10">
+            <FavoriteButton spaceId={space.id} size="sm" />
+          </div>
 
           {/* Badge disponibilidad o verificado */}
           {isAvailable !== undefined ? (

@@ -5,11 +5,13 @@ import Link from 'next/link'
 import {
   MapPin, Users, Shield, ChevronLeft, ChevronRight,
   Clock, CheckCircle, X, Music, Ban,
-  ArrowLeft, Share2, CreditCard, Lock, ChevronDown, Play, Images,
+  ArrowLeft, Share2, CreditCard, Lock, ChevronDown, Play, Images, MessageCircle,
 } from 'lucide-react'
 import { cn, formatCurrency, formatTime } from '@/lib/utils'
 import ChatDrawer from '@/components/marketplace/ChatDrawer'
 import BookingWidget from '@/components/marketplace/BookingWidget'
+import dynamic from 'next/dynamic'
+const FavoriteButton = dynamic(() => import('@/components/marketplace/FavoriteButton'), { ssr: false })
 
 const DAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 
@@ -193,18 +195,21 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
               </span>
             </div>
           </div>
-          <button
-            onClick={() => {
-              const url = window.location.href
-              if (navigator.share) {
-                navigator.share({ title: space.name, url })
-              } else {
-                navigator.clipboard.writeText(url).then(() => alert('Enlace copiado'))
-              }
-            }}
-            className="btn-outline hidden sm:flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl shrink-0">
-            <Share2 size={14} /> Compartir
-          </button>
+          <div className="hidden sm:flex items-center gap-2 shrink-0">
+            <FavoriteButton spaceId={space.id} size="md" />
+            <button
+              onClick={() => {
+                const url = window.location.href
+                if (navigator.share) {
+                  navigator.share({ title: space.name, url })
+                } else {
+                  navigator.clipboard.writeText(url).then(() => alert('Enlace copiado'))
+                }
+              }}
+              className="btn-outline flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl">
+              <Share2 size={14} /> Compartir
+            </button>
+          </div>
         </div>
 
         {/* ── Galería de medios ── */}
@@ -628,6 +633,90 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                     <div>
                       <div className="font-semibold text-sm mb-0.5" style={{ color: 'var(--text-primary)' }}>Forma de pago</div>
                       <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{termLabel[paymentTerms.term_type]}</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Habla con el propietario ── */}
+                {host && (
+                  <div className="rounded-2xl overflow-hidden"
+                    style={{ border: '1px solid var(--border-subtle)', boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}>
+
+                    {/* Header */}
+                    <div className="flex items-center gap-3.5 px-5 py-4"
+                      style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
+                      <div className="relative shrink-0">
+                        <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-white text-base font-bold"
+                          style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-dark))' }}>
+                          {host.full_name?.charAt(0).toUpperCase() ?? '?'}
+                        </div>
+                        <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white bg-green-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold text-sm leading-tight" style={{ color: 'var(--text-primary)' }}>
+                          {host.full_name}
+                        </div>
+                        <div className="text-xs mt-0.5 font-medium" style={{ color: 'var(--brand)' }}>
+                          Propietario · Responde en menos de 24h
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowChat(true)}
+                        className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl transition-all hover:opacity-90"
+                        style={{ background: '#03313C', color: '#fff' }}>
+                        <MessageCircle size={13} /> Mensaje
+                      </button>
+                    </div>
+
+                    {/* Body */}
+                    <div className="px-5 pt-4 pb-5" style={{ background: '#fff' }}>
+                      <h3 className="font-bold text-base mb-1" style={{ color: 'var(--text-primary)' }}>
+                        ¿Tienes preguntas sobre este Espot?
+                      </h3>
+                      <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                        Habla directamente con {host.full_name?.split(' ')[0]} antes de reservar.
+                        Pregunta lo que necesites saber.
+                      </p>
+
+                      {/* Preguntas rápidas */}
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {[
+                          '¿Hay disponibilidad para mi fecha?',
+                          '¿Permiten decoración externa?',
+                          '¿Cuál es el consumo mínimo?',
+                          '¿Hay estacionamiento?',
+                          '¿A qué hora puedo montar?',
+                          '¿Tienen música en vivo?',
+                        ].map(q => (
+                          <button
+                            key={q}
+                            onClick={() => setShowChat(true)}
+                            className="text-xs px-3 py-1.5 rounded-full transition-all hover:border-[#35C493] hover:text-[#35C493]"
+                            style={{
+                              background: 'var(--bg-elevated)',
+                              color: 'var(--text-secondary)',
+                              border: '1px solid var(--border-subtle)',
+                            }}>
+                            {q}
+                          </button>
+                        ))}
+                      </div>
+
+                      <button
+                        onClick={() => setShowChat(true)}
+                        className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl font-bold text-sm transition-all hover:opacity-90 active:scale-[0.99]"
+                        style={{
+                          background: '#03313C',
+                          color: '#fff',
+                          boxShadow: '0 4px 16px rgba(3,49,60,0.18)',
+                        }}>
+                        <MessageCircle size={17} />
+                        Enviar mensaje a {host.full_name?.split(' ')[0]}
+                      </button>
+
+                      <p className="text-xs text-center mt-2.5" style={{ color: 'var(--text-muted)' }}>
+                        Sin compromiso · Respuesta en menos de 24 horas
+                      </p>
                     </div>
                   </div>
                 )}
