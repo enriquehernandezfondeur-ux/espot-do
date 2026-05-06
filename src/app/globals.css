@@ -114,6 +114,43 @@ body {
   box-shadow: 0 0 0 3px var(--brand-dim);
 }
 
+/* ─────────────────────────────────────────────────────
+   HOST-THEME: Overrides para clases dark del wizard
+   Usa attribute selectors — no requiere editar el wizard
+   ───────────────────────────────────────────────────── */
+
+/* Fondos dark → claros */
+.host-theme [class*="bg-white/5"]  { background-color: var(--bg-elevated) !important; }
+.host-theme [class*="bg-white/10"] { background-color: var(--bg-hover)    !important; }
+
+/* Bordes dark → visibles */
+.host-theme [class*="border-white/10"],
+.host-theme [class*="border-white/20"] { border-color: var(--border-medium) !important; }
+
+/* Texto dentro de contenedores dark → oscuro */
+.host-theme [class*="bg-white/5"] [class*="text-white"],
+.host-theme [class*="bg-white/10"] [class*="text-white"] { color: var(--text-primary) !important; }
+
+/* Elemento con ambas clases (botones "Editar" etc.) */
+.host-theme [class*="bg-white/5"][class*="text-white"],
+.host-theme [class*="bg-white/10"][class*="text-white"] { color: var(--text-secondary) !important; }
+
+/* Headings con text-white → siempre visibles */
+.host-theme h1[class*="text-white"],
+.host-theme h2[class*="text-white"],
+.host-theme h3[class*="text-white"],
+.host-theme h4[class*="text-white"] { color: var(--text-primary) !important; }
+
+/* Inputs y textareas con text-white → texto oscuro */
+.host-theme input[class*="text-white"],
+.host-theme textarea[class*="text-white"],
+.host-theme select[class*="text-white"] { color: var(--text-primary) !important; }
+
+/* Placeholder */
+.host-theme [class*="placeholder-slate"]::placeholder { color: var(--text-muted) !important; }
+.host-theme input::placeholder,
+.host-theme textarea::placeholder { color: var(--text-muted) !important; }
+
 /* ── SCROLLBAR ───────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
