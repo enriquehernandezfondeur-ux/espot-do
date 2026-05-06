@@ -1217,7 +1217,7 @@ export default function EspacioPage() {
             <div className="space-y-3">
               {paymentTermOptions.map((option, i) => {
                 const isSel = paymentTerm === option.value
-                const isRec = i === 0 // Primero = Recomendado
+                const isRec = i === 0
                 return (
                   <button
                     key={option.value}
@@ -1228,19 +1228,19 @@ export default function EspacioPage() {
                       border: '2px solid #03313C',
                       boxShadow: '0 4px 16px rgba(3,49,60,0.15)',
                     } : {
-                      background: '#fff',
-                      border: '1.5px solid var(--border-medium)',
+                      background: '#ffffff',
+                      border: '1.5px solid #D1D5DB',
                     }}>
                     <div className="p-4">
                       <div className="flex items-start justify-between gap-3 mb-1.5">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-bold text-sm"
-                            style={{ color: isSel ? '#fff' : 'var(--text-primary)' }}>
+                            style={{ color: isSel ? '#ffffff' : '#03313C' }}>
                             {option.label}
                           </span>
                           {isRec && (
                             <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
-                              style={{ background: isSel ? 'rgba(53,196,147,0.25)' : 'rgba(53,196,147,0.1)', color: '#35C493' }}>
+                              style={{ background: 'rgba(53,196,147,0.15)', color: '#35C493' }}>
                               Recomendado
                             </span>
                           )}
@@ -1253,11 +1253,11 @@ export default function EspacioPage() {
                         )}
                       </div>
                       <p className="text-xs leading-relaxed mb-2"
-                        style={{ color: isSel ? 'rgba(255,255,255,0.65)' : 'var(--text-secondary)' }}>
+                        style={{ color: isSel ? 'rgba(255,255,255,0.7)' : '#6B7280' }}>
                         {option.desc}
                       </p>
-                      <p className="text-xs font-medium"
-                        style={{ color: isSel ? 'rgba(255,255,255,0.4)' : 'var(--text-muted)' }}>
+                      <p className="text-xs font-semibold"
+                        style={{ color: isSel ? 'rgba(255,255,255,0.45)' : '#9CA3AF' }}>
                         Ideal: {option.ideal}
                       </p>
                     </div>
