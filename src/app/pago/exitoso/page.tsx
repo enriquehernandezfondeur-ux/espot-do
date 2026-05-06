@@ -53,7 +53,11 @@ function ExitoContent() {
               </div>
               <div className="flex items-center gap-2">
                 <span style={{ color: '#35C493' }}>💰</span>
-                Total pagado: <span className="text-white font-bold">{formatCurrency(Number(booking.total_amount))}</span>
+                Depósito pagado (10%): <span className="text-white font-bold">{formatCurrency(Number(booking.platform_fee))}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span style={{ color: 'rgba(255,255,255,0.4)' }}>📋</span>
+                <span style={{ color: 'rgba(255,255,255,0.5)' }}>Resta pagar en el espacio: {formatCurrency(Number(booking.total_amount) - Number(booking.platform_fee))}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span style={{ color: '#35C493' }}>🆔</span>

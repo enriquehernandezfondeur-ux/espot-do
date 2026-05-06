@@ -239,7 +239,7 @@ export async function acceptBooking(bookingId: string) {
           <p style="color:#16A34A;font-weight:bold;">
             Paga el depósito del 10% para asegurar tu fecha.
           </p>`,
-        cta: { text: 'Completar pago', url: `${SITE}/dashboard/reservas` },
+        cta: { text: 'Completar pago ahora', url: `${SITE}/pago/${bookingId}` },
       }),
     }),
     // WhatsApp al cliente

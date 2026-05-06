@@ -69,17 +69,29 @@ export default function TimePicker({
   afterValue, minMinutesAfter, maxMinutesAfter,
   allowedRange, disabled,
 }: Props) {
-  const [open, setOpen]   = useState(false)
-  const ref               = useRef<HTMLDivElement>(null)
-  const listRef           = useRef<HTMLDivElement>(null)
+  const [open,    setOpen]    = useState(false)
+  const [dropPos, setDropPos] = useState({ top: 0, left: 0, width: 0 })
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const panelRef   = useRef<HTMLDivElement>(null)
+  const listRef    = useRef<HTMLDivElement>(null)
 
+  // Click-outside — cierra si el click no está ni en el trigger ni en el panel flotante
   useEffect(() => {
     function h(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+      const inWrapper = wrapperRef.current?.contains(e.target as Node)
+      const inPanel   = panelRef.current?.contains(e.target as Node)
+      if (!inWrapper && !inPanel) setOpen(false)
     }
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [])
+
+  // Escape key
+  useEffect(() => {
+    function h(e: KeyboardEvent) { if (e.key === 'Escape') setOpen(false) }
+    if (open) document.addEventListener('keydown', h)
+    return () => document.removeEventListener('keydown', h)
+  }, [open])
 
   // Auto-scroll al elemento seleccionado
   useEffect(() => {
@@ -90,6 +102,22 @@ export default function TimePicker({
       }, 60)
     }
   }, [open, value])
+
+  function toggleOpen() {
+    if (disabled) return
+    if (!open && wrapperRef.current) {
+      const r = wrapperRef.current.getBoundingClientRect()
+      // Ajustar si el panel se saldría por la derecha
+      const panelW = r.width
+      const left   = Math.min(r.left, window.innerWidth - panelW - 8)
+      // Ajustar si no hay espacio abajo: abre hacia arriba
+      const spaceBelow = window.innerHeight - r.bottom
+      const panelH     = 320
+      const top = spaceBelow >= panelH ? r.bottom + 6 : r.top - panelH - 6
+      setDropPos({ top, left, width: r.width })
+    }
+    setOpen(o => !o)
+  }
 
   // Filtrar slots disponibles
   const available = ALL_SLOTS.filter(s => {
@@ -121,13 +149,13 @@ export default function TimePicker({
   const label = ALL_SLOTS.find(s => s.v === value)?.l ?? null
 
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
+    <div ref={wrapperRef} style={{ position: 'relative' }}>
 
       {/* ── Trigger ── */}
       <button
         type="button"
         disabled={disabled}
-        onClick={() => !disabled && setOpen(o => !o)}
+        onClick={toggleOpen}
         style={{
           width:       '100%',
           display:     'flex',
@@ -153,7 +181,7 @@ export default function TimePicker({
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
-            fontSize:   11, fontWeight: 600, textTransform: 'uppercase',
+            fontSize: 11, fontWeight: 600, textTransform: 'uppercase',
             letterSpacing: '0.07em', color: '#9CA3AF', marginBottom: 2,
           }}>
             {placeholder.includes('inicio') ? 'Hora de inicio' : placeholder.includes('salida') ? 'Hora de salida' : 'Hora'}
@@ -174,21 +202,23 @@ export default function TimePicker({
         />
       </button>
 
-      {/* ── Dropdown ── */}
+      {/* ── Dropdown — position:fixed para escapar overflow:hidden del parent ── */}
       {open && (
-        <div style={{
-          position:    'absolute',
-          top:         'calc(100% + 6px)',
-          left:         0,
-          right:        0,
-          background:  '#fff',
-          border:      '1px solid #E5E7EB',
-          borderRadius: 16,
-          boxShadow:   '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)',
-          zIndex:       9999,
-          overflow:    'hidden',
-          animation:   'tpIn 0.14s ease-out',
-        }}>
+        <div
+          ref={panelRef}
+          style={{
+            position:    'fixed',
+            top:          dropPos.top,
+            left:         dropPos.left,
+            width:        dropPos.width,
+            background:  '#fff',
+            border:      '1px solid #E5E7EB',
+            borderRadius: 16,
+            boxShadow:   '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)',
+            zIndex:       9999,
+            overflow:    'hidden',
+            animation:   'tpIn 0.14s ease-out',
+          }}>
           <style>{`@keyframes tpIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}`}</style>
 
           {available.length === 0 ? (
@@ -206,10 +236,9 @@ export default function TimePicker({
               </p>
             </div>
           ) : (
-            <div ref={listRef} style={{ maxHeight: 280, overflowY: 'auto' }}>
+            <div ref={listRef} style={{ maxHeight: 280, overflowY: 'auto', overscrollBehavior: 'contain' }}>
               {Object.entries(groups).map(([group, slots]) => (
                 <div key={group}>
-                  {/* Cabecera de grupo */}
                   <div style={{
                     padding:       '8px 16px 6px',
                     fontSize:      10,
@@ -225,7 +254,6 @@ export default function TimePicker({
                     {group}
                   </div>
 
-                  {/* Slots */}
                   {slots.map(slot => {
                     const isSel = slot.v === value
                     return (
@@ -235,16 +263,16 @@ export default function TimePicker({
                         type="button"
                         onClick={() => { onChange(slot.v); setOpen(false) }}
                         style={{
-                          width:       '100%',
-                          display:     'flex',
-                          alignItems:  'center',
+                          width:          '100%',
+                          display:        'flex',
+                          alignItems:     'center',
                           justifyContent: 'space-between',
-                          padding:     '10px 16px',
-                          border:      'none',
-                          background:  isSel ? 'rgba(53,196,147,0.08)' : 'transparent',
-                          cursor:      'pointer',
-                          transition:  'background 0.1s',
-                          borderLeft:  isSel ? '3px solid #35C493' : '3px solid transparent',
+                          padding:        '10px 16px',
+                          border:         'none',
+                          background:     isSel ? 'rgba(53,196,147,0.08)' : 'transparent',
+                          cursor:         'pointer',
+                          transition:     'background 0.1s',
+                          borderLeft:     isSel ? '3px solid #35C493' : '3px solid transparent',
                         }}
                         onMouseEnter={e => { if (!isSel) (e.currentTarget as HTMLElement).style.background = '#F9FAFB' }}
                         onMouseLeave={e => { if (!isSel) (e.currentTarget as HTMLElement).style.background = 'transparent' }}>

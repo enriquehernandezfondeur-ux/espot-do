@@ -196,7 +196,7 @@ export default function MisReservasPage() {
                       onClick={() => handlePay(bk.id)}
                       className="w-full flex items-center justify-center gap-1.5 text-sm font-bold px-4 py-3 rounded-xl transition-all"
                       style={{ background: '#2563EB', color: '#fff', boxShadow: '0 2px 8px rgba(37,99,235,0.3)' }}>
-                      <CreditCard size={15} /> Pagar ahora — {formatCurrency(Number(bk.total_amount))}
+                      <CreditCard size={15} /> Pagar depósito — {formatCurrency(Number(bk.platform_fee))}
                     </button>
                   </div>
                 )}

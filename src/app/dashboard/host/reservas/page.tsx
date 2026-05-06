@@ -122,7 +122,7 @@ export default function HostReservasPage() {
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-5 items-start">
+      <div className="flex flex-col lg:flex-row gap-5 items-start">
         {/* Lista */}
         <div className="flex-1 min-w-0 rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
           {filtered.length === 0 ? (
@@ -216,7 +216,7 @@ export default function HostReservasPage() {
 
         {/* Panel de detalle */}
         {selected && (
-          <div className="w-72 shrink-0 rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+          <div className="w-full lg:w-72 shrink-0 rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
             <div className="px-5 py-4 flex justify-between" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
               <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Detalle</span>
               <button onClick={() => { setSelected(null); setShowRejectForm(false) }} style={{ color: 'var(--text-muted)' }}>✕</button>

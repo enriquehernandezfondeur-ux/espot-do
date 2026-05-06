@@ -191,7 +191,16 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
               </span>
             </div>
           </div>
-          <button className="btn-outline hidden sm:flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl shrink-0">
+          <button
+            onClick={() => {
+              const url = window.location.href
+              if (navigator.share) {
+                navigator.share({ title: space.name, url })
+              } else {
+                navigator.clipboard.writeText(url).then(() => alert('Enlace copiado'))
+              }
+            }}
+            className="btn-outline hidden sm:flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl shrink-0">
             <Share2 size={14} /> Compartir
           </button>
         </div>

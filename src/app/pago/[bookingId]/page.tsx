@@ -186,7 +186,7 @@ export default function PagoPage({ params }: { params: Promise<{ bookingId: stri
       {/* Top bar */}
       <div className="sticky top-0 z-50 px-4 md:px-6 py-3.5 flex items-center justify-between"
         style={{ background: '#fff', borderBottom: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-        <Link href={`/espacios/${booking.spaces?.slug ?? ''}`}
+        <Link href={booking.spaces?.slug ? `/espacios/${booking.spaces.slug}` : '/buscar'}
           className="flex items-center gap-1.5 text-sm font-medium"
           style={{ color: '#6B7280' }}>
           <ChevronLeft size={16} />
