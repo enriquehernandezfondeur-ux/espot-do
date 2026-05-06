@@ -12,7 +12,32 @@ import { buildPaymentSchedule, DEFAULT_PLANS, type PaymentPlanConfig } from '@/l
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import DatePicker from '@/components/ui/DatePicker'
-import TimePicker from '@/components/ui/TimePicker'
+import { hourToNum } from '@/components/ui/TimePicker'
+
+// Slots de media hora compartidos con TimePicker
+const TIME_SLOTS = [
+  { v: '06:00', l: '6:00 AM' }, { v: '06:30', l: '6:30 AM' },
+  { v: '07:00', l: '7:00 AM' }, { v: '07:30', l: '7:30 AM' },
+  { v: '08:00', l: '8:00 AM' }, { v: '08:30', l: '8:30 AM' },
+  { v: '09:00', l: '9:00 AM' }, { v: '09:30', l: '9:30 AM' },
+  { v: '10:00', l: '10:00 AM' },{ v: '10:30', l: '10:30 AM' },
+  { v: '11:00', l: '11:00 AM' },{ v: '11:30', l: '11:30 AM' },
+  { v: '12:00', l: '12:00 PM' },{ v: '12:30', l: '12:30 PM' },
+  { v: '13:00', l: '1:00 PM' }, { v: '13:30', l: '1:30 PM' },
+  { v: '14:00', l: '2:00 PM' }, { v: '14:30', l: '2:30 PM' },
+  { v: '15:00', l: '3:00 PM' }, { v: '15:30', l: '3:30 PM' },
+  { v: '16:00', l: '4:00 PM' }, { v: '16:30', l: '4:30 PM' },
+  { v: '17:00', l: '5:00 PM' }, { v: '17:30', l: '5:30 PM' },
+  { v: '18:00', l: '6:00 PM' }, { v: '18:30', l: '6:30 PM' },
+  { v: '19:00', l: '7:00 PM' }, { v: '19:30', l: '7:30 PM' },
+  { v: '20:00', l: '8:00 PM' }, { v: '20:30', l: '8:30 PM' },
+  { v: '21:00', l: '9:00 PM' }, { v: '21:30', l: '9:30 PM' },
+  { v: '22:00', l: '10:00 PM' },{ v: '22:30', l: '10:30 PM' },
+  { v: '23:00', l: '11:00 PM' },{ v: '23:30', l: '11:30 PM' },
+  { v: '00:00', l: '12:00 AM' },{ v: '00:30', l: '12:30 AM' },
+  { v: '01:00', l: '1:00 AM' }, { v: '01:30', l: '1:30 AM' },
+  { v: '02:00', l: '2:00 AM' }, { v: '03:00', l: '3:00 AM' },
+]
 
 // ── Configuración de tipos de evento ──────────────────────
 const EVENT_TYPES = [
@@ -429,30 +454,78 @@ export default function BookingWidget({ space, onChat }: Props) {
                     </span>
                   </div>
                 )}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
+                {/* Selector de horas — card integrada estilo Airbnb */}
+                <div className="rounded-2xl overflow-hidden"
+                  style={{ border: '1.5px solid var(--border-medium)', background: '#fff' }}>
+
+                  {/* Hora de inicio */}
+                  <div className="px-4 py-3.5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                     <div className="text-xs font-semibold uppercase tracking-widest mb-2"
-                      style={{ color: 'var(--text-muted)' }}>Hora de inicio</div>
-                    <TimePicker
-                      value={startTime}
-                      onChange={v => { setStartTime(v); setEndTime('') }}
-                      placeholder="Selecciona hora de inicio"
-                      allowedRange={allowedTimeRange}
-                    />
+                      style={{ color: 'var(--text-muted)' }}>
+                      Hora de inicio
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <Clock size={15} style={{ color: startTime ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
+                      <select
+                        value={startTime}
+                        onChange={e => { setStartTime(e.target.value); setEndTime('') }}
+                        className="flex-1 bg-transparent border-none text-sm font-semibold focus:outline-none cursor-pointer"
+                        style={{ color: startTime ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                        <option value="">Selecciona hora de inicio</option>
+                        {TIME_SLOTS
+                          .filter(s => {
+                            if (!allowedTimeRange) return true
+                            if (allowedTimeRange === null) return false
+                            const n = hourToNum(s.v)
+                            const sn = hourToNum(allowedTimeRange.start)
+                            const en = (allowedTimeRange.end === '00:00' || allowedTimeRange.end === '24:00') ? 24 : hourToNum(allowedTimeRange.end)
+                            return n >= sn && n < en
+                          })
+                          .map(s => <option key={s.v} value={s.v}>{s.l}</option>)
+                        }
+                      </select>
+                    </div>
                   </div>
-                  <div>
+
+                  {/* Hora de salida */}
+                  <div className="px-4 py-3.5">
                     <div className="text-xs font-semibold uppercase tracking-widest mb-2"
-                      style={{ color: 'var(--text-muted)' }}>Hora de salida</div>
-                    <TimePicker
-                      value={endTime}
-                      onChange={setEndTime}
-                      placeholder={startTime ? 'Selecciona hora de salida' : 'Primero elige inicio'}
-                      disabled={!startTime}
-                      afterValue={startTime || undefined}
-                      minMinutesAfter={isHourly && pricing.min_hours ? pricing.min_hours * 60 : undefined}
-                      maxMinutesAfter={isHourly && pricing.max_hours ? pricing.max_hours * 60 : undefined}
-                      allowedRange={allowedTimeRange}
-                    />
+                      style={{ color: 'var(--text-muted)' }}>
+                      Hora de salida
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <Clock size={15} style={{ color: endTime ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
+                      <select
+                        value={endTime}
+                        onChange={e => setEndTime(e.target.value)}
+                        disabled={!startTime}
+                        className="flex-1 bg-transparent border-none text-sm font-semibold focus:outline-none"
+                        style={{
+                          color:  endTime ? 'var(--text-primary)' : 'var(--text-muted)',
+                          cursor: startTime ? 'pointer' : 'not-allowed',
+                          opacity: startTime ? 1 : 0.5,
+                        }}>
+                        <option value="">{startTime ? 'Selecciona hora de salida' : 'Primero elige la hora de inicio'}</option>
+                        {startTime && TIME_SLOTS
+                          .filter(s => {
+                            const diff = (hourToNum(s.v) * 60) - (hourToNum(startTime) * 60 + parseInt(startTime.split(':')[1] ?? '0'))
+                            if (diff <= 0) return false
+                            const minM = isHourly && pricing.min_hours ? pricing.min_hours * 60 : 30
+                            const maxM = isHourly && pricing.max_hours ? pricing.max_hours * 60 : 9999
+                            const realDiff = hourToNum(s.v) * 60 + parseInt(s.v.split(':')[1]) - (hourToNum(startTime) * 60 + parseInt(startTime.split(':')[1]))
+                            if (realDiff < minM) return false
+                            if (realDiff > maxM) return false
+                            if (allowedTimeRange && allowedTimeRange !== null) {
+                              const n = hourToNum(s.v)
+                              const en = (allowedTimeRange.end === '00:00' || allowedTimeRange.end === '24:00') ? 24 : hourToNum(allowedTimeRange.end)
+                              if (n > en) return false
+                            }
+                            return true
+                          })
+                          .map(s => <option key={s.v} value={s.v}>{s.l}</option>)
+                        }
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>
