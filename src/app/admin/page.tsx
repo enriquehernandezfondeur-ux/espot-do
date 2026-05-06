@@ -149,7 +149,7 @@ export default async function AdminDashboard() {
                 Este mes
               </span>
             </div>
-            <div className="text-3xl font-bold text-white mb-1" style={{ letterSpacing: '-0.02em' }}>
+            <div className="text-3xl font-bold text-gray-900 mb-1" style={{ letterSpacing: '-0.02em' }}>
               {formatCurrency(stats?.monthlyRevenue ?? 0)}
             </div>
             <div className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
