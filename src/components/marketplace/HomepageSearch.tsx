@@ -123,27 +123,11 @@ export default function HomepageSearch() {
     setPanel(p)
   }
 
-  // Cerrar desktop panels al click afuera
+  // Cerrar con Escape
   useEffect(() => {
-    if (!panel) return
-    function onDown(e: MouseEvent) {
-      const t = e.target as Node
-      if (
-        actRef.current?.contains(t) ||
-        cityRef.current?.contains(t) ||
-        dateRef.current?.contains(t)
-      ) return
-      const panels = document.querySelectorAll('[data-ep-panel]')
-      for (const el of panels) if (el.contains(t)) return
-      setPanel(null)
-    }
     function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setPanel(null) }
-    document.addEventListener('mousedown', onDown)
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('mousedown', onDown)
-      document.removeEventListener('keydown', onKey)
-    }
+    if (panel) document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
   }, [panel])
 
   function pickActivity(key: string, label: string) {
@@ -411,9 +395,14 @@ export default function HomepageSearch() {
           DESKTOP: Dropdowns flotantes
           ─────────────────────────────────────────────────── */}
 
+      {/* Backdrop compartido — cierra panel sin importar scrollbar */}
+      {!isMobile && panel && (
+        <div className="fixed inset-0 z-[9997]" onClick={() => setPanel(null)} />
+      )}
+
       {/* Actividad */}
       {!isMobile && panel === 'activity' && filteredActivities.length > 0 && (
-        <div data-ep-panel style={{ ...dropBase, width: 260, animation: 'dropIn 0.15s ease-out' }}>
+        <div data-ep-panel style={{ ...dropBase, width: 260, zIndex: 9998, animation: 'dropIn 0.15s ease-out' }}>
           <style>{`@keyframes dropIn { from { opacity:0; transform:translateY(-5px) } to { opacity:1; transform:translateY(0) } }`}</style>
           <div className="py-1.5" style={{ maxHeight: 280, overflowY: 'auto' }}>
             {filteredActivities.map(act => (
@@ -432,7 +421,7 @@ export default function HomepageSearch() {
 
       {/* Ciudad */}
       {!isMobile && panel === 'city' && filteredSectors.length > 0 && (
-        <div data-ep-panel style={{ ...dropBase, width: 280, animation: 'dropIn 0.15s ease-out' }}>
+        <div data-ep-panel style={{ ...dropBase, width: 280, zIndex: 9998, animation: 'dropIn 0.15s ease-out' }}>
           <div className="py-1.5" style={{ maxHeight: 260, overflowY: 'auto' }}>
             {filteredSectors.map(s => (
               <button key={s} type="button" onClick={() => pickCity(s)}
@@ -450,7 +439,7 @@ export default function HomepageSearch() {
 
       {/* Fecha */}
       {!isMobile && panel === 'date' && (
-        <div data-ep-panel style={{ ...dropBase, width: 308, animation: 'dropIn 0.15s ease-out' }}>
+        <div data-ep-panel style={{ ...dropBase, width: 308, zIndex: 9998, animation: 'dropIn 0.15s ease-out' }}>
           <CalendarContent />
         </div>
       )}
