@@ -8,6 +8,7 @@ import {
   ArrowLeft, Share2, CreditCard, Lock, ChevronDown,
 } from 'lucide-react'
 import { cn, formatCurrency, formatTime } from '@/lib/utils'
+import { Play } from 'lucide-react'
 import ChatDrawer from '@/components/marketplace/ChatDrawer'
 import BookingWidget from '@/components/marketplace/BookingWidget'
 
@@ -254,6 +255,33 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
             </div>
           )}
         </div>
+
+        {/* ── Video del espacio (opcional) ── */}
+        {space.video_url && (
+          <div className="mb-6 md:mb-10">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+                style={{ background: 'rgba(53,196,147,0.1)' }}>
+                <Play size={14} style={{ color: 'var(--brand)' }} />
+              </div>
+              <h2 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
+                Video del espacio
+              </h2>
+            </div>
+            <div className="rounded-2xl md:rounded-3xl overflow-hidden"
+              style={{ aspectRatio: '16/9', background: '#000', border: '1px solid var(--border-subtle)' }}>
+              <video
+                src={space.video_url}
+                controls
+                className="w-full h-full object-contain"
+                poster={images[0]?.url}
+                preload="metadata"
+              >
+                Tu navegador no soporta la reproducción de video.
+              </video>
+            </div>
+          </div>
+        )}
 
         {/* Main grid — widget primero en móvil (order-1), contenido segundo (order-2) */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6 lg:gap-12 items-start">

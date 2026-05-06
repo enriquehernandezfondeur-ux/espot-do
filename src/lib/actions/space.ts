@@ -24,6 +24,7 @@ export interface SaveSpacePayload {
   sector: string
   lat?: string
   lng?: string
+  videoUrl?: string
   capacityMin: string
   capacityMax: string
   primaryActivity?: string
@@ -119,6 +120,7 @@ export async function saveSpace(payload: SaveSpacePayload) {
       sector: payload.sector,
       lat: payload.lat ? num(payload.lat) : null,
       lng: payload.lng ? num(payload.lng) : null,
+      video_url: payload.videoUrl || null,
       primary_activity:     payload.primaryActivity || null,
       secondary_activities: payload.secondaryActivities ?? [],
       is_published: false,
@@ -312,6 +314,7 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
     sector: payload.sector,
     lat: payload.lat ? num(payload.lat) : null,
     lng: payload.lng ? num(payload.lng) : null,
+    video_url: payload.videoUrl !== undefined ? (payload.videoUrl || null) : undefined,
     primary_activity:     payload.primaryActivity || null,
     secondary_activities: payload.secondaryActivities ?? [],
   }).eq('id', spaceId)

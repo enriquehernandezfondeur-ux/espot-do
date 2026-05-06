@@ -8,7 +8,8 @@ import PhotoUploader from '@/components/dashboard/PhotoUploader'
 import WeeklySchedule from '@/components/dashboard/WeeklySchedule'
 import ActivityPicker from '@/components/dashboard/ActivityPicker'
 import dynamic from 'next/dynamic'
-const LocationPicker = dynamic(() => import('@/components/dashboard/LocationPicker'), { ssr: false })
+const LocationPicker  = dynamic(() => import('@/components/dashboard/LocationPicker'),  { ssr: false })
+const VideoUploader   = dynamic(() => import('@/components/dashboard/VideoUploader'),   { ssr: false })
 import type { BaseActivity } from '@/lib/activities'
 import type { SpaceCategory, PricingType, PaymentTermType } from '@/types'
 
@@ -130,6 +131,7 @@ export default function EspacioPage() {
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
   const [pendingPhotos, setPendingPhotos] = useState<{ url: string; path: string; isCover: boolean }[]>([])
+  const [videoUrl,      setVideoUrl]      = useState('')
   const [editingSpaceId, setEditingSpaceId] = useState<string | null>(null)
 
   // Step 1 - Basic info
@@ -220,7 +222,7 @@ export default function EspacioPage() {
     setSaveError('')
 
     const payload = {
-      name, category, description, address, sector, lat, lng, capacityMin, capacityMax,
+      name, category, description, address, sector, lat, lng, capacityMin, capacityMax, videoUrl,
       primaryActivity, secondaryActivities,
       pricingType: pricingType as PricingType,
       hourlyPrice, minHours, maxHours, minConsumption, sessionHours,
@@ -288,6 +290,7 @@ export default function EspacioPage() {
     setSector(space.sector ?? '')
     setLat(space.lat ? String(space.lat) : '')
     setLng(space.lng ? String(space.lng) : '')
+    setVideoUrl(space.video_url ?? '')
     setCapacityMin(String(space.capacity_min ?? ''))
     setCapacityMax(String(space.capacity_max ?? ''))
     // Pricing
@@ -669,8 +672,31 @@ export default function EspacioPage() {
 
             {/* Photo upload */}
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Fotos del espacio</label>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                Fotos del espacio
+              </label>
               <PhotoUploader onChange={photos => setPendingPhotos(photos)} />
+            </div>
+
+            {/* Video opcional */}
+            <div>
+              <div className="flex items-center gap-2 mb-1.5">
+                <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                  Video del espacio
+                </label>
+                <span className="text-xs px-2 py-0.5 rounded-full font-medium"
+                  style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
+                  Opcional
+                </span>
+              </div>
+              <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
+                Un video corto muestra mejor el ambiente de tu espacio. No es obligatorio.
+              </p>
+              <VideoUploader
+                initialUrl={videoUrl}
+                onChange={(url) => setVideoUrl(url)}
+                onRemove={() => setVideoUrl('')}
+              />
             </div>
           </div>
         )}
