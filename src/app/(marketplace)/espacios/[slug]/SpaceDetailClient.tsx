@@ -70,10 +70,11 @@ const termLabel: Record<string, string> = {
 }
 
 export default function SpaceDetailClient({ space, similarSpaces = [], initialDate }: { space: any; similarSpaces?: any[]; initialDate?: string }) {
-  const [photoIdx, setPhotoIdx] = useState(0)
-  const [showChat, setShowChat] = useState(false)
-  const [activeTab, setActiveTab] = useState<'info' | 'addons' | 'rules'>('info')
-  const [showMobileWidget, setShowMobileWidget] = useState(false)
+  const [photoIdx,        setPhotoIdx]        = useState(0)
+  const [showChat,        setShowChat]        = useState(false)
+  const [activeTab,       setActiveTab]       = useState<'info' | 'addons' | 'rules'>('info')
+  const [showMobileWidget,setShowMobileWidget]= useState(false)
+  const [showVideoModal,  setShowVideoModal]  = useState(false)
 
   const images      = space.space_images ?? []
   const pricing     = space.space_pricing?.find((p: any) => p.is_active) ?? space.space_pricing?.[0]
@@ -242,9 +243,10 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
               </>
             )}
           </div>
-          {images.length > 1 && (
+          {/* Tira de thumbnails — fotos + video thumbnail si existe */}
+          {(images.length > 1 || (images.length > 0 && space.video_url)) && (
             <div className="flex gap-2 mt-2">
-              {images.slice(0,5).map((img: any, i: number) => (
+              {images.slice(0, space.video_url ? 4 : 5).map((img: any, i: number) => (
                 <button key={i} onClick={() => setPhotoIdx(i)}
                   className={cn('h-14 md:h-16 flex-1 rounded-xl overflow-hidden transition-all', photoIdx===i ? 'ring-2 opacity-100' : 'opacity-50 hover:opacity-80')}
                   style={{ ['--tw-ring-color' as any]: 'var(--brand)' }}>
@@ -252,35 +254,69 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   <img src={img.url} alt="" className="w-full h-full object-cover" />
                 </button>
               ))}
+              {space.video_url && (
+                <button
+                  onClick={() => setShowVideoModal(true)}
+                  className="relative h-14 md:h-16 flex-1 rounded-xl overflow-hidden transition-all opacity-80 hover:opacity-100 group"
+                  style={{ background: '#0a0a0a', minWidth: 56 }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <video
+                    src={`${space.video_url}#t=0.5`}
+                    muted preload="metadata"
+                    className="w-full h-full object-cover"
+                  />
+                  {/* Overlay oscuro + botón play */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-1"
+                    style={{ background: 'rgba(0,0,0,0.45)' }}>
+                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:scale-110"
+                      style={{ background: 'rgba(255,255,255,0.95)' }}>
+                      <Play size={13} className="ml-0.5" style={{ color: '#111' }} />
+                    </div>
+                  </div>
+                  {/* Badge VIDEO */}
+                  <div className="absolute bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded font-bold tracking-wide"
+                    style={{ background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: 8, letterSpacing: '0.08em' }}>
+                    VIDEO
+                  </div>
+                </button>
+              )}
             </div>
           )}
         </div>
 
-        {/* ── Video del espacio (opcional) ── */}
-        {space.video_url && (
-          <div className="mb-6 md:mb-10">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-                style={{ background: 'rgba(53,196,147,0.1)' }}>
-                <Play size={14} style={{ color: 'var(--brand)' }} />
+        {/* ── Modal de video ── */}
+        {showVideoModal && space.video_url && (
+          <>
+            <div
+              className="fixed inset-0 z-[60] flex items-center justify-center p-4 md:p-10"
+              style={{ background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(12px)' }}
+              onClick={() => setShowVideoModal(false)}>
+              <div className="relative w-full max-w-4xl" onClick={e => e.stopPropagation()}>
+                {/* Cerrar */}
+                <button
+                  onClick={() => setShowVideoModal(false)}
+                  className="absolute -top-4 -right-4 z-10 w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110"
+                  style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                  <X size={17} />
+                </button>
+                {/* Player */}
+                <div className="rounded-2xl overflow-hidden" style={{ background: '#000', boxShadow: '0 24px 64px rgba(0,0,0,0.6)' }}>
+                  <video
+                    src={space.video_url}
+                    controls
+                    autoPlay
+                    className="w-full"
+                    style={{ maxHeight: '78vh', display: 'block' }}>
+                    Tu navegador no soporta video.
+                  </video>
+                </div>
+                {/* Nombre del espacio */}
+                <p className="text-center mt-3 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                  {space.name}
+                </p>
               </div>
-              <h2 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
-                Video del espacio
-              </h2>
             </div>
-            <div className="rounded-2xl md:rounded-3xl overflow-hidden"
-              style={{ aspectRatio: '16/9', background: '#000', border: '1px solid var(--border-subtle)' }}>
-              <video
-                src={space.video_url}
-                controls
-                className="w-full h-full object-contain"
-                poster={images[0]?.url}
-                preload="metadata"
-              >
-                Tu navegador no soporta la reproducción de video.
-              </video>
-            </div>
-          </div>
+          </>
         )}
 
         {/* Main grid — widget primero en móvil (order-1), contenido segundo (order-2) */}
