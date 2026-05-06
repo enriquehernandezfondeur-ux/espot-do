@@ -11,7 +11,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
   const pathname = usePathname()
   const [menuOpen,  setMenuOpen]  = useState(false)
   const [searchQ,   setSearchQ]   = useState('')
-  const [user,      setUser]      = useState<{ email: string; role?: string } | null>(null)
+  const [user,      setUser]      = useState<{ email: string; role?: string; avatarUrl?: string } | null>(null)
   const [authReady, setAuthReady] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
 
@@ -25,10 +25,10 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
       if (u) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('role')
+          .select('role, avatar_url')
           .eq('id', u.id)
           .single()
-        setUser({ email: u.email ?? '', role: profile?.role })
+        setUser({ email: u.email ?? '', role: profile?.role, avatarUrl: profile?.avatar_url ?? undefined })
       }
       setAuthReady(true)
     })
@@ -91,10 +91,17 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                 style={{ color: 'var(--text-secondary)' }}
                 onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-elevated)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white"
-                  style={{ background: 'var(--brand)' }}>
-                  {user.email.charAt(0).toUpperCase()}
-                </div>
+                {user.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={user.avatarUrl} alt=""
+                    className="w-7 h-7 rounded-full object-cover shrink-0"
+                    style={{ border: '2px solid var(--brand)' }} />
+                ) : (
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+                    style={{ background: 'var(--brand)' }}>
+                    {user.email.charAt(0).toUpperCase()}
+                  </div>
+                )}
                 Mi panel
               </Link>
             ) : (

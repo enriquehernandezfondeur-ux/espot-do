@@ -22,7 +22,6 @@ function fold(line: string): string {
 
 /** Formatea fecha+hora para iCal con TZID (República Dominicana = UTC-4, sin DST) */
 function icalDT(date: string, time: string): string {
-  const [h] = time.split(':')
   const dateStr = date.replace(/-/g, '')
   const timeStr = time.replace(/:/g, '').slice(0, 6).padEnd(6, '0')
   return `${dateStr}T${timeStr}`
@@ -67,7 +66,7 @@ export async function GET(
 ) {
   const { token } = await params
 
-  if (!token || token.length < 10) {
+  if (!token || !/^[a-zA-Z0-9]{20,}$/.test(token)) {
     return new NextResponse('Token inválido', { status: 400 })
   }
 

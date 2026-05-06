@@ -49,11 +49,12 @@ const STEPS = [
 ]
 
 interface Props {
-  space:    any
-  onChat:   () => void
+  space:        any
+  onChat:       () => void
+  initialDate?: string
 }
 
-export default function BookingWidget({ space, onChat }: Props) {
+export default function BookingWidget({ space, onChat, initialDate }: Props) {
   const pricing    = space.space_pricing?.find((p: any) => p.is_active) ?? space.space_pricing?.[0]
   const addons     = space.space_addons ?? []
   const isHourly      = pricing?.pricing_type === 'hourly'
@@ -67,8 +68,8 @@ export default function BookingWidget({ space, onChat }: Props) {
   const maxStep = steps[steps.length - 1].id
 
   // ── State ───────────────────────────────────────────────
-  const [step, setStep]           = useState(1)
-  const [eventDate, setEventDate] = useState('')
+  const [step, setStep]           = useState(initialDate ? 2 : 1)
+  const [eventDate, setEventDate] = useState(initialDate ?? '')
   const [startTime, setStartTime] = useState('')
   const [endTime, setEndTime]     = useState('')
   const [guestCount, setGuestCount] = useState(

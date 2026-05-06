@@ -16,8 +16,11 @@ export default function HostMensajesPage() {
   const [body, setBody]         = useState('')
   const [sending, setSending]   = useState(false)
   const [search, setSearch]     = useState('')
-  const bottomRef = useRef<HTMLDivElement>(null)
-  const supabase  = createClient()
+  const bottomRef  = useRef<HTMLDivElement>(null)
+  const channelRef = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
+  const supabase   = createClient()
+
+  useEffect(() => () => { channelRef.current?.unsubscribe() }, [])
 
   useEffect(() => {
     async function init() {
@@ -43,10 +46,11 @@ export default function HostMensajesPage() {
     markMessagesRead(conv.spaceId)
     setConvs(prev => prev.map(c => c.spaceId === conv.spaceId ? { ...c, unread: false } : c))
 
-    supabase.channel(`msg-host-${conv.spaceId}`)
+    channelRef.current?.unsubscribe()
+    channelRef.current = supabase.channel(`msg-host-${conv.spaceId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `space_id=eq.${conv.spaceId}` },
         payload => { setMessages(prev => prev.find(m => m.id === payload.new.id) ? prev : [...prev, payload.new]) })
-      .subscribe()
+    channelRef.current.subscribe()
   }
 
   async function handleSend() {

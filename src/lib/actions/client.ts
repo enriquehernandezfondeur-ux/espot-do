@@ -52,6 +52,13 @@ export async function getClientPayments() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
 
+  // Fetch booking IDs for this user first, then join payments safely
+  const { data: userBookings } = await supabase
+    .from('bookings').select('id').eq('guest_id', user.id)
+  const bookingIds = userBookings?.map(b => b.id) ?? []
+
+  if (bookingIds.length === 0) return []
+
   const { data } = await supabase
     .from('payments')
     .select(`
@@ -61,9 +68,7 @@ export async function getClientPayments() {
         spaces!space_id(name, city)
       )
     `)
-    .in('booking_id',
-      (await supabase.from('bookings').select('id').eq('guest_id', user.id)).data?.map(b => b.id) ?? []
-    )
+    .in('booking_id', bookingIds)
     .order('created_at', { ascending: false })
 
   return data ?? []

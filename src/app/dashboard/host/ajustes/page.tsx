@@ -7,7 +7,7 @@ import { getOrCreateIcalToken, regenerateIcalToken, getGoogleCalendarStatus, dis
 import { createClient } from '@/lib/supabase/client'
 import { useSearchParams } from 'next/navigation'
 
-const BASE_URL = 'https://espothub.com'
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
 
 // Wrapper con Suspense requerido por useSearchParams en Next.js 16
 export default function HostAjustesPage() {

@@ -68,7 +68,7 @@ const termLabel: Record<string, string> = {
   quote_only:         'Cotización · Pago por Espot al aceptar',
 }
 
-export default function SpaceDetailClient({ space, similarSpaces = [] }: { space: any; similarSpaces?: any[] }) {
+export default function SpaceDetailClient({ space, similarSpaces = [], initialDate }: { space: any; similarSpaces?: any[]; initialDate?: string }) {
   const [photoIdx, setPhotoIdx] = useState(0)
   const [showChat, setShowChat] = useState(false)
   const [activeTab, setActiveTab] = useState<'info' | 'addons' | 'rules'>('info')
@@ -532,7 +532,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [] }: { space
 
           {/* ── RIGHT: BOOKING WIDGET ── */}
           <div className="sticky top-24" style={{ overflow: 'visible' }}>
-            <BookingWidget space={space} onChat={() => setShowChat(true)} />
+            <BookingWidget space={space} onChat={() => setShowChat(true)} initialDate={initialDate} />
           </div>
 
         </div>{/* end grid */}

@@ -71,9 +71,12 @@ export async function createBooking(payload: CreateBookingPayload) {
   }
 
   // Determinar si es cotización
-  const { data: pricing } = await supabase
-    .from('space_pricing').select('pricing_type').eq('id', payload.pricingId ?? '').single()
-  const isQuote = pricing?.pricing_type === 'custom_quote'
+  let isQuote = false
+  if (payload.pricingId) {
+    const { data: pricingRow } = await supabase
+      .from('space_pricing').select('pricing_type').eq('id', payload.pricingId).single()
+    isQuote = pricingRow?.pricing_type === 'custom_quote'
+  }
 
   // Insertar reserva
   const { data: booking, error: bookingError } = await supabase
@@ -103,7 +106,9 @@ export async function createBooking(payload: CreateBookingPayload) {
   // Guardar addons seleccionados
   if (payload.selectedAddonIds.length > 0) {
     const { data: addonData } = await supabase
-      .from('space_addons').select('id, name, price').in('id', payload.selectedAddonIds)
+      .from('space_addons').select('id, name, price')
+      .eq('space_id', payload.spaceId)
+      .in('id', payload.selectedAddonIds)
 
     if (addonData?.length) {
       await supabase.from('booking_addons').insert(

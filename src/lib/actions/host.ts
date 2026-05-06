@@ -331,6 +331,7 @@ export async function getHostQuotes() {
 
 // ── Responder cotización (enviar precio) ──────────────────
 export async function respondToQuote(bookingId: string, quotedPrice: number, message?: string) {
+  if (!quotedPrice || quotedPrice <= 0) return { error: 'El precio debe ser mayor a 0' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }

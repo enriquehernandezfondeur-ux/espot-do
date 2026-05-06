@@ -3,21 +3,15 @@
 import { useEffect, useRef } from 'react'
 import { formatCurrency } from '@/lib/utils'
 
-// Inyectar CSS de Leaflet via link tags (más confiable en Next.js que imports estáticos)
-const LEAFLET_CSS = [
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
-  'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css',
-  'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css',
-]
+// Inyectar CSS de Leaflet via link tags
+const LEAFLET_CSS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
 
 function injectLeafletCSS() {
-  LEAFLET_CSS.forEach(href => {
-    if (document.querySelector(`link[href="${href}"]`)) return
-    const link = document.createElement('link')
-    link.rel = 'stylesheet'
-    link.href = href
-    document.head.appendChild(link)
-  })
+  if (document.querySelector(`link[href="${LEAFLET_CSS}"]`)) return
+  const link = document.createElement('link')
+  link.rel = 'stylesheet'
+  link.href = LEAFLET_CSS
+  document.head.appendChild(link)
 }
 
 // ── Coordenadas de sectores de Santo Domingo y otras ciudades ──
@@ -57,7 +51,6 @@ export const SECTOR_COORDS: Record<string, [number, number]> = {
   'puerto plata':       [19.7934, -70.6931],
 }
 
-// Centro y zoom por ciudad
 export const CITY_VIEW: Record<string, { center: [number, number]; zoom: number }> = {
   default:          { center: [18.4719, -69.9312], zoom: 13 },
   'santo domingo':  { center: [18.4719, -69.9312], zoom: 13 },
@@ -74,12 +67,11 @@ export function getSpaceCoords(space: any): [number, number] | null {
   const sector = (space.sector ?? '').toLowerCase().trim()
   if (sector) {
     for (const [key, coords] of Object.entries(SECTOR_COORDS)) {
-      if (sector.includes(key) || key.includes(sector) && sector.length > 3) return coords
+      if (sector.includes(key) || (key.includes(sector) && sector.length > 3)) return coords
     }
   }
   const city = (space.city ?? '').toLowerCase()
   if (city.includes('santo domingo') || city.includes('distrito nacional')) {
-    // Pequeño offset para no apilar todos en el mismo punto
     const jitter = () => (Math.random() - 0.5) * 0.018
     return [18.4719 + jitter(), -69.9312 + jitter()]
   }
@@ -130,7 +122,6 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef       = useRef<any>(null)
   const markersRef   = useRef<Map<string, any>>(new Map())
-  const clusterRef   = useRef<any>(null)
   const coordsRef    = useRef<Map<string, [number, number]>>(new Map())
 
   // ── Inicializar el mapa ────────────────────────────────
@@ -139,25 +130,26 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
 
     injectLeafletCSS()
 
-    Promise.all([
-      import('leaflet'),
-      import('leaflet.markercluster'),
-    ]).then(([LModule]) => {
+    // Carga secuencial: primero Leaflet, luego el mapa
+    import('leaflet').then((LModule) => {
       const L = LModule.default
+
+      // Asegurarse de que el contenedor todavía existe
+      if (!containerRef.current) return
 
       const cityKey = Object.keys(CITY_VIEW).find(k =>
         k !== 'default' && (cityFilter ?? '').toLowerCase().includes(k)
       )
       const view = CITY_VIEW[cityKey ?? 'default']
 
-      const map = L.map(containerRef.current!, {
-        center:          view.center,
-        zoom:            view.zoom,
-        zoomControl:     false,
+      const map = L.map(containerRef.current, {
+        center:             view.center,
+        zoom:               view.zoom,
+        zoomControl:        false,
         attributionControl: true,
       })
 
-      // Tiles CartoDB Light — limpios y modernos
+      // Tiles CartoDB Light
       L.tileLayer(
         'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
         {
@@ -167,36 +159,14 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
         },
       ).addTo(map)
 
-      // Zoom control en esquina inferior derecha
       L.control.zoom({ position: 'bottomright' }).addTo(map)
 
-      // Sin clusters — todos los pins visibles individualmente
-      const cluster = (L as any).markerClusterGroup({
-        maxClusterRadius: 1,     // radio mínimo: prácticamente sin clustering
-        disableClusteringAtZoom: 10,
-        showCoverageOnHover: false,
-        spiderfyOnMaxZoom: true,
-        iconCreateFunction: (c: any) => {
-          const count = c.getChildCount()
-          return L.divIcon({
-            html: `<div style="
-              background:#35C493;color:#fff;border-radius:50%;
-              width:32px;height:32px;display:flex;align-items:center;
-              justify-content:center;font-size:12px;font-weight:700;
-              box-shadow:0 2px 10px rgba(53,196,147,0.4);border:2px solid #fff;
-            ">${count}</div>`,
-            className: '', iconSize: [32, 32], iconAnchor: [16, 16],
-          })
-        },
-      })
-
-      clusterRef.current = cluster
-      map.addLayer(cluster)
       mapRef.current = map
 
-      // Forzar recálculo de tamaño — necesario cuando el contenedor
-      // tiene height calculado por CSS en el momento del mount
-      setTimeout(() => map.invalidateSize(), 100)
+      // Forzar recálculo de tamaño después de que el DOM esté listo
+      requestAnimationFrame(() => {
+        map.invalidateSize()
+      })
 
       // Poblar marcadores
       spaces.forEach(space => {
@@ -209,17 +179,19 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
 
         marker.on('mouseover', () => {
           onSpaceHover?.(space.id)
-          setMarkerHovered(L, marker, label, true)
+          marker.setIcon(buildIcon(L, label, true))
+          marker.setZIndexOffset(1000)
         })
         marker.on('mouseout', () => {
           if (hoveredId !== space.id) {
             onSpaceHover?.(null)
-            setMarkerHovered(L, marker, label, false)
+            marker.setIcon(buildIcon(L, label, false))
+            marker.setZIndexOffset(0)
           }
         })
         marker.on('click', () => openSpacePopup(L, map, space, coords))
 
-        cluster.addLayer(marker)
+        marker.addTo(map)
         markersRef.current.set(space.id, marker)
       })
 
@@ -233,7 +205,7 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
 
     return () => {
       mapRef.current?.remove()
-      mapRef.current  = null
+      mapRef.current = null
       markersRef.current.clear()
       coordsRef.current.clear()
     }
@@ -245,11 +217,11 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
     if (!mapRef.current) return
     import('leaflet').then(({ default: L }) => {
       markersRef.current.forEach((marker, id) => {
-        const label   = getPricePin(spaces.find(s => s.id === id) ?? {})
-        const hovered = id === hoveredId
-        marker.setIcon(buildIcon(L, label, hovered))
-        if (hovered) marker.setZIndexOffset(1000)
-        else         marker.setZIndexOffset(0)
+        const space  = spaces.find(s => s.id === id)
+        const label  = getPricePin(space ?? {})
+        const active = id === hoveredId
+        marker.setIcon(buildIcon(L, label, active))
+        marker.setZIndexOffset(active ? 1000 : 0)
       })
     })
   }, [hoveredId, spaces])
@@ -286,8 +258,6 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
         .leaflet-container { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; }
         .leaflet-attribution-flag { display:none !important; }
         .leaflet-control-attribution { font-size:9px !important; }
-        .marker-cluster-small,.marker-cluster-medium,.marker-cluster-large { background:transparent !important; }
-        .marker-cluster-small div,.marker-cluster-medium div,.marker-cluster-large div { background:transparent !important; }
       `}</style>
       <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
     </>
@@ -317,10 +287,6 @@ function buildIcon(L: any, _label: string, active: boolean) {
     iconSize:   [28, 36],
     iconAnchor: [14, 36],
   })
-}
-
-function setMarkerHovered(L: any, marker: any, label: string, active: boolean) {
-  marker.setIcon(buildIcon(L, label, active))
 }
 
 function openSpacePopup(L: any, map: any, space: any, coords: [number, number]) {
@@ -359,10 +325,7 @@ function openSpacePopup(L: any, map: any, space: any, coords: [number, number]) 
         ${price ? `<div style="font-weight:700;font-size:13px;color:#35C493;margin-bottom:12px;">${price}</div>` : ''}
         <a href="/espacios/${space.slug}"
           style="display:block;background:#35C493;color:#fff;text-align:center;padding:9px 16px;
-                 border-radius:10px;font-size:12px;font-weight:700;text-decoration:none;
-                 transition:opacity 0.15s;"
-          onmouseover="this.style.opacity='0.88'"
-          onmouseout="this.style.opacity='1'">
+                 border-radius:10px;font-size:12px;font-weight:700;text-decoration:none;">
           Ver espacio →
         </a>
       </div>

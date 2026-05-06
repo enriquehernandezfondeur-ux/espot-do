@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import {
@@ -75,6 +75,23 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   const [priceMax,       setPriceMax]       = useState('')
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([])
   const [moreOpen,       setMoreOpen]       = useState(false)
+  const [blockedIds,     setBlockedIds]     = useState<Set<string>>(
+    // Pre-populate from SSR data (server already queried for the initial date)
+    () => new Set(spaces.filter((s: any) => s._dateFiltered && !s._available).map((s: any) => s.id))
+  )
+  const [availLoading, setAvailLoading] = useState(false)
+
+  // Re-fetch availability whenever the user changes the date on the client
+  useEffect(() => {
+    if (!dateFrom) { setBlockedIds(new Set()); return }
+    setAvailLoading(true)
+    const controller = new AbortController()
+    fetch(`/api/availability?date=${dateFrom}`, { signal: controller.signal })
+      .then(r => r.json())
+      .then(({ blockedSpaceIds }) => { setBlockedIds(new Set(blockedSpaceIds)); setAvailLoading(false) })
+      .catch(() => { setAvailLoading(false) })
+    return () => controller.abort()
+  }, [dateFrom])
 
   // ── Hover coordination carta ↔ pin ────────────────────
   const [hoveredId, setHoveredId] = useState<string | null>(null)
@@ -187,7 +204,10 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               />
             </div>
             <div className="flex items-center gap-2 rounded-2xl px-4 py-2.5 input-base w-44">
-              <CalendarDays size={15} style={{ color: dateFrom ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
+              {availLoading
+                ? <div className="w-[15px] h-[15px] rounded-full border-2 border-t-transparent animate-spin shrink-0" style={{ borderColor: 'var(--brand)', borderTopColor: 'transparent' }} />
+                : <CalendarDays size={15} style={{ color: dateFrom ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
+              }
               <input
                 type="date" value={dateFrom}
                 onChange={e => setDateFrom(e.target.value)}
@@ -277,6 +297,8 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                     space={space}
                     isHovered={hoveredId === space.id}
                     onHover={handleCardHover}
+                    dateFilter={dateFrom || undefined}
+                    isAvailable={dateFrom ? !blockedIds.has(space.id) : undefined}
                   />
                 ))}
               </div>
@@ -302,7 +324,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               : (
                 <div className="grid grid-cols-1 gap-4 pb-24">
                   {filtered.map(space => (
-                    <SpaceCard key={space.id} space={space} isHovered={false} onHover={() => {}} />
+                    <SpaceCard key={space.id} space={space} isHovered={false} onHover={() => {}} dateFilter={dateFrom || undefined} isAvailable={dateFrom ? !blockedIds.has(space.id) : undefined} />
                   ))}
                 </div>
               )
@@ -476,19 +498,22 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
 
 // ── Componente de card ────────────────────────────────────
 function SpaceCard({
-  space, isHovered, onHover,
+  space, isHovered, onHover, dateFilter, isAvailable,
 }: {
   space: any
   isHovered: boolean
   onHover: (id: string | null) => void
+  dateFilter?: string
+  isAvailable?: boolean   // undefined = no date filter active
 }) {
   const cover     = getCover(space)
   const priceInfo = getPriceInfo(space)
   const catLabel  = CATEGORIES.find(c => c.value === space.category)?.label ?? space.category
   const CatIcon   = CATEGORIES.find(c => c.value === space.category)?.icon ?? Building2
+  const href      = dateFilter ? `/espacios/${space.slug}?fecha=${dateFilter}` : `/espacios/${space.slug}`
 
   return (
-    <Link href={`/espacios/${space.slug}`} className="group block">
+    <Link href={href} className="group block">
       <div
         className="rounded-2xl overflow-hidden h-full flex flex-col"
         style={{
@@ -513,12 +538,21 @@ function SpaceCard({
               <CatIcon size={36} className="text-white opacity-60" />
             </div>
           )}
-          {space.is_verified && (
+          {isAvailable !== undefined ? (
+            <span className="absolute top-2.5 left-2.5 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
+              style={{
+                background: isAvailable ? 'rgba(53,196,147,0.92)' : 'rgba(220,38,38,0.85)',
+                color: '#fff', backdropFilter: 'blur(8px)',
+              }}>
+              {isAvailable ? <Check size={9} /> : <X size={9} />}
+              {isAvailable ? 'Disponible' : 'No disponible'}
+            </span>
+          ) : space.is_verified ? (
             <span className="absolute top-2.5 left-2.5 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
               style={{ background: 'rgba(53,196,147,0.92)', color: '#fff', backdropFilter: 'blur(8px)' }}>
               <Shield size={9} /> Verificado
             </span>
-          )}
+          ) : null}
           {priceInfo && (
             <span className="absolute bottom-2.5 left-2.5 text-xs font-bold px-3 py-1.5 rounded-full"
               style={{ background: 'rgba(0,0,0,0.72)', color: '#fff', backdropFilter: 'blur(8px)' }}>

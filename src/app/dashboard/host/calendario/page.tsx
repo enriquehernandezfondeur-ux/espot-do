@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, Building2, Lock, Loader2, Plus, X, Clock, Us
 import { cn, formatCurrency } from '@/lib/utils'
 import { getHostCalendarBookings, getHostSpaces, getSpaceAvailability, createAvailabilityBlock, deleteAvailabilityBlock, getOrCreateIcalToken, getGoogleCalendarStatus, disconnectGoogleCalendar } from '@/lib/actions/host'
 
-const BASE_URL = 'https://espothub.com'
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
 
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 const DAYS   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']

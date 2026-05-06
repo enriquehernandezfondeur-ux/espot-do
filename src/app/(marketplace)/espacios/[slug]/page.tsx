@@ -3,7 +3,7 @@ import { type Metadata } from 'next'
 import { getSpaceBySlug, getSimilarSpaces } from '@/lib/actions/marketplace'
 import SpaceDetailClient from './SpaceDetailClient'
 
-type Props = { params: Promise<{ slug: string }> }
+type Props = { params: Promise<{ slug: string }>; searchParams: Promise<Record<string, string | undefined>> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
@@ -57,12 +57,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function SpacePage({ params }: Props) {
-  const { slug } = await params
+export default async function SpacePage({ params, searchParams }: Props) {
+  const { slug }   = await params
+  const sp         = await searchParams
   const space = await getSpaceBySlug(slug)
   if (!space) notFound()
 
   const similar = await getSimilarSpaces(space)
 
-  return <SpaceDetailClient space={space} similarSpaces={similar} />
+  // Only pass initialDate if it's a valid future/today date from URL
+  const today = new Date().toISOString().split('T')[0]
+  const rawDate = sp.fecha
+  const initialDate =
+    rawDate && /^\d{4}-\d{2}-\d{2}$/.test(rawDate) && rawDate >= today
+      ? rawDate
+      : undefined
+
+  return <SpaceDetailClient space={space} similarSpaces={similar} initialDate={initialDate} />
 }
