@@ -16,15 +16,8 @@ import TimePicker from '@/components/ui/TimePicker'
 
 // ── Configuración de tipos de evento ──────────────────────
 const EVENT_TYPES = [
-  { label: 'Cumpleaños',  emoji: '🎂', color: '#F59E0B', bg: 'rgba(245,158,11,0.1)' },
-  { label: 'Boda',        emoji: '💍', color: '#EC4899', bg: 'rgba(236,72,153,0.1)' },
-  { label: 'Corporativo', emoji: '💼', color: '#3B82F6', bg: 'rgba(59,130,246,0.1)' },
-  { label: 'Graduación',  emoji: '🎓', color: '#8B5CF6', bg: 'rgba(139,92,246,0.1)' },
-  { label: 'Baby Shower', emoji: '👶', color: '#06B6D4', bg: 'rgba(6,182,212,0.1)' },
-  { label: 'Quinceañera', emoji: '👑', color: '#EF4444', bg: 'rgba(239,68,68,0.1)' },
-  { label: 'Fiesta',      emoji: '🎉', color: '#35C493', bg: 'rgba(53,196,147,0.1)' },
-  { label: 'Sesión foto', emoji: '📸', color: '#F97316', bg: 'rgba(249,115,22,0.1)' },
-  { label: 'Otro',        emoji: '✨', color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },
+  'Cumpleaños', 'Boda', 'Corporativo', 'Graduación',
+  'Baby Shower', 'Quinceañera', 'Fiesta', 'Sesión foto', 'Otro',
 ]
 
 function addonEmoji(name: string) {
@@ -82,11 +75,17 @@ export default function BookingWidget({ space, onChat }: Props) {
     space.capacity_min ? Math.max(space.capacity_min, 1) : 1
   )
   const [countInput, setCountInput] = useState(String(space.capacity_min ?? 1))
-  const [eventType, setEventType] = useState('')
-  const [selectedAddons, setSelectedAddons] = useState<string[]>([])
+  const [eventType,       setEventType]       = useState('')
+  const [customEventType, setCustomEventType] = useState('')
+  const [selectedAddons, setSelectedAddons]   = useState<string[]>([])
   const [paymentPlan] = useState<PaymentPlanConfig>(DEFAULT_PLANS[2])
   const [guestNote, setGuestNote] = useState('')
   const [showNote, setShowNote]   = useState(false)
+
+  // El tipo de evento real que se envía: si es "Otro" usa el texto personalizado
+  const finalEventType = eventType === 'Otro'
+    ? (customEventType.trim() || 'Otro')
+    : eventType
   const [booking, setBooking]     = useState(false)
   const [success, setSuccess]     = useState(false)
   const [error, setError]         = useState('')
@@ -168,7 +167,7 @@ export default function BookingWidget({ space, onChat }: Props) {
       return !!eventDate && timeOk && minHoursOk
     }
     if (step === 2) return guestCount >= 1
-    if (step === 3) return !!eventType
+    if (step === 3) return !!eventType && (eventType !== 'Otro' || customEventType.trim().length > 0)
     return true
   }
 
@@ -209,7 +208,7 @@ export default function BookingWidget({ space, onChat }: Props) {
       eventDate,
       startTime: startTime || '00:00',
       endTime:   endTime   || '23:59',
-      guestCount, eventType,
+      guestCount, eventType: finalEventType,
       eventNotes: guestNote || undefined,
       selectedAddonIds: selectedAddons,
       basePrice, addonsTotal, platformFee,
@@ -241,10 +240,10 @@ export default function BookingWidget({ space, onChat }: Props) {
             </span>
           </>
         )}
-        {step > 3 && eventType && (
+        {step > 3 && finalEventType && (
           <>
             <span style={{ color: 'var(--border-medium)' }}>·</span>
-            <span style={{ color: 'var(--text-secondary)' }}>{eventType}</span>
+            <span style={{ color: 'var(--text-secondary)' }}>{finalEventType}</span>
           </>
         )}
       </div>
@@ -537,40 +536,109 @@ export default function BookingWidget({ space, onChat }: Props) {
 
         {/* ── PASO 3: TIPO DE EVENTO ─────────────────────── */}
         {step === 3 && (
-          <div>
-            <h3 className="font-bold text-base mb-4" style={{ color: 'var(--text-primary)' }}>
-              ¿Qué tipo de evento es?
-            </h3>
-            <div className="grid grid-cols-3 gap-2">
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-bold text-base mb-1" style={{ color: 'var(--text-primary)' }}>
+                ¿Qué tipo de evento es?
+              </h3>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                Esta información ayuda al propietario a preparar el espacio.
+              </p>
+            </div>
+
+            {/* Pills de tipo de evento */}
+            <div className="flex flex-wrap gap-2">
               {EVENT_TYPES.map(et => {
-                const isSelected = eventType === et.label
+                const isSelected = eventType === et
                 return (
-                  <button key={et.label} onClick={() => setEventType(et.label)}
-                    className="flex flex-col items-center gap-2 py-4 px-2 rounded-2xl border transition-all duration-150"
+                  <button
+                    key={et}
+                    onClick={() => {
+                      setEventType(et)
+                      if (et !== 'Otro') setCustomEventType('')
+                    }}
+                    className="px-4 py-2.5 rounded-xl text-sm font-medium transition-all"
                     style={isSelected ? {
-                      background: `${et.color}12`,
-                      borderColor: et.color,
-                      boxShadow: `0 0 0 2px ${et.color}20`,
-                      transform: 'scale(1.03)',
+                      background: 'var(--brand)',
+                      color: '#fff',
+                      boxShadow: '0 2px 8px rgba(53,196,147,0.3)',
                     } : {
-                      background: 'var(--bg-base)',
-                      borderColor: 'var(--border-subtle)',
+                      background: 'var(--bg-elevated)',
+                      color: 'var(--text-secondary)',
+                      border: '1px solid var(--border-subtle)',
                     }}>
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
-                      style={{ background: isSelected ? et.bg : 'var(--bg-elevated)' }}>
-                      {et.emoji}
-                    </div>
-                    <span className="text-xs font-semibold leading-tight text-center"
-                      style={{ color: isSelected ? et.color : 'var(--text-secondary)' }}>
-                      {et.label}
-                    </span>
-                    {isSelected && (
-                      <div className="w-1.5 h-1.5 rounded-full" style={{ background: et.color }} />
-                    )}
+                    {et}
                   </button>
                 )
               })}
             </div>
+
+            {/* Campo abierto cuando eligen "Otro" */}
+            {eventType === 'Otro' && (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2"
+                    style={{ color: 'var(--text-muted)' }}>
+                    Describe tu evento
+                  </label>
+                  <input
+                    value={customEventType}
+                    onChange={e => setCustomEventType(e.target.value)}
+                    placeholder="Ej: Reunión de empresa, Lanzamiento de producto, Ensayo musical..."
+                    className="input-base w-full rounded-xl px-4 py-3 text-sm"
+                    autoFocus
+                  />
+                  {!customEventType.trim() && (
+                    <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
+                      Requerido para continuar
+                    </p>
+                  )}
+                </div>
+
+                {/* Nota automática cuando es "Otro" */}
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2"
+                    style={{ color: 'var(--text-muted)' }}>
+                    Mensaje al propietario <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(opcional)</span>
+                  </label>
+                  <textarea
+                    value={guestNote}
+                    onChange={e => setGuestNote(e.target.value)}
+                    placeholder="Cuéntale más sobre tu evento: cuántas personas, qué necesitas, si traes equipo propio..."
+                    rows={3}
+                    className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Nota opcional para otros tipos también */}
+            {eventType && eventType !== 'Otro' && (
+              <div>
+                {!showNote ? (
+                  <button
+                    onClick={() => setShowNote(true)}
+                    className="text-xs font-medium flex items-center gap-1.5 transition-colors"
+                    style={{ color: 'var(--text-muted)' }}>
+                    <MessageCircle size={13} /> Añadir nota al propietario (opcional)
+                  </button>
+                ) : (
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-widest mb-2"
+                      style={{ color: 'var(--text-muted)' }}>
+                      Mensaje al propietario
+                    </label>
+                    <textarea
+                      value={guestNote}
+                      onChange={e => setGuestNote(e.target.value)}
+                      placeholder="Ej: Llegaremos 2 horas antes para decorar, traemos nuestro DJ..."
+                      rows={2}
+                      className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -635,7 +703,7 @@ export default function BookingWidget({ space, onChat }: Props) {
                 { icon: CalendarDays, label: 'Fecha', value: new Date(eventDate + 'T12:00').toLocaleDateString('es-DO', { weekday: 'long', day: 'numeric', month: 'long' }) },
                 ...(needsTime && startTime ? [{ icon: Clock, label: 'Horario', value: `${formatTime(startTime)} – ${formatTime(endTime)}` }] : []),
                 { icon: Users, label: 'Personas', value: `${guestCount} personas` },
-                { icon: Sparkles, label: 'Evento', value: eventType },
+                { icon: Sparkles, label: 'Evento', value: finalEventType },
               ].map(({ icon: Icon, label, value }, i, arr) => (
                 <div key={label} className="flex items-center gap-3 px-4 py-3"
                   style={i < arr.length - 1 ? { borderBottom: '1px solid var(--border-subtle)' } : {}}>
@@ -719,20 +787,11 @@ export default function BookingWidget({ space, onChat }: Props) {
               </div>
             )}
 
-            {/* Nota opcional */}
-            {!showNote ? (
-              <button onClick={() => setShowNote(true)}
-                className="text-sm flex items-center gap-1.5 link-muted">
-                <MessageCircle size={14} /> Agregar nota al propietario
-              </button>
-            ) : (
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
-                  Nota (opcional)
-                </label>
-                <textarea value={guestNote} onChange={e => setGuestNote(e.target.value)}
-                  placeholder="Ej: Llegaremos 2 horas antes para decorar..."
-                  rows={2} className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none" />
+            {/* Nota — solo visible si fue añadida en el paso 3 */}
+            {guestNote && (
+              <div className="px-4 py-3 rounded-xl text-sm italic"
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
+                "{guestNote}"
               </div>
             )}
 
