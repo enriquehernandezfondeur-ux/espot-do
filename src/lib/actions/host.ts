@@ -125,6 +125,39 @@ export async function getSpaceAvailability(spaceId: string) {
   return data ?? []
 }
 
+// ── Cuenta bancaria ───────────────────────────────────────
+export async function getBankAccount() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+  const { data } = await supabase
+    .from('host_bank_accounts')
+    .select('*')
+    .eq('host_id', user.id)
+    .single()
+  return data ?? null
+}
+
+export async function saveBankAccount(payload: {
+  account_holder: string
+  bank_name:      string
+  account_type:   'ahorro' | 'corriente'
+  currency:       'DOP' | 'USD'
+  account_number: string
+  cedula_or_rnc:  string
+}) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+
+  const { error } = await supabase
+    .from('host_bank_accounts')
+    .upsert({ host_id: user.id, ...payload, status: 'pending', updated_at: new Date().toISOString() },
+             { onConflict: 'host_id' })
+
+  return error ? { error: error.message } : { success: true }
+}
+
 // ── Google Calendar — estado de conexión ─────────────────
 export async function getGoogleCalendarStatus(): Promise<{ connected: boolean }> {
   const supabase = await createClient()
