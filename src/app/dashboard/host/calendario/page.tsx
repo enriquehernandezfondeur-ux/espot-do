@@ -271,14 +271,50 @@ export default function CalendarioPage() {
         </div>
       </div>
 
-      {/* ── Contexto del espacio ── */}
-      <div className="flex items-center gap-3 mb-6 px-4 py-3 rounded-2xl"
-        style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-        <div className="w-2 h-2 rounded-full shrink-0" style={{ background: 'var(--brand)' }} />
-        <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
-          Espacio activo:
-        </span>
-        {spaceList.length > 1 ? (
+      {/* ── Selector de espacio ── */}
+      <div className="relative mb-6 rounded-2xl overflow-hidden"
+        style={{
+          background: '#fff',
+          border: '1.5px solid var(--border-medium)',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+        }}>
+
+        {/* Label */}
+        <div className="px-5 pt-4 pb-2">
+          <span className="text-xs font-semibold uppercase tracking-widest"
+            style={{ color: 'var(--text-muted)' }}>
+            Espacio activo
+          </span>
+        </div>
+
+        {/* Espacio seleccionado */}
+        <div className="flex items-center gap-4 px-5 pb-4">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: 'var(--brand-dim)' }}>
+            <Lock size={18} style={{ color: 'var(--brand)' }} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="font-bold text-base truncate"
+              style={{ color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+              {spaceName || 'Sin espacio'}
+            </div>
+            {spaceList.length > 1 && (
+              <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                Toca para cambiar espacio
+              </div>
+            )}
+          </div>
+          {spaceList.length > 1 && (
+            <div className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-xl shrink-0"
+              style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
+              <ChevronRight size={13} />
+              Cambiar
+            </div>
+          )}
+        </div>
+
+        {/* Select nativo invisible encima — activa el dropdown del SO */}
+        {spaceList.length > 1 && (
           <select
             value={spaceId ?? ''}
             onChange={async e => {
@@ -287,7 +323,6 @@ export default function CalendarioPage() {
               setSpaceId(sid)
               setSpaceName(name)
               setSelected(null)
-              // Recargar disponibilidad del espacio seleccionado
               const avail = await getSpaceAvailability(sid)
               const grouped: Record<string, any[]> = {}
               avail.forEach((a: any) => {
@@ -296,16 +331,11 @@ export default function CalendarioPage() {
               })
               setBlockedSlots(grouped)
             }}
-            className="text-sm font-semibold bg-transparent focus:outline-none flex-1"
-            style={{ color: 'var(--text-primary)' }}>
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
             {spaceList.map(s => (
-              <option key={s.id} value={s.id} style={{ background: 'var(--bg-base)' }}>{s.name}</option>
+              <option key={s.id} value={s.id}>{s.name}</option>
             ))}
           </select>
-        ) : (
-          <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-            {spaceName || 'Cargando...'}
-          </span>
         )}
       </div>
 
