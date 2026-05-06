@@ -41,7 +41,7 @@ const TIME_SLOTS = [
   {v:'20:00',l:'8pm'},{v:'21:00',l:'9pm'},{v:'22:00',l:'10pm'},{v:'23:00',l:'11pm'},
 ]
 const MONTH_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
-const DAY_NAMES = ['Lu','Ma','Mi','Ju','Vi','Sá','Do']
+const DAY_NAMES = ['Do','Lu','Ma','Mi','Ju','Vi','Sá']
 
 const AMENITIES = [
   { key: 'allows_external_decoration', label: 'Permite decoración externa' },
@@ -856,7 +856,7 @@ function DateTimePicker({
   const [mo, setMo] = useState(initD.getMonth())
 
   const cells = useMemo(() => {
-    const startOffset = (new Date(yr, mo, 1).getDay() + 6) % 7
+    const startOffset = new Date(yr, mo, 1).getDay() // 0=Dom, 1=Lun … 6=Sáb
     const totalDays = new Date(yr, mo + 1, 0).getDate()
     const arr: (number | null)[] = Array(startOffset).fill(null)
     for (let d = 1; d <= totalDays; d++) arr.push(d)
@@ -900,7 +900,7 @@ function DateTimePicker({
       {/* Grid de días */}
       <div className="grid grid-cols-7 gap-0.5">
         {cells.map((day, i) => {
-          if (!day) return <div key={i} />
+          if (!day) return <div key={i} className="aspect-square" />
           const cellDate = new Date(yr, mo, day)
           const isPast = cellDate < today
           const isoStr = iso(day)

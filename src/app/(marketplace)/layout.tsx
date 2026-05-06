@@ -121,7 +121,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
         borderBottom:  '1px solid var(--border-subtle)',
         boxShadow:     '0 1px 0 var(--border-subtle)',
       }}>
-        <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between gap-4 md:gap-6">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center gap-3 md:gap-5">
 
           {/* Logo */}
           <Link href="/" className="shrink-0">
@@ -129,7 +129,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
           </Link>
 
           {/* Search — solo desktop */}
-          <div className="hidden md:flex items-center gap-2 flex-1 max-w-sm rounded-full px-4 py-2.5"
+          <div className="hidden md:flex items-center gap-2 flex-1 max-w-xs rounded-full px-4 py-2.5"
             style={{ background: 'var(--bg-elevated)', border: '1.5px solid var(--border-medium)' }}>
             <Search size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
             <input
@@ -144,7 +144,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
           </div>
 
           {/* Desktop actions */}
-          <div className="hidden md:flex items-center gap-3 shrink-0">
+          <div className="hidden md:flex items-center gap-3 shrink-0 ml-auto">
             <Link href="/buscar" className="link-muted text-sm font-medium px-3 py-2 rounded-lg">
               Explorar
             </Link>
@@ -233,7 +233,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
           </div>
 
           {/* Mobile: acciones rápidas + hamburger */}
-          <div className="md:hidden flex items-center gap-2">
+          <div className="md:hidden flex items-center gap-2 ml-auto">
             {/* Buscar rápido móvil */}
             <Link href="/buscar"
               className="w-10 h-10 flex items-center justify-center rounded-xl"
