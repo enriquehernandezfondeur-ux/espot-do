@@ -120,7 +120,6 @@ export async function saveSpace(payload: SaveSpacePayload) {
       sector: payload.sector,
       lat: payload.lat ? num(payload.lat) : null,
       lng: payload.lng ? num(payload.lng) : null,
-      video_url: payload.videoUrl || null,
       primary_activity:     payload.primaryActivity || null,
       secondary_activities: payload.secondaryActivities ?? [],
       is_published: false,
@@ -132,6 +131,11 @@ export async function saveSpace(payload: SaveSpacePayload) {
   if (spaceError) return { error: spaceError.message }
 
   const spaceId = space.id
+
+  // Guardar video_url por separado — no falla si la columna aún no existe
+  if (payload.videoUrl !== undefined) {
+    await supabase.from('spaces').update({ video_url: payload.videoUrl || null }).eq('id', spaceId)
+  }
 
   const inserts = [
     supabase.from('space_pricing').insert(buildPricingData(spaceId, payload)),
@@ -314,12 +318,16 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
     sector: payload.sector,
     lat: payload.lat ? num(payload.lat) : null,
     lng: payload.lng ? num(payload.lng) : null,
-    video_url: payload.videoUrl !== undefined ? (payload.videoUrl || null) : undefined,
     primary_activity:     payload.primaryActivity || null,
     secondary_activities: payload.secondaryActivities ?? [],
   }).eq('id', spaceId)
 
   if (spaceError) return { error: spaceError.message }
+
+  // Guardar video_url por separado — no falla si la columna aún no existe
+  if (payload.videoUrl !== undefined) {
+    await supabase.from('spaces').update({ video_url: payload.videoUrl || null }).eq('id', spaceId)
+  }
 
   // Actualizar pricing
   const pricingData: Record<string, unknown> = {
