@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { Save, Camera, Loader2, CheckCircle, Calendar, Copy, RefreshCw, ExternalLink, Link2, Link2Off } from 'lucide-react'
 import { getClientProfile, updateClientProfile } from '@/lib/actions/client'
 import { getOrCreateIcalToken, regenerateIcalToken, getGoogleCalendarStatus, disconnectGoogleCalendar } from '@/lib/actions/host'
@@ -9,7 +9,12 @@ import { useSearchParams } from 'next/navigation'
 
 const BASE_URL = 'https://espothub.com'
 
+// Wrapper con Suspense requerido por useSearchParams en Next.js 16
 export default function HostAjustesPage() {
+  return <Suspense fallback={null}><AjustesInner /></Suspense>
+}
+
+function AjustesInner() {
   const [loading,   setLoading]   = useState(true)
   const [saving,    setSaving]    = useState(false)
   const [saved,     setSaved]     = useState(false)

@@ -6,25 +6,24 @@ import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard, Building2, CalendarDays, ClipboardList,
   MessageSquareQuote, MessageCircle, BarChart3, Settings,
-  LogOut, Sparkles, CreditCard,
+  LogOut, User,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
-  { href: '/dashboard/host',               label: 'Overview',      icon: LayoutDashboard },
-  { href: '/dashboard/host/espacio',       label: 'Mi Espacio',    icon: Building2 },
-  { href: '/dashboard/host/calendario',    label: 'Calendario',    icon: CalendarDays },
-  { href: '/dashboard/host/reservas',      label: 'Reservas',      icon: ClipboardList,        badge: 'pending' },
-  { href: '/dashboard/host/cotizaciones',  label: 'Cotizaciones',  icon: MessageSquareQuote,   badge: 'quotes' },
-  { href: '/dashboard/host/mensajes',      label: 'Mensajes',      icon: MessageCircle },
-  { href: '/dashboard/host/finanzas',      label: 'Finanzas',      icon: CreditCard },
-  { href: '/dashboard/host/analytics',     label: 'Analytics',     icon: BarChart3 },
-  { href: '/dashboard/host/ajustes',       label: 'Ajustes',       icon: Settings },
+  { href: '/dashboard/host',              label: 'Overview',     icon: LayoutDashboard },
+  { href: '/dashboard/host/espacio',      label: 'Mi espacio',   icon: Building2 },
+  { href: '/dashboard/host/calendario',   label: 'Calendario',   icon: CalendarDays },
+  { href: '/dashboard/host/reservas',     label: 'Reservas',     icon: ClipboardList },
+  { href: '/dashboard/host/cotizaciones', label: 'Cotizaciones', icon: MessageSquareQuote },
+  { href: '/dashboard/host/mensajes',     label: 'Mensajes',     icon: MessageCircle },
+  { href: '/dashboard/host/finanzas',     label: 'Finanzas',     icon: BarChart3 },
+  { href: '/dashboard/host/ajustes',      label: 'Ajustes',      icon: Settings },
 ]
 
 export default function Sidebar() {
   const pathname = usePathname()
-  const router = useRouter()
+  const router   = useRouter()
   const supabase = createClient()
 
   async function handleLogout() {
@@ -33,13 +32,14 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-60 min-h-screen flex flex-col" style={{ background: 'var(--bg-surface)', borderRight: '1px solid var(--border-subtle)' }}>
+    <aside className="w-56 min-h-screen flex flex-col shrink-0"
+      style={{ background: 'var(--bg-surface)', borderRight: '1px solid var(--border-subtle)' }}>
 
       {/* Logo */}
-      <div className="px-5 py-5 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm shadow-lg"
-            style={{ background: 'var(--brand)', color: '#0B0F0E', boxShadow: '0 0 16px rgba(53,196,147,0.3)' }}>
+      <div className="px-5 pt-5 pb-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-sm text-white"
+            style={{ background: 'var(--brand)', boxShadow: '0 2px 8px rgba(53,196,147,0.3)' }}>
             E
           </div>
           <div className="flex items-baseline gap-0.5">
@@ -49,17 +49,45 @@ export default function Sidebar() {
         </Link>
       </div>
 
+      {/* ── SWITCH DE MODO ── */}
+      <div className="px-3 py-3" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+        <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'var(--bg-elevated)' }}>
+          {/* Cambiar a Cliente */}
+          <Link href="/dashboard"
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors"
+            style={{ color: 'var(--text-muted)' }}>
+            <User size={12} /> Cliente
+          </Link>
+          {/* Modo activo: Negocio */}
+          <div className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
+            style={{ background: 'var(--bg-surface)', color: 'var(--brand)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+            <Building2 size={12} /> Negocio
+          </div>
+        </div>
+      </div>
+
+      {/* Indicador de modo */}
+      <div className="px-3 py-3">
+        <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl"
+          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+            style={{ background: 'var(--brand-dim)' }}>
+            <Building2 size={14} style={{ color: 'var(--brand)' }} />
+          </div>
+          <div className="min-w-0">
+            <div className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>Panel de negocio</div>
+            <div className="text-xs" style={{ color: 'var(--text-muted)' }}>Modo propietario</div>
+          </div>
+        </div>
+      </div>
+
       {/* Nav */}
-      <nav className="flex-1 p-3 space-y-0.5">
+      <nav className="flex-1 px-3 pb-4 space-y-0.5">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href || (href !== '/dashboard/host' && pathname.startsWith(href))
           return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group',
-              )}
+            <Link key={href} href={href}
+              className={cn('flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all')}
               style={isActive ? {
                 background: 'var(--brand-dim)',
                 color: 'var(--brand)',
@@ -68,38 +96,22 @@ export default function Sidebar() {
                 color: 'var(--text-secondary)',
               }}
               onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }}
-              onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }}
-            >
-              <Icon size={16} className="shrink-0" />
-              <span className="flex-1">{label}</span>
+              onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }}>
+              <Icon size={15} className="shrink-0" />
+              {label}
             </Link>
           )
         })}
       </nav>
 
-      {/* Bottom */}
-      <div className="p-3 space-y-2">
-        {/* Upgrade */}
-        <div className="rounded-xl p-4" style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
-          <div className="flex items-center gap-2 mb-1">
-            <Sparkles size={14} style={{ color: 'var(--brand)' }} />
-            <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Plan Pro</span>
-          </div>
-          <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>Fotos ilimitadas y analytics avanzados.</p>
-          <button className="w-full text-xs font-semibold py-1.5 rounded-lg transition-colors"
-            style={{ background: 'var(--brand)', color: '#0B0F0E' }}>
-            Mejorar plan
-          </button>
-        </div>
-
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm w-full transition-all"
+      {/* Logout */}
+      <div className="px-3 pb-5 pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+        <button onClick={handleLogout}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm w-full text-left transition-all"
           style={{ color: 'var(--text-muted)' }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#f87171' }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)' }}
-        >
-          <LogOut size={16} />
+          onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = '#f87171')}
+          onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'var(--text-muted)')}>
+          <LogOut size={15} />
           Cerrar sesión
         </button>
       </div>

@@ -1,22 +1,6 @@
-import { createClient } from '@/lib/supabase/server'
-import ClientSidebar from '@/components/client/ClientSidebar'
-
-export default async function ClientDashboardLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  let userName: string | undefined
-  if (user) {
-    const { data } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
-    userName = data?.full_name ?? user.email?.split('@')[0]
-  }
-
-  return (
-    <div className="light-theme flex min-h-screen" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
-      <ClientSidebar userName={userName} />
-      <main className="flex-1 overflow-auto" style={{ background: 'var(--bg-base)' }}>
-        {children}
-      </main>
-    </div>
-  )
+// Passthrough — no sidebar here.
+// Client pages use (client)/layout.tsx → ClientSidebar + light-theme
+// Host pages use host/layout.tsx → Sidebar + host-theme
+export default function DashboardRootLayout({ children }: { children: React.ReactNode }) {
+  return <>{children}</>
 }
