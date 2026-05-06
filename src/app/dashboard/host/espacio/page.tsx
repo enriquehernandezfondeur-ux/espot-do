@@ -714,10 +714,10 @@ export default function EspacioPage() {
             {/* Dynamic fields based on pricing type */}
             {pricingType === 'hourly' && (
               <div className="bg-[rgba(53,196,147,0.07)] border border-[rgba(53,196,147,0.20)] rounded-xl p-5 space-y-4">
-                <h3 className="text-[#4DD9A7] font-medium text-sm">Configuración de precio por hora</h3>
+                <h3 className="font-semibold text-sm" style={{ color: 'var(--brand)' }}>Configuración de precio por hora</h3>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-slate-300 text-xs font-medium mb-1.5">Precio por hora (RD$)</label>
+                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Precio por hora (RD$)</label>
                     <input
                       type="number"
                       value={hourlyPrice}
@@ -727,7 +727,7 @@ export default function EspacioPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-300 text-xs font-medium mb-1.5">Mínimo de horas</label>
+                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Mínimo de horas</label>
                     <input
                       type="number"
                       value={minHours}
@@ -737,7 +737,7 @@ export default function EspacioPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-300 text-xs font-medium mb-1.5">Máximo de horas</label>
+                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Máximo de horas</label>
                     <input
                       type="number"
                       value={maxHours}
@@ -757,10 +757,10 @@ export default function EspacioPage() {
 
             {pricingType === 'minimum_consumption' && (
               <div className="bg-[rgba(53,196,147,0.07)] border border-[rgba(53,196,147,0.20)] rounded-xl p-5 space-y-4">
-                <h3 className="text-[#4DD9A7] font-medium text-sm">Configuración de consumo mínimo</h3>
+                <h3 className="font-semibold text-sm" style={{ color: 'var(--brand)' }}>Configuración de consumo mínimo</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-slate-300 text-xs font-medium mb-1.5">Consumo mínimo (RD$)</label>
+                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Consumo mínimo (RD$)</label>
                     <input
                       type="number"
                       value={minConsumption}
@@ -770,7 +770,7 @@ export default function EspacioPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-300 text-xs font-medium mb-1.5">Duración de la sesión (horas)</label>
+                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Duración de la sesión (horas)</label>
                     <input
                       type="number"
                       value={sessionHours}
@@ -788,10 +788,10 @@ export default function EspacioPage() {
 
             {pricingType === 'fixed_package' && (
               <div className="bg-[rgba(53,196,147,0.07)] border border-[rgba(53,196,147,0.20)] rounded-xl p-5 space-y-4">
-                <h3 className="text-[#4DD9A7] font-medium text-sm">Configuración del paquete</h3>
+                <h3 className="font-semibold text-sm" style={{ color: 'var(--brand)' }}>Configuración del paquete</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-slate-300 text-xs font-medium mb-1.5">Nombre del paquete</label>
+                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Nombre del paquete</label>
                     <input
                       value={packageName}
                       onChange={e => setPackageName(e.target.value)}
@@ -800,7 +800,7 @@ export default function EspacioPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-300 text-xs font-medium mb-1.5">Precio del paquete (RD$)</label>
+                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Precio del paquete (RD$)</label>
                     <input
                       type="number"
                       value={fixedPrice}
@@ -811,7 +811,7 @@ export default function EspacioPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-slate-300 text-xs font-medium mb-2">¿Qué incluye el paquete?</label>
+                  <label className="block text-xs font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>¿Qué incluye el paquete?</label>
                   <div className="flex gap-2 mb-2">
                     <input
                       value={newInclude}
@@ -856,8 +856,8 @@ export default function EspacioPage() {
         {currentStep === 3 && (
           <div>
             <div className="mb-5">
-              <h2 className="text-xl font-bold text-white mb-1">Horarios de disponibilidad</h2>
-              <p className="text-slate-400 text-sm">
+              <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Horarios de disponibilidad</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                 Define en qué horarios aceptas reservas cada semana.
               </p>
             </div>
@@ -872,8 +872,8 @@ export default function EspacioPage() {
         {currentStep === 4 && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-bold text-white mb-1">Adicionales y extras</h2>
-              <p className="text-slate-400 text-sm">
+              <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Adicionales y extras</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                 Activa los servicios que ofreces. El cliente podrá agregarlos al reservar.
               </p>
             </div>
@@ -881,7 +881,7 @@ export default function EspacioPage() {
             {/* ─ Sección 1: Selección ─ */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+                <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
                   ¿Qué ofreces?
                 </p>
                 {addons.length > 0 && (
@@ -930,7 +930,7 @@ export default function EspacioPage() {
             {/* ─ Sección 2: Configurar precios (solo si hay seleccionados) ─ */}
             {addons.length > 0 && (
               <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">
+                <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
                   Configura precios de los seleccionados
                 </p>
                 <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
@@ -994,13 +994,13 @@ export default function EspacioPage() {
         {currentStep === 5 && (
           <div className="space-y-7">
             <div>
-              <h2 className="text-xl font-bold text-white mb-1">Reglas y condiciones</h2>
-              <p className="text-slate-400 text-sm">Define las reglas de tu espacio. El cliente las verá antes de reservar.</p>
+              <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Reglas y condiciones</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Define las reglas de tu espacio. El cliente las verá antes de reservar.</p>
             </div>
 
             {/* ─── 1. PERMISOS GENERALES ─── */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Permisos generales</p>
+              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Permisos generales</p>
               <div className="grid grid-cols-2 gap-2">
                 {([
                   { label: 'Decoración externa',    desc: 'Globos, flores, mantelería', value: allowsDecoration,  setter: setAllowsDecoration },
@@ -1018,8 +1018,8 @@ export default function EspacioPage() {
                     className="flex items-center justify-between px-4 py-3 rounded-xl"
                     style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${item.value ? 'rgba(53,196,147,0.25)' : 'rgba(255,255,255,0.06)'}` }}>
                     <div>
-                      <div className="text-sm font-medium text-white">{item.label}</div>
-                      <div className="text-xs text-slate-500">{item.desc}</div>
+                      <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{item.label}</div>
+                      <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{item.desc}</div>
                     </div>
                     <button
                       onClick={() => item.setter(!item.value)}
@@ -1035,10 +1035,10 @@ export default function EspacioPage() {
 
             {/* ─── 2. CONTROL DE RUIDO ─── */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Control de ruido</p>
+              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Control de ruido</p>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-300 text-sm font-medium mb-2">Nivel de ruido permitido</label>
+                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Nivel de ruido permitido</label>
                   <div className="flex gap-2">
                     {(['bajo', 'moderado', 'alto'] as const).map(level => (
                       <button key={level}
@@ -1057,23 +1057,23 @@ export default function EspacioPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-slate-300 text-sm font-medium mb-2">Hora límite de música</label>
+                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Hora límite de música</label>
                   <input type="time" value={musicCutoff} onChange={e => setMusicCutoff(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#35C493] text-sm transition-colors" />
+                    className="input-base w-full rounded-xl px-4 py-3 text-sm" />
                 </div>
               </div>
             </div>
 
             {/* ─── 3. DEPÓSITO Y PAGOS ─── */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Depósito y pagos</p>
+              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Depósito y pagos</p>
               <div className="space-y-3">
                 {/* Depósito */}
                 <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <div className="text-sm font-medium text-white">Depósito de garantía</div>
-                      <div className="text-xs text-slate-500">Monto que el cliente paga como garantía</div>
+                      <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Depósito de garantía</div>
+                      <div className="text-xs" style={{ color: 'var(--text-muted)' }}>Monto que el cliente paga como garantía</div>
                     </div>
                     <button onClick={() => setDepositRequired(!depositRequired)}
                       className="w-11 h-6 rounded-full relative transition-all shrink-0"
@@ -1085,13 +1085,13 @@ export default function EspacioPage() {
                   {depositRequired && (
                     <div className="grid grid-cols-2 gap-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                       <div>
-                        <label className="block text-slate-400 text-xs mb-1.5">Monto (RD$)</label>
+                        <label className="block text-xs mb-1.5" style={{ color: 'var(--text-muted)' }}>Monto (RD$)</label>
                         <input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)}
                           placeholder="Ej: 5000"
-                          className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm" />
+                          className="input-base w-full rounded-xl px-3 py-2.5 text-sm" />
                       </div>
                       <div>
-                        <label className="block text-slate-400 text-xs mb-1.5">¿Es reembolsable?</label>
+                        <label className="block text-xs mb-1.5" style={{ color: 'var(--text-muted)' }}>¿Es reembolsable?</label>
                         <div className="flex gap-2">
                           {[{ v: true, l: 'Sí' }, { v: false, l: 'No' }].map(opt => (
                             <button key={String(opt.v)} onClick={() => setDepositRefundable(opt.v)}
@@ -1115,8 +1115,8 @@ export default function EspacioPage() {
                 <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <div className="text-sm font-medium text-white">Servicio de limpieza</div>
-                      <div className="text-xs text-slate-500">¿Incluye limpieza al finalizar el evento?</div>
+                      <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Servicio de limpieza</div>
+                      <div className="text-xs" style={{ color: 'var(--text-muted)' }}>¿Incluye limpieza al finalizar el evento?</div>
                     </div>
                     <button onClick={() => setIncludesCleaning(!includesCleaning)}
                       className="w-11 h-6 rounded-full relative transition-all shrink-0"
@@ -1127,10 +1127,10 @@ export default function EspacioPage() {
                   </div>
                   {!includesCleaning && (
                     <div className="pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                      <label className="block text-slate-400 text-xs mb-1.5">Cargo de limpieza (RD$) — opcional</label>
+                      <label className="block text-xs mb-1.5" style={{ color: 'var(--text-muted)' }}>Cargo de limpieza (RD$) — opcional</label>
                       <input type="number" value={cleaningFee} onChange={e => setCleaningFee(e.target.value)}
                         placeholder="Dejar en blanco si no aplica"
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm" />
+                        className="input-base w-full rounded-xl px-3 py-2.5 text-sm" />
                     </div>
                   )}
                 </div>
@@ -1139,8 +1139,8 @@ export default function EspacioPage() {
                 <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <div className="text-sm font-medium text-white">Horas extra</div>
-                      <div className="text-xs text-slate-500">¿Se pueden solicitar horas adicionales?</div>
+                      <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Horas extra</div>
+                      <div className="text-xs" style={{ color: 'var(--text-muted)' }}>¿Se pueden solicitar horas adicionales?</div>
                     </div>
                     <button onClick={() => setAllowsExtraHours(!allowsExtraHours)}
                       className="w-11 h-6 rounded-full relative transition-all shrink-0"
@@ -1151,10 +1151,10 @@ export default function EspacioPage() {
                   </div>
                   {allowsExtraHours && (
                     <div className="pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                      <label className="block text-slate-400 text-xs mb-1.5">Precio por hora extra (RD$)</label>
+                      <label className="block text-xs mb-1.5" style={{ color: 'var(--text-muted)' }}>Precio por hora extra (RD$)</label>
                       <input type="number" value={extraHourPrice} onChange={e => setExtraHourPrice(e.target.value)}
                         placeholder="Ej: 5000"
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm" />
+                        className="input-base w-full rounded-xl px-3 py-2.5 text-sm" />
                     </div>
                   )}
                 </div>
@@ -1163,7 +1163,7 @@ export default function EspacioPage() {
 
             {/* ─── 4. POLÍTICA DE CANCELACIÓN ─── */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Política de cancelación</p>
+              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Política de cancelación</p>
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { value: 'flexible', label: 'Flexible',  desc: '100% reembolso hasta 24h antes' },
@@ -1184,7 +1184,7 @@ export default function EspacioPage() {
                       style={{ color: cancellationPolicy === policy.value ? '#35C493' : 'white' }}>
                       {policy.label}
                     </div>
-                    <div className="text-xs text-slate-500">{policy.desc}</div>
+                    <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{policy.desc}</div>
                   </button>
                 ))}
               </div>
@@ -1192,13 +1192,13 @@ export default function EspacioPage() {
 
             {/* ─── 5. REGLAS ADICIONALES ─── */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3">Reglas adicionales</p>
+              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Reglas adicionales</p>
               <textarea
                 value={customRules}
                 onChange={e => setCustomRules(e.target.value)}
                 placeholder="Ej: No se permiten velas. El espacio debe quedar limpio al terminar. Acceso desde las 6pm..."
                 rows={3}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#35C493] text-sm transition-colors resize-none"
+                className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none"
               />
             </div>
           </div>
@@ -1208,8 +1208,8 @@ export default function EspacioPage() {
         {currentStep === 6 && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-bold text-white mb-1">¿Cómo quieres cobrar?</h2>
-              <p className="text-slate-400 text-sm">Elige cómo se estructura el pago entre el cliente, Espot y tú</p>
+              <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>¿Cómo quieres cobrar?</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Elige cómo se estructura el pago entre el cliente, Espot y tú</p>
             </div>
 
             <div className="space-y-3">
@@ -1225,12 +1225,12 @@ export default function EspacioPage() {
                   )}
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className={cn('font-semibold', paymentTerm === option.value ? 'text-[#4DD9A7]' : 'text-white')}>
+                    <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                       {option.label}
                     </span>
                     {paymentTerm === option.value && <CheckCircle size={18} className="text-[#35C493]" />}
                   </div>
-                  <p className="text-slate-400 text-sm">{option.desc}</p>
+                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{option.desc}</p>
                 </button>
               ))}
             </div>
@@ -1246,22 +1246,22 @@ export default function EspacioPage() {
           <div className="space-y-6">
             <div className="text-center py-4">
               <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-[#28A87C] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[rgba(53,196,147,0.25)]">
-                <CheckCircle className="w-8 h-8 text-white" />
+                <CheckCircle className="w-8 h-8" style={{ color: 'var(--brand)' }} />
               </div>
-              <h2 className="text-2xl font-bold text-white mb-2">¡Todo listo para publicar!</h2>
-              <p className="text-slate-400">Tu Espot está configurado. Revisa el resumen antes de publicar.</p>
+              <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>¡Todo listo para publicar!</h2>
+              <p style={{ color: 'var(--text-muted)' }}>Tu Espot está configurado. Revisa el resumen antes de publicar.</p>
             </div>
 
             {/* Summary */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                <div className="text-slate-500 text-xs mb-2 uppercase tracking-wide">Espacio</div>
-                <div className="text-white font-semibold">{name || 'Sin nombre'}</div>
-                <div className="text-slate-400 text-sm">{category || 'Sin categoría'} · {capacityMax || '?'} personas máx.</div>
+              <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                <div className="text-xs mb-2 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Espacio</div>
+                <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>{name || 'Sin nombre'}</div>
+                <div className="text-sm" style={{ color: 'var(--text-muted)' }}>{category || 'Sin categoría'} · {capacityMax || '?'} personas máx.</div>
               </div>
-              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+              <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                 <div className="text-slate-500 text-xs mb-2 uppercase tracking-wide">Pricing</div>
-                <div className="text-white font-semibold">
+                <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                   {pricingType === 'hourly' && `${formatCurrency(Number(hourlyPrice))} / hora`}
                   {pricingType === 'minimum_consumption' && `Consumo mín. ${formatCurrency(Number(minConsumption))}`}
                   {pricingType === 'fixed_package' && `Paquete ${formatCurrency(Number(fixedPrice))}`}
@@ -1269,14 +1269,14 @@ export default function EspacioPage() {
                   {!pricingType && 'No configurado'}
                 </div>
               </div>
-              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+              <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                 <div className="text-slate-500 text-xs mb-2 uppercase tracking-wide">Adicionales</div>
-                <div className="text-white font-semibold">{addons.length} servicios</div>
-                <div className="text-slate-400 text-sm truncate">{addons.map(a => a.name).join(', ') || 'Ninguno'}</div>
+                <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>{addons.length} servicios</div>
+                <div className="text-sm truncate" style={{ color: 'var(--text-muted)' }}>{addons.map(a => a.name).join(', ') || 'Ninguno'}</div>
               </div>
-              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+              <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                 <div className="text-slate-500 text-xs mb-2 uppercase tracking-wide">Cobros</div>
-                <div className="text-white font-semibold text-sm">{paymentTermOptions.find(p => p.value === paymentTerm)?.label || 'No configurado'}</div>
+                <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{paymentTermOptions.find(p => p.value === paymentTerm)?.label || 'No configurado'}</div>
               </div>
             </div>
 
@@ -1290,7 +1290,7 @@ export default function EspacioPage() {
               <button
                 onClick={handlePublish}
                 disabled={saving || !name || !category || !capacityMax || !pricingType || !paymentTerm}
-                className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-[#35C493] to-[#28A87C] hover:from-violet-500 hover:to-purple-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-lg shadow-[rgba(53,196,147,0.20)]"
+                className="btn-brand flex-1 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed font-semibold py-3 px-6 rounded-xl transition-all"
               >
                 {saving ? <><Loader2 size={18} className="animate-spin" /> Guardando...</> : '🚀 Publicar mi Espot'}
               </button>
@@ -1303,11 +1303,11 @@ export default function EspacioPage() {
         )}
 
         {/* Navigation buttons */}
-        <div className="flex items-center justify-between mt-8 pt-6 border-t border-white/10">
+        <div className="flex items-center justify-between mt-8 pt-6 border-t">
           <button
             onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
             disabled={currentStep === 1}
-            className="flex items-center gap-2 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+            className="flex items-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm font-medium" style={{ color: 'var(--text-secondary)' }}
           >
             <ChevronLeft size={18} /> Anterior
           </button>
