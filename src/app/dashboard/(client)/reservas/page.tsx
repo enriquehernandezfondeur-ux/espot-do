@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { CalendarDays, Clock, Users, MapPin, ChevronRight, Loader2, Search, CreditCard, CheckCircle } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getClientBookings } from '@/lib/actions/client'
-import { confirmPayment } from '@/lib/actions/booking'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
 import { cn } from '@/lib/utils'
 
@@ -19,7 +19,7 @@ export default function MisReservasPage() {
   const [filter, setFilter]     = useState('Todas')
   const [search, setSearch]     = useState('')
   const [selected, setSelected] = useState<Booking | null>(null)
-  const [paying, setPaying]     = useState<string | null>(null)
+  const router = useRouter()
 
   useEffect(() => {
     getClientBookings().then(d => { setBookings(d); setLoading(false) })
@@ -39,18 +39,9 @@ export default function MisReservasPage() {
     return matchFilter && matchSearch
   })
 
-  async function handlePay(bookingId: string) {
-    setPaying(bookingId)
-    const result = await confirmPayment(bookingId)
-    if (!('error' in result)) {
-      setBookings(prev => prev.map(b =>
-        b.id === bookingId ? { ...b, status: 'confirmed' as const, payment_status: 'partial' } : b
-      ))
-      if (selected?.id === bookingId) {
-        setSelected((p: Booking | null) => p ? { ...p, status: 'confirmed' as const, payment_status: 'partial' } : null)
-      }
-    }
-    setPaying(null)
+  // Redirige al flujo de pago Azul — no se procesa aquí directamente
+  function handlePay(bookingId: string) {
+    router.push(`/pago/${bookingId}`)
   }
 
   // Cuántas reservas están esperando pago
@@ -85,7 +76,7 @@ export default function MisReservasPage() {
               🎉 ¡Tu reserva fue aceptada!
             </div>
             <div className="text-sm" style={{ color: '#3B82F6' }}>
-              Completa el pago del 10% para confirmar tu fecha.
+              Completa el pago para confirmar tu fecha.
             </div>
           </div>
           <button onClick={() => setFilter('Aceptadas')}
@@ -196,17 +187,14 @@ export default function MisReservasPage() {
                         🎉 ¡El propietario aceptó tu reserva!
                       </div>
                       <div className="text-xs mt-0.5" style={{ color: '#3B82F6' }}>
-                        Confirma pagando {formatCurrency(Number(bk.platform_fee))} (10% del total)
+                        Completa el pago para confirmar tu reserva
                       </div>
                     </div>
                     <button
                       onClick={() => handlePay(bk.id)}
-                      disabled={paying === bk.id}
-                      className="flex items-center gap-1.5 text-sm font-bold px-4 py-2.5 rounded-xl shrink-0 transition-all disabled:opacity-50"
+                      className="flex items-center gap-1.5 text-sm font-bold px-4 py-2.5 rounded-xl shrink-0 transition-all"
                       style={{ background: '#2563EB', color: '#fff', boxShadow: '0 2px 8px rgba(37,99,235,0.3)' }}>
-                      {paying === bk.id
-                        ? <><Loader2 size={15} className="animate-spin" /> Procesando...</>
-                        : <><CreditCard size={15} /> Pagar {formatCurrency(Number(bk.platform_fee))}</>}
+                      <CreditCard size={15} /> Pagar {formatCurrency(Number(bk.total_amount))}
                     </button>
                   </div>
                 )}

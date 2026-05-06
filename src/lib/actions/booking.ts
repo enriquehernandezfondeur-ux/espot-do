@@ -7,6 +7,8 @@ import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { createBookingEvent, deleteBookingEvent } from '@/lib/google-calendar'
 export type { BookingStatus } from '@/lib/bookingConfig'
 
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
+
 // ── CREAR RESERVA CON VALIDACIÓN ANTI-DOBLE ───────────────
 export interface CreateBookingPayload {
   spaceId: string
@@ -150,7 +152,7 @@ export async function createBooking(payload: CreateBookingPayload) {
           <p style="color:#6B7280;font-size:13px;">
             Recibirás un email cuando el propietario acepte o rechace tu solicitud.
           </p>`,
-        cta: { text: 'Ver mis reservas', url: 'https://espothub.com/dashboard/reservas' },
+        cta: { text: 'Ver mis reservas', url: `${SITE}/dashboard/reservas` },
       }),
     }),
     // Email al host
@@ -172,13 +174,13 @@ export async function createBooking(payload: CreateBookingPayload) {
             { label: 'Total del evento', value: formatCurrency(payload.totalAmount) },
             { label: 'Tu comisión Espot', value: formatCurrency(payload.platformFee) },
           ])}`,
-        cta: { text: 'Ver en mi panel', url: 'https://espothub.com/dashboard/host/reservas' },
+        cta: { text: 'Ver en mi panel', url: `${SITE}/dashboard/host/reservas` },
       }),
     }),
     // WhatsApp al host
     host?.phone && sendWhatsApp({
       to: host.phone,
-      body: `🔔 *Nueva reserva en ${spaceName}*\n\nCliente: ${guestName}\nEvento: ${payload.eventType}\n${eventInfo}\nTotal: ${formatCurrency(payload.totalAmount)}\n\nRevisa tu panel: https://espothub.com/dashboard/host/reservas`,
+      body: `🔔 *Nueva reserva en ${spaceName}*\n\nCliente: ${guestName}\nEvento: ${payload.eventType}\n${eventInfo}\nTotal: ${formatCurrency(payload.totalAmount)}\n\nRevisa tu panel: ${SITE}/dashboard/host/reservas`,
     }),
   ])
 
@@ -220,7 +222,7 @@ export async function acceptBooking(bookingId: string) {
       subject: `🎉 Reserva aceptada — ${space?.name}`,
       html: emailTemplate({
         title: '¡Tu reserva fue aceptada!',
-        subtitle: 'Completa el pago del 10% para confirmar tu fecha.',
+        subtitle: 'Completa el pago para confirmar tu fecha.',
         color: '#16A34A',
         emoji: '🎉',
         body: `
@@ -231,18 +233,17 @@ export async function acceptBooking(bookingId: string) {
             { label: 'Fecha', value: formatDate(bk.event_date) },
             { label: 'Horario', value: `${formatTime(bk.start_time)} – ${formatTime(bk.end_time)}` },
             { label: 'Total del evento', value: formatCurrency(Number(bk.total_amount)) },
-            { label: 'Pago ahora (10%)', value: depositAmount },
           ])}
           <p style="color:#16A34A;font-weight:bold;">
-            Para confirmar tu reserva debes completar el pago del 10%.
+            Completa el pago para confirmar tu reserva.
           </p>`,
-        cta: { text: 'Completar pago', url: 'https://espothub.com/dashboard/reservas' },
+        cta: { text: 'Completar pago', url: `${SITE}/dashboard/reservas` },
       }),
     }),
     // WhatsApp al cliente
     guest?.phone && sendWhatsApp({
       to: guest.phone,
-      body: `🎉 *¡Tu reserva fue aceptada!*\n\nEspacio: ${space?.name}\nFecha: ${formatDate(bk.event_date)}\n\nPaga el 10% (${depositAmount}) para confirmar tu lugar:\nhttps://espothub.com/dashboard/reservas`,
+      body: `🎉 *¡Tu reserva fue aceptada!*\n\nEspacio: ${space?.name}\nFecha: ${formatDate(bk.event_date)}\n\nCompleta el pago para confirmar tu lugar:\n${SITE}/dashboard/reservas`,
     }),
   ])
 
@@ -298,7 +299,7 @@ export async function rejectBooking(bookingId: string, reason?: string) {
           <p>Lamentablemente el propietario de <strong>${space?.name}</strong> no pudo aceptar tu solicitud para el ${formatDate(bk.event_date)}.</p>
           ${reason ? `<p>Motivo: <em>${reason}</em></p>` : ''}
           <p>Te invitamos a explorar otros espacios disponibles.</p>`,
-        cta: { text: 'Ver otros espacios', url: 'https://espothub.com/buscar' },
+        cta: { text: 'Ver otros espacios', url: `${SITE}/buscar` },
       }),
     })
   }
@@ -400,7 +401,7 @@ export async function confirmPayment(bookingId: string) {
             { label: 'Pagaste (10%)', value: formatCurrency(Number(bk.platform_fee)) },
             { label: 'Resta pagar en el espacio', value: remainingAmount },
           ])}`,
-        cta: { text: 'Ver mi reserva', url: 'https://espothub.com/dashboard/reservas' },
+        cta: { text: 'Ver mi reserva', url: `${SITE}/dashboard/reservas` },
       }),
     }),
     // Email al host: reserva confirmada y pagada
@@ -409,7 +410,7 @@ export async function confirmPayment(bookingId: string) {
       subject: `✅ Reserva confirmada con pago — ${space?.name}`,
       html: emailTemplate({
         title: 'Pago recibido — Reserva confirmada',
-        subtitle: `${guest?.full_name} completó el pago del 10%.`,
+        subtitle: `${guest?.full_name} completó el pago de la reserva.`,
         color: '#35C493',
         emoji: '💰',
         body: `
@@ -422,7 +423,7 @@ export async function confirmPayment(bookingId: string) {
             { label: 'Total del evento', value: formatCurrency(Number(bk.total_amount)) },
             { label: 'Comisión Espot (cobrada)', value: formatCurrency(Number(bk.platform_fee)) },
           ])}`,
-        cta: { text: 'Ver en mi panel', url: 'https://espothub.com/dashboard/host/reservas' },
+        cta: { text: 'Ver en mi panel', url: `${SITE}/dashboard/host/reservas` },
       }),
     }),
     // WhatsApp al cliente: confirmación
@@ -433,7 +434,7 @@ export async function confirmPayment(bookingId: string) {
     // WhatsApp al host: pago recibido
     host?.phone && sendWhatsApp({
       to: host.phone,
-      body: `💰 *Pago recibido — Reserva confirmada*\n\nCliente: ${guest?.full_name}\nEspacio: ${space?.name}\nFecha: ${formatDate(bk.event_date)}\nTotal del evento: ${formatCurrency(Number(bk.total_amount))}\n\nVe los detalles: https://espothub.com/dashboard/host/reservas`,
+      body: `💰 *Pago recibido — Reserva confirmada*\n\nCliente: ${guest?.full_name}\nEspacio: ${space?.name}\nFecha: ${formatDate(bk.event_date)}\nTotal del evento: ${formatCurrency(Number(bk.total_amount))}\n\nVe los detalles: ${SITE}/dashboard/host/reservas`,
     }),
   ])
 
@@ -500,7 +501,7 @@ export async function cancelBooking(bookingId: string, reason?: string) {
           <p>Hola <strong>${notifyName}</strong>,</p>
           <p>La reserva en <strong>${space?.name}</strong> para el ${formatDate(bk.event_date)} fue cancelada por ${cancelledBy}.</p>
           ${reason ? `<p>Motivo: <em>${reason}</em></p>` : ''}`,
-        cta: { text: 'Ver detalles', url: 'https://espothub.com/dashboard' },
+        cta: { text: 'Ver detalles', url: `${SITE}/dashboard` },
       }),
     })
   }

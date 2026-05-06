@@ -10,7 +10,7 @@ const poppins = Poppins({
   display: 'swap',
 })
 
-const BASE_URL = 'https://espothub.com'
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),

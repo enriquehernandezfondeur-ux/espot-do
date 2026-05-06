@@ -24,8 +24,10 @@ export default function CotizacionesPage() {
 
   async function handleRespond() {
     if (!selected || !price) return
+    const parsedPrice = parseFloat(price)
+    if (isNaN(parsedPrice) || parsedPrice <= 0) return
     setSending(true)
-    const result = await respondToQuote(selected.id, parseFloat(price), response || undefined)
+    const result = await respondToQuote(selected.id, parsedPrice, response || undefined)
     if (!('error' in result)) {
       // La reserva pasa a 'pending' con el precio cotizado
       setQuotes(prev => prev.filter(q => q.id !== selected.id))
