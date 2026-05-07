@@ -84,7 +84,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
 
   const finalEventType = eventType === 'Otro' ? (customEventType.trim() || 'Otro') : eventType
 
-  // ── Cálculo de horas — válido para TODOS los modelos ──
+  // ── Helpers de tiempo ─────────────────────────────────
   function calcHours(start: string, end: string): number {
     if (!start || !end) return 0
     const sh = parseInt(start.split(':')[0]), sm = parseInt(start.split(':')[1] || '0')
@@ -94,36 +94,70 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     return Math.max(0, (en - sn) / 60)
   }
 
-  const selectedHours = useMemo(() => calcHours(startTime, endTime), [startTime, endTime])
+  function addHoursToTime(start: string, hours: number): string {
+    const [h, m] = start.split(':').map(Number)
+    const totalMins = h * 60 + m + Math.round(hours * 60)
+    const endH = Math.floor(totalMins / 60) % 24
+    const endM = totalMins % 60
+    return `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`
+  }
 
-  // ── Rango horario del propietario ──────────────────────
+  // ── Rango horario del propietario (bug fix: usaba b en lugar de a) ──
   const allowedTimeRange = useMemo(() => {
     const blocks: any[] = space.space_time_blocks ?? []
     if (!blocks.length || !eventDate) return undefined
     const dow = new Date(eventDate + 'T12:00').getDay()
     const active = blocks.filter(b => b.is_active !== false && (b.days_of_week ?? []).includes(dow))
     if (!active.length) return null
-    const sorted = active.sort((a: any, b: any) => {
-      const aLen = (b.end_time === '00:00' ? 24 : parseInt(b.end_time)) - parseInt(a.start_time)
+    const sorted = [...active].sort((a: any, b: any) => {
+      const aLen = (a.end_time === '00:00' ? 24 : parseInt(a.end_time)) - parseInt(a.start_time)
       const bLen = (b.end_time === '00:00' ? 24 : parseInt(b.end_time)) - parseInt(b.start_time)
       return bLen - aLen
     })
     return { start: sorted[0].start_time as string, end: sorted[0].end_time as string }
   }, [eventDate, space.space_time_blocks])
 
-  // ── Validación de horas (aplica a todos los modelos con límites) ──
+  // ── Duración fija según modelo ─────────────────────────
+  // Consumo mínimo con session_hours fija o Paquete sin horas extra = duración inmutable
   const minHours     = pricing?.min_hours ?? 0
   const maxHours     = pricing?.max_hours ?? 0
   const packageHours = pricing?.package_hours ?? 0
+  const sessionHours = pricing?.session_hours ?? 0
 
+  const fixedDuration: number = (() => {
+    if (isConsumption && sessionHours > 0) return sessionHours
+    if (isPackage && packageHours > 0 && !(Number(pricing?.extra_hour_price) > 0)) return packageHours
+    return 0
+  })()
+
+  // Para modelos con duración fija, la hora de fin se calcula automáticamente
+  const effectiveEndTime = fixedDuration > 0 && startTime
+    ? addHoursToTime(startTime, fixedDuration)
+    : endTime
+
+  const selectedHours = useMemo(
+    () => calcHours(startTime, effectiveEndTime),
+    [startTime, effectiveEndTime]
+  )
+
+  // ── Validación de horas ────────────────────────────────
   const hoursError = useMemo((): string | null => {
-    if (!startTime || !endTime || selectedHours === 0) return null
+    if (!startTime || !effectiveEndTime || selectedHours === 0) return null
     if (minHours && selectedHours < minHours)
-      return `Mínimo ${minHours} hora${minHours > 1 ? 's' : ''} · Seleccionaste ${selectedHours.toFixed(1)}h`
+      return `Este Espot requiere mínimo ${minHours} hora${minHours > 1 ? 's' : ''} de reserva`
     if (maxHours && selectedHours > maxHours)
-      return `Máximo ${maxHours} hora${maxHours > 1 ? 's' : ''} · Seleccionaste ${selectedHours.toFixed(1)}h`
+      return `Este Espot permite máximo ${maxHours} hora${maxHours > 1 ? 's' : ''} de reserva`
+    // Validar que el fin no exceda el rango permitido por el propietario
+    if (allowedTimeRange && effectiveEndTime) {
+      const endN = parseInt(effectiveEndTime.split(':')[0]) < 6
+        ? parseInt(effectiveEndTime.split(':')[0]) + 24
+        : parseInt(effectiveEndTime.split(':')[0])
+      const rangeEnd = allowedTimeRange.end === '00:00' ? 24 : parseInt(allowedTimeRange.end)
+      if (endN > rangeEnd)
+        return `El horario seleccionado excede el cierre del espacio. Elige una hora de inicio más temprana.`
+    }
     return null
-  }, [selectedHours, minHours, maxHours, startTime, endTime])
+  }, [selectedHours, minHours, maxHours, startTime, effectiveEndTime, allowedTimeRange])
 
   // ── Cálculo de precio por modelo ───────────────────────
   const selectedAddonItems = useMemo(
@@ -166,9 +200,8 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   function canGoNext(): boolean {
     if (step === 1) {
       if (!eventDate) return false
-      // Cotización: solo fecha requerida (el host definirá horario)
       if (isQuote) return true
-      if (!startTime || !endTime) return false
+      if (!startTime || !effectiveEndTime) return false
       if (hoursError) return false
       return true
     }
@@ -210,7 +243,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     }
     const result = await createBooking({
       spaceId: space.id, pricingId: pricing?.id,
-      eventDate, startTime, endTime,
+      eventDate, startTime, endTime: effectiveEndTime,
       guestCount, eventType: finalEventType,
       eventNotes: guestNote || undefined,
       selectedAddonIds: selectedAddons,
@@ -239,11 +272,11 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             {new Date(eventDate + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
           </span>
         )}
-        {startTime && endTime && (
+        {startTime && effectiveEndTime && (
           <>
             <span style={{ color: 'var(--border-medium)' }}>·</span>
             <span className="flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
-              <Clock size={11} /> {formatTime(startTime)} – {formatTime(endTime)}
+              <Clock size={11} /> {formatTime(startTime)} – {formatTime(effectiveEndTime)}
               {selectedHours > 0 && ` (${selectedHours % 1 === 0 ? selectedHours : selectedHours.toFixed(1)}h)`}
             </span>
           </>
@@ -470,6 +503,8 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             {/* Selectores de hora — visibles cuando hay fecha y horario disponible */}
             {eventDate && allowedTimeRange !== null && !isQuote && (
               <div className="space-y-3">
+
+                {/* Info de límites para modelo por hora */}
                 {isHourly && (minHours > 0 || maxHours > 0) && (
                   <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
                     style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
@@ -482,24 +517,55 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                     </span>
                   </div>
                 )}
-                <div className="grid grid-cols-2 gap-3">
-                  <TimePicker
-                    value={startTime}
-                    onChange={v => { setStartTime(v); setEndTime('') }}
-                    placeholder="Hora de inicio"
-                    allowedRange={allowedTimeRange}
-                  />
-                  <TimePicker
-                    value={endTime}
-                    onChange={setEndTime}
-                    placeholder={startTime ? 'Hora de salida' : 'Elige inicio primero'}
-                    disabled={!startTime}
-                    afterValue={startTime || undefined}
-                    minMinutesAfter={minHours ? minHours * 60 : undefined}
-                    maxMinutesAfter={maxHours ? maxHours * 60 : undefined}
-                    allowedRange={allowedTimeRange}
-                  />
-                </div>
+
+                {fixedDuration > 0 ? (
+                  /* ── Duración fija (consumo mínimo con sesión o paquete sin extra) ── */
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
+                      style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid var(--brand-border)' }}>
+                      <Clock size={12} style={{ color: 'var(--brand)' }} />
+                      <span style={{ color: 'var(--text-secondary)' }}>
+                        Duración fija: <strong>{fixedDuration} hora{fixedDuration !== 1 ? 's' : ''}</strong>
+                        {' '}— La hora de salida se calcula automáticamente.
+                      </span>
+                    </div>
+                    <TimePicker
+                      value={startTime}
+                      onChange={v => { setStartTime(v) }}
+                      placeholder="Hora de inicio"
+                      allowedRange={allowedTimeRange}
+                    />
+                    {startTime && (
+                      <div className="flex items-center justify-between px-4 py-3.5 rounded-2xl"
+                        style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                        <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Hora de salida</span>
+                        <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>
+                          {formatTime(effectiveEndTime)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* ── Duración variable (por hora / consumo sin sesión fija / paquete extensible) ── */
+                  <div className="grid grid-cols-2 gap-3">
+                    <TimePicker
+                      value={startTime}
+                      onChange={v => { setStartTime(v); setEndTime('') }}
+                      placeholder="Hora de inicio"
+                      allowedRange={allowedTimeRange}
+                    />
+                    <TimePicker
+                      value={endTime}
+                      onChange={setEndTime}
+                      placeholder={startTime ? 'Hora de salida' : 'Elige inicio primero'}
+                      disabled={!startTime}
+                      afterValue={startTime || undefined}
+                      minMinutesAfter={minHours ? minHours * 60 : undefined}
+                      maxMinutesAfter={maxHours ? maxHours * 60 : undefined}
+                      allowedRange={allowedTimeRange}
+                    />
+                  </div>
+                )}
               </div>
             )}
 
@@ -512,12 +578,12 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             )}
 
             {/* Preview de precio cuando hay horario válido */}
-            {startTime && endTime && selectedHours > 0 && !hoursError && (
+            {startTime && effectiveEndTime && selectedHours > 0 && !hoursError && (
               <div className="flex items-center justify-between px-4 py-3.5 rounded-2xl"
                 style={{ background: isConsumption ? 'rgba(37,99,235,0.05)' : 'var(--brand-dim)', border: `1px solid ${isConsumption ? 'rgba(37,99,235,0.15)' : 'var(--brand-border)'}` }}>
                 <div>
                   <div className="text-sm font-medium" style={{ color: isConsumption ? '#1D4ED8' : 'var(--text-secondary)' }}>
-                    {formatTime(startTime)} – {formatTime(endTime)}
+                    {formatTime(startTime)} – {formatTime(effectiveEndTime)}
                     <span className="ml-1.5 text-xs opacity-70">
                       ({selectedHours % 1 === 0 ? selectedHours : selectedHours.toFixed(1)} horas)
                     </span>
@@ -673,7 +739,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
               {[
                 { icon: CalendarDays, label: 'Fecha', value: new Date(eventDate + 'T12:00').toLocaleDateString('es-DO', { weekday: 'long', day: 'numeric', month: 'long' }) },
-                { icon: Clock, label: 'Horario', value: `${formatTime(startTime)} – ${formatTime(endTime)} · ${selectedHours % 1 === 0 ? selectedHours : selectedHours.toFixed(1)} horas` },
+                { icon: Clock, label: 'Horario', value: `${formatTime(startTime)} – ${formatTime(effectiveEndTime)} · ${selectedHours % 1 === 0 ? selectedHours : selectedHours.toFixed(1)} horas` },
                 { icon: Users, label: 'Personas', value: `${guestCount} personas` },
                 { icon: Sparkles, label: 'Evento', value: finalEventType },
               ].map(({ icon: Icon, label, value }, i, arr) => (

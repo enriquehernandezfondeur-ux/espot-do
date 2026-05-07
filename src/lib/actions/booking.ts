@@ -45,6 +45,39 @@ export async function createBooking(payload: CreateBookingPayload) {
     .from('profiles').select('full_name, email, phone').eq('id', user.id).single()
     .then(r => r.data) : null
 
+  // ── Validar min/max horas según configuración del pricing ──
+  if (payload.pricingId && payload.startTime && payload.endTime) {
+    const { data: pricingCheck } = await supabase
+      .from('space_pricing')
+      .select('min_hours, max_hours, session_hours, package_hours, extra_hour_price, pricing_type')
+      .eq('id', payload.pricingId)
+      .single()
+
+    if (pricingCheck) {
+      // Calcular horas seleccionadas (maneja medianoche)
+      const sh = parseInt(payload.startTime.split(':')[0])
+      const eh = parseInt(payload.endTime.split(':')[0])
+      const sn = (sh < 6 ? sh + 24 : sh) * 60 + parseInt(payload.startTime.split(':')[1] || '0')
+      const en = (eh < 6 ? eh + 24 : eh) * 60 + parseInt(payload.endTime.split(':')[1] || '0')
+      const selectedH = Math.max(0, (en - sn) / 60)
+
+      const minH  = pricingCheck.min_hours    ?? 0
+      const maxH  = pricingCheck.max_hours    ?? 0
+      const sessH = pricingCheck.session_hours ?? 0
+      const pkgH  = pricingCheck.package_hours ?? 0
+      const hasExtra = Number(pricingCheck.extra_hour_price) > 0
+
+      if (minH > 0 && selectedH < minH)
+        return { error: `Este Espot requiere mínimo ${minH} hora${minH > 1 ? 's' : ''} de reserva.` }
+      if (maxH > 0 && selectedH > maxH)
+        return { error: `Este Espot permite máximo ${maxH} hora${maxH > 1 ? 's' : ''} de reserva.` }
+      if (sessH > 0 && Math.abs(selectedH - sessH) > 0.1)
+        return { error: `Este espacio requiere exactamente ${sessH} hora${sessH > 1 ? 's' : ''} de sesión.` }
+      if (pkgH > 0 && !hasExtra && Math.abs(selectedH - pkgH) > 0.1)
+        return { error: `Este paquete tiene una duración fija de ${pkgH} hora${pkgH > 1 ? 's' : ''}.` }
+    }
+  }
+
   // Validar disponibilidad — solo si el espacio es por hora y hay horario real
   const hasRealTime = payload.startTime !== '00:00' || payload.endTime !== '23:59'
   if (hasRealTime) {
