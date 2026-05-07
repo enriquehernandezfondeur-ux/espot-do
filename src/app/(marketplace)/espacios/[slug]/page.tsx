@@ -3,6 +3,8 @@ import { type Metadata } from 'next'
 import { getSpaceBySlug, getSimilarSpaces } from '@/lib/actions/marketplace'
 import SpaceDetailClient from './SpaceDetailClient'
 
+export const dynamic = 'force-dynamic'
+
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<Record<string, string | undefined>> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

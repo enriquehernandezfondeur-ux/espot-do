@@ -2,6 +2,8 @@ import { type Metadata } from 'next'
 import { getPublishedSpaces } from '@/lib/actions/marketplace'
 import BuscarClient from './BuscarClient'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Explorar espacios para eventos en República Dominicana',
   description: 'Encuentra salones, rooftops, restaurantes, villas y más para tu próximo evento en Santo Domingo y toda la RD. Filtra por sector, capacidad, fecha y tipo de evento.',
