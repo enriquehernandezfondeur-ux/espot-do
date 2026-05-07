@@ -3,35 +3,66 @@
 import { useState, useRef, useEffect } from 'react'
 import { Clock, ChevronDown, Check } from 'lucide-react'
 
-// Solo horas en punto — plataforma de reservas por hora
 const ALL_SLOTS = [
   { v: '06:00', l: '6:00 AM',  g: 'Mañana' },
+  { v: '06:30', l: '6:30 AM',  g: 'Mañana' },
   { v: '07:00', l: '7:00 AM',  g: 'Mañana' },
+  { v: '07:30', l: '7:30 AM',  g: 'Mañana' },
   { v: '08:00', l: '8:00 AM',  g: 'Mañana' },
+  { v: '08:30', l: '8:30 AM',  g: 'Mañana' },
   { v: '09:00', l: '9:00 AM',  g: 'Mañana' },
+  { v: '09:30', l: '9:30 AM',  g: 'Mañana' },
   { v: '10:00', l: '10:00 AM', g: 'Mañana' },
+  { v: '10:30', l: '10:30 AM', g: 'Mañana' },
   { v: '11:00', l: '11:00 AM', g: 'Mañana' },
+  { v: '11:30', l: '11:30 AM', g: 'Mañana' },
   { v: '12:00', l: '12:00 PM', g: 'Tarde' },
+  { v: '12:30', l: '12:30 PM', g: 'Tarde' },
   { v: '13:00', l: '1:00 PM',  g: 'Tarde' },
+  { v: '13:30', l: '1:30 PM',  g: 'Tarde' },
   { v: '14:00', l: '2:00 PM',  g: 'Tarde' },
+  { v: '14:30', l: '2:30 PM',  g: 'Tarde' },
   { v: '15:00', l: '3:00 PM',  g: 'Tarde' },
+  { v: '15:30', l: '3:30 PM',  g: 'Tarde' },
   { v: '16:00', l: '4:00 PM',  g: 'Tarde' },
+  { v: '16:30', l: '4:30 PM',  g: 'Tarde' },
   { v: '17:00', l: '5:00 PM',  g: 'Tarde' },
+  { v: '17:30', l: '5:30 PM',  g: 'Tarde' },
   { v: '18:00', l: '6:00 PM',  g: 'Noche' },
+  { v: '18:30', l: '6:30 PM',  g: 'Noche' },
   { v: '19:00', l: '7:00 PM',  g: 'Noche' },
+  { v: '19:30', l: '7:30 PM',  g: 'Noche' },
   { v: '20:00', l: '8:00 PM',  g: 'Noche' },
+  { v: '20:30', l: '8:30 PM',  g: 'Noche' },
   { v: '21:00', l: '9:00 PM',  g: 'Noche' },
+  { v: '21:30', l: '9:30 PM',  g: 'Noche' },
   { v: '22:00', l: '10:00 PM', g: 'Noche' },
+  { v: '22:30', l: '10:30 PM', g: 'Noche' },
   { v: '23:00', l: '11:00 PM', g: 'Noche' },
+  { v: '23:30', l: '11:30 PM', g: 'Noche' },
   { v: '00:00', l: '12:00 AM', g: 'Madrugada' },
+  { v: '00:30', l: '12:30 AM', g: 'Madrugada' },
   { v: '01:00', l: '1:00 AM',  g: 'Madrugada' },
+  { v: '01:30', l: '1:30 AM',  g: 'Madrugada' },
   { v: '02:00', l: '2:00 AM',  g: 'Madrugada' },
+  { v: '02:30', l: '2:30 AM',  g: 'Madrugada' },
   { v: '03:00', l: '3:00 AM',  g: 'Madrugada' },
 ]
 
+const SLOT_MINS = 30 // tamaño mínimo de slot
+
+// hourToNum exportado para compatibilidad (usa solo horas, sin minutos)
 export function hourToNum(h: string) {
   const n = parseInt(h.split(':')[0])
   return n < 6 ? n + 24 : n
+}
+
+// slotMins: conversión minuto-precisa con soporte overnight (0-5am = 24-29h)
+function slotMins(t: string): number {
+  const parts = t.split(':')
+  const h = parseInt(parts[0])
+  const m = parseInt(parts[1] ?? '0')
+  return (h < 6 ? h + 24 : h) * 60 + m
 }
 
 interface Props {
@@ -98,14 +129,18 @@ export default function TimePicker({
   const available = ALL_SLOTS.filter(s => {
     if (allowedRange === null) return false
     if (allowedRange) {
-      const n  = hourToNum(s.v)
-      const sn = hourToNum(allowedRange.start)
-      const en = (allowedRange.end === '00:00' || allowedRange.end === '24:00') ? 24 : hourToNum(allowedRange.end)
+      // Filtro minuto-preciso: slotMins considera tanto horas como minutos
+      // y maneja overnight (0-5am = 24-29h). El rango es [start, end).
+      const n  = slotMins(s.v)
+      const sn = slotMins(allowedRange.start)
+      const en = (allowedRange.end === '00:00' || allowedRange.end === '24:00')
+        ? 24 * 60
+        : slotMins(allowedRange.end)
       if (n < sn || n >= en) return false
     }
     if (afterValue) {
-      const fa = hourToNum(afterValue) * 60 + parseInt(afterValue.split(':')[1] ?? '0')
-      const fs = hourToNum(s.v)       * 60 + parseInt(s.v.split(':')[1]       ?? '0')
+      const fa = slotMins(afterValue)
+      const fs = slotMins(s.v)
       const diff = fs - fa
       if (diff <= 0) return false
       if (minMinutesAfter && diff < minMinutesAfter) return false

@@ -138,18 +138,27 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     return 0
   })()
 
-  // Para duración fija, restringir el picker de inicio para que
-  // start + fixedDuration <= blockEnd (solo mostrar inicios alcanzables)
+  const SLOT_MINS = 30 // tamaño mínimo de slot (30 minutos)
+
+  // Para duración fija, restringir el picker de inicio:
+  // solo mostrar starts donde start + fixedDuration <= blockEnd
   const startPickerRange = useMemo(() => {
     if (!allowedTimeRange || fixedDuration <= 0) return allowedTimeRange
-    const blockEndMins   = timeToMins(allowedTimeRange.end === '00:00' ? '24:00' : allowedTimeRange.end)
+    const blockEndMins    = timeToMins(allowedTimeRange.end === '00:00' ? '24:00' : allowedTimeRange.end)
     const latestStartMins = blockEndMins - fixedDuration * 60
-    if (latestStartMins <= timeToMins(allowedTimeRange.start)) return null // bloque muy corto
-    // Calcular la última hora entera válida y pasar la siguiente como límite exclusivo
-    const latestHour    = Math.floor(latestStartMins / 60) % 24
-    const exclusiveEnd  = minsToTime((latestHour + 1) * 60)
-    return { start: allowedTimeRange.start, end: exclusiveEnd }
+    // Si latestStart < blockStart no hay ningún inicio posible
+    if (latestStartMins < timeToMins(allowedTimeRange.start)) return null
+    // Pasar latestStart + SLOT_MINS como límite exclusivo para que latestStart QUEDE incluido
+    return { start: allowedTimeRange.start, end: minsToTime(latestStartMins + SLOT_MINS) }
   }, [allowedTimeRange, fixedDuration])
+
+  // Rango para el picker de hora de SALIDA: extiende el cierre del bloque +1 slot
+  // para que la hora exacta de cierre sea seleccionable (el filtro usa n >= end → exclusivo)
+  const endPickerAllowedRange = useMemo(() => {
+    if (!allowedTimeRange) return allowedTimeRange
+    const blockEndMins = timeToMins(allowedTimeRange.end === '00:00' ? '24:00' : allowedTimeRange.end)
+    return { start: allowedTimeRange.start, end: minsToTime(blockEndMins + SLOT_MINS) }
+  }, [allowedTimeRange])
 
   // Bloque demasiado corto para la duración fija requerida
   const blockTooShort = fixedDuration > 0 && allowedTimeRange !== null && allowedTimeRange !== undefined && startPickerRange === null
@@ -604,7 +613,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                           ? (maxHours ? Math.min(maxHours * 60, minsUntilBlockEnd) : minsUntilBlockEnd)
                           : (maxHours ? maxHours * 60 : undefined)
                       }
-                      allowedRange={allowedTimeRange}
+                      allowedRange={endPickerAllowedRange}
                     />
                   </div>
                 ) : null}
