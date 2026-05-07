@@ -80,6 +80,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   const [showNote,       setShowNote]       = useState(false)
   const [booking,        setBooking]        = useState(false)
   const [success,        setSuccess]        = useState(false)
+  const [successType,    setSuccessType]    = useState<'pending' | 'quote'>('pending')
   const [error,          setError]          = useState('')
 
   const finalEventType = eventType === 'Otro' ? (customEventType.trim() || 'Otro') : eventType
@@ -300,10 +301,9 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     setBooking(false)
     if ('error' in result) {
       setError(result.error ?? 'Error al procesar')
-    } else if (result.status === 'quote_requested') {
-      setSuccess(true)
     } else {
-      router.push(`/pago/${result.bookingId}`)
+      setSuccessType(result.status === 'quote_requested' ? 'quote' : 'pending')
+      setSuccess(true)
     }
   }
 
@@ -346,7 +346,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     )
   }
 
-  // ── Éxito (cotización enviada) ────────────────────────
+  // ── Pantalla de éxito ─────────────────────────────────
   if (success) return (
     <div className="rounded-3xl p-7 text-center"
       style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 40px rgba(0,0,0,0.08)' }}>
@@ -354,10 +354,35 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         style={{ background: 'rgba(53,196,147,0.1)' }}>
         <CheckCircle size={32} style={{ color: 'var(--brand)' }} />
       </div>
-      <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>¡Solicitud enviada!</h3>
-      <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>
-        El propietario te responderá con un precio personalizado. Revisa tu email.
-      </p>
+
+      {successType === 'pending' ? (
+        <>
+          <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+            ¡Solicitud enviada!
+          </h3>
+          <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            El propietario revisará tu solicitud y responderá en menos de 24 horas.
+          </p>
+          <div className="flex items-start gap-2.5 text-left px-4 py-3 rounded-xl mb-5"
+            style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.18)' }}>
+            <span style={{ fontSize: 16 }}>💳</span>
+            <p className="text-xs" style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+              <strong style={{ color: 'var(--text-primary)' }}>Solo pagas cuando el propietario acepte.</strong>{' '}
+              Recibirás un email con el enlace de pago una vez que confirme tu reserva.
+            </p>
+          </div>
+        </>
+      ) : (
+        <>
+          <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+            ¡Cotización solicitada!
+          </h3>
+          <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            El propietario te enviará un precio personalizado. Revisa tu email.
+          </p>
+        </>
+      )}
+
       <Link href="/dashboard/reservas"
         className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-3 rounded-xl"
         style={{ background: 'var(--brand)', color: '#fff' }}>
@@ -913,7 +938,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                 style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.15)' }}>
                 <ShieldCheck size={16} style={{ color: 'var(--brand)', flexShrink: 0 }} />
                 <p className="text-xs" style={{ color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                  Pago 100% seguro. Tu reserva queda confirmada inmediatamente al pagar.
+                  El propietario tiene 24 horas para aceptar. Solo pagarás cuando confirme tu solicitud.
                 </p>
               </div>
             )}
@@ -945,10 +970,10 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               boxShadow: `0 4px 24px ${isQuote ? 'rgba(8,145,178,0.3)' : 'rgba(53,196,147,0.35)'}`,
             }}>
             {booking
-              ? <><Loader2 size={18} className="animate-spin" /> Procesando...</>
+              ? <><Loader2 size={18} className="animate-spin" /> Enviando solicitud...</>
               : isQuote
                 ? <><MessageCircle size={18} /> Solicitar cotización</>
-                : <><CreditCard size={18} /> Continuar al pago · {formatCurrency(subtotal)}</>
+                : <><CheckCircle size={18} /> Enviar solicitud de reserva</>
             }
           </button>
         ) : (
