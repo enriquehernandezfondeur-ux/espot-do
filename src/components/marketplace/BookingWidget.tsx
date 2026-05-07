@@ -16,8 +16,9 @@ import DatePicker from '@/components/ui/DatePicker'
 import TimePicker from '@/components/ui/TimePicker'
 
 const EVENT_TYPES = [
-  'Cumpleaños', 'Boda', 'Corporativo', 'Graduación',
-  'Baby Shower', 'Quinceañera', 'Fiesta', 'Sesión foto', 'Otro',
+  'Cumpleaños', 'Boda', 'Quinceañera', 'Graduación',
+  'Baby Shower', 'Fiesta', 'Karaoke', 'Cena / Comida',
+  'Corporativo', 'Sesión foto', 'Otro',
 ]
 
 function addonEmoji(name: string) {

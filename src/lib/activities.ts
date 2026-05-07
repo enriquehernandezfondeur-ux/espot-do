@@ -56,13 +56,15 @@ export const BASE_ACTIVITIES: BaseActivityDef[] = [
 
 // ── Sub-actividades (para clientes en la búsqueda) ───────
 export const SUB_ACTIVITIES: SubActivity[] = [
-  // Fiesta
+  // Fiesta / Celebraciones
   { key: 'cumpleanos',        label: 'Cumpleaños',          base: 'fiesta' },
   { key: 'boda',              label: 'Boda',                 base: 'fiesta' },
   { key: 'quinceanera',       label: 'Quinceañera',          base: 'fiesta' },
   { key: 'baby-shower',       label: 'Baby Shower',          base: 'fiesta' },
   { key: 'graduacion',        label: 'Graduación',           base: 'fiesta' },
   { key: 'celebracion',       label: 'Celebración',          base: 'fiesta' },
+  { key: 'karaoke',           label: 'Karaoke',              base: 'fiesta' },
+  { key: 'cena',              label: 'Cena / Comida',        base: 'fiesta' },
   { key: 'despedida',         label: 'Despedida',            base: 'fiesta' },
   { key: 'evento-social',     label: 'Evento social',        base: 'fiesta' },
 
