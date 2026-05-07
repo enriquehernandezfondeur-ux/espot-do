@@ -26,20 +26,34 @@ export async function getConversation(spaceId: string) {
   return { messages: messages ?? [], space, userId: user.id }
 }
 
-// Enviar un mensaje
-export async function sendMessage(spaceId: string, receiverId: string, body: string) {
+export interface MessageAttachment {
+  url:  string
+  type: 'image' | 'file'
+  name: string
+}
+
+// Enviar un mensaje (con o sin adjunto)
+export async function sendMessage(
+  spaceId: string,
+  receiverId: string,
+  body: string,
+  attachment?: MessageAttachment,
+) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Debes iniciar sesión para enviar mensajes' }
-  if (!body.trim()) return { error: 'El mensaje no puede estar vacío' }
+  if (!body.trim() && !attachment) return { error: 'El mensaje no puede estar vacío' }
 
   const { data, error } = await supabase
     .from('messages')
     .insert({
-      space_id:    spaceId,
-      sender_id:   user.id,
-      receiver_id: receiverId,
-      body:        body.trim(),
+      space_id:        spaceId,
+      sender_id:       user.id,
+      receiver_id:     receiverId,
+      body:            body.trim() || null,
+      attachment_url:  attachment?.url  ?? null,
+      attachment_type: attachment?.type ?? null,
+      attachment_name: attachment?.name ?? null,
     })
     .select()
     .single()
