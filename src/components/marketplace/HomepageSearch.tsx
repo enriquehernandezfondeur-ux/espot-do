@@ -22,13 +22,23 @@ const ACTIVITIES = [
 ]
 
 const SECTORS = [
+  // ── Santo Domingo (sectores) ──
   'Piantini', 'Naco', 'Bella Vista', 'Evaristo Morales',
   'Arroyo Hondo', 'Gazcue', 'Zona Colonial', 'Los Prados',
   'Serrallés', 'Esperilla', 'Los Cacicazgos', 'Mirador Norte',
   'Ciudad Nueva', 'La Julia', 'Paraíso', 'Renacimiento',
   'Fernández', 'La Castellana', 'Urbanización Real',
-  'Santiago', 'La Romana', 'Boca Chica', 'Juan Dolio',
-  'Punta Cana', 'Las Terrenas', 'Puerto Plata',
+  'Miraflores', 'Alma Rosa', 'Ensanche Ozama', 'Los Mameyes',
+  'Mirador Sur', 'Los Ríos', 'Jardines del Sur', 'El Millón',
+  'Santo Domingo Este', 'Santo Domingo Norte', 'Santo Domingo Oeste',
+  // ── Otras ciudades ──
+  'Santiago', 'Puerto Plata', 'La Romana', 'Punta Cana',
+  'Boca Chica', 'Juan Dolio', 'Las Terrenas', 'Samaná',
+  'Higüey', 'San Pedro de Macorís', 'San Cristóbal',
+  'La Vega', 'Jarabacoa', 'Constanza',
+  'Sosúa', 'Cabarete', 'Cotuí', 'Moca',
+  'Cap Cana', 'Bayahíbe', 'Cabrera',
+  'Bonao', 'Nagua', 'Monte Cristi',
 ]
 
 const MONTHS = [
