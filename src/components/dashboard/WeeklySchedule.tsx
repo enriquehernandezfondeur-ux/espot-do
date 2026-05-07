@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Plus, X, Pencil, Copy, Check } from 'lucide-react'
+import TimePicker from '@/components/ui/TimePicker'
 
 // ── Tipos (sin cambios) ────────────────────────────────────
 interface TimeRange {
@@ -344,13 +345,22 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
                           /* Modo edición */
                           <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                              <input type="time" value={editDraft.start}
-                                onChange={e => setDraft(p => ({ ...p, [`edit-${range.id}`]: { ...editDraft, start: e.target.value } }))}
-                                className='input-base w-full rounded-xl px-3 py-2 text-sm font-medium' />
+                              <div className="flex-1 min-w-0">
+                                <TimePicker
+                                  value={editDraft.start}
+                                  onChange={v => setDraft(p => ({ ...p, [`edit-${range.id}`]: { ...editDraft, start: v } }))}
+                                  placeholder="Hora inicio"
+                                />
+                              </div>
                               <span className="text-sm shrink-0" style={{ color: 'var(--text-muted)' }}>–</span>
-                              <input type="time" value={editDraft.end}
-                                onChange={e => setDraft(p => ({ ...p, [`edit-${range.id}`]: { ...editDraft, end: e.target.value } }))}
-                                className='input-base w-full rounded-xl px-3 py-2 text-sm font-medium' />
+                              <div className="flex-1 min-w-0">
+                                <TimePicker
+                                  value={editDraft.end}
+                                  onChange={v => setDraft(p => ({ ...p, [`edit-${range.id}`]: { ...editDraft, end: v } }))}
+                                  placeholder="Hora fin"
+                                  afterValue={editDraft.start || undefined}
+                                />
+                              </div>
                               <button onClick={() => confirmEdit(key, range.id)}
                                 className="w-9 h-9 flex items-center justify-center rounded-xl transition-all shrink-0"
                                 style={{ background: '#35C493', color: '#0B0F0E' }}>
@@ -395,15 +405,22 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
                   {isAdding ? (
                     <div className="pt-3 space-y-2">
                       <div className="flex items-center gap-2">
-                        <input type="time" value={draftDay.start}
-                          onChange={e => setDraft(p => ({ ...p, [key]: { ...draftDay, start: e.target.value } }))}
-                          placeholder="Inicio"
-                          className='input-base w-full rounded-xl px-3 py-2 text-sm font-medium' />
+                        <div className="flex-1 min-w-0">
+                          <TimePicker
+                            value={draftDay.start}
+                            onChange={v => setDraft(p => ({ ...p, [key]: { ...draftDay, start: v } }))}
+                            placeholder="Hora inicio"
+                          />
+                        </div>
                         <span className="text-sm shrink-0" style={{ color: 'var(--text-muted)' }}>–</span>
-                        <input type="time" value={draftDay.end}
-                          onChange={e => setDraft(p => ({ ...p, [key]: { ...draftDay, end: e.target.value } }))}
-                          placeholder="Fin"
-                          className='input-base w-full rounded-xl px-3 py-2 text-sm font-medium' />
+                        <div className="flex-1 min-w-0">
+                          <TimePicker
+                            value={draftDay.end}
+                            onChange={v => setDraft(p => ({ ...p, [key]: { ...draftDay, end: v } }))}
+                            placeholder="Hora fin"
+                            afterValue={draftDay.start || undefined}
+                          />
+                        </div>
                         <button onClick={() => confirmAdd(key)}
                           className="w-9 h-9 flex items-center justify-center rounded-xl shrink-0"
                           style={{ background: '#35C493', color: '#0B0F0E' }}>
