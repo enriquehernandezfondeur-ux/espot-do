@@ -763,10 +763,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                         {[
                           '¿Hay disponibilidad para mi fecha?',
                           '¿Permiten decoración externa?',
-                          '¿Cuál es el consumo mínimo?',
                           '¿Hay estacionamiento?',
-                          '¿A qué hora puedo montar?',
-                          '¿Tienen música en vivo?',
                         ].map(q => (
                           <button
                             key={q}
