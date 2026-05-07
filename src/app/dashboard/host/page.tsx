@@ -126,7 +126,7 @@ export default function DashboardPage() {
   )
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto">
+    <div className="p-4 md:p-6 max-w-6xl mx-auto">
       <Suspense fallback={null}><PublishedToast /></Suspense>
 
       {/* ── Encabezado ── */}

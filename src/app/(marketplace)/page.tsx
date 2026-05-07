@@ -77,7 +77,7 @@ export default async function HomePage() {
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full pointer-events-none"
           style={{ background: 'radial-gradient(circle, rgba(53,196,147,0.08) 0%, transparent 70%)', transform: 'translate(-50%,-50%)' }} />
 
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-10 md:py-12 lg:py-14">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-10 lg:py-12">
           <div className="grid lg:grid-cols-[1fr_420px] gap-8 lg:gap-10 items-center">
 
             {/* Contenido izquierdo */}
@@ -150,7 +150,7 @@ export default async function HomePage() {
       {/* ─────────────────────────────────────────────
           TIPOS DE EVENTO
           ───────────────────────────────────────── */}
-      <section style={{ background: '#fff', borderTop: '1px solid var(--border-subtle)' }} className="py-10 md:py-12">
+      <section style={{ background: '#fff', borderTop: '1px solid var(--border-subtle)' }} className="py-8 md:py-10">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="flex items-end justify-between mb-6 md:mb-7">
             <div>
@@ -203,7 +203,7 @@ export default async function HomePage() {
       {/* ─────────────────────────────────────────────
           ESPACIOS DESTACADOS
           ───────────────────────────────────────── */}
-      <section style={{ background: 'var(--bg-elevated)', borderTop: '1px solid var(--border-subtle)' }} className="py-10 md:py-12">
+      <section style={{ background: 'var(--bg-elevated)', borderTop: '1px solid var(--border-subtle)' }} className="py-8 md:py-10">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="flex items-end justify-between mb-6 md:mb-7">
             <div>
@@ -322,7 +322,7 @@ export default async function HomePage() {
       {/* ─────────────────────────────────────────────
           CATEGORÍAS
           ───────────────────────────────────────── */}
-      <section style={{ background: '#fff', borderTop: '1px solid var(--border-subtle)' }} className="py-10 md:py-12">
+      <section style={{ background: '#fff', borderTop: '1px solid var(--border-subtle)' }} className="py-8 md:py-10">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="flex items-end justify-between mb-5 md:mb-6">
             <div>
@@ -362,7 +362,7 @@ export default async function HomePage() {
       {/* ─────────────────────────────────────────────
           CÓMO FUNCIONA
           ───────────────────────────────────────── */}
-      <section style={{ background: 'var(--bg-elevated)', borderTop: '1px solid var(--border-subtle)' }} className="py-10 md:py-12">
+      <section style={{ background: 'var(--bg-elevated)', borderTop: '1px solid var(--border-subtle)' }} className="py-8 md:py-10">
         <div className="max-w-5xl mx-auto px-4 md:px-6">
           <div className="text-center mb-8 md:mb-10">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: '#35C493' }}>

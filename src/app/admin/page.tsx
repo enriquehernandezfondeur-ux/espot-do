@@ -52,7 +52,7 @@ export default async function AdminDashboard() {
   ].filter(Boolean) as { label: string; href: string; color: string; icon: React.ElementType }[]
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-5 md:space-y-8">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6 md:space-y-8">
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">

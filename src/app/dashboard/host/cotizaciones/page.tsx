@@ -53,7 +53,7 @@ export default function CotizacionesPage() {
   )
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto">
       <div className="mb-5 md:mb-8">
         <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Cotizaciones</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>

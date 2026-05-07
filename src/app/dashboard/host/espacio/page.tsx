@@ -379,7 +379,7 @@ export default function EspacioPage() {
   // ── VISTA: Lista de espacios ──────────────────────────────
   if (view === 'list') {
     return (
-      <div className="p-4 md:p-8 max-w-5xl mx-auto">
+      <div className="p-4 md:p-6 max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-5 md:mb-8">
           <div>
             <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>

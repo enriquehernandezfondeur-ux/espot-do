@@ -193,7 +193,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
   const inputStyle = { background: '#F8FAFB', border: '1.5px solid #E8ECF0', color: '#0F1623' }
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
+    <div className="p-4 md:p-6 max-w-5xl mx-auto">
 
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">

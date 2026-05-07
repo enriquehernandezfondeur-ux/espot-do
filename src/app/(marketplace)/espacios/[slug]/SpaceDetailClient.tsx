@@ -524,7 +524,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
         )}
 
         {/* Main grid — widget primero en móvil (order-1), contenido segundo (order-2) */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6 lg:gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6 lg:gap-8 items-start">
 
           {/* ── IZQUIERDA: Contenido (order-2 en móvil, order-1 en desktop) ── */}
           <div className="order-2 lg:order-1">
@@ -989,7 +989,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
 
           {/* ── DERECHA: BOOKING WIDGET (order-1 en móvil, order-2 en desktop) ── */}
           {/* En desktop aparece como sticky column. En móvil está hidden (se usa el bottom sheet). */}
-          <div className="order-1 lg:order-2 lg:sticky lg:top-24 hidden lg:block" style={{ overflow: 'visible' }}>
+          <div className="order-1 lg:order-2 lg:sticky lg:top-20 hidden lg:block" style={{ overflow: 'visible' }}>
             <BookingWidget space={space} onChat={() => setShowChat(true)} initialDate={initialDate} />
           </div>
 

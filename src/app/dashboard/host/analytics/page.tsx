@@ -63,7 +63,7 @@ export default function AnalyticsPage() {
   const maxDay = Math.max(...popularDays.map(d => d.eventos), 1)
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto">
+    <div className="p-4 md:p-6 max-w-6xl mx-auto">
       <div className="mb-5 md:mb-8">
         <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Analytics</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>

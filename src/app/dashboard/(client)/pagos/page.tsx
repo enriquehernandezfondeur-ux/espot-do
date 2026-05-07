@@ -30,7 +30,7 @@ export default function PagosPage() {
   )
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto">
+    <div className="p-4 md:p-6 max-w-4xl mx-auto">
       <div className="mb-5 md:mb-8">
         <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Pagos</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>

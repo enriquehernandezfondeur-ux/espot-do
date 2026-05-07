@@ -33,7 +33,7 @@ export default function ClientDashboard() {
   const daysUntilNext = next ? Math.ceil((new Date(next.event_date).getTime() - today.getTime()) / (1000*60*60*24)) : null
 
   return (
-    <div className="p-4 md:p-8 max-w-5xl mx-auto">
+    <div className="p-4 md:p-6 max-w-6xl mx-auto">
 
       {/* Header */}
       <div className="mb-6 md:mb-8">

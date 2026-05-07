@@ -87,7 +87,7 @@ export default function HostPagosPage() {
   const ver = verConfig[bankStatus] ?? verConfig.pending
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-8">
+    <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-8">
 
       {/* Header */}
       <div>
