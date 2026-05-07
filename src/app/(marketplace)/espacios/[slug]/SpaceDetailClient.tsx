@@ -574,48 +574,67 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
 
 
                 {/* ── Horarios disponibles ── */}
-                {timeBlocks.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      Horarios disponibles
-                    </h3>
-                    <div className="space-y-2">
-                      {timeBlocks.map((block: any, i: number) => {
-                        const activeDays: number[] = block.days_of_week ?? []
-                        return (
-                          <div key={i}
-                            className="flex items-center justify-between gap-4 px-4 py-3 rounded-2xl"
-                            style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+                {timeBlocks.length > 0 && (() => {
+                  // Mapear cada día → su primer bloque activo
+                  const map: Record<number, any> = {}
+                  timeBlocks.forEach((b: any) => {
+                    (b.days_of_week ?? []).forEach((d: number) => {
+                      if (!map[d]) map[d] = b
+                    })
+                  })
+                  const DAY_NAMES = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
+                  const ORDER     = [1,2,3,4,5,6,0]   // Lun → Dom
+                  const todayIdx  = new Date().getDay()
 
-                            {/* Días como círculos */}
-                            <div className="flex gap-1">
-                              {DAYS.map((d, j) => {
-                                const active = activeDays.includes(j)
-                                return (
-                                  <span key={j}
-                                    className="w-7 h-7 rounded-full flex items-center justify-center font-semibold"
-                                    style={{
-                                      fontSize: 10,
-                                      background: active ? 'var(--brand)' : 'var(--bg-elevated)',
-                                      color: active ? '#fff' : 'var(--text-muted)',
-                                    }}>
-                                    {d[0]}
+                  return (
+                    <div>
+                      <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                        Horarios disponibles
+                      </h3>
+                      <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
+                        {ORDER.map((d, i) => {
+                          const block   = map[d]
+                          const isToday = d === todayIdx
+                          return (
+                            <div key={d}
+                              className="flex items-center justify-between px-4 py-2.5"
+                              style={{
+                                borderBottom: i < 6 ? '1px solid var(--border-subtle)' : undefined,
+                                background: isToday ? 'rgba(53,196,147,0.05)' : '#fff',
+                              }}>
+
+                              {/* Día */}
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm w-8 shrink-0"
+                                  style={{ fontWeight: isToday ? 700 : 500, color: block ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                                  {DAY_NAMES[d]}
+                                </span>
+                                {isToday && (
+                                  <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full"
+                                    style={{ background: 'var(--brand-dim)', color: 'var(--brand)' }}>
+                                    Hoy
                                   </span>
-                                )
-                              })}
-                            </div>
+                                )}
+                              </div>
 
-                            {/* Hora */}
-                            <span className="text-sm font-semibold tabular-nums shrink-0"
-                              style={{ color: 'var(--text-primary)' }}>
-                              {formatTime(block.start_time)} – {formatTime(block.end_time)}
-                            </span>
-                          </div>
-                        )
-                      })}
+                              {/* Horario */}
+                              {block ? (
+                                <span className="text-sm font-semibold tabular-nums"
+                                  style={{ color: isToday ? 'var(--brand)' : 'var(--text-primary)' }}>
+                                  {formatTime(block.start_time)} – {formatTime(block.end_time)}
+                                </span>
+                              ) : (
+                                <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                                  No disponible
+                                </span>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )
+                })()}
 
                 {/* Forma de pago */}
                 {paymentTerms && (
