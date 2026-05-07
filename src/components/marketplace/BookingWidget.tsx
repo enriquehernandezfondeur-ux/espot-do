@@ -140,62 +140,76 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
 
   const SLOT_MINS = 30 // tamaño mínimo de slot (30 minutos)
 
-  // Para duración fija, restringir el picker de inicio:
-  // solo mostrar starts donde start + fixedDuration <= blockEnd
+  // Para duración fija, restringir el picker de inicio
   const startPickerRange = useMemo(() => {
     if (!allowedTimeRange || fixedDuration <= 0) return allowedTimeRange
     const blockEndMins    = timeToMins(allowedTimeRange.end === '00:00' ? '24:00' : allowedTimeRange.end)
     const latestStartMins = blockEndMins - fixedDuration * 60
-    // Si latestStart < blockStart no hay ningún inicio posible
     if (latestStartMins < timeToMins(allowedTimeRange.start)) return null
-    // Pasar latestStart + SLOT_MINS como límite exclusivo para que latestStart QUEDE incluido
     return { start: allowedTimeRange.start, end: minsToTime(latestStartMins + SLOT_MINS) }
   }, [allowedTimeRange, fixedDuration])
 
-  // Rango para el picker de hora de SALIDA: extiende el cierre del bloque +1 slot
-  // para que la hora exacta de cierre sea seleccionable (el filtro usa n >= end → exclusivo)
+  // Rango para picker de salida: incluye la hora exacta de cierre del bloque
   const endPickerAllowedRange = useMemo(() => {
     if (!allowedTimeRange) return allowedTimeRange
     const blockEndMins = timeToMins(allowedTimeRange.end === '00:00' ? '24:00' : allowedTimeRange.end)
     return { start: allowedTimeRange.start, end: minsToTime(blockEndMins + SLOT_MINS) }
   }, [allowedTimeRange])
 
-  // Bloque demasiado corto para la duración fija requerida
+  // Bloque demasiado corto para la duración fija
   const blockTooShort = fixedDuration > 0 && allowedTimeRange !== null && allowedTimeRange !== undefined && startPickerRange === null
 
-  // Hora de fin efectiva: fija (calculada) o elegida por el usuario
+  // Para consumo mínimo: detectar si el bloque tiene exactamente un solo turno posible
+  // (ej: bloque 8pm-12am = exactamente fixedDuration horas → solo un inicio válido)
+  const singleTurno = useMemo(() => {
+    if (!fixedDuration || !startPickerRange || !allowedTimeRange) return null
+    const sStart = timeToMins(startPickerRange.start)
+    const sEnd   = timeToMins(startPickerRange.end === '00:00' ? '24:00' : startPickerRange.end)
+    // Si solo cabe un slot de inicio (diferencia < 2 slots) → turno único
+    if (sEnd - sStart <= SLOT_MINS) return allowedTimeRange.start
+    return null
+  }, [startPickerRange, fixedDuration, allowedTimeRange])
+
+  // Hora de fin efectiva
   const effectiveEndTime = fixedDuration > 0 && startTime
     ? addHoursToTime(startTime, fixedDuration)
     : endTime
 
-  // Minutos disponibles desde el inicio hasta el cierre del bloque (para end picker)
+  // Minutos disponibles desde inicio hasta cierre del bloque (para end picker)
   const minsUntilBlockEnd = useMemo(() => {
     if (!allowedTimeRange || !startTime) return undefined
     const blockEndMins = timeToMins(allowedTimeRange.end === '00:00' ? '24:00' : allowedTimeRange.end)
     return blockEndMins - timeToMins(startTime)
   }, [allowedTimeRange, startTime])
 
+  // Auto-seleccionar el inicio cuando hay un turno único
+  const effectiveStartTime = singleTurno && !startTime ? singleTurno : startTime
+
+  // effectiveEndTime recalculado con effectiveStartTime (incluye turno único auto-seleccionado)
+  const realEndTime = fixedDuration > 0 && effectiveStartTime
+    ? addHoursToTime(effectiveStartTime, fixedDuration)
+    : endTime
+
   const selectedHours = useMemo(
-    () => calcHours(startTime, effectiveEndTime),
-    [startTime, effectiveEndTime]
+    () => calcHours(effectiveStartTime, realEndTime),
+    [effectiveStartTime, realEndTime]
   )
 
   // ── Validación de horas ────────────────────────────────
   const hoursError = useMemo((): string | null => {
-    if (!startTime || !effectiveEndTime || selectedHours === 0) return null
+    if (!effectiveStartTime || !realEndTime || selectedHours === 0) return null
     if (minHours && selectedHours < minHours)
       return `Este Espot requiere mínimo ${minHours} hora${minHours > 1 ? 's' : ''} de reserva`
     if (maxHours && selectedHours > maxHours)
       return `Este Espot permite máximo ${maxHours} hora${maxHours > 1 ? 's' : ''} de reserva`
-    // Validar que el fin no exceda el cierre del bloque (comparación con minutos exactos)
     if (allowedTimeRange) {
-      const endMins      = timeToMins(effectiveEndTime)
+      const endMins      = timeToMins(realEndTime)
       const blockEndMins = timeToMins(allowedTimeRange.end === '00:00' ? '24:00' : allowedTimeRange.end)
       if (endMins > blockEndMins)
-        return `El horario seleccionado excede el cierre del espacio (${formatTime(allowedTimeRange.end)}). Elige una hora de inicio más temprana.`
+        return `El horario excede el cierre del espacio (${formatTime(allowedTimeRange.end)}). Elige una hora de llegada más temprana.`
     }
     return null
-  }, [selectedHours, minHours, maxHours, startTime, effectiveEndTime, allowedTimeRange])
+  }, [selectedHours, minHours, maxHours, effectiveStartTime, realEndTime, allowedTimeRange])
 
   // ── Cálculo de precio por modelo ───────────────────────
   const selectedAddonItems = useMemo(
@@ -204,7 +218,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   )
 
   const basePrice = useMemo(() => {
-    if (!startTime || !effectiveEndTime || selectedHours === 0) return 0
+    if (!effectiveStartTime || !realEndTime || selectedHours === 0) return 0
 
     if (isHourly) {
       return (pricing?.hourly_price ?? 0) * selectedHours
@@ -239,7 +253,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     if (step === 1) {
       if (!eventDate) return false
       if (isQuote) return true
-      if (!startTime || !effectiveEndTime) return false
+      if (!effectiveStartTime || !realEndTime) return false
       if (hoursError) return false
       return true
     }
@@ -281,7 +295,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     }
     const result = await createBooking({
       spaceId: space.id, pricingId: pricing?.id,
-      eventDate, startTime, endTime: effectiveEndTime,
+      eventDate, startTime: effectiveStartTime, endTime: realEndTime,
       guestCount, eventType: finalEventType,
       eventNotes: guestNote || undefined,
       selectedAddonIds: selectedAddons,
@@ -310,11 +324,11 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             {new Date(eventDate + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
           </span>
         )}
-        {startTime && effectiveEndTime && (
+        {effectiveStartTime && realEndTime && (
           <>
             <span style={{ color: 'var(--border-medium)' }}>·</span>
             <span className="flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
-              <Clock size={11} /> {formatTime(startTime)} – {formatTime(effectiveEndTime)}
+              <Clock size={11} /> {formatTime(effectiveStartTime)} – {formatTime(realEndTime)}
               {selectedHours > 0 && ` (${selectedHours % 1 === 0 ? selectedHours : selectedHours.toFixed(1)}h)`}
             </span>
           </>
@@ -490,16 +504,30 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
 
             {/* Mensaje informativo por modelo */}
             {isConsumption && (
-              <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl"
-                style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.15)' }}>
-                <Info size={14} style={{ color: '#2563EB', flexShrink: 0, marginTop: 1 }} />
-                <div className="text-xs" style={{ color: '#1D4ED8', lineHeight: 1.6 }}>
-                  <strong>Consumo mínimo garantizado: {formatCurrency(pricing.minimum_consumption)}</strong><br />
-                  Tu grupo debe consumir ese monto en comida y bebidas. Lo que exceda ese mínimo lo pagas directo en el lugar.
-                  {(minHours > 0 || maxHours > 0) && (
-                    <span> · Duración: {minHours > 0 && maxHours > 0
-                      ? `${minHours}–${maxHours} horas`
-                      : minHours > 0 ? `mín. ${minHours}h` : `máx. ${maxHours}h`}
+              <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(37,99,235,0.18)' }}>
+                <div className="flex items-center justify-between px-4 py-3"
+                  style={{ background: 'rgba(37,99,235,0.06)', borderBottom: '1px solid rgba(37,99,235,0.12)' }}>
+                  <span className="text-xs font-bold uppercase tracking-wide" style={{ color: '#2563EB' }}>
+                    Consumo mínimo garantizado
+                  </span>
+                  <span className="text-base font-bold" style={{ color: '#1D4ED8' }}>
+                    {formatCurrency(pricing.minimum_consumption)}
+                  </span>
+                </div>
+                <div className="px-4 py-3 text-xs" style={{ color: '#374151', lineHeight: 1.7 }}>
+                  Tu grupo garantiza consumir este monto en el espacio (comida y bebidas).
+                  Lo que exceda, se paga directamente en el lugar.
+                  {(fixedDuration > 0) && (
+                    <span className="block mt-1 font-semibold" style={{ color: '#1D4ED8' }}>
+                      Duración de la sesión: {fixedDuration} hora{fixedDuration !== 1 ? 's' : ''}
+                    </span>
+                  )}
+                  {(!fixedDuration && (minHours > 0 || maxHours > 0)) && (
+                    <span className="block mt-1 font-semibold" style={{ color: '#1D4ED8' }}>
+                      {minHours > 0 && maxHours > 0
+                        ? `Puedes quedarte entre ${minHours} y ${maxHours} horas`
+                        : minHours > 0 ? `Mínimo ${minHours} hora${minHours > 1 ? 's' : ''}`
+                        : `Máximo ${maxHours} horas`}
                     </span>
                   )}
                 </div>
@@ -538,14 +566,30 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               </div>
             )}
 
-            {/* Selectores de hora — visibles cuando hay fecha y horario disponible */}
+            {/* Selectores de hora */}
             {eventDate && allowedTimeRange !== null && !isQuote && (
               <div className="space-y-3">
 
-                {/* Info de límites para modelo por hora */}
+                {/* Bloque del día disponible — siempre visible para contexto */}
+                {allowedTimeRange && (
+                  <div className="flex items-center justify-between px-4 py-3 rounded-xl"
+                    style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                    <div className="flex items-center gap-2">
+                      <Clock size={13} style={{ color: 'var(--brand)', flexShrink: 0 }} />
+                      <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+                        Disponible este día
+                      </span>
+                    </div>
+                    <span className="text-xs font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>
+                      {formatTime(allowedTimeRange.start)} – {formatTime(allowedTimeRange.end)}
+                    </span>
+                  </div>
+                )}
+
+                {/* Info de duración para precio por hora */}
                 {isHourly && (minHours > 0 || maxHours > 0) && (
                   <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
-                    style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                    style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
                     <Clock size={12} style={{ color: 'var(--brand)' }} />
                     <span style={{ color: 'var(--text-secondary)' }}>
                       {minHours > 0 && maxHours > 0
@@ -556,55 +600,73 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                   </div>
                 )}
 
-                {/* Aviso si el bloque es demasiado corto para la duración fija */}
+                {/* Error: bloque demasiado corto */}
                 {blockTooShort && (
                   <div className="px-4 py-3 rounded-xl text-sm"
                     style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)', color: '#DC2626' }}>
-                    No hay horarios disponibles este día para completar {fixedDuration} hora{fixedDuration !== 1 ? 's' : ''} de sesión.
+                    El horario disponible este día no es suficiente para completar la sesión de {fixedDuration}h.
                     Elige otra fecha o consulta al propietario.
                   </div>
                 )}
 
-                {!blockTooShort && fixedDuration > 0 ? (
-                  /* ── Duración fija: solo picker de inicio, salida calculada ── */
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
-                      style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid var(--brand-border)' }}>
-                      <Clock size={12} style={{ color: 'var(--brand)' }} />
-                      <span style={{ color: 'var(--text-secondary)' }}>
-                        Duración fija: <strong>{fixedDuration} hora{fixedDuration !== 1 ? 's' : ''}</strong>
-                        {' '}— La hora de salida se calcula automáticamente.
-                      </span>
+                {/* ── CASO A: Turno único (ej: restaurante 8pm-12am exacto) ── */}
+                {!blockTooShort && singleTurno && (
+                  <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--brand-border)' }}>
+                    <div className="flex items-center justify-between px-4 py-3.5"
+                      style={{ background: 'var(--brand-dim)' }}>
+                      <div>
+                        <div className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                          {formatTime(singleTurno)} → {formatTime(addHoursToTime(singleTurno, fixedDuration))}
+                        </div>
+                        <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                          Sesión de {fixedDuration} hora{fixedDuration !== 1 ? 's' : ''}
+                          {isConsumption ? ' · Consumo mínimo incluido' : ''}
+                        </div>
+                      </div>
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center"
+                        style={{ background: 'var(--brand)' }}>
+                        <CheckCircle size={13} className="text-white" />
+                      </div>
                     </div>
+                  </div>
+                )}
+
+                {/* ── CASO B: Duración fija con múltiples inicios posibles ── */}
+                {!blockTooShort && fixedDuration > 0 && !singleTurno && (
+                  <div className="space-y-3">
                     <TimePicker
                       value={startTime}
-                      onChange={v => { setStartTime(v) }}
-                      placeholder="Hora de inicio"
+                      onChange={v => setStartTime(v)}
+                      placeholder={isConsumption ? '¿A qué hora llega tu grupo?' : 'Hora de llegada'}
                       allowedRange={startPickerRange}
                     />
                     {startTime && (
                       <div className="flex items-center justify-between px-4 py-3.5 rounded-2xl"
                         style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                        <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Hora de salida</span>
+                        <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                          {isConsumption ? 'Tu grupo sale a las' : 'Hora de salida'}
+                        </span>
                         <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>
-                          {formatTime(effectiveEndTime)}
+                          {formatTime(addHoursToTime(startTime, fixedDuration))}
                         </span>
                       </div>
                     )}
                   </div>
-                ) : !blockTooShort ? (
-                  /* ── Duración variable: dos pickers, fin restringido al cierre del bloque ── */
+                )}
+
+                {/* ── CASO C: Duración variable (precio por hora o consumo flexible) ── */}
+                {!blockTooShort && fixedDuration === 0 && (
                   <div className="grid grid-cols-2 gap-3">
                     <TimePicker
                       value={startTime}
                       onChange={v => { setStartTime(v); setEndTime('') }}
-                      placeholder="Hora de inicio"
+                      placeholder={isConsumption ? 'Llegada' : 'Hora de inicio'}
                       allowedRange={allowedTimeRange}
                     />
                     <TimePicker
                       value={endTime}
                       onChange={setEndTime}
-                      placeholder={startTime ? 'Hora de salida' : 'Elige inicio primero'}
+                      placeholder={startTime ? (isConsumption ? 'Salida' : 'Hora de salida') : 'Elige llegada primero'}
                       disabled={!startTime}
                       afterValue={startTime || undefined}
                       minMinutesAfter={minHours ? minHours * 60 : undefined}
@@ -616,7 +678,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                       allowedRange={endPickerAllowedRange}
                     />
                   </div>
-                ) : null}
+                )}
               </div>
             )}
 
@@ -629,12 +691,12 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             )}
 
             {/* Preview de precio cuando hay horario válido */}
-            {startTime && effectiveEndTime && selectedHours > 0 && !hoursError && (
+            {effectiveStartTime && realEndTime && selectedHours > 0 && !hoursError && !singleTurno && (
               <div className="flex items-center justify-between px-4 py-3.5 rounded-2xl"
                 style={{ background: isConsumption ? 'rgba(37,99,235,0.05)' : 'var(--brand-dim)', border: `1px solid ${isConsumption ? 'rgba(37,99,235,0.15)' : 'var(--brand-border)'}` }}>
                 <div>
                   <div className="text-sm font-medium" style={{ color: isConsumption ? '#1D4ED8' : 'var(--text-secondary)' }}>
-                    {formatTime(startTime)} – {formatTime(effectiveEndTime)}
+                    {formatTime(effectiveStartTime)} – {formatTime(realEndTime)}
                     <span className="ml-1.5 text-xs opacity-70">
                       ({selectedHours % 1 === 0 ? selectedHours : selectedHours.toFixed(1)} horas)
                     </span>
@@ -790,7 +852,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
               {[
                 { icon: CalendarDays, label: 'Fecha', value: new Date(eventDate + 'T12:00').toLocaleDateString('es-DO', { weekday: 'long', day: 'numeric', month: 'long' }) },
-                { icon: Clock, label: 'Horario', value: `${formatTime(startTime)} – ${formatTime(effectiveEndTime)} · ${selectedHours % 1 === 0 ? selectedHours : selectedHours.toFixed(1)} horas` },
+                { icon: Clock, label: 'Horario', value: `${formatTime(effectiveStartTime)} – ${formatTime(realEndTime)} · ${selectedHours % 1 === 0 ? selectedHours : selectedHours.toFixed(1)} horas` },
                 { icon: Users, label: 'Personas', value: `${guestCount} personas` },
                 { icon: Sparkles, label: 'Evento', value: finalEventType },
               ].map(({ icon: Icon, label, value }, i, arr) => (
