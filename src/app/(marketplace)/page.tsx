@@ -40,12 +40,11 @@ const eventTypes = [
   { label: 'Baby Shower',  slug: 'baby-shower',   img: 'https://images.unsplash.com/photo-1529634806980-85c3dd6d34ac?w=700&q=85&fit=crop' },
 ]
 
-// Curated hero photos — always used regardless of published spaces
-const HERO_PHOTOS = [
-  { src: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=600&q=90&fit=crop', alt: 'Elegant event hall' },
-  { src: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600&q=90&fit=crop', alt: 'Birthday celebration' },
-  { src: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=90&fit=crop', alt: 'Fine dining venue' },
-  { src: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=90&fit=crop', alt: 'Rooftop event space' },
+const HERO_FALLBACK = [
+  'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=500&q=85&fit=crop',
+  'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&q=85&fit=crop',
+  'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=500&q=85&fit=crop',
+  'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=500&q=85&fit=crop',
 ]
 
 function getCover(space: any) {
@@ -63,24 +62,23 @@ function getPriceLabel(space: any) {
 export default async function HomePage() {
   const spaces = await getPublishedSpaces()
 
+  const heroCovers = spaces.slice(0, 4).map(getCover).filter(Boolean)
+  const mosaicImgs = heroCovers.length >= 4 ? heroCovers.slice(0, 4) : HERO_FALLBACK
+
   return (
     <div style={{ background: '#fff' }}>
 
       {/* ─────────────────────────────────────────────
-          HERO — fills full first screen on desktop
+          HERO
           ───────────────────────────────────────── */}
-      <section
-        className="relative overflow-hidden flex flex-col justify-center"
-        style={{
-          background: 'linear-gradient(155deg, #0A1A14 0%, #0D2318 55%, #0A0E0D 100%)',
-          minHeight: 'calc(100dvh - 64px)',
-        }}>
+      <section className="relative overflow-hidden"
+        style={{ background: 'linear-gradient(155deg, #0A1A14 0%, #0D2318 55%, #0A0E0D 100%)' }}>
 
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full pointer-events-none"
           style={{ background: 'radial-gradient(circle, rgba(53,196,147,0.08) 0%, transparent 70%)', transform: 'translate(-50%,-50%)' }} />
 
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-10 md:py-12 w-full">
-          <div className="grid lg:grid-cols-[1fr_440px] gap-8 lg:gap-12 items-center">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-10 lg:py-12">
+          <div className="grid lg:grid-cols-[1fr_420px] gap-8 lg:gap-10 items-center">
 
             {/* Contenido izquierdo */}
             <div>
@@ -91,7 +89,7 @@ export default async function HomePage() {
               </div>
 
               <h1 className="font-bold text-white mb-4"
-                style={{ fontSize: 'clamp(2rem, 5.5vw, 3.6rem)', lineHeight: 1.08, letterSpacing: '-0.04em' }}>
+                style={{ fontSize: 'clamp(2rem, 6vw, 3.6rem)', lineHeight: 1.08, letterSpacing: '-0.04em' }}>
                 El espacio perfecto
                 <br />
                 <span style={{
@@ -126,20 +124,20 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Mosaico derecho — curated event photos, solo en lg+ */}
+            {/* Mosaico derecho — solo en lg+ */}
             <div className="hidden lg:grid grid-cols-2 gap-3">
-              {HERO_PHOTOS.map((photo, i) => (
+              {mosaicImgs.map((src, i) => (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   key={i}
-                  src={photo.src}
-                  alt={photo.alt}
+                  src={src}
+                  alt=""
                   className="w-full object-cover"
                   style={{
-                    height: i === 0 || i === 3 ? 220 : 175,
+                    height: i === 0 || i === 3 ? 220 : 170,
                     borderRadius: 16,
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-                    marginTop: i === 1 || i === 3 ? 32 : 0,
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                    marginTop: i === 1 || i === 3 ? 28 : 0,
                   }}
                 />
               ))}
