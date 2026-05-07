@@ -210,6 +210,17 @@ export default function MisReservasPage() {
                           <div className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>Tipo de evento</div>
                           <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{bk.event_type}</div>
                         </div>
+                        {(bk as any).space_pricing?.pricing_type === 'fixed_package' && (bk as any).space_pricing?.package_includes && (
+                          <div>
+                            <div className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>
+                              {(bk as any).space_pricing.package_name ? `Paquete: ${(bk as any).space_pricing.package_name}` : 'Incluye el paquete'}
+                            </div>
+                            <div className="text-xs rounded-xl px-3 py-2.5 whitespace-pre-line"
+                              style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid rgba(53,196,147,0.15)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                              {(bk as any).space_pricing.package_includes}
+                            </div>
+                          </div>
+                        )}
                         {bk.event_notes && (
                           <div>
                             <div className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>Nota enviada</div>

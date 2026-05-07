@@ -180,6 +180,7 @@ export async function getAdminBookings(filter?: { status?: string; search?: stri
     *,
     spaces!space_id(name, category, city, profiles!host_id(full_name, email)),
     profiles!guest_id(full_name, email, phone),
+    space_pricing!pricing_id(package_name, package_includes, pricing_type),
     booking_addons(quantity, subtotal, space_addons(name))
   `).order('created_at', { ascending: false })
 

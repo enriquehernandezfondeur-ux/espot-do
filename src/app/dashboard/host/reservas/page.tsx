@@ -280,6 +280,19 @@ export default function HostReservasPage() {
                 )}
               </div>
 
+              {/* Contenido del paquete */}
+              {(selected as any).space_pricing?.pricing_type === 'fixed_package' && (selected as any).space_pricing?.package_includes && (
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                    {(selected as any).space_pricing.package_name ? `Paquete · ${(selected as any).space_pricing.package_name}` : 'Incluye el paquete'}
+                  </div>
+                  <div className="rounded-xl px-3 py-2.5 text-xs whitespace-pre-line"
+                    style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid rgba(53,196,147,0.15)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                    {(selected as any).space_pricing.package_includes}
+                  </div>
+                </div>
+              )}
+
               {/* Finanzas */}
               <div className="rounded-xl p-3 space-y-1.5" style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
                 <div className="flex justify-between text-xs">

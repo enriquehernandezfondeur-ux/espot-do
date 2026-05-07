@@ -170,6 +170,19 @@ export default function AdminReservasPage() {
                 ))}
               </div>
 
+              {/* Paquete incluye */}
+              {(selected as any).space_pricing?.pricing_type === 'fixed_package' && (selected as any).space_pricing?.package_includes && (
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">
+                    {(selected as any).space_pricing.package_name ? `Paquete · ${(selected as any).space_pricing.package_name}` : 'Incluye el paquete'}
+                  </div>
+                  <div className="rounded-xl px-3 py-2.5 text-xs whitespace-pre-line"
+                    style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid rgba(53,196,147,0.15)', color: '#6B7280', lineHeight: 1.7 }}>
+                    {(selected as any).space_pricing.package_includes}
+                  </div>
+                </div>
+              )}
+
               {/* Addons */}
               {selected.booking_addons?.length > 0 && (
                 <div>

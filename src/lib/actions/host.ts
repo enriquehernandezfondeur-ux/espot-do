@@ -203,6 +203,7 @@ export async function getHostBookings(statusFilter?: string) {
       *,
       profiles!guest_id(full_name, email, phone),
       spaces!space_id(name, category),
+      space_pricing!pricing_id(package_name, package_includes, pricing_type),
       booking_addons(addon_id, quantity, unit_price, subtotal, space_addons(name))
     `)
     .in('space_id', spaces.map(s => s.id))

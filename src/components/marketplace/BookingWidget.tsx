@@ -556,16 +556,25 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             )}
 
             {isPackage && (
-              <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl"
+              <div className="rounded-xl overflow-hidden"
                 style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid rgba(53,196,147,0.15)' }}>
-                <Info size={14} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: 1 }} />
-                <div className="text-xs" style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                  <strong>Paquete: {formatCurrency(pricing.fixed_price)}</strong>
-                  {packageHours > 0 && <span> · {packageHours} horas incluidas</span>}
-                  {pricing.extra_hour_price > 0 && (
-                    <span> · Hora adicional: {formatCurrency(pricing.extra_hour_price)}</span>
-                  )}
+                <div className="flex items-start gap-2.5 px-4 py-3">
+                  <Info size={14} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: 1 }} />
+                  <div className="text-xs" style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                    <strong>Paquete: {formatCurrency(pricing.fixed_price)}</strong>
+                    {packageHours > 0 && <span> · {packageHours} horas incluidas</span>}
+                    {pricing.extra_hour_price > 0 && (
+                      <span> · Hora adicional: {formatCurrency(pricing.extra_hour_price)}</span>
+                    )}
+                  </div>
                 </div>
+                {pricing.package_includes && (
+                  <div className="px-4 pb-3 text-xs whitespace-pre-line"
+                    style={{ borderTop: '1px solid rgba(53,196,147,0.15)', paddingTop: 10, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                    <span className="font-semibold block mb-1" style={{ color: 'var(--brand)' }}>Incluye:</span>
+                    {pricing.package_includes}
+                  </div>
+                )}
               </div>
             )}
 
