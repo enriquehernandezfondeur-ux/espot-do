@@ -260,10 +260,10 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
           borderBottom:   '1px solid var(--border-subtle)',
           boxShadow:      '0 1px 8px rgba(0,0,0,0.05)',
         }}>
-        <div className="max-w-screen-2xl mx-auto px-4 md:px-6 py-2 w-full">
+        <div className="max-w-screen-2xl mx-auto px-4 md:px-6 py-3 w-full">
 
           {/* ── Desktop: fila única ── */}
-          <div className="hidden md:flex gap-2 mb-2">
+          <div className="hidden md:flex gap-2 mb-3">
             <div className="flex-1 flex items-center gap-3 rounded-2xl px-4 py-2.5 input-base">
               <Search size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
               <input
@@ -360,10 +360,10 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
           </div>
 
           {/* ── Móvil: UNA sola barra limpia ── */}
-          <div className="md:hidden mb-2 w-full overflow-hidden">
+          <div className="md:hidden mb-3 w-full overflow-hidden">
             <div className="flex gap-2.5 w-full">
               {/* Search input grande y cómodo */}
-              <div className="flex-1 min-w-0 flex items-center gap-3 rounded-2xl px-4 py-3 input-base">
+              <div className="flex-1 min-w-0 flex items-center gap-3 rounded-2xl px-4 py-3.5 input-base">
                 <Search size={17} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
                 <input
                   value={q} onChange={e => setQ(e.target.value)}
@@ -450,7 +450,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
       <div className="max-w-screen-2xl mx-auto px-4 md:px-6 w-full">
 
         {/* Header de resultados */}
-        <div className="flex items-center justify-between py-1.5 md:py-2">
+        <div className="flex items-center justify-between py-3 md:py-4">
           <div>
             <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
               {filtered.length} espacio{filtered.length !== 1 ? 's' : ''} encontrado{filtered.length !== 1 ? 's' : ''}
@@ -474,7 +474,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
         {/* ── DESKTOP: Lista (60%) + Mapa (40%) ── */}
         <div
           className="hidden md:flex gap-5"
-          style={{ height: 'calc(100vh - 196px)' }}
+          style={{ height: 'calc(100vh - 226px)' }}
         >
           <div className="overflow-y-auto pr-2" style={{ flex: '0 0 60%' }}>
             {filtered.length === 0
@@ -490,7 +490,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               )
             }
           </div>
-          <div style={{ flex: '0 0 40%', position: 'sticky', top: 0, height: 'calc(100vh - 196px)', borderRadius: 16, overflow: 'hidden' }}>
+          <div style={{ flex: '0 0 40%', position: 'sticky', top: 0, height: 'calc(100vh - 226px)', borderRadius: 16, overflow: 'hidden' }}>
             <SpacesMap spaces={filtered} hoveredId={hoveredId} cityFilter={sector} onSpaceHover={handleCardHover} />
           </div>
         </div>
