@@ -362,7 +362,7 @@ export async function confirmPayment(bookingId: string) {
     .from('bookings')
     .update({
       status: 'confirmed',
-      payment_status: 'partial',
+      payment_status: 'advance',
       paid_at: new Date().toISOString(),
       confirmed_at: new Date().toISOString(),
       commission_status: 'collected',

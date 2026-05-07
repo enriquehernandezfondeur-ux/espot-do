@@ -211,7 +211,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
       return base + extra * extraRate
     }
     return 0 // quote
-  }, [pricing, startTime, endTime, selectedHours, isHourly, isConsumption, isPackage, packageHours])
+  }, [pricing, startTime, effectiveEndTime, selectedHours, isHourly, isConsumption, isPackage, packageHours])
 
   const addonsTotal = useMemo(() =>
     selectedAddonItems.reduce((s: number, a: any) => {

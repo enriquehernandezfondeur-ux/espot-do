@@ -6,6 +6,14 @@
 //   Rojo    → cancelado / rechazado
 //   Gris    → neutro
 
+// Estados de payment_status que indican que el depósito fue cobrado.
+// Azul pone 'advance'; legacy/manual pone 'partial' o 'paid'.
+export const PAID_STATUSES = ['advance', 'partial', 'paid'] as const
+export type PaymentPaidStatus = typeof PAID_STATUSES[number]
+export function isPaid(ps: string | null | undefined): boolean {
+  return PAID_STATUSES.includes(ps as PaymentPaidStatus)
+}
+
 export type BookingStatus =
   | 'pending'
   | 'accepted'

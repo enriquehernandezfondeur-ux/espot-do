@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { CalendarDays, Clock, Users, MapPin, ChevronRight, Loader2, Search, CreditCard, CheckCircle } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getClientBookings } from '@/lib/actions/client'
-import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
+import { STATUS_LABELS, STATUS_COLORS, isPaid } from '@/lib/bookingConfig'
 import { cn } from '@/lib/utils'
 
 type Booking = Awaited<ReturnType<typeof getClientBookings>>[0]
@@ -180,8 +180,8 @@ export default function MisReservasPage() {
                   </div>
                 </button>
 
-                {/* ── CTA de pago cuando está aceptada ── */}
-                {bk.status === 'accepted' && (
+                {/* ── CTA de pago cuando está aceptada y NO ha pagado aún ── */}
+                {bk.status === 'accepted' && !isPaid(bk.payment_status) && (
                   <div className="mx-4 mb-4 px-4 py-4 rounded-2xl"
                     style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.2)' }}>
                     <div className="mb-3">
@@ -244,8 +244,8 @@ export default function MisReservasPage() {
                           <span>{formatCurrency(Number(bk.total_amount) - Number(bk.platform_fee))}</span>
                         </div>
                         <div className="flex items-center gap-1 text-xs font-semibold mt-1"
-                          style={{ color: bk.payment_status === 'partial' || bk.payment_status === 'paid' ? '#16A34A' : '#D97706' }}>
-                          {bk.payment_status === 'partial' || bk.payment_status === 'paid'
+                          style={{ color: isPaid(bk.payment_status) ? '#16A34A' : '#D97706' }}>
+                          {isPaid(bk.payment_status)
                             ? <><CheckCircle size={11} /> Pago inicial confirmado</>
                             : '⏳ Pago inicial pendiente'}
                         </div>

@@ -11,6 +11,7 @@ import {
 import { createClient } from '@/lib/supabase/client'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { formatCard, detectBrand } from '@/lib/azul/client'
+import { isPaid } from '@/lib/bookingConfig'
 
 // ── Iconos de tarjeta ─────────────────────────────────────
 function VisaIcon() {
@@ -88,7 +89,8 @@ export default function PagoPage({ params }: { params: Promise<{ bookingId: stri
         .single()
 
       if (!data) { router.push('/dashboard/reservas'); return }
-      if (data.payment_status === 'paid') { router.push(`/pago/exitoso?b=${bookingId}`); return }
+      // Redirigir si el depósito ya fue cobrado ('advance' = Azul, 'partial'/'paid' = legacy)
+      if (isPaid(data.payment_status)) { router.push(`/pago/exitoso?b=${bookingId}`); return }
       setBooking(data)
       setLoading(false)
     }
