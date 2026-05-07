@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -47,6 +47,14 @@ function AuthContent() {
   const [error,    setError]    = useState('')
   const router   = useRouter()
   const supabase = createClient()
+
+  // Si ya hay sesión activa, redirigir directamente al destino
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) router.replace(redirectTo)
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function reset() { setError(''); setEmail(''); setPassword('') }
 

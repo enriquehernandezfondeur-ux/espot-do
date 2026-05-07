@@ -230,7 +230,7 @@ export default async function HomePage() {
               </div>
               <h3 className="font-bold text-lg mb-2" style={{ color: 'var(--text-primary)' }}>Próximamente más espacios</h3>
               <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>Sé el primero en publicar tu espacio</p>
-              <Link href="/auth?mode=register&redirect=/dashboard/host" className="btn-brand inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-xl">
+              <Link href="/auth?mode=register&redirect=/dashboard/host/espacio" className="btn-brand inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-xl">
                 Publicar espacio gratis
               </Link>
             </div>
@@ -468,7 +468,7 @@ export default async function HomePage() {
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row md:flex-col gap-3 shrink-0">
-                <Link href="/auth"
+                <Link href="/auth?mode=register&redirect=/dashboard/host/espacio"
                   className="inline-flex items-center justify-center gap-2 font-bold px-6 md:px-8 py-3.5 md:py-4 rounded-2xl text-sm whitespace-nowrap"
                   style={{ background: '#35C493', color: '#fff', boxShadow: '0 4px 20px rgba(53,196,147,0.35)' }}>
                   Publicar espacio gratis <ArrowRight size={15} />
