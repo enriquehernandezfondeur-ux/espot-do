@@ -555,35 +555,6 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   </div>
                 </div>
 
-                {/* ── Amenidades ── */}
-                {(pricing?.package_includes?.length > 0 || addons.length > 0) && (
-                  <div>
-                    <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      Amenidades
-                    </h3>
-                    {pricing?.package_includes?.length > 0 ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-6">
-                        {pricing.package_includes.map((item: string) => (
-                          <div key={item} className="flex items-center gap-2.5">
-                            <CheckCircle size={14} style={{ color: 'var(--brand)', flexShrink: 0 }} />
-                            <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>{item}</span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-2 gap-y-2.5 gap-x-4">
-                        {addons.slice(0, 6).map((addon: any) => (
-                          <div key={addon.id} className="flex items-center gap-2">
-                            <span className="text-base shrink-0">{addonEmoji(addon.name)}</span>
-                            <span className="text-sm truncate" style={{ color: 'var(--text-secondary)' }}>
-                              {addon.name}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
 
                 {/* ── Horarios disponibles ── */}
                 {timeBlocks.length > 0 && (
