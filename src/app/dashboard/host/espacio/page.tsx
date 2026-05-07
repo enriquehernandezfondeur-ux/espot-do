@@ -1160,30 +1160,6 @@ export default function EspacioPage() {
                   )}
                 </div>
 
-                {/* Limpieza */}
-                <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Servicio de limpieza</div>
-                      <div className="text-xs" style={{ color: 'var(--text-muted)' }}>¿Incluye limpieza al finalizar el evento?</div>
-                    </div>
-                    <button onClick={() => setIncludesCleaning(!includesCleaning)}
-                      className="w-11 h-6 rounded-full relative transition-all shrink-0"
-                      style={{ background: includesCleaning ? '#35C493' : 'var(--border-medium)' }}>
-                      <span className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
-                        style={{ left: includesCleaning ? 22 : 2 }} />
-                    </button>
-                  </div>
-                  {!includesCleaning && (
-                    <div className="pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-                      <label className="block text-xs mb-1.5" style={{ color: 'var(--text-muted)' }}>Cargo de limpieza (RD$) — opcional</label>
-                      <input type="number" value={cleaningFee} onChange={e => setCleaningFee(e.target.value)}
-                        placeholder="Dejar en blanco si no aplica"
-                        className="input-base w-full rounded-xl px-3 py-2.5 text-sm" />
-                    </div>
-                  )}
-                </div>
-
                 {/* Horas extra */}
                 <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                   <div className="flex items-center justify-between mb-3">
