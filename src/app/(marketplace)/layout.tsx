@@ -118,7 +118,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
           </Link>
 
           {/* Search — solo desktop */}
-          <div className="hidden md:flex items-center gap-2 flex-1 max-w-xs rounded-full px-4 py-2.5"
+          <div className="hidden md:flex items-center gap-2 w-64 rounded-full px-4 py-2.5"
             style={{ background: 'var(--bg-elevated)', border: '1.5px solid var(--border-medium)' }}>
             <Search size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
             <input
