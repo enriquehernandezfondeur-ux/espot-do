@@ -18,7 +18,7 @@ export default async function AdminPagosPage() {
   const totalEventValue = bookings.reduce((s, b) => s + Number((b as any).total_amount), 0)
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Pagos</h1>
         <p className="text-sm text-slate-500 mt-0.5">Historial de comisiones y pagos de la plataforma</p>

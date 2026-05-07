@@ -35,7 +35,7 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Usuarios</h1>
         <p className="text-sm text-slate-500 mt-0.5">{users.length} usuarios registrados</p>

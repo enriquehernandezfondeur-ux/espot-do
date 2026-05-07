@@ -57,7 +57,7 @@ export default function AdminPayoutsPage() {
     .reduce((s, b) => s + (Number(b.total_amount) - Number(b.platform_fee)), 0)
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto">
 
       {/* Header */}
       <div className="flex items-start justify-between mb-8">

@@ -96,7 +96,7 @@ export default function ClientDashboard() {
       )}
 
       {/* Stats — 2 cols en móvil, 4 en desktop */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
         {[
           { label: 'Total reservas', value: stats?.total ?? 0,     icon: CalendarDays, color: 'var(--brand)' },
           { label: 'Pendientes',     value: stats?.pending ?? 0,   icon: Clock,        color: '#D97706' },

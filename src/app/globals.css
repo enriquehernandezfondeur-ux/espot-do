@@ -197,13 +197,18 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   justify-content: center;
 }
 
-/* Prevenir zoom en inputs en iOS */
+/* Prevenir zoom en inputs en iOS — TODOS los tipos */
 @media (max-width: 767px) {
+  input,
   input[type="text"],
   input[type="email"],
   input[type="number"],
   input[type="date"],
   input[type="time"],
+  input[type="tel"],
+  input[type="password"],
+  input[type="search"],
+  input[type="url"],
   select,
   textarea {
     font-size: 16px !important;

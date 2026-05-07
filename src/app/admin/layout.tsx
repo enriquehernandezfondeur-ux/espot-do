@@ -17,7 +17,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="flex min-h-screen" style={{ background: '#F4F6F8' }}>
       <AdminSidebar />
-      <main className="flex-1 overflow-auto">
+      {/* pt-14 compensa la top bar fija en móvil */}
+      <main className="flex-1 overflow-auto pt-14 md:pt-0">
         {children}
       </main>
     </div>

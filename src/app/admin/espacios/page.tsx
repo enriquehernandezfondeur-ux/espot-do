@@ -43,7 +43,7 @@ export default function AdminSpacesPage() {
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Espacios</h1>
@@ -77,8 +77,9 @@ export default function AdminSpacesPage() {
         </div>
       ) : (
         <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+          <div className="overflow-x-auto scrollbar-hide">
           {/* Table header */}
-          <div className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-slate-400"
+          <div className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-slate-400 min-w-[600px]"
             style={{ borderBottom: '1px solid #F0F2F5', background: '#FAFBFC' }}>
             <span>Espacio</span><span>Precio</span><span>Reservas</span><span>Estado</span><span>Acciones</span>
           </div>
@@ -92,7 +93,7 @@ export default function AdminSpacesPage() {
                 const host  = space.profiles
                 const bookingsCount = space.bookings?.length ?? 0
                 return (
-                  <div key={space.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 items-center px-5 py-4 hover:bg-slate-50 transition-colors">
+                  <div key={space.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 items-center px-5 py-4 hover:bg-slate-50 transition-colors min-w-[600px]">
 
                     {/* Space info */}
                     <div className="flex items-center gap-3 min-w-0">
@@ -207,6 +208,7 @@ export default function AdminSpacesPage() {
               })}
             </div>
           )}
+          </div>{/* end overflow-x-auto */}
         </div>
       )}
     </div>

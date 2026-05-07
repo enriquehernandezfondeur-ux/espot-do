@@ -52,10 +52,10 @@ export default async function AdminDashboard() {
   ].filter(Boolean) as { label: string; href: string; color: string; icon: React.ElementType }[]
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-5 md:space-y-8">
 
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 mb-0.5">
             <Shield size={14} style={{ color: '#35C493' }} />
@@ -63,21 +63,21 @@ export default async function AdminDashboard() {
               Admin Console
             </span>
           </div>
-          <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>
+          <h1 className="text-xl md:text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>
             {greeting}, Enrique 👋
           </h1>
           <p className="text-sm mt-0.5 capitalize" style={{ color: '#94A3B8' }}>{dateLabel}</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-wrap">
           <Link href="/admin/espacios?status=pending"
-            className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl transition-all"
+            className="flex items-center gap-2 text-xs md:text-sm font-semibold px-3 md:px-4 py-2 md:py-2.5 rounded-xl transition-all"
             style={{ background: '#0F1623', color: '#fff' }}>
-            <Building2 size={14} /> Aprobar espacios
+            <Building2 size={13} /> Aprobar espacios
           </Link>
           <Link href="/admin/payouts"
-            className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl transition-all"
-            style={{ background: '#35C493', color: '#0B0F0E', boxShadow: '0 2px 8px rgba(53,196,147,0.3)' }}>
-            <Banknote size={14} /> Gestionar payouts
+            className="flex items-center gap-2 text-xs md:text-sm font-semibold px-3 md:px-4 py-2 md:py-2.5 rounded-xl transition-all"
+            style={{ background: '#35C493', color: '#0B0F0E' }}>
+            <Banknote size={13} /> Payouts
           </Link>
         </div>
       </div>
@@ -112,7 +112,7 @@ export default async function AdminDashboard() {
       )}
 
       {/* Metric cards */}
-      <div className="grid grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
         {[
           { label: 'Espacios',      value: stats?.totalSpaces ?? 0,                  sub: `${stats?.pendingSpaces ?? 0} por aprobar`,      icon: Building2,  color: '#7C3AED', href: '/admin/espacios',      format: 'num' },
           { label: 'Reservas',      value: stats?.totalBookings ?? 0,                sub: `${stats?.pendingBookings ?? 0} pendientes`,      icon: CalendarDays,color: '#2563EB', href: '/admin/reservas',      format: 'num' },

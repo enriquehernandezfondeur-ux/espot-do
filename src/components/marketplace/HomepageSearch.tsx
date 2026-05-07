@@ -492,8 +492,8 @@ export default function HomepageSearch() {
                       value={actQ}
                       onChange={e => { setActQ(e.target.value); setActivity('') }}
                       placeholder="Buscar tipo de evento..."
-                      className="flex-1 bg-transparent text-sm focus:outline-none"
-                      style={{ color: '#111827' }}
+                      className="flex-1 bg-transparent focus:outline-none"
+                      style={{ color: '#111827', fontSize: 16 }}
                       autoFocus
                     />
                   </div>
@@ -523,8 +523,8 @@ export default function HomepageSearch() {
                       value={cityQ}
                       onChange={e => { setCityQ(e.target.value); setCity('') }}
                       placeholder="Buscar sector o ciudad..."
-                      className="flex-1 bg-transparent text-sm focus:outline-none"
-                      style={{ color: '#111827' }}
+                      className="flex-1 bg-transparent focus:outline-none"
+                      style={{ color: '#111827', fontSize: 16 }}
                       autoFocus
                     />
                     {cityQ && (
