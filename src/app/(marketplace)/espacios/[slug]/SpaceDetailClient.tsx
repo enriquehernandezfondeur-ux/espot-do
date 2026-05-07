@@ -15,6 +15,23 @@ const FavoriteButton = dynamic(() => import('@/components/marketplace/FavoriteBu
 
 const DAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 
+function daysToLabel(days: number[]): string {
+  if (!days?.length) return '—'
+  const s = [...days].sort((a, b) => a - b)
+  const N = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+  if (s.length === 7) return 'Todos los días'
+  if (s.join() === '1,2,3,4,5') return 'Lun – Vie'
+  if (s.join() === '0,6')       return 'Sáb y Dom'
+  if (s.join() === '1,2,3,4,5,6') return 'Lun – Sáb'
+  if (s.join() === '0,1,2,3,4,5') return 'Dom – Vie'
+  // Rango consecutivo
+  const isConsec = s.every((d, i) => i === 0 || d === s[i - 1] + 1)
+  if (isConsec) return `${N[s[0]]} – ${N[s[s.length - 1]]}`
+  // Lista corta
+  if (s.length <= 3) return s.map(d => N[d]).join(', ')
+  return `${N[s[0]]} – ${N[s[s.length - 1]]}`
+}
+
 function addonEmoji(name: string) {
   const n = name.toLowerCase()
   if (n.includes('bartender') || n.includes('barra')) return '🍹'
@@ -560,47 +577,21 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                 {timeBlocks.length > 0 && (
                   <div>
                     <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      Horarios disponibles
+                      Horarios
                     </h3>
-                    <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
-                      {timeBlocks.map((block: any, i: number) => {
-                        const activeDays: number[] = block.days_of_week ?? []
-                        return (
-                          <div key={i}
-                            className="px-4 py-3.5"
-                            style={{ borderBottom: i < timeBlocks.length - 1 ? '1px solid var(--border-subtle)' : undefined, background: '#fff' }}>
-
-                            {/* Nombre + hora */}
-                            <div className="flex items-center justify-between gap-3 mb-2.5">
-                              <div className="flex items-center gap-2">
-                                <Clock size={13} style={{ color: 'var(--brand)', flexShrink: 0 }} />
-                                <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                                  {block.block_name || `Turno ${i + 1}`}
-                                </span>
-                              </div>
-                              <span className="text-sm font-bold tabular-nums shrink-0" style={{ color: 'var(--brand)' }}>
-                                {formatTime(block.start_time)} – {formatTime(block.end_time)}
-                              </span>
-                            </div>
-
-                            {/* Días */}
-                            <div className="flex gap-1">
-                              {DAYS.map((d, j) => {
-                                const active = activeDays.includes(j)
-                                return (
-                                  <div key={j}
-                                    className="flex-1 text-center py-1.5 rounded-lg text-xs font-semibold transition-colors"
-                                    style={active
-                                      ? { background: 'var(--brand-dim)', color: 'var(--brand)' }
-                                      : { color: 'var(--text-muted)', opacity: 0.4 }}>
-                                    {d}
-                                  </div>
-                                )
-                              })}
-                            </div>
-                          </div>
-                        )
-                      })}
+                    <div>
+                      {timeBlocks.map((block: any, i: number) => (
+                        <div key={i}
+                          className="flex items-center justify-between py-2.5"
+                          style={{ borderBottom: i < timeBlocks.length - 1 ? '1px solid var(--border-subtle)' : undefined }}>
+                          <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                            {daysToLabel(block.days_of_week ?? [])}
+                          </span>
+                          <span className="text-sm tabular-nums" style={{ color: 'var(--text-secondary)' }}>
+                            {formatTime(block.start_time)} – {formatTime(block.end_time)}
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
