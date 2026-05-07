@@ -87,7 +87,9 @@ function buildPricingData(spaceId: string, p: SaveSpacePayload) {
   if (p.pricingType === 'minimum_consumption') return {
     ...base,
     minimum_consumption: num(p.minConsumption),
-    session_hours: int(p.sessionHours),
+    session_hours: int(p.sessionHours) || null,
+    min_hours:     int(p.minHours) || null,
+    max_hours:     int(p.maxHours) || null,
   }
   if (p.pricingType === 'fixed_package') return {
     ...base,
@@ -341,7 +343,9 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
   }
   if (payload.pricingType === 'minimum_consumption') {
     pricingData.minimum_consumption = parseFloat(payload.minConsumption)
-    if (payload.sessionHours) pricingData.session_hours = parseInt(payload.sessionHours)
+    pricingData.session_hours = payload.sessionHours ? parseInt(payload.sessionHours) : null
+    pricingData.min_hours     = payload.minHours     ? parseInt(payload.minHours)     : null
+    pricingData.max_hours     = payload.maxHours     ? parseInt(payload.maxHours)     : null
   }
   if (payload.pricingType === 'fixed_package') {
     pricingData.fixed_price      = parseFloat(payload.fixedPrice)
