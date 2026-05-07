@@ -13,7 +13,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     avatarUrl = data?.avatar_url ?? undefined
   }
 
-  const isAdmin = user?.email === 'enriquehernandezfondeur@gmail.com'
+  const isAdmin = user?.email === (process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com')
 
   return (
     <div className="host-theme flex min-h-screen" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>

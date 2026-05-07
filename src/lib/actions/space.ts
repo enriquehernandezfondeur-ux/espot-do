@@ -262,6 +262,12 @@ export async function saveSpaceImages(
   photos: { url: string; path: string; isCover: boolean }[]
 ) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+
+  // Verificar que el usuario es el propietario del espacio
+  const { data: space } = await supabase.from('spaces').select('host_id').eq('id', spaceId).single()
+  if (!space || space.host_id !== user.id) return { error: 'No autorizado' }
 
   // Eliminar fotos anteriores
   await supabase.from('space_images').delete().eq('space_id', spaceId)

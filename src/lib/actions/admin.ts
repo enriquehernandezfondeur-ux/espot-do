@@ -76,7 +76,8 @@ export async function adminUpsertAddon(spaceId: string, addon: { id?: string; na
   const supabase = await requireAdmin()
   if (!supabase) return { error: 'No autorizado' }
   if (addon.id) {
-    const { error } = await supabase.from('space_addons').update(addon).eq('id', addon.id)
+    const { id, ...updateData } = addon
+    const { error } = await supabase.from('space_addons').update(updateData).eq('id', id)
     return error ? { error: error.message } : { success: true }
   }
   const { error } = await supabase.from('space_addons').insert({ ...addon, space_id: spaceId, is_available: true })
@@ -191,7 +192,15 @@ export async function getAdminBookings(filter?: { status?: string; search?: stri
 export async function updateBookingStatus(bookingId: string, status: string) {
   const supabase = await requireAdmin()
   if (!supabase) return { error: 'No autorizado' }
-  const { error } = await supabase.from('bookings').update({ status }).eq('id', bookingId)
+  const now = new Date().toISOString()
+  const extra: Record<string, unknown> = {}
+  if (status === 'confirmed') {
+    extra.payment_status = 'advance'
+    extra.confirmed_at   = now
+    extra.paid_at        = now
+  }
+  if (status === 'completed') extra.payment_status = 'paid'
+  const { error } = await supabase.from('bookings').update({ status, ...extra }).eq('id', bookingId)
   return error ? { error: error.message } : { success: true }
 }
 
@@ -275,7 +284,8 @@ export async function getAdminReports() {
     const start = d.toISOString().split('T')[0]
     const end = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split('T')[0]
     const mes = d.toLocaleDateString('es-DO', { month: 'short' })
-    const items = (monthlyData.data ?? []).filter(b => b.created_at >= start && b.created_at <= end)
+    const nextMonthStart = new Date(d.getFullYear(), d.getMonth() + 1, 1).toISOString()
+    const items = (monthlyData.data ?? []).filter(b => b.created_at >= start && b.created_at < nextMonthStart)
     return {
       mes: mes.charAt(0).toUpperCase() + mes.slice(1),
       ingresos: items.reduce((s, b) => s + Number(b.platform_fee), 0),

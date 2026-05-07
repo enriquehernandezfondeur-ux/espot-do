@@ -7,7 +7,7 @@ import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { createBookingEvent, deleteBookingEvent } from '@/lib/google-calendar'
 export type { BookingStatus } from '@/lib/bookingConfig'
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 
 // ── CREAR RESERVA CON VALIDACIÓN ANTI-DOBLE ───────────────
 export interface CreateBookingPayload {
@@ -243,7 +243,7 @@ export async function acceptBooking(bookingId: string) {
     .from('bookings')
     .update({ status: 'accepted', accepted_at: new Date().toISOString() })
     .eq('id', bookingId)
-    .eq('status', 'pending')
+    .in('status', ['pending', 'quote_requested'])
 
   if (error) return { error: error.message }
 
@@ -507,7 +507,7 @@ export async function cancelBooking(bookingId: string, reason?: string) {
       cancellation_reason: reason ?? null,
     })
     .eq('id', bookingId)
-    .in('status', ['pending', 'accepted', 'confirmed'])
+    .in('status', ['pending', 'quote_requested', 'accepted', 'confirmed'])
 
   if (error) return { error: error.message }
 
