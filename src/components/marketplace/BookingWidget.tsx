@@ -84,56 +84,87 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
 
   const finalEventType = eventType === 'Otro' ? (customEventType.trim() || 'Otro') : eventType
 
-  // ── Helpers de tiempo ─────────────────────────────────
+  // ── Helpers de tiempo con precisión de minutos ────────
+  // Convierte 'HH:MM' a minutos totales. Horas 0-5 = siguiente día (24-29h).
+  function timeToMins(t: string): number {
+    if (!t) return 0
+    const [h, m] = t.split(':').map(Number)
+    const baseH = h < 6 ? h + 24 : h
+    return baseH * 60 + m
+  }
+
+  // Convierte minutos totales de vuelta a 'HH:MM'
+  function minsToTime(mins: number): string {
+    const h = Math.floor(mins / 60) % 24
+    const m = mins % 60
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+  }
+
   function calcHours(start: string, end: string): number {
     if (!start || !end) return 0
-    const sh = parseInt(start.split(':')[0]), sm = parseInt(start.split(':')[1] || '0')
-    const eh = parseInt(end.split(':')[0]),   em = parseInt(end.split(':')[1] || '0')
-    const sn = (sh < 6 ? sh + 24 : sh) * 60 + sm
-    const en = (eh < 6 ? eh + 24 : eh) * 60 + em
-    return Math.max(0, (en - sn) / 60)
+    return Math.max(0, (timeToMins(end) - timeToMins(start)) / 60)
   }
 
   function addHoursToTime(start: string, hours: number): string {
-    const [h, m] = start.split(':').map(Number)
-    const totalMins = h * 60 + m + Math.round(hours * 60)
-    const endH = Math.floor(totalMins / 60) % 24
-    const endM = totalMins % 60
-    return `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`
+    return minsToTime(timeToMins(start) + Math.round(hours * 60))
   }
 
-  // ── Rango horario del propietario (bug fix: usaba b en lugar de a) ──
+  // ── Rango horario del propietario ─────────────────────
   const allowedTimeRange = useMemo(() => {
     const blocks: any[] = space.space_time_blocks ?? []
     if (!blocks.length || !eventDate) return undefined
     const dow = new Date(eventDate + 'T12:00').getDay()
     const active = blocks.filter(b => b.is_active !== false && (b.days_of_week ?? []).includes(dow))
     if (!active.length) return null
+    // Elegir el bloque más largo del día (fix: usaba b.end_time para calcular aLen)
     const sorted = [...active].sort((a: any, b: any) => {
-      const aLen = (a.end_time === '00:00' ? 24 : parseInt(a.end_time)) - parseInt(a.start_time)
-      const bLen = (b.end_time === '00:00' ? 24 : parseInt(b.end_time)) - parseInt(b.start_time)
+      const aLen = timeToMins(a.end_time === '00:00' ? '24:00' : a.end_time) - timeToMins(a.start_time)
+      const bLen = timeToMins(b.end_time === '00:00' ? '24:00' : b.end_time) - timeToMins(b.start_time)
       return bLen - aLen
     })
     return { start: sorted[0].start_time as string, end: sorted[0].end_time as string }
   }, [eventDate, space.space_time_blocks])
 
-  // ── Duración fija según modelo ─────────────────────────
-  // Consumo mínimo con session_hours fija o Paquete sin horas extra = duración inmutable
-  const minHours     = pricing?.min_hours ?? 0
-  const maxHours     = pricing?.max_hours ?? 0
+  // ── Configuración de límites ───────────────────────────
+  const minHours     = pricing?.min_hours     ?? 0
+  const maxHours     = pricing?.max_hours     ?? 0
   const packageHours = pricing?.package_hours ?? 0
   const sessionHours = pricing?.session_hours ?? 0
 
+  // Duración fija: consumo mínimo con sesión definida o paquete sin horas extra
   const fixedDuration: number = (() => {
     if (isConsumption && sessionHours > 0) return sessionHours
     if (isPackage && packageHours > 0 && !(Number(pricing?.extra_hour_price) > 0)) return packageHours
     return 0
   })()
 
-  // Para modelos con duración fija, la hora de fin se calcula automáticamente
+  // Para duración fija, restringir el picker de inicio para que
+  // start + fixedDuration <= blockEnd (solo mostrar inicios alcanzables)
+  const startPickerRange = useMemo(() => {
+    if (!allowedTimeRange || fixedDuration <= 0) return allowedTimeRange
+    const blockEndMins   = timeToMins(allowedTimeRange.end === '00:00' ? '24:00' : allowedTimeRange.end)
+    const latestStartMins = blockEndMins - fixedDuration * 60
+    if (latestStartMins <= timeToMins(allowedTimeRange.start)) return null // bloque muy corto
+    // Calcular la última hora entera válida y pasar la siguiente como límite exclusivo
+    const latestHour    = Math.floor(latestStartMins / 60) % 24
+    const exclusiveEnd  = minsToTime((latestHour + 1) * 60)
+    return { start: allowedTimeRange.start, end: exclusiveEnd }
+  }, [allowedTimeRange, fixedDuration])
+
+  // Bloque demasiado corto para la duración fija requerida
+  const blockTooShort = fixedDuration > 0 && allowedTimeRange !== null && allowedTimeRange !== undefined && startPickerRange === null
+
+  // Hora de fin efectiva: fija (calculada) o elegida por el usuario
   const effectiveEndTime = fixedDuration > 0 && startTime
     ? addHoursToTime(startTime, fixedDuration)
     : endTime
+
+  // Minutos disponibles desde el inicio hasta el cierre del bloque (para end picker)
+  const minsUntilBlockEnd = useMemo(() => {
+    if (!allowedTimeRange || !startTime) return undefined
+    const blockEndMins = timeToMins(allowedTimeRange.end === '00:00' ? '24:00' : allowedTimeRange.end)
+    return blockEndMins - timeToMins(startTime)
+  }, [allowedTimeRange, startTime])
 
   const selectedHours = useMemo(
     () => calcHours(startTime, effectiveEndTime),
@@ -147,14 +178,12 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
       return `Este Espot requiere mínimo ${minHours} hora${minHours > 1 ? 's' : ''} de reserva`
     if (maxHours && selectedHours > maxHours)
       return `Este Espot permite máximo ${maxHours} hora${maxHours > 1 ? 's' : ''} de reserva`
-    // Validar que el fin no exceda el rango permitido por el propietario
-    if (allowedTimeRange && effectiveEndTime) {
-      const endN = parseInt(effectiveEndTime.split(':')[0]) < 6
-        ? parseInt(effectiveEndTime.split(':')[0]) + 24
-        : parseInt(effectiveEndTime.split(':')[0])
-      const rangeEnd = allowedTimeRange.end === '00:00' ? 24 : parseInt(allowedTimeRange.end)
-      if (endN > rangeEnd)
-        return `El horario seleccionado excede el cierre del espacio. Elige una hora de inicio más temprana.`
+    // Validar que el fin no exceda el cierre del bloque (comparación con minutos exactos)
+    if (allowedTimeRange) {
+      const endMins      = timeToMins(effectiveEndTime)
+      const blockEndMins = timeToMins(allowedTimeRange.end === '00:00' ? '24:00' : allowedTimeRange.end)
+      if (endMins > blockEndMins)
+        return `El horario seleccionado excede el cierre del espacio (${formatTime(allowedTimeRange.end)}). Elige una hora de inicio más temprana.`
     }
     return null
   }, [selectedHours, minHours, maxHours, startTime, effectiveEndTime, allowedTimeRange])
@@ -166,7 +195,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   )
 
   const basePrice = useMemo(() => {
-    if (!startTime || !endTime || selectedHours === 0) return 0
+    if (!startTime || !effectiveEndTime || selectedHours === 0) return 0
 
     if (isHourly) {
       return (pricing?.hourly_price ?? 0) * selectedHours
@@ -518,8 +547,17 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                   </div>
                 )}
 
-                {fixedDuration > 0 ? (
-                  /* ── Duración fija (consumo mínimo con sesión o paquete sin extra) ── */
+                {/* Aviso si el bloque es demasiado corto para la duración fija */}
+                {blockTooShort && (
+                  <div className="px-4 py-3 rounded-xl text-sm"
+                    style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)', color: '#DC2626' }}>
+                    No hay horarios disponibles este día para completar {fixedDuration} hora{fixedDuration !== 1 ? 's' : ''} de sesión.
+                    Elige otra fecha o consulta al propietario.
+                  </div>
+                )}
+
+                {!blockTooShort && fixedDuration > 0 ? (
+                  /* ── Duración fija: solo picker de inicio, salida calculada ── */
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
                       style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid var(--brand-border)' }}>
@@ -533,7 +571,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                       value={startTime}
                       onChange={v => { setStartTime(v) }}
                       placeholder="Hora de inicio"
-                      allowedRange={allowedTimeRange}
+                      allowedRange={startPickerRange}
                     />
                     {startTime && (
                       <div className="flex items-center justify-between px-4 py-3.5 rounded-2xl"
@@ -545,8 +583,8 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                       </div>
                     )}
                   </div>
-                ) : (
-                  /* ── Duración variable (por hora / consumo sin sesión fija / paquete extensible) ── */
+                ) : !blockTooShort ? (
+                  /* ── Duración variable: dos pickers, fin restringido al cierre del bloque ── */
                   <div className="grid grid-cols-2 gap-3">
                     <TimePicker
                       value={startTime}
@@ -561,11 +599,15 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                       disabled={!startTime}
                       afterValue={startTime || undefined}
                       minMinutesAfter={minHours ? minHours * 60 : undefined}
-                      maxMinutesAfter={maxHours ? maxHours * 60 : undefined}
+                      maxMinutesAfter={
+                        minsUntilBlockEnd !== undefined
+                          ? (maxHours ? Math.min(maxHours * 60, minsUntilBlockEnd) : minsUntilBlockEnd)
+                          : (maxHours ? maxHours * 60 : undefined)
+                      }
                       allowedRange={allowedTimeRange}
                     />
                   </div>
-                )}
+                ) : null}
               </div>
             )}
 
