@@ -10,6 +10,7 @@ import ActivityPicker from '@/components/dashboard/ActivityPicker'
 import dynamic from 'next/dynamic'
 const LocationPicker  = dynamic(() => import('@/components/dashboard/LocationPicker'),  { ssr: false })
 const VideoUploader   = dynamic(() => import('@/components/dashboard/VideoUploader'),   { ssr: false })
+const MenuUploader    = dynamic(() => import('@/components/dashboard/MenuUploader'),    { ssr: false })
 import type { BaseActivity } from '@/lib/activities'
 import type { SpaceCategory, PricingType, PaymentTermType } from '@/types'
 
@@ -132,6 +133,8 @@ export default function EspacioPage() {
   const [saveError, setSaveError] = useState('')
   const [pendingPhotos, setPendingPhotos] = useState<{ url: string; path: string; isCover: boolean }[]>([])
   const [videoUrl,      setVideoUrl]      = useState('')
+  const [menuUrl,       setMenuUrl]       = useState('')
+  const [menuFileName,  setMenuFileName]  = useState('')
   const [editingSpaceId, setEditingSpaceId] = useState<string | null>(null)
 
   // Step 1 - Basic info
@@ -222,7 +225,7 @@ export default function EspacioPage() {
     setSaveError('')
 
     const payload = {
-      name, category, description, address, sector, lat, lng, capacityMin, capacityMax, videoUrl,
+      name, category, description, address, sector, lat, lng, capacityMin, capacityMax, videoUrl, menuUrl, menuFileName,
       primaryActivity, secondaryActivities,
       pricingType: pricingType as PricingType,
       hourlyPrice, minHours, maxHours, minConsumption, sessionHours,
@@ -291,6 +294,8 @@ export default function EspacioPage() {
     setLat(space.lat ? String(space.lat) : '')
     setLng(space.lng ? String(space.lng) : '')
     setVideoUrl(space.video_url ?? '')
+    setMenuUrl(space.menu_url ?? '')
+    setMenuFileName(space.menu_file_name ?? '')
     setCapacityMin(String(space.capacity_min ?? ''))
     setCapacityMax(String(space.capacity_max ?? ''))
     // Pricing
@@ -696,6 +701,28 @@ export default function EspacioPage() {
                 initialUrl={videoUrl}
                 onChange={(url) => setVideoUrl(url)}
                 onRemove={() => setVideoUrl('')}
+              />
+            </div>
+
+            {/* Menú / carta opcional */}
+            <div>
+              <div className="flex items-center gap-2 mb-1.5">
+                <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                  Menú o carta
+                </label>
+                <span className="text-xs px-2 py-0.5 rounded-full font-medium"
+                  style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
+                  Opcional
+                </span>
+              </div>
+              <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
+                Sube tu menú o carta en PDF o Word. Los clientes podrán descargarlo directamente desde tu Espot.
+              </p>
+              <MenuUploader
+                initialUrl={menuUrl}
+                initialName={menuFileName}
+                onChange={(url, name) => { setMenuUrl(url); setMenuFileName(name) }}
+                onRemove={() => { setMenuUrl(''); setMenuFileName('') }}
               />
             </div>
           </div>

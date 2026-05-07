@@ -25,6 +25,8 @@ export interface SaveSpacePayload {
   lat?: string
   lng?: string
   videoUrl?: string
+  menuUrl?: string
+  menuFileName?: string
   capacityMin: string
   capacityMax: string
   primaryActivity?: string
@@ -134,9 +136,13 @@ export async function saveSpace(payload: SaveSpacePayload) {
 
   const spaceId = space.id
 
-  // Guardar video_url por separado — no falla si la columna aún no existe
-  if (payload.videoUrl !== undefined) {
-    await supabase.from('spaces').update({ video_url: payload.videoUrl || null }).eq('id', spaceId)
+  // Guardar video_url y menu_url por separado — no fallan si la columna aún no existe
+  if (payload.videoUrl !== undefined || payload.menuUrl !== undefined) {
+    const extras: Record<string, unknown> = {}
+    if (payload.videoUrl    !== undefined) extras.video_url      = payload.videoUrl    || null
+    if (payload.menuUrl     !== undefined) extras.menu_url       = payload.menuUrl     || null
+    if (payload.menuFileName !== undefined) extras.menu_file_name = payload.menuFileName || null
+    await supabase.from('spaces').update(extras).eq('id', spaceId)
   }
 
   const inserts = [
@@ -326,9 +332,13 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
 
   if (spaceError) return { error: spaceError.message }
 
-  // Guardar video_url por separado — no falla si la columna aún no existe
-  if (payload.videoUrl !== undefined) {
-    await supabase.from('spaces').update({ video_url: payload.videoUrl || null }).eq('id', spaceId)
+  // Guardar video_url y menu_url por separado — no fallan si la columna aún no existe
+  if (payload.videoUrl !== undefined || payload.menuUrl !== undefined) {
+    const extras: Record<string, unknown> = {}
+    if (payload.videoUrl    !== undefined) extras.video_url      = payload.videoUrl    || null
+    if (payload.menuUrl     !== undefined) extras.menu_url       = payload.menuUrl     || null
+    if (payload.menuFileName !== undefined) extras.menu_file_name = payload.menuFileName || null
+    await supabase.from('spaces').update(extras).eq('id', spaceId)
   }
 
   // Actualizar pricing

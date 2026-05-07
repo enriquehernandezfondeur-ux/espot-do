@@ -647,6 +647,38 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   )
                 })()}
 
+                {/* ── Menú / carta descargable ── */}
+                {space.menu_url && (
+                  <div>
+                    <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                      Menú / Carta
+                    </h3>
+                    <a
+                      href={space.menu_url}
+                      download={space.menu_file_name || 'menu'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all hover:opacity-90 w-full"
+                      style={{ background: '#fff', border: '1.5px solid var(--brand-border)' }}>
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                        style={{ background: 'var(--brand-dim)' }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--brand)' }}>
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><polyline points="9 15 12 18 15 15"/>
+                        </svg>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                          {space.menu_file_name || 'Ver menú del espacio'}
+                        </div>
+                        <div className="text-xs" style={{ color: 'var(--text-muted)' }}>Toca para descargar</div>
+                      </div>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--brand)', flexShrink: 0 }}>
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                      </svg>
+                    </a>
+                  </div>
+                )}
+
                 {/* Forma de pago */}
                 {paymentTerms && (
                   <div className="flex items-start gap-3 p-4 md:p-5 rounded-2xl"
