@@ -480,20 +480,31 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
             {/* Host */}
             {host && (
               <div className="flex items-center gap-4 pb-6 mb-6" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center text-white text-xl font-bold shrink-0"
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl overflow-hidden shrink-0"
                   style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-dark))' }}>
-                  {host.full_name?.charAt(0) ?? 'H'}
+                  {host.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={host.avatar_url} alt={host.full_name ?? ''} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-white text-xl font-bold">
+                      {host.full_name?.charAt(0) ?? 'H'}
+                    </div>
+                  )}
                 </div>
-                <div className="flex-1">
-                  <div className="font-semibold text-sm md:text-base" style={{ color: 'var(--text-primary)' }}>{host.full_name}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold text-sm md:text-base" style={{ color: 'var(--text-primary)' }}>
+                      {host.full_name}
+                    </span>
+                    {host.id_verified && (
+                      <span className="flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full shrink-0"
+                        style={{ background: 'rgba(34,197,94,0.1)', color: '#16A34A', border: '1px solid rgba(34,197,94,0.2)' }}>
+                        <CheckCircle size={10} /> Verificado
+                      </span>
+                    )}
+                  </div>
                   <div className="text-xs md:text-sm" style={{ color: 'var(--text-secondary)' }}>Propietario del espacio</div>
                 </div>
-                {host.id_verified && (
-                  <div className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full"
-                    style={{ background: 'rgba(34,197,94,0.08)', color: '#16A34A', border: '1px solid rgba(34,197,94,0.15)' }}>
-                    <CheckCircle size={12} /> Identidad verificada
-                  </div>
-                )}
               </div>
             )}
 
@@ -656,21 +667,42 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                     {/* Header */}
                     <div className="flex items-center gap-3.5 px-5 py-4"
                       style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
+                      {/* Avatar con foto real */}
                       <div className="relative shrink-0">
-                        <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-white text-base font-bold"
+                        <div className="w-12 h-12 rounded-2xl overflow-hidden"
                           style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-dark))' }}>
-                          {host.full_name?.charAt(0).toUpperCase() ?? '?'}
+                          {host.avatar_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={host.avatar_url} alt={host.full_name ?? ''}
+                              className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-white text-base font-bold">
+                              {host.full_name?.charAt(0).toUpperCase() ?? '?'}
+                            </div>
+                          )}
                         </div>
-                        <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white bg-green-400" />
+                        {/* Punto online */}
+                        <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white bg-green-400" />
                       </div>
+
                       <div className="flex-1 min-w-0">
-                        <div className="font-bold text-sm leading-tight" style={{ color: 'var(--text-primary)' }}>
-                          {host.full_name}
+                        {/* Nombre + badge verificado */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-bold text-sm leading-tight" style={{ color: 'var(--text-primary)' }}>
+                            {host.full_name}
+                          </span>
+                          {host.id_verified && (
+                            <span className="flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full shrink-0"
+                              style={{ background: 'rgba(34,197,94,0.12)', color: '#16A34A', border: '1px solid rgba(34,197,94,0.25)' }}>
+                              <CheckCircle size={10} /> Verificado
+                            </span>
+                          )}
                         </div>
                         <div className="text-xs mt-0.5 font-medium" style={{ color: 'var(--brand)' }}>
                           Propietario · Responde en menos de 24h
                         </div>
                       </div>
+
                       <button
                         onClick={() => setShowChat(true)}
                         className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl transition-all hover:opacity-90"
