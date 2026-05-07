@@ -558,53 +558,26 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                 {/* ── Amenidades ── */}
                 {(pricing?.package_includes?.length > 0 || addons.length > 0) && (
                   <div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <h3 className="text-base md:text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
-                        Amenidades
-                      </h3>
-                      {pricing?.package_includes?.length > 0 && (
-                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
-                          style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
-                          Incluidas en el precio
-                        </span>
-                      )}
-                    </div>
-
+                    <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                      Amenidades
+                    </h3>
                     {pricing?.package_includes?.length > 0 ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-6">
                         {pricing.package_includes.map((item: string) => (
-                          <div key={item}
-                            className="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all"
-                            style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.14)' }}>
-                            <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
-                              style={{ background: 'var(--brand)' }}>
-                              <CheckCircle size={13} className="text-white" />
-                            </div>
-                            <span className="text-sm font-medium leading-tight" style={{ color: 'var(--text-primary)' }}>
-                              {item}
-                            </span>
+                          <div key={item} className="flex items-center gap-2.5">
+                            <CheckCircle size={14} style={{ color: 'var(--brand)', flexShrink: 0 }} />
+                            <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>{item}</span>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 gap-y-2.5 gap-x-4">
                         {addons.slice(0, 6).map((addon: any) => (
-                          <div key={addon.id}
-                            className="flex items-center gap-3 px-4 py-3.5 rounded-2xl"
-                            style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
-                            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-xl shrink-0"
-                              style={{ background: 'var(--bg-elevated)' }}>
-                              {addonEmoji(addon.name)}
-                            </div>
-                            <div className="min-w-0">
-                              <div className="text-sm font-semibold leading-tight truncate"
-                                style={{ color: 'var(--text-primary)' }}>
-                                {addon.name}
-                              </div>
-                              <div className="text-xs font-medium mt-0.5" style={{ color: 'var(--brand)' }}>
-                                + {formatCurrency(addon.price)}
-                              </div>
-                            </div>
+                          <div key={addon.id} className="flex items-center gap-2">
+                            <span className="text-base shrink-0">{addonEmoji(addon.name)}</span>
+                            <span className="text-sm truncate" style={{ color: 'var(--text-secondary)' }}>
+                              {addon.name}
+                            </span>
                           </div>
                         ))}
                       </div>
@@ -615,96 +588,44 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                 {/* ── Horarios disponibles ── */}
                 {timeBlocks.length > 0 && (
                   <div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <h3 className="text-base md:text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
-                        Horarios disponibles
-                      </h3>
-                      <span className="text-xs font-medium px-2.5 py-1 rounded-full"
-                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
-                        {timeBlocks.length} turno{timeBlocks.length !== 1 ? 's' : ''}
-                      </span>
-                    </div>
-
-                    <div className="space-y-3">
+                    <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                      Horarios disponibles
+                    </h3>
+                    <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
                       {timeBlocks.map((block: any, i: number) => {
                         const activeDays: number[] = block.days_of_week ?? []
-                        const allDays = activeDays.length === 7
-                        const weekdays = activeDays.filter((d: number) => d >= 1 && d <= 5).length === 5
-                        const weekends = activeDays.filter((d: number) => d === 0 || d === 6).length === 2
-                        const label = allDays ? 'Todos los días' : weekdays && !weekends ? 'Lun – Vie' : weekends && !weekdays ? 'Sáb y Dom' : null
-
                         return (
-                          <div key={i} className="rounded-2xl overflow-hidden"
-                            style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                          <div key={i}
+                            className="px-4 py-3.5"
+                            style={{ borderBottom: i < timeBlocks.length - 1 ? '1px solid var(--border-subtle)' : undefined, background: '#fff' }}>
 
-                            {/* Encabezado: nombre del turno + horario */}
-                            <div className="flex items-center justify-between px-4 py-3.5"
-                              style={{ background: 'var(--brand-dim)', borderBottom: '1px solid var(--brand-border)' }}>
-                              <div className="flex items-center gap-2.5">
-                                <div className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0"
-                                  style={{ background: 'var(--brand)' }}>
-                                  <Clock size={13} className="text-white" />
-                                </div>
-                                <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
+                            {/* Nombre + hora */}
+                            <div className="flex items-center justify-between gap-3 mb-2.5">
+                              <div className="flex items-center gap-2">
+                                <Clock size={13} style={{ color: 'var(--brand)', flexShrink: 0 }} />
+                                <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                                   {block.block_name || `Turno ${i + 1}`}
                                 </span>
                               </div>
-                              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl"
-                                style={{ background: 'var(--brand)', color: '#fff' }}>
-                                <span className="text-xs font-bold tabular-nums">
-                                  {formatTime(block.start_time)}
-                                </span>
-                                <span className="text-xs opacity-70">–</span>
-                                <span className="text-xs font-bold tabular-nums">
-                                  {formatTime(block.end_time)}
-                                </span>
-                              </div>
+                              <span className="text-sm font-bold tabular-nums shrink-0" style={{ color: 'var(--brand)' }}>
+                                {formatTime(block.start_time)} – {formatTime(block.end_time)}
+                              </span>
                             </div>
 
-                            {/* Días de la semana */}
-                            <div className="px-4 py-3.5">
-                              <p className="text-xs font-semibold uppercase tracking-wide mb-2.5"
-                                style={{ color: 'var(--text-muted)' }}>
-                                Días disponibles
-                              </p>
-                              {label ? (
-                                <div className="flex items-center gap-2">
-                                  <span className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full"
-                                    style={{ background: 'var(--brand)', color: '#fff' }}>
-                                    <CheckCircle size={11} /> {label}
-                                  </span>
-                                  <div className="flex gap-1">
-                                    {DAYS.map((d, j) => (
-                                      <span key={j}
-                                        className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
-                                        style={activeDays.includes(j)
-                                          ? { background: 'var(--brand)', color: '#fff' }
-                                          : { background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                                        {d[0]}
-                                      </span>
-                                    ))}
+                            {/* Días */}
+                            <div className="flex gap-1">
+                              {DAYS.map((d, j) => {
+                                const active = activeDays.includes(j)
+                                return (
+                                  <div key={j}
+                                    className="flex-1 text-center py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                                    style={active
+                                      ? { background: 'var(--brand-dim)', color: 'var(--brand)' }
+                                      : { color: 'var(--text-muted)', opacity: 0.4 }}>
+                                    {d}
                                   </div>
-                                </div>
-                              ) : (
-                                <div className="flex gap-1">
-                                  {DAYS.map((d, j) => {
-                                    const active = activeDays.includes(j)
-                                    return (
-                                      <div key={j}
-                                        className="flex-1 flex flex-col items-center gap-1 py-1.5 rounded-xl transition-all"
-                                        style={active
-                                          ? { background: 'var(--brand)', color: '#fff' }
-                                          : { background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                                        <span className="text-xs font-bold leading-none">{d}</span>
-                                        <span className="text-[9px] leading-none"
-                                          style={{ opacity: active ? 0.75 : 0.5 }}>
-                                          {active ? '●' : '○'}
-                                        </span>
-                                      </div>
-                                    )
-                                  })}
-                                </div>
-                              )}
+                                )
+                              })}
                             </div>
                           </div>
                         )
