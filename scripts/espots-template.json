@@ -1,0 +1,81 @@
+[
+  {
+    "_comment": "PLANTILLA DE MIGRACIÓN ESPOTHUB — Elimina este campo antes de importar",
+    "_source_id": "wp-123",
+    "_source_url": "https://espot.do/espacio/ejemplo",
+
+    "name": "Nombre del Espacio",
+    "slug": "nombre-del-espacio",
+    "category": "salon",
+    "description": "Descripción completa del espacio...",
+    "address": "Av. Winston Churchill #123",
+    "sector": "Piantini",
+    "city": "Santo Domingo",
+    "lat": "18.4733",
+    "lng": "-69.9388",
+    "capacity_min": 20,
+    "capacity_max": 150,
+    "is_published": true,
+
+    "pricing": {
+      "type": "hourly",
+      "hourly_price": 5000,
+      "min_hours": 3,
+      "max_hours": 8,
+      "minimum_consumption": null,
+      "session_hours": null,
+      "fixed_price": null,
+      "package_name": null,
+      "package_hours": null,
+      "extra_hour_price": null,
+      "package_includes": []
+    },
+
+    "payment_terms": {
+      "term_type": "platform_guarantee"
+    },
+
+    "time_blocks": [
+      {
+        "block_name": "Horario principal",
+        "start_time": "08:00",
+        "end_time": "23:00",
+        "days_of_week": [0,1,2,3,4,5,6]
+      }
+    ],
+
+    "addons": [
+      { "name": "Bartender", "price": 8000, "unit": "evento" },
+      { "name": "DJ",        "price": 15000, "unit": "evento" }
+    ],
+
+    "conditions": {
+      "allows_external_decoration": true,
+      "allows_external_food": false,
+      "allows_external_alcohol": false,
+      "allows_smoking": false,
+      "allows_pets": false,
+      "allows_live_music": true,
+      "allows_dj": true,
+      "allows_children": true,
+      "allows_parties": true,
+      "allows_corporate": true,
+      "music_cutoff_time": "23:00",
+      "deposit_required": false,
+      "deposit_amount": null,
+      "cancellation_policy": "moderada",
+      "cancellation_hours_before": 72,
+      "cancellation_refund_pct": 50,
+      "custom_rules": ""
+    },
+
+    "images": [
+      "https://espot.do/wp-content/uploads/foto1.jpg",
+      "https://espot.do/wp-content/uploads/foto2.jpg"
+    ],
+    "cover_image_index": 0,
+    "video_url": null,
+
+    "host_email": "propietario@email.com"
+  }
+]
