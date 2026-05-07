@@ -577,21 +577,42 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                 {timeBlocks.length > 0 && (
                   <div>
                     <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      Horarios
+                      Horarios disponibles
                     </h3>
-                    <div>
-                      {timeBlocks.map((block: any, i: number) => (
-                        <div key={i}
-                          className="flex items-center justify-between py-2.5"
-                          style={{ borderBottom: i < timeBlocks.length - 1 ? '1px solid var(--border-subtle)' : undefined }}>
-                          <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                            {daysToLabel(block.days_of_week ?? [])}
-                          </span>
-                          <span className="text-sm tabular-nums" style={{ color: 'var(--text-secondary)' }}>
-                            {formatTime(block.start_time)} – {formatTime(block.end_time)}
-                          </span>
-                        </div>
-                      ))}
+                    <div className="space-y-2">
+                      {timeBlocks.map((block: any, i: number) => {
+                        const activeDays: number[] = block.days_of_week ?? []
+                        return (
+                          <div key={i}
+                            className="flex items-center justify-between gap-4 px-4 py-3 rounded-2xl"
+                            style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+
+                            {/* Días como círculos */}
+                            <div className="flex gap-1">
+                              {DAYS.map((d, j) => {
+                                const active = activeDays.includes(j)
+                                return (
+                                  <span key={j}
+                                    className="w-7 h-7 rounded-full flex items-center justify-center font-semibold"
+                                    style={{
+                                      fontSize: 10,
+                                      background: active ? 'var(--brand)' : 'var(--bg-elevated)',
+                                      color: active ? '#fff' : 'var(--text-muted)',
+                                    }}>
+                                    {d[0]}
+                                  </span>
+                                )
+                              })}
+                            </div>
+
+                            {/* Hora */}
+                            <span className="text-sm font-semibold tabular-nums shrink-0"
+                              style={{ color: 'var(--text-primary)' }}>
+                              {formatTime(block.start_time)} – {formatTime(block.end_time)}
+                            </span>
+                          </div>
+                        )
+                      })}
                     </div>
                   </div>
                 )}
