@@ -250,7 +250,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   ].filter(Boolean) as { key: string; label: string; onRemove: () => void }[]
 
   return (
-    <div style={{ background: 'var(--bg-base)', minHeight: '100dvh', overflowX: 'hidden', width: '100%' }}>
+    <div style={{ background: 'var(--bg-base)', minHeight: '100dvh', width: '100%' }}>
 
       {/* ── Barra de filtros sticky ── */}
       <div className="sticky top-16 z-40 w-full"
@@ -262,61 +262,87 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
         }}>
         <div className="max-w-screen-2xl mx-auto px-4 md:px-6 py-3 w-full">
 
-          {/* ── Desktop: fila única ── */}
-          <div className="hidden md:flex gap-2 mb-3">
-            <div className="flex-1 flex items-center gap-3 rounded-2xl px-4 py-2.5 input-base">
-              <Search size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+          {/* ── Desktop: fila única compacta (search + pills + sector + fecha + filtros) ── */}
+          <div className="hidden md:flex items-center gap-2">
+            {/* Search compacto */}
+            <div className="flex items-center gap-2 rounded-2xl px-3 py-2 input-base shrink-0" style={{ width: 200 }}>
+              <Search size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
               <input
                 value={q} onChange={e => setQ(e.target.value)}
-                placeholder="Salón, rooftop, restaurante, cumpleaños..."
-                className="flex-1 bg-transparent text-sm focus:outline-none"
-                style={{ color: 'var(--text-primary)' }}
+                placeholder="Buscar espacios..."
+                className="bg-transparent focus:outline-none min-w-0 flex-1"
+                style={{ color: 'var(--text-primary)', fontSize: 13 }}
               />
-              {q && <button onClick={() => setQ('')} style={{ color: 'var(--text-muted)' }}><X size={14} /></button>}
+              {q && <button onClick={() => setQ('')} style={{ color: 'var(--text-muted)' }}><X size={12} /></button>}
             </div>
-            <div className="flex items-center gap-2 rounded-2xl px-4 py-2.5 input-base w-40">
-              <MapPin size={15} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+
+            {/* Divider */}
+            <div className="shrink-0 w-px h-5" style={{ background: 'var(--border-medium)' }} />
+
+            {/* Pills scrollable */}
+            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide flex-1 py-0.5">
+              {CATEGORIES.map(cat => {
+                const isActive = categoria === cat.value
+                const Icon = cat.icon
+                return (
+                  <button key={cat.value}
+                    onClick={() => setCategoria(isActive ? '' : cat.value)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0"
+                    style={isActive
+                      ? { background: 'var(--brand)', color: '#fff', boxShadow: '0 2px 8px rgba(53,196,147,0.3)' }
+                      : { background: '#fff', color: 'var(--text-secondary)', border: '1px solid var(--border-medium)' }
+                    }>
+                    <Icon size={12} />
+                    {cat.label}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Divider */}
+            <div className="shrink-0 w-px h-5" style={{ background: 'var(--border-medium)' }} />
+
+            {/* Sector compacto */}
+            <div className="flex items-center gap-1.5 rounded-2xl px-3 py-2 input-base shrink-0" style={{ width: 124 }}>
+              <MapPin size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
               <input
                 value={sector} onChange={e => { setSector(e.target.value); setSectorQ(e.target.value) }}
                 placeholder="Sector"
-                className="w-full bg-transparent text-sm focus:outline-none"
-                style={{ color: 'var(--text-primary)' }}
+                className="w-full bg-transparent focus:outline-none"
+                style={{ color: 'var(--text-primary)', fontSize: 13 }}
               />
             </div>
-            <div className="relative" ref={datePickerRef}>
+
+            {/* Fecha compacta */}
+            <div className="relative shrink-0" ref={datePickerRef}>
               <button
                 onClick={openDatePicker}
-                className="flex items-center gap-2 rounded-2xl px-4 py-2.5 input-base transition-all"
+                className="flex items-center gap-1.5 rounded-2xl px-3 py-2 input-base transition-all"
                 style={{
-                  minWidth: 186,
                   background: '#fff',
                   borderColor: datePickerOpen ? 'var(--brand)' : undefined,
                   boxShadow: datePickerOpen ? '0 0 0 3px var(--brand-dim)' : undefined,
                 }}>
                 {availLoading
-                  ? <div className="w-[15px] h-[15px] rounded-full border-2 border-t-transparent animate-spin shrink-0" style={{ borderColor: 'var(--brand)', borderTopColor: 'transparent' }} />
-                  : <CalendarDays size={15} style={{ color: dateFrom ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
+                  ? <div className="w-3.5 h-3.5 rounded-full border-2 border-t-transparent animate-spin shrink-0" style={{ borderColor: 'var(--brand)', borderTopColor: 'transparent' }} />
+                  : <CalendarDays size={13} style={{ color: dateFrom ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
                 }
-                <span className="text-sm flex-1 text-left whitespace-nowrap"
+                <span className="text-xs whitespace-nowrap"
                   style={{ color: dateFrom ? 'var(--text-primary)' : 'var(--text-muted)' }}>
                   {dateFrom
                     ? (timeFrom ? `${fmtDateShort(dateFrom)} · ${fmtTime(timeFrom)}` : fmtDateShort(dateFrom))
-                    : 'Fecha y hora'}
+                    : 'Fecha'}
                 </span>
                 {dateFrom && (
                   <button onClick={e => { e.stopPropagation(); setDateFrom(''); setTimeFrom('') }}
                     className="shrink-0" style={{ color: 'var(--text-muted)' }}>
-                    <X size={13} />
+                    <X size={11} />
                   </button>
                 )}
               </button>
               {datePickerOpen && (
                 <>
-                  {/* Backdrop — cierra al hacer click fuera sin importar scrollbar ni drag */}
-                  <div
-                    className="fixed inset-0 z-[9998]"
-                    onClick={() => setDatePickerOpen(false)}
-                  />
+                  <div className="fixed inset-0 z-[9998]" onClick={() => setDatePickerOpen(false)} />
                   <div
                     style={{
                       position: 'fixed',
@@ -341,17 +367,19 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                 </>
               )}
             </div>
+
+            {/* Filtros */}
             <button onClick={() => setMoreOpen(true)}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-semibold transition-all shrink-0"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-semibold transition-all shrink-0"
               style={{
                 background:  activeFiltersCount > 0 ? 'var(--brand)' : '#fff',
                 color:       activeFiltersCount > 0 ? '#fff' : 'var(--text-primary)',
                 border:      '1.5px solid var(--border-medium)',
               }}>
-              <SlidersHorizontal size={15} />
+              <SlidersHorizontal size={13} />
               Filtros
               {activeFiltersCount > 0 && (
-                <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
+                <span className="w-4 h-4 rounded-full flex items-center justify-center text-xs font-bold"
                   style={{ background: 'rgba(255,255,255,0.25)' }}>
                   {activeFiltersCount}
                 </span>
@@ -424,8 +452,8 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
             )}
           </div>
 
-          {/* Category pills — igual en ambos */}
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          {/* Category pills — solo mobile (desktop las tiene inline arriba) */}
+          <div className="md:hidden flex gap-2 overflow-x-auto pb-1 scrollbar-hide mt-2.5">
             {CATEGORIES.map(cat => {
               const isActive = categoria === cat.value
               const Icon = cat.icon
@@ -474,7 +502,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
         {/* ── DESKTOP: Lista (60%) + Mapa (40%) ── */}
         <div
           className="hidden md:flex gap-5"
-          style={{ height: 'calc(100vh - 226px)' }}
+          style={{ height: 'calc(100vh - 174px)' }}
         >
           <div className="overflow-y-auto pr-2" style={{ flex: '0 0 60%' }}>
             {filtered.length === 0
