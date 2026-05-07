@@ -249,15 +249,24 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
         .leaflet-popup-content { margin:0 !important; }
         .leaflet-popup-close-button {
           color:#6B7280 !important;
-          top:8px !important;
-          right:8px !important;
-          font-size:18px !important;
+          top:10px !important;
+          right:10px !important;
+          font-size:20px !important;
+          width:28px !important;
+          height:28px !important;
+          line-height:28px !important;
+          text-align:center !important;
+          background:rgba(255,255,255,0.9) !important;
+          border-radius:50% !important;
           z-index:10;
         }
         .leaflet-popup-tip { background:#fff !important; }
         .leaflet-container { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; }
         .leaflet-attribution-flag { display:none !important; }
         .leaflet-control-attribution { font-size:9px !important; }
+        @media (max-width:767px) {
+          .leaflet-control-zoom { margin-bottom:70px !important; }
+        }
       `}</style>
       <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
     </>
@@ -294,39 +303,38 @@ function openSpacePopup(L: any, map: any, space: any, coords: [number, number]) 
   const price    = getFullPrice(space)
   const location = [space.sector, space.city].filter(Boolean).join(', ')
 
+  // Ancho responsivo: más grande en móvil
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const popupW   = isMobile ? Math.min(window.innerWidth - 32, 320) : 260
+
   const popup = L.popup({
-    offset:    [0, -8],
+    offset:    [0, -10],
     className: 'espot-popup',
-    maxWidth:  260,
+    maxWidth:  popupW,
+    autoPan:   true,
+    autoPanPadding: [20, 80],
   }).setLatLng(coords).setContent(`
-    <div style="width:240px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+    <div style="width:${popupW}px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
       ${cover
-        ? `<div style="height:140px;overflow:hidden;">
+        ? `<div style="height:${isMobile ? 160 : 140}px;overflow:hidden;">
              <img src="${cover}" style="width:100%;height:100%;object-fit:cover;" />
            </div>`
-        : `<div style="height:100px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;">
-             <span style="color:#fff;font-size:32px;opacity:0.7">🏛</span>
+        : `<div style="height:${isMobile ? 110 : 90}px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;">
+             <span style="color:#fff;font-size:36px;opacity:0.7">🏛</span>
            </div>`
       }
-      <div style="padding:14px;">
-        <div style="font-weight:700;font-size:14px;color:#111827;margin-bottom:4px;line-height:1.3;">${space.name}</div>
-        <div style="font-size:12px;color:#6B7280;margin-bottom:8px;display:flex;align-items:center;gap:4px;">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-          </svg>
-          ${location}
-          &nbsp;·&nbsp;
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-          </svg>
-          ${space.capacity_max} máx.
+      <div style="padding:${isMobile ? '16px' : '14px'};">
+        <div style="font-weight:700;font-size:${isMobile ? '15px' : '14px'};color:#111827;margin-bottom:4px;line-height:1.3;">${space.name}</div>
+        <div style="font-size:${isMobile ? '13px' : '12px'};color:#6B7280;margin-bottom:8px;">
+          📍 ${location} · 👥 ${space.capacity_max} máx.
         </div>
-        ${price ? `<div style="font-weight:700;font-size:13px;color:#35C493;margin-bottom:12px;">${price}</div>` : ''}
+        ${price ? `<div style="font-weight:700;font-size:${isMobile ? '14px' : '13px'};color:#35C493;margin-bottom:${isMobile ? '14px' : '12px'};">${price}</div>` : ''}
         <a href="/espacios/${space.slug}"
-          style="display:block;background:#35C493;color:#fff;text-align:center;padding:9px 16px;
-                 border-radius:10px;font-size:12px;font-weight:700;text-decoration:none;">
-          Ver espacio →
+          style="display:block;background:#35C493;color:#fff;text-align:center;
+                 padding:${isMobile ? '12px 16px' : '9px 16px'};
+                 border-radius:12px;font-size:${isMobile ? '14px' : '12px'};
+                 font-weight:700;text-decoration:none;letter-spacing:-0.01em;">
+          Ver Espot →
         </a>
       </div>
     </div>

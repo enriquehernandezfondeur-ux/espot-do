@@ -501,8 +501,16 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                 </div>
               )
           ) : (
-            <div style={{ height: 'calc(100dvh - 290px)', borderRadius: 16, overflow: 'hidden', marginBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
-              <SpacesMap spaces={filtered} cityFilter={sector} />
+            /* Mapa full-width: cancela el padding del contenedor padre con -mx-4 */
+            <div className="-mx-4"
+              style={{
+                height: 'calc(100dvh - 160px)',
+                minHeight: 400,
+                overflow: 'hidden',
+                marginBottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))',
+              }}>
+              {/* key fuerza remount al activar el mapa → Leaflet recalcula tamaño */}
+              <SpacesMap key="mobile-map" spaces={filtered} cityFilter={sector} />
             </div>
           )}
         </div>
@@ -513,11 +521,16 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
         style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}>
         <button
           onClick={() => setMobileView(v => v === 'list' ? 'map' : 'list')}
-          className="flex items-center gap-2.5 px-6 py-3.5 rounded-full text-sm font-bold text-white shadow-xl"
-          style={{ background: 'var(--brand)', boxShadow: '0 4px 24px rgba(53,196,147,0.45)' }}>
+          className="flex items-center gap-2.5 px-6 py-3.5 rounded-full text-sm font-bold text-white"
+          style={{
+            background: mobileView === 'map' ? '#03313C' : 'var(--brand)',
+            boxShadow: mobileView === 'map'
+              ? '0 4px 20px rgba(3,49,60,0.45), 0 0 0 3px rgba(255,255,255,0.15)'
+              : '0 4px 24px rgba(53,196,147,0.5), 0 0 0 3px rgba(255,255,255,0.15)',
+          }}>
           {mobileView === 'list'
             ? <><Map size={16} /> Ver mapa</>
-            : <><LayoutList size={16} /> Ver lista</>
+            : <><LayoutList size={16} /> Ver lista ({filtered.length})</>
           }
         </button>
       </div>
