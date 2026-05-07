@@ -170,25 +170,20 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     return null
   }, [startPickerRange, fixedDuration, allowedTimeRange])
 
-  // Hora de fin efectiva
-  const effectiveEndTime = fixedDuration > 0 && startTime
-    ? addHoursToTime(startTime, fixedDuration)
-    : endTime
-
-  // Minutos disponibles desde inicio hasta cierre del bloque (para end picker)
-  const minsUntilBlockEnd = useMemo(() => {
-    if (!allowedTimeRange || !startTime) return undefined
-    const blockEndMins = timeToMins(allowedTimeRange.end === '00:00' ? '24:00' : allowedTimeRange.end)
-    return blockEndMins - timeToMins(startTime)
-  }, [allowedTimeRange, startTime])
-
-  // Auto-seleccionar el inicio cuando hay un turno único
+  // effectiveStartTime: usa el turno único auto-seleccionado si el usuario no eligió manualmente
   const effectiveStartTime = singleTurno && !startTime ? singleTurno : startTime
 
-  // effectiveEndTime recalculado con effectiveStartTime (incluye turno único auto-seleccionado)
+  // realEndTime: para duración fija se calcula desde effectiveStartTime; para variable = endTime
   const realEndTime = fixedDuration > 0 && effectiveStartTime
     ? addHoursToTime(effectiveStartTime, fixedDuration)
     : endTime
+
+  // Minutos disponibles desde efectiveStartTime hasta el cierre del bloque (para end picker)
+  const minsUntilBlockEnd = useMemo(() => {
+    if (!allowedTimeRange || !effectiveStartTime) return undefined
+    const blockEndMins = timeToMins(allowedTimeRange.end === '00:00' ? '24:00' : allowedTimeRange.end)
+    return blockEndMins - timeToMins(effectiveStartTime)
+  }, [allowedTimeRange, effectiveStartTime])
 
   const selectedHours = useMemo(
     () => calcHours(effectiveStartTime, realEndTime),
@@ -234,7 +229,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
       return base + extra * extraRate
     }
     return 0 // quote
-  }, [pricing, startTime, effectiveEndTime, selectedHours, isHourly, isConsumption, isPackage, packageHours])
+  }, [pricing, effectiveStartTime, realEndTime, selectedHours, isHourly, isConsumption, isPackage, packageHours])
 
   const addonsTotal = useMemo(() =>
     selectedAddonItems.reduce((s: number, a: any) => {
