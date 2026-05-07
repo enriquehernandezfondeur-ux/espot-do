@@ -78,8 +78,9 @@ export async function createBooking(payload: CreateBookingPayload) {
     }
   }
 
-  // Validar disponibilidad — solo si el espacio es por hora y hay horario real
-  const hasRealTime = payload.startTime !== '00:00' || payload.endTime !== '23:59'
+  // Validar disponibilidad — solo si hay horario real definido (no vacío ni placeholder)
+  const hasRealTime = !!(payload.startTime && payload.endTime &&
+    (payload.startTime !== '00:00' || payload.endTime !== '23:59'))
   if (hasRealTime) {
     const { data: availCheck, error: rpcError } = await supabase.rpc('check_space_availability', {
       p_space_id:   payload.spaceId,
@@ -122,8 +123,8 @@ export async function createBooking(payload: CreateBookingPayload) {
       guest_id:     user?.id ?? null,
       pricing_id:   payload.pricingId ?? null,
       event_date:   payload.eventDate,
-      start_time:   payload.startTime,
-      end_time:     payload.endTime,
+      start_time:   payload.startTime || null,
+      end_time:     payload.endTime   || null,
       guest_count:  payload.guestCount,
       event_type:   payload.eventType,
       event_notes:  payload.eventNotes ?? null,

@@ -319,7 +319,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             {new Date(eventDate + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
           </span>
         )}
-        {effectiveStartTime && realEndTime && (
+        {effectiveStartTime && realEndTime && effectiveStartTime !== '' && realEndTime !== '' && (
           <>
             <span style={{ color: 'var(--border-medium)' }}>·</span>
             <span className="flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
@@ -573,7 +573,8 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                 style={{ background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)' }}>
                 <Info size={14} style={{ color: '#D97706', flexShrink: 0, marginTop: 1 }} />
                 <div className="text-xs" style={{ color: '#92400E', lineHeight: 1.6 }}>
-                  El propietario te enviará un precio personalizado basado en tu horario y evento.
+                  El propietario te enviará un precio personalizado. Selecciona el horario que necesitas
+                  para que pueda prepararte la mejor propuesta. <strong>El horario es opcional</strong> — puedes continuar sin elegir horas.
                 </div>
               </div>
             )}
@@ -586,8 +587,8 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               </div>
             )}
 
-            {/* Selectores de hora */}
-            {eventDate && allowedTimeRange !== null && !isQuote && (
+            {/* Selectores de hora — disponibles para todos los modelos incluyendo cotización */}
+            {eventDate && allowedTimeRange !== null && (
               <div className="space-y-3">
 
                 {/* Bloque del día disponible — siempre visible para contexto */}
@@ -872,7 +873,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
               {[
                 { icon: CalendarDays, label: 'Fecha', value: new Date(eventDate + 'T12:00').toLocaleDateString('es-DO', { weekday: 'long', day: 'numeric', month: 'long' }) },
-                { icon: Clock, label: 'Horario', value: `${formatTime(effectiveStartTime)} – ${formatTime(realEndTime)} · ${selectedHours % 1 === 0 ? selectedHours : selectedHours.toFixed(1)} horas` },
+                { icon: Clock, label: 'Horario', value: effectiveStartTime && realEndTime ? `${formatTime(effectiveStartTime)} – ${formatTime(realEndTime)} · ${selectedHours % 1 === 0 ? selectedHours : selectedHours.toFixed(1)} horas` : (isQuote ? 'A definir con el propietario' : '—') },
                 { icon: Users, label: 'Personas', value: `${guestCount} personas` },
                 { icon: Sparkles, label: 'Evento', value: finalEventType },
               ].map(({ icon: Icon, label, value }, i, arr) => (
