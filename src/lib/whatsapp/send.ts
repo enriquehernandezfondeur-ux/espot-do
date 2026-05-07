@@ -27,20 +27,29 @@ export async function sendWhatsApp({
   try {
     const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`
     const credentials = Buffer.from(`${accountSid}:${authToken}`).toString('base64')
+    const toFormatted = `whatsapp:${formatPhone(to)}`
+    const fromFormatted = from.startsWith('whatsapp:') ? from : `whatsapp:${from}`
 
-    await fetch(url, {
+    const res = await fetch(url, {
       method: 'POST',
       headers: {
         Authorization: `Basic ${credentials}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
-        From: from.startsWith('whatsapp:') ? from : `whatsapp:${from}`,
-        To:   `whatsapp:${formatPhone(to)}`,
+        From: fromFormatted,
+        To:   toFormatted,
         Body: body,
       }).toString(),
     })
-  } catch {
-    // No bloquear el flujo si WA falla
+
+    const json = await res.json()
+    if (!res.ok) {
+      console.error('[WhatsApp] Twilio error:', res.status, json?.message ?? json)
+    } else {
+      console.log('[WhatsApp] Sent OK to', toFormatted, '— SID:', json?.sid)
+    }
+  } catch (err) {
+    console.error('[WhatsApp] fetch error:', err)
   }
 }
