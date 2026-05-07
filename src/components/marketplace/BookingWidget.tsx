@@ -284,27 +284,31 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
 
   async function handleBook() {
     setBooking(true); setError('')
-    const { data: { user } } = await createClient().auth.getUser()
-    if (!user) {
+    try {
+      const { data: { user } } = await createClient().auth.getUser()
+      if (!user) {
+        router.push(`/auth?redirect=${encodeURIComponent(window.location.pathname)}`)
+        return
+      }
+      const result = await createBooking({
+        spaceId: space.id, pricingId: pricing?.id,
+        eventDate, startTime: effectiveStartTime, endTime: realEndTime,
+        guestCount, eventType: finalEventType,
+        eventNotes: guestNote || undefined,
+        selectedAddonIds: selectedAddons,
+        basePrice, addonsTotal, platformFee,
+        totalAmount: subtotal,
+      })
+      if ('error' in result) {
+        setError(result.error ?? 'Error al procesar la solicitud')
+      } else {
+        setSuccessType(result.status === 'quote_requested' ? 'quote' : 'pending')
+        setSuccess(true)
+      }
+    } catch {
+      setError('Ocurrió un error inesperado. Por favor intenta de nuevo.')
+    } finally {
       setBooking(false)
-      router.push(`/auth?redirect=${encodeURIComponent(window.location.pathname)}`)
-      return
-    }
-    const result = await createBooking({
-      spaceId: space.id, pricingId: pricing?.id,
-      eventDate, startTime: effectiveStartTime, endTime: realEndTime,
-      guestCount, eventType: finalEventType,
-      eventNotes: guestNote || undefined,
-      selectedAddonIds: selectedAddons,
-      basePrice, addonsTotal, platformFee,
-      totalAmount: subtotal,
-    })
-    setBooking(false)
-    if ('error' in result) {
-      setError(result.error ?? 'Error al procesar')
-    } else {
-      setSuccessType(result.status === 'quote_requested' ? 'quote' : 'pending')
-      setSuccess(true)
     }
   }
 
