@@ -94,6 +94,8 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
   const [activeTab,       setActiveTab]       = useState<'info' | 'addons' | 'rules'>('info')
   const [showMobileWidget,setShowMobileWidget]= useState(false)
   const [showVideoModal,  setShowVideoModal]  = useState(false)
+  const [showShareMenu,   setShowShareMenu]   = useState(false)
+  const [copied,          setCopied]          = useState(false)
 
   const images      = space.space_images ?? []
   const pricing     = space.space_pricing?.find((p: any) => p.is_active) ?? space.space_pricing?.[0]
@@ -212,20 +214,70 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
               </span>
             </div>
           </div>
-          <div className="hidden sm:flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <FavoriteButton spaceId={space.id} size="md" />
-            <button
-              onClick={() => {
-                const url = window.location.href
-                if (navigator.share) {
-                  navigator.share({ title: space.name, url })
-                } else {
-                  navigator.clipboard.writeText(url).then(() => alert('Enlace copiado'))
-                }
-              }}
-              className="btn-outline flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl">
-              <Share2 size={14} /> Compartir
-            </button>
+
+            {/* Botón compartir — visible en mobile y desktop */}
+            <div className="relative">
+              <button
+                onClick={() => {
+                  const url = window.location.href
+                  // En móvil con Web Share API → share sheet nativo (WhatsApp, Instagram, SMS...)
+                  if (navigator.share) {
+                    navigator.share({ title: space.name, text: `¡Mira este Espot en EspotHub! ${space.name}`, url })
+                  } else {
+                    setShowShareMenu(s => !s)
+                  }
+                }}
+                className="btn-outline flex items-center gap-2 text-sm font-medium px-3 md:px-4 py-2 rounded-xl">
+                <Share2 size={14} />
+                <span className="hidden sm:inline">Compartir</span>
+              </button>
+
+              {/* Dropdown para desktop (cuando no hay Web Share API) */}
+              {showShareMenu && (
+                <>
+                  <div className="fixed inset-0 z-[9998]" onClick={() => setShowShareMenu(false)} />
+                  <div className="absolute right-0 mt-2 z-[9999] rounded-2xl overflow-hidden shadow-xl"
+                    style={{ background: '#fff', border: '1px solid var(--border-subtle)', width: 220 }}>
+
+                    {/* WhatsApp */}
+                    <a
+                      href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`¡Mira este Espot! ${space.name} — ${window.location.href}`)}`}
+                      target="_blank" rel="noopener noreferrer"
+                      onClick={() => setShowShareMenu(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors hover:bg-gray-50"
+                      style={{ color: '#111827' }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                        <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.117 1.523 5.845L.044 23.956a.5.5 0 0 0 .622.622l6.111-1.479A11.946 11.946 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.836 9.836 0 0 1-5.023-1.377l-.36-.213-3.628.877.893-3.628-.235-.374A9.818 9.818 0 0 1 2.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
+                      </svg>
+                      WhatsApp
+                    </a>
+
+                    {/* Copiar enlace */}
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(window.location.href)
+                        setCopied(true)
+                        setTimeout(() => { setCopied(false); setShowShareMenu(false) }, 2000)
+                      }}
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium w-full text-left transition-colors hover:bg-gray-50"
+                      style={{ color: copied ? '#16A34A' : '#111827', borderTop: '1px solid #F3F4F6' }}>
+                      {copied ? (
+                        <CheckCircle size={17} style={{ color: '#16A34A' }} />
+                      ) : (
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#6B7280' }}>
+                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                      )}
+                      {copied ? '¡Enlace copiado!' : 'Copiar enlace'}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
