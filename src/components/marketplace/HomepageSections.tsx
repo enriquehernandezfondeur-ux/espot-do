@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
-  ArrowRight, Shield, Users, Search, Clock, CreditCard,
-  CheckCircle, MapPin, Building2, UtensilsCrossed, Sunset,
+  ArrowRight, Users, Search, Clock, CreditCard,
+  MapPin, Building2, UtensilsCrossed, Sunset,
   Wine, Trees, Camera, Briefcase, Home,
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
@@ -74,19 +74,46 @@ function Reveal({ children, delay = 0, className = '', style = {} }: {
   )
 }
 
+// ── Marquee ticker ────────────────────────────────────────
+const TICKER_ITEMS = [
+  'Salones de eventos', 'Rooftops exclusivos', 'Restaurantes privados',
+  'Villas de lujo', 'Terrazas con vista', 'Bares privados',
+  'Estudios creativos', 'Espacios coworking', 'Espacios verificados',
+  'Confirmación en 24h', 'Pago seguro',
+]
+
+function Ticker() {
+  const items = [...TICKER_ITEMS, ...TICKER_ITEMS]
+  return (
+    <div className="overflow-hidden py-3.5" style={{ background: '#060D09', borderTop: '1px solid rgba(53,196,147,0.08)', borderBottom: '1px solid rgba(53,196,147,0.08)' }}>
+      <div style={{ display: 'flex', animation: 'ticker 28s linear infinite', whiteSpace: 'nowrap', willChange: 'transform' }}>
+        {items.map((item, i) => (
+          <span key={i} className="inline-flex items-center gap-3 mx-4 text-xs font-semibold tracking-widest uppercase"
+            style={{ color: 'rgba(255,255,255,0.25)' }}>
+            <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#35C493', display: 'inline-block', flexShrink: 0 }} />
+            {item}
+          </span>
+        ))}
+      </div>
+      <style>{`@keyframes ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
+    </div>
+  )
+}
+
 // ── Componente principal ──────────────────────────────────
 export default function HomepageSections({ spaces }: { spaces: any[] }) {
 
-  // ── TIPOS DE EVENTO ─────────────────────────────────────
-  const evSection = useReveal()
-  const spSection = useReveal()
+  const evSection  = useReveal()
+  const spSection  = useReveal()
   const catSection = useReveal()
   const howSection = useReveal()
-  const trustSection = useReveal()
   const ctaSection = useReveal()
 
   return (
     <div style={{ background: '#fff' }}>
+
+      {/* ── TICKER ── */}
+      <Ticker />
 
       {/* ── TIPOS DE EVENTO ── */}
       <section className="py-14 md:py-20" style={{ background: '#fff' }}>
@@ -98,7 +125,10 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                 Por tipo de evento
               </p>
               <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
-                ¿Qué estás celebrando?
+                ¿Qué estás{' '}
+                <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  celebrando?
+                </span>
               </h2>
             </div>
             <Link href="/buscar" className="hidden md:flex items-center gap-1.5 text-sm font-semibold"
@@ -156,9 +186,13 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                 Espacios disponibles
               </p>
               <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
-                {spaces.length > 0
-                  ? `${spaces.length} espacio${spaces.length !== 1 ? 's' : ''} en República Dominicana`
-                  : 'Próximamente más espacios'}
+                {spaces.length > 0 ? (
+                  <>{spaces.length}{' '}
+                    <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                      espacio{spaces.length !== 1 ? 's' : ''}
+                    </span>
+                    {' '}en República Dominicana</>
+                ) : 'Próximamente más espacios'}
               </h2>
             </div>
             <Link href="/buscar" className="hidden md:flex items-center gap-1.5 text-sm font-semibold"
@@ -271,7 +305,10 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
               Por tipo de espacio
             </p>
             <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
-              Explora tu opción
+              Explora{' '}
+              <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                tu opción
+              </span>
             </h2>
           </Reveal>
 
@@ -308,9 +345,18 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
       <section className="py-20 md:py-28 relative overflow-hidden"
         style={{ background: '#060D09' }}>
 
+        {/* Patrón de puntos */}
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
+          backgroundImage: 'radial-gradient(circle, rgba(53,196,147,0.12) 1px, transparent 1px)',
+          backgroundSize: '32px 32px',
+          maskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%)',
+        }} />
+
         {/* Orbes */}
-        <div style={{ position: 'absolute', top: -100, right: -100, width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(53,196,147,0.06) 0%, transparent 65%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: -80, left: '20%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(53,196,147,0.04) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: -100, right: -100, width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(53,196,147,0.07) 0%, transparent 65%)', pointerEvents: 'none', zIndex: 0 }} />
+        <div style={{ position: 'absolute', bottom: -80, left: '20%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(53,196,147,0.05) 0%, transparent 65%)', pointerEvents: 'none', zIndex: 0 }} />
 
         <div className="max-w-5xl mx-auto px-4 md:px-6">
 
@@ -328,9 +374,9 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
 
           <div ref={howSection.ref} className="grid md:grid-cols-3 gap-6 md:gap-8">
             {[
-              { num: '01', icon: Search,     title: 'Busca tu espacio',     desc: 'Filtra por tipo de evento, sector, capacidad y disponibilidad.' },
-              { num: '02', icon: Clock,      title: 'Elige fecha y horario', desc: 'Selecciona el día, el horario y los servicios adicionales que necesitas.' },
-              { num: '03', icon: CreditCard, title: 'Confirma y paga',       desc: 'Garantiza tu fecha con el pago. Sin sorpresas, todo transparente.' },
+              { num: '01', icon: Search,     title: 'Busca tu espacio',     desc: 'Filtra por sector, tipo y capacidad. Todos los espacios son verificados por nuestro equipo antes de publicarse.' },
+              { num: '02', icon: Clock,      title: 'Elige fecha y horario', desc: 'Selecciona el día, horario y adicionales. El propietario confirma en menos de 24 horas.' },
+              { num: '03', icon: CreditCard, title: 'Confirma y paga',       desc: 'Pago seguro con Azul Payments. El precio que ves es el precio que pagas — sin cargos ocultos.' },
             ].map((step, i) => {
               const Icon = step.icon
               return (
@@ -372,36 +418,6 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
               )
             })}
           </div>
-        </div>
-      </section>
-
-      {/* ── TRUST ── */}
-      <section className="py-14 md:py-20" style={{ background: '#fff' }}>
-        <div ref={trustSection.ref} className="max-w-4xl mx-auto px-4 md:px-6 grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
-          {[
-            { icon: Shield,      color: '#35C493', title: 'Espacios verificados',       desc: 'Revisamos cada espacio antes de publicarlo en la plataforma.' },
-            { icon: CheckCircle, color: '#3B82F6', title: 'Confirmación en 24 horas',   desc: 'Los propietarios responden rápido. Máximo 24 horas.' },
-            { icon: CreditCard,  color: '#8B5CF6', title: 'Pago directo y seguro',      desc: 'Tu pago está protegido hasta confirmar tu reserva.' },
-          ].map(({ icon: Icon, color, title, desc }, i) => (
-            <div key={title}
-              className="flex items-start gap-4"
-              style={{
-                opacity: trustSection.on ? 1 : 0,
-                transform: trustSection.on ? 'translateY(0)' : 'translateY(20px)',
-                transition: `opacity 0.6s ease ${i * 120}ms, transform 0.6s ease ${i * 120}ms`,
-              }}>
-              <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
-                style={{ background: `${color}12` }}>
-                <Icon size={20} style={{ color }} />
-              </div>
-              <div>
-                <h4 className="font-bold text-sm mb-1.5" style={{ color: '#0F1623', letterSpacing: '-0.01em' }}>
-                  {title}
-                </h4>
-                <p className="text-xs leading-relaxed" style={{ color: '#94A3B8' }}>{desc}</p>
-              </div>
-            </div>
-          ))}
         </div>
       </section>
 
