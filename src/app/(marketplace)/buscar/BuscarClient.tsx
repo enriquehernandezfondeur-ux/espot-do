@@ -449,23 +449,66 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                 )}
               </div>
 
-              {/* Más filtros */}
-              <button onClick={() => setMoreOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ml-auto"
-                style={{
-                  background: activeFiltersCount > 0 ? 'var(--brand)' : '#fff',
-                  color:      activeFiltersCount > 0 ? '#fff' : 'var(--text-primary)',
-                  border:     `1.5px solid ${activeFiltersCount > 0 ? 'var(--brand)' : 'var(--border-medium)'}`,
-                }}>
-                <SlidersHorizontal size={14} />
-                Más filtros
-                {activeFiltersCount > 0 && (
-                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
-                    style={{ background: 'rgba(255,255,255,0.25)' }}>
-                    {activeFiltersCount}
-                  </span>
-                )}
-              </button>
+              {/* Sort + Más filtros — agrupados al final */}
+              <div className="flex items-center gap-1.5 ml-auto">
+
+                {/* Ordenar */}
+                <div className="relative">
+                  {sortOpen && <div className="fixed inset-0 z-40" onClick={() => setSortOpen(false)} />}
+                  <button onClick={() => setSortOpen(o => !o)}
+                    className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all"
+                    style={{
+                      background: sortBy !== 'relevancia' ? 'var(--brand-dim)' : '#fff',
+                      border: `1.5px solid ${sortBy !== 'relevancia' ? 'var(--brand-border)' : 'var(--border-medium)'}`,
+                      color: sortBy !== 'relevancia' ? 'var(--brand)' : 'var(--text-primary)',
+                    }}>
+                    <SlidersHorizontal size={13} />
+                    {sortBy === 'relevancia' ? 'Ordenar' : sortBy === 'precio_asc' ? 'Precio ↑' : sortBy === 'precio_desc' ? 'Precio ↓' : 'Capacidad'}
+                  </button>
+                  {sortOpen && (
+                    <div className="absolute right-0 top-full mt-2 z-50 rounded-2xl overflow-hidden"
+                      style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', minWidth: 210 }}>
+                      {[
+                        { value: 'relevancia',  label: 'Relevancia',            sub: 'Orden por defecto' },
+                        { value: 'precio_asc',  label: 'Precio: menor a mayor', sub: 'Más económicos primero' },
+                        { value: 'precio_desc', label: 'Precio: mayor a menor', sub: 'Más premium primero' },
+                        { value: 'capacidad',   label: 'Mayor capacidad',        sub: 'Más personas primero' },
+                      ].map(opt => (
+                        <button key={opt.value}
+                          onClick={() => { setSortBy(opt.value as typeof sortBy); setSortOpen(false) }}
+                          className="w-full flex items-center justify-between px-4 py-3 text-left"
+                          style={{ borderBottom: '1px solid var(--border-subtle)' }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
+                          <div>
+                            <p className="text-xs font-semibold" style={{ color: sortBy === opt.value ? 'var(--brand)' : 'var(--text-primary)' }}>{opt.label}</p>
+                            <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{opt.sub}</p>
+                          </div>
+                          {sortBy === opt.value && <Check size={13} style={{ color: 'var(--brand)' }} />}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Más filtros */}
+                <button onClick={() => setMoreOpen(true)}
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all"
+                  style={{
+                    background: activeFiltersCount > 0 ? 'var(--brand)' : '#fff',
+                    color:      activeFiltersCount > 0 ? '#fff' : 'var(--text-primary)',
+                    border:     `1.5px solid ${activeFiltersCount > 0 ? 'var(--brand)' : 'var(--border-medium)'}`,
+                  }}>
+                  <SlidersHorizontal size={13} />
+                  Filtros
+                  {activeFiltersCount > 0 && (
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center text-xs font-bold"
+                      style={{ background: 'rgba(255,255,255,0.3)' }}>
+                      {activeFiltersCount}
+                    </span>
+                  )}
+                </button>
+              </div>
             </div>
 
           {/* ── Móvil: UNA sola barra limpia ── */}
@@ -653,7 +696,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               )
             }
           </div>
-          <div style={{ flex: '0 0 40%', position: 'sticky', top: 0, height: 'calc(100vh - 226px)', borderRadius: 16, overflow: 'hidden' }}>
+          <div style={{ flex: '0 0 40%', position: 'sticky', top: 0, height: 'calc(100vh - 226px)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.08)', border: '1px solid var(--border-subtle)' }}>
             <SpacesMap spaces={filtered} hoveredId={hoveredId} cityFilter={sector} onSpaceHover={handleCardHover} />
           </div>
         </div>
