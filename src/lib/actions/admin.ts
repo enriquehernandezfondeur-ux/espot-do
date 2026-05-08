@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
 
 const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
 
@@ -161,6 +162,7 @@ export async function updateSpaceStatus(spaceId: string, updates: {
   const supabase = await requireAdmin()
   if (!supabase) return { error: 'No autorizado' }
   const { error } = await supabase.from('spaces').update(updates).eq('id', spaceId)
+  if (!error) revalidatePath('/buscar')
   return error ? { error: error.message } : { success: true }
 }
 
@@ -168,6 +170,7 @@ export async function deleteSpace(spaceId: string) {
   const supabase = await requireAdmin()
   if (!supabase) return { error: 'No autorizado' }
   const { error } = await supabase.from('spaces').update({ is_active: false }).eq('id', spaceId)
+  if (!error) revalidatePath('/buscar')
   return error ? { error: error.message } : { success: true }
 }
 

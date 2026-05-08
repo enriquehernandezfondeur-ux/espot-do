@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import {
@@ -8,6 +8,7 @@ import {
   ChevronLeft, ChevronRight, Shield, LayoutList, Map, ArrowRight,
   Check, Building2, UtensilsCrossed, ChevronDown,
   Sunset, Wine, Trees, Camera, Briefcase, Home, Hotel,
+  Car, Volume2, Music2, Waves, Minus, Plus, Wifi,
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 
@@ -50,6 +51,17 @@ const AMENITIES = [
   { key: 'allows_external_food',       label: 'Permite comida externa' },
   { key: 'allows_external_alcohol',    label: 'Permite alcohol externo' },
   { key: 'verified',                   label: 'Espacio verificado' },
+]
+
+const FACILITIES: { key: string; label: string; icon: React.ElementType; categories: string[] }[] = [
+  { key: 'parking',   label: 'Parking',           icon: Car,             categories: ['salon', 'hotel', 'villa'] },
+  { key: 'cocina',    label: 'Cocina equipada',    icon: UtensilsCrossed, categories: ['restaurante', 'hotel', 'villa', 'salon'] },
+  { key: 'sonido',    label: 'Sistema de sonido',  icon: Volume2,         categories: ['salon', 'hotel', 'villa'] },
+  { key: 'pista',     label: 'Pista de baile',     icon: Music2,          categories: ['salon', 'hotel'] },
+  { key: 'exterior',  label: 'Área exterior',      icon: Trees,           categories: ['rooftop', 'terraza', 'villa'] },
+  { key: 'piscina',   label: 'Piscina',            icon: Waves,           categories: ['villa'] },
+  { key: 'wifi',      label: 'WiFi',               icon: Wifi,            categories: ['salon','restaurante','bar','rooftop','terraza','hotel','coworking','villa','estudio','otro'] },
+  { key: 'ciclorama', label: 'Ciclorama',          icon: Camera,          categories: ['estudio'] },
 ]
 
 const SECTORS = [
@@ -116,7 +128,8 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   const datePickerRef  = useRef<HTMLDivElement>(null)
   const [priceMin,       setPriceMin]       = useState('')
   const [priceMax,       setPriceMax]       = useState('')
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([])
+  const [selectedAmenities,   setSelectedAmenities]   = useState<string[]>([])
+  const [selectedFacilities,  setSelectedFacilities]  = useState<string[]>([])
   const [moreOpen,       setMoreOpen]       = useState(false)
   const [blockedIds,     setBlockedIds]     = useState<Set<string>>(
     () => new Set(spaces.filter((s: any) => s._dateFiltered && !s._available).map((s: any) => s.id))
@@ -213,6 +226,14 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
       result = result.filter(s => s.space_conditions?.[0]?.allows_external_food)
     if (selectedAmenities.includes('allows_external_alcohol'))
       result = result.filter(s => s.space_conditions?.[0]?.allows_external_alcohol)
+    if (selectedFacilities.length > 0) {
+      result = result.filter(s =>
+        selectedFacilities.every(fk => {
+          const fac = FACILITIES.find(f => f.key === fk)
+          return fac ? fac.categories.includes(s.category) : true
+        })
+      )
+    }
     // Ordenar
     if (sortBy === 'precio_asc' || sortBy === 'precio_desc') {
       result.sort((a, b) => {
@@ -228,13 +249,23 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
     }
 
     return result
-  }, [spaces, q, categoria, sector, capacidad, priceMin, priceMax, selectedAmenities, sortBy])
+  }, [spaces, q, categoria, sector, capacidad, priceMin, priceMax, selectedAmenities, selectedFacilities, sortBy])
 
   function applyCapacity(val: string) {
     setCapacidad(val); setCapacidadInput(val)
   }
+  function stepCapacity(delta: number) {
+    const current = parseInt(capacidadInput || '0')
+    const next = Math.max(0, current + delta)
+    applyCapacity(next === 0 ? '' : String(next))
+  }
   function toggleAmenity(key: string) {
     setSelectedAmenities(prev =>
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key],
+    )
+  }
+  function toggleFacility(key: string) {
+    setSelectedFacilities(prev =>
       prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key],
     )
   }
@@ -246,12 +277,12 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   }
 
   const activeFiltersCount = [
-    categoria, sector, capacidad, dateFrom, timeFrom, ...selectedAmenities, priceMin, priceMax,
+    categoria, sector, capacidad, dateFrom, timeFrom, ...selectedAmenities, ...selectedFacilities, priceMin, priceMax,
   ].filter(Boolean).length
 
   function clearAll() {
     setQ(''); setSector(''); setSectorQ(''); setCategoria(''); setCapacidad(''); setCapacidadInput('')
-    setSelectedAmenities([]); setPriceMin(''); setPriceMax(''); setDateFrom(''); setTimeFrom('')
+    setSelectedAmenities([]); setSelectedFacilities([]); setPriceMin(''); setPriceMax(''); setDateFrom(''); setTimeFrom('')
   }
 
   const handleCardHover = useCallback((id: string | null) => setHoveredId(id), [])
@@ -267,6 +298,11 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
       key: k,
       label: AMENITIES.find(a => a.key === k)?.label ?? k,
       onRemove: () => toggleAmenity(k),
+    })),
+    ...selectedFacilities.map(k => ({
+      key: `fac_${k}`,
+      label: FACILITIES.find(f => f.key === k)?.label ?? k,
+      onRemove: () => toggleFacility(k),
     })),
   ].filter(Boolean) as { key: string; label: string; onRemove: () => void }[]
 
@@ -284,7 +320,10 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
         <div className="max-w-screen-2xl mx-auto px-4 md:px-6 py-3 w-full">
 
           {/* ── Desktop: 1 sola fila limpia ── */}
-          <div className="hidden md:flex items-center gap-2">
+          <div className="hidden md:flex items-center">
+
+              {/* Filtros centrados */}
+              <div className="flex-1 flex items-center justify-center gap-2">
 
               {/* Tipo de espacio */}
               <div className="relative">
@@ -345,21 +384,58 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                   }
                 </button>
                 {capOpen && (
-                  <div className="absolute left-0 top-full mt-2 z-50 rounded-2xl overflow-hidden py-1.5"
-                    style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', minWidth: 200 }}>
-                    <p className="px-4 py-2 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                  <div className="absolute left-0 top-full mt-2 z-50 rounded-2xl p-4"
+                    style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', minWidth: 256 }}>
+                    <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
                       Mínimo de personas
                     </p>
-                    {[{ v: '', l: 'Cualquier cantidad' }, ...QUICK_CAPACITIES.map(n => ({ v: String(n), l: n === 150 ? '150 o más' : `${n} o más` }))].map(opt => (
-                      <button key={opt.v} onClick={() => { applyCapacity(opt.v); setCapOpen(false) }}
-                        className="w-full flex items-center justify-between px-4 py-2.5 text-sm transition-all"
-                        style={{ color: capacidad === opt.v ? 'var(--brand)' : 'var(--text-primary)', fontWeight: capacidad === opt.v ? 600 : 400 }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
-                        {opt.l}
-                        {capacidad === opt.v && <Check size={13} style={{ color: 'var(--brand)' }} />}
+                    {/* Stepper */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <button
+                        onClick={() => stepCapacity(-5)}
+                        className="w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0"
+                        style={{ background: 'var(--bg-elevated)', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)' }}>
+                        <Minus size={14} />
                       </button>
-                    ))}
+                      <div className="flex-1 flex items-center gap-1.5 rounded-xl px-3 py-2"
+                        style={{ background: 'var(--bg-elevated)', border: '1.5px solid var(--brand-border)' }}>
+                        <Users size={13} style={{ color: 'var(--brand)', flexShrink: 0 }} />
+                        <input
+                          type="number" value={capacidadInput}
+                          onChange={e => { setCapacidadInput(e.target.value); setCapacidad(e.target.value) }}
+                          placeholder="0"
+                          className="w-full bg-transparent text-center text-sm font-bold focus:outline-none"
+                          style={{ color: 'var(--text-primary)', minWidth: 0 }}
+                        />
+                        <span className="text-xs shrink-0" style={{ color: 'var(--text-muted)' }}>pers.</span>
+                      </div>
+                      <button
+                        onClick={() => stepCapacity(5)}
+                        className="w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0"
+                        style={{ background: 'var(--brand)', color: '#fff' }}>
+                        <Plus size={14} />
+                      </button>
+                    </div>
+                    {/* Quick presets */}
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {QUICK_CAPACITIES.map(n => (
+                        <button key={n} onClick={() => { applyCapacity(String(n)); setCapOpen(false) }}
+                          className="py-2 rounded-xl text-xs font-semibold transition-all"
+                          style={capacidad === String(n)
+                            ? { background: 'var(--brand)', color: '#fff' }
+                            : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }
+                          }>
+                          {n === 150 ? '150+' : n}
+                        </button>
+                      ))}
+                    </div>
+                    {capacidad && (
+                      <button onClick={() => { applyCapacity(''); setCapOpen(false) }}
+                        className="flex items-center gap-1 mt-3 text-xs font-medium mx-auto"
+                        style={{ color: '#DC2626' }}>
+                        <X size={10} /> Quitar filtro
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -449,8 +525,10 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                 )}
               </div>
 
+              </div>{/* /filtros centrados */}
+
               {/* Sort + Más filtros — agrupados al final */}
-              <div className="flex items-center gap-1.5 ml-auto">
+              <div className="flex items-center gap-1.5 shrink-0">
 
                 {/* Ordenar */}
                 <div className="relative">
@@ -798,31 +876,47 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                   ¿Cuántos invitados?
                 </h3>
                 <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
-                  Espacios con esa capacidad o mayor
+                  Muestra espacios con esa capacidad o mayor
                 </p>
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="flex-1 flex items-center gap-2 rounded-xl px-4 py-3.5 input-base">
-                    <Users size={15} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                {/* Stepper grande */}
+                <div className="flex items-center gap-3 mb-4">
+                  <button
+                    onClick={() => stepCapacity(-5)}
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all shrink-0"
+                    style={{ background: 'var(--bg-elevated)', border: '2px solid var(--border-medium)', color: 'var(--text-primary)' }}>
+                    <Minus size={18} />
+                  </button>
+                  <div className="flex-1 flex items-center gap-2 rounded-2xl px-4 py-3 input-base"
+                    style={{ border: '2px solid var(--brand-border)' }}>
+                    <Users size={16} style={{ color: 'var(--brand)', flexShrink: 0 }} />
                     <input
                       type="number" value={capacidadInput}
                       onChange={e => { setCapacidadInput(e.target.value); setCapacidad(e.target.value) }}
-                      placeholder="Número de personas"
-                      className="flex-1 bg-transparent text-sm focus:outline-none"
-                      style={{ color: 'var(--text-primary)' }}
+                      placeholder="0"
+                      className="flex-1 bg-transparent text-center text-lg font-bold focus:outline-none"
+                      style={{ color: 'var(--text-primary)', minWidth: 0 }}
                     />
+                    <span className="text-xs shrink-0" style={{ color: 'var(--text-muted)' }}>pers.</span>
                     {capacidadInput && (
-                      <button onClick={() => { setCapacidad(''); setCapacidadInput('') }}>
+                      <button onClick={() => applyCapacity('')}>
                         <X size={13} style={{ color: 'var(--text-muted)' }} />
                       </button>
                     )}
                   </div>
+                  <button
+                    onClick={() => stepCapacity(5)}
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all shrink-0"
+                    style={{ background: 'var(--brand)', color: '#fff', boxShadow: '0 2px 8px rgba(53,196,147,0.35)' }}>
+                    <Plus size={18} />
+                  </button>
                 </div>
-                <div className="flex gap-2 flex-wrap">
+                {/* Quick presets */}
+                <div className="grid grid-cols-4 gap-2">
                   {QUICK_CAPACITIES.map(n => (
                     <button key={n} onClick={() => applyCapacity(String(n))}
-                      className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
+                      className="py-2.5 rounded-xl text-sm font-semibold transition-all"
                       style={capacidad === String(n)
-                        ? { background: 'var(--brand)', color: '#fff' }
+                        ? { background: 'var(--brand)', color: '#fff', boxShadow: '0 2px 8px rgba(53,196,147,0.3)' }
                         : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }
                       }>
                       {n === 150 ? '150+' : n}
@@ -869,6 +963,30 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                     <input type="number" value={priceMax} onChange={e => setPriceMax(e.target.value)}
                       placeholder="Sin límite" className="input-base w-full rounded-xl px-4 py-3.5 text-sm" />
                   </div>
+                </div>
+              </div>
+
+              {/* ── FACILIDADES ── */}
+              <div>
+                <h3 className="font-bold text-sm mb-1" style={{ color: 'var(--text-primary)' }}>Facilidades</h3>
+                <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>¿Qué necesitas que tenga el espacio?</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {FACILITIES.map(fac => {
+                    const isActive = selectedFacilities.includes(fac.key)
+                    const Icon = fac.icon
+                    return (
+                      <button key={fac.key} onClick={() => toggleFacility(fac.key)}
+                        className="flex items-center gap-2.5 px-3 py-3 rounded-xl text-left transition-all"
+                        style={isActive
+                          ? { background: 'var(--brand-dim)', border: '1.5px solid var(--brand-border)', color: 'var(--brand)' }
+                          : { background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }
+                        }>
+                        <Icon size={15} className="shrink-0" style={{ color: isActive ? 'var(--brand)' : 'var(--text-muted)' }} />
+                        <span className="text-xs font-medium leading-tight flex-1">{fac.label}</span>
+                        {isActive && <Check size={12} className="shrink-0" style={{ color: 'var(--brand)' }} />}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
 

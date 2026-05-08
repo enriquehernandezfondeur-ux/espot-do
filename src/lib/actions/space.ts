@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { generateSlug, num, int } from '@/lib/utils'
+import { revalidatePath } from 'next/cache'
 import type { PricingType, PaymentTermType } from '@/types'
 
 const PLATFORM_FEE_PCT = 10
@@ -239,6 +240,7 @@ export async function publishSpace(spaceId: string) {
     .from('spaces')
     .update({ is_published: true })
     .eq('id', spaceId)
+  if (!error) revalidatePath('/buscar')
   return error ? { error: error.message } : { success: true }
 }
 
@@ -283,6 +285,7 @@ export async function saveSpaceImages(
     }))
   )
 
+  if (!error) revalidatePath('/buscar')
   return error ? { error: error.message } : { success: true }
 }
 
@@ -413,5 +416,6 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
     await supabase.from('space_conditions').insert(condData)
   }
 
+  revalidatePath('/buscar')
   return { success: true, spaceId }
 }
