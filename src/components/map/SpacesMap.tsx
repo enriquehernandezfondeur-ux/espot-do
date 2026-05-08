@@ -275,53 +275,26 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
 
 // ── Helpers de Leaflet ────────────────────────────────────
 
-function buildIcon(L: any, label: string, active: boolean) {
-  const bg    = active ? '#35C493' : '#0F1623'
-  const color = '#ffffff'
-  const scale = active ? 'scale(1.12)' : 'scale(1)'
+function buildIcon(L: any, _label: string, active: boolean) {
+  const color  = active ? '#0F1623' : '#35C493'
   const shadow = active
-    ? '0 4px 16px rgba(53,196,147,0.45)'
-    : '0 2px 8px rgba(0,0,0,0.22)'
-
+    ? '0 4px 16px rgba(15,22,35,0.45)'
+    : '0 2px 10px rgba(53,196,147,0.4)'
   return L.divIcon({
     html: `
-      <div style="
-        position:relative;
-        display:inline-block;
-        transform:${scale};
-        transform-origin:center bottom;
-        transition:transform 0.15s ease;
-        cursor:pointer;
-      ">
-        <div style="
-          display:inline-flex;
-          align-items:center;
-          padding:5px 10px;
-          border-radius:20px;
-          background:${bg};
-          color:${color};
-          font-size:11px;
-          font-weight:700;
-          white-space:nowrap;
-          box-shadow:${shadow};
-          letter-spacing:-0.01em;
-          font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-        ">${label}</div>
-        <div style="
-          position:absolute;
-          left:50%;
-          bottom:-5px;
-          transform:translateX(-50%);
-          width:0;height:0;
-          border-left:5px solid transparent;
-          border-right:5px solid transparent;
-          border-top:6px solid ${bg};
-        "></div>
+      <div style="position:relative;width:28px;height:36px;cursor:pointer;
+                  transition:transform 0.15s;transform:${active ? 'scale(1.25)' : 'scale(1)'}">
+        <svg width="28" height="36" viewBox="0 0 28 36" fill="none"
+             xmlns="http://www.w3.org/2000/svg"
+             style="filter:drop-shadow(${shadow})">
+          <path d="M14 0C6.3 0 0 6.3 0 14c0 5.2 2.8 9.7 7 12.2L14 36l7-9.8C25.2 23.7 28 19.2 28 14 28 6.3 21.7 0 14 0z"
+                fill="${color}"/>
+          <circle cx="14" cy="13" r="6" fill="white"/>
+        </svg>
       </div>`,
-    className:   '',
-    iconSize:    [70, 38],
-    iconAnchor:  [35, 43],
-    popupAnchor: [0, -46],
+    className:  '',
+    iconSize:   [28, 36],
+    iconAnchor: [14, 36],
   })
 }
 

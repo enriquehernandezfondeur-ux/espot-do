@@ -627,53 +627,6 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               </div>
             </div>
 
-            {/* Ordenar — dropdown custom desktop */}
-            <div className="hidden md:block relative shrink-0">
-              {sortOpen && <div className="fixed inset-0 z-40" onClick={() => setSortOpen(false)} />}
-              <button
-                onClick={() => setSortOpen(o => !o)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
-                style={{
-                  background: sortBy !== 'relevancia' ? 'var(--brand-dim)' : '#fff',
-                  border: `1px solid ${sortBy !== 'relevancia' ? 'var(--brand-border)' : 'var(--border-medium)'}`,
-                  color: sortBy !== 'relevancia' ? 'var(--brand)' : 'var(--text-primary)',
-                }}>
-                <SlidersHorizontal size={11} />
-                {sortBy === 'relevancia'   ? 'Ordenar'          :
-                 sortBy === 'precio_asc'   ? 'Precio ↑'         :
-                 sortBy === 'precio_desc'  ? 'Precio ↓'         : 'Capacidad'}
-                <ChevronRight size={11} style={{ rotate: sortOpen ? '90deg' : '0deg', transition: 'rotate 0.2s' }} />
-              </button>
-              {sortOpen && (
-                <div className="absolute right-0 top-full mt-2 z-50 rounded-2xl overflow-hidden"
-                  style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', minWidth: 200 }}>
-                  {[
-                    { value: 'relevancia',  label: 'Relevancia',           sub: 'Orden por defecto' },
-                    { value: 'precio_asc',  label: 'Precio: menor a mayor', sub: 'Más económicos primero' },
-                    { value: 'precio_desc', label: 'Precio: mayor a menor', sub: 'Más premium primero' },
-                    { value: 'capacidad',   label: 'Mayor capacidad',       sub: 'Más personas primero' },
-                  ].map(opt => (
-                    <button key={opt.value}
-                      onClick={() => { setSortBy(opt.value as typeof sortBy); setSortOpen(false) }}
-                      className="w-full flex items-center justify-between px-4 py-3 text-left transition-all"
-                      style={{
-                        background: sortBy === opt.value ? 'var(--brand-dim)' : 'transparent',
-                        borderBottom: '1px solid var(--border-subtle)',
-                      }}
-                      onMouseEnter={e => { if (sortBy !== opt.value) (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}
-                      onMouseLeave={e => { if (sortBy !== opt.value) (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
-                      <div>
-                        <p className="text-xs font-semibold" style={{ color: sortBy === opt.value ? 'var(--brand)' : 'var(--text-primary)' }}>
-                          {opt.label}
-                        </p>
-                        <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{opt.sub}</p>
-                      </div>
-                      {sortBy === opt.value && <Check size={13} style={{ color: 'var(--brand)', flexShrink: 0 }} />}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
