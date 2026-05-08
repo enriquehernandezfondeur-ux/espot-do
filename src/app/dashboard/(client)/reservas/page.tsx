@@ -8,16 +8,23 @@ import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getClientBookings } from '@/lib/actions/client'
 import { STATUS_LABELS, STATUS_COLORS, isPaid } from '@/lib/bookingConfig'
 import { cn } from '@/lib/utils'
+import { submitReview } from '@/lib/actions/reviews'
 
 type Booking = Awaited<ReturnType<typeof getClientBookings>>[0]
 
 const FILTERS = ['Todas', 'Pendientes', 'Aceptadas', 'Confirmadas', 'Completadas', 'Canceladas']
 
 export default function MisReservasPage() {
-  const [bookings, setBookings] = useState<Booking[]>([])
-  const [loading, setLoading]   = useState(true)
-  const [filter, setFilter]     = useState('Todas')
-  const [search, setSearch]     = useState('')
+  const [bookings, setBookings]   = useState<Booking[]>([])
+  const [loading, setLoading]     = useState(true)
+  const [filter, setFilter]       = useState('Todas')
+  const [search, setSearch]       = useState('')
+  const [reviewFor, setReviewFor] = useState<string | null>(null) // bookingId activo
+  const [hoverStar, setHoverStar] = useState(0)
+  const [rating, setRating]       = useState(0)
+  const [comment, setComment]     = useState('')
+  const [reviewed, setReviewed]   = useState<Set<string>>(new Set())
+  const [submitting, setSubmitting] = useState(false)
   const [selected, setSelected] = useState<Booking | null>(null)
   const router = useRouter()
 
@@ -310,6 +317,84 @@ export default function MisReservasPage() {
                         Cancelaste esta reserva.
                         {bk.cancellation_reason && (
                           <p className="mt-1">Motivo: {bk.cancellation_reason}</p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* ── Reseña — aparece para reservas completadas con fecha pasada ── */}
+                    {(bk.status === 'confirmed' || bk.status === 'completed') &&
+                     isPaid(bk.payment_status) &&
+                     new Date(bk.event_date) < new Date() && (
+                      <div className="mt-4">
+                        {reviewed.has(bk.id) ? (
+                          <div className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm"
+                            style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.2)', color: '#166534' }}>
+                            <span>⭐</span> ¡Gracias por tu reseña!
+                          </div>
+                        ) : reviewFor === bk.id ? (
+                          <div className="p-4 rounded-2xl space-y-3"
+                            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                            <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                              ¿Cómo estuvo tu evento en {(bk as any).spaces?.name}?
+                            </p>
+                            {/* Estrellas */}
+                            <div className="flex gap-1">
+                              {[1,2,3,4,5].map(s => (
+                                <button key={s} type="button"
+                                  onMouseEnter={() => setHoverStar(s)}
+                                  onMouseLeave={() => setHoverStar(0)}
+                                  onClick={() => setRating(s)}>
+                                  <svg width="28" height="28" viewBox="0 0 16 16" style={{ transition: 'transform 0.1s', transform: s <= (hoverStar || rating) ? 'scale(1.15)' : 'scale(1)' }}>
+                                    <path d="M8 1l1.8 3.6L14 5.3l-3 2.9.7 4.1L8 10.4l-3.7 1.9.7-4.1-3-2.9 4.2-.7z"
+                                      fill={s <= (hoverStar || rating) ? '#F59E0B' : '#D1D5DB'}/>
+                                  </svg>
+                                </button>
+                              ))}
+                            </div>
+                            <textarea
+                              value={comment} onChange={e => setComment(e.target.value)}
+                              placeholder="Cuéntanos cómo fue tu experiencia (opcional)"
+                              rows={3}
+                              className="w-full rounded-xl px-3 py-2.5 text-sm resize-none focus:outline-none"
+                              style={{ background: '#fff', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)' }}
+                            />
+                            <div className="flex gap-2">
+                              <button
+                                disabled={rating === 0 || submitting}
+                                onClick={async () => {
+                                  if (!rating) return
+                                  setSubmitting(true)
+                                  const { error } = await submitReview({
+                                    bookingId: bk.id,
+                                    spaceId:   (bk as any).space_id,
+                                    rating,
+                                    comment,
+                                  })
+                                  setSubmitting(false)
+                                  if (!error) {
+                                    setReviewed(prev => new Set([...prev, bk.id]))
+                                    setReviewFor(null)
+                                    setRating(0)
+                                    setComment('')
+                                  }
+                                }}
+                                className="px-4 py-2 rounded-xl text-sm font-bold disabled:opacity-40"
+                                style={{ background: '#35C493', color: '#fff' }}>
+                                {submitting ? 'Publicando...' : 'Publicar reseña'}
+                              </button>
+                              <button onClick={() => { setReviewFor(null); setRating(0); setComment('') }}
+                                className="px-4 py-2 rounded-xl text-sm"
+                                style={{ color: 'var(--text-secondary)' }}>
+                                Cancelar
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button onClick={() => { setReviewFor(bk.id); setRating(0); setComment('') }}
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold w-full"
+                            style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)', color: '#92400E' }}>
+                            <span>⭐</span> Dejar reseña de este espacio
+                          </button>
                         )}
                       </div>
                     )}

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { getSpaceReviews, type ReviewsSummary } from '@/lib/actions/reviews'
 import Link from 'next/link'
 import {
   MapPin, Users, Shield, ChevronLeft, ChevronRight,
@@ -91,7 +92,12 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
   const [photoIdx,        setPhotoIdx]        = useState(0)
   const [showLightbox,    setShowLightbox]    = useState(false)
   const [showChat,        setShowChat]        = useState(false)
-  const [activeTab,       setActiveTab]       = useState<'info' | 'addons' | 'rules'>('info')
+  const [activeTab,       setActiveTab]       = useState<'info' | 'addons' | 'rules' | 'reviews'>('info')
+  const [reviewsData,     setReviewsData]     = useState<ReviewsSummary | null>(null)
+
+  useEffect(() => {
+    getSpaceReviews(space.id).then(setReviewsData)
+  }, [space.id])
   const [showMobileWidget,setShowMobileWidget]= useState(false)
   const [showVideoModal,  setShowVideoModal]  = useState(false)
   const [showShareMenu,   setShowShareMenu]   = useState(false)
@@ -601,9 +607,10 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
             <div className="mb-6 md:mb-8">
               <div className="flex gap-1 p-1 rounded-2xl w-full md:w-fit" style={{ background: 'var(--bg-elevated)' }}>
                 {([
-                  { id: 'info',   label: 'Descripción' },
-                  { id: 'addons', label: `Adicionales${addons.length ? ` (${addons.length})` : ''}` },
-                  { id: 'rules',  label: 'Reglas' },
+                  { id: 'info',    label: 'Descripción' },
+                  { id: 'addons',  label: `Adicionales${addons.length ? ` (${addons.length})` : ''}` },
+                  { id: 'rules',   label: 'Reglas' },
+                  { id: 'reviews', label: reviewsData?.total ? `Reseñas (${reviewsData.total})` : 'Reseñas' },
                 ] as const).map(tab => (
                   <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                     className="flex-1 md:flex-none px-4 md:px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
@@ -890,6 +897,82 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
             )}
 
             {/* ── TAB: Reglas ── */}
+            {/* ── TAB: Reseñas ── */}
+            {activeTab === 'reviews' && (
+              <div>
+                {!reviewsData || reviewsData.total === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-4xl mb-3">⭐</div>
+                    <p className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>Aún no hay reseñas</p>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                      Sé el primero en dejar una reseña después de tu evento.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {/* Resumen compacto */}
+                    <div className="flex items-center gap-3 p-4 rounded-2xl"
+                      style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+                      <div className="text-4xl font-bold" style={{ color: 'var(--text-primary)', lineHeight: 1 }}>
+                        {reviewsData.average}
+                      </div>
+                      <div>
+                        <div className="flex gap-0.5 mb-0.5">
+                          {[1,2,3,4,5].map(s => (
+                            <svg key={s} width="16" height="16" viewBox="0 0 16 16">
+                              <path d="M8 1l1.8 3.6L14 5.3l-3 2.9.7 4.1L8 10.4l-3.7 1.9.7-4.1-3-2.9 4.2-.7z"
+                                fill={s <= Math.round(reviewsData.average) ? '#F59E0B' : '#E5E7EB'}/>
+                            </svg>
+                          ))}
+                        </div>
+                        <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                          {reviewsData.total} {reviewsData.total === 1 ? 'reseña' : 'reseñas'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Lista de reseñas */}
+                    {reviewsData.reviews.map(r => {
+                      const name    = r.guest.full_name ?? 'Usuario'
+                      const initial = name.charAt(0).toUpperCase()
+                      const colors  = ['#35C493','#6366F1','#F59E0B','#EF4444','#0EA5E9']
+                      const color   = colors[name.charCodeAt(0) % colors.length]
+                      const date    = new Date(r.created_at).toLocaleDateString('es-DO', { month: 'short', year: 'numeric' })
+                      return (
+                        <div key={r.id} className="p-4 rounded-2xl"
+                          style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+                          <div className="flex items-start gap-3">
+                            <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+                              style={{ background: color }}>
+                              {initial}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between gap-2 mb-1">
+                                <span className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{name}</span>
+                                <span className="text-xs flex-shrink-0" style={{ color: 'var(--text-muted)' }}>{date}</span>
+                              </div>
+                              <div className="flex gap-0.5 mb-2">
+                                {[1,2,3,4,5].map(s => (
+                                  <svg key={s} width="12" height="12" viewBox="0 0 16 16">
+                                    <path d="M8 1l1.8 3.6L14 5.3l-3 2.9.7 4.1L8 10.4l-3.7 1.9.7-4.1-3-2.9 4.2-.7z"
+                                      fill={s <= r.rating ? '#F59E0B' : '#E5E7EB'}/>
+                                  </svg>
+                                ))}
+                                <span className="text-xs ml-1" style={{ color: 'var(--text-muted)', fontSize: 10 }}>✓ Reserva verificada</span>
+                              </div>
+                              {r.comment && (
+                                <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{r.comment}</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
             {activeTab === 'rules' && (
               <div className="space-y-6 md:space-y-8">
                 {conditions && (
