@@ -5,17 +5,7 @@
 
 import { createHmac } from 'crypto'
 
-const MERCHANT_ID   = process.env.AZUL_MERCHANT_ID   ?? ''
-const MERCHANT_NAME = process.env.AZUL_MERCHANT_NAME ?? 'ESPOT, S.R.L.'
 const MERCHANT_TYPE = 'Marketplace'
-const PRIVATE_KEY   = process.env.AZUL_PRIVATE_KEY   ?? ''
-const SITE          = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
-
-// En desarrollo usa el sandbox de Azul; en producción usa la URL real
-const IS_PROD = process.env.NODE_ENV === 'production'
-const PAGE_URL = IS_PROD
-  ? (process.env.AZUL_PAYMENT_PAGE_URL ?? 'https://pagos.azul.com.do/PaymentPage/Default.aspx')
-  : 'https://pruebas.azul.com.do/PaymentPage/Default.aspx'
 
 // ── Construir campos firmados para PaymentPage ────────────
 export interface AzulPageParams {
@@ -31,9 +21,18 @@ export interface AzulPageFields {
 }
 
 export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
-  if (!MERCHANT_ID || !PRIVATE_KEY || !PAGE_URL) {
-    throw new Error('Azul PaymentPage no está configurada. Verifica AZUL_MERCHANT_ID, AZUL_PRIVATE_KEY y AZUL_PAYMENT_PAGE_URL en las variables de entorno.')
-  }
+  // Leer siempre en tiempo de ejecución para capturar las variables de Vercel
+  const MERCHANT_ID   = process.env.AZUL_MERCHANT_ID   ?? ''
+  const MERCHANT_NAME = process.env.AZUL_MERCHANT_NAME ?? 'ESPOT, S.R.L.'
+  const PRIVATE_KEY   = process.env.AZUL_PRIVATE_KEY   ?? ''
+  const SITE          = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
+  const IS_PROD       = process.env.NODE_ENV === 'production'
+  const PAGE_URL      = IS_PROD
+    ? (process.env.AZUL_PAYMENT_PAGE_URL ?? 'https://pagos.azul.com.do/PaymentPage/Default.aspx')
+    : 'https://pruebas.azul.com.do/PaymentPage/Default.aspx'
+
+  if (!MERCHANT_ID) throw new Error('Falta AZUL_MERCHANT_ID en las variables de entorno de Vercel.')
+  if (!PRIVATE_KEY) throw new Error('Falta AZUL_PRIVATE_KEY en las variables de entorno de Vercel.')
 
   const amountStr = String(Math.round(params.amount * 100))
   const itbisStr  = String(Math.round((params.itbis ?? 0) * 100))
@@ -42,7 +41,6 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
   const declinedUrl = `${SITE}/pago/fallido?b=${params.bookingId}`
   const cancelUrl   = `${SITE}/pago/cancelado?b=${params.bookingId}`
 
-  // Campos concatenados para HMAC — orden exacto requerido por Azul PaymentPage
   const hashInput = [
     MERCHANT_ID,
     MERCHANT_NAME,
@@ -95,6 +93,7 @@ export interface AzulResponseParams {
 }
 
 export function verifyResponseHash(p: AzulResponseParams): boolean {
+  const PRIVATE_KEY = process.env.AZUL_PRIVATE_KEY ?? ''
   if (!PRIVATE_KEY) return false
 
   const input = [
