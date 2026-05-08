@@ -278,25 +278,11 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
         }}>
         <div className="max-w-screen-2xl mx-auto px-4 md:px-6 py-3 w-full">
 
-          {/* ── Desktop: fila única compacta (search + pills + sector + fecha + filtros) ── */}
+          {/* ── Desktop: categorías + capacidad rápida + sector + fecha + filtros ── */}
           <div className="hidden md:flex items-center gap-2">
-            {/* Search compacto */}
-            <div className="flex items-center gap-2 rounded-2xl px-3 py-2 input-base shrink-0" style={{ width: 200 }}>
-              <Search size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-              <input
-                value={q} onChange={e => setQ(e.target.value)}
-                placeholder="Buscar espacios..."
-                className="bg-transparent focus:outline-none min-w-0 flex-1"
-                style={{ color: 'var(--text-primary)', fontSize: 13 }}
-              />
-              {q && <button onClick={() => setQ('')} style={{ color: 'var(--text-muted)' }}><X size={12} /></button>}
-            </div>
 
-            {/* Divider */}
-            <div className="shrink-0 w-px h-5" style={{ background: 'var(--border-medium)' }} />
-
-            {/* Pills scrollable */}
-            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide flex-1 py-0.5">
+            {/* Categorías */}
+            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide py-0.5" style={{ maxWidth: '40%' }}>
               {CATEGORIES.map(cat => {
                 const isActive = categoria === cat.value
                 const Icon = cat.icon
@@ -315,28 +301,49 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               })}
             </div>
 
-            {/* Divider */}
             <div className="shrink-0 w-px h-5" style={{ background: 'var(--border-medium)' }} />
 
-            {/* Sector compacto */}
-            <div className="flex items-center gap-1.5 rounded-2xl px-3 py-2 input-base shrink-0" style={{ width: 168 }}>
-              <MapPin size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+            {/* Capacidad rápida */}
+            <div className="flex items-center gap-1 shrink-0">
+              <Users size={12} style={{ color: 'var(--text-muted)' }} />
+              {QUICK_CAPACITIES.map(n => {
+                const isActive = capacidad === String(n)
+                return (
+                  <button key={n}
+                    onClick={() => applyCapacity(isActive ? '' : String(n))}
+                    className="px-2.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all"
+                    style={isActive
+                      ? { background: 'var(--brand)', color: '#fff', boxShadow: '0 2px 8px rgba(53,196,147,0.3)' }
+                      : { background: '#fff', color: 'var(--text-secondary)', border: '1px solid var(--border-medium)' }
+                    }>
+                    {n === 150 ? '150+' : `${n}+`}
+                  </button>
+                )
+              })}
+            </div>
+
+            <div className="shrink-0 w-px h-5" style={{ background: 'var(--border-medium)' }} />
+
+            {/* Sector */}
+            <div className="flex items-center gap-1.5 rounded-2xl px-3 py-2 input-base shrink-0" style={{ width: 160 }}>
+              <MapPin size={13} style={{ color: sector ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
               <input
                 value={sector} onChange={e => { setSector(e.target.value); setSectorQ(e.target.value) }}
-                placeholder="Sector"
+                placeholder="Sector / Ciudad"
                 className="w-full bg-transparent focus:outline-none"
                 style={{ color: 'var(--text-primary)', fontSize: 13 }}
               />
+              {sector && <button onClick={() => { setSector(''); setSectorQ('') }}><X size={11} style={{ color: 'var(--text-muted)' }} /></button>}
             </div>
 
-            {/* Fecha compacta */}
+            {/* Fecha */}
             <div className="relative shrink-0" ref={datePickerRef}>
               <button
                 onClick={openDatePicker}
                 className="flex items-center gap-1.5 rounded-2xl px-3 py-2 input-base transition-all"
                 style={{
                   background: '#fff',
-                  borderColor: datePickerOpen ? 'var(--brand)' : undefined,
+                  borderColor: datePickerOpen || dateFrom ? 'var(--brand)' : undefined,
                   boxShadow: datePickerOpen ? '0 0 0 3px var(--brand-dim)' : undefined,
                 }}>
                 {availLoading
@@ -344,7 +351,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                   : <CalendarDays size={13} style={{ color: dateFrom ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
                 }
                 <span className="text-xs whitespace-nowrap"
-                  style={{ color: dateFrom ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                  style={{ color: dateFrom ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: dateFrom ? 600 : 400 }}>
                   {dateFrom
                     ? (timeFrom ? `${fmtDateShort(dateFrom)} · ${fmtTime(timeFrom)}` : fmtDateShort(dateFrom))
                     : 'Fecha'}
@@ -359,20 +366,13 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               {datePickerOpen && (
                 <>
                   <div className="fixed inset-0 z-[9998]" onClick={() => setDatePickerOpen(false)} />
-                  <div
-                    style={{
-                      position: 'fixed',
-                      top: pickerPos.top,
-                      left: pickerPos.left,
-                      zIndex: 9999,
-                      background: '#fff',
-                      borderRadius: 16,
-                      border: '1px solid var(--border-subtle)',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.14)',
-                      maxHeight: `calc(100dvh - ${pickerPos.top + 16}px)`,
-                      overflowY: 'auto',
-                      overscrollBehavior: 'contain',
-                    }}>
+                  <div style={{
+                    position: 'fixed', top: pickerPos.top, left: pickerPos.left,
+                    zIndex: 9999, background: '#fff', borderRadius: 16,
+                    border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.14)',
+                    maxHeight: `calc(100dvh - ${pickerPos.top + 16}px)`,
+                    overflowY: 'auto', overscrollBehavior: 'contain',
+                  }}>
                     <DateTimePicker
                       date={dateFrom} time={timeFrom}
                       onDate={setDateFrom}
@@ -384,16 +384,16 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               )}
             </div>
 
-            {/* Filtros */}
+            {/* Más filtros */}
             <button onClick={() => setMoreOpen(true)}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-semibold transition-all shrink-0"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-semibold transition-all shrink-0 ml-auto"
               style={{
-                background:  activeFiltersCount > 0 ? 'var(--brand)' : '#fff',
-                color:       activeFiltersCount > 0 ? '#fff' : 'var(--text-primary)',
-                border:      '1.5px solid var(--border-medium)',
+                background: activeFiltersCount > 0 ? 'var(--brand)' : '#fff',
+                color:      activeFiltersCount > 0 ? '#fff' : 'var(--text-primary)',
+                border:     '1.5px solid var(--border-medium)',
               }}>
               <SlidersHorizontal size={13} />
-              Filtros
+              Más filtros
               {activeFiltersCount > 0 && (
                 <span className="w-4 h-4 rounded-full flex items-center justify-center text-xs font-bold"
                   style={{ background: 'rgba(255,255,255,0.25)' }}>
