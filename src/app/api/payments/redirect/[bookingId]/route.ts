@@ -66,7 +66,11 @@ export async function GET(
       bookingId,
     })
 
-    // Página HTML con auto-submit
+    // Página HTML — auto-submit + botón visible como respaldo
+    const hiddenInputs = Object.entries(fields)
+      .map(([k, v]) => `<input type="hidden" name="${k}" value="${v.replace(/"/g, '&quot;')}">`)
+      .join('\n    ')
+
     const html = `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -74,32 +78,49 @@ export async function GET(
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Redirigiendo a Azul Payments...</title>
   <style>
-    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-           background: #F4F6F8; display: flex; align-items: center; justify-content: center;
-           min-height: 100vh; }
-    .card { text-align: center; padding: 40px 32px; background: #fff;
-            border-radius: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); max-width: 360px; }
-    .spinner { width: 44px; height: 44px; border: 3px solid #E2E8F0;
-               border-top-color: #0057A8; border-radius: 50%;
-               animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    h2 { color: #0F1623; font-size: 18px; margin: 0 0 8px; }
-    p  { color: #94A3B8; font-size: 13px; margin: 0; }
-    .azul { margin-top: 20px; font-size: 11px; color: #CBD5E1; }
-    .azul span { color: #0057A8; font-weight: 700; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+         background:#F4F6F8;display:flex;align-items:center;justify-content:center;min-height:100vh}
+    .card{text-align:center;padding:40px 32px;background:#fff;border-radius:24px;
+          box-shadow:0 4px 24px rgba(0,0,0,0.08);max-width:380px;width:100%;margin:16px}
+    .spinner{width:48px;height:48px;border:3px solid #E2E8F0;border-top-color:#0057A8;
+             border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 20px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    h2{color:#0F1623;font-size:18px;margin:0 0 8px;font-weight:700}
+    p{color:#94A3B8;font-size:13px;margin:0 0 4px}
+    .btn{display:none;margin-top:24px;width:100%;padding:14px 24px;background:#0057A8;
+         color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;
+         cursor:pointer;text-align:center}
+    .btn:hover{background:#0066CC}
+    .note{margin-top:12px;font-size:11px;color:#CBD5E1}
+    .note span{color:#0057A8;font-weight:700}
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="spinner"></div>
+    <div class="spinner" id="sp"></div>
     <h2>Conectando con Azul Payments</h2>
     <p>Serás redirigido en un momento...</p>
-    <p class="azul">Pago seguro por <span>azul</span></p>
+    <form id="azul-form" method="POST" action="${pageUrl}" style="display:none">
+      ${hiddenInputs}
+    </form>
+    <button class="btn" id="btn" onclick="document.getElementById('azul-form').submit()">
+      Continuar al pago seguro →
+    </button>
+    <p class="note">Pago seguro por <span>azul</span> payments</p>
   </div>
-  <form id="f" method="POST" action="${pageUrl}">
-    ${Object.entries(fields).map(([k, v]) => `<input type="hidden" name="${k}" value="${v}">`).join('\n    ')}
-  </form>
-  <script>document.getElementById('f').submit();</script>
+  <script>
+    try {
+      document.getElementById('azul-form').submit();
+    } catch(e) {
+      document.getElementById('sp').style.display = 'none';
+      document.getElementById('btn').style.display = 'block';
+    }
+    // Mostrar botón después de 3s por si el auto-submit no navegó
+    setTimeout(function() {
+      document.getElementById('btn').style.display = 'block';
+    }, 3000);
+  </script>
 </body>
 </html>`
 
