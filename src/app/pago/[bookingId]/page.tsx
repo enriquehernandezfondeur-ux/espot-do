@@ -4,15 +4,34 @@ import { useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Loader2 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function PagoPage({ params }: { params: Promise<{ bookingId: string }> }) {
   const { bookingId } = use(params)
   const router = useRouter()
 
   useEffect(() => {
-    // Navegar directamente a la ruta que genera el form y hace auto-submit a Azul.
-    // El servidor construye todo — sin fetch, sin JavaScript complejo en el cliente.
-    window.location.href = `/api/payments/redirect/${bookingId}`
+    async function load() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.push('/auth'); return }
+
+      const { data } = await supabase
+        .from('bookings')
+        .select('total_amount, payment_status')
+        .eq('id', bookingId)
+        .eq('guest_id', user.id)
+        .single()
+
+      if (!data) { router.push('/dashboard/reservas'); return }
+
+      const { isPaid } = await import('@/lib/bookingConfig')
+      if (isPaid(data.payment_status)) { router.push(`/pago/exitoso?b=${bookingId}`); return }
+
+      // Pasar el monto en la URL para evitar llamadas a Supabase en el servidor
+      window.location.href = `/api/payments/redirect/${bookingId}?amount=${data.total_amount}`
+    }
+    load()
   }, [bookingId])
 
   return (
