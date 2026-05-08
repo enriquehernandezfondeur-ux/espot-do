@@ -1235,37 +1235,38 @@ function SpaceCard({
 
           {/* Nombre + ubicación */}
           <div>
-            <h3 className="font-semibold text-sm leading-snug mb-0.5"
-              style={{ color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
-              {space.name}
-            </h3>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <h3 className="font-semibold text-sm leading-snug min-w-0 truncate"
+                style={{ color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+                {space.name}
+              </h3>
+              {space.is_verified && (
+                <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0"
+                  style={{ background: 'var(--brand)', boxShadow: '0 0 0 2px #fff' }}
+                  title="Espacio verificado">
+                  <Check size={9} className="text-white" strokeWidth={3} />
+                </div>
+              )}
+            </div>
             <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
               <MapPin size={10} />
               {space.sector ? `${space.sector}, ` : ''}{space.city}
             </div>
           </div>
 
-          {/* Footer: tipo de precio (color) + verificado + flecha */}
+          {/* Footer: tipo de precio + categoría + flecha */}
           <div className="flex items-center justify-between gap-2 pt-0.5">
             <div className="flex items-center gap-1.5 min-w-0">
-              {/* Badge tipo de precio — con color */}
               {pricingDef?.value && (
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-md shrink-0 whitespace-nowrap"
                   style={{ background: pricingDef.bg, color: pricingDef.text, border: `1px solid ${pricingDef.border}` }}>
                   {pricingDef.label}
                 </span>
               )}
-              {/* Categoría */}
               <span className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md truncate"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
                 <CatIcon size={10} className="shrink-0" /> {catLabel}
               </span>
-              {space.is_verified && (
-                <span className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg"
-                  style={{ background: 'rgba(53,196,147,0.08)', color: '#16A34A', border: '1px solid rgba(53,196,147,0.2)' }}>
-                  <Shield size={9} /> Verificado
-                </span>
-              )}
             </div>
             <ArrowRight size={13}
               className="transition-transform duration-200 group-hover:translate-x-0.5 shrink-0"
