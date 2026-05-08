@@ -71,13 +71,21 @@ export default async function HomePage() {
       {/* ─────────────────────────────────────────────
           HERO
           ───────────────────────────────────────── */}
-      <section className="relative overflow-hidden"
-        style={{ background: 'linear-gradient(155deg, #0A1A14 0%, #0D2318 55%, #0A0E0D 100%)' }}>
+      <section className="relative overflow-hidden" style={{ minHeight: 420 }}>
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0 }}
+        >
+          <source src="/dia.mp4" type="video/mp4" />
+        </video>
 
-        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(53,196,147,0.08) 0%, transparent 70%)', transform: 'translate(-50%,-50%)' }} />
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: 'linear-gradient(155deg, rgba(10,26,20,0.72) 0%, rgba(13,35,24,0.68) 55%, rgba(10,14,13,0.72) 100%)', zIndex: 1 }} />
 
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-10 lg:py-12">
+        <div className="relative max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-10 lg:py-12" style={{ zIndex: 2 }}>
           <div className="grid lg:grid-cols-[1fr_420px] gap-8 lg:gap-10 items-center">
 
             {/* Contenido izquierdo */}
