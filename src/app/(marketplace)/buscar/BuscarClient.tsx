@@ -165,6 +165,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   const [sortOpen, setSortOpen] = useState(false)
   const [capOpen,  setCapOpen]  = useState(false)
   const [secOpen,  setSecOpen]  = useState(false)
+  const [catOpen,  setCatOpen]  = useState(false)
   const capRef = useRef<HTMLDivElement>(null)
   const secRef = useRef<HTMLDivElement>(null)
 
@@ -282,30 +283,49 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
         }}>
         <div className="max-w-screen-2xl mx-auto px-4 md:px-6 py-3 w-full">
 
-          {/* ── Desktop: 2 filas — categorías arriba, filtros abajo ── */}
-          <div className="hidden md:block">
+          {/* ── Desktop: 1 sola fila limpia ── */}
+          <div className="hidden md:flex items-center gap-2">
 
-            {/* Fila 1: categorías */}
-            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-2.5">
-              {CATEGORIES.map(cat => {
-                const isActive = categoria === cat.value
-                const Icon = cat.icon
-                return (
-                  <button key={cat.value}
-                    onClick={() => setCategoria(isActive ? '' : cat.value)}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0"
-                    style={isActive
-                      ? { background: 'var(--brand)', color: '#fff', boxShadow: '0 2px 8px rgba(53,196,147,0.3)' }
-                      : { background: '#fff', color: 'var(--text-secondary)', border: '1px solid var(--border-medium)' }
-                    }>
-                    <Icon size={12} /> {cat.label}
-                  </button>
-                )
-              })}
-            </div>
+              {/* Tipo de espacio */}
+              <div className="relative">
+                {catOpen && <div className="fixed inset-0 z-40" onClick={() => setCatOpen(false)} />}
+                <button onClick={() => { setCatOpen(o => !o); setCapOpen(false); setSecOpen(false) }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap"
+                  style={{
+                    background: categoria ? 'var(--brand-dim)' : '#fff',
+                    border: `1.5px solid ${categoria ? 'var(--brand-border)' : 'var(--border-medium)'}`,
+                    color: categoria ? 'var(--brand)' : 'var(--text-primary)',
+                  }}>
+                  {(() => { const cat = CATEGORIES.find(c => c.value === categoria); const Icon = cat?.icon ?? LayoutList; return <Icon size={14} style={{ flexShrink: 0 }} /> })()}
+                  <span>{categoria ? CATEGORIES.find(c => c.value === categoria)?.label : 'Tipo de espacio'}</span>
+                  {categoria
+                    ? <button onClick={e => { e.stopPropagation(); setCategoria('') }}><X size={12} /></button>
+                    : <ChevronDown size={13} style={{ opacity: 0.5 }} />
+                  }
+                </button>
+                {catOpen && (
+                  <div className="absolute left-0 top-full mt-2 z-50 rounded-2xl overflow-hidden py-1.5"
+                    style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', minWidth: 200 }}>
+                    {CATEGORIES.map(cat => {
+                      const Icon = cat.icon
+                      const isActive = categoria === cat.value
+                      return (
+                        <button key={cat.value} onClick={() => { setCategoria(isActive ? '' : cat.value); setCatOpen(false) }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-all"
+                          style={{ color: isActive ? 'var(--brand)' : 'var(--text-primary)', fontWeight: isActive ? 600 : 400 }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
+                          <Icon size={14} style={{ color: isActive ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
+                          {cat.label}
+                          {isActive && <Check size={13} style={{ color: 'var(--brand)', marginLeft: 'auto' }} />}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
 
-            {/* Fila 2: filtros como dropdown buttons */}
-            <div className="flex items-center gap-2">
+              <div className="w-px h-5 shrink-0" style={{ background: 'var(--border-medium)' }} />
 
               {/* Personas */}
               <div className="relative" ref={capRef}>
@@ -447,7 +467,6 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                 )}
               </button>
             </div>
-          </div>
 
           {/* ── Móvil: UNA sola barra limpia ── */}
           <div className="md:hidden mb-3 w-full overflow-hidden">
