@@ -80,10 +80,10 @@ function getCover(space: any) {
 function getPriceInfo(space: any) {
   const p = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
   if (!p) return null
-  if (p.pricing_type === 'hourly')             return { label: `${formatCurrency(p.hourly_price)} / hora` }
-  if (p.pricing_type === 'minimum_consumption') return { label: `Desde ${formatCurrency(p.minimum_consumption)}` }
-  if (p.pricing_type === 'fixed_package')       return { label: formatCurrency(p.fixed_price) }
-  return { label: 'Cotizar' }
+  if (p.pricing_type === 'hourly')              return { type: 'Por hora',        amount: formatCurrency(p.hourly_price),         full: `${formatCurrency(p.hourly_price)} / hora` }
+  if (p.pricing_type === 'minimum_consumption') return { type: 'Consumo mínimo', amount: formatCurrency(p.minimum_consumption),  full: `Desde ${formatCurrency(p.minimum_consumption)}` }
+  if (p.pricing_type === 'fixed_package')       return { type: 'Paquete',        amount: formatCurrency(p.fixed_price),          full: formatCurrency(p.fixed_price) }
+  return { type: 'Cotizar',  amount: null, full: 'Cotizar precio' }
 }
 
 function fmtDateShort(v: string) {
@@ -892,12 +892,12 @@ function SpaceCard({
         onMouseEnter={() => onHover(space.id)}
         onMouseLeave={() => onHover(null)}
       >
-        {/* Imagen */}
-        <div className="relative overflow-hidden" style={{ aspectRatio: '16/10', flexShrink: 0 }}>
+        {/* ── Foto limpia — solo favorito y badge disponibilidad ── */}
+        <div className="relative overflow-hidden" style={{ aspectRatio: '4/3', flexShrink: 0 }}>
           {cover ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={cover} alt={space.name}
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]" />
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
           ) : (
             <div className="w-full h-full flex items-center justify-center"
               style={{ background: 'linear-gradient(135deg,#667eea,#764ba2)' }}>
@@ -905,60 +905,101 @@ function SpaceCard({
             </div>
           )}
 
-          {/* Favorito */}
-          <div className="absolute top-2.5 right-2.5 z-10">
+          {/* Favorito — único overlay */}
+          <div className="absolute top-3 right-3 z-10">
             <FavoriteButton spaceId={space.id} size="sm" />
           </div>
 
-          {/* Badge disponibilidad o verificado */}
-          {isAvailable !== undefined ? (
-            <span className="absolute top-2.5 left-2.5 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
+          {/* Badge disponibilidad cuando hay filtro de fecha */}
+          {isAvailable !== undefined && (
+            <span className="absolute top-3 left-3 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
               style={{ background: isAvailable ? 'rgba(53,196,147,0.92)' : 'rgba(220,38,38,0.85)', color: '#fff', backdropFilter: 'blur(8px)' }}>
               {isAvailable ? <Check size={9} /> : <X size={9} />}
               {isAvailable ? 'Disponible' : 'No disponible'}
             </span>
-          ) : space.is_verified ? (
-            <span className="absolute top-2.5 left-2.5 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
-              style={{ background: 'rgba(53,196,147,0.92)', color: '#fff', backdropFilter: 'blur(8px)' }}>
-              <Shield size={9} /> Verificado
-            </span>
-          ) : null}
-
-          {/* Capacidad */}
-          <span className="absolute bottom-2.5 right-2.5 flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-full"
-            style={{ background: 'rgba(0,0,0,0.6)', color: '#fff', backdropFilter: 'blur(8px)' }}>
-            <Users size={10} /> {space.capacity_max}
-          </span>
+          )}
         </div>
 
-        {/* Info */}
-        <div className="p-4 flex flex-col flex-1">
-          <div className="flex items-start justify-between gap-2 mb-1.5">
-            <h3 className="font-semibold text-sm leading-snug flex-1"
+        {/* ── Info completa abajo ── */}
+        <div className="p-4 flex flex-col gap-2.5">
+
+          {/* Nombre + ubicación */}
+          <div>
+            <h3 className="font-semibold text-sm leading-snug mb-1"
               style={{ color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
               {space.name}
             </h3>
-            {priceInfo && (
-              <span className="text-xs font-bold shrink-0" style={{ color: 'var(--brand)' }}>
-                {priceInfo.label}
-              </span>
+            <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+              <MapPin size={10} />
+              {space.sector ? `${space.sector}, ` : ''}{space.city}
+            </div>
+          </div>
+
+          {/* Precio + capacidad — la info clave */}
+          <div className="flex items-center justify-between gap-2 py-2.5 px-3 rounded-xl"
+            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+
+            {/* Precio con tipo */}
+            {priceInfo ? (
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-wide mb-0.5"
+                  style={{ color: 'var(--text-muted)' }}>
+                  {priceInfo.type}
+                </p>
+                {priceInfo.amount ? (
+                  <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                    {priceInfo.amount}
+                  </p>
+                ) : (
+                  <p className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>
+                    Cotizar precio
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wide mb-0.5" style={{ color: 'var(--text-muted)' }}>Precio</p>
+                <p className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>Cotizar</p>
+              </div>
             )}
+
+            {/* Separador */}
+            <div className="w-px h-8 shrink-0" style={{ background: 'var(--border-medium)' }} />
+
+            {/* Capacidad */}
+            <div className="text-right shrink-0">
+              <p className="text-[10px] font-semibold uppercase tracking-wide mb-0.5"
+                style={{ color: 'var(--text-muted)' }}>
+                Capacidad
+              </p>
+              <div className="flex items-center justify-end gap-1">
+                <Users size={11} style={{ color: 'var(--text-secondary)' }} />
+                <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                  {space.capacity_max} personas
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
-            <MapPin size={10} />
-            {space.sector ? `${space.sector}, ` : ''}{space.city}
-          </div>
-          <div className="mt-auto pt-3 flex items-center justify-between"
-            style={{ borderTop: '1px solid var(--border-subtle)', marginTop: 12 }}>
-            <span className="flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-lg"
-              style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-              <CatIcon size={10} />
-              {catLabel}
-            </span>
+
+          {/* Footer: categoría + verificado + flecha */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
+                <CatIcon size={10} /> {catLabel}
+              </span>
+              {space.is_verified && (
+                <span className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg"
+                  style={{ background: 'rgba(53,196,147,0.08)', color: '#16A34A', border: '1px solid rgba(53,196,147,0.2)' }}>
+                  <Shield size={9} /> Verificado
+                </span>
+              )}
+            </div>
             <ArrowRight size={13}
-              className="transition-transform duration-200 group-hover:translate-x-0.5"
+              className="transition-transform duration-200 group-hover:translate-x-0.5 shrink-0"
               style={{ color: 'var(--brand)' }} />
           </div>
+
         </div>
       </div>
     </Link>
