@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, use, useRef } from 'react'
+import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Lock, Calendar, Users, MapPin, Loader2, X } from 'lucide-react'
@@ -8,24 +8,31 @@ import { createClient } from '@/lib/supabase/client'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { isPaid } from '@/lib/bookingConfig'
 
+// Crea un form invisible, lo agrega al DOM y lo envía a Azul
+function submitToAzul(pageUrl: string, fields: Record<string, string>) {
+  const form = document.createElement('form')
+  form.method = 'POST'
+  form.action = pageUrl
+  form.style.display = 'none'
+  Object.entries(fields).forEach(([key, value]) => {
+    const input = document.createElement('input')
+    input.type  = 'hidden'
+    input.name  = key
+    input.value = value
+    form.appendChild(input)
+  })
+  document.body.appendChild(form)
+  form.submit()
+}
+
 export default function PagoPage({ params }: { params: Promise<{ bookingId: string }> }) {
   const { bookingId } = use(params)
   const router   = useRouter()
   const supabase = createClient()
-  const formRef  = useRef<HTMLFormElement>(null)
 
-  const [booking,  setBooking]  = useState<any>(null)
-  const [step,     setStep]     = useState<'loading' | 'redirecting' | 'error'>('loading')
-  const [error,    setError]    = useState('')
-  const [azulFields,   setAzulFields]   = useState<Record<string, string> | null>(null)
-  const [azulPageUrl,  setAzulPageUrl]  = useState('')
-
-  // Auto-submit form a Azul cuando los campos estén listos
-  useEffect(() => {
-    if (azulFields && formRef.current) {
-      formRef.current.submit()
-    }
-  }, [azulFields])
+  const [booking, setBooking] = useState<any>(null)
+  const [step,    setStep]    = useState<'loading' | 'redirecting' | 'error'>('loading')
+  const [error,   setError]   = useState('')
 
   useEffect(() => {
     async function loadAndRedirect() {
@@ -65,8 +72,8 @@ export default function PagoPage({ params }: { params: Promise<{ bookingId: stri
           return
         }
 
-        setAzulPageUrl(json.pageUrl)
-        setAzulFields(json.fields)
+        // Enviar directamente al DOM — evita problemas de timing con React refs
+        submitToAzul(json.pageUrl, json.fields)
       } catch {
         setError('Error de conexión. Verifica tu red e intenta de nuevo.')
         setStep('error')
@@ -82,15 +89,6 @@ export default function PagoPage({ params }: { params: Promise<{ bookingId: stri
 
   return (
     <>
-      {/* Form oculto que se envía a Azul PaymentPage */}
-      {azulFields && azulPageUrl && (
-        <form ref={formRef} method="POST" action={azulPageUrl} style={{ display: 'none' }}>
-          {Object.entries(azulFields).map(([key, value]) => (
-            <input key={key} type="hidden" name={key} value={value} />
-          ))}
-        </form>
-      )}
-
       <div className="min-h-screen flex flex-col items-center justify-center px-4"
         style={{ background: '#F4F6F8' }}>
 
@@ -181,8 +179,7 @@ export default function PagoPage({ params }: { params: Promise<{ bookingId: stri
                   })
                   const json = await res.json()
                   if (!res.ok || json.error) { setError(json.error ?? 'Error'); setStep('error'); return }
-                  setAzulPageUrl(json.pageUrl)
-                  setAzulFields(json.fields)
+                  submitToAzul(json.pageUrl, json.fields)
                 } catch { setError('Error de conexión.'); setStep('error') }
               }}>
               Intentar de nuevo
