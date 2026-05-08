@@ -6,7 +6,7 @@ import Link from 'next/link'
 import {
   Search, MapPin, Users, SlidersHorizontal, X, CalendarDays, Clock,
   ChevronLeft, ChevronRight, Shield, LayoutList, Map, ArrowRight,
-  Check, Building2, UtensilsCrossed,
+  Check, Building2, UtensilsCrossed, ChevronDown,
   Sunset, Wine, Trees, Camera, Briefcase, Home, Hotel,
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
@@ -163,6 +163,10 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   const [mobileView, setMobileView] = useState<'list' | 'map'>('list')
   const [sortBy, setSortBy] = useState<'relevancia' | 'precio_asc' | 'precio_desc' | 'capacidad'>('relevancia')
   const [sortOpen, setSortOpen] = useState(false)
+  const [capOpen,  setCapOpen]  = useState(false)
+  const [secOpen,  setSecOpen]  = useState(false)
+  const capRef = useRef<HTMLDivElement>(null)
+  const secRef = useRef<HTMLDivElement>(null)
 
   // Sectores filtrados por búsqueda en el drawer
   const filteredSectors = SECTORS.filter(s =>
@@ -278,129 +282,171 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
         }}>
         <div className="max-w-screen-2xl mx-auto px-4 md:px-6 py-3 w-full">
 
-          {/* ── Desktop: categorías + capacidad rápida + sector + fecha + filtros ── */}
-          <div className="hidden md:flex items-center gap-2">
+          {/* ── Desktop: 2 filas — categorías arriba, filtros abajo ── */}
+          <div className="hidden md:block">
 
-            {/* Categorías */}
-            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide py-0.5" style={{ maxWidth: '40%' }}>
+            {/* Fila 1: categorías */}
+            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide pb-2.5">
               {CATEGORIES.map(cat => {
                 const isActive = categoria === cat.value
                 const Icon = cat.icon
                 return (
                   <button key={cat.value}
                     onClick={() => setCategoria(isActive ? '' : cat.value)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0"
                     style={isActive
                       ? { background: 'var(--brand)', color: '#fff', boxShadow: '0 2px 8px rgba(53,196,147,0.3)' }
                       : { background: '#fff', color: 'var(--text-secondary)', border: '1px solid var(--border-medium)' }
                     }>
-                    <Icon size={12} />
-                    {cat.label}
+                    <Icon size={12} /> {cat.label}
                   </button>
                 )
               })}
             </div>
 
-            <div className="shrink-0 w-px h-5" style={{ background: 'var(--border-medium)' }} />
+            {/* Fila 2: filtros como dropdown buttons */}
+            <div className="flex items-center gap-2">
 
-            {/* Capacidad rápida */}
-            <div className="flex items-center gap-1 shrink-0">
-              <Users size={12} style={{ color: 'var(--text-muted)' }} />
-              {QUICK_CAPACITIES.map(n => {
-                const isActive = capacidad === String(n)
-                return (
-                  <button key={n}
-                    onClick={() => applyCapacity(isActive ? '' : String(n))}
-                    className="px-2.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all"
-                    style={isActive
-                      ? { background: 'var(--brand)', color: '#fff', boxShadow: '0 2px 8px rgba(53,196,147,0.3)' }
-                      : { background: '#fff', color: 'var(--text-secondary)', border: '1px solid var(--border-medium)' }
-                    }>
-                    {n === 150 ? '150+' : `${n}+`}
-                  </button>
-                )
-              })}
-            </div>
+              {/* Personas */}
+              <div className="relative" ref={capRef}>
+                {capOpen && <div className="fixed inset-0 z-40" onClick={() => setCapOpen(false)} />}
+                <button onClick={() => { setCapOpen(o => !o); setSecOpen(false) }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all"
+                  style={{
+                    background: capacidad ? 'var(--brand-dim)' : '#fff',
+                    border: `1.5px solid ${capacidad ? 'var(--brand-border)' : 'var(--border-medium)'}`,
+                    color: capacidad ? 'var(--brand)' : 'var(--text-primary)',
+                  }}>
+                  <Users size={14} style={{ flexShrink: 0 }} />
+                  <span>{capacidad ? `${capacidad}+ personas` : 'Personas'}</span>
+                  {capacidad
+                    ? <button onClick={e => { e.stopPropagation(); applyCapacity('') }}><X size={12} /></button>
+                    : <ChevronDown size={13} style={{ opacity: 0.5 }} />
+                  }
+                </button>
+                {capOpen && (
+                  <div className="absolute left-0 top-full mt-2 z-50 rounded-2xl overflow-hidden py-1.5"
+                    style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', minWidth: 200 }}>
+                    <p className="px-4 py-2 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                      Mínimo de personas
+                    </p>
+                    {[{ v: '', l: 'Cualquier cantidad' }, ...QUICK_CAPACITIES.map(n => ({ v: String(n), l: n === 150 ? '150 o más' : `${n} o más` }))].map(opt => (
+                      <button key={opt.v} onClick={() => { applyCapacity(opt.v); setCapOpen(false) }}
+                        className="w-full flex items-center justify-between px-4 py-2.5 text-sm transition-all"
+                        style={{ color: capacidad === opt.v ? 'var(--brand)' : 'var(--text-primary)', fontWeight: capacidad === opt.v ? 600 : 400 }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
+                        {opt.l}
+                        {capacidad === opt.v && <Check size={13} style={{ color: 'var(--brand)' }} />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-            <div className="shrink-0 w-px h-5" style={{ background: 'var(--border-medium)' }} />
+              {/* Sector / Ciudad */}
+              <div className="relative" ref={secRef}>
+                {secOpen && <div className="fixed inset-0 z-40" onClick={() => setSecOpen(false)} />}
+                <button onClick={() => { setSecOpen(o => !o); setCapOpen(false) }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all"
+                  style={{
+                    background: sector ? 'var(--brand-dim)' : '#fff',
+                    border: `1.5px solid ${sector ? 'var(--brand-border)' : 'var(--border-medium)'}`,
+                    color: sector ? 'var(--brand)' : 'var(--text-primary)',
+                  }}>
+                  <MapPin size={14} style={{ flexShrink: 0 }} />
+                  <span className="max-w-[120px] truncate">{sector || 'Dónde'}</span>
+                  {sector
+                    ? <button onClick={e => { e.stopPropagation(); clearSector(); setSecOpen(false) }}><X size={12} /></button>
+                    : <ChevronDown size={13} style={{ opacity: 0.5 }} />
+                  }
+                </button>
+                {secOpen && (
+                  <div className="absolute left-0 top-full mt-2 z-50 rounded-2xl overflow-hidden"
+                    style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', width: 260 }}>
+                    <div className="p-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
+                      <div className="flex items-center gap-2 rounded-xl px-3 py-2 input-base">
+                        <Search size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                        <input
+                          value={sectorQ} autoFocus
+                          onChange={e => { setSectorQ(e.target.value); setSector('') }}
+                          placeholder="Buscar sector o ciudad..."
+                          className="flex-1 bg-transparent text-sm focus:outline-none"
+                          style={{ color: 'var(--text-primary)' }}
+                        />
+                      </div>
+                    </div>
+                    <div style={{ maxHeight: 220, overflowY: 'auto' }}>
+                      {filteredSectors.slice(0, 20).map(s => (
+                        <button key={s} onClick={() => { pickSector(s); setSecOpen(false) }}
+                          className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-all text-left"
+                          style={{ color: sector === s ? 'var(--brand)' : 'var(--text-primary)', fontWeight: sector === s ? 600 : 400 }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
+                          <MapPin size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                          {s}
+                          {sector === s && <Check size={13} style={{ color: 'var(--brand)', marginLeft: 'auto' }} />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
 
-            {/* Sector */}
-            <div className="flex items-center gap-1.5 rounded-2xl px-3 py-2 input-base shrink-0" style={{ width: 160 }}>
-              <MapPin size={13} style={{ color: sector ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
-              <input
-                value={sector} onChange={e => { setSector(e.target.value); setSectorQ(e.target.value) }}
-                placeholder="Sector / Ciudad"
-                className="w-full bg-transparent focus:outline-none"
-                style={{ color: 'var(--text-primary)', fontSize: 13 }}
-              />
-              {sector && <button onClick={() => { setSector(''); setSectorQ('') }}><X size={11} style={{ color: 'var(--text-muted)' }} /></button>}
-            </div>
-
-            {/* Fecha */}
-            <div className="relative shrink-0" ref={datePickerRef}>
-              <button
-                onClick={openDatePicker}
-                className="flex items-center gap-1.5 rounded-2xl px-3 py-2 input-base transition-all"
-                style={{
-                  background: '#fff',
-                  borderColor: datePickerOpen || dateFrom ? 'var(--brand)' : undefined,
-                  boxShadow: datePickerOpen ? '0 0 0 3px var(--brand-dim)' : undefined,
-                }}>
-                {availLoading
-                  ? <div className="w-3.5 h-3.5 rounded-full border-2 border-t-transparent animate-spin shrink-0" style={{ borderColor: 'var(--brand)', borderTopColor: 'transparent' }} />
-                  : <CalendarDays size={13} style={{ color: dateFrom ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
-                }
-                <span className="text-xs whitespace-nowrap"
-                  style={{ color: dateFrom ? 'var(--text-primary)' : 'var(--text-muted)', fontWeight: dateFrom ? 600 : 400 }}>
+              {/* Fecha */}
+              <div className="relative" ref={datePickerRef}>
+                <button onClick={openDatePicker}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all"
+                  style={{
+                    background: dateFrom ? 'var(--brand-dim)' : '#fff',
+                    border: `1.5px solid ${dateFrom || datePickerOpen ? 'var(--brand-border)' : 'var(--border-medium)'}`,
+                    color: dateFrom ? 'var(--brand)' : 'var(--text-primary)',
+                  }}>
+                  {availLoading
+                    ? <div className="w-3.5 h-3.5 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'var(--brand)', borderTopColor: 'transparent' }} />
+                    : <CalendarDays size={14} style={{ flexShrink: 0 }} />
+                  }
+                  <span>{dateFrom ? (timeFrom ? `${fmtDateShort(dateFrom)} · ${fmtTime(timeFrom)}` : fmtDateShort(dateFrom)) : 'Fecha'}</span>
                   {dateFrom
-                    ? (timeFrom ? `${fmtDateShort(dateFrom)} · ${fmtTime(timeFrom)}` : fmtDateShort(dateFrom))
-                    : 'Fecha'}
-                </span>
-                {dateFrom && (
-                  <button onClick={e => { e.stopPropagation(); setDateFrom(''); setTimeFrom('') }}
-                    className="shrink-0" style={{ color: 'var(--text-muted)' }}>
-                    <X size={11} />
-                  </button>
+                    ? <button onClick={e => { e.stopPropagation(); setDateFrom(''); setTimeFrom('') }}><X size={12} /></button>
+                    : <ChevronDown size={13} style={{ opacity: 0.5 }} />
+                  }
+                </button>
+                {datePickerOpen && (
+                  <>
+                    <div className="fixed inset-0 z-[9998]" onClick={() => setDatePickerOpen(false)} />
+                    <div style={{
+                      position: 'fixed', top: pickerPos.top, left: pickerPos.left,
+                      zIndex: 9999, background: '#fff', borderRadius: 16,
+                      border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.14)',
+                      maxHeight: `calc(100dvh - ${pickerPos.top + 16}px)`, overflowY: 'auto',
+                    }}>
+                      <DateTimePicker date={dateFrom} time={timeFrom} onDate={setDateFrom}
+                        onTime={t => { setTimeFrom(t); if (t) setTimeout(() => setDatePickerOpen(false), 200) }}
+                        loading={availLoading} />
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Más filtros */}
+              <button onClick={() => setMoreOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ml-auto"
+                style={{
+                  background: activeFiltersCount > 0 ? 'var(--brand)' : '#fff',
+                  color:      activeFiltersCount > 0 ? '#fff' : 'var(--text-primary)',
+                  border:     `1.5px solid ${activeFiltersCount > 0 ? 'var(--brand)' : 'var(--border-medium)'}`,
+                }}>
+                <SlidersHorizontal size={14} />
+                Más filtros
+                {activeFiltersCount > 0 && (
+                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
+                    style={{ background: 'rgba(255,255,255,0.25)' }}>
+                    {activeFiltersCount}
+                  </span>
                 )}
               </button>
-              {datePickerOpen && (
-                <>
-                  <div className="fixed inset-0 z-[9998]" onClick={() => setDatePickerOpen(false)} />
-                  <div style={{
-                    position: 'fixed', top: pickerPos.top, left: pickerPos.left,
-                    zIndex: 9999, background: '#fff', borderRadius: 16,
-                    border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.14)',
-                    maxHeight: `calc(100dvh - ${pickerPos.top + 16}px)`,
-                    overflowY: 'auto', overscrollBehavior: 'contain',
-                  }}>
-                    <DateTimePicker
-                      date={dateFrom} time={timeFrom}
-                      onDate={setDateFrom}
-                      onTime={t => { setTimeFrom(t); if (t) setTimeout(() => setDatePickerOpen(false), 200) }}
-                      loading={availLoading}
-                    />
-                  </div>
-                </>
-              )}
             </div>
-
-            {/* Más filtros */}
-            <button onClick={() => setMoreOpen(true)}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-semibold transition-all shrink-0 ml-auto"
-              style={{
-                background: activeFiltersCount > 0 ? 'var(--brand)' : '#fff',
-                color:      activeFiltersCount > 0 ? '#fff' : 'var(--text-primary)',
-                border:     '1.5px solid var(--border-medium)',
-              }}>
-              <SlidersHorizontal size={13} />
-              Más filtros
-              {activeFiltersCount > 0 && (
-                <span className="w-4 h-4 rounded-full flex items-center justify-center text-xs font-bold"
-                  style={{ background: 'rgba(255,255,255,0.25)' }}>
-                  {activeFiltersCount}
-                </span>
-              )}
-            </button>
           </div>
 
           {/* ── Móvil: UNA sola barra limpia ── */}
