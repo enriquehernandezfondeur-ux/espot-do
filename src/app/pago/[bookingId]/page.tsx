@@ -57,13 +57,19 @@ export default function PagoPage({ params }: { params: Promise<{ bookingId: stri
       setBooking(data)
       setStep('redirecting')
 
-      // Iniciar pago automáticamente
+      // Iniciar pago automáticamente con timeout de 15s
       try {
-        const res  = await fetch('/api/payments/initiate', {
+        const controller = new AbortController()
+        const timeout    = setTimeout(() => controller.abort(), 15000)
+
+        const res = await fetch('/api/payments/initiate', {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
           body:    JSON.stringify({ bookingId }),
+          signal:  controller.signal,
         })
+        clearTimeout(timeout)
+
         const json = await res.json()
 
         if (!res.ok || json.error) {
@@ -72,10 +78,13 @@ export default function PagoPage({ params }: { params: Promise<{ bookingId: stri
           return
         }
 
-        // Enviar directamente al DOM — evita problemas de timing con React refs
         submitToAzul(json.pageUrl, json.fields)
-      } catch {
-        setError('Error de conexión. Verifica tu red e intenta de nuevo.')
+      } catch (err: any) {
+        if (err?.name === 'AbortError') {
+          setError('Tiempo de espera agotado. Verifica tu conexión e intenta de nuevo.')
+        } else {
+          setError('Error de conexión. Verifica tu red e intenta de nuevo.')
+        }
         setStep('error')
       }
     }

@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 
   if (!booking) return NextResponse.json({ error: 'Reserva no encontrada' }, { status: 404 })
 
-  if (!['payment_pending', 'unpaid', 'failed'].includes(booking.payment_status ?? '')) {
+  if (!['payment_pending', 'unpaid', 'failed', 'processing'].includes(booking.payment_status ?? '')) {
     return NextResponse.json({ error: 'Esta reserva ya fue procesada' }, { status: 400 })
   }
 
