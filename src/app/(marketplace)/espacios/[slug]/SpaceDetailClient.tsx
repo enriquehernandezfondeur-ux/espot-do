@@ -282,7 +282,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                       target="_blank" rel="noopener noreferrer"
                       onClick={() => setShowShareMenu(false)}
                       className="flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors hover:bg-gray-50"
-                      style={{ color: '#111827' }}>
+                      style={{ color: '#0F1623' }}>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366">
                         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
                         <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.117 1.523 5.845L.044 23.956a.5.5 0 0 0 .622.622l6.111-1.479A11.946 11.946 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.836 9.836 0 0 1-5.023-1.377l-.36-.213-3.628.877.893-3.628-.235-.374A9.818 9.818 0 0 1 2.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
@@ -298,7 +298,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                         setTimeout(() => { setCopied(false); setShowShareMenu(false) }, 2000)
                       }}
                       className="flex items-center gap-3 px-4 py-3 text-sm font-medium w-full text-left transition-colors hover:bg-gray-50"
-                      style={{ color: copied ? '#16A34A' : '#111827', borderTop: '1px solid #F3F4F6' }}>
+                      style={{ color: copied ? '#16A34A' : '#0F1623', borderTop: '1px solid #F3F4F6' }}>
                       {copied ? (
                         <CheckCircle size={17} style={{ color: '#16A34A' }} />
                       ) : (
@@ -359,7 +359,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                       style={{ background: 'rgba(0,0,0,0.38)' }}>
                       <div className="w-11 h-11 rounded-full flex items-center justify-center shadow-xl transition-transform duration-200 group-hover:scale-110"
                         style={{ background: 'rgba(255,255,255,0.95)' }}>
-                        <Play size={18} className="ml-0.5" style={{ color: '#111' }} />
+                        <Play size={18} className="ml-0.5" style={{ color: '#0F1623' }} />
                       </div>
                     </div>
                     <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
@@ -807,7 +807,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                           )}
                         </div>
                         {/* Punto online */}
-                        <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white bg-green-400" />
+                        <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white" style={{ background: "#35C493" }} />
                       </div>
 
                       <div className="flex-1 min-w-0">
@@ -1023,8 +1023,8 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                             <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
                               style={{ background: item.ok ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.08)' }}>
                               {item.ok
-                                ? <CheckCircle size={15} className="text-green-500" />
-                                : <X size={15} className="text-red-400" />}
+                                ? <CheckCircle size={15} style={{ color: '#16A34A' }} />
+                                : <X size={15} style={{ color: '#DC2626' }} />}
                             </div>
                             <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{item.label}</span>
                           </div>
@@ -1049,7 +1049,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                         {notAllowed.map(item => (
                           <div key={item} className="flex items-center gap-2.5 p-3.5 rounded-xl"
                             style={{ background: 'rgba(239,68,68,0.04)', border: '1px solid rgba(239,68,68,0.1)' }}>
-                            <Ban size={14} className="text-red-400 shrink-0" />
+                            <Ban size={14} style={{ color: '#DC2626', flexShrink: 0 }} />
                             <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>{item}</span>
                           </div>
                         ))}
@@ -1075,7 +1075,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                     {conditions.deposit_required && (
                       <div className="flex items-start gap-3 p-5 rounded-2xl"
                         style={{ background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.15)' }}>
-                        <Lock size={16} className="text-blue-500 shrink-0 mt-0.5" />
+                        <Lock size={16} style={{ color: '#2563EB', flexShrink: 0, marginTop: 2 }} />
                         <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                           <strong style={{ color: 'var(--text-primary)' }}>Depósito reembolsable: </strong>
                           {conditions.deposit_amount

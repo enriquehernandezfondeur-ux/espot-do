@@ -1217,15 +1217,11 @@ function SpaceCard({
   timeFilter?: string
   isAvailable?: boolean
 }) {
-  const cover      = getCover(space)
-  const priceInfo  = getPriceInfo(space)
-  const rating     = getSpaceRating(space)
-  const catLabel   = CATEGORIES.find(c => c.value === space.category)?.label ?? space.category
-  const CatIcon    = CATEGORIES.find(c => c.value === space.category)?.icon ?? Building2
-  const pricingDef = PRICING_TYPES.find(p => {
-    const pt = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
-    return p.value === pt?.pricing_type
-  })
+  const cover     = getCover(space)
+  const priceInfo = getPriceInfo(space)
+  const rating    = getSpaceRating(space)
+  const catLabel  = CATEGORIES.find(c => c.value === space.category)?.label ?? space.category
+  const CatIcon   = CATEGORIES.find(c => c.value === space.category)?.icon ?? Building2
   const href = dateFilter
     ? `/espacios/${space.slug}?fecha=${dateFilter}${timeFilter ? `&hora=${timeFilter}` : ''}`
     : `/espacios/${space.slug}`
@@ -1243,55 +1239,43 @@ function SpaceCard({
       <div
         className="rounded-2xl overflow-hidden h-full flex flex-col"
         style={{
-          background:  '#fff',
-          border:      `1px solid ${isHovered ? 'rgba(53,196,147,0.45)' : 'var(--border-subtle)'}`,
-          boxShadow:   isHovered ? '0 10px 36px rgba(0,0,0,0.1)' : '0 1px 6px rgba(0,0,0,0.05)',
-          transform:   isHovered ? 'translateY(-3px)' : 'none',
-          transition:  'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
+          background: '#fff',
+          border: `1px solid ${isHovered ? 'rgba(53,196,147,0.4)' : '#E8ECF0'}`,
+          boxShadow: isHovered ? '0 12px 40px rgba(0,0,0,0.12)' : '0 2px 12px rgba(0,0,0,0.05)',
+          transform: isHovered ? 'translateY(-2px)' : 'none',
+          transition: 'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
         }}
         onMouseEnter={() => onHover(space.id)}
         onMouseLeave={() => onHover(null)}
       >
-        {/* ── Foto con precio encima ── */}
-        <div className="relative overflow-hidden" style={{ aspectRatio: '4/3', flexShrink: 0 }}>
+        {/* ── Foto ── */}
+        <div className="relative overflow-hidden" style={{ aspectRatio: '16/10', flexShrink: 0 }}>
           {cover ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={cover} alt={space.name}
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
+            <img src={cover} alt={space.name} loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" />
           ) : (
             <div className="w-full h-full flex items-center justify-center"
               style={{ background: 'linear-gradient(135deg,#667eea,#764ba2)' }}>
-              <CatIcon size={36} className="text-white opacity-60" />
+              <CatIcon size={40} className="text-white opacity-70" />
             </div>
           )}
 
-          {/* Gradiente inferior para legibilidad del precio */}
-          <div className="absolute inset-0 pointer-events-none"
-            style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.1) 45%, transparent 70%)' }} />
-
-          {/* Precio + tipo — bottom left sobre la foto */}
-          <div className="absolute bottom-3 left-3 z-10">
-            {priceInfo?.amount ? (
-              <div>
-                <p className="text-white font-bold leading-tight" style={{ fontSize: 15, letterSpacing: '-0.02em', textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}>
-                  {priceInfo.amount}
-                </p>
-                <p className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.72)' }}>
-                  {priceInfo.type.toLowerCase()}
-                </p>
-              </div>
-            ) : (
-              <span className="text-xs font-bold px-2.5 py-1 rounded-full"
-                style={{ background: 'rgba(255,255,255,0.18)', color: '#fff', backdropFilter: 'blur(6px)' }}>
-                Cotizar precio
-              </span>
-            )}
-          </div>
+          {/* Precio — bottom left */}
+          {priceInfo && (
+            <div className="absolute bottom-3 left-3 z-10 text-xs font-bold px-3 py-1.5 rounded-full"
+              style={{ background: 'rgba(0,0,0,0.72)', color: '#fff', backdropFilter: 'blur(8px)' }}>
+              {priceInfo.amount ?? 'Cotizar'}
+              {priceInfo.amount && priceInfo.type !== 'Cotizar' && (
+                <span className="opacity-70 ml-1 font-normal">· {priceInfo.type}</span>
+              )}
+            </div>
+          )}
 
           {/* Capacidad — bottom right */}
-          <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold"
-            style={{ background: 'rgba(0,0,0,0.45)', color: '#fff', backdropFilter: 'blur(6px)' }}>
-            <Users size={10} /> hasta {space.capacity_max}
+          <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-full"
+            style={{ background: 'rgba(0,0,0,0.6)', color: '#fff', backdropFilter: 'blur(8px)' }}>
+            <Users size={10} /> {space.capacity_max}
           </div>
 
           {/* Favorito — top right */}
@@ -1299,76 +1283,56 @@ function SpaceCard({
             <FavoriteButton spaceId={space.id} size="sm" />
           </div>
 
-          {/* Badge reserva instantánea */}
-          {space.instant_booking && isAvailable === undefined && (
-            <span className="absolute top-3 left-3 z-10 flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full"
-              style={{ background: 'rgba(37,99,235,0.9)', color: '#fff', backdropFilter: 'blur(8px)' }}>
-              ⚡ Instantánea
-            </span>
-          )}
-
-          {/* Badge disponibilidad */}
-          {isAvailable !== undefined && (
+          {/* Badges top-left: disponibilidad > instantánea > verificado */}
+          {isAvailable !== undefined ? (
             <span className="absolute top-3 left-3 z-10 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
-              style={{ background: isAvailable ? 'rgba(53,196,147,0.92)' : 'rgba(220,38,38,0.85)', color: '#fff', backdropFilter: 'blur(8px)' }}>
+              style={{ background: isAvailable ? 'rgba(53,196,147,0.9)' : 'rgba(220,38,38,0.85)', color: '#fff' }}>
               {isAvailable ? <Check size={9} /> : <X size={9} />}
               {isAvailable ? 'Disponible' : 'No disponible'}
             </span>
-          )}
+          ) : space.instant_booking ? (
+            <span className="absolute top-3 left-3 z-10 flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full"
+              style={{ background: 'rgba(37,99,235,0.88)', color: '#fff' }}>
+              ⚡ Instantánea
+            </span>
+          ) : space.is_verified ? (
+            <span className="absolute top-3 left-3 z-10 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
+              style={{ background: 'rgba(53,196,147,0.9)', color: '#fff' }}>
+              <Shield size={9} /> Verificado
+            </span>
+          ) : null}
         </div>
 
-        {/* ── Info abajo ── */}
-        <div className="p-3.5 flex flex-col gap-2">
+        {/* ── Info ── */}
+        <div className="p-4 flex flex-col flex-1">
+          <h3 className="font-semibold text-sm leading-snug mb-1.5"
+            style={{ color: '#0F1623', letterSpacing: '-0.01em' }}>
+            {space.name}
+          </h3>
 
-          {/* Nombre + ubicación + rating */}
-          <div>
-            <div className="flex items-center gap-1.5 mb-0.5">
-              <h3 className="font-semibold text-sm leading-snug min-w-0 truncate"
-                style={{ color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
-                {space.name}
-              </h3>
-              {space.is_verified && (
-                <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0"
-                  style={{ background: 'var(--brand)', boxShadow: '0 0 0 2px #fff' }}
-                  title="Espacio verificado">
-                  <Check size={9} className="text-white" strokeWidth={3} />
-                </div>
-              )}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 text-xs min-w-0" style={{ color: '#94A3B8' }}>
+              <MapPin size={10} className="shrink-0" />
+              <span className="truncate">{space.sector ? `${space.sector}, ` : ''}{space.city}</span>
             </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
-                <MapPin size={10} />
-                {space.sector ? `${space.sector}, ` : ''}{space.city}
+            {rating && (
+              <div className="flex items-center gap-1 shrink-0 text-xs">
+                <span style={{ color: '#F59E0B' }}>★</span>
+                <span className="font-semibold" style={{ color: '#0F1623' }}>{rating.avg}</span>
+                <span style={{ color: '#94A3B8' }}>({rating.count})</span>
               </div>
-              {rating && (
-                <div className="flex items-center gap-1 shrink-0">
-                  <span style={{ color: '#F59E0B', fontSize: 11 }}>★</span>
-                  <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{rating.avg}</span>
-                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>({rating.count})</span>
-                </div>
-              )}
-            </div>
+            )}
           </div>
 
-          {/* Footer: tipo de precio + categoría + flecha */}
-          <div className="flex items-center justify-between gap-2 pt-0.5">
-            <div className="flex items-center gap-1.5 min-w-0">
-              {pricingDef?.value && (
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-md shrink-0 whitespace-nowrap"
-                  style={{ background: pricingDef.bg, color: pricingDef.text, border: `1px solid ${pricingDef.border}` }}>
-                  {pricingDef.label}
-                </span>
-              )}
-              <span className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md truncate"
-                style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
-                <CatIcon size={10} className="shrink-0" /> {catLabel}
-              </span>
-            </div>
-            <ArrowRight size={13}
-              className="transition-transform duration-200 group-hover:translate-x-0.5 shrink-0"
-              style={{ color: 'var(--brand)' }} />
+          <div className="mt-auto pt-3 flex items-center justify-between"
+            style={{ borderTop: '1px solid #F0F2F5', marginTop: 12 }}>
+            <span className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg"
+              style={{ background: '#F4F6F8', color: '#6B7280' }}>
+              <CatIcon size={10} /> {catLabel}
+            </span>
+            <ArrowRight size={14} style={{ color: '#35C493', transition: 'transform 0.2s' }}
+              className="group-hover:translate-x-1" />
           </div>
-
         </div>
       </div>
     </Link>
