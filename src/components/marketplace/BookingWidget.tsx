@@ -78,6 +78,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   const [customEventType,setCustomEventType]= useState('')
   const [selectedAddons, setSelectedAddons] = useState<string[]>([])
   const [guestNote,      setGuestNote]      = useState('')
+  const [guestCedula,    setGuestCedula]    = useState('')
   const [showNote,       setShowNote]       = useState(false)
   const [booking,        setBooking]        = useState(false)
   const [success,        setSuccess]        = useState(false)
@@ -298,6 +299,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         eventDate, startTime: effectiveStartTime, endTime: realEndTime,
         guestCount, eventType: finalEventType,
         eventNotes: guestNote || undefined,
+        guestCedula: guestCedula || undefined,
         selectedAddonIds: selectedAddons,
         basePrice, addonsTotal, platformFee,
         totalAmount: subtotal,
@@ -410,6 +412,13 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     )
     return (
       <div className="pb-4 mb-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+        {space.instant_booking && (
+          <div className="flex items-center gap-1.5 mb-3 px-3 py-1.5 rounded-xl w-fit"
+            style={{ background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.2)' }}>
+            <span style={{ fontSize: 13 }}>⚡</span>
+            <span className="text-xs font-bold" style={{ color: '#1D4ED8' }}>Confirmación instantánea</span>
+          </div>
+        )}
         {isHourly && (
           <div>
             <div className="flex items-baseline gap-1 mb-1">
@@ -838,6 +847,25 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                   placeholder="Ej: Llegaremos 2 horas antes para decorar..."
                   rows={2} className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none" />
               )
+            )}
+
+            {/* Cédula / identificación — opcional */}
+            {eventType && (
+              <div className="pt-2 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
+                <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                  Cédula o pasaporte <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(opcional)</span>
+                </label>
+                <input
+                  type="text" value={guestCedula}
+                  onChange={e => setGuestCedula(e.target.value)}
+                  placeholder="001-1234567-8"
+                  className="input-base w-full rounded-xl px-4 py-3 text-sm"
+                  style={{ color: 'var(--text-primary)' }}
+                />
+                <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
+                  Algunos espacios requieren verificación de identidad del reservante.
+                </p>
+              </div>
             )}
           </div>
         )}

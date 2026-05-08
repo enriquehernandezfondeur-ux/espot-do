@@ -147,6 +147,7 @@ export async function getPublishedSpaces(filters?: {
         has_bar, has_stage, has_cyclorama, has_natural_light, has_generator,
         has_dressing_room, chairs_count, tables_count, bathrooms_count
       ),
+      reviews(rating, is_public),
       space_payment_terms(term_type, platform_fee_pct)
     `)
     .eq('is_published', true)
@@ -279,7 +280,7 @@ export async function getSpaceBySlug(slug: string) {
       space_conditions(*),
       space_payment_terms(*),
       space_time_blocks(*),
-      profiles!host_id(id, full_name, avatar_url, id_verified, created_at)
+      profiles!host_id(id, full_name, avatar_url, id_verified, created_at, whatsapp)
     `)
     .eq('slug', slug)
     .eq('is_published', true)

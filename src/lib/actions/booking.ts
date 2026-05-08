@@ -18,6 +18,7 @@ export interface CreateBookingPayload {
   guestCount: number
   eventType: string
   eventNotes?: string
+  guestCedula?: string
   selectedAddonIds: string[]
   basePrice: number
   addonsTotal: number
@@ -106,13 +107,16 @@ export async function createBooking(payload: CreateBookingPayload) {
     }
   }
 
-  // Determinar si es cotización
+  // Determinar si es cotización y si el espacio tiene reserva instantánea
   let isQuote = false
   if (payload.pricingId) {
     const { data: pricingRow } = await supabase
       .from('space_pricing').select('pricing_type').eq('id', payload.pricingId).single()
     isQuote = pricingRow?.pricing_type === 'custom_quote'
   }
+  const { data: spaceRow } = await supabase
+    .from('spaces').select('instant_booking').eq('id', payload.spaceId).single()
+  const isInstant = !isQuote && (spaceRow?.instant_booking === true)
 
   // Insertar reserva
   const { data: booking, error: bookingError } = await supabase
@@ -127,11 +131,13 @@ export async function createBooking(payload: CreateBookingPayload) {
       guest_count:  payload.guestCount,
       event_type:   payload.eventType,
       event_notes:  payload.eventNotes ?? null,
+      guest_cedula: payload.guestCedula ?? null,
       base_price:   payload.basePrice,
       addons_total: payload.addonsTotal,
       platform_fee: payload.platformFee,
       total_amount: payload.totalAmount,
-      status:       isQuote ? 'quote_requested' : 'pending',
+      status:       isQuote ? 'quote_requested' : isInstant ? 'accepted' : 'pending',
+      accepted_at:  isInstant ? new Date().toISOString() : null,
       payment_status: 'unpaid',
     })
     .select('id')
@@ -214,7 +220,7 @@ export async function createBooking(payload: CreateBookingPayload) {
     }),
   ])
 
-  return { success: true, bookingId: booking.id, status: isQuote ? 'quote_requested' : 'pending' }
+  return { success: true, bookingId: booking.id, status: isQuote ? 'quote_requested' : isInstant ? 'accepted' : 'pending' }
 }
 
 // ── ACEPTAR RESERVA (host) ────────────────────────────────

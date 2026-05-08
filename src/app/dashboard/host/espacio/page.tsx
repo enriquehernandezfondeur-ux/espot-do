@@ -172,6 +172,9 @@ export default function EspacioPage() {
   // Step 4 - Addons
   const [addons, setAddons] = useState<AddonItem[]>([])
 
+  // Reserva instantánea
+  const [instantBooking, setInstantBooking] = useState(false)
+
   // Step 5 — Facilidades físicas
   const [hasParkingFac,    setHasParkingFac]    = useState(false)
   const [hasValetParking,  setHasValetParking]  = useState(false)
@@ -252,6 +255,7 @@ export default function EspacioPage() {
       hourlyPrice, minHours, maxHours, minConsumption, sessionHours,
       fixedPrice, packageName, packageHours, pkgExtraHourPrice, packageIncludes,
       timeBlocks, addons,
+      instantBooking,
       hasParkingFac, hasValetParking, hasWifi, hasAc, hasSoundSystem, hasProjector,
       hasDanceFloor, hasOutdoorArea, hasPool, hasKitchen, hasBar, hasStage,
       hasCyclorama, hasNaturalLight, hasGenerator, hasDressingRoom,
@@ -347,6 +351,9 @@ export default function EspacioPage() {
     // Actividades
     setPrimaryActivity(space.primary_activity ?? '')
     setSecondaryActivities(space.secondary_activities ?? [])
+    // Reserva instantánea
+    setInstantBooking(space.instant_booking ?? false)
+
     // Condiciones
     const c = space.space_conditions?.[0]
     if (c) {
@@ -1467,6 +1474,31 @@ export default function EspacioPage() {
               <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                 <div className="text-xs mb-2 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Cobros</div>
                 <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{paymentTermOptions.find(p => p.value === paymentTerm)?.label || 'No configurado'}</div>
+              </div>
+            </div>
+
+            {/* Reserva instantánea */}
+            <div className="rounded-2xl p-4"
+              style={{ background: instantBooking ? 'rgba(37,99,235,0.05)' : 'var(--bg-elevated)', border: `1.5px solid ${instantBooking ? 'rgba(37,99,235,0.25)' : 'var(--border-subtle)'}` }}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>⚡ Reserva instantánea</span>
+                    {instantBooking && (
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                        style={{ background: 'rgba(37,99,235,0.1)', color: '#1D4ED8' }}>Activa</span>
+                    )}
+                  </div>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                    Las reservas se confirman automáticamente sin revisión. Ideal para espacios con disponibilidad libre.
+                  </p>
+                </div>
+                <button onClick={() => setInstantBooking(v => !v)}
+                  className="w-11 h-6 rounded-full relative transition-all shrink-0 ml-4"
+                  style={{ background: instantBooking ? '#2563EB' : 'var(--border-medium)' }}>
+                  <span className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
+                    style={{ left: instantBooking ? 22 : 2 }} />
+                </button>
               </div>
             </div>
 

@@ -48,6 +48,8 @@ export interface SaveSpacePayload {
   timeBlocks: { block_name: string; start_time: string; end_time: string; days: number[] }[]
   // Step 4
   addons: { name: string; price: number; unit: string; category: string }[]
+  // Reserva instantánea
+  instantBooking: boolean
   // Step 5 — Facilidades físicas (booleanas)
   hasParkingFac: boolean
   hasValetParking: boolean
@@ -148,6 +150,7 @@ export async function saveSpace(payload: SaveSpacePayload) {
       lng: payload.lng ? num(payload.lng) : null,
       primary_activity:     payload.primaryActivity || null,
       secondary_activities: payload.secondaryActivities ?? [],
+      instant_booking: payload.instantBooking ?? false,
       is_published: false,
       is_active: true,
     })
@@ -378,6 +381,7 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
     lng: payload.lng ? num(payload.lng) : null,
     primary_activity:     payload.primaryActivity || null,
     secondary_activities: payload.secondaryActivities ?? [],
+    instant_booking: payload.instantBooking ?? false,
   }).eq('id', spaceId)
 
   if (spaceError) return { error: spaceError.message }

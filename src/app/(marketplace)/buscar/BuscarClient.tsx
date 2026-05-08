@@ -109,6 +109,13 @@ function getCover(space: any) {
       ?? null
 }
 
+function getSpaceRating(space: any): { avg: number; count: number } | null {
+  const reviews = (space.reviews ?? []).filter((r: any) => r.is_public && r.rating > 0)
+  if (!reviews.length) return null
+  const avg = reviews.reduce((s: number, r: any) => s + r.rating, 0) / reviews.length
+  return { avg: Math.round(avg * 10) / 10, count: reviews.length }
+}
+
 function getPriceInfo(space: any) {
   const p = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
   if (!p) return null
@@ -192,6 +199,14 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
     else          document.body.style.overflow = ''
     return () => { document.body.style.overflow = '' }
   }, [moreOpen])
+
+  const [recentIds, setRecentIds] = useState<string[]>([])
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('espot_recent') ?? '[]')
+      if (Array.isArray(stored)) setRecentIds(stored.slice(0, 6))
+    } catch {}
+  }, [])
 
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [mobileView, setMobileView] = useState<'list' | 'map'>('list')
@@ -358,6 +373,25 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
 
           {/* ── Desktop: 1 sola fila limpia ── */}
           <div className="hidden md:flex items-center gap-2">
+
+              {/* Búsqueda texto */}
+              <div className="flex items-center gap-2 rounded-xl px-3.5 py-2 flex-1 max-w-[220px]"
+                style={{ background: '#fff', border: `1.5px solid ${q ? 'var(--brand-border)' : 'var(--border-medium)'}` }}>
+                <Search size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                <input
+                  value={q} onChange={e => setQ(e.target.value)}
+                  placeholder="Buscar espacios..."
+                  className="flex-1 bg-transparent text-sm focus:outline-none min-w-0"
+                  style={{ color: 'var(--text-primary)' }}
+                />
+                {q && (
+                  <button onClick={() => setQ('')} style={{ color: 'var(--text-muted)' }}>
+                    <X size={12} />
+                  </button>
+                )}
+              </div>
+
+              <div className="w-px h-5 shrink-0" style={{ background: 'var(--border-medium)' }} />
 
               {/* Tipo de espacio */}
               <div className="relative">
@@ -754,6 +788,42 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
       {/* ── Contenido principal ── */}
       <div className="max-w-screen-2xl mx-auto px-4 md:px-6 w-full">
 
+        {/* ── Vistos recientemente — solo sin filtros activos ── */}
+        {activeFiltersCount === 0 && !q && recentIds.length > 0 && (() => {
+          const recentSpaces = recentIds.map(id => spaces.find((s: any) => s.id === id)).filter(Boolean)
+          if (!recentSpaces.length) return null
+          return (
+            <div className="pt-3 pb-1">
+              <p className="text-xs font-semibold uppercase tracking-widest mb-2.5" style={{ color: 'var(--text-muted)' }}>
+                Vistos recientemente
+              </p>
+              <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+                {recentSpaces.map((space: any) => {
+                  const cover = getCover(space)
+                  const CatIcon = CATEGORIES.find(c => c.value === space.category)?.icon ?? Building2
+                  return (
+                    <Link key={space.id} href={`/espacios/${space.slug}`}
+                      className="group shrink-0 flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all"
+                      style={{ background: '#fff', border: '1px solid var(--border-subtle)', minWidth: 180 }}>
+                      <div className="w-9 h-9 rounded-lg overflow-hidden shrink-0"
+                        style={{ background: 'linear-gradient(135deg,#667eea,#764ba2)' }}>
+                        {cover
+                          ? <img src={cover} alt={space.name} className="w-full h-full object-cover" loading="lazy" />
+                          : <div className="w-full h-full flex items-center justify-center"><CatIcon size={14} className="text-white opacity-60" /></div>
+                        }
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{space.name}</p>
+                        <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{space.sector || space.city}</p>
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })()}
+
         {/* Header de resultados */}
         <div className="py-3 md:py-4">
           <div className="flex items-center justify-between gap-4">
@@ -1149,6 +1219,7 @@ function SpaceCard({
 }) {
   const cover      = getCover(space)
   const priceInfo  = getPriceInfo(space)
+  const rating     = getSpaceRating(space)
   const catLabel   = CATEGORIES.find(c => c.value === space.category)?.label ?? space.category
   const CatIcon    = CATEGORIES.find(c => c.value === space.category)?.icon ?? Building2
   const pricingDef = PRICING_TYPES.find(p => {
@@ -1159,8 +1230,16 @@ function SpaceCard({
     ? `/espacios/${space.slug}?fecha=${dateFilter}${timeFilter ? `&hora=${timeFilter}` : ''}`
     : `/espacios/${space.slug}`
 
+  function trackRecent() {
+    try {
+      const prev: string[] = JSON.parse(localStorage.getItem('espot_recent') ?? '[]')
+      const next = [space.id, ...prev.filter((id: string) => id !== space.id)].slice(0, 6)
+      localStorage.setItem('espot_recent', JSON.stringify(next))
+    } catch {}
+  }
+
   return (
-    <Link href={href} className="group block">
+    <Link href={href} className="group block" onClick={trackRecent}>
       <div
         className="rounded-2xl overflow-hidden h-full flex flex-col"
         style={{
@@ -1220,6 +1299,14 @@ function SpaceCard({
             <FavoriteButton spaceId={space.id} size="sm" />
           </div>
 
+          {/* Badge reserva instantánea */}
+          {space.instant_booking && isAvailable === undefined && (
+            <span className="absolute top-3 left-3 z-10 flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full"
+              style={{ background: 'rgba(37,99,235,0.9)', color: '#fff', backdropFilter: 'blur(8px)' }}>
+              ⚡ Instantánea
+            </span>
+          )}
+
           {/* Badge disponibilidad */}
           {isAvailable !== undefined && (
             <span className="absolute top-3 left-3 z-10 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
@@ -1233,7 +1320,7 @@ function SpaceCard({
         {/* ── Info abajo ── */}
         <div className="p-3.5 flex flex-col gap-2">
 
-          {/* Nombre + ubicación */}
+          {/* Nombre + ubicación + rating */}
           <div>
             <div className="flex items-center gap-1.5 mb-0.5">
               <h3 className="font-semibold text-sm leading-snug min-w-0 truncate"
@@ -1248,9 +1335,18 @@ function SpaceCard({
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
-              <MapPin size={10} />
-              {space.sector ? `${space.sector}, ` : ''}{space.city}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+                <MapPin size={10} />
+                {space.sector ? `${space.sector}, ` : ''}{space.city}
+              </div>
+              {rating && (
+                <div className="flex items-center gap-1 shrink-0">
+                  <span style={{ color: '#F59E0B', fontSize: 11 }}>★</span>
+                  <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{rating.avg}</span>
+                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>({rating.count})</span>
+                </div>
+              )}
             </div>
           </div>
 

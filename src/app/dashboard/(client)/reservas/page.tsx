@@ -3,12 +3,13 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { CalendarDays, Clock, Users, MapPin, ChevronRight, Loader2, Search, CreditCard, CheckCircle } from 'lucide-react'
+import { CalendarDays, Clock, Users, MapPin, ChevronRight, Loader2, Search, CreditCard, CheckCircle, X, AlertTriangle } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getClientBookings } from '@/lib/actions/client'
 import { STATUS_LABELS, STATUS_COLORS, isPaid } from '@/lib/bookingConfig'
 import { cn } from '@/lib/utils'
 import { submitReview, getUserReviewedBookings } from '@/lib/actions/reviews'
+import { cancelBooking } from '@/lib/actions/booking'
 
 type Booking = Awaited<ReturnType<typeof getClientBookings>>[0]
 
@@ -24,9 +25,26 @@ export default function MisReservasPage() {
   const [rating, setRating]       = useState(0)
   const [comment, setComment]     = useState('')
   const [reviewed, setReviewed]   = useState<Set<string>>(new Set())
-  const [submitting, setSubmitting] = useState(false)
-  const [selected, setSelected] = useState<Booking | null>(null)
+  const [submitting, setSubmitting]   = useState(false)
+  const [selected, setSelected]       = useState<Booking | null>(null)
+  const [cancelModal, setCancelModal] = useState<Booking | null>(null)
+  const [cancelReason, setCancelReason] = useState('')
+  const [cancelling, setCancelling]   = useState(false)
   const router = useRouter()
+
+  async function handleCancel() {
+    if (!cancelModal) return
+    setCancelling(true)
+    const result = await cancelBooking(cancelModal.id, cancelReason || undefined)
+    if (!('error' in result)) {
+      setBookings(prev => prev.map(b =>
+        b.id === cancelModal.id ? { ...b, status: 'cancelled_guest' as any } : b
+      ))
+    }
+    setCancelling(false)
+    setCancelModal(null)
+    setCancelReason('')
+  }
 
   useEffect(() => {
     Promise.all([
@@ -279,9 +297,16 @@ export default function MisReservasPage() {
 
                     {/* Guías por estado */}
                     {bk.status === 'pending' && (
-                      <div className="mt-4 px-4 py-3 rounded-xl text-sm"
-                        style={{ background: 'rgba(217,119,6,0.05)', border: '1px solid rgba(217,119,6,0.15)', color: '#92400E' }}>
-                        El propietario tiene 24 horas para aceptar o rechazar tu solicitud.
+                      <div className="mt-4 space-y-3">
+                        <div className="px-4 py-3 rounded-xl text-sm"
+                          style={{ background: 'rgba(217,119,6,0.05)', border: '1px solid rgba(217,119,6,0.15)', color: '#92400E' }}>
+                          El propietario tiene 24 horas para aceptar o rechazar tu solicitud.
+                        </div>
+                        <button onClick={() => setCancelModal(bk)}
+                          className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
+                          style={{ color: '#DC2626', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
+                          <X size={12} /> Cancelar solicitud
+                        </button>
                       </div>
                     )}
                     {bk.status === 'confirmed' && (
@@ -411,6 +436,57 @@ export default function MisReservasPage() {
             )
           })}
         </div>
+      )}
+
+      {/* ── Modal cancelar reserva ── */}
+      {cancelModal && (
+        <>
+          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={() => setCancelModal(null)} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="w-full max-w-md rounded-3xl p-6 space-y-5"
+              style={{ background: '#fff', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+                  style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.15)' }}>
+                  <AlertTriangle size={20} style={{ color: '#DC2626' }} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base mb-1" style={{ color: 'var(--text-primary)' }}>
+                    ¿Cancelar reserva?
+                  </h3>
+                  <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                    Esta acción no se puede deshacer. Si ya pagaste el depósito, aplica la política de cancelación del espacio.
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                  Motivo (opcional)
+                </label>
+                <textarea
+                  value={cancelReason}
+                  onChange={e => setCancelReason(e.target.value)}
+                  placeholder="Ej: Cambio de fecha, evento cancelado..."
+                  rows={3}
+                  className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button onClick={() => setCancelModal(null)}
+                  className="flex-1 py-3 rounded-xl text-sm font-semibold btn-outline">
+                  Volver
+                </button>
+                <button onClick={handleCancel} disabled={cancelling}
+                  className="flex-1 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+                  style={{ background: '#DC2626', color: '#fff' }}>
+                  {cancelling ? <><Loader2 size={15} className="animate-spin" /> Cancelando...</> : 'Sí, cancelar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   )
