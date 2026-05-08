@@ -7,17 +7,24 @@ import { XCircle, RefreshCw, MessageCircle, Phone, CreditCard } from 'lucide-rea
 
 // Consejos específicos por código ISO de Azul
 const ISO_TIPS: Record<string, { short: string; tip: string }> = {
-  '01': { short: 'Requiere autorización del banco', tip: 'Llama al número del reverso de tu tarjeta y autoriza la transacción antes de intentar de nuevo.' },
-  '04': { short: 'Tarjeta retenida', tip: 'Tu banco retuvo la tarjeta. Llama al número del reverso para liberar el bloqueo.' },
-  '05': { short: 'Pago no autorizado', tip: 'Tu banco no autorizó el pago. Llama al número del reverso de tu tarjeta para resolver.' },
-  '14': { short: 'Número de tarjeta incorrecto', tip: 'Verifica el número de tarjeta con cuidado e intenta de nuevo.' },
-  '51': { short: 'Fondos insuficientes', tip: 'Verifica el saldo disponible o usa otra tarjeta con fondos suficientes.' },
-  '54': { short: 'Tarjeta vencida', tip: 'Esta tarjeta ya venció. Usa una tarjeta vigente.' },
-  '57': { short: 'Transacción no permitida', tip: 'Tu tarjeta no permite compras en línea. Habilítalo en la app de tu banco o usa otra tarjeta.' },
-  '62': { short: 'Tarjeta restringida', tip: 'Tu banco tiene restricciones en esta tarjeta. Contáctalos para habilitarla.' },
-  '65': { short: 'Límite de intentos superado', tip: 'Espera 24 horas o usa una tarjeta diferente.' },
-  '91': { short: 'Banco no disponible', tip: 'El banco emisor está temporalmente fuera de servicio. Intenta en unos minutos.' },
-  '96': { short: 'Error del sistema', tip: 'Error temporal. Espera unos minutos e intenta de nuevo.' },
+  '01': { short: 'Requiere autorización del banco',   tip: 'Llama al número del reverso de tu tarjeta y autoriza la transacción antes de intentar de nuevo.' },
+  '04': { short: 'Tarjeta retenida',                  tip: 'Tu banco retuvo la tarjeta. Llama al número del reverso para liberar el bloqueo.' },
+  '05': { short: 'Pago no autorizado',                tip: 'Tu banco no autorizó el pago. Llama al número del reverso de tu tarjeta para resolver.' },
+  '06': { short: 'Error general',                     tip: 'Error general del banco. Intenta de nuevo o usa otra tarjeta.' },
+  '12': { short: 'Transacción inválida',              tip: 'Verifica los datos de tu tarjeta e intenta de nuevo.' },
+  '13': { short: 'Monto inválido',                    tip: 'Hubo un error con el monto. Contacta soporte.' },
+  '14': { short: 'Número de tarjeta incorrecto',      tip: 'Verifica el número de tarjeta con cuidado e intenta de nuevo.' },
+  '51': { short: 'Fondos insuficientes',              tip: 'Verifica el saldo disponible o usa otra tarjeta con fondos suficientes.' },
+  '52': { short: 'Cuenta inválida',                   tip: 'La cuenta de esta tarjeta no es válida. Usa otra tarjeta.' },
+  '54': { short: 'Tarjeta vencida',                   tip: 'Esta tarjeta ya venció. Usa una tarjeta vigente.' },
+  '57': { short: 'Transacción no permitida',          tip: 'Tu tarjeta no permite compras en línea. Habilítalo en la app de tu banco o usa otra tarjeta.' },
+  '58': { short: 'Transacción no permitida al terminal', tip: 'Tu tarjeta no permite este tipo de operación. Contacta a tu banco.' },
+  '62': { short: 'Tarjeta restringida',               tip: 'Tu banco tiene restricciones en esta tarjeta. Contáctalos para habilitarla.' },
+  '63': { short: 'Violación de seguridad',            tip: 'Problema de seguridad con esta transacción. Contacta a tu banco.' },
+  '65': { short: 'Límite de intentos superado',       tip: 'Espera 24 horas o usa una tarjeta diferente.' },
+  '68': { short: 'Respuesta tardía',                  tip: 'El banco tardó demasiado en responder. Intenta de nuevo.' },
+  '91': { short: 'Banco no disponible',               tip: 'El banco emisor está temporalmente fuera de servicio. Intenta en unos minutos.' },
+  '96': { short: 'Error del sistema',                 tip: 'Error temporal. Espera unos minutos e intenta de nuevo.' },
 }
 
 function defaultTip(code: string) {

@@ -106,7 +106,8 @@ export async function POST(req: NextRequest) {
   const hostEmail  = host?.email       ?? ''
   const eventInfo  = `${formatDate(booking.event_date)} · ${formatTime(booking.start_time)} – ${formatTime(booking.end_time)} · ${booking.guest_count} personas`
 
-  await Promise.all([
+  // allSettled — un email fallando no debe revertir un pago ya procesado
+  await Promise.allSettled([
     guestEmail && sendEmail({
       to:      guestEmail,
       subject: `¡Reserva confirmada! — ${spaceName}`,

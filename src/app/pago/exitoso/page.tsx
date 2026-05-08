@@ -50,8 +50,11 @@ function ExitoContent() {
         return
       }
 
+      // Validar que los params requeridos de Azul estén presentes
+      const hasAzulParams = isoCode && authHash && orderNumber && amount && azulOrderId
+
       // Si Azul envió params de respuesta, verificar y confirmar
-      if (isoCode === '00' && authHash) {
+      if (hasAzulParams && isoCode === '00') {
         setVerifying(true)
         try {
           const res = await fetch('/api/payments/confirm', {
@@ -91,13 +94,13 @@ function ExitoContent() {
         } finally {
           setVerifying(false)
         }
-      } else if (!authHash) {
-        // Llegó directo sin params de Azul (link manual/reload) — solo mostrar si ya está pagado
-        setConfirmed(data?.payment_status === 'advance')
-      } else {
-        // IsoCode no es "00" — redirigir a fallido
+      } else if (hasAzulParams && isoCode !== '00') {
+        // Azul rechazó el pago — redirigir a fallido con el código
         router.push(`/pago/fallido?b=${bookingId}&code=${encodeURIComponent(isoCode)}&r=${encodeURIComponent(responseMessage || 'Pago no aprobado')}`)
         return
+      } else {
+        // Recarga manual o llegó sin params de Azul — mostrar si ya está pagado en DB
+        setConfirmed(data?.payment_status === 'advance')
       }
 
       setTimeout(() => setVisible(true), 80)

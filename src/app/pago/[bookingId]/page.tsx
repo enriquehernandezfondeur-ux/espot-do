@@ -61,15 +61,19 @@ export default function PagoPage({ params }: { params: Promise<{ bookingId: stri
         const controller = new AbortController()
         const timeout    = setTimeout(() => controller.abort(), 15000)
 
-        const res = await fetch('/api/payments/initiate', {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ bookingId }),
-          signal:  controller.signal,
-        })
-        clearTimeout(timeout)
+        let res: Response
+        try {
+          res = await fetch('/api/payments/initiate', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ bookingId }),
+            signal:  controller.signal,
+          })
+        } finally {
+          clearTimeout(timeout)
+        }
 
-        const json = await res.json()
+        const json = await res!.json()
 
         if (!res.ok || json.error) {
           setError(json.error ?? 'No se pudo iniciar el pago.')

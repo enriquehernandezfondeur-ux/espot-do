@@ -10,7 +10,17 @@ function CanceladoContent() {
   const bookingId = sp.get('b')
   const [visible, setVisible] = useState(false)
 
-  useEffect(() => { setTimeout(() => setVisible(true), 80) }, [])
+  useEffect(() => {
+    setTimeout(() => setVisible(true), 80)
+    // Resetear booking de 'processing' a 'payment_pending' para permitir reintentos
+    if (bookingId) {
+      fetch('/api/payments/cancel', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ bookingId }),
+      }).catch(() => {})
+    }
+  }, [])
 
   return (
     <div className="min-h-screen" style={{ background: 'linear-gradient(160deg, #080f12 0%, #0B0F0E 55%)' }}>
