@@ -5,7 +5,7 @@ import Link from 'next/link'
 import {
   ArrowRight, Shield, Users, Search, Clock, CreditCard,
   MapPin, Building2, UtensilsCrossed, Sunset,
-  Wine, Trees, Camera, Briefcase, Home,
+  Wine, Trees, Camera, Briefcase, Home, CheckCircle, Zap, Lock,
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 
@@ -22,6 +22,23 @@ function useReveal(threshold = 0.12) {
     return () => obs.disconnect()
   }, [threshold])
   return { ref, on }
+}
+
+// ── Hook de contador animado ──────────────────────────────
+function useCounter(target: number, on: boolean, duration = 1200) {
+  const [value, setValue] = useState(0)
+  useEffect(() => {
+    if (!on) return
+    const start = performance.now()
+    const tick = (now: number) => {
+      const p = Math.min((now - start) / duration, 1)
+      const eased = 1 - Math.pow(1 - p, 3)
+      setValue(Math.round(eased * target))
+      if (p < 1) requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+  }, [on, target, duration])
+  return value
 }
 
 // ── Utilidades ────────────────────────────────────────────
@@ -100,6 +117,50 @@ function Ticker() {
   )
 }
 
+// ── Stats strip ───────────────────────────────────────────
+function StatStrip({ spaceCount }: { spaceCount: number }) {
+  const { ref, on } = useReveal(0.2)
+  const count = useCounter(spaceCount, on)
+
+  const stats = [
+    { value: `${count}+`, label: 'Espacios disponibles', sub: 'Salones, rooftops, villas y más' },
+    { value: '24h',        label: 'Confirmación garantizada', sub: 'El host responde en menos de un día' },
+    { value: '100%',       label: 'Todo online',              sub: 'Sin llamadas, sin esperas' },
+    { value: 'RD$0',       label: 'Para publicar tu espacio', sub: 'Sin costo de registro para hosts' },
+  ]
+
+  return (
+    <section style={{ background: '#060D09', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+      {/* Grid pattern overlay */}
+      <div style={{
+        position: 'absolute', left: 0, right: 0, height: '100%', pointerEvents: 'none', zIndex: 0,
+        backgroundImage: 'linear-gradient(rgba(53,196,147,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(53,196,147,0.04) 1px, transparent 1px)',
+        backgroundSize: '64px 64px',
+      }} />
+      <div ref={ref} className="relative max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-16 z-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0">
+          {stats.map((stat, i) => (
+            <div key={i} className="md:px-8 first:pl-0 last:pr-0"
+              style={{
+                opacity: on ? 1 : 0,
+                transform: on ? 'translateY(0)' : 'translateY(20px)',
+                transition: `opacity 0.7s ease ${i * 120}ms, transform 0.7s ease ${i * 120}ms`,
+                borderRight: i < 3 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+              }}>
+              <div className="font-bold mb-1.5 tabular-nums"
+                style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', letterSpacing: '-0.05em', color: '#35C493', lineHeight: 1 }}>
+                {stat.value}
+              </div>
+              <div className="text-sm font-semibold text-white mb-1">{stat.label}</div>
+              <div className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.3)' }}>{stat.sub}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // ── Componente principal ──────────────────────────────────
 export default function HomepageSections({ spaces }: { spaces: any[] }) {
 
@@ -113,6 +174,11 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
 
       {/* ── TICKER ── */}
       <Ticker />
+
+      {/* ── STATS STRIP (TECH) ── */}
+      <div className="relative overflow-hidden">
+        <StatStrip spaceCount={spaces.length} />
+      </div>
 
       {/* ── TIPOS DE EVENTO ── */}
       <section className="py-14 md:py-20" style={{ background: '#fff' }}>
@@ -296,19 +362,36 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
         </div>
       </section>
 
-      {/* ── CATEGORÍAS ── */}
-      <section className="py-14 md:py-20" style={{ background: '#fff' }}>
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <Reveal className="mb-10 md:mb-12">
-            <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: '#35C493' }}>
-              Por tipo de espacio
-            </p>
-            <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
-              Explora{' '}
-              <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                tu opción
-              </span>
-            </h2>
+      {/* ── CATEGORÍAS (DARK TECH) ── */}
+      <section className="py-14 md:py-20 relative overflow-hidden" style={{ background: '#060D09' }}>
+
+        {/* Grid lines */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          backgroundImage: 'linear-gradient(rgba(53,196,147,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(53,196,147,0.05) 1px, transparent 1px)',
+          backgroundSize: '80px 80px',
+        }} />
+        {/* Fade edges */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: 'radial-gradient(ellipse 90% 80% at 50% 50%, transparent 40%, #060D09 100%)',
+        }} />
+
+        <div className="relative max-w-7xl mx-auto px-4 md:px-6 z-10">
+          <Reveal className="flex items-end justify-between mb-10 md:mb-12">
+            <div>
+              <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: '#35C493' }}>
+                Por tipo de espacio
+              </p>
+              <h2 className="font-bold text-white" style={{ fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
+                Explora{' '}
+                <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  tu opción
+                </span>
+              </h2>
+            </div>
+            <Link href="/buscar" className="hidden md:flex items-center gap-1.5 text-sm font-semibold"
+              style={{ color: 'rgba(255,255,255,0.35)' }}>
+              Ver todos <ArrowRight size={14} />
+            </Link>
           </Reveal>
 
           <div ref={catSection.ref} className="grid grid-cols-4 lg:grid-cols-8 gap-3">
@@ -316,21 +399,32 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
               const Icon = cat.icon
               return (
                 <Link key={cat.value} href={`/buscar?categoria=${cat.value}`}
-                  className="group flex flex-col items-center gap-2.5 p-3 md:p-4 rounded-2xl text-center"
+                  className="group flex flex-col items-center gap-2.5 p-3 md:p-4 rounded-2xl text-center transition-all duration-300"
                   style={{
-                    border: '1px solid #E8ECF0',
-                    background: '#fff',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.07)',
                     opacity: catSection.on ? 1 : 0,
                     transform: catSection.on ? 'translateY(0) scale(1)' : 'translateY(16px) scale(0.95)',
-                    transition: `opacity 0.5s ease ${i * 60}ms, transform 0.5s ease ${i * 60}ms`,
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                    transition: `opacity 0.5s ease ${i * 60}ms, transform 0.5s ease ${i * 60}ms, border-color 0.2s, background 0.2s, box-shadow 0.2s`,
+                  }}
+                  onMouseEnter={e => {
+                    const el = e.currentTarget as HTMLAnchorElement
+                    el.style.background = 'rgba(53,196,147,0.07)'
+                    el.style.borderColor = 'rgba(53,196,147,0.3)'
+                    el.style.boxShadow = '0 0 24px rgba(53,196,147,0.08)'
+                  }}
+                  onMouseLeave={e => {
+                    const el = e.currentTarget as HTMLAnchorElement
+                    el.style.background = 'rgba(255,255,255,0.03)'
+                    el.style.borderColor = 'rgba(255,255,255,0.07)'
+                    el.style.boxShadow = 'none'
                   }}>
-                  <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:bg-green-50"
-                    style={{ background: '#F4F6F8' }}>
-                    <Icon size={16} style={{ color: '#6B7280', transition: 'color 0.2s' }}
-                      className="group-hover:text-green-600" />
+                  <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center transition-all duration-200"
+                    style={{ background: 'rgba(53,196,147,0.08)', border: '1px solid rgba(53,196,147,0.15)' }}>
+                    <Icon size={16} style={{ color: '#35C493' }} />
                   </div>
-                  <span className="text-[10px] md:text-xs font-semibold leading-tight" style={{ color: '#6B7280' }}>
+                  <span className="text-[10px] md:text-xs font-semibold leading-tight group-hover:text-white"
+                    style={{ color: 'rgba(255,255,255,0.45)', transition: 'color 0.2s' }}>
                     {cat.label}
                   </span>
                 </Link>
@@ -340,11 +434,11 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
         </div>
       </section>
 
-      {/* ── CÓMO FUNCIONA — sección oscura ── */}
+      {/* ── CÓMO FUNCIONA (DARK TECH ENHANCED) ── */}
       <section className="py-20 md:py-28 relative overflow-hidden"
         style={{ background: '#060D09' }}>
 
-        {/* Patrón de puntos */}
+        {/* Dot pattern */}
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
           backgroundImage: 'radial-gradient(circle, rgba(53,196,147,0.12) 1px, transparent 1px)',
@@ -357,9 +451,17 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
         <div style={{ position: 'absolute', top: -100, right: -100, width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(53,196,147,0.07) 0%, transparent 65%)', pointerEvents: 'none', zIndex: 0 }} />
         <div style={{ position: 'absolute', bottom: -80, left: '20%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(53,196,147,0.05) 0%, transparent 65%)', pointerEvents: 'none', zIndex: 0 }} />
 
-        <div className="max-w-5xl mx-auto px-4 md:px-6">
+        <div className="relative max-w-5xl mx-auto px-4 md:px-6 z-10">
 
           <Reveal className="text-center mb-16 md:mb-20">
+            {/* Terminal chrome */}
+            <div className="inline-flex items-center gap-1.5 mb-6 px-3 py-1.5 rounded-lg"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#FF5F57' }} />
+              <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#FFBD2E' }} />
+              <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#28C840' }} />
+              <span className="ml-2 text-xs font-mono" style={{ color: 'rgba(255,255,255,0.25)' }}>espothub.do — reserva</span>
+            </div>
             <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{ color: '#35C493' }}>
               Proceso simple
             </p>
@@ -373,18 +475,19 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
 
           <div ref={howSection.ref} className="grid md:grid-cols-3 gap-6 md:gap-8">
             {[
-              { num: '01', icon: Search,     title: 'Busca tu espacio',     desc: 'Filtra por sector, tipo y capacidad. Todos los espacios son verificados por nuestro equipo antes de publicarse.' },
-              { num: '02', icon: Clock,      title: 'Elige fecha y horario', desc: 'Selecciona el día, horario y adicionales. El propietario confirma en menos de 24 horas.' },
-              { num: '03', icon: CreditCard, title: 'Paga y asegura tu fecha', desc: 'Una vez aceptada, paga el depósito de forma segura con Azul Payments. El precio que ves es el que pagas.' },
+              { num: '01', icon: Search,     title: 'Busca tu espacio',      desc: 'Filtra por sector, tipo y capacidad. Todos los espacios son verificados por nuestro equipo antes de publicarse.' },
+              { num: '02', icon: Clock,      title: 'Elige fecha y horario',  desc: 'Selecciona el día, horario y adicionales. El propietario confirma en menos de 24 horas.' },
+              { num: '03', icon: CreditCard, title: 'Paga y asegura tu fecha', desc: 'Una vez aceptada, paga de forma segura con Azul Payments. El precio que ves es el que pagas.' },
             ].map((step, i) => {
               const Icon = step.icon
               return (
-                <div key={step.num} className="relative"
+                <div key={step.num} className="relative group"
                   style={{
                     opacity: howSection.on ? 1 : 0,
                     transform: howSection.on ? 'translateY(0)' : 'translateY(36px)',
                     transition: `opacity 0.7s ease ${i * 150}ms, transform 0.7s ease ${i * 150}ms`,
                   }}>
+
                   {/* Número de fondo */}
                   <div className="absolute -top-4 -left-2 font-bold select-none pointer-events-none"
                     style={{ fontSize: 96, color: 'rgba(255,255,255,0.03)', lineHeight: 1, letterSpacing: '-0.05em' }}>
@@ -393,23 +496,46 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
 
                   {/* Línea conectora */}
                   {i < 2 && (
-                    <div className="hidden md:block absolute top-6 left-full w-8 h-px"
-                      style={{ background: 'rgba(53,196,147,0.2)', zIndex: 1 }} />
+                    <div className="hidden md:block absolute top-7 left-full w-8 h-px"
+                      style={{ background: 'linear-gradient(90deg, rgba(53,196,147,0.3), transparent)', zIndex: 1 }} />
                   )}
 
-                  <div className="relative p-6 md:p-8 rounded-2xl"
-                    style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                    <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5"
-                      style={{ background: 'rgba(53,196,147,0.12)', border: '1px solid rgba(53,196,147,0.2)' }}>
-                      <Icon size={18} style={{ color: '#35C493' }} />
+                  <div className="relative p-6 md:p-8 rounded-2xl transition-all duration-300"
+                    style={{
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid rgba(255,255,255,0.07)',
+                    }}
+                    onMouseEnter={e => {
+                      const el = e.currentTarget as HTMLDivElement
+                      el.style.background = 'rgba(53,196,147,0.05)'
+                      el.style.borderColor = 'rgba(53,196,147,0.2)'
+                      el.style.boxShadow = '0 0 40px rgba(53,196,147,0.06), inset 0 1px 0 rgba(53,196,147,0.1)'
+                    }}
+                    onMouseLeave={e => {
+                      const el = e.currentTarget as HTMLDivElement
+                      el.style.background = 'rgba(255,255,255,0.03)'
+                      el.style.borderColor = 'rgba(255,255,255,0.07)'
+                      el.style.boxShadow = 'none'
+                    }}>
+
+                    {/* Icono con glow */}
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 transition-all duration-300"
+                      style={{
+                        background: 'rgba(53,196,147,0.1)',
+                        border: '1px solid rgba(53,196,147,0.2)',
+                        boxShadow: '0 0 20px rgba(53,196,147,0.1)',
+                      }}>
+                      <Icon size={20} style={{ color: '#35C493' }} />
                     </div>
-                    <div className="text-xs font-bold tracking-widest mb-2" style={{ color: 'rgba(53,196,147,0.6)' }}>
-                      PASO {step.num}
+
+                    <div className="text-xs font-mono font-bold tracking-widest mb-2"
+                      style={{ color: 'rgba(53,196,147,0.5)' }}>
+                      _{step.num}
                     </div>
                     <h3 className="font-bold text-white mb-2" style={{ letterSpacing: '-0.02em' }}>
                       {step.title}
                     </h3>
-                    <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                    <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.38)' }}>
                       {step.desc}
                     </p>
                   </div>
@@ -417,6 +543,35 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
               )
             })}
           </div>
+        </div>
+      </section>
+
+      {/* ── TRUST STRIP (TECH) ── */}
+      <section className="relative overflow-hidden" style={{ background: '#060D09', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+          <Reveal className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+            {[
+              { icon: Lock,         label: 'Pago 100% seguro',           sub: 'Azul Payments certificado' },
+              { icon: Shield,       label: 'Espacios verificados',        sub: 'Revisados por nuestro equipo' },
+              { icon: CheckCircle,  label: 'Confirmación en 24h',         sub: 'Garantizado o te devolvemos' },
+              { icon: Zap,          label: 'Reserva en minutos',          sub: 'Sin llamadas ni emails' },
+            ].map((item, i) => {
+              const Icon = item.icon
+              return (
+                <div key={i} className="flex items-center gap-3" style={{ opacity: 0.75 }}>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ background: 'rgba(53,196,147,0.08)', border: '1px solid rgba(53,196,147,0.15)' }}>
+                    <Icon size={14} style={{ color: '#35C493' }} />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-white leading-tight">{item.label}</div>
+                    <div className="text-[10px]" style={{ color: 'rgba(255,255,255,0.3)' }}>{item.sub}</div>
+                  </div>
+                  {i < 3 && <div className="hidden md:block w-px h-8 ml-7" style={{ background: 'rgba(255,255,255,0.06)' }} />}
+                </div>
+              )
+            })}
+          </Reveal>
         </div>
       </section>
 
@@ -432,13 +587,19 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                   style={{ background: 'rgba(53,196,147,0.08)', transform: 'translate(30%,-30%)' }} />
                 <div className="absolute bottom-0 left-1/3 w-72 h-72 rounded-full blur-3xl"
                   style={{ background: 'rgba(53,196,147,0.06)', transform: 'translateY(35%)' }} />
+                {/* Grid lines inside CTA */}
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  backgroundImage: 'linear-gradient(rgba(53,196,147,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(53,196,147,0.04) 1px, transparent 1px)',
+                  backgroundSize: '48px 48px',
+                }} />
               </div>
 
               <div className="relative grid md:grid-cols-[1fr_auto] items-center gap-6 md:gap-10 px-8 py-10 md:px-14 md:py-14">
                 <div>
                   <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-5 text-xs font-semibold"
                     style={{ background: 'rgba(53,196,147,0.12)', color: '#6EE7C7', border: '1px solid rgba(53,196,147,0.18)' }}>
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#35C493' }} />
+                    <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#35C493' }} />
                     Para propietarios
                   </div>
                   <h2 className="font-bold text-white mb-3"
