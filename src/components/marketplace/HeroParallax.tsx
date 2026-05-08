@@ -21,22 +21,21 @@ export default function HeroParallax({ spaceCount }: Props) {
       requestAnimationFrame(() => {
         const y = window.scrollY
 
-        // Video sube más lento → efecto parallax
+        // Solo el VIDEO hace parallax con transform
+        // El contenido NO usa transform para no romper position:fixed de los dropdowns
         if (videoRef.current) {
           videoRef.current.style.transform = `translateY(${y * 0.45}px)`
         }
 
-        // Contenido se desvanece y sube suavemente
+        // Contenido solo hace fade — sin transform
         if (contentRef.current) {
-          const opacity = Math.max(0, 1 - y / 480)
-          const moveUp  = y * 0.18
-          contentRef.current.style.opacity   = String(opacity)
-          contentRef.current.style.transform = `translateY(${moveUp}px)`
+          const opacity = Math.max(0, 1 - y / 420)
+          contentRef.current.style.opacity = String(opacity)
         }
 
         // Overlay se oscurece levemente al scrollear
         if (overlayRef.current) {
-          const extra = Math.min(y / 600, 0.18)
+          const extra = Math.min(y / 600, 0.15)
           overlayRef.current.style.opacity = String(1 + extra)
         }
 
@@ -96,7 +95,7 @@ export default function HeroParallax({ spaceCount }: Props) {
         className="relative flex flex-col items-center justify-center text-center px-4 md:px-6"
         style={{
           height: '100%', zIndex: 2,
-          willChange: 'transform, opacity',
+          willChange: 'opacity',
         }}>
 
         {/* Badge */}

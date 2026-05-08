@@ -136,18 +136,11 @@ export default function HomepageSearch() {
     setPanel(p)
   }
 
-  // Cerrar con Escape o al hacer scroll (el buscador no es sticky)
+  // Cerrar con Escape (no al scrollear — los dropdowns son fixed)
   useEffect(() => {
     function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setPanel(null) }
-    function onScroll() { setPanel(null) }
-    if (panel) {
-      document.addEventListener('keydown', onKey)
-      window.addEventListener('scroll', onScroll, { passive: true })
-    }
-    return () => {
-      document.removeEventListener('keydown', onKey)
-      window.removeEventListener('scroll', onScroll)
-    }
+    if (panel) document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
   }, [panel])
 
   function pickActivity(key: string, label: string) {
@@ -344,69 +337,62 @@ export default function HomepageSearch() {
       {/* ───────────────────────────────────────────────────────
           MÓVIL: Barra compacta con campos stacked + modales
           ─────────────────────────────────────────────────── */}
-      <div className="md:hidden">
+      <div className="md:hidden w-full max-w-sm mx-auto">
         <div className="rounded-2xl overflow-hidden"
-          style={{ background: '#fff', boxShadow: '0 16px 48px rgba(0,0,0,0.28)' }}>
+          style={{ background: 'rgba(255,255,255,0.97)', boxShadow: '0 20px 60px rgba(0,0,0,0.35)', backdropFilter: 'blur(12px)' }}>
 
           {/* Campo Actividad */}
           <button type="button" onClick={() => setMobileModal('activity')}
-            className="w-full flex items-center gap-3 px-5 py-4 text-left"
+            className="w-full flex items-center gap-3 px-4 py-4 text-left active:bg-gray-50"
             style={{ borderBottom: '1px solid #F3F4F6' }}>
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: activity ? 'rgba(53,196,147,0.1)' : '#F9FAFB' }}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: activity ? 'rgba(53,196,147,0.12)' : '#F4F6F8' }}>
               <Search size={15} style={{ color: activity ? '#35C493' : '#9CA3AF' }} />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#9CA3AF' }}>Actividad</div>
-              <div className="text-sm font-medium mt-0.5 truncate" style={{ color: activity ? '#111827' : '#9CA3AF' }}>
-                {actQ || 'Cualquier evento'}
+              <div className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: '#9CA3AF' }}>Evento</div>
+              <div className="text-sm font-semibold truncate" style={{ color: activity ? '#111827' : '#9CA3AF' }}>
+                {actQ || 'Tipo de evento'}
               </div>
             </div>
-            {activity ? (
-              <span onClick={e => { e.stopPropagation(); setActivity(''); setActQ('') }}
-                className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
-                style={{ background: '#F3F4F6' }}>
-                <X size={11} style={{ color: '#6B7280' }} />
-              </span>
-            ) : (
-              <ChevronDown size={16} style={{ color: '#9CA3AF', flexShrink: 0 }} />
-            )}
+            {activity
+              ? <span onClick={e => { e.stopPropagation(); setActivity(''); setActQ('') }}
+                  className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
+                  style={{ background: '#F3F4F6' }}><X size={11} style={{ color: '#6B7280' }} /></span>
+              : <ChevronDown size={14} style={{ color: '#9CA3AF', flexShrink: 0 }} />
+            }
           </button>
 
-          {/* Fila inferior: Ciudad + Fecha */}
+          {/* Sector + Fecha */}
           <div className="flex">
-            {/* Ciudad */}
             <button type="button" onClick={() => setMobileModal('city')}
-              className="flex-1 flex items-center gap-2.5 px-4 py-3.5 text-left"
+              className="flex-1 flex items-center gap-2 px-4 py-3.5 text-left active:bg-gray-50"
               style={{ borderRight: '1px solid #F3F4F6' }}>
-              <MapPin size={14} style={{ color: city ? '#35C493' : '#9CA3AF', flexShrink: 0 }} />
+              <MapPin size={13} style={{ color: city ? '#35C493' : '#9CA3AF', flexShrink: 0 }} />
               <div className="flex-1 min-w-0">
-                <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#9CA3AF' }}>Sector</div>
-                <div className="text-sm font-medium mt-0.5 truncate" style={{ color: city ? '#111827' : '#9CA3AF' }}>
+                <div className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: '#9CA3AF' }}>Sector</div>
+                <div className="text-xs font-semibold truncate" style={{ color: city ? '#111827' : '#9CA3AF' }}>
                   {city || '¿Dónde?'}
                 </div>
               </div>
             </button>
-
-            {/* Fecha */}
             <button type="button" onClick={() => setMobileModal('date')}
-              className="flex-1 flex items-center gap-2.5 px-4 py-3.5 text-left">
-              <CalendarDays size={14} style={{ color: dateFrom ? '#35C493' : '#9CA3AF', flexShrink: 0 }} />
+              className="flex-1 flex items-center gap-2 px-4 py-3.5 text-left active:bg-gray-50">
+              <CalendarDays size={13} style={{ color: dateFrom ? '#35C493' : '#9CA3AF', flexShrink: 0 }} />
               <div className="flex-1 min-w-0">
-                <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#9CA3AF' }}>Fecha</div>
-                <div className="text-sm font-medium mt-0.5 truncate" style={{ color: dateFrom ? '#111827' : '#9CA3AF' }}>
+                <div className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: '#9CA3AF' }}>Fecha</div>
+                <div className="text-xs font-semibold truncate" style={{ color: dateFrom ? '#111827' : '#9CA3AF' }}>
                   {dateFrom ? fmtDateShort(dateFrom) : '¿Cuándo?'}
                 </div>
               </div>
             </button>
           </div>
 
-          {/* Botón buscar */}
+          {/* Buscar */}
           <button type="button" onClick={search}
-            className="w-full flex items-center justify-center gap-2.5 py-4 text-base font-bold text-white"
+            className="w-full flex items-center justify-center gap-2 py-4 text-sm font-bold text-white"
             style={{ background: 'linear-gradient(135deg, #35C493, #28A87C)' }}>
-            <Search size={18} />
-            Buscar espacios
+            <Search size={16} /> Buscar espacios
           </button>
         </div>
       </div>
