@@ -36,29 +36,28 @@ export default function PagoPage({ params }: { params: Promise<{ bookingId: stri
 
   useEffect(() => {
     async function loadAndRedirect() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/auth'); return }
-
-      const { data } = await supabase
-        .from('bookings')
-        .select(`
-          *,
-          spaces!space_id(name, address, city, sector, space_images(url, is_cover)),
-          profiles!guest_id(full_name, email),
-          booking_addons(quantity, unit_price, subtotal, space_addons(name))
-        `)
-        .eq('id', bookingId)
-        .eq('guest_id', user.id)
-        .single()
-
-      if (!data) { router.push('/dashboard/reservas'); return }
-      if (isPaid(data.payment_status)) { router.push(`/pago/exitoso?b=${bookingId}`); return }
-
-      setBooking(data)
-      setStep('redirecting')
-
-      // Iniciar pago automáticamente con timeout de 15s
       try {
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        if (authError || !user) { router.push('/auth'); return }
+
+        const { data, error: bookingError } = await supabase
+          .from('bookings')
+          .select(`
+            *,
+            spaces!space_id(name, address, city, sector, space_images(url, is_cover)),
+            profiles!guest_id(full_name, email),
+            booking_addons(quantity, unit_price, subtotal, space_addons(name))
+          `)
+          .eq('id', bookingId)
+          .eq('guest_id', user.id)
+          .single()
+
+        if (bookingError || !data) { router.push('/dashboard/reservas'); return }
+        if (isPaid(data.payment_status)) { router.push(`/pago/exitoso?b=${bookingId}`); return }
+
+        setBooking(data)
+        setStep('redirecting')
+
         const controller = new AbortController()
         const timeout    = setTimeout(() => controller.abort(), 15000)
 
@@ -79,11 +78,12 @@ export default function PagoPage({ params }: { params: Promise<{ bookingId: stri
         }
 
         submitToAzul(json.pageUrl, json.fields)
+
       } catch (err: any) {
         if (err?.name === 'AbortError') {
           setError('Tiempo de espera agotado. Verifica tu conexión e intenta de nuevo.')
         } else {
-          setError('Error de conexión. Verifica tu red e intenta de nuevo.')
+          setError(err?.message ?? 'Ocurrió un error inesperado. Intenta de nuevo.')
         }
         setStep('error')
       }
