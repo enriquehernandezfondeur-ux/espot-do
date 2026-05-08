@@ -10,6 +10,7 @@ import {
   Sunset, Wine, Trees, Camera, Briefcase, Home, Hotel,
   Car, Volume2, Music2, Waves, Minus, Plus, Wifi,
   Wind, Projector, Zap, ShowerHead, MonitorPlay,
+  Package, MessageSquare, Timer,
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 
@@ -37,6 +38,14 @@ const CATEGORIES = [
 ]
 
 const QUICK_CAPACITIES = [20, 50, 100, 150]
+
+const PRICING_TYPES = [
+  { value: '',                    label: 'Todos',            icon: null,           bg: '',                         text: '',        border: '' },
+  { value: 'hourly',              label: 'Por hora',         icon: Timer,          bg: 'rgba(37,99,235,0.09)',     text: '#1D4ED8', border: 'rgba(37,99,235,0.22)' },
+  { value: 'minimum_consumption', label: 'Consumo mínimo',  icon: Wine,           bg: 'rgba(180,83,9,0.09)',      text: '#B45309', border: 'rgba(180,83,9,0.22)' },
+  { value: 'fixed_package',       label: 'Paquete fijo',    icon: Package,        bg: 'rgba(109,40,217,0.09)',    text: '#6D28D9', border: 'rgba(109,40,217,0.22)' },
+  { value: 'custom_quote',        label: 'Cotización',      icon: MessageSquare,  bg: 'rgba(71,85,105,0.09)',     text: '#475569', border: 'rgba(71,85,105,0.22)' },
+] as const
 
 const TIME_SLOTS = [
   {v:'08:00',l:'8am'},{v:'09:00',l:'9am'},{v:'10:00',l:'10am'},{v:'11:00',l:'11am'},
@@ -141,6 +150,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   const [priceMax,       setPriceMax]       = useState('')
   const [selectedAmenities,   setSelectedAmenities]   = useState<string[]>([])
   const [selectedFacilities,  setSelectedFacilities]  = useState<string[]>([])
+  const [pricingFilter,       setPricingFilter]       = useState('')
   const [moreOpen,       setMoreOpen]       = useState(false)
   const [blockedIds,     setBlockedIds]     = useState<Set<string>>(
     () => new Set(spaces.filter((s: any) => s._dateFiltered && !s._available).map((s: any) => s.id))
@@ -248,6 +258,12 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
         })
       })
     }
+    if (pricingFilter) {
+      result = result.filter(s => {
+        const p = s.space_pricing?.find((x: any) => x.is_active) ?? s.space_pricing?.[0]
+        return p?.pricing_type === pricingFilter
+      })
+    }
     // Ordenar
     if (sortBy === 'precio_asc' || sortBy === 'precio_desc') {
       result.sort((a, b) => {
@@ -263,7 +279,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
     }
 
     return result
-  }, [spaces, q, categoria, sector, capacidad, priceMin, priceMax, selectedAmenities, selectedFacilities, sortBy])
+  }, [spaces, q, categoria, sector, capacidad, priceMin, priceMax, selectedAmenities, selectedFacilities, pricingFilter, sortBy])
 
   function applyCapacity(val: string) {
     setCapacidad(val); setCapacidadInput(val)
@@ -291,12 +307,12 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   }
 
   const activeFiltersCount = [
-    categoria, sector, capacidad, dateFrom, timeFrom, ...selectedAmenities, ...selectedFacilities, priceMin, priceMax,
+    categoria, sector, capacidad, dateFrom, timeFrom, pricingFilter, ...selectedAmenities, ...selectedFacilities, priceMin, priceMax,
   ].filter(Boolean).length
 
   function clearAll() {
     setQ(''); setSector(''); setSectorQ(''); setCategoria(''); setCapacidad(''); setCapacidadInput('')
-    setSelectedAmenities([]); setSelectedFacilities([]); setPriceMin(''); setPriceMax(''); setDateFrom(''); setTimeFrom('')
+    setSelectedAmenities([]); setSelectedFacilities([]); setPricingFilter(''); setPriceMin(''); setPriceMax(''); setDateFrom(''); setTimeFrom('')
   }
 
   const handleCardHover = useCallback((id: string | null) => setHoveredId(id), [])
@@ -318,6 +334,11 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
       label: FACILITIES.find(f => f.key === k)?.label ?? k,
       onRemove: () => toggleFacility(k),
     })),
+    pricingFilter && {
+      key: 'pricing',
+      label: PRICING_TYPES.find(p => p.value === pricingFilter)?.label ?? pricingFilter,
+      onRemove: () => setPricingFilter(''),
+    },
   ].filter(Boolean) as { key: string; label: string; onRemove: () => void }[]
 
   return (
@@ -686,6 +707,25 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
       {/* ── Contenido principal ── */}
       <div className="max-w-screen-2xl mx-auto px-4 md:px-6 w-full">
 
+        {/* ── Pills tipo de precio ── */}
+        <div className="flex gap-2 pt-3 pb-1 overflow-x-auto scrollbar-hide">
+          {PRICING_TYPES.map(pt => {
+            const isActive = pricingFilter === pt.value
+            const Icon = pt.icon
+            return (
+              <button key={pt.value} onClick={() => setPricingFilter(isActive && pt.value !== '' ? '' : pt.value)}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-all"
+                style={isActive
+                  ? { background: pt.value ? pt.bg : 'var(--brand)', color: pt.value ? pt.text : '#fff', border: `1.5px solid ${pt.value ? pt.border : 'var(--brand)'}`, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }
+                  : { background: '#fff', color: 'var(--text-secondary)', border: '1.5px solid var(--border-medium)' }
+                }>
+                {Icon && <Icon size={11} />}
+                {pt.label}
+              </button>
+            )
+          })}
+        </div>
+
         {/* Header de resultados */}
         <div className="py-3 md:py-4">
           <div className="flex items-center justify-between gap-4">
@@ -955,9 +995,33 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                 </div>
               </div>
 
+              {/* ── TIPO DE PRECIO ── */}
+              <div>
+                <h3 className="font-bold text-sm mb-1" style={{ color: 'var(--text-primary)' }}>Tipo de precio</h3>
+                <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>¿Cómo prefieres pagar?</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {PRICING_TYPES.filter(p => p.value).map(pt => {
+                    const isActive = pricingFilter === pt.value
+                    const Icon = pt.icon
+                    return (
+                      <button key={pt.value} onClick={() => setPricingFilter(isActive ? '' : pt.value)}
+                        className="flex items-center gap-2.5 px-3 py-3 rounded-xl text-left transition-all"
+                        style={isActive
+                          ? { background: pt.bg, border: `1.5px solid ${pt.border}`, color: pt.text }
+                          : { background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }
+                        }>
+                        {Icon && <Icon size={14} className="shrink-0" style={{ color: isActive ? pt.text : 'var(--text-muted)' }} />}
+                        <span className="text-xs font-medium leading-tight">{pt.label}</span>
+                        {isActive && <Check size={12} className="ml-auto shrink-0" style={{ color: pt.text }} />}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
               {/* ── PRECIO ── */}
               <div>
-                <h3 className="font-bold text-sm mb-3" style={{ color: 'var(--text-primary)' }}>Precio (RD$)</h3>
+                <h3 className="font-bold text-sm mb-3" style={{ color: 'var(--text-primary)' }}>Rango de precio (RD$)</h3>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs mb-1.5" style={{ color: 'var(--text-muted)' }}>Mínimo</label>
@@ -1055,11 +1119,15 @@ function SpaceCard({
   timeFilter?: string
   isAvailable?: boolean
 }) {
-  const cover     = getCover(space)
-  const priceInfo = getPriceInfo(space)
-  const catLabel  = CATEGORIES.find(c => c.value === space.category)?.label ?? space.category
-  const CatIcon   = CATEGORIES.find(c => c.value === space.category)?.icon ?? Building2
-  const href      = dateFilter
+  const cover      = getCover(space)
+  const priceInfo  = getPriceInfo(space)
+  const catLabel   = CATEGORIES.find(c => c.value === space.category)?.label ?? space.category
+  const CatIcon    = CATEGORIES.find(c => c.value === space.category)?.icon ?? Building2
+  const pricingDef = PRICING_TYPES.find(p => {
+    const pt = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
+    return p.value === pt?.pricing_type
+  })
+  const href = dateFilter
     ? `/espacios/${space.slug}?fecha=${dateFilter}${timeFilter ? `&hora=${timeFilter}` : ''}`
     : `/espacios/${space.slug}`
 
@@ -1069,15 +1137,15 @@ function SpaceCard({
         className="rounded-2xl overflow-hidden h-full flex flex-col"
         style={{
           background:  '#fff',
-          border:      `1px solid ${isHovered ? 'rgba(53,196,147,0.5)' : 'var(--border-subtle)'}`,
-          boxShadow:   isHovered ? '0 8px 32px rgba(53,196,147,0.15)' : '0 1px 4px rgba(0,0,0,0.04)',
+          border:      `1px solid ${isHovered ? 'rgba(53,196,147,0.45)' : 'var(--border-subtle)'}`,
+          boxShadow:   isHovered ? '0 10px 36px rgba(0,0,0,0.1)' : '0 1px 6px rgba(0,0,0,0.05)',
           transform:   isHovered ? 'translateY(-3px)' : 'none',
           transition:  'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
         }}
         onMouseEnter={() => onHover(space.id)}
         onMouseLeave={() => onHover(null)}
       >
-        {/* ── Foto limpia — solo favorito y badge disponibilidad ── */}
+        {/* ── Foto con precio encima ── */}
         <div className="relative overflow-hidden" style={{ aspectRatio: '4/3', flexShrink: 0 }}>
           {cover ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -1090,14 +1158,43 @@ function SpaceCard({
             </div>
           )}
 
-          {/* Favorito — único overlay */}
+          {/* Gradiente inferior para legibilidad del precio */}
+          <div className="absolute inset-0 pointer-events-none"
+            style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.1) 45%, transparent 70%)' }} />
+
+          {/* Precio + tipo — bottom left sobre la foto */}
+          <div className="absolute bottom-3 left-3 z-10">
+            {priceInfo?.amount ? (
+              <div>
+                <p className="text-white font-bold leading-tight" style={{ fontSize: 15, letterSpacing: '-0.02em', textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}>
+                  {priceInfo.amount}
+                </p>
+                <p className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.72)' }}>
+                  {priceInfo.type.toLowerCase()}
+                </p>
+              </div>
+            ) : (
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full"
+                style={{ background: 'rgba(255,255,255,0.18)', color: '#fff', backdropFilter: 'blur(6px)' }}>
+                Cotizar precio
+              </span>
+            )}
+          </div>
+
+          {/* Capacidad — bottom right */}
+          <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold"
+            style={{ background: 'rgba(0,0,0,0.45)', color: '#fff', backdropFilter: 'blur(6px)' }}>
+            <Users size={10} /> hasta {space.capacity_max}
+          </div>
+
+          {/* Favorito — top right */}
           <div className="absolute top-3 right-3 z-10">
             <FavoriteButton spaceId={space.id} size="sm" />
           </div>
 
-          {/* Badge disponibilidad cuando hay filtro de fecha */}
+          {/* Badge disponibilidad */}
           {isAvailable !== undefined && (
-            <span className="absolute top-3 left-3 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
+            <span className="absolute top-3 left-3 z-10 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
               style={{ background: isAvailable ? 'rgba(53,196,147,0.92)' : 'rgba(220,38,38,0.85)', color: '#fff', backdropFilter: 'blur(8px)' }}>
               {isAvailable ? <Check size={9} /> : <X size={9} />}
               {isAvailable ? 'Disponible' : 'No disponible'}
@@ -1105,12 +1202,12 @@ function SpaceCard({
           )}
         </div>
 
-        {/* ── Info completa abajo ── */}
-        <div className="p-4 flex flex-col gap-2.5">
+        {/* ── Info abajo ── */}
+        <div className="p-3.5 flex flex-col gap-2">
 
           {/* Nombre + ubicación */}
           <div>
-            <h3 className="font-semibold text-sm leading-snug mb-1"
+            <h3 className="font-semibold text-sm leading-snug mb-0.5"
               style={{ color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
               {space.name}
             </h3>
@@ -1120,40 +1217,20 @@ function SpaceCard({
             </div>
           </div>
 
-          {/* Precio + capacidad */}
-          <div className="flex items-end justify-between gap-2">
-            {/* Precio */}
-            <div>
-              {priceInfo?.amount ? (
-                <>
-                  <p className="text-base font-bold leading-tight" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-                    {priceInfo.amount}
-                  </p>
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                    {priceInfo.type.toLowerCase()}
-                  </p>
-                </>
-              ) : (
-                <p className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>
-                  Cotizar precio
-                </p>
+          {/* Footer: tipo de precio (color) + verificado + flecha */}
+          <div className="flex items-center justify-between gap-2 pt-0.5">
+            <div className="flex items-center gap-1.5 min-w-0">
+              {/* Badge tipo de precio — con color */}
+              {pricingDef?.value && (
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-md shrink-0 whitespace-nowrap"
+                  style={{ background: pricingDef.bg, color: pricingDef.text, border: `1px solid ${pricingDef.border}` }}>
+                  {pricingDef.label}
+                </span>
               )}
-            </div>
-            {/* Capacidad */}
-            <div className="flex items-center gap-1 shrink-0 pb-0.5">
-              <Users size={12} style={{ color: 'var(--text-muted)' }} />
-              <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
-                hasta {space.capacity_max}
-              </span>
-            </div>
-          </div>
-
-          {/* Footer: categoría + verificado + flecha */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg"
+              {/* Categoría */}
+              <span className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md truncate"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
-                <CatIcon size={10} /> {catLabel}
+                <CatIcon size={10} className="shrink-0" /> {catLabel}
               </span>
               {space.is_verified && (
                 <span className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg"
