@@ -161,6 +161,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
 
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [mobileView, setMobileView] = useState<'list' | 'map'>('list')
+  const [sortBy, setSortBy] = useState<'relevancia' | 'precio_asc' | 'precio_desc' | 'capacidad'>('relevancia')
 
   // Sectores filtrados por búsqueda en el drawer
   const filteredSectors = SECTORS.filter(s =>
@@ -206,8 +207,22 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
       result = result.filter(s => s.space_conditions?.[0]?.allows_external_food)
     if (selectedAmenities.includes('allows_external_alcohol'))
       result = result.filter(s => s.space_conditions?.[0]?.allows_external_alcohol)
+    // Ordenar
+    if (sortBy === 'precio_asc' || sortBy === 'precio_desc') {
+      result.sort((a, b) => {
+        const getPrice = (s: any) => {
+          const p = s.space_pricing?.find((x: any) => x.is_active) ?? s.space_pricing?.[0]
+          if (!p) return 0
+          return p.hourly_price ?? p.minimum_consumption ?? p.fixed_price ?? 0
+        }
+        return sortBy === 'precio_asc' ? getPrice(a) - getPrice(b) : getPrice(b) - getPrice(a)
+      })
+    } else if (sortBy === 'capacidad') {
+      result.sort((a, b) => (b.capacity_max ?? 0) - (a.capacity_max ?? 0))
+    }
+
     return result
-  }, [spaces, q, categoria, sector, capacidad, priceMin, priceMax, selectedAmenities])
+  }, [spaces, q, categoria, sector, capacidad, priceMin, priceMax, selectedAmenities, sortBy])
 
   function applyCapacity(val: string) {
     setCapacidad(val); setCapacidadInput(val)
@@ -303,7 +318,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
             <div className="shrink-0 w-px h-5" style={{ background: 'var(--border-medium)' }} />
 
             {/* Sector compacto */}
-            <div className="flex items-center gap-1.5 rounded-2xl px-3 py-2 input-base shrink-0" style={{ width: 124 }}>
+            <div className="flex items-center gap-1.5 rounded-2xl px-3 py-2 input-base shrink-0" style={{ width: 168 }}>
               <MapPin size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
               <input
                 value={sector} onChange={e => { setSector(e.target.value); setSectorQ(e.target.value) }}
@@ -478,25 +493,46 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
       <div className="max-w-screen-2xl mx-auto px-4 md:px-6 w-full">
 
         {/* Header de resultados */}
-        <div className="flex items-center justify-between py-3 md:py-4">
-          <div>
-            <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-              {filtered.length} espacio{filtered.length !== 1 ? 's' : ''} encontrado{filtered.length !== 1 ? 's' : ''}
-            </p>
-            {(categoria) && (
-              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                {CATEGORIES.find(c => c.value === categoria)?.label}
+        <div className="py-3 md:py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 flex-wrap">
+              <p className="text-sm font-semibold shrink-0" style={{ color: 'var(--text-primary)' }}>
+                {filtered.length} espacio{filtered.length !== 1 ? 's' : ''}
               </p>
-            )}
+              {/* Chips de filtros activos — desktop */}
+              <div className="hidden md:flex items-center gap-2 flex-wrap">
+                {activeChips.map(chip => (
+                  <button key={chip.key} onClick={chip.onRemove}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+                    style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
+                    {chip.label} <X size={9} />
+                  </button>
+                ))}
+                {activeFiltersCount > 0 && (
+                  <button onClick={clearAll}
+                    className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full"
+                    style={{ color: '#DC2626', background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.12)' }}>
+                    <X size={9} /> Limpiar
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Ordenar — solo desktop */}
+            <div className="hidden md:flex items-center gap-2 shrink-0">
+              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Ordenar:</span>
+              <select
+                value={sortBy}
+                onChange={e => setSortBy(e.target.value as typeof sortBy)}
+                className="text-xs font-semibold rounded-xl px-3 py-1.5 focus:outline-none cursor-pointer"
+                style={{ background: '#fff', border: '1px solid var(--border-medium)', color: 'var(--text-primary)' }}>
+                <option value="relevancia">Relevancia</option>
+                <option value="precio_asc">Precio: menor a mayor</option>
+                <option value="precio_desc">Precio: mayor a menor</option>
+                <option value="capacidad">Mayor capacidad</option>
+              </select>
+            </div>
           </div>
-          {/* Limpiar — solo desktop */}
-          {activeFiltersCount > 0 && (
-            <button onClick={clearAll}
-              className="hidden md:flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl"
-              style={{ color: '#DC2626', background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)' }}>
-              <X size={12} /> Limpiar filtros
-            </button>
-          )}
         </div>
 
         {/* ── DESKTOP: Lista (60%) + Mapa (40%) ── */}
@@ -823,11 +859,11 @@ function SpaceCard({
         onMouseLeave={() => onHover(null)}
       >
         {/* Imagen */}
-        <div className="relative overflow-hidden" style={{ aspectRatio: '4/3', flexShrink: 0 }}>
+        <div className="relative overflow-hidden" style={{ aspectRatio: '16/10', flexShrink: 0 }}>
           {cover ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={cover} alt={space.name}
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]" />
           ) : (
             <div className="w-full h-full flex items-center justify-center"
               style={{ background: 'linear-gradient(135deg,#667eea,#764ba2)' }}>
@@ -835,7 +871,7 @@ function SpaceCard({
             </div>
           )}
 
-          {/* Favorito — esquina superior derecha */}
+          {/* Favorito */}
           <div className="absolute top-2.5 right-2.5 z-10">
             <FavoriteButton spaceId={space.id} size="sm" />
           </div>
@@ -843,10 +879,7 @@ function SpaceCard({
           {/* Badge disponibilidad o verificado */}
           {isAvailable !== undefined ? (
             <span className="absolute top-2.5 left-2.5 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
-              style={{
-                background: isAvailable ? 'rgba(53,196,147,0.92)' : 'rgba(220,38,38,0.85)',
-                color: '#fff', backdropFilter: 'blur(8px)',
-              }}>
+              style={{ background: isAvailable ? 'rgba(53,196,147,0.92)' : 'rgba(220,38,38,0.85)', color: '#fff', backdropFilter: 'blur(8px)' }}>
               {isAvailable ? <Check size={9} /> : <X size={9} />}
               {isAvailable ? 'Disponible' : 'No disponible'}
             </span>
@@ -857,14 +890,6 @@ function SpaceCard({
             </span>
           ) : null}
 
-          {/* Precio */}
-          {priceInfo && (
-            <span className="absolute bottom-2.5 left-2.5 text-xs font-bold px-3 py-1.5 rounded-full"
-              style={{ background: 'rgba(0,0,0,0.72)', color: '#fff', backdropFilter: 'blur(8px)' }}>
-              {priceInfo.label}
-            </span>
-          )}
-
           {/* Capacidad */}
           <span className="absolute bottom-2.5 right-2.5 flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-full"
             style={{ background: 'rgba(0,0,0,0.6)', color: '#fff', backdropFilter: 'blur(8px)' }}>
@@ -873,25 +898,30 @@ function SpaceCard({
         </div>
 
         {/* Info */}
-        <div className="p-3.5 flex flex-col flex-1">
-          <h3 className="font-semibold text-sm leading-snug mb-1"
-            style={{ color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
-            {space.name}
-          </h3>
-          <div className="flex items-center gap-1.5 text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
+        <div className="p-4 flex flex-col flex-1">
+          <div className="flex items-start justify-between gap-2 mb-1.5">
+            <h3 className="font-semibold text-sm leading-snug flex-1"
+              style={{ color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+              {space.name}
+            </h3>
+            {priceInfo && (
+              <span className="text-xs font-bold shrink-0" style={{ color: 'var(--brand)' }}>
+                {priceInfo.label}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
             <MapPin size={10} />
             {space.sector ? `${space.sector}, ` : ''}{space.city}
           </div>
-          <div className="mt-auto pt-2.5 flex items-center justify-between"
-            style={{ borderTop: '1px solid var(--border-subtle)' }}>
-            <div className="flex items-center gap-1.5">
-              <div className="w-5 h-5 rounded-md flex items-center justify-center"
-                style={{ background: 'var(--bg-elevated)' }}>
-                <CatIcon size={11} style={{ color: 'var(--text-muted)' }} />
-              </div>
-              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{catLabel}</span>
-            </div>
-            <ArrowRight size={14}
+          <div className="mt-auto pt-3 flex items-center justify-between"
+            style={{ borderTop: '1px solid var(--border-subtle)', marginTop: 12 }}>
+            <span className="flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-lg"
+              style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
+              <CatIcon size={10} />
+              {catLabel}
+            </span>
+            <ArrowRight size={13}
               className="transition-transform duration-200 group-hover:translate-x-0.5"
               style={{ color: 'var(--brand)' }} />
           </div>
