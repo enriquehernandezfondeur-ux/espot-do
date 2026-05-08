@@ -320,10 +320,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
         <div className="max-w-screen-2xl mx-auto px-4 md:px-6 py-3 w-full">
 
           {/* ── Desktop: 1 sola fila limpia ── */}
-          <div className="hidden md:flex items-center">
-
-              {/* Filtros centrados */}
-              <div className="flex-1 flex items-center justify-center gap-2">
+          <div className="hidden md:flex items-center gap-2">
 
               {/* Tipo de espacio */}
               <div className="relative">
@@ -385,35 +382,33 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                 </button>
                 {capOpen && (
                   <div className="absolute left-0 top-full mt-2 z-50 rounded-2xl p-4"
-                    style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', minWidth: 256 }}>
+                    style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', width: 280 }}>
                     <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
                       Mínimo de personas
                     </p>
-                    {/* Stepper */}
-                    <div className="flex items-center gap-2 mb-3">
-                      <button
-                        onClick={() => stepCapacity(-5)}
-                        className="w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0"
-                        style={{ background: 'var(--bg-elevated)', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)' }}>
-                        <Minus size={14} />
+                    {/* Stepper — igual que BookingWidget paso 2 */}
+                    <div className="flex items-stretch gap-0 rounded-2xl overflow-hidden mb-3"
+                      style={{ border: '1.5px solid var(--border-medium)' }}>
+                      <button onClick={() => stepCapacity(-10)}
+                        className="w-14 flex items-center justify-center transition-colors shrink-0"
+                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)' }}>
+                        <Minus size={18} />
                       </button>
-                      <div className="flex-1 flex items-center gap-1.5 rounded-xl px-3 py-2"
-                        style={{ background: 'var(--bg-elevated)', border: '1.5px solid var(--brand-border)' }}>
-                        <Users size={13} style={{ color: 'var(--brand)', flexShrink: 0 }} />
+                      <div className="flex-1 flex flex-col items-center justify-center py-3 border-x"
+                        style={{ borderColor: 'var(--border-medium)' }}>
                         <input
                           type="number" value={capacidadInput}
                           onChange={e => { setCapacidadInput(e.target.value); setCapacidad(e.target.value) }}
                           placeholder="0"
-                          className="w-full bg-transparent text-center text-sm font-bold focus:outline-none"
-                          style={{ color: 'var(--text-primary)', minWidth: 0 }}
+                          className="text-2xl font-bold text-center bg-transparent focus:outline-none w-20 tabular-nums"
+                          style={{ color: 'var(--text-primary)' }}
                         />
-                        <span className="text-xs shrink-0" style={{ color: 'var(--text-muted)' }}>pers.</span>
+                        <span className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>personas</span>
                       </div>
-                      <button
-                        onClick={() => stepCapacity(5)}
-                        className="w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0"
-                        style={{ background: 'var(--brand)', color: '#fff' }}>
-                        <Plus size={14} />
+                      <button onClick={() => stepCapacity(+10)}
+                        className="w-14 flex items-center justify-center transition-colors shrink-0"
+                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)' }}>
+                        <Plus size={18} />
                       </button>
                     </div>
                     {/* Quick presets */}
@@ -525,10 +520,8 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                 )}
               </div>
 
-              </div>{/* /filtros centrados */}
-
               {/* Sort + Más filtros — agrupados al final */}
-              <div className="flex items-center gap-1.5 shrink-0">
+              <div className="flex items-center gap-1.5 ml-auto">
 
                 {/* Ordenar */}
                 <div className="relative">
@@ -878,37 +871,36 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                 <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
                   Muestra espacios con esa capacidad o mayor
                 </p>
-                {/* Stepper grande */}
-                <div className="flex items-center gap-3 mb-4">
-                  <button
-                    onClick={() => stepCapacity(-5)}
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all shrink-0"
-                    style={{ background: 'var(--bg-elevated)', border: '2px solid var(--border-medium)', color: 'var(--text-primary)' }}>
+                {/* Stepper — idéntico a BookingWidget paso 2 */}
+                <div className="flex items-stretch gap-0 rounded-2xl overflow-hidden mb-3"
+                  style={{ border: '1.5px solid var(--border-medium)' }}>
+                  <button onClick={() => stepCapacity(-10)}
+                    disabled={!capacidadInput || parseInt(capacidadInput) <= 0}
+                    className="w-14 flex items-center justify-center transition-colors shrink-0 disabled:opacity-30"
+                    style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)' }}>
                     <Minus size={18} />
                   </button>
-                  <div className="flex-1 flex items-center gap-2 rounded-2xl px-4 py-3 input-base"
-                    style={{ border: '2px solid var(--brand-border)' }}>
-                    <Users size={16} style={{ color: 'var(--brand)', flexShrink: 0 }} />
+                  <div className="flex-1 flex flex-col items-center justify-center py-4 border-x"
+                    style={{ borderColor: 'var(--border-medium)' }}>
                     <input
                       type="number" value={capacidadInput}
                       onChange={e => { setCapacidadInput(e.target.value); setCapacidad(e.target.value) }}
+                      onBlur={() => { if (capacidadInput && parseInt(capacidadInput) < 0) applyCapacity('') }}
                       placeholder="0"
-                      className="flex-1 bg-transparent text-center text-lg font-bold focus:outline-none"
-                      style={{ color: 'var(--text-primary)', minWidth: 0 }}
+                      className="text-3xl font-bold text-center bg-transparent focus:outline-none w-24 tabular-nums"
+                      style={{ color: 'var(--text-primary)' }}
                     />
-                    <span className="text-xs shrink-0" style={{ color: 'var(--text-muted)' }}>pers.</span>
-                    {capacidadInput && (
-                      <button onClick={() => applyCapacity('')}>
-                        <X size={13} style={{ color: 'var(--text-muted)' }} />
-                      </button>
-                    )}
+                    <span className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>personas</span>
                   </div>
-                  <button
-                    onClick={() => stepCapacity(5)}
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all shrink-0"
-                    style={{ background: 'var(--brand)', color: '#fff', boxShadow: '0 2px 8px rgba(53,196,147,0.35)' }}>
+                  <button onClick={() => stepCapacity(+10)}
+                    className="w-14 flex items-center justify-center transition-colors shrink-0"
+                    style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)' }}>
                     <Plus size={18} />
                   </button>
+                </div>
+                <div className="flex justify-between mb-3 text-xs px-1" style={{ color: 'var(--text-muted)' }}>
+                  <span>Desde 1 persona</span>
+                  {capacidadInput && <button onClick={() => applyCapacity('')} style={{ color: '#DC2626' }}>Quitar</button>}
                 </div>
                 {/* Quick presets */}
                 <div className="grid grid-cols-4 gap-2">
