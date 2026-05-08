@@ -119,7 +119,7 @@ export default function HeroParallax({ spaceCount }: Props) {
           }}>
           Reserva salones, rooftops, restaurantes y más.
           <br className="hidden md:block" />
-          Confirmación en 24 horas, paga solo para asegurar tu fecha.
+          Confirmación en 24 horas. Paga el depósito para asegurar tu fecha.
         </p>
 
         {/* Search */}
@@ -129,8 +129,8 @@ export default function HeroParallax({ spaceCount }: Props) {
         <div className="flex items-center justify-center gap-8 md:gap-14 mt-10">
           {[
             { value: `${spaceCount}+`, label: 'espacios' },
-            { value: '24h',            label: 'respuesta' },
-            { value: '100%',           label: 'confirmados' },
+            { value: '24h',            label: 'respuesta del host' },
+            { value: 'RD$0',           label: 'costo de registro' },
           ].map((s, i) => (
             <div key={s.label} className="flex items-center">
               {i > 0 && (

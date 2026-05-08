@@ -78,8 +78,8 @@ function Reveal({ children, delay = 0, className = '', style = {} }: {
 const TICKER_ITEMS = [
   'Salones de eventos', 'Rooftops exclusivos', 'Restaurantes privados',
   'Villas de lujo', 'Terrazas con vista', 'Bares privados',
-  'Estudios creativos', 'Espacios coworking', 'Espacios verificados',
-  'Confirmación en 24h', 'Pago seguro',
+  'Estudios creativos', 'Espacios Coworking', 'Punta Cana',
+  'Santo Domingo', 'Santiago', 'Cap Cana',
 ]
 
 function Ticker() {
@@ -107,7 +107,6 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
   const spSection  = useReveal()
   const catSection = useReveal()
   const howSection = useReveal()
-  const ctaSection = useReveal()
 
   return (
     <div style={{ background: '#fff' }}>
@@ -376,7 +375,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
             {[
               { num: '01', icon: Search,     title: 'Busca tu espacio',     desc: 'Filtra por sector, tipo y capacidad. Todos los espacios son verificados por nuestro equipo antes de publicarse.' },
               { num: '02', icon: Clock,      title: 'Elige fecha y horario', desc: 'Selecciona el día, horario y adicionales. El propietario confirma en menos de 24 horas.' },
-              { num: '03', icon: CreditCard, title: 'Confirma y paga',       desc: 'Pago seguro con Azul Payments. El precio que ves es el precio que pagas — sin cargos ocultos.' },
+              { num: '03', icon: CreditCard, title: 'Paga y asegura tu fecha', desc: 'Una vez aceptada, paga el depósito de forma segura con Azul Payments. El precio que ves es el que pagas.' },
             ].map((step, i) => {
               const Icon = step.icon
               return (
@@ -456,10 +455,10 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                     style={{ background: '#35C493', color: '#060D09', boxShadow: '0 4px 24px rgba(53,196,147,0.3)' }}>
                     Publicar espacio gratis <ArrowRight size={15} />
                   </Link>
-                  <Link href="/buscar"
+                  <Link href="/auth?mode=login"
                     className="inline-flex items-center justify-center gap-2 font-medium px-8 py-4 rounded-2xl text-sm whitespace-nowrap"
                     style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    Explorar espacios
+                    Ya tengo cuenta
                   </Link>
                 </div>
               </div>
