@@ -3,87 +3,238 @@
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { CheckCircle, Calendar, ArrowRight, Home } from 'lucide-react'
+import { CheckCircle, Calendar, MapPin, ArrowRight, Home, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 
 function ExitoContent() {
   const sp        = useSearchParams()
+  const router    = useRouter()
   const bookingId = sp.get('b')
-  const [booking, setBooking] = useState<any>(null)
+
+  // Parámetros que Azul envía al redirigir al ApprovedUrl
+  const orderNumber       = sp.get('OrderNumber') ?? sp.get('ordernumber') ?? ''
+  const amount            = sp.get('Amount') ?? ''
+  const itbis             = sp.get('ITBIS') ?? '0'
+  const responseMessage   = sp.get('ResponseMessage') ?? ''
+  const isoCode           = sp.get('IsoCode') ?? ''
+  const authorizationCode = sp.get('AuthorizationCode') ?? ''
+  const dateTime          = sp.get('DateTime') ?? ''
+  const azulOrderId       = sp.get('AzulOrderId') ?? ''
+  const authHash          = sp.get('AuthHash') ?? ''
+
+  const [booking,   setBooking]  = useState<any>(null)
+  const [confirmed, setConfirmed] = useState(false)
+  const [verifying, setVerifying] = useState(false)
+  const [visible,   setVisible]  = useState(false)
 
   useEffect(() => {
-    if (!bookingId) return
-    const supabase = createClient()
-    supabase.from('bookings')
-      .select('*, spaces!space_id(name, address, city), profiles!guest_id(full_name)')
-      .eq('id', bookingId)
-      .single()
-      .then(({ data }) => setBooking(data))
+    if (!bookingId) { router.push('/'); return }
+
+    async function loadAndConfirm() {
+      const supabase = createClient()
+
+      // Cargar datos de la reserva
+      const { data } = await supabase
+        .from('bookings')
+        .select('*, spaces!space_id(name, address, city, sector), profiles!guest_id(full_name, email)')
+        .eq('id', bookingId)
+        .single()
+
+      setBooking(data)
+
+      // Si ya estaba confirmada (recarga de página), no llamar confirm otra vez
+      if (data?.payment_status === 'advance') {
+        setConfirmed(true)
+        setTimeout(() => setVisible(true), 80)
+        return
+      }
+
+      // Si Azul envió params de respuesta, verificar y confirmar
+      if (isoCode === '00' && authHash) {
+        setVerifying(true)
+        try {
+          const res = await fetch('/api/payments/confirm', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              bookingId,
+              OrderNumber:       orderNumber,
+              Amount:            amount,
+              ITBIS:             itbis,
+              ResponseMessage:   responseMessage,
+              IsoCode:           isoCode,
+              AuthorizationCode: authorizationCode,
+              DateTime:          dateTime,
+              AzulOrderId:       azulOrderId,
+              AuthHash:          authHash,
+            }),
+          })
+          const result = await res.json()
+          if (result.success) {
+            setConfirmed(true)
+            // Recargar booking para mostrar datos actualizados
+            const { data: updated } = await supabase
+              .from('bookings')
+              .select('*, spaces!space_id(name, address, city, sector), profiles!guest_id(full_name, email)')
+              .eq('id', bookingId)
+              .single()
+            if (updated) setBooking(updated)
+          } else {
+            // Fallo en verificación — redirigir a fallido
+            router.push(`/pago/fallido?b=${bookingId}&r=${encodeURIComponent(result.error ?? 'Error al verificar el pago')}`)
+            return
+          }
+        } catch {
+          router.push(`/pago/fallido?b=${bookingId}&r=${encodeURIComponent('Error de conexión al confirmar el pago')}`)
+          return
+        } finally {
+          setVerifying(false)
+        }
+      } else if (!authHash) {
+        // Llegó directo sin params de Azul (link manual/reload) — solo mostrar si ya está pagado
+        setConfirmed(data?.payment_status === 'advance')
+      } else {
+        // IsoCode no es "00" — redirigir a fallido
+        router.push(`/pago/fallido?b=${bookingId}&code=${encodeURIComponent(isoCode)}&r=${encodeURIComponent(responseMessage || 'Pago no aprobado')}`)
+        return
+      }
+
+      setTimeout(() => setVisible(true), 80)
+    }
+
+    loadAndConfirm()
   }, [bookingId])
 
-  const space = booking?.spaces as any
+  if (verifying) return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4"
+      style={{ background: 'linear-gradient(160deg, #071814 0%, #0B0F0E 55%)' }}>
+      <Loader2 size={32} className="animate-spin" style={{ color: '#35C493' }} />
+      <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>Verificando pago con Azul...</p>
+    </div>
+  )
+
+  const space     = booking?.spaces as any
+  const fee       = Number(booking?.platform_fee ?? 0)
+  const total     = Number(booking?.total_amount ?? 0)
+  const remaining = total - fee
+  const txId      = booking?.azul_order_id ?? azulOrderId ?? booking?.id?.slice(0, 8).toUpperCase()
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: 'linear-gradient(145deg, #071410 0%, #0B0F0E 60%)' }}>
-      <div className="w-full max-w-md text-center">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(160deg, #071814 0%, #0B0F0E 55%)' }}>
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: 0, height: 320,
+        background: 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(53,196,147,0.14) 0%, transparent 70%)',
+        pointerEvents: 'none',
+      }} />
 
-        {/* Success animation */}
-        <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
-          style={{ background: 'rgba(53,196,147,0.15)', border: '2px solid rgba(53,196,147,0.3)' }}>
-          <CheckCircle size={40} style={{ color: '#35C493' }} />
+      <div className="relative max-w-lg mx-auto px-4 py-12 md:py-20">
+
+        <div className="text-center mb-8"
+          style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.5s ease' }}>
+          <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6"
+            style={{
+              background: 'radial-gradient(circle, rgba(53,196,147,0.2) 0%, rgba(53,196,147,0.06) 70%)',
+              border: '2px solid rgba(53,196,147,0.35)',
+              boxShadow: '0 0 40px rgba(53,196,147,0.15)',
+            }}>
+            <CheckCircle size={44} style={{ color: '#35C493' }} />
+          </div>
+          <h1 className="text-3xl font-bold text-white mb-2" style={{ letterSpacing: '-0.03em' }}>
+            ¡Pago exitoso!
+          </h1>
+          <p className="text-base" style={{ color: 'rgba(255,255,255,0.5)' }}>
+            Tu reserva está confirmada. Revisa tu email.
+          </p>
         </div>
 
-        <h1 className="text-3xl font-bold text-white mb-2" style={{ letterSpacing: '-0.02em' }}>
-          ¡Pago exitoso!
-        </h1>
-        <p className="text-base mb-8" style={{ color: 'rgba(255,255,255,0.5)' }}>
-          Tu reserva está confirmada. Te enviamos los detalles por email.
-        </p>
-
         {booking && (
-          <div className="rounded-2xl p-6 mb-8 text-left"
-            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <div className="text-sm font-bold text-white mb-4">{space?.name}</div>
-            <div className="space-y-2.5 text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              <div className="flex items-center gap-2">
-                <Calendar size={14} style={{ color: '#35C493' }} />
-                {formatDate(booking.event_date)} · {formatTime(booking.start_time)} – {formatTime(booking.end_time)}
+          <div className="rounded-3xl overflow-hidden mb-6"
+            style={{
+              background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)',
+              opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(20px)',
+              transition: 'all 0.55s ease 0.1s',
+            }}>
+            <div className="px-6 py-5 flex items-center justify-between"
+              style={{ background: 'rgba(53,196,147,0.1)', borderBottom: '1px solid rgba(53,196,147,0.15)' }}>
+              <div>
+                <p className="text-xs font-semibold mb-0.5" style={{ color: '#35C493' }}>RESERVA CONFIRMADA</p>
+                <p className="text-white font-bold">{space?.name}</p>
               </div>
-              <div className="flex items-center gap-2">
-                <span style={{ color: '#35C493' }}>💰</span>
-                Depósito pagado (10%): <span className="text-white font-bold">{formatCurrency(Number(booking.platform_fee))}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span style={{ color: 'rgba(255,255,255,0.4)' }}>📋</span>
-                <span style={{ color: 'rgba(255,255,255,0.5)' }}>Resta pagar en el espacio: {formatCurrency(Number(booking.total_amount) - Number(booking.platform_fee))}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span style={{ color: '#35C493' }}>🆔</span>
-                ID: <span className="text-white font-mono text-xs">{booking.azul_order_id ?? booking.id?.slice(0, 8).toUpperCase()}</span>
+              <div className="text-right">
+                <p className="text-xs mb-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>ID Transacción</p>
+                <p className="font-mono text-xs font-bold" style={{ color: '#35C493' }}>{txId}</p>
               </div>
             </div>
+
+            <div className="px-6 py-5 space-y-3">
+              <div className="flex items-center gap-2.5 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                <MapPin size={14} style={{ color: '#35C493', flexShrink: 0 }} />
+                {[space?.sector, space?.city].filter(Boolean).join(', ')}
+              </div>
+              <div className="flex items-center gap-2.5 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                <Calendar size={14} style={{ color: '#35C493', flexShrink: 0 }} />
+                {formatDate(booking.event_date)} · {formatTime(booking.start_time)} – {formatTime(booking.end_time)}
+              </div>
+            </div>
+
+            <div style={{ margin: '0 24px', borderTop: '1px dashed rgba(255,255,255,0.1)' }} />
+
+            <div className="px-6 py-5 space-y-3">
+              <div className="flex justify-between text-sm">
+                <span style={{ color: 'rgba(255,255,255,0.5)' }}>Depósito pagado hoy</span>
+                <span className="font-bold text-white">{formatCurrency(fee)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span style={{ color: 'rgba(255,255,255,0.5)' }}>Resta pagar en el espacio</span>
+                <span style={{ color: 'rgba(255,255,255,0.5)' }}>{formatCurrency(remaining)}</span>
+              </div>
+              <div className="flex justify-between text-sm pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+                <span style={{ color: 'rgba(255,255,255,0.5)' }}>Total del evento</span>
+                <span className="font-semibold text-white">{formatCurrency(total)}</span>
+              </div>
+            </div>
+
+            {(booking.azul_auth_code || authorizationCode) && (
+              <div className="px-6 pb-5">
+                <div className="rounded-xl px-4 py-3 flex items-center justify-between"
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Código de autorización</span>
+                  <span className="font-mono text-xs font-bold" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                    {booking.azul_auth_code ?? authorizationCode}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
-        <div className="space-y-3">
+        <div className="space-y-3"
+          style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.2s' }}>
           <Link href="/dashboard/reservas"
-            className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-bold text-sm"
-            style={{ background: '#35C493', color: '#0B0F0E' }}>
-            <Calendar size={16} /> Ver mis reservas <ArrowRight size={14} />
+            className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-bold text-base"
+            style={{ background: '#35C493', color: '#071814', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
+            <Calendar size={17} /> Ver mis reservas <ArrowRight size={15} />
           </Link>
           <Link href="/"
             className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-semibold text-sm"
-            style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <Home size={15} /> Ir al inicio
+            style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.65)', border: '1px solid rgba(255,255,255,0.09)' }}>
+            <Home size={15} /> Explorar más espacios
           </Link>
         </div>
+
+        <p className="text-center text-xs mt-8" style={{ color: 'rgba(255,255,255,0.2)' }}>
+          EspotHub · Procesado por <span style={{ color: '#0057A8', fontWeight: 700 }}>azul</span> payments
+        </p>
       </div>
     </div>
   )
 }
 
 export default function ExitoPage() {
-  return <Suspense fallback={null}><ExitoContent /></Suspense>
+  return <Suspense fallback={
+    <div className="min-h-screen flex items-center justify-center" style={{ background: '#0B0F0E' }}>
+      <Loader2 size={28} className="animate-spin" style={{ color: '#35C493' }} />
+    </div>
+  }><ExitoContent /></Suspense>
 }

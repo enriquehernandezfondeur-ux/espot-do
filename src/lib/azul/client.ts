@@ -1,119 +1,130 @@
-// ── Cliente Azul Payments (República Dominicana) ──────────
-// Documentación: https://developers.azul.com.do
+// ── Azul PaymentPage — República Dominicana ───────────────
+// Modelo: página de pago alojada por Azul (no API directa).
+// Azul recoge los datos de tarjeta en su dominio. Nosotros
+// solo generamos la firma HMAC-SHA512 y redirigimos al usuario.
 
-const AZUL_PROD_URL = 'https://pagos.azul.com.do/webservices/JSON/Default.aspx'
-const AZUL_TEST_URL = 'https://pruebas.azul.com.do/webservices/JSON/Default.aspx'
+import { createHmac } from 'crypto'
 
-const IS_PROD     = process.env.NODE_ENV === 'production'
-const AZUL_URL    = IS_PROD ? AZUL_PROD_URL : AZUL_TEST_URL
-const STORE       = process.env.AZUL_MERCHANT_ID ?? ''
-const AUTH1       = process.env.AZUL_AUTH1 ?? ''
-const AUTH2       = process.env.AZUL_AUTH2 ?? ''
-const CHANNEL     = 'EC'
+const MERCHANT_ID   = process.env.AZUL_MERCHANT_ID   ?? ''
+const MERCHANT_NAME = process.env.AZUL_MERCHANT_NAME ?? 'ESPOT, S.R.L.'
+const MERCHANT_TYPE = 'Marketplace'
+const PRIVATE_KEY   = process.env.AZUL_PRIVATE_KEY   ?? ''
+const SITE          = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
 
-export interface AzulSalePayload {
-  cardNumber:   string   // sin espacios ni guiones
-  expiration:   string   // YYYYMM
-  cvv:          string
-  amount:       number   // en pesos (ej: 1500.00)
-  itbis?:       number   // ITBIS/ITBIS (ej: 270.00)
-  customOrderId: string  // tu ID único de orden
-  orderDesc?:   string
+// En desarrollo usa el sandbox de Azul; en producción usa la URL real
+const IS_PROD = process.env.NODE_ENV === 'production'
+const PAGE_URL = IS_PROD
+  ? (process.env.AZUL_PAYMENT_PAGE_URL ?? 'https://pagos.azul.com.do/PaymentPage/Default.aspx')
+  : 'https://pruebas.azul.com.do/PaymentPage/Default.aspx'
+
+// ── Construir campos firmados para PaymentPage ────────────
+export interface AzulPageParams {
+  amount:      number  // en pesos RD$ (ej: 1500.00)
+  itbis?:      number  // ITBIS — 0 por defecto
+  orderNumber: string  // ID único de orden
+  bookingId:   string  // para construir las URLs de retorno
 }
 
-export interface AzulSaleResponse {
-  success:         boolean
-  azulOrderId?:    string
-  authCode?:       string
-  responseCode?:   string
-  responseMessage?: string
-  isoCode?:        string
-  errorDescription?: string
-  rawResponse?:    Record<string, unknown>
+export interface AzulPageFields {
+  pageUrl: string
+  fields:  Record<string, string>
 }
 
-export async function azulSale(payload: AzulSalePayload): Promise<AzulSaleResponse> {
-  if (!STORE || !AUTH1 || !AUTH2) {
-    console.error('[Azul] Credenciales no configuradas')
-    return { success: false, errorDescription: 'Pasarela de pago no configurada' }
+export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
+  if (!MERCHANT_ID || !PRIVATE_KEY || !PAGE_URL) {
+    throw new Error('Azul PaymentPage no está configurada. Verifica AZUL_MERCHANT_ID, AZUL_PRIVATE_KEY y AZUL_PAYMENT_PAGE_URL en las variables de entorno.')
   }
 
-  // Azul recibe el monto en centavos como string (sin punto decimal)
-  const amountStr = String(Math.round(payload.amount * 100))
-  const itbisStr  = String(Math.round((payload.itbis ?? 0) * 100))
+  const amountStr = String(Math.round(params.amount * 100))
+  const itbisStr  = String(Math.round((params.itbis ?? 0) * 100))
 
-  const body = {
-    Channel:             CHANNEL,
-    Store:               STORE,
-    CardNumber:          payload.cardNumber.replace(/\s/g, ''),
-    Expiration:          payload.expiration,      // YYYYMM
-    CVC:                 payload.cvv,
-    PosInputMode:        'E-Commerce',
-    TrxType:             'Sale',
-    Amount:              amountStr,
-    Itbis:               itbisStr,
-    CurrencyPosCode:     '$',
-    Payments:            '1',
-    Plan:                '0',
-    AcquirerRefData:     '1',
-    CustomerServicePhone:'8095550000',
-    ECommerceUrl:        process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com',
-    CustomOrderId:       payload.customOrderId,
-    OrderNumber:         payload.customOrderId,
-    SaveToDataVault:     '0',
-    DataVaultToken:      null,
-    ForceNo3DS:          '0',
-  }
+  const approvedUrl = `${SITE}/pago/exitoso?b=${params.bookingId}`
+  const declinedUrl = `${SITE}/pago/fallido?b=${params.bookingId}`
+  const cancelUrl   = `${SITE}/pago/cancelado?b=${params.bookingId}`
 
-  try {
-    const res = await fetch(AZUL_URL, {
-      method:  'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Auth1':        AUTH1,
-        'Auth2':        AUTH2,
-        'MerchantType': 'E-Commerce',
-      },
-      body: JSON.stringify(body),
-    })
+  // Campos concatenados para HMAC — orden exacto requerido por Azul PaymentPage
+  const hashInput = [
+    MERCHANT_ID,
+    MERCHANT_NAME,
+    MERCHANT_TYPE,
+    '$',
+    params.orderNumber,
+    amountStr,
+    itbisStr,
+    approvedUrl,
+    declinedUrl,
+    cancelUrl,
+  ].join('')
 
-    if (!res.ok) {
-      const text = await res.text()
-      console.error('[Azul] HTTP error', res.status, text)
-      return { success: false, errorDescription: `Error HTTP ${res.status}` }
-    }
+  const authHash = createHmac('sha512', PRIVATE_KEY)
+    .update(hashInput)
+    .digest('hex')
+    .toUpperCase()
 
-    const data = await res.json() as Record<string, string>
-
-    // IsoCode "00" = aprobada
-    const success = data.IsoCode === '00'
-
-    return {
-      success,
-      azulOrderId:      data.AzulOrderId,
-      authCode:         data.AuthorizationCode,
-      responseCode:     data.ResponseCode,
-      responseMessage:  data.ResponseMessage,
-      isoCode:          data.IsoCode,
-      errorDescription: data.ErrorDescription || (!success ? data.ResponseMessage : undefined),
-      rawResponse:      data,
-    }
-  } catch (err) {
-    console.error('[Azul] Fetch error', err)
-    return { success: false, errorDescription: 'Error de conexión con la pasarela de pago' }
+  return {
+    pageUrl: PAGE_URL,
+    fields: {
+      MerchantId:   MERCHANT_ID,
+      MerchantName: MERCHANT_NAME,
+      MerchantType: MERCHANT_TYPE,
+      CurrencyCode: '$',
+      OrderNumber:  params.orderNumber,
+      Amount:       amountStr,
+      ITBIS:        itbisStr,
+      ApprovedUrl:  approvedUrl,
+      DeclinedUrl:  declinedUrl,
+      CancelUrl:    cancelUrl,
+      AuthHash:     authHash,
+    },
   }
 }
 
-// Formatea número de tarjeta para mostrar (agrega espacios cada 4 dígitos)
+// ── Verificar hash de respuesta de Azul ──────────────────
+// Azul envía estos params al regresar al ApprovedUrl.
+// Debemos verificar el hash antes de confirmar la reserva.
+export interface AzulResponseParams {
+  OrderNumber:       string
+  Amount:            string
+  ITBIS:             string
+  ResponseMessage:   string
+  IsoCode:           string
+  AuthorizationCode: string
+  DateTime:          string
+  AzulOrderId:       string
+  AuthHash:          string
+}
+
+export function verifyResponseHash(p: AzulResponseParams): boolean {
+  if (!PRIVATE_KEY) return false
+
+  const input = [
+    p.OrderNumber,
+    p.Amount,
+    p.ITBIS,
+    p.ResponseMessage,
+    p.IsoCode,
+    p.AuthorizationCode,
+    p.DateTime,
+    p.AzulOrderId,
+  ].join('')
+
+  const expected = createHmac('sha512', PRIVATE_KEY)
+    .update(input)
+    .digest('hex')
+    .toUpperCase()
+
+  return expected === (p.AuthHash ?? '').toUpperCase()
+}
+
+// ── Utilidades de formato de tarjeta (para display) ──────
 export function formatCard(value: string): string {
   return value.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim()
 }
 
-// Detecta la marca de la tarjeta por el número
 export function detectBrand(num: string): 'visa' | 'mastercard' | 'amex' | 'unknown' {
   const n = num.replace(/\D/g, '')
-  if (n.startsWith('4'))                    return 'visa'
+  if (n.startsWith('4'))                       return 'visa'
   if (/^5[1-5]/.test(n) || /^2[2-7]/.test(n)) return 'mastercard'
-  if (/^3[47]/.test(n))                    return 'amex'
+  if (/^3[47]/.test(n))                        return 'amex'
   return 'unknown'
 }

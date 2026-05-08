@@ -7,7 +7,7 @@ import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { createBookingEvent, deleteBookingEvent } from '@/lib/google-calendar'
 export type { BookingStatus } from '@/lib/bookingConfig'
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
 
 // ── CREAR RESERVA CON VALIDACIÓN ANTI-DOBLE ───────────────
 export interface CreateBookingPayload {
@@ -602,7 +602,7 @@ function emailTemplate({ title, subtitle, color, emoji, body, cta }: {
     </div>
 
     <p style="color:#9CA3AF;font-size:11px;text-align:center;margin-top:20px;">
-      © 2026 espot.do · República Dominicana
+      © 2026 EspotHub · República Dominicana
     </p>
   </div>
 </body></html>`

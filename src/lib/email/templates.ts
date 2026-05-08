@@ -41,7 +41,7 @@ export function bookingConfirmationGuest(data: BookingEmailData): string {
         <div style="width:36px;height:36px;background:linear-gradient(135deg,#7c3aed,#6d28d9);border-radius:10px;display:inline-flex;align-items:center;justify-content:center;">
           <span style="color:white;font-weight:bold;font-size:18px;">E</span>
         </div>
-        <span style="color:white;font-size:22px;font-weight:bold;">espot<span style="color:#a78bfa;font-weight:300;">.do</span></span>
+        <span style="color:white;font-size:22px;font-weight:bold;">Espot<span style="color:#35C493;font-weight:300;">Hub</span></span>
       </div>
     </div>
 
@@ -111,7 +111,7 @@ export function bookingConfirmationGuest(data: BookingEmailData): string {
           <ul style="color:#c4b5fd;font-size:13px;margin:0;padding:0 0 0 16px;line-height:1.8;">
             <li>El propietario tiene 24 horas para confirmar tu reserva</li>
             <li>Recibirás un email de confirmación cuando sea aprobada</li>
-            <li>Puedes contactar al propietario por mensajes en espot.do</li>
+            <li>Puedes contactar al propietario por mensajes en EspotHub</li>
           </ul>
         </div>
 
@@ -122,7 +122,7 @@ export function bookingConfirmationGuest(data: BookingEmailData): string {
     </div>
 
     <p style="color:#334155;font-size:12px;text-align:center;margin-top:24px;">
-      © 2026 espot.do · República Dominicana
+      © 2026 EspotHub · República Dominicana
     </p>
   </div>
 </body>
@@ -146,7 +146,7 @@ export function newBookingHost(data: BookingEmailData): string {
         <div style="width:36px;height:36px;background:linear-gradient(135deg,#7c3aed,#6d28d9);border-radius:10px;display:inline-flex;align-items:center;justify-content:center;">
           <span style="color:white;font-weight:bold;font-size:18px;">E</span>
         </div>
-        <span style="color:white;font-size:22px;font-weight:bold;">espot<span style="color:#a78bfa;font-weight:300;">.do</span></span>
+        <span style="color:white;font-size:22px;font-weight:bold;">Espot<span style="color:#35C493;font-weight:300;">Hub</span></span>
       </div>
     </div>
 
@@ -215,7 +215,7 @@ export function newBookingHost(data: BookingEmailData): string {
 
         <!-- CTA -->
         <div style="text-align:center;">
-          <a href="https://espot.do/dashboard/reservas" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;font-size:15px;font-weight:bold;padding:14px 32px;border-radius:12px;text-decoration:none;">
+          <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'}/dashboard/reservas" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;font-size:15px;font-weight:bold;padding:14px 32px;border-radius:12px;text-decoration:none;">
             Ver reserva en el panel →
           </a>
           <p style="color:#475569;font-size:12px;margin-top:16px;">
@@ -226,7 +226,7 @@ export function newBookingHost(data: BookingEmailData): string {
     </div>
 
     <p style="color:#334155;font-size:12px;text-align:center;margin-top:24px;">
-      © 2026 espot.do · República Dominicana
+      © 2026 EspotHub · República Dominicana
     </p>
   </div>
 </body>
