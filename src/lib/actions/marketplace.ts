@@ -269,7 +269,7 @@ export async function getSimilarSpaces(
 
 export async function getSpaceBySlug(slug: string) {
   const supabase = await createClient()
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('spaces')
     .select(`
       *,
@@ -284,5 +284,9 @@ export async function getSpaceBySlug(slug: string) {
     .eq('slug', slug)
     .eq('is_published', true)
     .single()
+  if (error && error.code !== 'PGRST116') {
+    // PGRST116 = "no rows found" (esperado para slugs inexistentes)
+    console.error('[getSpaceBySlug] DB error:', error.message)
+  }
   return data
 }

@@ -195,6 +195,9 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   // ── Validación de horas ────────────────────────────────
   const hoursError = useMemo((): string | null => {
     if (!effectiveStartTime || !realEndTime || selectedHours === 0) return null
+    // Mínimo absoluto: 30 minutos (medio slot) — evita reservas de 5 o 15 min por selección manual
+    if (selectedHours > 0 && selectedHours < 0.5)
+      return 'La reserva mínima es de 30 minutos'
     if (minHours && selectedHours < minHours)
       return `Este Espot requiere mínimo ${minHours} hora${minHours > 1 ? 's' : ''} de reserva`
     if (maxHours && selectedHours > maxHours)

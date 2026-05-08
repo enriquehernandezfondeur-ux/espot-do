@@ -256,7 +256,7 @@ export async function acceptBooking(bookingId: string) {
         color: '#16A34A',
         emoji: '🎉',
         body: `
-          <p>Hola <strong>${guest.full_name}</strong>,</p>
+          <p>Hola <strong>${guest?.full_name ?? 'Cliente'}</strong>,</p>
           <p>El propietario de <strong>${space?.name}</strong> aceptó tu solicitud.</p>
           ${infoBox([
             { label: 'Evento', value: bk.event_type },
@@ -321,7 +321,7 @@ export async function rejectBooking(bookingId: string, reason?: string) {
         color: '#DC2626',
         emoji: '📅',
         body: `
-          <p>Hola <strong>${guest.full_name}</strong>,</p>
+          <p>Hola <strong>${guest?.full_name ?? 'Cliente'}</strong>,</p>
           <p>Lamentablemente el propietario de <strong>${space?.name}</strong> no pudo aceptar tu solicitud para el ${formatDate(bk.event_date)}.</p>
           ${reason ? `<p>Motivo: <em>${reason}</em></p>` : ''}
           <p>Te invitamos a explorar otros espacios disponibles.</p>`,
@@ -416,7 +416,7 @@ export async function confirmPayment(bookingId: string) {
         color: '#16A34A',
         emoji: '🎊',
         body: `
-          <p>Hola <strong>${guest.full_name}</strong>,</p>
+          <p>Hola <strong>${guest?.full_name ?? 'Cliente'}</strong>,</p>
           <p>Tu reserva en <strong>${space?.name}</strong> está confirmada.</p>
           ${infoBox([
             { label: 'Evento', value: bk.event_type },
@@ -440,7 +440,7 @@ export async function confirmPayment(bookingId: string) {
         color: '#35C493',
         emoji: '💰',
         body: `
-          <p>Hola <strong>${host.full_name}</strong>,</p>
+          <p>Hola <strong>${host?.full_name ?? 'Propietario'}</strong>,</p>
           <p><strong>${guest?.full_name}</strong> confirmó y pagó su reserva en <strong>${space?.name}</strong>.</p>
           ${infoBox([
             { label: 'Cliente', value: guest?.full_name ?? '—' },

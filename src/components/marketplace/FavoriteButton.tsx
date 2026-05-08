@@ -22,18 +22,36 @@ export default function FavoriteButton({ spaceId, size = 'md', className = '' }:
   useEffect(() => {
     setMounted(true)
     const supabase = createClient()
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return
+
+    function fetchFavorite(userId: string) {
       supabase
         .from('favorites')
         .select('id')
-        .eq('guest_id', user.id)
+        .eq('guest_id', userId)
         .eq('space_id', spaceId)
         .maybeSingle()
         .then(({ data }) => {
-          if (data) { setSaved(true); setFavoriteId(data.id) }
+          setSaved(!!data)
+          setFavoriteId(data?.id ?? null)
         })
+    }
+
+    // Fetch inicial
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) fetchFavorite(user.id)
     })
+
+    // Actualizar en cambios de sesión (login / logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        fetchFavorite(session.user.id)
+      } else {
+        setSaved(false)
+        setFavoriteId(null)
+      }
+    })
+
+    return () => subscription.unsubscribe()
   }, [spaceId])
 
   async function toggle(e: React.MouseEvent) {

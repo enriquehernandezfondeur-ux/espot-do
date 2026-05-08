@@ -15,15 +15,16 @@ export function formatCurrency(amount: number): string {
 }
 
 export function formatDate(date: string | Date): string {
-  // Strings como "2026-06-15" se parsean como UTC midnight → en UTC-4 muestran el día anterior.
-  // Forzar noon local para evitar el desfase de zona horaria.
+  // "2026-06-15" sin hora se parsea como UTC midnight, lo que en UTC-4 retrocede al día anterior.
+  // Usamos UTC noon explícito (Z) para que el día sea siempre correcto en UTC-12 a UTC+11.
   const d = typeof date === 'string' && date.length === 10
-    ? new Date(date + 'T12:00:00')
+    ? new Date(date + 'T12:00:00Z')
     : new Date(date)
   return new Intl.DateTimeFormat('es-DO', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
+    timeZone: 'America/Santo_Domingo',
   }).format(d)
 }
 
