@@ -935,49 +935,31 @@ function SpaceCard({
             </div>
           </div>
 
-          {/* Precio + capacidad — la info clave */}
-          <div className="flex items-center justify-between gap-2 py-2.5 px-3 rounded-xl"
-            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-
-            {/* Precio con tipo */}
-            {priceInfo ? (
-              <div className="min-w-0">
-                <p className="text-[10px] font-semibold uppercase tracking-wide mb-0.5"
-                  style={{ color: 'var(--text-muted)' }}>
-                  {priceInfo.type}
-                </p>
-                {priceInfo.amount ? (
-                  <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+          {/* Precio + capacidad */}
+          <div className="flex items-end justify-between gap-2">
+            {/* Precio */}
+            <div>
+              {priceInfo?.amount ? (
+                <>
+                  <p className="text-base font-bold leading-tight" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
                     {priceInfo.amount}
                   </p>
-                ) : (
-                  <p className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>
-                    Cotizar precio
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                    {priceInfo.type.toLowerCase()}
                   </p>
-                )}
-              </div>
-            ) : (
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wide mb-0.5" style={{ color: 'var(--text-muted)' }}>Precio</p>
-                <p className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>Cotizar</p>
-              </div>
-            )}
-
-            {/* Separador */}
-            <div className="w-px h-8 shrink-0" style={{ background: 'var(--border-medium)' }} />
-
-            {/* Capacidad */}
-            <div className="text-right shrink-0">
-              <p className="text-[10px] font-semibold uppercase tracking-wide mb-0.5"
-                style={{ color: 'var(--text-muted)' }}>
-                Capacidad
-              </p>
-              <div className="flex items-center justify-end gap-1">
-                <Users size={11} style={{ color: 'var(--text-secondary)' }} />
-                <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                  {space.capacity_max} personas
+                </>
+              ) : (
+                <p className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>
+                  Cotizar precio
                 </p>
-              </div>
+              )}
+            </div>
+            {/* Capacidad */}
+            <div className="flex items-center gap-1 shrink-0 pb-0.5">
+              <Users size={12} style={{ color: 'var(--text-muted)' }} />
+              <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
+                hasta {space.capacity_max}
+              </span>
             </div>
           </div>
 
