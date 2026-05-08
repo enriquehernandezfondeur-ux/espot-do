@@ -10,7 +10,6 @@ interface Props {
 export default function HeroParallax({ spaceCount }: Props) {
   const videoRef   = useRef<HTMLVideoElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
-  const overlayRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let ticking = false
@@ -21,22 +20,9 @@ export default function HeroParallax({ spaceCount }: Props) {
       requestAnimationFrame(() => {
         const y = window.scrollY
 
-        // Solo el VIDEO hace parallax con transform
-        // El contenido NO usa transform para no romper position:fixed de los dropdowns
+        // Solo el VIDEO hace parallax — el contenido queda estático
         if (videoRef.current) {
           videoRef.current.style.transform = `translateY(${y * 0.45}px)`
-        }
-
-        // Contenido solo hace fade — sin transform
-        if (contentRef.current) {
-          const opacity = Math.max(0, 1 - y / 420)
-          contentRef.current.style.opacity = String(opacity)
-        }
-
-        // Overlay se oscurece levemente al scrollear
-        if (overlayRef.current) {
-          const extra = Math.min(y / 600, 0.15)
-          overlayRef.current.style.opacity = String(1 + extra)
         }
 
         ticking = false
@@ -67,7 +53,6 @@ export default function HeroParallax({ spaceCount }: Props) {
 
       {/* Overlay */}
       <div
-        ref={overlayRef}
         className="absolute inset-0 pointer-events-none"
         style={{
           background: 'linear-gradient(160deg, rgba(3,10,7,0.85) 0%, rgba(6,18,12,0.78) 50%, rgba(3,8,6,0.88) 100%)',
@@ -93,10 +78,7 @@ export default function HeroParallax({ spaceCount }: Props) {
       <div
         ref={contentRef}
         className="relative flex flex-col items-center justify-center text-center px-4 md:px-6"
-        style={{
-          height: '100%', zIndex: 2,
-          willChange: 'opacity',
-        }}>
+        style={{ height: '100%', zIndex: 2 }}>
 
         {/* Badge */}
         <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-7 text-xs font-semibold tracking-wide"
