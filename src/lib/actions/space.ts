@@ -48,6 +48,27 @@ export interface SaveSpacePayload {
   timeBlocks: { block_name: string; start_time: string; end_time: string; days: number[] }[]
   // Step 4
   addons: { name: string; price: number; unit: string; category: string }[]
+  // Step 5 — Facilidades físicas (booleanas)
+  hasParkingFac: boolean
+  hasValetParking: boolean
+  hasWifi: boolean
+  hasAc: boolean
+  hasSoundSystem: boolean
+  hasProjector: boolean
+  hasDanceFloor: boolean
+  hasOutdoorArea: boolean
+  hasPool: boolean
+  hasKitchen: boolean
+  hasBar: boolean
+  hasStage: boolean
+  hasCyclorama: boolean
+  hasNaturalLight: boolean
+  hasGenerator: boolean
+  hasDressingRoom: boolean
+  // Step 5 — Facilidades con cantidad
+  chairsCount: string
+  tablesCount: string
+  bathroomsCount: string
   // Step 5 — Permisos
   allowsDecoration: boolean
   allowsFood: boolean
@@ -174,6 +195,26 @@ export async function saveSpace(payload: SaveSpacePayload) {
       : null,
     supabase.from('space_conditions').insert({
       space_id: spaceId,
+      // Facilidades físicas
+      has_parking:       payload.hasParkingFac,
+      has_valet_parking: payload.hasValetParking,
+      has_wifi:          payload.hasWifi,
+      has_ac:            payload.hasAc,
+      has_sound_system:  payload.hasSoundSystem,
+      has_projector:     payload.hasProjector,
+      has_dance_floor:   payload.hasDanceFloor,
+      has_outdoor_area:  payload.hasOutdoorArea,
+      has_pool:          payload.hasPool,
+      has_kitchen:       payload.hasKitchen,
+      has_bar:           payload.hasBar,
+      has_stage:         payload.hasStage,
+      has_cyclorama:     payload.hasCyclorama,
+      has_natural_light: payload.hasNaturalLight,
+      has_generator:     payload.hasGenerator,
+      has_dressing_room: payload.hasDressingRoom,
+      chairs_count:    int(payload.chairsCount)    ?? 0,
+      tables_count:    int(payload.tablesCount)    ?? 0,
+      bathrooms_count: int(payload.bathroomsCount) ?? 0,
       // Permisos generales
       allows_external_decoration: payload.allowsDecoration,
       allows_external_food:       payload.allowsFood,
@@ -384,6 +425,27 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
   // Actualizar condiciones
   const condData = {
     space_id: spaceId,
+    // Facilidades físicas
+    has_parking:       payload.hasParkingFac,
+    has_valet_parking: payload.hasValetParking,
+    has_wifi:          payload.hasWifi,
+    has_ac:            payload.hasAc,
+    has_sound_system:  payload.hasSoundSystem,
+    has_projector:     payload.hasProjector,
+    has_dance_floor:   payload.hasDanceFloor,
+    has_outdoor_area:  payload.hasOutdoorArea,
+    has_pool:          payload.hasPool,
+    has_kitchen:       payload.hasKitchen,
+    has_bar:           payload.hasBar,
+    has_stage:         payload.hasStage,
+    has_cyclorama:     payload.hasCyclorama,
+    has_natural_light: payload.hasNaturalLight,
+    has_generator:     payload.hasGenerator,
+    has_dressing_room: payload.hasDressingRoom,
+    chairs_count:    int(payload.chairsCount)    ?? 0,
+    tables_count:    int(payload.tablesCount)    ?? 0,
+    bathrooms_count: int(payload.bathroomsCount) ?? 0,
+    // Permisos generales
     allows_external_decoration: payload.allowsDecoration,
     allows_external_food:       payload.allowsFood,
     allows_external_alcohol:    payload.allowsAlcohol,

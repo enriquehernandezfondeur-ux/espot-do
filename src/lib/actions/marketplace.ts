@@ -139,7 +139,14 @@ export async function getPublishedSpaces(filters?: {
       space_images(url, is_cover, position),
       space_pricing(pricing_type, hourly_price, minimum_consumption, fixed_price, package_name, is_active),
       space_addons(id, name, price, unit),
-      space_conditions(allows_external_decoration, allows_external_food, allows_external_alcohol, music_cutoff_time, cancellation_policy),
+      space_conditions(
+        allows_external_decoration, allows_external_food, allows_external_alcohol,
+        music_cutoff_time, cancellation_policy,
+        has_parking, has_valet_parking, has_wifi, has_ac, has_sound_system,
+        has_projector, has_dance_floor, has_outdoor_area, has_pool, has_kitchen,
+        has_bar, has_stage, has_cyclorama, has_natural_light, has_generator,
+        has_dressing_room, chairs_count, tables_count, bathrooms_count
+      ),
       space_payment_terms(term_type, platform_fee_pct)
     `)
     .eq('is_published', true)

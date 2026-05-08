@@ -57,21 +57,50 @@ function addonEmoji(name: string) {
 }
 
 function getFacilities(space: any) {
-  const cat = space.category
-  const base: { icon: string; label: string }[] = []
-  if (['salon','hotel','villa'].includes(cat)) base.push({ icon: '🅿️', label: 'Estacionamiento' })
-  if (['restaurante','hotel','villa','salon'].includes(cat)) base.push({ icon: '🍳', label: 'Cocina equipada' })
-  base.push({ icon: '❄️', label: 'Aire acondicionado' })
-  base.push({ icon: '📶', label: 'WiFi incluido' })
-  if (['salon','hotel','villa'].includes(cat)) base.push({ icon: '🔊', label: 'Sistema de sonido' })
-  if (['salon','hotel'].includes(cat)) base.push({ icon: '💃', label: 'Pista de baile' })
-  if (['rooftop','terraza','villa'].includes(cat)) base.push({ icon: '🌿', label: 'Área al aire libre' })
-  if (cat === 'villa') base.push({ icon: '🏊', label: 'Piscina' })
-  if (['salon','hotel'].includes(cat)) base.push({ icon: '🚻', label: 'Baños privados' })
-  if (['estudio'].includes(cat)) base.push({ icon: '🎬', label: 'Ciclorama profesional' })
-  if (['coworking'].includes(cat)) base.push({ icon: '🖨️', label: 'Impresora / scanner' })
-  base.push({ icon: '🔒', label: 'Seguridad 24/7' })
-  return base.slice(0, 8)
+  const cond = space.space_conditions?.[0]
+  const result: { icon: string; label: string }[] = []
+
+  if (cond) {
+    if (cond.has_parking)       result.push({ icon: '🅿️', label: 'Estacionamiento' })
+    if (cond.has_valet_parking) result.push({ icon: '🚗', label: 'Valet parking' })
+    if (cond.has_wifi)          result.push({ icon: '📶', label: 'WiFi incluido' })
+    if (cond.has_ac)            result.push({ icon: '❄️', label: 'Aire acondicionado' })
+    if (cond.has_kitchen)       result.push({ icon: '🍳', label: 'Cocina equipada' })
+    if (cond.has_sound_system)  result.push({ icon: '🔊', label: 'Sistema de sonido' })
+    if (cond.has_projector)     result.push({ icon: '📽️', label: 'Proyector' })
+    if (cond.has_dance_floor)   result.push({ icon: '💃', label: 'Pista de baile' })
+    if (cond.has_outdoor_area)  result.push({ icon: '🌿', label: 'Área al aire libre' })
+    if (cond.has_pool)          result.push({ icon: '🏊', label: 'Piscina' })
+    if (cond.has_bar)           result.push({ icon: '🍸', label: 'Barra de bar' })
+    if (cond.has_stage)         result.push({ icon: '🎭', label: 'Escenario' })
+    if (cond.has_cyclorama)     result.push({ icon: '🎬', label: 'Ciclorama profesional' })
+    if (cond.has_natural_light) result.push({ icon: '☀️', label: 'Luz natural' })
+    if (cond.has_generator)     result.push({ icon: '⚡', label: 'Planta eléctrica' })
+    if (cond.has_dressing_room) result.push({ icon: '👗', label: 'Camerino' })
+    if ((cond.chairs_count ?? 0) > 0)
+      result.push({ icon: '🪑', label: `${cond.chairs_count} sillas` })
+    if ((cond.tables_count ?? 0) > 0)
+      result.push({ icon: '🪞', label: `${cond.tables_count} mesas` })
+    if ((cond.bathrooms_count ?? 0) > 0)
+      result.push({ icon: '🚻', label: `${cond.bathrooms_count} baño${cond.bathrooms_count > 1 ? 's' : ''} privado${cond.bathrooms_count > 1 ? 's' : ''}` })
+  }
+
+  // Fallback por categoría si el host no ha configurado facilidades aún
+  if (result.length === 0) {
+    const cat = space.category
+    if (['salon','hotel','villa'].includes(cat))              result.push({ icon: '🅿️', label: 'Estacionamiento' })
+    if (['restaurante','hotel','villa','salon'].includes(cat)) result.push({ icon: '🍳', label: 'Cocina equipada' })
+    result.push({ icon: '❄️', label: 'Aire acondicionado' })
+    result.push({ icon: '📶', label: 'WiFi incluido' })
+    if (['salon','hotel','villa'].includes(cat))              result.push({ icon: '🔊', label: 'Sistema de sonido' })
+    if (['salon','hotel'].includes(cat))                      result.push({ icon: '💃', label: 'Pista de baile' })
+    if (['rooftop','terraza','villa'].includes(cat))          result.push({ icon: '🌿', label: 'Área al aire libre' })
+    if (cat === 'villa')                                      result.push({ icon: '🏊', label: 'Piscina' })
+    if (['salon','hotel'].includes(cat))                      result.push({ icon: '🚻', label: 'Baños privados' })
+    if (cat === 'estudio')                                    result.push({ icon: '🎬', label: 'Ciclorama profesional' })
+  }
+
+  return result.slice(0, 12)
 }
 
 const pricingTypeLabel: Record<string, string> = {

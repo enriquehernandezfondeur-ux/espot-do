@@ -172,6 +172,27 @@ export default function EspacioPage() {
   // Step 4 - Addons
   const [addons, setAddons] = useState<AddonItem[]>([])
 
+  // Step 5 — Facilidades físicas
+  const [hasParkingFac,    setHasParkingFac]    = useState(false)
+  const [hasValetParking,  setHasValetParking]  = useState(false)
+  const [hasWifi,          setHasWifi]          = useState(false)
+  const [hasAc,            setHasAc]            = useState(false)
+  const [hasSoundSystem,   setHasSoundSystem]   = useState(false)
+  const [hasProjector,     setHasProjector]     = useState(false)
+  const [hasDanceFloor,    setHasDanceFloor]    = useState(false)
+  const [hasOutdoorArea,   setHasOutdoorArea]   = useState(false)
+  const [hasPool,          setHasPool]          = useState(false)
+  const [hasKitchen,       setHasKitchen]       = useState(false)
+  const [hasBar,           setHasBar]           = useState(false)
+  const [hasStage,         setHasStage]         = useState(false)
+  const [hasCyclorama,     setHasCyclorama]     = useState(false)
+  const [hasNaturalLight,  setHasNaturalLight]  = useState(false)
+  const [hasGenerator,     setHasGenerator]     = useState(false)
+  const [hasDressingRoom,  setHasDressingRoom]  = useState(false)
+  const [chairsCount,      setChairsCount]      = useState('0')
+  const [tablesCount,      setTablesCount]      = useState('0')
+  const [bathroomsCount,   setBathroomsCount]   = useState('0')
+
   // Step 5 - Conditions
   // Permisos
   const [allowsDecoration, setAllowsDecoration]     = useState(true)
@@ -231,6 +252,10 @@ export default function EspacioPage() {
       hourlyPrice, minHours, maxHours, minConsumption, sessionHours,
       fixedPrice, packageName, packageHours, pkgExtraHourPrice, packageIncludes,
       timeBlocks, addons,
+      hasParkingFac, hasValetParking, hasWifi, hasAc, hasSoundSystem, hasProjector,
+      hasDanceFloor, hasOutdoorArea, hasPool, hasKitchen, hasBar, hasStage,
+      hasCyclorama, hasNaturalLight, hasGenerator, hasDressingRoom,
+      chairsCount, tablesCount, bathroomsCount,
       musicCutoff, noiseLevel,
       allowsDecoration, allowsFood, allowsAlcohol,
       allowsLiveMusic, allowsDJ, allowsSmoking,
@@ -325,6 +350,26 @@ export default function EspacioPage() {
     // Condiciones
     const c = space.space_conditions?.[0]
     if (c) {
+      // Facilidades físicas
+      setHasParkingFac(c.has_parking ?? false)
+      setHasValetParking(c.has_valet_parking ?? false)
+      setHasWifi(c.has_wifi ?? false)
+      setHasAc(c.has_ac ?? false)
+      setHasSoundSystem(c.has_sound_system ?? false)
+      setHasProjector(c.has_projector ?? false)
+      setHasDanceFloor(c.has_dance_floor ?? false)
+      setHasOutdoorArea(c.has_outdoor_area ?? false)
+      setHasPool(c.has_pool ?? false)
+      setHasKitchen(c.has_kitchen ?? false)
+      setHasBar(c.has_bar ?? false)
+      setHasStage(c.has_stage ?? false)
+      setHasCyclorama(c.has_cyclorama ?? false)
+      setHasNaturalLight(c.has_natural_light ?? false)
+      setHasGenerator(c.has_generator ?? false)
+      setHasDressingRoom(c.has_dressing_room ?? false)
+      setChairsCount(String(c.chairs_count ?? 0))
+      setTablesCount(String(c.tables_count ?? 0))
+      setBathroomsCount(String(c.bathrooms_count ?? 0))
       // Permisos
       setAllowsDecoration(c.allows_external_decoration ?? true)
       setAllowsFood(c.allows_external_food ?? false)
@@ -1045,6 +1090,84 @@ export default function EspacioPage() {
             <div>
               <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Reglas y condiciones</h2>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Define las reglas de tu espacio. El cliente las verá antes de reservar.</p>
+            </div>
+
+            {/* ─── 0. FACILIDADES E INSTALACIONES ─── */}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>Instalaciones y facilidades</p>
+              <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>Indica qué incluye tu espacio. Los clientes podrán filtrar por esto.</p>
+
+              {/* Grid de facilidades booleanas */}
+              <div className="grid grid-cols-2 gap-2 mb-5">
+                {([
+                  { label: 'Estacionamiento',    emoji: '🅿️', value: hasParkingFac,   setter: setHasParkingFac },
+                  { label: 'Valet parking',       emoji: '🚗', value: hasValetParking, setter: setHasValetParking },
+                  { label: 'WiFi',                emoji: '📶', value: hasWifi,         setter: setHasWifi },
+                  { label: 'Aire acondicionado',  emoji: '❄️', value: hasAc,           setter: setHasAc },
+                  { label: 'Sistema de sonido',   emoji: '🔊', value: hasSoundSystem,  setter: setHasSoundSystem },
+                  { label: 'Proyector / pantalla',emoji: '📽️', value: hasProjector,    setter: setHasProjector },
+                  { label: 'Pista de baile',      emoji: '💃', value: hasDanceFloor,   setter: setHasDanceFloor },
+                  { label: 'Área exterior',       emoji: '🌿', value: hasOutdoorArea,  setter: setHasOutdoorArea },
+                  { label: 'Piscina',             emoji: '🏊', value: hasPool,         setter: setHasPool },
+                  { label: 'Cocina equipada',     emoji: '🍳', value: hasKitchen,      setter: setHasKitchen },
+                  { label: 'Barra de bar',        emoji: '🍸', value: hasBar,          setter: setHasBar },
+                  { label: 'Escenario',           emoji: '🎭', value: hasStage,        setter: setHasStage },
+                  { label: 'Ciclorama',           emoji: '🎬', value: hasCyclorama,    setter: setHasCyclorama },
+                  { label: 'Luz natural',         emoji: '☀️', value: hasNaturalLight, setter: setHasNaturalLight },
+                  { label: 'Planta eléctrica',    emoji: '⚡', value: hasGenerator,    setter: setHasGenerator },
+                  { label: 'Camerino',            emoji: '👗', value: hasDressingRoom, setter: setHasDressingRoom },
+                ] as { label: string; emoji: string; value: boolean; setter: (v: boolean) => void }[]).map(item => (
+                  <button key={item.label}
+                    onClick={() => item.setter(!item.value)}
+                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left transition-all"
+                    style={item.value
+                      ? { background: 'var(--brand-dim)', border: '1.5px solid var(--brand-border)', color: 'var(--brand)' }
+                      : { background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }
+                    }>
+                    <span className="text-base shrink-0">{item.emoji}</span>
+                    <span className="text-xs font-medium leading-tight">{item.label}</span>
+                    {item.value && <span className="ml-auto text-xs font-bold" style={{ color: 'var(--brand)' }}>✓</span>}
+                  </button>
+                ))}
+              </div>
+
+              {/* Cantidades de mobiliario */}
+              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Mobiliario incluido (opcional)</p>
+              <div className="grid grid-cols-3 gap-3">
+                {([
+                  { label: 'Sillas',         emoji: '🪑', value: chairsCount,    setter: setChairsCount },
+                  { label: 'Mesas',          emoji: '🪞', value: tablesCount,    setter: setTablesCount },
+                  { label: 'Baños privados', emoji: '🚻', value: bathroomsCount, setter: setBathroomsCount },
+                ] as { label: string; emoji: string; value: string; setter: (v: string) => void }[]).map(item => (
+                  <div key={item.label} className="rounded-xl overflow-hidden"
+                    style={{ border: `1.5px solid ${parseInt(item.value) > 0 ? 'var(--brand-border)' : 'var(--border-medium)'}` }}>
+                    <div className="px-3 py-2 text-xs font-semibold flex items-center gap-1.5"
+                      style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
+                      <span>{item.emoji}</span>{item.label}
+                    </div>
+                    <div className="flex items-stretch">
+                      <button
+                        onClick={() => item.setter(String(Math.max(0, (parseInt(item.value) || 0) - 1)))}
+                        className="w-9 flex items-center justify-center text-lg font-bold transition-colors"
+                        style={{ background: 'var(--bg-base)', color: 'var(--text-muted)', borderRight: '1px solid var(--border-subtle)' }}>
+                        −
+                      </button>
+                      <input
+                        type="number" min="0" value={item.value}
+                        onChange={e => item.setter(e.target.value)}
+                        className="flex-1 text-center font-bold text-base bg-transparent focus:outline-none py-2 tabular-nums"
+                        style={{ color: parseInt(item.value) > 0 ? 'var(--brand)' : 'var(--text-primary)' }}
+                      />
+                      <button
+                        onClick={() => item.setter(String((parseInt(item.value) || 0) + 1))}
+                        className="w-9 flex items-center justify-center text-lg font-bold transition-colors"
+                        style={{ background: 'var(--bg-base)', color: 'var(--text-muted)', borderLeft: '1px solid var(--border-subtle)' }}>
+                        +
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* ─── 1. PERMISOS GENERALES ─── */}

@@ -9,6 +9,7 @@ import {
   Check, Building2, UtensilsCrossed, ChevronDown,
   Sunset, Wine, Trees, Camera, Briefcase, Home, Hotel,
   Car, Volume2, Music2, Waves, Minus, Plus, Wifi,
+  Wind, Projector, Zap, ShowerHead, MonitorPlay,
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 
@@ -53,15 +54,25 @@ const AMENITIES = [
   { key: 'verified',                   label: 'Espacio verificado' },
 ]
 
-const FACILITIES: { key: string; label: string; icon: React.ElementType; categories: string[] }[] = [
-  { key: 'parking',   label: 'Parking',           icon: Car,             categories: ['salon', 'hotel', 'villa'] },
-  { key: 'cocina',    label: 'Cocina equipada',    icon: UtensilsCrossed, categories: ['restaurante', 'hotel', 'villa', 'salon'] },
-  { key: 'sonido',    label: 'Sistema de sonido',  icon: Volume2,         categories: ['salon', 'hotel', 'villa'] },
-  { key: 'pista',     label: 'Pista de baile',     icon: Music2,          categories: ['salon', 'hotel'] },
-  { key: 'exterior',  label: 'Área exterior',      icon: Trees,           categories: ['rooftop', 'terraza', 'villa'] },
-  { key: 'piscina',   label: 'Piscina',            icon: Waves,           categories: ['villa'] },
-  { key: 'wifi',      label: 'WiFi',               icon: Wifi,            categories: ['salon','restaurante','bar','rooftop','terraza','hotel','coworking','villa','estudio','otro'] },
-  { key: 'ciclorama', label: 'Ciclorama',          icon: Camera,          categories: ['estudio'] },
+const FACILITIES: { key: string; label: string; icon: React.ElementType; dbField: string; isCount?: boolean }[] = [
+  { key: 'has_parking',       label: 'Parking',            icon: Car,             dbField: 'has_parking' },
+  { key: 'has_valet_parking', label: 'Valet parking',      icon: Car,             dbField: 'has_valet_parking' },
+  { key: 'has_wifi',          label: 'WiFi',               icon: Wifi,            dbField: 'has_wifi' },
+  { key: 'has_ac',            label: 'Aire acondicionado', icon: Wind,            dbField: 'has_ac' },
+  { key: 'has_kitchen',       label: 'Cocina equipada',    icon: UtensilsCrossed, dbField: 'has_kitchen' },
+  { key: 'has_sound_system',  label: 'Sistema de sonido',  icon: Volume2,         dbField: 'has_sound_system' },
+  { key: 'has_projector',     label: 'Proyector',          icon: Projector,       dbField: 'has_projector' },
+  { key: 'has_dance_floor',   label: 'Pista de baile',     icon: Music2,          dbField: 'has_dance_floor' },
+  { key: 'has_outdoor_area',  label: 'Área exterior',      icon: Trees,           dbField: 'has_outdoor_area' },
+  { key: 'has_pool',          label: 'Piscina',            icon: Waves,           dbField: 'has_pool' },
+  { key: 'has_bar',           label: 'Barra de bar',       icon: Wine,            dbField: 'has_bar' },
+  { key: 'has_stage',         label: 'Escenario',          icon: MonitorPlay,     dbField: 'has_stage' },
+  { key: 'has_generator',     label: 'Planta eléctrica',   icon: Zap,             dbField: 'has_generator' },
+  { key: 'has_dressing_room', label: 'Camerino',           icon: ShowerHead,      dbField: 'has_dressing_room' },
+  { key: 'has_cyclorama',     label: 'Ciclorama',          icon: Camera,          dbField: 'has_cyclorama' },
+  { key: 'chairs_count',      label: 'Sillas incluidas',   icon: Users,           dbField: 'chairs_count',    isCount: true },
+  { key: 'tables_count',      label: 'Mesas incluidas',    icon: Building2,       dbField: 'tables_count',    isCount: true },
+  { key: 'bathrooms_count',   label: 'Baños privados',     icon: ShowerHead,      dbField: 'bathrooms_count', isCount: true },
 ]
 
 const SECTORS = [
@@ -227,12 +238,15 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
     if (selectedAmenities.includes('allows_external_alcohol'))
       result = result.filter(s => s.space_conditions?.[0]?.allows_external_alcohol)
     if (selectedFacilities.length > 0) {
-      result = result.filter(s =>
-        selectedFacilities.every(fk => {
+      result = result.filter(s => {
+        const cond = s.space_conditions?.[0]
+        if (!cond) return false
+        return selectedFacilities.every(fk => {
           const fac = FACILITIES.find(f => f.key === fk)
-          return fac ? fac.categories.includes(s.category) : true
+          if (!fac) return true
+          return fac.isCount ? (cond[fac.dbField] ?? 0) > 0 : cond[fac.dbField] === true
         })
-      )
+      })
     }
     // Ordenar
     if (sortBy === 'precio_asc' || sortBy === 'precio_desc') {
