@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
-  ArrowRight, Users, Search, Clock, CreditCard,
+  ArrowRight, Shield, Users, Search, Clock, CreditCard,
   MapPin, Building2, UtensilsCrossed, Sunset,
   Wine, Trees, Camera, Briefcase, Home,
 } from 'lucide-react'
