@@ -62,96 +62,79 @@ function getPriceLabel(space: any) {
 export default async function HomePage() {
   const spaces = await getPublishedSpaces()
 
-  const heroCovers = spaces.slice(0, 4).map(getCover).filter(Boolean)
-  const mosaicImgs = heroCovers.length >= 4 ? heroCovers.slice(0, 4) : HERO_FALLBACK
-
   return (
     <div style={{ background: '#fff' }}>
 
       {/* ─────────────────────────────────────────────
           HERO
           ───────────────────────────────────────── */}
-      <section className="relative overflow-hidden" style={{ minHeight: 420 }}>
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0 }}
-        >
+      <section className="relative overflow-hidden" style={{ minHeight: 480 }}>
+        <video autoPlay muted loop playsInline
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0 }}>
           <source src="/dia.mp4" type="video/mp4" />
         </video>
 
+        {/* Overlay */}
         <div className="absolute inset-0 pointer-events-none"
-          style={{ background: 'linear-gradient(155deg, rgba(10,26,20,0.72) 0%, rgba(13,35,24,0.68) 55%, rgba(10,14,13,0.72) 100%)', zIndex: 1 }} />
+          style={{ background: 'linear-gradient(155deg, rgba(4,14,10,0.82) 0%, rgba(8,22,15,0.76) 55%, rgba(4,10,8,0.82) 100%)', zIndex: 1 }} />
 
-        <div className="relative max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-10 lg:py-12" style={{ zIndex: 2 }}>
-          <div className="grid lg:grid-cols-[1fr_420px] gap-8 lg:gap-10 items-center">
+        {/* Orbes decorativos */}
+        <div style={{ position: 'absolute', top: -120, right: -120, width: 480, height: 480, borderRadius: '50%', background: 'radial-gradient(circle, rgba(53,196,147,0.07) 0%, transparent 70%)', zIndex: 1, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: -80, left: -80, width: 320, height: 320, borderRadius: '50%', background: 'radial-gradient(circle, rgba(53,196,147,0.05) 0%, transparent 70%)', zIndex: 1, pointerEvents: 'none' }} />
 
-            {/* Contenido izquierdo */}
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 mb-5 md:mb-6 text-xs font-semibold tracking-wide"
-                style={{ background: 'rgba(53,196,147,0.1)', border: '1px solid rgba(53,196,147,0.2)', color: '#6EE7C7' }}>
-                <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#35C493' }} />
-                Espacios para eventos en República Dominicana
-              </div>
+        <div className="relative max-w-4xl mx-auto px-4 md:px-6 py-16 md:py-20 lg:py-24 text-center" style={{ zIndex: 2 }}>
 
-              <h1 className="font-bold text-white mb-4"
-                style={{ fontSize: 'clamp(2rem, 6vw, 3.6rem)', lineHeight: 1.08, letterSpacing: '-0.04em' }}>
-                El espacio perfecto
-                <br />
-                <span style={{
-                  background: 'linear-gradient(95deg, #35C493 0%, #5CE8BC 100%)',
-                  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                }}>
-                  para tu evento
-                </span>
-              </h1>
-
-              <p className="mb-7 md:mb-8 max-w-md text-sm md:text-base" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.75 }}>
-                Reserva salones, rooftops, restaurantes y más — por hora o paquete, confirmación en 24&nbsp;horas.
-              </p>
-
-              <HomepageSearch />
-
-              {/* Métricas inline */}
-              <div className="flex items-center gap-5 md:gap-6 mt-6">
-                {[
-                  { value: spaces.length + '+', label: 'espacios' },
-                  { value: '24h',  label: 'respuesta' },
-                  { value: '10%',  label: 'para reservar' },
-                ].map((s, i) => (
-                  <div key={s.label} className="flex items-center gap-2.5">
-                    {i > 0 && <div className="w-px h-6 md:h-7" style={{ background: 'rgba(255,255,255,0.1)' }} />}
-                    <div>
-                      <div className="font-bold text-white" style={{ fontSize: 'clamp(1rem, 3vw, 1.25rem)', letterSpacing: '-0.03em' }}>{s.value}</div>
-                      <div className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{s.label}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Mosaico derecho — solo en lg+ */}
-            <div className="hidden lg:grid grid-cols-2 gap-3">
-              {mosaicImgs.map((src, i) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  key={i}
-                  src={src}
-                  alt=""
-                  className="w-full object-cover"
-                  style={{
-                    height: i === 0 || i === 3 ? 220 : 170,
-                    borderRadius: 16,
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-                    marginTop: i === 1 || i === 3 ? 28 : 0,
-                  }}
-                />
-              ))}
-            </div>
-
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 mb-6 text-xs font-semibold tracking-wide"
+            style={{ background: 'rgba(53,196,147,0.1)', border: '1px solid rgba(53,196,147,0.2)', color: '#6EE7C7' }}>
+            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#35C493' }} />
+            Espacios para eventos en República Dominicana
           </div>
+
+          {/* Headline */}
+          <h1 className="font-bold text-white mb-5"
+            style={{ fontSize: 'clamp(2.4rem, 7vw, 4.5rem)', lineHeight: 1.06, letterSpacing: '-0.04em' }}>
+            El espacio perfecto
+            <br />
+            <span style={{
+              background: 'linear-gradient(95deg, #35C493 0%, #5CE8BC 60%, #35C493 100%)',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+            }}>
+              para tu evento
+            </span>
+          </h1>
+
+          {/* Subtítulo */}
+          <p className="mb-8 md:mb-10 mx-auto text-sm md:text-base"
+            style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.8, maxWidth: 480 }}>
+            Reserva salones, rooftops, restaurantes y más —<br className="hidden md:block" />
+            por hora o paquete, confirmación en 24&nbsp;horas.
+          </p>
+
+          {/* Search */}
+          <div className="flex justify-center mb-10 md:mb-12">
+            <HomepageSearch />
+          </div>
+
+          {/* Métricas */}
+          <div className="flex items-center justify-center gap-8 md:gap-12">
+            {[
+              { value: spaces.length + '+', label: 'espacios disponibles' },
+              { value: '24h',               label: 'tiempo de respuesta' },
+              { value: '100%',              label: 'reservas confirmadas' },
+            ].map((s, i) => (
+              <div key={s.label} className="flex items-center gap-6 md:gap-10">
+                {i > 0 && <div className="w-px h-8" style={{ background: 'rgba(255,255,255,0.08)' }} />}
+                <div>
+                  <div className="font-bold text-white" style={{ fontSize: 'clamp(1.3rem, 3.5vw, 1.75rem)', letterSpacing: '-0.03em' }}>
+                    {s.value}
+                  </div>
+                  <div className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>{s.label}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
         </div>
       </section>
 
