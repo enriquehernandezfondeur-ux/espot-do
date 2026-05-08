@@ -197,11 +197,13 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   const [mobileView, setMobileView] = useState<'list' | 'map'>('list')
   const [sortBy, setSortBy] = useState<'relevancia' | 'precio_asc' | 'precio_desc' | 'capacidad'>('relevancia')
   const [sortOpen, setSortOpen] = useState(false)
-  const [capOpen,  setCapOpen]  = useState(false)
-  const [secOpen,  setSecOpen]  = useState(false)
-  const [catOpen,  setCatOpen]  = useState(false)
-  const capRef = useRef<HTMLDivElement>(null)
-  const secRef = useRef<HTMLDivElement>(null)
+  const [capOpen,   setCapOpen]   = useState(false)
+  const [secOpen,   setSecOpen]   = useState(false)
+  const [catOpen,   setCatOpen]   = useState(false)
+  const [priceOpen, setPriceOpen] = useState(false)
+  const capRef   = useRef<HTMLDivElement>(null)
+  const secRef   = useRef<HTMLDivElement>(null)
+  const priceRef = useRef<HTMLDivElement>(null)
 
   // Sectores filtrados por búsqueda en el drawer
   const filteredSectors = SECTORS.filter(s =>
@@ -555,6 +557,51 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                 )}
               </div>
 
+              {/* Tipo de precio */}
+              <div className="relative" ref={priceRef}>
+                {priceOpen && <div className="fixed inset-0 z-40" onClick={() => setPriceOpen(false)} />}
+                <button onClick={() => { setPriceOpen(o => !o); setCapOpen(false); setSecOpen(false) }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap"
+                  style={{
+                    background: pricingFilter ? (PRICING_TYPES.find(p => p.value === pricingFilter)?.bg ?? 'var(--brand-dim)') : '#fff',
+                    border: `1.5px solid ${pricingFilter ? (PRICING_TYPES.find(p => p.value === pricingFilter)?.border ?? 'var(--brand-border)') : 'var(--border-medium)'}`,
+                    color: pricingFilter ? (PRICING_TYPES.find(p => p.value === pricingFilter)?.text ?? 'var(--brand)') : 'var(--text-primary)',
+                  }}>
+                  <Clock size={14} style={{ flexShrink: 0 }} />
+                  <span>{pricingFilter ? PRICING_TYPES.find(p => p.value === pricingFilter)?.label : 'Precio'}</span>
+                  {pricingFilter
+                    ? <button onClick={e => { e.stopPropagation(); setPricingFilter('') }}><X size={12} /></button>
+                    : <ChevronDown size={13} style={{ opacity: 0.5 }} />
+                  }
+                </button>
+                {priceOpen && (
+                  <div className="absolute left-0 top-full mt-2 z-50 rounded-2xl overflow-hidden py-1.5"
+                    style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', minWidth: 220 }}>
+                    <p className="px-4 py-2 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                      ¿Cómo prefieres pagar?
+                    </p>
+                    {PRICING_TYPES.filter(p => p.value).map(pt => {
+                      const Icon = pt.icon
+                      const isActive = pricingFilter === pt.value
+                      return (
+                        <button key={pt.value} onClick={() => { setPricingFilter(isActive ? '' : pt.value); setPriceOpen(false) }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-all"
+                          style={{ color: isActive ? pt.text : 'var(--text-primary)', fontWeight: isActive ? 600 : 400 }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
+                          <span className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0"
+                            style={{ background: pt.bg, border: `1px solid ${pt.border}` }}>
+                            {Icon && <Icon size={12} style={{ color: pt.text }} />}
+                          </span>
+                          {pt.label}
+                          {isActive && <Check size={13} style={{ color: pt.text, marginLeft: 'auto' }} />}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+
               {/* Sort + Más filtros — agrupados al final */}
               <div className="flex items-center gap-1.5 ml-auto">
 
@@ -706,25 +753,6 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
 
       {/* ── Contenido principal ── */}
       <div className="max-w-screen-2xl mx-auto px-4 md:px-6 w-full">
-
-        {/* ── Pills tipo de precio ── */}
-        <div className="flex gap-2 pt-3 pb-1 overflow-x-auto scrollbar-hide">
-          {PRICING_TYPES.map(pt => {
-            const isActive = pricingFilter === pt.value
-            const Icon = pt.icon
-            return (
-              <button key={pt.value} onClick={() => setPricingFilter(isActive && pt.value !== '' ? '' : pt.value)}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-all"
-                style={isActive
-                  ? { background: pt.value ? pt.bg : 'var(--brand)', color: pt.value ? pt.text : '#fff', border: `1.5px solid ${pt.value ? pt.border : 'var(--brand)'}`, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }
-                  : { background: '#fff', color: 'var(--text-secondary)', border: '1.5px solid var(--border-medium)' }
-                }>
-                {Icon && <Icon size={11} />}
-                {pt.label}
-              </button>
-            )
-          })}
-        </div>
 
         {/* Header de resultados */}
         <div className="py-3 md:py-4">
