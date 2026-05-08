@@ -2,7 +2,6 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/email/send'
-import { sendWhatsApp } from '@/lib/whatsapp/send'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { createBookingEvent, deleteBookingEvent } from '@/lib/google-calendar'
 export type { BookingStatus } from '@/lib/bookingConfig'
@@ -212,11 +211,6 @@ export async function createBooking(payload: CreateBookingPayload) {
         cta: { text: 'Ver en mi panel', url: `${SITE}/dashboard/host/reservas` },
       }),
     }),
-    // WhatsApp al host
-    host?.phone && sendWhatsApp({
-      to: host.phone,
-      body: `🔔 *Nueva reserva en ${spaceName}*\n\nCliente: ${guestName}\nEvento: ${payload.eventType}\n${eventInfo}\nTotal: ${formatCurrency(payload.totalAmount)}\n\nRevisa tu panel: ${SITE}/dashboard/host/reservas`,
-    }),
   ])
 
   return { success: true, bookingId: booking.id, status: isQuote ? 'quote_requested' : 'pending' }
@@ -275,11 +269,6 @@ export async function acceptBooking(bookingId: string) {
           </p>`,
         cta: { text: 'Completar pago ahora', url: `${SITE}/pago/${bookingId}` },
       }),
-    }),
-    // WhatsApp al cliente
-    guest?.phone && sendWhatsApp({
-      to: guest.phone,
-      body: `🎉 *¡Tu reserva fue aceptada!*\n\nEspacio: ${space?.name}\nFecha: ${formatDate(bk.event_date)}\n\nCompleta el pago para confirmar tu lugar:\n${SITE}/dashboard/reservas`,
     }),
   ])
 
@@ -461,16 +450,6 @@ export async function confirmPayment(bookingId: string) {
           ])}`,
         cta: { text: 'Ver en mi panel', url: `${SITE}/dashboard/host/reservas` },
       }),
-    }),
-    // WhatsApp al cliente: confirmación
-    guest?.phone && sendWhatsApp({
-      to: guest.phone,
-      body: `🎊 *¡Reserva confirmada!*\n\nEspacio: ${space?.name}\nFecha: ${formatDate(bk.event_date)}\nHorario: ${formatTime(bk.start_time)} – ${formatTime(bk.end_time)}\nDirección: ${space?.address}, ${space?.city}\n\n💰 Resta pagar en el espacio: ${remainingAmount}\n\n¡Nos vemos pronto!`,
-    }),
-    // WhatsApp al host: pago recibido
-    host?.phone && sendWhatsApp({
-      to: host.phone,
-      body: `💰 *Pago recibido — Reserva confirmada*\n\nCliente: ${guest?.full_name}\nEspacio: ${space?.name}\nFecha: ${formatDate(bk.event_date)}\nTotal del evento: ${formatCurrency(Number(bk.total_amount))}\n\nVe los detalles: ${SITE}/dashboard/host/reservas`,
     }),
   ])
 
