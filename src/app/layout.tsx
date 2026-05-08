@@ -14,6 +14,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
+  robots: { index: false, follow: false },
   title: {
     default:  'espot.do — Espacios a tu alcance en República Dominicana',
     template: '%s | espot.do',

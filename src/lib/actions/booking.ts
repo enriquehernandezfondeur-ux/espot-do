@@ -147,12 +147,13 @@ export async function createBooking(payload: CreateBookingPayload) {
       .in('id', payload.selectedAddonIds)
 
     if (addonData?.length) {
-      await supabase.from('booking_addons').insert(
+      const { error: addonInsertError } = await supabase.from('booking_addons').insert(
         addonData.map(a => ({
           booking_id: booking.id, addon_id: a.id,
           quantity: 1, unit_price: a.price, subtotal: a.price,
         }))
       )
+      if (addonInsertError) console.error('[createBooking] addon insert failed:', addonInsertError.message)
     }
   }
 

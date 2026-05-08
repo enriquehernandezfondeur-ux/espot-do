@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildPaymentPageFields } from '@/lib/azul/client'
+import { createClient } from '@/lib/supabase/server'
 
 export const maxDuration = 30
 
 // GET /api/payments/redirect/[bookingId]?amount=1500
-// Sin llamadas a Supabase — el monto viene de la URL.
-// Genera HTML con form y auto-submit a Azul PaymentPage.
+// Verifica que la reserva pertenece al usuario autenticado antes de redirigir a Azul.
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ bookingId: string }> }
@@ -17,6 +17,23 @@ export async function GET(
     return new NextResponse(errorHtml('Monto de reserva inválido.'), {
       status: 400, headers: { 'Content-Type': 'text/html' },
     })
+  }
+
+  // Verificar que el usuario autenticado es el dueño de la reserva
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { data: booking } = await supabase
+        .from('bookings').select('guest_id').eq('id', bookingId).single()
+      if (booking && booking.guest_id !== user.id) {
+        return new NextResponse(errorHtml('No autorizado para este pago.'), {
+          status: 403, headers: { 'Content-Type': 'text/html' },
+        })
+      }
+    }
+  } catch {
+    // Si falla la verificación de auth, se continúa (no bloquear el pago por error de session)
   }
 
   const missingVars = [
