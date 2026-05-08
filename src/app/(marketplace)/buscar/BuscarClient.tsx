@@ -162,6 +162,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [mobileView, setMobileView] = useState<'list' | 'map'>('list')
   const [sortBy, setSortBy] = useState<'relevancia' | 'precio_asc' | 'precio_desc' | 'capacidad'>('relevancia')
+  const [sortOpen, setSortOpen] = useState(false)
 
   // Sectores filtrados por búsqueda en el drawer
   const filteredSectors = SECTORS.filter(s =>
@@ -518,19 +519,52 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               </div>
             </div>
 
-            {/* Ordenar — solo desktop */}
-            <div className="hidden md:flex items-center gap-2 shrink-0">
-              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Ordenar:</span>
-              <select
-                value={sortBy}
-                onChange={e => setSortBy(e.target.value as typeof sortBy)}
-                className="text-xs font-semibold rounded-xl px-3 py-1.5 focus:outline-none cursor-pointer"
-                style={{ background: '#fff', border: '1px solid var(--border-medium)', color: 'var(--text-primary)' }}>
-                <option value="relevancia">Relevancia</option>
-                <option value="precio_asc">Precio: menor a mayor</option>
-                <option value="precio_desc">Precio: mayor a menor</option>
-                <option value="capacidad">Mayor capacidad</option>
-              </select>
+            {/* Ordenar — dropdown custom desktop */}
+            <div className="hidden md:block relative shrink-0">
+              {sortOpen && <div className="fixed inset-0 z-40" onClick={() => setSortOpen(false)} />}
+              <button
+                onClick={() => setSortOpen(o => !o)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all"
+                style={{
+                  background: sortBy !== 'relevancia' ? 'var(--brand-dim)' : '#fff',
+                  border: `1px solid ${sortBy !== 'relevancia' ? 'var(--brand-border)' : 'var(--border-medium)'}`,
+                  color: sortBy !== 'relevancia' ? 'var(--brand)' : 'var(--text-primary)',
+                }}>
+                <SlidersHorizontal size={11} />
+                {sortBy === 'relevancia'   ? 'Ordenar'          :
+                 sortBy === 'precio_asc'   ? 'Precio ↑'         :
+                 sortBy === 'precio_desc'  ? 'Precio ↓'         : 'Capacidad'}
+                <ChevronRight size={11} style={{ rotate: sortOpen ? '90deg' : '0deg', transition: 'rotate 0.2s' }} />
+              </button>
+              {sortOpen && (
+                <div className="absolute right-0 top-full mt-2 z-50 rounded-2xl overflow-hidden"
+                  style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', minWidth: 200 }}>
+                  {[
+                    { value: 'relevancia',  label: 'Relevancia',           sub: 'Orden por defecto' },
+                    { value: 'precio_asc',  label: 'Precio: menor a mayor', sub: 'Más económicos primero' },
+                    { value: 'precio_desc', label: 'Precio: mayor a menor', sub: 'Más premium primero' },
+                    { value: 'capacidad',   label: 'Mayor capacidad',       sub: 'Más personas primero' },
+                  ].map(opt => (
+                    <button key={opt.value}
+                      onClick={() => { setSortBy(opt.value as typeof sortBy); setSortOpen(false) }}
+                      className="w-full flex items-center justify-between px-4 py-3 text-left transition-all"
+                      style={{
+                        background: sortBy === opt.value ? 'var(--brand-dim)' : 'transparent',
+                        borderBottom: '1px solid var(--border-subtle)',
+                      }}
+                      onMouseEnter={e => { if (sortBy !== opt.value) (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}
+                      onMouseLeave={e => { if (sortBy !== opt.value) (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
+                      <div>
+                        <p className="text-xs font-semibold" style={{ color: sortBy === opt.value ? 'var(--brand)' : 'var(--text-primary)' }}>
+                          {opt.label}
+                        </p>
+                        <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{opt.sub}</p>
+                      </div>
+                      {sortBy === opt.value && <Check size={13} style={{ color: 'var(--brand)', flexShrink: 0 }} />}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -544,7 +578,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
             {filtered.length === 0
               ? <EmptyState onClear={clearAll} />
               : (
-                <div className="grid grid-cols-2 gap-4 pb-6">
+                <div className="grid grid-cols-2 xl:grid-cols-3 gap-4 pb-6">
                   {filtered.map(space => (
                     <SpaceCard key={space.id} space={space} isHovered={hoveredId === space.id}
                       onHover={handleCardHover} dateFilter={dateFrom || undefined} timeFilter={timeFrom || undefined}
