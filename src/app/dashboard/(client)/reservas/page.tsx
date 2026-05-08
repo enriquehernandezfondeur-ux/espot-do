@@ -8,7 +8,7 @@ import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getClientBookings } from '@/lib/actions/client'
 import { STATUS_LABELS, STATUS_COLORS, isPaid } from '@/lib/bookingConfig'
 import { cn } from '@/lib/utils'
-import { submitReview } from '@/lib/actions/reviews'
+import { submitReview, getUserReviewedBookings } from '@/lib/actions/reviews'
 
 type Booking = Awaited<ReturnType<typeof getClientBookings>>[0]
 
@@ -29,7 +29,14 @@ export default function MisReservasPage() {
   const router = useRouter()
 
   useEffect(() => {
-    getClientBookings().then(d => { setBookings(d); setLoading(false) })
+    Promise.all([
+      getClientBookings(),
+      getUserReviewedBookings(),
+    ]).then(([bookingsData, reviewedIds]) => {
+      setBookings(bookingsData)
+      setReviewed(reviewedIds)
+      setLoading(false)
+    })
   }, [])
 
   const filtered = bookings.filter(b => {

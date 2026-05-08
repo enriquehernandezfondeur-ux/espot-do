@@ -80,6 +80,19 @@ export async function getUserPendingReview(userId: string): Promise<{
   }
 }
 
+export async function getUserReviewedBookings(): Promise<Set<string>> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return new Set()
+
+  const { data } = await supabase
+    .from('reviews')
+    .select('booking_id')
+    .eq('guest_id', user.id)
+
+  return new Set((data ?? []).map((r: any) => r.booking_id))
+}
+
 export async function submitReview(data: {
   bookingId: string
   spaceId:   string
