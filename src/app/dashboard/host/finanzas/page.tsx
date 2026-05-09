@@ -258,7 +258,7 @@ export default function FinanzasPage() {
           <span>Reserva</span>
           <span>Fecha evento</span>
           <span className="text-right">Total cliente</span>
-          <span className="text-right">Neto tuyo</span>
+          <span className="text-right">Neto a recibir</span>
           <span>Payout</span>
         </div>
 

@@ -73,9 +73,9 @@ function CanceladoContent() {
           </p>
           <ul className="space-y-3">
             {[
-              'Tu reserva permanece como "pendiente de pago".',
-              'Puedes completar el pago cuando quieras desde tu dashboard.',
-              'El espacio no queda bloqueado hasta que se confirme el pago.',
+              'Tu reserva sigue activa y pendiente de pago.',
+              'Puedes completar el pago cuando quieras desde tu panel de reservas.',
+              'El espacio permanece disponible para otros clientes hasta que confirmes tu pago.',
             ].map((item, i) => (
               <li key={i} className="flex items-start gap-2.5 text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>
                 <span className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"

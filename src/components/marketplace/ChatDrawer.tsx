@@ -190,7 +190,7 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, onClo
           </div>
           <div className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>En línea</span>
+            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Propietario del espacio</span>
           </div>
         </div>
 
@@ -357,6 +357,7 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, onClo
                   border: '1.5px solid var(--border-medium)',
                   color: 'var(--text-primary)',
                   maxHeight: 120,
+                  fontSize: 16,
                 }}
                 onInput={e => {
                   const t = e.target as HTMLTextAreaElement

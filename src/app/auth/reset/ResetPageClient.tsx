@@ -120,6 +120,11 @@ function ResetContent() {
                       onChange={e => setConfirm(e.target.value)}
                       placeholder="Repite la contraseña" required minLength={8}
                       style={inputStyle} />
+                    <button type="button" onClick={() => setShowPwd(v => !v)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2"
+                      style={{ color: 'rgba(255,255,255,0.3)' }}>
+                      {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
                   </div>
                 </div>
                 <button type="submit" disabled={loading}

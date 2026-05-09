@@ -143,17 +143,33 @@ export default function AdminSpacesPage() {
 
                     {/* Actions */}
                     <div className="flex items-center gap-1">
+                      {/* Aprobar (pendiente) — botón prominente */}
+                      {!space.is_published && space.is_active && (
+                        <button
+                          onClick={() => toggle(space.id, 'is_published', false)}
+                          disabled={actionId === space.id + 'is_published'}
+                          title="Aprobar espacio"
+                          className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
+                          style={{ background: '#16A34A', color: '#fff' }}>
+                          {actionId === space.id + 'is_published'
+                            ? <Loader2 size={11} className="animate-spin" />
+                            : <CheckCircle size={11} />}
+                          Aprobar
+                        </button>
+                      )}
                       {/* Publicar/Despublicar */}
-                      <button
-                        onClick={() => toggle(space.id, 'is_published', space.is_published)}
-                        disabled={actionId === space.id + 'is_published'}
-                        title={space.is_published ? 'Despublicar' : 'Publicar'}
-                        className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:bg-slate-100"
-                        style={{ color: space.is_published ? '#16A34A' : '#9CA3AF' }}>
-                        {actionId === space.id + 'is_published'
-                          ? <Loader2 size={14} className="animate-spin" />
-                          : space.is_published ? <Eye size={14} /> : <EyeOff size={14} />}
-                      </button>
+                      {space.is_published && (
+                        <button
+                          onClick={() => toggle(space.id, 'is_published', space.is_published)}
+                          disabled={actionId === space.id + 'is_published'}
+                          title="Despublicar"
+                          className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:bg-slate-100"
+                          style={{ color: '#16A34A' }}>
+                          {actionId === space.id + 'is_published'
+                            ? <Loader2 size={14} className="animate-spin" />
+                            : <Eye size={14} />}
+                        </button>
+                      )}
 
                       {/* Verificar */}
                       <button
@@ -179,9 +195,12 @@ export default function AdminSpacesPage() {
                           : <Star size={14} />}
                       </button>
 
-                      {/* Desactivar */}
+                      {/* Desactivar — con confirmación */}
                       <button
-                        onClick={() => toggle(space.id, 'is_active', space.is_active)}
+                        onClick={() => {
+                          if (space.is_active && !window.confirm(`¿Desactivar "${space.name}"? Los clientes no podrán verlo ni reservarlo.`)) return
+                          toggle(space.id, 'is_active', space.is_active)
+                        }}
                         disabled={actionId === space.id + 'is_active'}
                         title={space.is_active ? 'Desactivar' : 'Activar'}
                         className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:bg-red-50"
