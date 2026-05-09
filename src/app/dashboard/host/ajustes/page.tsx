@@ -200,14 +200,14 @@ function AjustesInner() {
               style={{ color: 'var(--text-muted)' }}>Nombre del negocio</label>
             <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
               style={{ background: 'rgba(53,196,147,0.1)', color: 'var(--brand)' }}>
-              📍 Visible en el marketplace
+              Visible en el marketplace
             </span>
           </div>
           <input value={fullName} onChange={e => setFullName(e.target.value)}
-            placeholder="Ej: Salón La Elegancia"
+            placeholder="Ej: Rivera Eventos"
             className="input-base w-full rounded-xl px-4 py-3.5 text-sm" />
           <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
-            Este nombre lo verán los clientes cuando busquen espacios. Usa el nombre de tu negocio, no tu nombre personal.
+            El nombre de tu empresa o marca — no el nombre del espacio. Los clientes verán esto en el marketplace.
           </p>
         </div>
 

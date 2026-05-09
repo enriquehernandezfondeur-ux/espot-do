@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Building2, Eye, EyeOff, ArrowLeft, Mail, CheckCircle2 } from 'lucide-react'
+import { Building2, Eye, EyeOff, ArrowLeft, Mail, CheckCircle2, CalendarDays, ChevronRight } from 'lucide-react'
 
 // ── Íconos SVG de proveedores ─────────────────────────────
 function GoogleIcon() {
@@ -255,43 +255,52 @@ function AuthContent() {
 
       {/* Selector de tipo de cuenta — solo en registro sin rol elegido */}
       {screen === 'register' && userType === null && (
-        <div>
-          <p className="text-sm font-semibold text-center mb-4" style={{ color: 'rgba(255,255,255,0.7)' }}>
-            ¿Cómo vas a usar espot.do?
+        <div className="space-y-3">
+          <p className="text-sm font-semibold text-center" style={{ color: 'rgba(255,255,255,0.6)' }}>
+            ¿Qué quieres hacer en espot.do?
           </p>
-          <div className="grid grid-cols-2 gap-3">
-            {([
-              {
-                type: 'client' as UserType,
-                icon: '🎉',
-                title: 'Soy cliente',
-                desc: 'Quiero explorar y reservar espacios para mis eventos',
-              },
-              {
-                type: 'host' as UserType,
-                icon: '🏢',
-                title: 'Tengo un negocio',
-                desc: 'Quiero publicar mi espacio y recibir reservas',
-              },
-            ] as { type: UserType; icon: string; title: string; desc: string }[]).map(opt => (
-              <button
-                key={String(opt.type)}
-                type="button"
-                onClick={() => setUserType(opt.type)}
-                className="flex flex-col items-center text-center p-4 rounded-2xl transition-all"
-                style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1.5px solid rgba(255,255,255,0.1)',
-                  color: '#fff',
-                }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#35C493'; (e.currentTarget as HTMLElement).style.background = 'rgba(53,196,147,0.08)' }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)' }}>
-                <span className="text-3xl mb-2">{opt.icon}</span>
-                <span className="text-sm font-bold mb-1">{opt.title}</span>
-                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)', lineHeight: 1.4 }}>{opt.desc}</span>
-              </button>
-            ))}
-          </div>
+
+          {([
+            {
+              type: 'client' as UserType,
+              Icon: CalendarDays,
+              title: 'Reservar espacios',
+              desc: 'Explora y reserva los mejores espacios para tus eventos en RD',
+            },
+            {
+              type: 'host' as UserType,
+              Icon: Building2,
+              title: 'Publicar mi espacio',
+              desc: 'Publica tu local y empieza a recibir reservas de clientes',
+            },
+          ]).map(({ type, Icon, title, desc }) => (
+            <button
+              key={String(type)}
+              type="button"
+              onClick={() => setUserType(type)}
+              className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-left transition-all"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1.5px solid rgba(255,255,255,0.08)' }}
+              onMouseEnter={e => {
+                const el = e.currentTarget as HTMLElement
+                el.style.borderColor = '#35C493'
+                el.style.background = 'rgba(53,196,147,0.07)'
+              }}
+              onMouseLeave={e => {
+                const el = e.currentTarget as HTMLElement
+                el.style.borderColor = 'rgba(255,255,255,0.08)'
+                el.style.background = 'rgba(255,255,255,0.04)'
+              }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: 'rgba(53,196,147,0.1)', border: '1px solid rgba(53,196,147,0.2)' }}>
+                <Icon size={18} style={{ color: '#35C493' }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-bold text-white leading-snug">{title}</div>
+                <div className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)', lineHeight: 1.45 }}>{desc}</div>
+              </div>
+              <ChevronRight size={15} style={{ color: 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
+            </button>
+          ))}
         </div>
       )}
 
@@ -300,14 +309,19 @@ function AuthContent() {
       <form onSubmit={screen === 'login' ? handleLogin : handleRegister} className="space-y-4">
         {screen === 'register' && (
           <>
-            {/* Chip de tipo elegido + opción de cambiar */}
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full"
-                style={{ background: userType === 'host' ? 'rgba(53,196,147,0.12)' : 'rgba(37,99,235,0.12)', color: userType === 'host' ? '#35C493' : '#60A5FA' }}>
-                {userType === 'host' ? '🏢 Negocio' : '🎉 Cliente'}
-              </span>
+            {/* Tipo elegido + cambiar */}
+            <div className="flex items-center justify-between px-4 py-2.5 rounded-xl"
+              style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.15)' }}>
+              <div className="flex items-center gap-2">
+                {userType === 'host'
+                  ? <Building2 size={13} style={{ color: '#35C493' }} />
+                  : <CalendarDays size={13} style={{ color: '#35C493' }} />}
+                <span className="text-xs font-semibold" style={{ color: '#35C493' }}>
+                  {userType === 'host' ? 'Publicar mi espacio' : 'Reservar espacios'}
+                </span>
+              </div>
               <button type="button" onClick={() => setUserType(null)}
-                className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>
                 Cambiar
               </button>
             </div>
@@ -317,11 +331,11 @@ function AuthContent() {
                 {userType === 'host' ? 'Nombre del negocio' : 'Nombre completo'}
               </label>
               <input type="text" value={fullName} onChange={e => setFullName(e.target.value)}
-                placeholder={userType === 'host' ? 'Ej: Salón La Elegancia' : 'Ej: María González'}
+                placeholder={userType === 'host' ? 'Ej: Rivera Eventos' : 'Ej: María González'}
                 required style={inputStyle} />
               {userType === 'host' && (
-                <p className="text-xs mt-1.5" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                  📍 Este nombre es visible públicamente en el marketplace
+                <p className="text-xs mt-1.5" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                  El nombre de tu empresa o marca. Lo verán los clientes en el marketplace.
                 </p>
               )}
             </div>
