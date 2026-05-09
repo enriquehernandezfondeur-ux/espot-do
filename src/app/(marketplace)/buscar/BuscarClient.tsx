@@ -1342,7 +1342,7 @@ function SpaceCard({
               {pricingDef?.value && (
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-md shrink-0 whitespace-nowrap"
                   style={{ background: pricingDef.bg, color: pricingDef.text, border: `1px solid ${pricingDef.border}` }}>
-                  {priceInfo?.type ?? pricingDef.label}
+                  {pricingDef.label}
                 </span>
               )}
               <span className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md truncate"
