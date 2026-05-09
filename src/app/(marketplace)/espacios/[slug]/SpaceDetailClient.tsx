@@ -7,6 +7,8 @@ import {
   MapPin, Users, Shield, ChevronLeft, ChevronRight,
   Clock, CheckCircle, X, Music, Ban,
   ArrowLeft, Share2, CreditCard, Lock, ChevronDown, Play, Images, MessageCircle,
+  Car, Wifi, Wind, UtensilsCrossed, Volume2, Monitor, Music2, Trees, Waves, Wine,
+  Sun, Zap, ShowerHead, Building2, Star, Video, Package, Sparkles, Camera,
 } from 'lucide-react'
 import { cn, formatCurrency, formatTime } from '@/lib/utils'
 import ChatDrawer from '@/components/marketplace/ChatDrawer'
@@ -33,71 +35,71 @@ function daysToLabel(days: number[]): string {
   return `${N[s[0]]} – ${N[s[s.length - 1]]}`
 }
 
-function addonEmoji(name: string) {
+function addonIcon(name: string) {
   const n = name.toLowerCase()
-  if (n.includes('bartender') || n.includes('barra')) return '🍹'
-  if (n.includes('dj'))         return '🎧'
-  if (n.includes('sonido'))     return '🔊'
-  if (n.includes('iluminaci'))  return '💡'
-  if (n.includes('camarero'))   return '🤵'
-  if (n.includes('seguridad'))  return '💂'
-  if (n.includes('decorac'))    return '🎊'
-  if (n.includes('proyector'))  return '📽️'
-  if (n.includes('torta') || n.includes('pastel')) return '🎂'
-  if (n.includes('menú') || n.includes('catering')) return '🍽️'
-  if (n.includes('vino') || n.includes('open bar')) return '🍷'
-  if (n.includes('fotóg') || n.includes('foto'))   return '📸'
-  if (n.includes('video'))      return '🎬'
-  if (n.includes('músico') || n.includes('orquesta')) return '🎵'
-  if (n.includes('maquill'))    return '💄'
-  if (n.includes('extra') || n.includes('hora adicional')) return '⏰'
-  if (n.includes('suite'))      return '🛏️'
-  if (n.includes('pantalla') || n.includes('led')) return '📺'
-  return '✨'
+  if (n.includes('bartender') || n.includes('barra')) return Wine
+  if (n.includes('dj'))         return Music2
+  if (n.includes('sonido'))     return Volume2
+  if (n.includes('iluminaci'))  return Sun
+  if (n.includes('camarero'))   return Users
+  if (n.includes('seguridad'))  return Shield
+  if (n.includes('decorac'))    return Sparkles
+  if (n.includes('proyector'))  return Monitor
+  if (n.includes('torta') || n.includes('pastel')) return Package
+  if (n.includes('menú') || n.includes('catering')) return UtensilsCrossed
+  if (n.includes('vino') || n.includes('open bar')) return Wine
+  if (n.includes('fotóg') || n.includes('foto'))   return Camera
+  if (n.includes('video'))      return Video
+  if (n.includes('músico') || n.includes('orquesta')) return Music2
+  if (n.includes('maquill'))    return Sparkles
+  if (n.includes('extra') || n.includes('hora adicional')) return Clock
+  if (n.includes('suite'))      return Building2
+  if (n.includes('pantalla') || n.includes('led')) return Monitor
+  return Package
 }
 
-function getFacilities(space: any) {
+function getFacilities(space: any): { icon: any; label: string }[] {
   const cond = space.space_conditions?.[0]
-  const result: { icon: string; label: string }[] = []
+  const result: { icon: any; label: string }[] = []
 
   if (cond) {
-    if (cond.has_parking)       result.push({ icon: '🅿️', label: 'Estacionamiento' })
-    if (cond.has_valet_parking) result.push({ icon: '🚗', label: 'Valet parking' })
-    if (cond.has_wifi)          result.push({ icon: '📶', label: 'WiFi incluido' })
-    if (cond.has_ac)            result.push({ icon: '❄️', label: 'Aire acondicionado' })
-    if (cond.has_kitchen)       result.push({ icon: '🍳', label: 'Cocina equipada' })
-    if (cond.has_sound_system)  result.push({ icon: '🔊', label: 'Sistema de sonido' })
-    if (cond.has_projector)     result.push({ icon: '📽️', label: 'Proyector' })
-    if (cond.has_dance_floor)   result.push({ icon: '💃', label: 'Pista de baile' })
-    if (cond.has_outdoor_area)  result.push({ icon: '🌿', label: 'Área al aire libre' })
-    if (cond.has_pool)          result.push({ icon: '🏊', label: 'Piscina' })
-    if (cond.has_bar)           result.push({ icon: '🍸', label: 'Barra de bar' })
-    if (cond.has_stage)         result.push({ icon: '🎭', label: 'Escenario' })
-    if (cond.has_cyclorama)     result.push({ icon: '🎬', label: 'Ciclorama profesional' })
-    if (cond.has_natural_light) result.push({ icon: '☀️', label: 'Luz natural' })
-    if (cond.has_generator)     result.push({ icon: '⚡', label: 'Planta eléctrica' })
-    if (cond.has_dressing_room) result.push({ icon: '👗', label: 'Camerino' })
+    if (cond.has_parking)       result.push({ icon: Car,            label: 'Estacionamiento' })
+    if (cond.has_valet_parking) result.push({ icon: Car,            label: 'Valet parking' })
+    if (cond.has_wifi)          result.push({ icon: Wifi,           label: 'WiFi incluido' })
+    if (cond.has_ac)            result.push({ icon: Wind,           label: 'Aire acondicionado' })
+    if (cond.has_kitchen)       result.push({ icon: UtensilsCrossed,label: 'Cocina equipada' })
+    if (cond.has_sound_system)  result.push({ icon: Volume2,        label: 'Sistema de sonido' })
+    if (cond.has_projector)     result.push({ icon: Monitor,        label: 'Proyector' })
+    if (cond.has_dance_floor)   result.push({ icon: Music2,         label: 'Pista de baile' })
+    if (cond.has_outdoor_area)  result.push({ icon: Trees,          label: 'Área al aire libre' })
+    if (cond.has_pool)          result.push({ icon: Waves,          label: 'Piscina' })
+    if (cond.has_bar)           result.push({ icon: Wine,           label: 'Barra de bar' })
+    if (cond.has_stage)         result.push({ icon: Music2,         label: 'Escenario' })
+    if (cond.has_cyclorama)     result.push({ icon: Camera,         label: 'Ciclorama profesional' })
+    if (cond.has_natural_light) result.push({ icon: Sun,            label: 'Luz natural' })
+    if (cond.has_generator)     result.push({ icon: Zap,            label: 'Planta eléctrica' })
+    if (cond.has_dressing_room) result.push({ icon: ShowerHead,     label: 'Camerino' })
     if ((cond.chairs_count ?? 0) > 0)
-      result.push({ icon: '🪑', label: `${cond.chairs_count} sillas` })
+      result.push({ icon: Users,    label: `${cond.chairs_count} sillas` })
     if ((cond.tables_count ?? 0) > 0)
-      result.push({ icon: '🪞', label: `${cond.tables_count} mesas` })
+      result.push({ icon: Building2, label: `${cond.tables_count} mesas` })
     if ((cond.bathrooms_count ?? 0) > 0)
-      result.push({ icon: '🚻', label: `${cond.bathrooms_count} baño${cond.bathrooms_count > 1 ? 's' : ''} privado${cond.bathrooms_count > 1 ? 's' : ''}` })
+      result.push({ icon: ShowerHead, label: `${cond.bathrooms_count} baño${cond.bathrooms_count > 1 ? 's' : ''} privado${cond.bathrooms_count > 1 ? 's' : ''}` })
   }
 
   // Fallback por categoría si el host no ha configurado facilidades aún
   if (result.length === 0) {
     const cat = space.category
-    if (['salon','hotel','villa'].includes(cat))              result.push({ icon: '🅿️', label: 'Estacionamiento' })
-    if (['restaurante','hotel','villa','salon'].includes(cat)) result.push({ icon: '🍳', label: 'Cocina equipada' })
-    result.push({ icon: '❄️', label: 'Aire acondicionado' })
-    result.push({ icon: '📶', label: 'WiFi incluido' })
-    if (['salon','hotel','villa'].includes(cat))              result.push({ icon: '🔊', label: 'Sistema de sonido' })
-    if (['salon','hotel'].includes(cat))                      result.push({ icon: '💃', label: 'Pista de baile' })
-    if (['rooftop','terraza','villa'].includes(cat))          result.push({ icon: '🌿', label: 'Área al aire libre' })
-    if (cat === 'villa')                                      result.push({ icon: '🏊', label: 'Piscina' })
-    if (['salon','hotel'].includes(cat))                      result.push({ icon: '🚻', label: 'Baños privados' })
-    if (cat === 'estudio')                                    result.push({ icon: '🎬', label: 'Ciclorama profesional' })
+    if (['salon','hotel','villa'].includes(cat))              result.push({ icon: Car,            label: 'Estacionamiento' })
+    if (['restaurante','hotel','villa','salon'].includes(cat)) result.push({ icon: UtensilsCrossed,label: 'Cocina equipada' })
+    result.push({ icon: Wind,   label: 'Aire acondicionado' })
+    result.push({ icon: Wifi,   label: 'WiFi incluido' })
+    if (['salon','hotel','villa'].includes(cat))              result.push({ icon: Volume2, label: 'Sistema de sonido' })
+    if (['salon','hotel'].includes(cat))                      result.push({ icon: Music2,  label: 'Pista de baile' })
+    if (['rooftop','terraza','villa'].includes(cat))          result.push({ icon: Trees,   label: 'Área al aire libre' })
+    if (cat === 'villa')                                      result.push({ icon: Waves,   label: 'Piscina' })
+    if (['salon','hotel'].includes(cat))                      result.push({ icon: ShowerHead, label: 'Baños privados' })
+    if (cat === 'estudio')                                    result.push({ icon: Camera,  label: 'Ciclorama profesional' })
   }
 
   return result.slice(0, 12)
@@ -334,7 +336,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-8xl opacity-20">🏛️</span>
+                  <Building2 size={80} style={{ color: 'var(--text-muted)', opacity: 0.12 }} />
                 </div>
               )}
             </button>
@@ -420,7 +422,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                 onClick={() => setShowLightbox(true)} />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <span className="text-6xl opacity-20">🏛️</span>
+                <Building2 size={60} style={{ color: 'var(--text-muted)', opacity: 0.12 }} />
               </div>
             )}
 
@@ -672,17 +674,17 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {[
-                      { label: 'Tipo de espacio', value: space.category?.charAt(0).toUpperCase() + space.category?.slice(1), icon: '🏛️' },
-                      { label: 'Capacidad', value: `${space.capacity_min ? space.capacity_min + '–' : 'Hasta '}${space.capacity_max} personas`, icon: '👥' },
-                      { label: 'Ubicación', value: `${space.sector ? space.sector + ', ' : ''}${space.city}`, icon: '📍' },
-                      { label: 'Modalidad', value: pricingTypeLabel[pricing?.pricing_type] ?? '—', icon: '💳' },
-                      ...(pricing?.pricing_type === 'hourly' && pricing.min_hours ? [{ label: 'Mínimo de horas', value: `${pricing.min_hours} hora${pricing.min_hours > 1 ? 's' : ''}`, icon: '⏱️' }] : []),
-                      ...(pricing?.pricing_type === 'hourly' && pricing.max_hours ? [{ label: 'Máximo de horas', value: `${pricing.max_hours} horas`, icon: '⌛' }] : []),
-                      ...(pricing?.pricing_type === 'minimum_consumption' && pricing.session_hours ? [{ label: 'Duración de sesión', value: `${pricing.session_hours} horas`, icon: '⏳' }] : []),
+                      { label: 'Tipo de espacio', value: space.category?.charAt(0).toUpperCase() + space.category?.slice(1), icon: Building2 },
+                      { label: 'Capacidad', value: `${space.capacity_min ? space.capacity_min + '–' : 'Hasta '}${space.capacity_max} personas`, icon: Users },
+                      { label: 'Ubicación', value: `${space.sector ? space.sector + ', ' : ''}${space.city}`, icon: MapPin },
+                      { label: 'Modalidad', value: pricingTypeLabel[pricing?.pricing_type] ?? '—', icon: CreditCard },
+                      ...(pricing?.pricing_type === 'hourly' && pricing.min_hours ? [{ label: 'Mínimo de horas', value: `${pricing.min_hours} hora${pricing.min_hours > 1 ? 's' : ''}`, icon: Clock }] : []),
+                      ...(pricing?.pricing_type === 'hourly' && pricing.max_hours ? [{ label: 'Máximo de horas', value: `${pricing.max_hours} horas`, icon: Clock }] : []),
+                      ...(pricing?.pricing_type === 'minimum_consumption' && pricing.session_hours ? [{ label: 'Duración de sesión', value: `${pricing.session_hours} horas`, icon: Clock }] : []),
                     ].map(({ label, value, icon }) => (
                       <div key={label} className="flex items-center gap-3 p-4 rounded-xl"
                         style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
-                        <span className="text-xl shrink-0">{icon}</span>
+                        {(() => { const I = icon as any; return <I size={18} style={{ color: 'var(--brand)' }} /> })()}
                         <div>
                           <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{label}</div>
                           <div className="font-semibold text-sm mt-0.5" style={{ color: 'var(--text-primary)' }}>{value}</div>
@@ -701,7 +703,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                     {facilities.map(({ icon, label }) => (
                       <div key={label} className="flex flex-col items-center gap-2 p-3 md:p-4 rounded-xl text-center"
                         style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
-                        <span className="text-xl md:text-2xl">{icon}</span>
+                        {(() => { const I = icon as any; return <I size={20} style={{ color: 'var(--text-secondary)' }} /> })()}
                         <span className="text-xs font-medium leading-tight" style={{ color: 'var(--text-secondary)' }}>{label}</span>
                       </div>
                     ))}
@@ -905,9 +907,9 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                         <div key={addon.id}
                           className="flex items-center gap-4 p-4 rounded-2xl"
                           style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
-                          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
+                          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                             style={{ background: 'var(--bg-elevated)' }}>
-                            {addonEmoji(addon.name)}
+                            {(() => { const I = addonIcon(addon.name); return <I size={18} style={{ color: 'var(--text-secondary)' }} /> })()}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>
@@ -931,7 +933,9 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
               <div>
                 {!reviewsData || reviewsData.total === 0 ? (
                   <div className="text-center py-12">
-                    <div className="text-4xl mb-3">⭐</div>
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3" style={{ background: 'var(--bg-elevated)' }}>
+                      <Star size={24} style={{ color: 'var(--text-muted)' }} />
+                    </div>
                     <p className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>Aún no hay reseñas</p>
                     <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                       Sé el primero en dejar una reseña después de tu evento.
