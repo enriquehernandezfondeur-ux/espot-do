@@ -192,10 +192,6 @@ export default function EspacioPage() {
   const [hasNaturalLight,  setHasNaturalLight]  = useState(false)
   const [hasGenerator,     setHasGenerator]     = useState(false)
   const [hasDressingRoom,  setHasDressingRoom]  = useState(false)
-  const [chairsCount,      setChairsCount]      = useState('0')
-  const [tablesCount,      setTablesCount]      = useState('0')
-  const [bathroomsCount,   setBathroomsCount]   = useState('0')
-
   // Step 5 - Conditions
   // Permisos
   const [allowsDecoration, setAllowsDecoration]     = useState(true)
@@ -208,13 +204,6 @@ export default function EspacioPage() {
   const [allowsPets, setAllowsPets]                 = useState(false)
   const [allowsParties, setAllowsParties]           = useState(true)
   const [allowsCorporate, setAllowsCorporate]       = useState(true)
-  // Ruido
-  const [musicCutoff, setMusicCutoff]               = useState('00:00')
-  const [noiseLevel, setNoiseLevel]                 = useState<'bajo' | 'moderado' | 'alto'>('moderado')
-  // Depósito
-  const [depositRequired, setDepositRequired]       = useState(false)
-  const [depositAmount, setDepositAmount]           = useState('')
-  const [depositRefundable, setDepositRefundable]   = useState(true)
   // Limpieza
   const [includesCleaning, setIncludesCleaning]     = useState(false)
   const [cleaningFee, setCleaningFee]               = useState('')
@@ -259,12 +248,9 @@ export default function EspacioPage() {
       hasParkingFac, hasValetParking, hasWifi, hasAc, hasSoundSystem, hasProjector,
       hasDanceFloor, hasOutdoorArea, hasPool, hasKitchen, hasBar, hasStage,
       hasCyclorama, hasNaturalLight, hasGenerator, hasDressingRoom,
-      chairsCount, tablesCount, bathroomsCount,
-      musicCutoff, noiseLevel,
       allowsDecoration, allowsFood, allowsAlcohol,
       allowsLiveMusic, allowsDJ, allowsSmoking,
       allowsChildren, allowsPets, allowsParties, allowsCorporate,
-      depositRequired, depositAmount, depositRefundable,
       includesCleaning, cleaningFee,
       allowsExtraHours, extraHourPrice,
       cancellationPolicy, customRules,
@@ -374,9 +360,6 @@ export default function EspacioPage() {
       setHasNaturalLight(c.has_natural_light ?? false)
       setHasGenerator(c.has_generator ?? false)
       setHasDressingRoom(c.has_dressing_room ?? false)
-      setChairsCount(String(c.chairs_count ?? 0))
-      setTablesCount(String(c.tables_count ?? 0))
-      setBathroomsCount(String(c.bathrooms_count ?? 0))
       // Permisos
       setAllowsDecoration(c.allows_external_decoration ?? true)
       setAllowsFood(c.allows_external_food ?? false)
@@ -388,13 +371,6 @@ export default function EspacioPage() {
       setAllowsPets(c.allows_pets ?? false)
       setAllowsParties(c.allows_parties ?? true)
       setAllowsCorporate(c.allows_corporate ?? true)
-      // Ruido
-      setMusicCutoff(c.music_cutoff_time?.slice(0,5) ?? '00:00')
-      setNoiseLevel(c.noise_level ?? 'moderado')
-      // Depósito
-      setDepositRequired(c.deposit_required ?? false)
-      setDepositAmount(String(c.deposit_amount ?? ''))
-      setDepositRefundable(c.deposit_refundable ?? true)
       // Limpieza
       setIncludesCleaning(c.cleaning_included ?? false)
       setCleaningFee(String(c.cleaning_fee ?? ''))
@@ -1138,43 +1114,6 @@ export default function EspacioPage() {
                 ))}
               </div>
 
-              {/* Cantidades de mobiliario */}
-              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Mobiliario incluido (opcional)</p>
-              <div className="grid grid-cols-3 gap-3">
-                {([
-                  { label: 'Sillas',         emoji: '🪑', value: chairsCount,    setter: setChairsCount },
-                  { label: 'Mesas',          emoji: '🪞', value: tablesCount,    setter: setTablesCount },
-                  { label: 'Baños privados', emoji: '🚻', value: bathroomsCount, setter: setBathroomsCount },
-                ] as { label: string; emoji: string; value: string; setter: (v: string) => void }[]).map(item => (
-                  <div key={item.label} className="rounded-xl overflow-hidden"
-                    style={{ border: `1.5px solid ${parseInt(item.value) > 0 ? 'var(--brand-border)' : 'var(--border-medium)'}` }}>
-                    <div className="px-3 py-2 text-xs font-semibold flex items-center gap-1.5"
-                      style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', borderBottom: '1px solid var(--border-subtle)' }}>
-                      <span>{item.emoji}</span>{item.label}
-                    </div>
-                    <div className="flex items-stretch">
-                      <button
-                        onClick={() => item.setter(String(Math.max(0, (parseInt(item.value) || 0) - 1)))}
-                        className="w-9 flex items-center justify-center text-lg font-bold transition-colors"
-                        style={{ background: 'var(--bg-base)', color: 'var(--text-muted)', borderRight: '1px solid var(--border-subtle)' }}>
-                        −
-                      </button>
-                      <input
-                        type="number" min="0" value={item.value}
-                        onChange={e => item.setter(e.target.value)}
-                        className="flex-1 text-center font-bold text-base bg-transparent focus:outline-none py-2 tabular-nums"
-                        style={{ color: parseInt(item.value) > 0 ? 'var(--brand)' : 'var(--text-primary)' }}
-                      />
-                      <button
-                        onClick={() => item.setter(String((parseInt(item.value) || 0) + 1))}
-                        className="w-9 flex items-center justify-center text-lg font-bold transition-colors"
-                        style={{ background: 'var(--bg-base)', color: 'var(--text-muted)', borderLeft: '1px solid var(--border-subtle)' }}>
-                        +
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
 
             {/* ─── 1. PERMISOS GENERALES ─── */}
@@ -1212,84 +1151,10 @@ export default function EspacioPage() {
               </div>
             </div>
 
-            {/* ─── 2. CONTROL DE RUIDO ─── */}
+            {/* ─── 2. HORAS EXTRA ─── */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Control de ruido</p>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Nivel de ruido permitido</label>
-                  <div className="flex gap-2">
-                    {(['bajo', 'moderado', 'alto'] as const).map(level => (
-                      <button key={level}
-                        onClick={() => setNoiseLevel(level)}
-                        className="flex-1 py-2.5 rounded-xl text-sm font-semibold capitalize transition-all"
-                        style={noiseLevel === level ? {
-                          background: '#35C493', color: '#0B0F0E',
-                        } : {
-                          background: 'var(--bg-elevated)',
-                          color: 'var(--text-muted)',
-                          border: '1px solid var(--border-subtle)',
-                        }}>
-                        {level.charAt(0).toUpperCase() + level.slice(1)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Hora límite de música</label>
-                  <input type="time" value={musicCutoff} onChange={e => setMusicCutoff(e.target.value)}
-                    className="input-base w-full rounded-xl px-4 py-3 text-sm" />
-                </div>
-              </div>
-            </div>
-
-            {/* ─── 3. DEPÓSITO Y PAGOS ─── */}
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Depósito y pagos</p>
+              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Horas extra</p>
               <div className="space-y-3">
-                {/* Depósito */}
-                <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Depósito de garantía</div>
-                      <div className="text-xs" style={{ color: 'var(--text-muted)' }}>Monto que el cliente paga como garantía</div>
-                    </div>
-                    <button onClick={() => setDepositRequired(!depositRequired)}
-                      className="w-11 h-6 rounded-full relative transition-all shrink-0"
-                      style={{ background: depositRequired ? '#35C493' : 'var(--border-medium)' }}>
-                      <span className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
-                        style={{ left: depositRequired ? 22 : 2 }} />
-                    </button>
-                  </div>
-                  {depositRequired && (
-                    <div className="grid grid-cols-2 gap-3 pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-                      <div>
-                        <label className="block text-xs mb-1.5" style={{ color: 'var(--text-muted)' }}>Monto (RD$)</label>
-                        <input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)}
-                          placeholder="Ej: 5000"
-                          className="input-base w-full rounded-xl px-3 py-2.5 text-sm" />
-                      </div>
-                      <div>
-                        <label className="block text-xs mb-1.5" style={{ color: 'var(--text-muted)' }}>¿Es reembolsable?</label>
-                        <div className="flex gap-2">
-                          {[{ v: true, l: 'Sí' }, { v: false, l: 'No' }].map(opt => (
-                            <button key={String(opt.v)} onClick={() => setDepositRefundable(opt.v)}
-                              className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all"
-                              style={depositRefundable === opt.v ? {
-                                background: '#35C493', color: '#0B0F0E',
-                              } : {
-                                background: 'var(--bg-elevated)', color: 'var(--text-muted)',
-                                border: '1px solid var(--border-subtle)',
-                              }}>
-                              {opt.l}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
                 {/* Horas extra */}
                 <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                   <div className="flex items-center justify-between mb-3">

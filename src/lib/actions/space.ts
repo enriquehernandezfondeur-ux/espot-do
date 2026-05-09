@@ -67,10 +67,6 @@ export interface SaveSpacePayload {
   hasNaturalLight: boolean
   hasGenerator: boolean
   hasDressingRoom: boolean
-  // Step 5 — Facilidades con cantidad
-  chairsCount: string
-  tablesCount: string
-  bathroomsCount: string
   // Step 5 — Permisos
   allowsDecoration: boolean
   allowsFood: boolean
@@ -82,13 +78,6 @@ export interface SaveSpacePayload {
   allowsPets: boolean
   allowsParties: boolean
   allowsCorporate: boolean
-  // Step 5 — Ruido
-  musicCutoff: string
-  noiseLevel: string
-  // Step 5 — Depósito
-  depositRequired: boolean
-  depositAmount: string
-  depositRefundable: boolean
   // Step 5 — Limpieza
   includesCleaning: boolean
   cleaningFee: string
@@ -215,9 +204,6 @@ export async function saveSpace(payload: SaveSpacePayload) {
       has_natural_light: payload.hasNaturalLight,
       has_generator:     payload.hasGenerator,
       has_dressing_room: payload.hasDressingRoom,
-      chairs_count:    int(payload.chairsCount)    ?? 0,
-      tables_count:    int(payload.tablesCount)    ?? 0,
-      bathrooms_count: int(payload.bathroomsCount) ?? 0,
       // Permisos generales
       allows_external_decoration: payload.allowsDecoration,
       allows_external_food:       payload.allowsFood,
@@ -229,13 +215,6 @@ export async function saveSpace(payload: SaveSpacePayload) {
       allows_children:            payload.allowsChildren,
       allows_parties:             payload.allowsParties,
       allows_corporate:           payload.allowsCorporate,
-      // Ruido
-      music_cutoff_time: payload.musicCutoff || null,
-      noise_level:       payload.noiseLevel || 'moderado',
-      // Depósito
-      deposit_required:    payload.depositRequired,
-      deposit_amount:      num(payload.depositAmount),
-      deposit_refundable:  payload.depositRefundable ?? true,
       // Limpieza
       cleaning_included: payload.includesCleaning,
       cleaning_fee:      num(payload.cleaningFee),
@@ -446,9 +425,6 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
     has_natural_light: payload.hasNaturalLight,
     has_generator:     payload.hasGenerator,
     has_dressing_room: payload.hasDressingRoom,
-    chairs_count:    int(payload.chairsCount)    ?? 0,
-    tables_count:    int(payload.tablesCount)    ?? 0,
-    bathrooms_count: int(payload.bathroomsCount) ?? 0,
     // Permisos generales
     allows_external_decoration: payload.allowsDecoration,
     allows_external_food:       payload.allowsFood,
@@ -460,11 +436,6 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
     allows_children:            payload.allowsChildren,
     allows_parties:             payload.allowsParties,
     allows_corporate:           payload.allowsCorporate,
-    music_cutoff_time:          payload.musicCutoff || null,
-    noise_level:                payload.noiseLevel || 'moderado',
-    deposit_required:           payload.depositRequired,
-    deposit_amount:             num(payload.depositAmount),
-    deposit_refundable:         payload.depositRefundable ?? true,
     cleaning_included:          payload.includesCleaning,
     cleaning_fee:               num(payload.cleaningFee),
     overtime_allowed:           payload.allowsExtraHours,
