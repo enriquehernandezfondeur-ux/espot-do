@@ -746,7 +746,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                   onChange={e => handleCountInput(e.target.value)}
                   onBlur={() => setCountInput(String(guestCount))}
                   className="text-3xl font-bold text-center bg-transparent focus:outline-none w-24 tabular-nums"
-                  style={{ color: 'var(--text-primary)', fontSize: 16 }}
+                  style={{ color: 'var(--text-primary)', fontSize: 16, minHeight: 48 }}
                   min={space.capacity_min ?? 1} max={space.capacity_max} />
                 <span className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>personas</span>
               </div>

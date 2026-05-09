@@ -192,8 +192,8 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
             style={{ background: 'var(--bg-base)', maxHeight: '92dvh', overflowY: 'auto' }}>
             <div className="flex items-center justify-between px-5 pt-4 pb-3 sticky top-0"
               style={{ background: 'var(--bg-base)', borderBottom: '1px solid var(--border-subtle)', zIndex: 1 }}>
-              <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>
-                Reservar espacio
+              <h3 className="font-bold text-sm truncate" style={{ color: 'var(--text-primary)' }}>
+                {space.name}
               </h3>
               <button onClick={() => setShowMobileWidget(false)}
                 className="w-9 h-9 flex items-center justify-center rounded-full"
@@ -644,7 +644,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   { id: 'reviews', label: reviewsData?.total ? `Reseñas (${reviewsData.total})` : 'Reseñas' },
                 ] as const).map(tab => (
                   <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                    className="flex-1 md:flex-none px-4 md:px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+                    className="flex-1 md:flex-none px-4 md:px-5 py-3 rounded-xl text-sm font-medium transition-all duration-200"
                     style={activeTab === tab.id ? {
                       background: '#fff', color: 'var(--text-primary)',
                       boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
@@ -1236,7 +1236,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
         })()}
 
         {/* Espacio extra al fondo para el sticky CTA móvil */}
-        <div className="h-24 lg:hidden" />
+        <div className="h-28 lg:hidden" />
       </div>
 
       {/* ── MÓVIL: Sticky CTA de reserva ── */}

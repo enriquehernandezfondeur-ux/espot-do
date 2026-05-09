@@ -695,7 +695,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
 
             {/* Chips de filtros activos — solo si hay filtros */}
             {activeChips.length > 0 && (
-              <div className="flex gap-2 mt-2.5 overflow-x-auto scrollbar-hide">
+              <div className="flex gap-2 mt-2.5 flex-wrap">
                 {activeChips.map(chip => (
                   <button key={chip.key}
                     onClick={chip.onRemove}
@@ -719,7 +719,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
           </div>
 
           {/* Category pills — solo mobile (desktop las tiene inline arriba) */}
-          <div className="md:hidden flex gap-2 overflow-x-auto pb-1 scrollbar-hide mt-2.5">
+          <div className="md:hidden flex gap-2 overflow-x-auto pb-2 pr-4 scrollbar-hide mt-2.5">
             {CATEGORIES.map(cat => {
               const isActive = categoria === cat.value
               const Icon = cat.icon
@@ -850,7 +850,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
       {/* ── PANEL DE FILTROS (drawer lateral) ── */}
       {moreOpen && (
         <>
-          <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm" onClick={() => setMoreOpen(false)} />
+          <div className="fixed inset-0 z-[49] bg-black/40 backdrop-blur-sm" onClick={() => setMoreOpen(false)} />
           <div className="fixed right-0 top-0 h-full w-full max-w-md z-50 flex flex-col overflow-hidden"
             style={{ background: '#fff', boxShadow: '-8px 0 40px rgba(0,0,0,0.12)' }}>
 
