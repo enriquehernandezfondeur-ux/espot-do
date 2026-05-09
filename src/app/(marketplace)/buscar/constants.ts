@@ -11,7 +11,8 @@ export const CATEGORIES = [
   { value: 'rooftop',      label: 'Rooftops',     icon: Sunset },
   { value: 'terraza',      label: 'Terrazas',     icon: Trees },
   { value: 'bar',          label: 'Bares',        icon: Wine },
-  { value: 'hotel',        label: 'Hotel / Villa', icon: Hotel },
+  { value: 'hotel',        label: 'Hoteles',      icon: Hotel },
+  { value: 'villa',        label: 'Villas',       icon: Home },
   { value: 'coworking',    label: 'Coworking',    icon: Briefcase },
   { value: 'estudio',      label: 'Estudios',     icon: Camera },
 ]

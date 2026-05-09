@@ -121,7 +121,8 @@ const categories = [
   { value: 'terraza',    label: 'Terrazas',     icon: Trees },
   { value: 'estudio',    label: 'Estudios',     icon: Camera },
   { value: 'coworking',  label: 'Coworking',    icon: Briefcase },
-  { value: 'hotel',      label: 'Hotel / Villa', icon: Building2 },
+  { value: 'hotel',      label: 'Hoteles',      icon: Building2 },
+  { value: 'villa',      label: 'Villas',       icon: Home },
 ]
 
 const eventTypes = [

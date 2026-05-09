@@ -32,7 +32,8 @@ const categories: { value: SpaceCategory; label: string; icon: React.ElementType
   { value: 'terraza',    label: 'Terraza',            icon: Trees },
   { value: 'estudio',    label: 'Estudio',            icon: Camera },
   { value: 'coworking',  label: 'Coworking',          icon: Briefcase },
-  { value: 'hotel',      label: 'Hotel / Villa',      icon: Building2 },
+  { value: 'hotel',      label: 'Hotel',              icon: Building2 },
+  { value: 'villa',      label: 'Villa',              icon: Home },
   { value: 'otro',       label: 'Otro',               icon: MapPin },
 ]
 
@@ -237,10 +238,26 @@ export default function EspacioPage() {
     setSaving(true)
     setSaveError('')
 
-    // Validar que hay al menos 1 foto subida antes de publicar
-    const hasImages = pendingPhotos.length > 0
-    if (!hasImages) {
+    // Validar fotos
+    if (pendingPhotos.length === 0) {
       setSaveError('Debes subir al menos una foto del espacio antes de publicar.')
+      setSaving(false)
+      return
+    }
+
+    // Validar precio según modalidad
+    if (pricingType === 'hourly' && !hourlyPrice.trim()) {
+      setSaveError('Indica el precio por hora de tu espacio.')
+      setSaving(false)
+      return
+    }
+    if (pricingType === 'minimum_consumption' && !minConsumption.trim()) {
+      setSaveError('Indica el consumo mínimo garantizado.')
+      setSaving(false)
+      return
+    }
+    if (pricingType === 'fixed_package' && !fixedPrice.trim()) {
+      setSaveError('Indica el precio del paquete.')
       setSaving(false)
       return
     }
@@ -1170,7 +1187,6 @@ export default function EspacioPage() {
                   { label: 'Niños',                  desc: 'Menores de edad',            value: allowsChildren,    setter: setAllowsChildren },
                   { label: 'Mascotas',               desc: 'Animales de compañía',       value: allowsPets,        setter: setAllowsPets },
                   { label: 'Fiestas',                desc: 'Eventos sociales',           value: allowsParties,     setter: setAllowsParties },
-                  { label: 'Eventos corporativos',   desc: 'Reuniones de empresa',       value: allowsCorporate,   setter: setAllowsCorporate },
                 ] as { label: string; desc: string; value: boolean; setter: (v: boolean) => void }[]).map(item => (
                   <div key={item.label}
                     className="flex items-center justify-between px-4 py-3 rounded-xl"
