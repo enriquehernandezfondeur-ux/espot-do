@@ -120,7 +120,7 @@ export default function DashboardPage() {
     .slice(0, 6)
 
   if (loading) return (
-    <div className="flex items-center justify-center h-screen">
+    <div className="flex items-center justify-center h-dvh">
       <Loader2 size={28} className="animate-spin" style={{ color: 'var(--brand)' }} />
     </div>
   )

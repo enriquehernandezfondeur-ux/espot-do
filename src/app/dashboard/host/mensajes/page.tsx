@@ -71,13 +71,13 @@ export default function HostMensajesPage() {
   }
 
   if (loading) return (
-    <div className="flex items-center justify-center h-screen" style={{ background: 'var(--bg-base)' }}>
+    <div className="flex items-center justify-center h-dvh" style={{ background: 'var(--bg-base)' }}>
       <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand)' }} />
     </div>
   )
 
   return (
-    <div className="flex flex-col md:flex-row md:h-screen" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', minHeight: '100dvh' }}>
+    <div className="flex flex-col md:flex-row md:h-dvh" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', minHeight: '100dvh' }}>
 
       {/* Sidebar conversations */}
       <div className={`w-full md:w-72 md:flex-col md:shrink-0 flex flex-col ${active ? 'hidden md:flex' : 'flex'}`}

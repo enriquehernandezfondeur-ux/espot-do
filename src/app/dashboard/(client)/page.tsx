@@ -23,7 +23,7 @@ export default function ClientDashboard() {
   }, [])
 
   if (loading) return (
-    <div className="flex items-center justify-center h-screen">
+    <div className="flex items-center justify-center h-dvh">
       <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand)' }} />
     </div>
   )

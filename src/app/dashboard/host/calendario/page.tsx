@@ -215,7 +215,7 @@ export default function CalendarioPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen" style={{ background: 'var(--bg-base)' }}>
+      <div className="flex items-center justify-center h-dvh" style={{ background: 'var(--bg-base)' }}>
         <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand)' }} />
       </div>
     )

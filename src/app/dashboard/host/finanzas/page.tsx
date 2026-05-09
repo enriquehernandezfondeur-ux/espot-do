@@ -79,7 +79,7 @@ export default function FinanzasPage() {
   }
 
   if (loading) return (
-    <div className="flex items-center justify-center h-screen" style={{ background: 'var(--bg-base)' }}>
+    <div className="flex items-center justify-center h-dvh" style={{ background: 'var(--bg-base)' }}>
       <Loader2 size={28} className="animate-spin" style={{ color: 'var(--brand)' }} />
     </div>
   )

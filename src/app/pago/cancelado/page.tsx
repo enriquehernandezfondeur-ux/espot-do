@@ -23,7 +23,7 @@ function CanceladoContent() {
   }, [])
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(160deg, #080f12 0%, #0B0F0E 55%)' }}>
+    <div className="min-h-dvh" style={{ background: 'linear-gradient(160deg, #080f12 0%, #0B0F0E 55%)' }}>
 
       {/* Fondo decorativo neutro */}
       <div style={{
@@ -124,7 +124,7 @@ function CanceladoContent() {
 
 export default function CanceladoPage() {
   return <Suspense fallback={
-    <div className="min-h-screen flex items-center justify-center" style={{ background: '#0B0F0E' }}>
+    <div className="min-h-dvh flex items-center justify-center" style={{ background: '#0B0F0E' }}>
       <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#94A3B8' }} />
     </div>
   }><CanceladoContent /></Suspense>

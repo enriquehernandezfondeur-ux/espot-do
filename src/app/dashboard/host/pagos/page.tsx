@@ -74,7 +74,7 @@ export default function HostPagosPage() {
   }
 
   if (loading) return (
-    <div className="flex items-center justify-center h-screen" style={{ background: '#F4F6F8' }}>
+    <div className="flex items-center justify-center h-dvh" style={{ background: '#F4F6F8' }}>
       <Loader2 size={28} className="animate-spin" style={{ color: '#35C493' }} />
     </div>
   )

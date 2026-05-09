@@ -74,7 +74,7 @@ En estos casos, Espot podrá facilitar la comunicación entre las partes, sin as
 
 export default function ReembolsoPage() {
   return (
-    <div style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--bg-base)', minHeight: '100dvh' }}>
       <div className="max-w-3xl mx-auto px-6 py-12">
 
         <Link href="/" className="inline-flex items-center gap-1.5 text-sm mb-8"

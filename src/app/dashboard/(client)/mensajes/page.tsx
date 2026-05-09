@@ -75,10 +75,10 @@ export default function ClientMensajesPage() {
     return date.toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })
   }
 
-  if (loading) return <div className="flex items-center justify-center h-screen"><Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand)' }} /></div>
+  if (loading) return <div className="flex items-center justify-center h-dvh"><Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand)' }} /></div>
 
   return (
-    <div className="flex flex-col md:flex-row md:h-screen" style={{ background: 'var(--bg-base)', minHeight: '100dvh' }}>
+    <div className="flex flex-col md:flex-row md:h-dvh" style={{ background: 'var(--bg-base)', minHeight: '100dvh' }}>
 
       {/* Conversation list */}
       <div className={`w-full md:w-72 md:flex-col md:shrink-0 flex flex-col ${active ? 'hidden md:flex' : 'flex'}`}

@@ -40,7 +40,7 @@ Puedes configurar tu navegador para bloquear o eliminar cookies si lo prefieres.
 
 export default function CookiesPage() {
   return (
-    <div style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--bg-base)', minHeight: '100dvh' }}>
       <div className="max-w-3xl mx-auto px-6 py-12">
 
         <Link href="/" className="inline-flex items-center gap-1.5 text-sm mb-8"

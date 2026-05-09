@@ -71,7 +71,7 @@ export default function HostReservasPage() {
   }
 
   if (loading) return (
-    <div className="flex items-center justify-center h-screen" style={{ background: 'var(--bg-base)' }}>
+    <div className="flex items-center justify-center h-dvh" style={{ background: 'var(--bg-base)' }}>
       <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand)' }} />
     </div>
   )
@@ -93,7 +93,7 @@ export default function HostReservasPage() {
           { l: 'Por aceptar',    v: pending,   c: '#D97706' },
           { l: 'Esperan pago',   v: accepted,  c: '#2563EB' },
           { l: 'Confirmadas',    v: bookings.filter(b => b.status === 'confirmed').length, c: '#16A34A' },
-          { l: 'Ingresos conf.', v: formatCurrency(bookings.filter(b => b.status === 'confirmed').reduce((s, b) => s + Number(b.total_amount), 0)), c: 'var(--brand)' },
+          { l: 'Ingresos conf.', v: formatCurrency(bookings.filter(b => b.status === 'confirmed').reduce((s, b) => s + (Number(b.total_amount) || 0), 0)), c: 'var(--brand)' },
         ].map(m => (
           <div key={m.l} className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
             <div className="text-xl font-bold" style={{ color: m.c }}>{m.v}</div>

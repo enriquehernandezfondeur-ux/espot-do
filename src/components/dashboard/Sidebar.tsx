@@ -178,7 +178,7 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
   return (
     <>
       {/* ── DESKTOP: Sidebar fijo a la izquierda ── */}
-      <aside className="hidden md:flex w-60 min-h-screen flex-col shrink-0"
+      <aside className="hidden md:flex w-60 min-h-dvh flex-col shrink-0"
         style={{ background: 'var(--bg-surface)', borderRight: '1px solid var(--border-subtle)' }}>
         <SidebarInner />
       </aside>

@@ -16,7 +16,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const isAdmin = user?.email === (process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com')
 
   return (
-    <div className="host-theme flex min-h-screen" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
+    <div className="host-theme flex min-h-dvh" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       <Sidebar userName={userName} avatarUrl={avatarUrl} isAdmin={isAdmin} />
       {/* pt-14 compensa el top bar fijo en móvil; pb-20 para la barra inferior */}
       <main className="flex-1 overflow-auto pt-14 pb-20 md:pt-0 md:pb-0" style={{ background: 'var(--bg-base)' }}>

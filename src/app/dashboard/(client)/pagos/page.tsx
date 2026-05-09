@@ -24,7 +24,7 @@ export default function PagosPage() {
   const totalPending = bookings.filter(b => b.payment_status !== 'paid' && !b.status.startsWith('cancelled')).reduce((s, b) => s + Number(b.platform_fee), 0)
 
   if (loading) return (
-    <div className="flex items-center justify-center h-screen">
+    <div className="flex items-center justify-center h-dvh">
       <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand)' }} />
     </div>
   )

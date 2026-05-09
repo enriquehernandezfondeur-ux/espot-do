@@ -50,7 +50,7 @@ function ResetContent() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4"
+    <div className="min-h-dvh flex items-center justify-center p-4"
       style={{ background: 'linear-gradient(145deg, #071410 0%, #0B0F0E 60%, #0a0d12 100%)' }}>
 
       <div className="w-full max-w-[400px]">

@@ -57,7 +57,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   }
 
   return (
-    <aside className="w-64 md:w-56 min-h-screen flex flex-col" style={{ background: '#0A1019' }}>
+    <aside className="w-64 md:w-56 min-h-dvh flex flex-col" style={{ background: '#0A1019' }}>
       {/* Logo + close (mobile only) */}
       <div className="px-5 pt-6 pb-5 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         <Link href="/admin" className="flex items-center gap-2.5" onClick={onClose}>

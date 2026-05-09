@@ -152,7 +152,7 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
   return (
     <>
       {/* ── DESKTOP: Sidebar fijo ── */}
-      <aside className="hidden md:flex w-60 min-h-screen flex-col shrink-0"
+      <aside className="hidden md:flex w-60 min-h-dvh flex-col shrink-0"
         style={{ background: '#fff', borderRight: '1px solid var(--border-subtle)' }}>
         <SidebarInner />
       </aside>

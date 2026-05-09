@@ -168,7 +168,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
   const hostProfile = space.profiles as any
 
   return (
-    <div style={{ background: 'var(--bg-base)', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--bg-base)', minHeight: '100dvh' }}>
 
       {/* Chat Drawer */}
       {showChat && hostProfile && (
