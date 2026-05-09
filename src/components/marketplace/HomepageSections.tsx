@@ -9,17 +9,33 @@ function SocialSection() {
   useEffect(() => {
     const container = widgetRef.current
     if (!container) return
+
     // Crear el web component via DOM (evita problemas de SSR/hidratación)
     const widget = document.createElement('behold-widget')
     widget.setAttribute('feed-id', 'djCYJQQhkC3IfDDkpR0B')
     container.appendChild(widget)
-    // Cargar script exactamente como lo indica Behold.so
+
+    // Cargar script exactamente como indica Behold.so
     if (!document.querySelector('script[src*="behold.so"]')) {
       const s = document.createElement('script')
       s.type = 'module'
       s.src  = 'https://w.behold.so/widget.js'
       document.head.append(s)
     }
+
+    // Ocultar branding "Made with Behold" cuando el shadow DOM esté listo
+    const observer = new MutationObserver(() => {
+      const shadow = (widget as any).shadowRoot
+      if (!shadow) return
+      const existing = shadow.querySelector('#hide-behold-brand')
+      if (existing) return
+      const style = document.createElement('style')
+      style.id = 'hide-behold-brand'
+      style.textContent = '[class*="attribution"],[class*="branding"],[class*="powered"],[href*="behold"]{display:none!important}'
+      shadow.appendChild(style)
+    })
+    observer.observe(widget, { childList: true, subtree: true })
+    return () => observer.disconnect()
   }, [])
 
   return (
@@ -343,6 +359,9 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
         </div>
       </section>
 
+      {/* ── REDES SOCIALES ── */}
+      <SocialSection />
+
       {/* ── CÓMO FUNCIONA — sección oscura ── */}
       <section className="py-20 md:py-28 relative overflow-hidden"
         style={{ background: '#060D09' }}>
@@ -470,8 +489,6 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
         </div>
       </section>
 
-      {/* ── REDES SOCIALES ── */}
-      <SocialSection />
 
     </div>
   )
