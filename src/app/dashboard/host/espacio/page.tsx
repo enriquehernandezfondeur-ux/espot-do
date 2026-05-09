@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Building2, Clock, DollarSign, Plus, Gift, Shield, CreditCard, CheckCircle, ChevronRight, ChevronLeft, X, Loader2, Eye, EyeOff, MapPin, Users, Pencil, PlusCircle } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { Building2, Clock, DollarSign, Plus, Gift, Shield, CreditCard, CheckCircle, ChevronRight, ChevronLeft, X, Loader2, Eye, EyeOff, MapPin, Users, Pencil, PlusCircle, Wine, UtensilsCrossed, Sunset, Trees, Camera, Briefcase, Home, Package, MessageSquare, Music2, Volume2, Sun, Car, Wifi, Wind, Waves, Monitor, Zap, ShowerHead, Sparkles } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
 import { saveSpace, publishSpace, getMySpaces, saveSpaceImages, updateSpace } from '@/lib/actions/space'
 import PhotoUploader from '@/components/dashboard/PhotoUploader'
@@ -24,46 +24,46 @@ const steps = [
   { id: 7, label: 'Publicar',           icon: CheckCircle },
 ]
 
-const categories: { value: SpaceCategory; label: string; emoji: string }[] = [
-  { value: 'salon',      label: 'Salón de eventos', emoji: '🏛️' },
-  { value: 'restaurante',label: 'Restaurante',       emoji: '🍽️' },
-  { value: 'bar',        label: 'Bar / Lounge',      emoji: '🍸' },
-  { value: 'rooftop',   label: 'Rooftop',            emoji: '🌆' },
-  { value: 'terraza',   label: 'Terraza',            emoji: '🌿' },
-  { value: 'estudio',   label: 'Estudio',            emoji: '🎬' },
-  { value: 'coworking', label: 'Coworking',           emoji: '💼' },
-  { value: 'hotel',     label: 'Hotel / Villa',      emoji: '🏨' },
-  { value: 'villa',     label: 'Villa',               emoji: '🏡' },
-  { value: 'otro',      label: 'Otro',                emoji: '📍' },
+const categories: { value: SpaceCategory; label: string; icon: React.ElementType }[] = [
+  { value: 'salon',       label: 'Salón de eventos', icon: Building2 },
+  { value: 'restaurante', label: 'Restaurante',       icon: UtensilsCrossed },
+  { value: 'bar',         label: 'Bar / Lounge',      icon: Wine },
+  { value: 'rooftop',    label: 'Rooftop',            icon: Sunset },
+  { value: 'terraza',    label: 'Terraza',            icon: Trees },
+  { value: 'estudio',    label: 'Estudio',            icon: Camera },
+  { value: 'coworking',  label: 'Coworking',          icon: Briefcase },
+  { value: 'hotel',      label: 'Hotel / Villa',      icon: Building2 },
+  { value: 'villa',      label: 'Villa',              icon: Home },
+  { value: 'otro',       label: 'Otro',               icon: MapPin },
 ]
 
-const pricingOptions: { value: PricingType; label: string; desc: string; emoji: string; ideal: string }[] = [
+const pricingOptions: { value: PricingType; label: string; desc: string; icon: React.ElementType; ideal: string }[] = [
   {
     value: 'hourly',
     label: 'Precio por hora',
     desc: 'El cliente paga por las horas que usa el espacio.',
-    emoji: '⏱️',
+    icon: Clock,
     ideal: 'Salones, terrazas, estudios, coworkings',
   },
   {
     value: 'minimum_consumption',
     label: 'Consumo mínimo',
     desc: 'El cliente debe consumir un monto mínimo en comida/bebida.',
-    emoji: '🍷',
+    icon: Wine,
     ideal: 'Restaurantes, bares, lounges, rooftops',
   },
   {
     value: 'fixed_package',
     label: 'Paquete fijo',
     desc: 'Precio fijo que incluye espacio + servicios específicos.',
-    emoji: '📦',
+    icon: Package,
     ideal: 'Salones con todo incluido, hoteles, venues',
   },
   {
     value: 'custom_quote',
     label: 'Cotización personalizada',
     desc: 'El cliente solicita propuesta y tú envías el precio.',
-    emoji: '💬',
+    icon: MessageSquare,
     ideal: 'Bodas, eventos corporativos, eventos grandes',
   },
 ]
@@ -90,22 +90,22 @@ const paymentTermOptions: { value: PaymentTermType; label: string; desc: string;
 ]
 
 const addonSuggestions = [
-  { name: 'Bartender', price: 8000, unit: 'evento', category: 'personal', emoji: '🍹' },
-  { name: 'DJ', price: 15000, unit: 'evento', category: 'personal', emoji: '🎧' },
-  { name: 'Sonido', price: 5000, unit: 'evento', category: 'equipo', emoji: '🔊' },
-  { name: 'Iluminación', price: 4000, unit: 'evento', category: 'equipo', emoji: '💡' },
-  { name: 'Camarero', price: 3500, unit: 'evento', category: 'personal', emoji: '🤵' },
-  { name: 'Seguridad', price: 4000, unit: 'evento', category: 'personal', emoji: '💂' },
-  { name: 'Decoración básica', price: 6000, unit: 'evento', category: 'decoracion', emoji: '🎊' },
-  { name: 'Proyector', price: 2500, unit: 'evento', category: 'equipo', emoji: '📽️' },
-  { name: 'Mesa de dulces', price: 5000, unit: 'evento', category: 'alimentos', emoji: '🍰' },
-  { name: 'Menú personalizado', price: 0, unit: 'persona', category: 'alimentos', emoji: '🍽️' },
-  { name: 'Hora extra', price: 5000, unit: 'hora', category: 'tiempo', emoji: '⏰' },
-  { name: 'Mobiliario extra', price: 3000, unit: 'evento', category: 'mobiliario', emoji: '🪑' },
+  { name: 'Bartender', price: 8000, unit: 'evento', category: 'personal', icon: Wine },
+  { name: 'DJ', price: 15000, unit: 'evento', category: 'personal', icon: Music2 },
+  { name: 'Sonido', price: 5000, unit: 'evento', category: 'equipo', icon: Volume2 },
+  { name: 'Iluminación', price: 4000, unit: 'evento', category: 'equipo', icon: Sun },
+  { name: 'Camarero', price: 3500, unit: 'evento', category: 'personal', icon: Users },
+  { name: 'Seguridad', price: 4000, unit: 'evento', category: 'personal', icon: Shield },
+  { name: 'Decoración básica', price: 6000, unit: 'evento', category: 'decoracion', icon: Sparkles },
+  { name: 'Proyector', price: 2500, unit: 'evento', category: 'equipo', icon: Monitor },
+  { name: 'Mesa de dulces', price: 5000, unit: 'evento', category: 'alimentos', icon: Package },
+  { name: 'Menú personalizado', price: 0, unit: 'persona', category: 'alimentos', icon: UtensilsCrossed },
+  { name: 'Hora extra', price: 5000, unit: 'hora', category: 'tiempo', icon: Clock },
+  { name: 'Mobiliario extra', price: 3000, unit: 'evento', category: 'mobiliario', icon: Users },
 ]
 
 interface AddonItem {
-  name: string; price: number; unit: string; category: string; emoji: string
+  name: string; price: number; unit: string; category: string; icon: React.ElementType
 }
 
 interface TimeBlock {
@@ -331,7 +331,7 @@ export default function EspacioPage() {
     // Addons
     if (space.space_addons?.length) {
       setAddons(space.space_addons.map((a: any) => ({
-        name: a.name, price: a.price, unit: a.unit, category: a.category, emoji: '✨',
+        name: a.name, price: a.price, unit: a.unit, category: a.category, icon: Package,
       })))
     }
     // Actividades
@@ -641,7 +641,7 @@ export default function EspacioPage() {
                       color: 'var(--text-secondary)',
                     }}
                   >
-                    <span className="text-xl">{cat.emoji}</span>
+                    {(() => { const I = cat.icon as any; return <I size={18} /> })()}
                     <span>{cat.label}</span>
                   </button>
                 ))}
@@ -777,7 +777,7 @@ export default function EspacioPage() {
                   )}
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xl">{option.emoji}</span>
+                    {(() => { const I = option.icon as any; return <I size={18} style={{ color: pricingType === option.value ? 'var(--brand)' : 'var(--text-muted)' }} /> })()}
                     <span className="font-semibold text-sm" style={{ color: pricingType === option.value ? 'var(--brand)' : 'var(--text-primary)' }}>
                       {option.label}
                     </span>
@@ -984,7 +984,7 @@ export default function EspacioPage() {
                         border:     '1px solid var(--border-subtle)',
                       }}
                     >
-                      <span className="text-xl shrink-0">{addon.emoji}</span>
+                      {(() => { const I = addon.icon as any; return <I size={18} style={{ color: 'var(--text-secondary)' }} /> })()}
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium truncate"
                           style={{ color: selected ? 'var(--brand)' : 'var(--text-primary)' }}>
@@ -1015,7 +1015,7 @@ export default function EspacioPage() {
                     <div key={i}
                       className="flex items-center gap-4 px-4 py-3"
                       style={{ borderBottom: i < addons.length - 1 ? '1px solid var(--border-subtle)' : 'none', background: 'var(--bg-elevated)' }}>
-                      <span className="text-base shrink-0">{addon.emoji}</span>
+                      {(() => { const I = addon.icon as any; return <I size={16} style={{ color: 'var(--text-secondary)' }} /> })()}
                       <span className="text-sm font-medium flex-1" style={{ color: 'var(--text-primary)' }}>{addon.name}</span>
                       <div className="flex items-center gap-2">
                         <span className="text-xs" style={{ color: 'var(--text-muted)' }}>RD$</span>
@@ -1083,23 +1083,23 @@ export default function EspacioPage() {
               {/* Grid de facilidades booleanas */}
               <div className="grid grid-cols-2 gap-2 mb-5">
                 {([
-                  { label: 'Estacionamiento',    emoji: '🅿️', value: hasParkingFac,   setter: setHasParkingFac },
-                  { label: 'Valet parking',       emoji: '🚗', value: hasValetParking, setter: setHasValetParking },
-                  { label: 'WiFi',                emoji: '📶', value: hasWifi,         setter: setHasWifi },
-                  { label: 'Aire acondicionado',  emoji: '❄️', value: hasAc,           setter: setHasAc },
-                  { label: 'Sistema de sonido',   emoji: '🔊', value: hasSoundSystem,  setter: setHasSoundSystem },
-                  { label: 'Proyector / pantalla',emoji: '📽️', value: hasProjector,    setter: setHasProjector },
-                  { label: 'Pista de baile',      emoji: '💃', value: hasDanceFloor,   setter: setHasDanceFloor },
-                  { label: 'Área exterior',       emoji: '🌿', value: hasOutdoorArea,  setter: setHasOutdoorArea },
-                  { label: 'Piscina',             emoji: '🏊', value: hasPool,         setter: setHasPool },
-                  { label: 'Cocina equipada',     emoji: '🍳', value: hasKitchen,      setter: setHasKitchen },
-                  { label: 'Barra de bar',        emoji: '🍸', value: hasBar,          setter: setHasBar },
-                  { label: 'Escenario',           emoji: '🎭', value: hasStage,        setter: setHasStage },
-                  { label: 'Ciclorama',           emoji: '🎬', value: hasCyclorama,    setter: setHasCyclorama },
-                  { label: 'Luz natural',         emoji: '☀️', value: hasNaturalLight, setter: setHasNaturalLight },
-                  { label: 'Planta eléctrica',    emoji: '⚡', value: hasGenerator,    setter: setHasGenerator },
-                  { label: 'Camerino',            emoji: '👗', value: hasDressingRoom, setter: setHasDressingRoom },
-                ] as { label: string; emoji: string; value: boolean; setter: (v: boolean) => void }[]).map(item => (
+                  { label: 'Estacionamiento',    icon: Car,             value: hasParkingFac,   setter: setHasParkingFac },
+                  { label: 'Valet parking',       icon: Car,             value: hasValetParking, setter: setHasValetParking },
+                  { label: 'WiFi',                icon: Wifi,            value: hasWifi,         setter: setHasWifi },
+                  { label: 'Aire acondicionado',  icon: Wind,            value: hasAc,           setter: setHasAc },
+                  { label: 'Sistema de sonido',   icon: Volume2,         value: hasSoundSystem,  setter: setHasSoundSystem },
+                  { label: 'Proyector / pantalla',icon: Monitor,         value: hasProjector,    setter: setHasProjector },
+                  { label: 'Pista de baile',      icon: Music2,          value: hasDanceFloor,   setter: setHasDanceFloor },
+                  { label: 'Área exterior',       icon: Trees,           value: hasOutdoorArea,  setter: setHasOutdoorArea },
+                  { label: 'Piscina',             icon: Waves,           value: hasPool,         setter: setHasPool },
+                  { label: 'Cocina equipada',     icon: UtensilsCrossed, value: hasKitchen,      setter: setHasKitchen },
+                  { label: 'Barra de bar',        icon: Wine,            value: hasBar,          setter: setHasBar },
+                  { label: 'Escenario',           icon: Music2,          value: hasStage,        setter: setHasStage },
+                  { label: 'Ciclorama',           icon: Camera,          value: hasCyclorama,    setter: setHasCyclorama },
+                  { label: 'Luz natural',         icon: Sun,             value: hasNaturalLight, setter: setHasNaturalLight },
+                  { label: 'Planta eléctrica',    icon: Zap,             value: hasGenerator,    setter: setHasGenerator },
+                  { label: 'Camerino',            icon: ShowerHead,      value: hasDressingRoom, setter: setHasDressingRoom },
+                ] as { label: string; icon: React.ElementType; value: boolean; setter: (v: boolean) => void }[]).map(item => (
                   <button key={item.label}
                     onClick={() => item.setter(!item.value)}
                     className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left transition-all"
@@ -1107,7 +1107,7 @@ export default function EspacioPage() {
                       ? { background: 'var(--brand-dim)', border: '1.5px solid var(--brand-border)', color: 'var(--brand)' }
                       : { background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }
                     }>
-                    <span className="text-base shrink-0">{item.emoji}</span>
+                    {(() => { const I = item.icon as any; return <I size={16} style={{ color: item.value ? 'var(--brand)' : 'var(--text-muted)' }} /> })()}
                     <span className="text-xs font-medium leading-tight">{item.label}</span>
                     {item.value && <span className="ml-auto text-xs font-bold" style={{ color: 'var(--brand)' }}>✓</span>}
                   </button>
