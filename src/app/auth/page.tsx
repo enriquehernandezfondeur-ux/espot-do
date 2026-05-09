@@ -27,7 +27,8 @@ function AppleIcon() {
 }
 
 // ── View types ────────────────────────────────────────────
-type Screen = 'login' | 'register' | 'forgot' | 'forgot_sent'
+type Screen   = 'login' | 'register' | 'forgot' | 'forgot_sent'
+type UserType = 'client' | 'host' | null
 
 function AuthContent() {
   const searchParams = useSearchParams()
@@ -37,6 +38,7 @@ function AuthContent() {
   const defaultScreen: Screen = searchParams.get('mode') === 'register' ? 'register' : 'login'
 
   const [screen,   setScreen]   = useState<Screen>(defaultScreen)
+  const [userType, setUserType] = useState<UserType>(isHost ? 'host' : null)
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
@@ -56,7 +58,7 @@ function AuthContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function reset() { setError(''); setEmail(''); setPassword('') }
+  function reset() { setError(''); setEmail(''); setPassword(''); setUserType(isHost ? 'host' : null) }
 
   // ── OAuth ───────────────────────────────────────────────
   async function handleOAuth(provider: 'google' | 'apple') {
@@ -92,7 +94,7 @@ function AuthContent() {
     setLoading(true); setError('')
     const { error } = await supabase.auth.signUp({
       email, password,
-      options: { data: { full_name: fullName, phone, role: isHost ? 'host' : 'guest' } },
+      options: { data: { full_name: fullName, phone, role: userType === 'host' ? 'host' : 'guest' } },
     })
     if (error) {
       setError(error.message)
@@ -251,14 +253,77 @@ function AuthContent() {
 
       {error && <ErrorBox msg={error} />}
 
-      {/* Form */}
+      {/* Selector de tipo de cuenta — solo en registro sin rol elegido */}
+      {screen === 'register' && userType === null && (
+        <div>
+          <p className="text-sm font-semibold text-center mb-4" style={{ color: 'rgba(255,255,255,0.7)' }}>
+            ¿Cómo vas a usar espot.do?
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            {([
+              {
+                type: 'client' as UserType,
+                icon: '🎉',
+                title: 'Soy cliente',
+                desc: 'Quiero explorar y reservar espacios para mis eventos',
+              },
+              {
+                type: 'host' as UserType,
+                icon: '🏢',
+                title: 'Tengo un negocio',
+                desc: 'Quiero publicar mi espacio y recibir reservas',
+              },
+            ] as { type: UserType; icon: string; title: string; desc: string }[]).map(opt => (
+              <button
+                key={String(opt.type)}
+                type="button"
+                onClick={() => setUserType(opt.type)}
+                className="flex flex-col items-center text-center p-4 rounded-2xl transition-all"
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1.5px solid rgba(255,255,255,0.1)',
+                  color: '#fff',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#35C493'; (e.currentTarget as HTMLElement).style.background = 'rgba(53,196,147,0.08)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)' }}>
+                <span className="text-3xl mb-2">{opt.icon}</span>
+                <span className="text-sm font-bold mb-1">{opt.title}</span>
+                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)', lineHeight: 1.4 }}>{opt.desc}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Form — solo si ya eligió tipo de cuenta (o es login) */}
+      {(screen === 'login' || userType !== null) && (
       <form onSubmit={screen === 'login' ? handleLogin : handleRegister} className="space-y-4">
         {screen === 'register' && (
           <>
+            {/* Chip de tipo elegido + opción de cambiar */}
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full"
+                style={{ background: userType === 'host' ? 'rgba(53,196,147,0.12)' : 'rgba(37,99,235,0.12)', color: userType === 'host' ? '#35C493' : '#60A5FA' }}>
+                {userType === 'host' ? '🏢 Negocio' : '🎉 Cliente'}
+              </span>
+              <button type="button" onClick={() => setUserType(null)}
+                className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                Cambiar
+              </button>
+            </div>
+
             <div>
-              <label style={labelStyle}>Nombre completo</label>
+              <label style={labelStyle}>
+                {userType === 'host' ? 'Nombre del negocio' : 'Nombre completo'}
+              </label>
               <input type="text" value={fullName} onChange={e => setFullName(e.target.value)}
-                placeholder="María González" required style={inputStyle} />
+                placeholder={userType === 'host' ? 'Ej: Salón La Elegancia' : 'Ej: María González'}
+                required style={inputStyle} />
+              {userType === 'host' && (
+                <p className="text-xs mt-1.5" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  📍 Este nombre es visible públicamente en el marketplace
+                </p>
+              )}
             </div>
             <div>
               <label style={labelStyle}>Teléfono / WhatsApp</label>
@@ -309,12 +374,13 @@ function AuthContent() {
           className="w-full font-bold py-3.5 rounded-xl text-sm transition-all mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ background: '#35C493', color: '#0B0F0E', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
           {loading ? 'Cargando...' : screen === 'login'
-            ? (isHost ? 'Entrar al panel de propietario' : 'Iniciar sesión')
-            : (isHost ? 'Crear cuenta y publicar mi espacio' : 'Crear mi cuenta')}
+            ? 'Iniciar sesión'
+            : userType === 'host' ? 'Crear cuenta de negocio' : 'Crear mi cuenta'}
         </button>
       </form>
+      )}
 
-      {screen === 'register' && (
+      {screen === 'register' && userType !== null && (
         <p className="text-xs text-center mt-4" style={{ color: 'rgba(255,255,255,0.25)' }}>
           Al registrarte aceptas los{' '}
           <Link href="/terminos" style={{ color: 'rgba(255,255,255,0.45)', textDecoration: 'underline' }}>

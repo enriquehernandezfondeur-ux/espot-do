@@ -191,11 +191,29 @@ function AjustesInner() {
       {/* Formulario */}
       <div className="rounded-2xl p-6 mb-5 space-y-5"
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-        <h2 className="font-bold" style={{ color: 'var(--text-primary)' }}>Información personal</h2>
+        <h2 className="font-bold" style={{ color: 'var(--text-primary)' }}>Información del negocio</h2>
+
+        {/* Nombre del negocio — campo más importante, con contexto */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-xs font-semibold uppercase tracking-widest"
+              style={{ color: 'var(--text-muted)' }}>Nombre del negocio</label>
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+              style={{ background: 'rgba(53,196,147,0.1)', color: 'var(--brand)' }}>
+              📍 Visible en el marketplace
+            </span>
+          </div>
+          <input value={fullName} onChange={e => setFullName(e.target.value)}
+            placeholder="Ej: Salón La Elegancia"
+            className="input-base w-full rounded-xl px-4 py-3.5 text-sm" />
+          <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
+            Este nombre lo verán los clientes cuando busquen espacios. Usa el nombre de tu negocio, no tu nombre personal.
+          </p>
+        </div>
+
         {[
-          { label: 'Nombre completo', value: fullName, setter: setFullName, placeholder: 'Tu nombre' },
-          { label: 'Teléfono',        value: phone,    setter: setPhone,    placeholder: '+1 (809) 000-0000' },
-          { label: 'WhatsApp',        value: whatsapp, setter: setWhatsapp, placeholder: '+1 (829) 000-0000' },
+          { label: 'Teléfono',  value: phone,    setter: setPhone,    placeholder: '+1 (809) 000-0000' },
+          { label: 'WhatsApp',  value: whatsapp, setter: setWhatsapp, placeholder: '+1 (829) 000-0000' },
         ].map(field => (
           <div key={field.label}>
             <label className="block text-xs font-semibold uppercase tracking-widest mb-2"
