@@ -151,7 +151,6 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   const [dateFrom,       setDateFrom]       = useState(initialParams.dateFrom ?? '')
   const [timeFrom,       setTimeFrom]       = useState(initialParams.timeFrom ?? '')
   const [datePickerOpen, setDatePickerOpen] = useState(false)
-  const [pickerPos,      setPickerPos]      = useState({ top: 0, left: 0 })
   const datePickerRef  = useRef<HTMLDivElement>(null)
   const [priceMin,       setPriceMin]       = useState('')
   const [priceMax,       setPriceMax]       = useState('')
@@ -183,13 +182,20 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
     return () => document.removeEventListener('keydown', onKey)
   }, [datePickerOpen])
 
-  function openDatePicker() {
-    if (!datePickerOpen && datePickerRef.current) {
-      const rect = datePickerRef.current.getBoundingClientRect()
-      const pickerW = 310
-      const left = rect.left + pickerW > window.innerWidth ? rect.right - pickerW : rect.left
-      setPickerPos({ top: rect.bottom + 8, left })
+  useEffect(() => {
+    function onScroll() {
+      setCatOpen(false)
+      setCapOpen(false)
+      setSecOpen(false)
+      setPriceOpen(false)
+      setSortOpen(false)
+      setDatePickerOpen(false)
     }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  function openDatePicker() {
     setDatePickerOpen(o => !o)
   }
 
@@ -364,7 +370,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
       {/* ── Barra de filtros sticky ── */}
       <div className="sticky top-16 z-40 w-full"
         style={{
-          background:     'rgba(244,246,245,0.97)',
+          background:     '#F4F6F5',
           backdropFilter: 'blur(16px)',
           borderBottom:   '1px solid var(--border-subtle)',
           boxShadow:      '0 1px 8px rgba(0,0,0,0.05)',
@@ -382,7 +388,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                   value={q} onChange={e => setQ(e.target.value)}
                   placeholder="Buscar espacios..."
                   className="flex-1 bg-transparent text-sm focus:outline-none min-w-0"
-                  style={{ color: 'var(--text-primary)' }}
+                  style={{ color: 'var(--text-primary)', fontSize: 16 }}
                 />
                 {q && (
                   <button onClick={() => setQ('')} style={{ color: 'var(--text-muted)' }}>
@@ -472,7 +478,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                           onChange={e => { setCapacidadInput(e.target.value); setCapacidad(e.target.value) }}
                           placeholder="0"
                           className="text-2xl font-bold text-center bg-transparent focus:outline-none w-20 tabular-nums"
-                          style={{ color: 'var(--text-primary)' }}
+                          style={{ color: 'var(--text-primary)', fontSize: 16 }}
                         />
                         <span className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>personas</span>
                       </div>
@@ -534,7 +540,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                           onChange={e => { setSectorQ(e.target.value); setSector('') }}
                           placeholder="Buscar sector o ciudad..."
                           className="flex-1 bg-transparent text-sm focus:outline-none"
-                          style={{ color: 'var(--text-primary)' }}
+                          style={{ color: 'var(--text-primary)', fontSize: 16 }}
                         />
                       </div>
                     </div>
@@ -577,12 +583,14 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                 {datePickerOpen && (
                   <>
                     <div className="fixed inset-0 z-[9998]" onClick={() => setDatePickerOpen(false)} />
-                    <div style={{
-                      position: 'fixed', top: pickerPos.top, left: pickerPos.left,
-                      zIndex: 9999, background: '#fff', borderRadius: 16,
-                      border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.14)',
-                      maxHeight: `calc(100dvh - ${pickerPos.top + 16}px)`, overflowY: 'auto',
-                    }}>
+                    <div className="absolute top-full mt-2 z-[9999]"
+                      style={{
+                        right: 0,
+                        background: '#fff', borderRadius: 16,
+                        border: '1px solid var(--border-subtle)',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.14)',
+                        maxHeight: 'calc(100dvh - 200px)', overflowY: 'auto',
+                      }}>
                       <DateTimePicker date={dateFrom} time={timeFrom} onDate={setDateFrom}
                         onTime={t => { setTimeFrom(t); if (t) setTimeout(() => setDatePickerOpen(false), 200) }}
                         loading={availLoading} />
@@ -708,7 +716,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                   value={q} onChange={e => setQ(e.target.value)}
                   placeholder="Salones, rooftops, eventos..."
                   className="flex-1 min-w-0 bg-transparent focus:outline-none font-medium"
-                  style={{ color: 'var(--text-primary)', fontSize: 15 }}
+                  style={{ color: 'var(--text-primary)', fontSize: 16 }}
                 />
                 {q && (
                   <button onClick={() => setQ('')}
@@ -968,7 +976,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                     onChange={e => { setSectorQ(e.target.value); if (!e.target.value) setSector('') }}
                     placeholder="Ej: Piantini, Naco, Santiago..."
                     className="input-base w-full rounded-xl pl-10 pr-10 py-3.5 text-sm"
-                    style={{ color: 'var(--text-primary)' }}
+                    style={{ color: 'var(--text-primary)', fontSize: 16 }}
                   />
                   {sectorQ && (
                     <button onClick={clearSector}
@@ -1040,7 +1048,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                       onBlur={() => { if (capacidadInput && parseInt(capacidadInput) < 0) applyCapacity('') }}
                       placeholder="0"
                       className="text-3xl font-bold text-center bg-transparent focus:outline-none w-24 tabular-nums"
-                      style={{ color: 'var(--text-primary)' }}
+                      style={{ color: 'var(--text-primary)', fontSize: 16 }}
                     />
                     <span className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>personas</span>
                   </div>
@@ -1124,12 +1132,12 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                   <div>
                     <label className="block text-xs mb-1.5" style={{ color: 'var(--text-muted)' }}>Mínimo</label>
                     <input type="number" value={priceMin} onChange={e => setPriceMin(e.target.value)}
-                      placeholder="0" className="input-base w-full rounded-xl px-4 py-3.5 text-sm" />
+                      placeholder="0" className="input-base w-full rounded-xl px-4 py-3.5 text-sm" style={{ fontSize: 16 }} />
                   </div>
                   <div>
                     <label className="block text-xs mb-1.5" style={{ color: 'var(--text-muted)' }}>Máximo</label>
                     <input type="number" value={priceMax} onChange={e => setPriceMax(e.target.value)}
-                      placeholder="Sin límite" className="input-base w-full rounded-xl px-4 py-3.5 text-sm" />
+                      placeholder="Sin límite" className="input-base w-full rounded-xl px-4 py-3.5 text-sm" style={{ fontSize: 16 }} />
                   </div>
                 </div>
               </div>
