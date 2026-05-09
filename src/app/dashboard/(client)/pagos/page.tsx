@@ -42,7 +42,7 @@ export default function PagosPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
         {[
           { label: 'Total pagado',   value: formatCurrency(totalPaid),    color: '#16A34A' },
-          { label: 'Pendiente',      value: formatCurrency(totalPending), color: '#D97706' },
+          { label: 'Por confirmar',  value: formatCurrency(totalPending), color: '#D97706' },
           { label: 'Transacciones',  value: bookings.length,              color: 'var(--brand)' },
         ].map(({ label, value, color }) => (
           <div key={label} className="rounded-2xl p-5"

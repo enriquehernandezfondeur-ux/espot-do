@@ -75,7 +75,7 @@ function AccessForm() {
               style={{
                 width: '100%', padding: '14px 16px', borderRadius: 14,
                 background: 'rgba(255,255,255,0.06)', border: `1.5px solid ${error ? 'rgba(220,38,38,0.5)' : 'rgba(255,255,255,0.1)'}`,
-                color: '#fff', fontSize: 15, outline: 'none', boxSizing: 'border-box',
+                color: '#fff', fontSize: 16, outline: 'none', boxSizing: 'border-box',
                 fontFamily: 'inherit',
               }}
             />

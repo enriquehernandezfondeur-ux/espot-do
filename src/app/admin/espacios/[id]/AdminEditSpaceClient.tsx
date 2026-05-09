@@ -190,7 +190,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
   }
 
   const inputCls = "w-full px-4 py-3 rounded-xl text-sm border focus:outline-none transition-colors"
-  const inputStyle = { background: '#F8FAFB', border: '1.5px solid #E8ECF0', color: '#0F1623' }
+  const inputStyle = { background: '#F8FAFB', border: '1.5px solid #E8ECF0', color: '#0F1623', fontSize: 16 }
 
   return (
     <div className="p-4 md:p-6 max-w-5xl mx-auto">

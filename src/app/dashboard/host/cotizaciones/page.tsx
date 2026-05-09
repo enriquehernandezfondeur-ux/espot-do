@@ -28,8 +28,9 @@ export default function CotizacionesPage() {
     if (isNaN(parsedPrice) || parsedPrice <= 0) return
     setSending(true)
     const result = await respondToQuote(selected.id, parsedPrice, response || undefined)
-    if (!('error' in result)) {
-      // La reserva pasa a 'pending' con el precio cotizado
+    if ('error' in result) {
+      alert(`Error al enviar cotización: ${result.error}`)
+    } else {
       setQuotes(prev => prev.filter(q => q.id !== selected.id))
       setSelected(null)
       setResponse('')
@@ -158,7 +159,8 @@ export default function CotizacionesPage() {
                     </label>
                     <input type="number" value={price} onChange={e => setPrice(e.target.value)}
                       placeholder="Ej: 85000"
-                      className="input-base w-full rounded-xl px-4 py-3 text-sm" />
+                      className="input-base w-full rounded-xl px-4 py-3 text-sm"
+                      style={{ fontSize: 16 }} />
                     {price && (
                       <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
                         Comisión Espot: {formatCurrency(parseFloat(price) * 0.10)} · Recibes: {formatCurrency(parseFloat(price) * 0.90)}
@@ -173,7 +175,8 @@ export default function CotizacionesPage() {
                     <textarea value={response} onChange={e => setResponse(e.target.value)}
                       placeholder="Ej: Buenos días, con gusto podemos atender su evento. El precio incluye..."
                       rows={4}
-                      className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none" />
+                      className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none"
+                      style={{ fontSize: 16 }} />
                   </div>
 
                   <div className="flex gap-3">

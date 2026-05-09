@@ -28,6 +28,8 @@ export default function AdminUsersPage() {
   )
 
   async function handleRoleChange(userId: string, role: string) {
+    const label = roleConfig[role]?.label ?? role
+    if (!window.confirm(`¿Cambiar el rol de este usuario a "${label}"?`)) return
     setUpdating(userId)
     await updateUserRole(userId, role)
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, role } : u))
