@@ -3,6 +3,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/email/send'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
+import {
+  tplSolicitudCliente, tplSolicitudHost,
+  tplAceptadaCliente, tplConfirmadaCliente, tplConfirmadaHost,
+  tplRechazadaCliente, tplCancelada,
+} from '@/lib/email/templates'
 import { createBookingEvent, deleteBookingEvent } from '@/lib/google-calendar'
 export type { BookingStatus } from '@/lib/bookingConfig'
 
@@ -171,52 +176,25 @@ export async function createBooking(payload: CreateBookingPayload) {
   const spaceName  = space.name
   const eventInfo  = `${formatDate(payload.eventDate)} · ${formatTime(payload.startTime)} – ${formatTime(payload.endTime)} · ${payload.guestCount} personas`
 
+  const bookingData = {
+    guestName, guestEmail, hostName: host?.full_name ?? '',
+    spaceName, spaceAddress: space.address ?? '',
+    eventDate: payload.eventDate, startTime: payload.startTime, endTime: payload.endTime,
+    eventType: payload.eventType, guestCount: payload.guestCount,
+    totalAmount: payload.totalAmount, platformFee: payload.platformFee,
+    basePrice: payload.basePrice, selectedAddons: [],
+    bookingId: booking.id,
+  }
   await Promise.all([
-    // Email al cliente
     guestEmail && sendEmail({
       to: guestEmail,
-      subject: `✅ Solicitud recibida — ${spaceName}`,
-      html: emailTemplate({
-        title: '¡Solicitud enviada!',
-        subtitle: 'El propietario revisará tu solicitud y responderá en menos de 24 horas.',
-        color: '#2563EB',
-        emoji: '📋',
-        body: `
-          <p>Hola <strong>${guestName}</strong>,</p>
-          <p>Tu solicitud de reserva fue enviada a <strong>${spaceName}</strong>.</p>
-          ${infoBox([
-            { label: 'Evento', value: payload.eventType },
-            { label: 'Fecha y horario', value: eventInfo },
-            { label: 'Total del evento', value: formatCurrency(payload.totalAmount) },
-            { label: 'Estado', value: '⏳ Pendiente de aceptación' },
-          ])}
-          <p style="color:#6B7280;font-size:13px;">
-            Recibirás un email cuando el propietario acepte o rechace tu solicitud.
-          </p>`,
-        cta: { text: 'Ver mis reservas', url: `${SITE}/dashboard/reservas` },
-      }),
+      subject: `Solicitud recibida — ${spaceName}`,
+      html: tplSolicitudCliente(bookingData),
     }),
-    // Email al host
     hostEmail && sendEmail({
       to: hostEmail,
-      subject: `🔔 Nueva solicitud de reserva — ${spaceName}`,
-      html: emailTemplate({
-        title: '¡Nueva solicitud de reserva!',
-        subtitle: 'Tienes 24 horas para aceptar o rechazar.',
-        color: '#35C493',
-        emoji: '🔔',
-        body: `
-          <p>Hola <strong>${host?.full_name}</strong>,</p>
-          <p><strong>${guestName}</strong> quiere reservar <strong>${spaceName}</strong>.</p>
-          ${infoBox([
-            { label: 'Cliente', value: `${guestName} (${guestEmail})` },
-            { label: 'Evento', value: payload.eventType },
-            { label: 'Fecha y horario', value: eventInfo },
-            { label: 'Total del evento', value: formatCurrency(payload.totalAmount) },
-            { label: 'Tu comisión Espot', value: formatCurrency(payload.platformFee) },
-          ])}`,
-        cta: { text: 'Ver en mi panel', url: `${SITE}/dashboard/host/reservas` },
-      }),
+      subject: `Nueva solicitud de reserva — ${spaceName}`,
+      html: tplSolicitudHost(bookingData),
     }),
   ])
 
@@ -252,29 +230,17 @@ export async function acceptBooking(bookingId: string) {
   const depositAmount = formatCurrency(Number(bk.platform_fee))
 
   await Promise.all([
-    // Email al cliente
     guest?.email && sendEmail({
       to: guest.email,
-      subject: `🎉 Reserva aceptada — ${space?.name}`,
-      html: emailTemplate({
-        title: '¡Tu reserva fue aceptada!',
-        subtitle: 'Completa el pago del depósito para confirmar tu fecha.',
-        color: '#16A34A',
-        emoji: '🎉',
-        body: `
-          <p>Hola <strong>${guest?.full_name ?? 'Cliente'}</strong>,</p>
-          <p>El propietario de <strong>${space?.name}</strong> aceptó tu solicitud.</p>
-          ${infoBox([
-            { label: 'Evento', value: bk.event_type },
-            { label: 'Fecha', value: formatDate(bk.event_date) },
-            { label: 'Horario', value: `${formatTime(bk.start_time)} – ${formatTime(bk.end_time)}` },
-            { label: 'Depósito a pagar (10%)', value: depositAmount },
-            { label: 'Total del evento', value: formatCurrency(Number(bk.total_amount)) },
-          ])}
-          <p style="color:#16A34A;font-weight:bold;">
-            Paga el depósito del 10% para asegurar tu fecha.
-          </p>`,
-        cta: { text: 'Completar pago ahora', url: `${SITE}/pago/${bookingId}` },
+      subject: `El propietario aceptó tu solicitud — ${space?.name}`,
+      html: tplAceptadaCliente({
+        guestName: guest?.full_name ?? 'Cliente',
+        hostName: '', guestEmail: guest?.email ?? '',
+        spaceName: space?.name ?? '', spaceAddress: space?.address ?? '',
+        eventDate: bk.event_date, startTime: bk.start_time, endTime: bk.end_time,
+        eventType: bk.event_type, guestCount: bk.guest_count,
+        totalAmount: Number(bk.total_amount), platformFee: Number(bk.platform_fee),
+        basePrice: Number(bk.total_amount), selectedAddons: [], bookingId,
       }),
     }),
   ])
@@ -320,18 +286,12 @@ export async function rejectBooking(bookingId: string, reason?: string) {
   if (guest?.email) {
     await sendEmail({
       to: guest.email,
-      subject: `Actualización sobre tu reserva en ${space?.name}`,
-      html: emailTemplate({
-        title: 'Reserva no disponible',
-        subtitle: 'El propietario no pudo aceptar tu solicitud para esa fecha.',
-        color: '#DC2626',
-        emoji: '📅',
-        body: `
-          <p>Hola <strong>${guest?.full_name ?? 'Cliente'}</strong>,</p>
-          <p>Lamentablemente el propietario de <strong>${space?.name}</strong> no pudo aceptar tu solicitud para el ${formatDate(bk.event_date)}.</p>
-          ${reason ? `<p>Motivo: <em>${reason}</em></p>` : ''}
-          <p>Te invitamos a explorar otros espacios disponibles.</p>`,
-        cta: { text: 'Ver otros espacios', url: `${SITE}/buscar` },
+      subject: `El espacio no está disponible — ${space?.name}`,
+      html: tplRechazadaCliente({
+        guestName: guest?.full_name ?? 'Cliente',
+        spaceName: space?.name ?? '',
+        eventDate: bk.event_date,
+        reason,
       }),
     })
   }
@@ -411,52 +371,25 @@ export async function confirmPayment(bookingId: string) {
     }
   }
 
+  const confirmData = {
+    guestName: guest?.full_name ?? 'Cliente', guestEmail: guest?.email ?? '',
+    hostName: host?.full_name ?? 'Propietario',
+    spaceName: space?.name ?? '', spaceAddress: `${space?.address ?? ''}, ${space?.city ?? ''}`,
+    eventDate: bk.event_date, startTime: bk.start_time, endTime: bk.end_time,
+    eventType: bk.event_type, guestCount: bk.guest_count,
+    totalAmount: Number(bk.total_amount), platformFee: Number(bk.platform_fee),
+    basePrice: Number(bk.total_amount), selectedAddons: [], bookingId,
+  }
   await Promise.all([
-    // Email de confirmación al cliente
     guest?.email && sendEmail({
       to: guest.email,
-      subject: `🎊 ¡Reserva confirmada! — ${space?.name}`,
-      html: emailTemplate({
-        title: '¡Reserva confirmada!',
-        subtitle: 'Tu evento está asegurado. ¡Nos vemos pronto!',
-        color: '#16A34A',
-        emoji: '🎊',
-        body: `
-          <p>Hola <strong>${guest?.full_name ?? 'Cliente'}</strong>,</p>
-          <p>Tu reserva en <strong>${space?.name}</strong> está confirmada.</p>
-          ${infoBox([
-            { label: 'Evento', value: bk.event_type },
-            { label: 'Fecha', value: formatDate(bk.event_date) },
-            { label: 'Horario', value: `${formatTime(bk.start_time)} – ${formatTime(bk.end_time)}` },
-            { label: 'Personas', value: String(bk.guest_count) },
-            { label: 'Dirección', value: `${space?.address}, ${space?.city}` },
-            { label: 'Pagaste (10%)', value: formatCurrency(Number(bk.platform_fee)) },
-            { label: 'Resta pagar en el espacio', value: remainingAmount },
-          ])}`,
-        cta: { text: 'Ver mi reserva', url: `${SITE}/dashboard/reservas` },
-      }),
+      subject: `Reserva confirmada — ${space?.name}`,
+      html: tplConfirmadaCliente({ ...confirmData, remainingAmount: Number(bk.total_amount) - Number(bk.platform_fee) }),
     }),
-    // Email al host: reserva confirmada y pagada
     host?.email && sendEmail({
       to: host.email,
-      subject: `✅ Reserva confirmada con pago — ${space?.name}`,
-      html: emailTemplate({
-        title: 'Pago recibido — Reserva confirmada',
-        subtitle: `${guest?.full_name} completó el pago de la reserva.`,
-        color: '#35C493',
-        emoji: '💰',
-        body: `
-          <p>Hola <strong>${host?.full_name ?? 'Propietario'}</strong>,</p>
-          <p><strong>${guest?.full_name}</strong> confirmó y pagó su reserva en <strong>${space?.name}</strong>.</p>
-          ${infoBox([
-            { label: 'Cliente', value: guest?.full_name ?? '—' },
-            { label: 'Evento', value: bk.event_type },
-            { label: 'Fecha', value: formatDate(bk.event_date) },
-            { label: 'Total del evento', value: formatCurrency(Number(bk.total_amount)) },
-            { label: 'Comisión Espot (cobrada)', value: formatCurrency(Number(bk.platform_fee)) },
-          ])}`,
-        cta: { text: 'Ver en mi panel', url: `${SITE}/dashboard/host/reservas` },
-      }),
+      subject: `Reserva confirmada con pago — ${space?.name}`,
+      html: tplConfirmadaHost(confirmData),
     }),
   ])
 
@@ -514,82 +447,16 @@ export async function cancelBooking(bookingId: string, reason?: string) {
     await sendEmail({
       to: notifyEmail,
       subject: `Reserva cancelada — ${space?.name}`,
-      html: emailTemplate({
-        title: 'Reserva cancelada',
-        subtitle: '',
-        color: '#DC2626',
-        emoji: '❌',
-        body: `
-          <p>Hola <strong>${notifyName}</strong>,</p>
-          <p>La reserva en <strong>${space?.name}</strong> para el ${formatDate(bk.event_date)} fue cancelada por ${cancelledBy}.</p>
-          ${reason ? `<p>Motivo: <em>${reason}</em></p>` : ''}`,
-        cta: { text: 'Ver detalles', url: `${SITE}/dashboard` },
+      html: tplCancelada({
+        recipientName: notifyName ?? '',
+        cancelledBy: cancelledBy ?? '',
+        spaceName: space?.name ?? '',
+        eventDate: bk.event_date,
+        reason,
+        isGuest: !isGuest, // El que recibe es el opuesto
       }),
     })
   }
 
   return { success: true }
-}
-
-// ── HELPERS PARA EMAILS ───────────────────────────────────
-function infoBox(rows: { label: string; value: string }[]) {
-  return `
-    <table style="width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden;margin:16px 0;background:#F8FAFB;border:1px solid #E8ECF0;">
-      ${rows.map(r => `
-        <tr>
-          <td style="padding:10px 16px;font-size:13px;color:#6B7280;border-bottom:1px solid #E8ECF0;width:40%">${r.label}</td>
-          <td style="padding:10px 16px;font-size:13px;color:#0F1623;font-weight:600;border-bottom:1px solid #E8ECF0;">${r.value}</td>
-        </tr>
-      `).join('')}
-    </table>`
-}
-
-function emailTemplate({ title, subtitle, color, emoji, body, cta }: {
-  title: string; subtitle: string; color: string; emoji: string
-  body: string; cta: { text: string; url: string }
-}) {
-  return `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#F4F6F8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-  <div style="max-width:560px;margin:0 auto;padding:32px 20px;">
-
-    <!-- Logo -->
-    <div style="text-align:center;margin-bottom:24px;">
-      <div style="display:inline-flex;align-items:center;gap:8px;">
-        <div style="width:32px;height:32px;background:#35C493;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;">
-          <span style="color:#fff;font-weight:bold;font-size:16px;">E</span>
-        </div>
-        <span style="color:#0F1623;font-size:20px;font-weight:bold;">espot<span style="color:#35C493;font-weight:300;">.do</span></span>
-      </div>
-    </div>
-
-    <!-- Card -->
-    <div style="background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
-
-      <!-- Header -->
-      <div style="background:${color};padding:28px 32px;text-align:center;">
-        <div style="font-size:36px;margin-bottom:8px;">${emoji}</div>
-        <h1 style="color:#fff;font-size:20px;font-weight:bold;margin:0 0 6px;">${title}</h1>
-        ${subtitle ? `<p style="color:rgba(255,255,255,0.8);font-size:13px;margin:0;">${subtitle}</p>` : ''}
-      </div>
-
-      <!-- Body -->
-      <div style="padding:28px 32px;color:#374151;font-size:14px;line-height:1.7;">
-        ${body}
-      </div>
-
-      <!-- CTA -->
-      <div style="padding:0 32px 28px;text-align:center;">
-        <a href="${cta.url}"
-          style="display:inline-block;background:#35C493;color:#fff;font-size:14px;font-weight:bold;padding:14px 32px;border-radius:12px;text-decoration:none;">
-          ${cta.text} →
-        </a>
-      </div>
-    </div>
-
-    <p style="color:#9CA3AF;font-size:11px;text-align:center;margin-top:20px;">
-      © 2026 EspotHub · República Dominicana
-    </p>
-  </div>
-</body></html>`
 }

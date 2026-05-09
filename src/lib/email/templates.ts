@@ -1,10 +1,121 @@
+/**
+ * Sistema centralizado de emails para EspotHub.
+ * Un único template base, consistente con la identidad de marca.
+ */
+
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 
-interface BookingEmailData {
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
+
+// ── Componentes reutilizables ────────────────────────────
+
+function logo() {
+  return `
+    <div style="text-align:center;margin-bottom:36px;">
+      <img src="${SITE}/logo-dark.svg" alt="EspotHub" height="26"
+        style="height:26px;width:auto;display:inline-block;" />
+    </div>`
+}
+
+function infoRow(label: string, value: string, last = false) {
+  return `
+    <tr>
+      <td style="padding:11px 18px;font-size:13px;color:#6B7280;${last ? '' : 'border-bottom:1px solid #F0F2F5;'}width:44%;background:#FAFBFC;vertical-align:top;">${label}</td>
+      <td style="padding:11px 18px;font-size:13px;color:#0F1623;font-weight:600;${last ? '' : 'border-bottom:1px solid #F0F2F5;'}vertical-align:top;">${value}</td>
+    </tr>`
+}
+
+export function infoBox(rows: { label: string; value: string }[]) {
+  return `
+    <table style="width:100%;border-collapse:collapse;margin:18px 0;border:1px solid #E8ECF0;border-radius:14px;overflow:hidden;">
+      ${rows.map((r, i) => infoRow(r.label, r.value, i === rows.length - 1)).join('')}
+    </table>`
+}
+
+// ── Template base ─────────────────────────────────────────
+
+export function emailBase({
+  title,
+  subtitle,
+  accentColor = '#35C493',
+  body,
+  cta,
+  note,
+}: {
+  title: string
+  subtitle?: string
+  accentColor?: string
+  body: string
+  cta: { text: string; url: string }
+  note?: string
+}) {
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${title}</title>
+</head>
+<body style="margin:0;padding:0;background:#F2F4F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+  <div style="max-width:580px;margin:0 auto;padding:40px 20px;">
+
+    ${logo()}
+
+    <!-- Tarjeta principal -->
+    <div style="background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.07);">
+
+      <!-- Banda de color superior -->
+      <div style="height:5px;background:${accentColor};"></div>
+
+      <!-- Encabezado -->
+      <div style="padding:32px 36px 20px;">
+        <h1 style="color:#03313C;font-size:21px;font-weight:700;margin:0 0 8px;letter-spacing:-0.03em;line-height:1.2;">${title}</h1>
+        ${subtitle ? `<p style="color:#6B7280;font-size:14px;margin:0;line-height:1.5;">${subtitle}</p>` : ''}
+      </div>
+
+      <div style="height:1px;background:#F0F2F5;"></div>
+
+      <!-- Cuerpo -->
+      <div style="padding:24px 36px;color:#374151;font-size:14px;line-height:1.75;">
+        ${body}
+      </div>
+
+      ${note ? `
+      <!-- Nota informativa -->
+      <div style="margin:0 36px 24px;padding:14px 18px;background:#F0FDF9;border:1px solid rgba(53,196,147,0.25);border-radius:12px;">
+        <p style="color:#065F46;font-size:13px;margin:0;line-height:1.6;">${note}</p>
+      </div>` : ''}
+
+      <!-- Botón CTA -->
+      <div style="padding:0 36px 36px;text-align:center;">
+        <a href="${cta.url}"
+          style="display:inline-block;background:#35C493;color:#fff;font-size:14px;font-weight:700;padding:15px 36px;border-radius:14px;text-decoration:none;letter-spacing:-0.01em;">
+          ${cta.text} →
+        </a>
+      </div>
+    </div>
+
+    <!-- Pie de página -->
+    <div style="text-align:center;margin-top:28px;">
+      <p style="color:#9CA3AF;font-size:12px;margin:0 0 4px;">
+        EspotHub · Espacios para eventos en República Dominicana
+      </p>
+      <p style="color:#CBD5E1;font-size:11px;margin:0;">
+        © 2026 ESPOT, S.R.L. · Si tienes dudas escríbenos a
+        <a href="mailto:contacto@espot.do" style="color:#6EE7C7;text-decoration:none;">contacto@espot.do</a>
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>`
+}
+
+// ── Templates específicos por evento ─────────────────────
+
+interface BookingData {
   guestName: string
-  guestEmail: string
   hostName: string
-  hostEmail: string
   spaceName: string
   spaceAddress: string
   eventDate: string
@@ -12,223 +123,196 @@ interface BookingEmailData {
   endTime: string
   eventType: string
   guestCount: number
-  basePrice: number
-  addonsTotal: number
-  platformFee: number
   totalAmount: number
+  platformFee: number
+  basePrice: number
   selectedAddons: { name: string; price: number }[]
   bookingId: string
+  guestEmail?: string
 }
 
-export function bookingConfirmationGuest(data: BookingEmailData): string {
-  const addonRows = data.selectedAddons.length > 0
-    ? data.selectedAddons.map(a => `
-        <tr>
-          <td style="padding:6px 0;color:#94a3b8;font-size:14px;">${a.name}</td>
-          <td style="padding:6px 0;color:#94a3b8;font-size:14px;text-align:right;">${formatCurrency(a.price)}</td>
-        </tr>`).join('')
-    : ''
-
-  return `<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#0f172a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-  <div style="max-width:560px;margin:0 auto;padding:40px 20px;">
-
-    <!-- Logo -->
-    <div style="text-align:center;margin-bottom:32px;">
-      <div style="display:inline-flex;align-items:center;gap:8px;">
-        <div style="width:36px;height:36px;background:linear-gradient(135deg,#7c3aed,#6d28d9);border-radius:10px;display:inline-flex;align-items:center;justify-content:center;">
-          <span style="color:white;font-weight:bold;font-size:18px;">E</span>
-        </div>
-        <span style="color:white;font-size:22px;font-weight:bold;">Espot<span style="color:#35C493;font-weight:300;">Hub</span></span>
-      </div>
-    </div>
-
-    <!-- Card -->
-    <div style="background:#1e293b;border:1px solid #334155;border-radius:20px;overflow:hidden;">
-
-      <!-- Header -->
-      <div style="background:linear-gradient(135deg,#4c1d95,#7c3aed);padding:32px;text-align:center;">
-        <div style="font-size:40px;margin-bottom:12px;">🎉</div>
-        <h1 style="color:white;font-size:22px;font-weight:bold;margin:0 0 6px;">¡Reserva enviada!</h1>
-        <p style="color:#c4b5fd;font-size:14px;margin:0;">Tu solicitud fue recibida. El propietario la confirmará pronto.</p>
-      </div>
-
-      <!-- Body -->
-      <div style="padding:32px;">
-
-        <p style="color:#e2e8f0;font-size:15px;margin:0 0 24px;">Hola <strong>${data.guestName}</strong>, aquí está el resumen de tu reserva:</p>
-
-        <!-- Space info -->
-        <div style="background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px;margin-bottom:20px;">
-          <h2 style="color:white;font-size:17px;font-weight:bold;margin:0 0 4px;">${data.spaceName}</h2>
-          <p style="color:#64748b;font-size:13px;margin:0 0 16px;">📍 ${data.spaceAddress}</p>
-
-          <table style="width:100%;border-collapse:collapse;">
-            <tr>
-              <td style="padding:6px 0;color:#94a3b8;font-size:14px;">📅 Fecha</td>
-              <td style="padding:6px 0;color:white;font-size:14px;text-align:right;font-weight:600;">${formatDate(data.eventDate)}</td>
-            </tr>
-            <tr>
-              <td style="padding:6px 0;color:#94a3b8;font-size:14px;">⏰ Horario</td>
-              <td style="padding:6px 0;color:white;font-size:14px;text-align:right;font-weight:600;">${formatTime(data.startTime)} – ${formatTime(data.endTime)}</td>
-            </tr>
-            <tr>
-              <td style="padding:6px 0;color:#94a3b8;font-size:14px;">🎊 Tipo de evento</td>
-              <td style="padding:6px 0;color:white;font-size:14px;text-align:right;">${data.eventType}</td>
-            </tr>
-            <tr>
-              <td style="padding:6px 0;color:#94a3b8;font-size:14px;">👥 Personas</td>
-              <td style="padding:6px 0;color:white;font-size:14px;text-align:right;">${data.guestCount}</td>
-            </tr>
-          </table>
-        </div>
-
-        <!-- Price breakdown -->
-        <div style="background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px;margin-bottom:24px;">
-          <h3 style="color:#94a3b8;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">Desglose de precio</h3>
-          <table style="width:100%;border-collapse:collapse;">
-            <tr>
-              <td style="padding:6px 0;color:#94a3b8;font-size:14px;">Espacio</td>
-              <td style="padding:6px 0;color:#94a3b8;font-size:14px;text-align:right;">${formatCurrency(data.basePrice)}</td>
-            </tr>
-            ${addonRows}
-            <tr>
-              <td style="padding:10px 0 6px;color:#e2e8f0;font-size:14px;border-top:1px solid #1e293b;">Total del evento</td>
-              <td style="padding:10px 0 6px;color:white;font-size:14px;font-weight:bold;text-align:right;border-top:1px solid #1e293b;">${formatCurrency(data.totalAmount)}</td>
-            </tr>
-            <tr>
-              <td style="padding:6px 0;color:#a78bfa;font-size:15px;font-weight:bold;">Pagado ahora (10%)</td>
-              <td style="padding:6px 0;color:#a78bfa;font-size:15px;font-weight:bold;text-align:right;">${formatCurrency(data.platformFee)}</td>
-            </tr>
-          </table>
-        </div>
-
-        <!-- Next steps -->
-        <div style="background:#1a1040;border:1px solid #4c1d95;border-radius:14px;padding:20px;margin-bottom:24px;">
-          <h3 style="color:#a78bfa;font-size:13px;font-weight:600;margin:0 0 12px;">¿Qué sigue?</h3>
-          <ul style="color:#c4b5fd;font-size:13px;margin:0;padding:0 0 0 16px;line-height:1.8;">
-            <li>El propietario tiene 24 horas para confirmar tu reserva</li>
-            <li>Recibirás un email de confirmación cuando sea aprobada</li>
-            <li>Puedes contactar al propietario por mensajes en EspotHub</li>
-          </ul>
-        </div>
-
-        <p style="color:#475569;font-size:12px;text-align:center;margin:0;">
-          Referencia: <strong style="color:#64748b;">${data.bookingId.slice(0,8).toUpperCase()}</strong>
-        </p>
-      </div>
-    </div>
-
-    <p style="color:#334155;font-size:12px;text-align:center;margin-top:24px;">
-      © 2026 EspotHub · República Dominicana
-    </p>
-  </div>
-</body>
-</html>`
+/** Cliente: solicitud enviada */
+export function tplSolicitudCliente(d: BookingData) {
+  const rows = [
+    { label: 'Espacio',        value: d.spaceName },
+    { label: 'Tipo de evento', value: d.eventType },
+    { label: 'Fecha',          value: formatDate(d.eventDate) },
+    { label: 'Horario',        value: `${formatTime(d.startTime)} – ${formatTime(d.endTime)}` },
+    { label: 'Personas',       value: `${d.guestCount}` },
+    { label: 'Total del evento', value: formatCurrency(d.totalAmount) },
+    { label: 'Referencia',     value: d.bookingId.slice(0, 8).toUpperCase() },
+  ]
+  return emailBase({
+    title: 'Solicitud enviada',
+    subtitle: `Hola ${d.guestName}, recibimos tu solicitud para ${d.spaceName}.`,
+    accentColor: '#2563EB',
+    body: `
+      <p style="color:#374151;margin:0 0 16px;">Tu solicitud fue enviada al propietario, quien revisará disponibilidad y te notificaremos cuando responda.</p>
+      ${infoBox(rows)}
+      <p style="color:#6B7280;font-size:13px;margin:0;">Puedes hacer seguimiento desde tu panel de reservas en cualquier momento.</p>`,
+    cta: { text: 'Ver mis reservas', url: `${SITE}/dashboard/reservas` },
+  })
 }
 
-export function newBookingHost(data: BookingEmailData): string {
-  const addonsList = data.selectedAddons.length > 0
-    ? data.selectedAddons.map(a => `<li>${a.name} — ${formatCurrency(a.price)}</li>`).join('')
-    : '<li style="color:#64748b;">Sin adicionales</li>'
+/** Propietario: nueva solicitud */
+export function tplSolicitudHost(d: BookingData) {
+  const rows = [
+    { label: 'Cliente',        value: `${d.guestName}${d.guestEmail ? ` · ${d.guestEmail}` : ''}` },
+    { label: 'Tipo de evento', value: d.eventType },
+    { label: 'Fecha',          value: formatDate(d.eventDate) },
+    { label: 'Horario',        value: `${formatTime(d.startTime)} – ${formatTime(d.endTime)}` },
+    { label: 'Personas',       value: `${d.guestCount}` },
+    { label: 'Total del evento', value: formatCurrency(d.totalAmount) },
+    ...(d.selectedAddons.length > 0 ? [{ label: 'Adicionales', value: d.selectedAddons.map(a => a.name).join(', ') }] : []),
+  ]
+  return emailBase({
+    title: 'Nueva solicitud de reserva',
+    subtitle: `${d.guestName} quiere reservar ${d.spaceName}.`,
+    accentColor: '#35C493',
+    body: `
+      <p style="color:#374151;margin:0 0 16px;">Alguien quiere celebrar en tu espacio. Revisa los detalles y confirma disponibilidad desde tu panel.</p>
+      ${infoBox(rows)}`,
+    cta: { text: 'Ver solicitud en mi panel', url: `${SITE}/dashboard/host/reservas` },
+  })
+}
 
-  return `<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#0f172a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-  <div style="max-width:560px;margin:0 auto;padding:40px 20px;">
+/** Cliente: reserva aceptada — procede a pagar */
+export function tplAceptadaCliente(d: BookingData) {
+  const rows = [
+    { label: 'Espacio',        value: d.spaceName },
+    { label: 'Fecha',          value: formatDate(d.eventDate) },
+    { label: 'Horario',        value: `${formatTime(d.startTime)} – ${formatTime(d.endTime)}` },
+    { label: 'Total del evento', value: formatCurrency(d.totalAmount) },
+    { label: 'Pago para confirmar', value: formatCurrency(d.platformFee) },
+  ]
+  return emailBase({
+    title: 'El propietario aceptó tu solicitud',
+    subtitle: `${d.spaceName} está disponible para tu evento.`,
+    accentColor: '#16A34A',
+    body: `
+      <p style="color:#374151;margin:0 0 16px;">Hola <strong>${d.guestName}</strong>, el propietario confirmó disponibilidad para tu evento. Completa el pago para asegurar la fecha.</p>
+      ${infoBox(rows)}`,
+    cta: { text: 'Completar pago', url: `${SITE}/pago/${d.bookingId}` },
+    note: 'Solo pagarás si decides confirmar. El pago asegura tu fecha y se procesa de forma segura con Azul Payments.',
+  })
+}
 
-    <!-- Logo -->
-    <div style="text-align:center;margin-bottom:32px;">
-      <div style="display:inline-flex;align-items:center;gap:8px;">
-        <div style="width:36px;height:36px;background:linear-gradient(135deg,#7c3aed,#6d28d9);border-radius:10px;display:inline-flex;align-items:center;justify-content:center;">
-          <span style="color:white;font-weight:bold;font-size:18px;">E</span>
-        </div>
-        <span style="color:white;font-size:22px;font-weight:bold;">Espot<span style="color:#35C493;font-weight:300;">Hub</span></span>
-      </div>
-    </div>
+/** Cliente: reserva confirmada con pago */
+export function tplConfirmadaCliente(d: BookingData & { remainingAmount: number }) {
+  const rows = [
+    { label: 'Espacio',        value: d.spaceName },
+    { label: 'Dirección',      value: d.spaceAddress },
+    { label: 'Fecha',          value: formatDate(d.eventDate) },
+    { label: 'Horario',        value: `${formatTime(d.startTime)} – ${formatTime(d.endTime)}` },
+    { label: 'Personas',       value: `${d.guestCount}` },
+    { label: 'Pago realizado', value: formatCurrency(d.platformFee) },
+    { label: 'Saldo en el lugar', value: formatCurrency(d.remainingAmount) },
+    { label: 'Referencia',     value: d.bookingId.slice(0, 8).toUpperCase() },
+  ]
+  return emailBase({
+    title: 'Reserva confirmada',
+    subtitle: `Todo listo para tu evento en ${d.spaceName}.`,
+    accentColor: '#35C493',
+    body: `
+      <p style="color:#374151;margin:0 0 16px;">Hola <strong>${d.guestName}</strong>, tu reserva está confirmada y tu fecha asegurada.</p>
+      ${infoBox(rows)}
+      <p style="color:#6B7280;font-size:13px;margin:8px 0 0;">El saldo restante se paga directamente en el espacio el día del evento.</p>`,
+    cta: { text: 'Ver mi reserva', url: `${SITE}/dashboard/reservas` },
+  })
+}
 
-    <!-- Card -->
-    <div style="background:#1e293b;border:1px solid #334155;border-radius:20px;overflow:hidden;">
+/** Propietario: reserva confirmada con pago */
+export function tplConfirmadaHost(d: BookingData) {
+  const rows = [
+    { label: 'Cliente',        value: d.guestName },
+    { label: 'Tipo de evento', value: d.eventType },
+    { label: 'Fecha',          value: formatDate(d.eventDate) },
+    { label: 'Horario',        value: `${formatTime(d.startTime)} – ${formatTime(d.endTime)}` },
+    { label: 'Personas',       value: `${d.guestCount}` },
+    { label: 'Total del evento', value: formatCurrency(d.totalAmount) },
+    { label: 'Comisión EspotHub', value: formatCurrency(d.platformFee) },
+  ]
+  return emailBase({
+    title: 'Reserva confirmada y pagada',
+    subtitle: `${d.guestName} completó el pago en ${d.spaceName}.`,
+    accentColor: '#35C493',
+    body: `
+      <p style="color:#374151;margin:0 0 16px;">Hola <strong>${d.hostName}</strong>, la reserva fue confirmada y el pago procesado correctamente.</p>
+      ${infoBox(rows)}`,
+    cta: { text: 'Ver en mi panel', url: `${SITE}/dashboard/host/reservas` },
+  })
+}
 
-      <!-- Header urgente -->
-      <div style="background:linear-gradient(135deg,#065f46,#047857);padding:28px;text-align:center;">
-        <div style="font-size:36px;margin-bottom:10px;">🔔</div>
-        <h1 style="color:white;font-size:20px;font-weight:bold;margin:0 0 4px;">¡Nueva solicitud de reserva!</h1>
-        <p style="color:#6ee7b7;font-size:13px;margin:0;">Tienes 24 horas para confirmar o rechazar</p>
-      </div>
+/** Cliente: reserva rechazada */
+export function tplRechazadaCliente(data: {
+  guestName: string; spaceName: string; eventDate: string; reason?: string
+}) {
+  return emailBase({
+    title: 'El espacio no está disponible',
+    subtitle: `${data.spaceName} no pudo confirmar tu solicitud para esa fecha.`,
+    accentColor: '#DC2626',
+    body: `
+      <p style="color:#374151;margin:0 0 16px;">Hola <strong>${data.guestName}</strong>, lamentablemente el propietario de <strong>${data.spaceName}</strong> no puede aceptar tu solicitud para el ${formatDate(data.eventDate)}.</p>
+      ${data.reason ? `<p style="color:#6B7280;font-size:13px;background:#FEF2F2;border:1px solid #FEE2E2;border-radius:10px;padding:12px 16px;margin:0 0 16px;">Motivo: ${data.reason}</p>` : ''}
+      <p style="color:#374151;margin:0;">Te invitamos a explorar otros espacios disponibles. Hay muchas opciones esperándote.</p>`,
+    cta: { text: 'Explorar otros espacios', url: `${SITE}/buscar` },
+  })
+}
 
-      <div style="padding:32px;">
+/** Participante: reserva cancelada */
+export function tplCancelada(data: {
+  recipientName: string; cancelledBy: string; spaceName: string
+  eventDate: string; reason?: string; isGuest: boolean
+}) {
+  return emailBase({
+    title: 'Reserva cancelada',
+    subtitle: `La reserva en ${data.spaceName} fue cancelada.`,
+    accentColor: '#6B7280',
+    body: `
+      <p style="color:#374151;margin:0 0 16px;">Hola <strong>${data.recipientName}</strong>, la reserva en <strong>${data.spaceName}</strong> para el ${formatDate(data.eventDate)} fue cancelada por ${data.cancelledBy}.</p>
+      ${data.reason ? `<p style="color:#6B7280;font-size:13px;background:#F9FAFB;border:1px solid #E8ECF0;border-radius:10px;padding:12px 16px;margin:0 0 16px;">Motivo: ${data.reason}</p>` : ''}
+      <p style="color:#374151;margin:0;">${data.isGuest ? 'Si tienes preguntas sobre reembolsos, contáctanos.' : 'El cliente será notificado.'}</p>`,
+    cta: data.isGuest
+      ? { text: 'Explorar otros espacios', url: `${SITE}/buscar` }
+      : { text: 'Ver mis reservas', url: `${SITE}/dashboard/host/reservas` },
+  })
+}
 
-        <p style="color:#e2e8f0;font-size:15px;margin:0 0 20px;">Hola <strong>${data.hostName}</strong>, alguien quiere reservar <strong>${data.spaceName}</strong>:</p>
-
-        <!-- Guest info -->
-        <div style="background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px;margin-bottom:20px;">
-          <h3 style="color:#94a3b8;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">Cliente</h3>
-          <p style="color:white;font-size:16px;font-weight:bold;margin:0 0 4px;">${data.guestName}</p>
-          <p style="color:#64748b;font-size:13px;margin:0;">${data.guestEmail}</p>
-        </div>
-
-        <!-- Event details -->
-        <div style="background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px;margin-bottom:20px;">
-          <h3 style="color:#94a3b8;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">Detalles del evento</h3>
-          <table style="width:100%;border-collapse:collapse;">
-            <tr>
-              <td style="padding:5px 0;color:#94a3b8;font-size:14px;">Evento</td>
-              <td style="padding:5px 0;color:white;font-size:14px;text-align:right;font-weight:600;">${data.eventType}</td>
-            </tr>
-            <tr>
-              <td style="padding:5px 0;color:#94a3b8;font-size:14px;">Fecha</td>
-              <td style="padding:5px 0;color:white;font-size:14px;text-align:right;font-weight:600;">${formatDate(data.eventDate)}</td>
-            </tr>
-            <tr>
-              <td style="padding:5px 0;color:#94a3b8;font-size:14px;">Horario</td>
-              <td style="padding:5px 0;color:white;font-size:14px;text-align:right;">${formatTime(data.startTime)} – ${formatTime(data.endTime)}</td>
-            </tr>
-            <tr>
-              <td style="padding:5px 0;color:#94a3b8;font-size:14px;">Personas</td>
-              <td style="padding:5px 0;color:white;font-size:14px;text-align:right;">${data.guestCount}</td>
-            </tr>
-          </table>
-          ${data.selectedAddons.length > 0 ? `
-          <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1e293b;">
-            <p style="color:#94a3b8;font-size:13px;margin:0 0 6px;">Adicionales solicitados:</p>
-            <ul style="color:#e2e8f0;font-size:13px;margin:0;padding:0 0 0 16px;line-height:1.8;">${addonsList}</ul>
-          </div>` : ''}
-        </div>
-
-        <!-- Revenue -->
-        <div style="background:#052e16;border:1px solid #14532d;border-radius:14px;padding:20px;margin-bottom:24px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div>
-              <p style="color:#86efac;font-size:12px;margin:0 0 4px;">Valor total del evento</p>
-              <p style="color:white;font-size:28px;font-weight:bold;margin:0;">${formatCurrency(data.totalAmount)}</p>
-            </div>
-            <div style="text-align:right;">
-              <p style="color:#86efac;font-size:12px;margin:0 0 4px;">Ya pagaron (plataforma)</p>
-              <p style="color:#4ade80;font-size:18px;font-weight:bold;margin:0;">${formatCurrency(data.platformFee)}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- CTA -->
-        <div style="text-align:center;">
-          <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'}/dashboard/reservas" style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;font-size:15px;font-weight:bold;padding:14px 32px;border-radius:12px;text-decoration:none;">
-            Ver reserva en el panel →
-          </a>
-          <p style="color:#475569;font-size:12px;margin-top:16px;">
-            Ref: <strong style="color:#64748b;">${data.bookingId.slice(0,8).toUpperCase()}</strong>
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <p style="color:#334155;font-size:12px;text-align:center;margin-top:24px;">
-      © 2026 EspotHub · República Dominicana
-    </p>
-  </div>
-</body>
-</html>`
+/** Pago completado — para admin y notificaciones de Azul */
+export function tplPagoCompletado(data: {
+  recipientName: string
+  spaceName: string
+  guestName: string
+  eventDate: string
+  eventInfo: string
+  totalAmount: number
+  commissionAmount: number
+  netAmount: number
+  azulOrderId?: string
+  isAdmin?: boolean
+  isHost?: boolean
+  siteUrl: string
+}) {
+  const baseRows = [
+    { label: 'Espacio',           value: data.spaceName },
+    { label: 'Cliente',           value: data.guestName },
+    { label: 'Evento',            value: data.eventInfo },
+    { label: 'Total del evento',  value: formatCurrency(data.totalAmount) },
+    { label: 'Comisión EspotHub', value: formatCurrency(data.commissionAmount) },
+    { label: 'Neto al propietario', value: formatCurrency(data.netAmount) },
+    ...(data.azulOrderId ? [{ label: 'ID transacción Azul', value: data.azulOrderId }] : []),
+  ]
+  return emailBase({
+    title: 'Pago procesado correctamente',
+    subtitle: `Reserva confirmada en ${data.spaceName}.`,
+    accentColor: '#35C493',
+    body: `
+      <p style="color:#374151;margin:0 0 16px;">Hola <strong>${data.recipientName}</strong>, el pago fue procesado y la reserva confirmada.</p>
+      ${infoBox(baseRows)}`,
+    cta: data.isAdmin
+      ? { text: 'Ver en el panel admin', url: `${data.siteUrl}/admin/liquidaciones` }
+      : data.isHost
+        ? { text: 'Ver en mi panel', url: `${data.siteUrl}/dashboard/host/pagos` }
+        : { text: 'Ver mi reserva', url: `${data.siteUrl}/dashboard/reservas` },
+  })
 }
