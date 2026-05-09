@@ -342,7 +342,7 @@ export default function CalendarioPage() {
               <ChevronLeft size={20} />
             </button>
             <div className="text-center">
-              <div className="text-lg font-bold" style={{ color: 'var(--text-primary)', fontSize: 16 }}>{MONTHS[current.month]}</div>
+              <div className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{MONTHS[current.month]}</div>
               <div className="text-sm" style={{ color: 'var(--text-muted)' }}>{current.year}</div>
             </div>
             <button onClick={nextMonth}
@@ -359,7 +359,7 @@ export default function CalendarioPage() {
               <div className="text-xs" style={{ color: 'var(--text-muted)' }}>ingresos confirmados</div>
             </div>
             <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-              <div className="text-lg font-bold" style={{ color: 'var(--text-primary)', fontSize: 16 }}>{monthEvents}</div>
+              <div className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{monthEvents}</div>
               <div className="text-xs" style={{ color: 'var(--text-muted)' }}>eventos este mes</div>
             </div>
           </div>
@@ -432,7 +432,7 @@ export default function CalendarioPage() {
               <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-semibold" style={{ color: 'var(--text-primary)', fontSize: 16 }}>
+                    <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                       {new Date(selected + 'T12:00').toLocaleDateString('es-DO', { weekday: 'long', day: 'numeric', month: 'long' })}
                     </div>
                     <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
@@ -456,7 +456,7 @@ export default function CalendarioPage() {
               {blocking && (
                 <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)', fontSize: 16 }}>
+                    <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                       Bloquear horario
                     </span>
                     <button onClick={() => { setBlocking(false); setBlockError('') }}
@@ -475,7 +475,7 @@ export default function CalendarioPage() {
                         value={blockStart}
                         onChange={e => setBlockStart(e.target.value)}
                         className="input-base w-full rounded-xl px-3 py-2.5 text-sm font-medium"
-                        style={{ color: 'var(--text-primary)', fontSize: 16 }}>
+                        style={{ color: 'var(--text-primary)' }}>
                         {HOURS.map(h => (
                           <option key={h} value={h}>{toLabel(h)}</option>
                         ))}
@@ -489,7 +489,7 @@ export default function CalendarioPage() {
                         value={blockEnd}
                         onChange={e => setBlockEnd(e.target.value)}
                         className="input-base w-full rounded-xl px-3 py-2.5 text-sm font-medium"
-                        style={{ color: 'var(--text-primary)', fontSize: 16 }}>
+                        style={{ color: 'var(--text-primary)' }}>
                         {HOURS.map(h => (
                           <option key={h} value={h}>{toLabel(h)}</option>
                         ))}
@@ -519,9 +519,9 @@ export default function CalendarioPage() {
                       <span>
                         {new Date(selected + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
                         {' · '}
-                        <strong style={{ color: 'var(--text-primary)', fontSize: 16 }}>{toLabel(blockStart)}</strong>
+                        <strong style={{ color: 'var(--text-primary)' }}>{toLabel(blockStart)}</strong>
                         {' — '}
-                        <strong style={{ color: 'var(--text-primary)', fontSize: 16 }}>{toLabel(blockEnd)}</strong>
+                        <strong style={{ color: 'var(--text-primary)' }}>{toLabel(blockEnd)}</strong>
                       </span>
                     </div>
                   )}
@@ -562,7 +562,7 @@ export default function CalendarioPage() {
                           style={{ background: status.booking.status === 'confirmed' ? 'rgba(34,197,94,0.1)' : 'rgba(251,191,36,0.1)' }}>
                           <span className={cn('w-2 h-2 rounded-full shrink-0', status.booking.status === 'confirmed' ? 'bg-green-400' : 'bg-amber-400')} />
                           <div className="min-w-0 flex-1">
-                            <div className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)', fontSize: 16 }}>
+                            <div className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>
                               {(status.booking as any).profiles?.full_name ?? 'Cliente'}
                             </div>
                             <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
@@ -598,7 +598,7 @@ export default function CalendarioPage() {
           ) : (
             <div className="rounded-2xl p-6 text-center" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
               <Clock className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
-              <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)', fontSize: 16 }}>
+              <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
                 Selecciona un día
               </p>
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
@@ -609,7 +609,7 @@ export default function CalendarioPage() {
 
           {/* Próximos eventos */}
           <div className="mt-4 rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-            <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)', fontSize: 16 }}>Próximos eventos</h3>
+            <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Próximos eventos</h3>
             {bookings
               .filter(b => b.event_date >= today.toISOString().split('T')[0])
               .sort((a, b) => a.event_date.localeCompare(b.event_date))
@@ -626,7 +626,7 @@ export default function CalendarioPage() {
                     <div key={b.id} className="flex items-center gap-3">
                       <div className={cn('w-1.5 h-8 rounded-full shrink-0', b.status === 'confirmed' ? 'bg-green-400' : 'bg-amber-400')} />
                       <div className="min-w-0 flex-1">
-                        <div className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)', fontSize: 16 }}>
+                        <div className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>
                           {b.profiles?.full_name ?? 'Cliente'}
                         </div>
                         <div className="text-xs" style={{ color: 'var(--text-muted)' }}>

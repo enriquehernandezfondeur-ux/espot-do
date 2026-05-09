@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
       .not('status', 'in', '("cancelled_guest","cancelled_host","rejected")'),
     supabase
       .from('space_availability')
-      .select('space_id')
+      .select('space_id, start_time, end_time, block_type')
       .eq('blocked_date', date),
   ])
 
@@ -26,11 +26,8 @@ export async function GET(req: NextRequest) {
 
   bookings?.forEach(b => {
     if (!time) {
-      // Sin hora: cualquier reserva bloquea el espacio
       ids.add(b.space_id)
     } else {
-      // Con hora: bloquear si la reserva no tiene horario (todo el día)
-      // o si el horario solicitado cae dentro del rango de la reserva
       const start = b.start_time ? b.start_time.slice(0, 5) : null
       const end   = b.end_time   ? b.end_time.slice(0, 5)   : null
       if (!start || !end || (time >= start && time < end)) {
@@ -39,7 +36,21 @@ export async function GET(req: NextRequest) {
     }
   })
 
-  blocks?.forEach(b => ids.add(b.space_id))
+  // Bloqueos manuales: respetar el rango de horas del bloqueo
+  // full_day o sin horario → bloquea todo el día
+  // time_range → solo bloquea si la hora pedida cae dentro del rango
+  blocks?.forEach(b => {
+    const isFullDay = b.block_type === 'full_day' || !b.start_time || !b.end_time
+    if (!time || isFullDay) {
+      ids.add(b.space_id)
+    } else {
+      const bStart = b.start_time.slice(0, 5)
+      const bEnd   = b.end_time.slice(0, 5)
+      if (time >= bStart && time < bEnd) {
+        ids.add(b.space_id)
+      }
+    }
+  })
 
   return NextResponse.json({ blockedSpaceIds: [...ids] })
 }
