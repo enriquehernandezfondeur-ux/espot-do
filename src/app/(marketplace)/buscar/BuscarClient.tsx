@@ -1299,72 +1299,73 @@ function SpaceCard({
         </div>
 
         {/* ── Info ── */}
-        <div className="p-4 flex flex-col gap-3 flex-1">
+        <div className="p-4 flex flex-col gap-2 flex-1">
 
-          {/* Nombre + ubicación + rating */}
-          <div>
-            <h3 className="font-semibold text-sm leading-snug truncate mb-1"
-              style={{ color: '#0F1623', letterSpacing: '-0.01em' }}>
-              {space.name}
-            </h3>
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1 text-xs min-w-0 truncate" style={{ color: 'var(--text-muted)' }}>
-                <MapPin size={10} className="shrink-0" />
-                <span className="truncate">{space.sector ? `${space.sector}, ` : ''}{space.city}</span>
-              </div>
-              {rating && (
-                <div className="flex items-center gap-0.5 shrink-0">
-                  <span style={{ color: '#F59E0B', fontSize: 11 }}>★</span>
-                  <span className="text-xs font-semibold" style={{ color: '#0F1623' }}>{rating.avg}</span>
-                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>({rating.count})</span>
-                </div>
-              )}
+          {/* Nombre */}
+          <h3 className="font-semibold text-sm leading-snug truncate"
+            style={{ color: '#0F1623', letterSpacing: '-0.01em' }}>
+            {space.name}
+            {space.is_verified && (
+              <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full ml-1.5 relative top-[-1px]"
+                style={{ background: 'var(--brand)', boxShadow: '0 0 0 1.5px #fff' }}
+                title="Verificado">
+                <Check size={8} className="text-white" strokeWidth={3} />
+              </span>
+            )}
+          </h3>
+
+          {/* Ubicación + rating */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1 text-xs min-w-0 truncate" style={{ color: 'var(--text-muted)' }}>
+              <MapPin size={10} className="shrink-0" />
+              <span className="truncate">{space.sector ? `${space.sector}, ` : ''}{space.city}</span>
             </div>
+            {rating && (
+              <div className="flex items-center gap-0.5 shrink-0">
+                <span style={{ color: '#F59E0B', fontSize: 11 }}>★</span>
+                <span className="text-xs font-semibold" style={{ color: '#0F1623' }}>{rating.avg}</span>
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>({rating.count})</span>
+              </div>
+            )}
           </div>
 
-          {/* Stats: precio + capacidad */}
-          <div className="flex items-stretch rounded-xl overflow-hidden"
-            style={{ border: '1.5px solid #E8ECF0', background: '#FAFBFC' }}>
+          {/* Precio + capacidad — fila compacta con divisor */}
+          <div className="flex items-center justify-between gap-3 pt-2.5 mt-0.5"
+            style={{ borderTop: '1px solid #F0F2F5' }}>
 
             {/* Precio */}
-            <div className="flex-1 px-3.5 py-2.5">
-              <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#94A3B8' }}>
-                Precio
-              </p>
+            <div className="min-w-0">
               {priceInfo?.amount ? (
                 <>
-                  <p className="font-bold leading-tight" style={{ color: '#0F1623', fontSize: 14 }}>
+                  <p className="font-bold text-sm leading-snug" style={{ color: '#0F1623' }}>
                     {priceInfo.amount}
                   </p>
-                  <p className="text-xs font-semibold mt-0.5"
-                    style={{ color: pricingDef?.text ?? 'var(--text-muted)' }}>
-                    {priceInfo.type}
-                  </p>
+                  {pricingDef?.value && (
+                    <span className="inline-flex items-center text-[11px] font-semibold px-1.5 py-0.5 rounded-md mt-1 whitespace-nowrap"
+                      style={{ background: pricingDef.bg, color: pricingDef.text, border: `1px solid ${pricingDef.border}` }}>
+                      {pricingDef.label}
+                    </span>
+                  )}
                 </>
               ) : (
-                <p className="font-bold text-sm" style={{ color: '#0F1623' }}>Cotizar</p>
+                <span className="text-sm font-semibold" style={{ color: 'var(--text-muted)' }}>Cotizar</span>
               )}
             </div>
 
-            {/* Divider */}
-            <div style={{ width: 1, background: '#E8ECF0', flexShrink: 0 }} />
-
             {/* Capacidad */}
-            <div className="flex-1 px-3.5 py-2.5">
-              <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#94A3B8' }}>
-                Capacidad
-              </p>
-              <p className="font-bold leading-tight flex items-center gap-1" style={{ color: '#0F1623', fontSize: 14 }}>
-                <Users size={12} style={{ color: '#35C493', flexShrink: 0 }} />
-                {space.capacity_max}
-              </p>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>personas máx.</p>
+            <div className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl shrink-0"
+              style={{ background: '#F4F6F8', border: '1px solid #E8ECF0' }}>
+              <Users size={12} style={{ color: '#35C493' }} />
+              <div>
+                <p className="font-bold text-xs leading-none" style={{ color: '#0F1623' }}>{space.capacity_max}</p>
+                <p className="text-[10px] leading-none mt-0.5" style={{ color: '#94A3B8' }}>pers. máx.</p>
+              </div>
             </div>
           </div>
 
           {/* Footer: categoría + flecha */}
-          <div className="flex items-center justify-between mt-auto">
-            <span className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg"
+          <div className="flex items-center justify-between mt-auto pt-1">
+            <span className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg"
               style={{ background: '#F4F6F8', color: '#6B7280' }}>
               <CatIcon size={10} /> {catLabel}
             </span>
