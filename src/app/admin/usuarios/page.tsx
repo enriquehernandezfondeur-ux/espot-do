@@ -62,7 +62,8 @@ export default function AdminUsersPage() {
       </div>
 
       <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-        <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-slate-400"
+        <div className="overflow-x-auto scrollbar-hide">
+        <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-slate-400 min-w-[560px]"
           style={{ borderBottom: '1px solid #F0F2F5', background: '#FAFBFC' }}>
           <span>Usuario</span><span>Rol</span><span>Teléfono</span><span>Cambiar rol</span>
         </div>
@@ -79,7 +80,7 @@ export default function AdminUsersPage() {
               const rc = roleConfig[user.role] ?? roleConfig.guest
               const Icon = rc.icon
               return (
-                <div key={user.id} className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-4 items-center px-5 py-4 hover:bg-slate-50 transition-colors">
+                <div key={user.id} className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-4 items-center px-5 py-4 hover:bg-slate-50 transition-colors min-w-[560px]">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm text-white shrink-0"
                       style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-dark))' }}>
@@ -116,6 +117,7 @@ export default function AdminUsersPage() {
             })}
           </div>
         )}
+        </div>{/* end overflow-x-auto */}
       </div>
     </div>
   )

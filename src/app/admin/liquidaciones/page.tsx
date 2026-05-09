@@ -117,7 +117,7 @@ export default function AdminLiquidacionesPage() {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <div className="rounded-2xl p-5"
           style={{ background: 'linear-gradient(135deg, #0A1019, #0F2A22)', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }}>
           <div className="flex items-center gap-2 mb-3">

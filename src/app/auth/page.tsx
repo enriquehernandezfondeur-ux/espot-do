@@ -125,7 +125,7 @@ function AuthContent() {
     borderRadius: 12,
     width: '100%',
     padding: '12px 16px',
-    fontSize: 14,
+    fontSize: 16,
     outline: 'none',
     transition: 'border-color 0.15s',
   }

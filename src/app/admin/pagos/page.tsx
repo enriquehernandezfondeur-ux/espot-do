@@ -25,7 +25,7 @@ export default async function AdminPagosPage() {
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
           { label: 'Comisión total',       value: formatCurrency(totalRevenue),    icon: TrendingUp,  color: '#35C493' },
           { label: 'Comisión cobrada',     value: formatCurrency(totalPaid),       icon: CheckCircle, color: '#16A34A' },
@@ -46,7 +46,8 @@ export default async function AdminPagosPage() {
 
       {/* Table */}
       <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-        <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-3 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-slate-400"
+        <div className="overflow-x-auto scrollbar-hide">
+        <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-3 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-slate-400 min-w-[640px]"
           style={{ borderBottom: '1px solid #F0F2F5', background: '#FAFBFC' }}>
           <span>Reserva</span><span>Fecha evento</span><span>Valor total</span><span>Comisión Espot</span><span>Estado pago</span>
         </div>
@@ -54,7 +55,7 @@ export default async function AdminPagosPage() {
           {bookings.map((bk: any) => {
             const pc = paymentConfig[bk.payment_status] ?? paymentConfig.unpaid
             return (
-              <div key={bk.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-3 items-center px-5 py-4 hover:bg-slate-50 transition-colors">
+              <div key={bk.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-3 items-center px-5 py-4 hover:bg-slate-50 transition-colors min-w-[640px]">
                 <div>
                   <div className="font-semibold text-sm" style={{ color: '#0F1623' }}>{bk.spaces?.name}</div>
                   <div className="text-xs text-slate-400">{bk.profiles?.full_name} · {bk.event_type}</div>
@@ -70,6 +71,7 @@ export default async function AdminPagosPage() {
             )
           })}
         </div>
+        </div>{/* end overflow-x-auto */}
       </div>
     </div>
   )
