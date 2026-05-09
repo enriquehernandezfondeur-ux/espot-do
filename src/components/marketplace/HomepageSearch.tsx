@@ -82,9 +82,10 @@ export default function HomepageSearch() {
   // Mobile: modal sheets
   const [mobileModal, setMobileModal] = useState<MobileModal>(null)
 
-  const actRef  = useRef<HTMLDivElement>(null)
-  const cityRef = useRef<HTMLDivElement>(null)
-  const dateRef = useRef<HTMLButtonElement>(null)
+  const actRef     = useRef<HTMLDivElement>(null)
+  const cityRef    = useRef<HTMLDivElement>(null)
+  const dateRef    = useRef<HTMLButtonElement>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
 
   // Calendario
   const today = new Date()
@@ -103,11 +104,12 @@ export default function HomepageSearch() {
     !cityQ || s.toLowerCase().includes(cityQ.toLowerCase())
   )
 
-  // Detectar si es móvil
-  const [isMobile, setIsMobile] = useState(false)
+  // Detectar si es móvil — inicializar directamente para evitar flash de comportamiento incorrecto
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  )
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
-    check()
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)
   }, [])
@@ -136,11 +138,30 @@ export default function HomepageSearch() {
     setPanel(p)
   }
 
-  // Cerrar con Escape (no al scrollear — los dropdowns son fixed)
+  // Panel desktop: Escape + click-outside + scroll lock
   useEffect(() => {
+    if (!panel) return
+
+    // Bloquear scroll mientras el panel está abierto
+    document.body.style.overflow = 'hidden'
+
     function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setPanel(null) }
-    if (panel) document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
+
+    // Click fuera del wrapper Y fuera del panel flotante → cerrar
+    function onMouseDown(e: MouseEvent) {
+      const target = e.target as Node
+      const inWrapper = wrapperRef.current?.contains(target) ?? false
+      const inPanel   = !!document.querySelector('[data-ep-panel]')?.contains(target)
+      if (!inWrapper && !inPanel) setPanel(null)
+    }
+
+    document.addEventListener('keydown',    onKey)
+    document.addEventListener('mousedown',  onMouseDown)
+    return () => {
+      document.removeEventListener('keydown',   onKey)
+      document.removeEventListener('mousedown', onMouseDown)
+      document.body.style.overflow = ''
+    }
   }, [panel])
 
   function pickActivity(key: string, label: string) {
@@ -246,7 +267,7 @@ export default function HomepageSearch() {
       {/* ───────────────────────────────────────────────────────
           DESKTOP: Barra horizontal con dropdowns flotantes
           ─────────────────────────────────────────────────── */}
-      <div className="hidden md:block max-w-3xl">
+      <div ref={wrapperRef} className="hidden md:block max-w-3xl" style={{ position: 'relative', zIndex: 10000 }}>
         <div className="flex items-stretch rounded-2xl"
           style={{ background: '#fff', boxShadow: '0 20px 60px rgba(0,0,0,0.28)', overflow: 'hidden' }}>
 
@@ -401,11 +422,6 @@ export default function HomepageSearch() {
           DESKTOP: Dropdowns flotantes
           ─────────────────────────────────────────────────── */}
 
-      {/* Backdrop compartido — cierra panel sin importar scrollbar */}
-      {!isMobile && panel && (
-        <div className="fixed inset-0 z-[9997]" onClick={() => setPanel(null)} />
-      )}
-
       {/* Actividad */}
       {!isMobile && panel === 'activity' && filteredActivities.length > 0 && (
         <div data-ep-panel style={{ ...dropBase, width: 260, zIndex: 9998, animation: 'dropIn 0.15s ease-out' }}>
@@ -493,7 +509,6 @@ export default function HomepageSearch() {
                       placeholder="Buscar tipo de evento..."
                       className="flex-1 bg-transparent focus:outline-none"
                       style={{ color: '#111827', fontSize: 16 }}
-                      autoFocus
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
@@ -524,7 +539,6 @@ export default function HomepageSearch() {
                       placeholder="Buscar sector o ciudad..."
                       className="flex-1 bg-transparent focus:outline-none"
                       style={{ color: '#111827', fontSize: 16 }}
-                      autoFocus
                     />
                     {cityQ && (
                       <button onClick={() => { setCityQ(''); setCity('') }}>
