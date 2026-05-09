@@ -39,7 +39,7 @@ function SocialSection() {
   }, [])
 
   return (
-    <section style={{ background: '#fff', borderTop: '1px solid #F0F2F5' }}>
+    <section style={{ background: '#F8FAFC' }}>
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-14 md:py-20">
 
         {/* Header */}
@@ -121,8 +121,7 @@ const categories = [
   { value: 'terraza',    label: 'Terrazas',     icon: Trees },
   { value: 'estudio',    label: 'Estudios',     icon: Camera },
   { value: 'coworking',  label: 'Coworking',    icon: Briefcase },
-  { value: 'hotel',      label: 'Hoteles',      icon: Building2 },
-  { value: 'villa',      label: 'Villas',       icon: Home },
+  { value: 'hotel',      label: 'Hotel / Villa', icon: Building2 },
 ]
 
 const eventTypes = [
