@@ -119,10 +119,10 @@ function getSpaceRating(space: any): { avg: number; count: number } | null {
 function getPriceInfo(space: any) {
   const p = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
   if (!p) return null
-  if (p.pricing_type === 'hourly')              return { type: 'Por hora',        amount: formatCurrency(p.hourly_price),         full: `${formatCurrency(p.hourly_price)} / hora` }
-  if (p.pricing_type === 'minimum_consumption') return { type: 'Consumo mínimo', amount: formatCurrency(p.minimum_consumption),  full: `Desde ${formatCurrency(p.minimum_consumption)}` }
-  if (p.pricing_type === 'fixed_package')       return { type: 'Paquete',        amount: formatCurrency(p.fixed_price),          full: formatCurrency(p.fixed_price) }
-  return { type: 'Cotizar',  amount: null, full: 'Cotizar precio' }
+  if (p.pricing_type === 'hourly')              return { type: 'Por hora',       unit: '/ hora',     amount: formatCurrency(p.hourly_price),        full: `${formatCurrency(p.hourly_price)} / hora` }
+  if (p.pricing_type === 'minimum_consumption') return { type: 'Cons. mín.',    unit: 'cons. mín.', amount: formatCurrency(p.minimum_consumption), full: `Desde ${formatCurrency(p.minimum_consumption)}` }
+  if (p.pricing_type === 'fixed_package')       return { type: 'Paquete',       unit: 'paquete',    amount: formatCurrency(p.fixed_price),         full: formatCurrency(p.fixed_price) }
+  return { type: 'Cotizar', unit: '', amount: null, full: 'Cotizar precio' }
 }
 
 function fmtDateShort(v: string) {
@@ -1252,12 +1252,12 @@ function SpaceCard({
         onMouseEnter={() => onHover(space.id)}
         onMouseLeave={() => onHover(null)}
       >
-        {/* ── Foto con precio encima ── */}
-        <div className="relative overflow-hidden" style={{ aspectRatio: '4/3', flexShrink: 0 }}>
+        {/* ── Foto ── */}
+        <div className="relative overflow-hidden" style={{ aspectRatio: '16/10', flexShrink: 0 }}>
           {cover ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={cover} alt={space.name}
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" />
           ) : (
             <div className="w-full h-full flex items-center justify-center"
               style={{ background: 'linear-gradient(135deg,#667eea,#764ba2)' }}>
@@ -1265,33 +1265,19 @@ function SpaceCard({
             </div>
           )}
 
-          {/* Gradiente inferior para legibilidad del precio */}
-          <div className="absolute inset-0 pointer-events-none"
-            style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.1) 45%, transparent 70%)' }} />
-
-          {/* Precio + tipo — bottom left sobre la foto */}
-          <div className="absolute bottom-3 left-3 z-10">
-            {priceInfo?.amount ? (
-              <div>
-                <p className="text-white font-bold leading-tight" style={{ fontSize: 15, letterSpacing: '-0.02em', textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}>
-                  {priceInfo.amount}
-                </p>
-                <p className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.72)' }}>
-                  {priceInfo.type.toLowerCase()}
-                </p>
-              </div>
-            ) : (
-              <span className="text-xs font-bold px-2.5 py-1 rounded-full"
-                style={{ background: 'rgba(255,255,255,0.18)', color: '#fff', backdropFilter: 'blur(6px)' }}>
-                Cotizar precio
-              </span>
-            )}
-          </div>
+          {/* Precio — bottom left */}
+          {priceInfo?.amount && (
+            <div className="absolute bottom-3 left-3 z-10 text-xs font-bold px-3 py-1.5 rounded-full"
+              style={{ background: 'rgba(0,0,0,0.72)', color: '#fff', backdropFilter: 'blur(8px)' }}>
+              {priceInfo.amount}
+              <span className="opacity-70 font-normal ml-1">· {priceInfo.unit}</span>
+            </div>
+          )}
 
           {/* Capacidad — bottom right */}
-          <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold"
-            style={{ background: 'rgba(0,0,0,0.45)', color: '#fff', backdropFilter: 'blur(6px)' }}>
-            <Users size={10} /> hasta {space.capacity_max}
+          <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-semibold"
+            style={{ background: 'rgba(0,0,0,0.6)', color: '#fff', backdropFilter: 'blur(8px)' }}>
+            <Users size={10} /> {space.capacity_max}
           </div>
 
           {/* Favorito — top right */}
@@ -1356,7 +1342,7 @@ function SpaceCard({
               {pricingDef?.value && (
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-md shrink-0 whitespace-nowrap"
                   style={{ background: pricingDef.bg, color: pricingDef.text, border: `1px solid ${pricingDef.border}` }}>
-                  {pricingDef.label}
+                  {priceInfo?.type ?? pricingDef.label}
                 </span>
               )}
               <span className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md truncate"
