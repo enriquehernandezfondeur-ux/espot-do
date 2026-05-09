@@ -335,21 +335,52 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
               const Icon = cat.icon
               return (
                 <Link key={cat.value} href={`/buscar?categoria=${cat.value}`}
-                  className="group flex flex-col items-center gap-2.5 p-3 md:p-4 rounded-2xl text-center"
+                  className="flex flex-col items-center gap-2.5 p-3 md:p-4 rounded-2xl text-center"
                   style={{
                     border: '1px solid #E8ECF0',
                     background: '#fff',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
                     opacity: catSection.on ? 1 : 0,
                     transform: catSection.on ? 'translateY(0) scale(1)' : 'translateY(16px) scale(0.95)',
-                    transition: `opacity 0.5s ease ${i * 60}ms, transform 0.5s ease ${i * 60}ms`,
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                    // Después del entrance, transición rápida para hover (sin delay)
+                    transition: catSection.on
+                      ? 'transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, background 0.22s ease'
+                      : `opacity 0.5s ease ${i * 60}ms, transform 0.5s ease ${i * 60}ms`,
+                  }}
+                  onMouseEnter={e => {
+                    const el = e.currentTarget as HTMLElement
+                    el.style.transform = 'translateY(-4px) scale(1)'
+                    el.style.boxShadow = '0 10px 28px rgba(53,196,147,0.13), 0 0 0 1.5px rgba(53,196,147,0.28)'
+                    el.style.borderColor = 'rgba(53,196,147,0.3)'
+                    el.style.background = '#FAFFFE'
+                    const iconBox = el.querySelector('[data-icon-box]') as HTMLElement | null
+                    if (iconBox) iconBox.style.background = 'rgba(53,196,147,0.1)'
+                    const iconSvg = el.querySelector('svg') as SVGElement | null
+                    if (iconSvg) (iconSvg as any).style.color = '#35C493'
+                    const label = el.querySelector('[data-label]') as HTMLElement | null
+                    if (label) label.style.color = '#0F1623'
+                  }}
+                  onMouseLeave={e => {
+                    const el = e.currentTarget as HTMLElement
+                    el.style.transform = 'translateY(0) scale(1)'
+                    el.style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)'
+                    el.style.borderColor = '#E8ECF0'
+                    el.style.background = '#fff'
+                    const iconBox = el.querySelector('[data-icon-box]') as HTMLElement | null
+                    if (iconBox) iconBox.style.background = '#F4F6F8'
+                    const iconSvg = el.querySelector('svg') as SVGElement | null
+                    if (iconSvg) (iconSvg as any).style.color = '#6B7280'
+                    const label = el.querySelector('[data-label]') as HTMLElement | null
+                    if (label) label.style.color = '#6B7280'
                   }}>
-                  <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:bg-green-50"
-                    style={{ background: '#F4F6F8' }}>
-                    <Icon size={16} style={{ color: '#6B7280', transition: 'color 0.2s' }}
-                      className="group-hover:text-green-600" />
+                  <div data-icon-box
+                    className="w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center"
+                    style={{ background: '#F4F6F8', transition: 'background 0.22s ease' }}>
+                    <Icon size={16} style={{ color: '#6B7280', transition: 'color 0.22s ease' }} />
                   </div>
-                  <span className="text-[10px] md:text-xs font-semibold leading-tight" style={{ color: '#6B7280' }}>
+                  <span data-label
+                    className="text-[10px] md:text-xs font-semibold leading-tight"
+                    style={{ color: '#6B7280', transition: 'color 0.22s ease' }}>
                     {cat.label}
                   </span>
                 </Link>
