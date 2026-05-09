@@ -4,11 +4,11 @@ import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
-  ArrowRight, Shield, Users, Search, Clock, CreditCard,
+  ArrowRight, Search, Clock, CreditCard,
   MapPin, Building2, UtensilsCrossed, Sunset,
   Wine, Trees, Camera, Briefcase, Home,
 } from 'lucide-react'
-import { formatCurrency } from '@/lib/utils'
+import { SpaceCard } from '@/app/(marketplace)/buscar/SpaceCard'
 
 // ── Hook de animación al entrar en viewport ───────────────
 function useReveal(threshold = 0.12) {
@@ -45,18 +45,6 @@ const eventTypes = [
   { label: 'Quinceañeras', slug: 'quinceaneras',  img: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=700&q=85&fit=crop' },
   { label: 'Baby Shower',  slug: 'baby-shower',   img: 'https://images.unsplash.com/photo-1529634806980-85c3dd6d34ac?w=700&q=85&fit=crop' },
 ]
-
-function getCover(space: any) {
-  return space.space_images?.find((i: any) => i.is_cover)?.url ?? space.space_images?.[0]?.url ?? null
-}
-function getPriceLabel(space: any) {
-  const p = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
-  if (!p) return null
-  if (p.pricing_type === 'hourly')              return { price: formatCurrency(p.hourly_price), unit: '/ hora' }
-  if (p.pricing_type === 'minimum_consumption') return { price: formatCurrency(p.minimum_consumption), unit: 'consumo mín.' }
-  if (p.pricing_type === 'fixed_package')       return { price: formatCurrency(p.fixed_price), unit: 'paquete' }
-  return { price: 'Cotizar', unit: '' }
-}
 
 // ── Fade + slide wrapper ──────────────────────────────────
 function Reveal({ children, delay = 0, className = '', style = {} }: {
@@ -104,10 +92,11 @@ function Ticker() {
 // ── Componente principal ──────────────────────────────────
 export default function HomepageSections({ spaces }: { spaces: any[] }) {
 
-  const evSection  = useReveal()
-  const spSection  = useReveal()
-  const catSection = useReveal()
-  const howSection = useReveal()
+  const evSection   = useReveal()
+  const spSection   = useReveal()
+  const catSection  = useReveal()
+  const howSection  = useReveal()
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
 
   return (
     <div style={{ background: '#fff' }}>
@@ -214,88 +203,19 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
             </Reveal>
           ) : (
             <div ref={spSection.ref} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-              {spaces.slice(0, 6).map((space: any, i: number) => {
-                const priceInfo = getPriceLabel(space)
-                const cover     = getCover(space)
-                const catDef    = categories.find(c => c.value === space.category)
-                const Icon      = catDef?.icon ?? Building2
-                return (
-                  <Link key={space.id} href={`/espacios/${space.slug}`}
-                    className="group block"
-                    style={{
-                      opacity: spSection.on ? 1 : 0,
-                      transform: spSection.on ? 'translateY(0)' : 'translateY(32px)',
-                      transition: `opacity 0.65s ease ${i * 90}ms, transform 0.65s ease ${i * 90}ms`,
-                    }}>
-                    <div className="rounded-2xl overflow-hidden h-full flex flex-col"
-                      style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 2px 12px rgba(0,0,0,0.05)', transition: 'box-shadow 0.3s ease, transform 0.3s ease' }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 12px 40px rgba(0,0,0,0.12)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(53,196,147,0.4)' }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 12px rgba(0,0,0,0.05)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLDivElement).style.borderColor = '#E8ECF0' }}>
-
-                      <div className="relative overflow-hidden" style={{ aspectRatio: '16/10', flexShrink: 0 }}>
-                        {cover ? (
-                          <Image src={cover} alt={space.name} fill
-                            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center"
-                            style={{ background: 'linear-gradient(135deg,#667eea,#764ba2)' }}>
-                            <Icon size={40} className="text-white opacity-70" />
-                          </div>
-                        )}
-
-                        {/* Precio — bottom left */}
-                        {priceInfo && (
-                          <div className="absolute bottom-3 left-3 z-10 text-xs font-bold px-3 py-1.5 rounded-full"
-                            style={{ background: 'rgba(0,0,0,0.72)', color: '#fff', backdropFilter: 'blur(8px)' }}>
-                            {priceInfo.price}
-                            {priceInfo.unit && <span className="opacity-70 font-normal ml-1">· {priceInfo.unit}</span>}
-                          </div>
-                        )}
-
-                        {/* Capacidad — bottom right */}
-                        <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-full"
-                          style={{ background: 'rgba(0,0,0,0.6)', color: '#fff', backdropFilter: 'blur(8px)' }}>
-                          <Users size={10} /> {space.capacity_max}
-                        </div>
-
-                        {/* Badge top-left: instantánea > verificado */}
-                        {space.instant_booking ? (
-                          <span className="absolute top-3 left-3 z-10 flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full"
-                            style={{ background: 'rgba(37,99,235,0.88)', color: '#fff' }}>
-                            ⚡ Instantánea
-                          </span>
-                        ) : space.is_verified ? (
-                          <span className="absolute top-3 left-3 z-10 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
-                            style={{ background: 'rgba(53,196,147,0.9)', color: '#fff' }}>
-                            <Shield size={9} /> Verificado
-                          </span>
-                        ) : null}
-                      </div>
-
-                      <div className="p-4 flex flex-col flex-1">
-                        <h3 className="font-semibold text-sm leading-snug mb-1.5"
-                          style={{ color: '#0F1623', letterSpacing: '-0.01em' }}>
-                          {space.name}
-                        </h3>
-                        <div className="flex items-center gap-1.5 text-xs" style={{ color: '#94A3B8' }}>
-                          <MapPin size={10} />
-                          {space.sector ? `${space.sector}, ` : ''}{space.city}
-                        </div>
-                        <div className="mt-auto pt-3 flex items-center justify-between"
-                          style={{ borderTop: '1px solid #F0F2F5', marginTop: 12 }}>
-                          <span className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg"
-                            style={{ background: '#F4F6F8', color: '#6B7280' }}>
-                            <Icon size={10} /> {catDef?.label ?? space.category}
-                          </span>
-                          <ArrowRight size={14} style={{ color: '#35C493', transition: 'transform 0.2s' }}
-                            className="group-hover:translate-x-1" />
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                )
-              })}
+              {spaces.slice(0, 6).map((space: any, i: number) => (
+                <div key={space.id} style={{
+                  opacity: spSection.on ? 1 : 0,
+                  transform: spSection.on ? 'translateY(0)' : 'translateY(32px)',
+                  transition: `opacity 0.65s ease ${i * 90}ms, transform 0.65s ease ${i * 90}ms`,
+                }}>
+                  <SpaceCard
+                    space={space}
+                    isHovered={hoveredId === space.id}
+                    onHover={setHoveredId}
+                  />
+                </div>
+              ))}
             </div>
           )}
 
