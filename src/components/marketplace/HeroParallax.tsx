@@ -12,19 +12,18 @@ export default function HeroParallax({ spaceCount }: Props) {
   const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    // Parallax solo en desktop — en móvil causa jank en Safari iOS
+    if (window.innerWidth < 768) return
+
     let ticking = false
 
     function onScroll() {
       if (ticking) return
       ticking = true
       requestAnimationFrame(() => {
-        const y = window.scrollY
-
-        // Solo el VIDEO hace parallax — el contenido queda estático
         if (videoRef.current) {
-          videoRef.current.style.transform = `translateY(${y * 0.45}px)`
+          videoRef.current.style.transform = `translateY(${window.scrollY * 0.45}px)`
         }
-
         ticking = false
       })
     }
@@ -36,7 +35,7 @@ export default function HeroParallax({ spaceCount }: Props) {
   return (
     <section
       className="relative overflow-hidden"
-      style={{ height: '100vh', minHeight: 560, maxHeight: 900 }}>
+      style={{ height: '100dvh', minHeight: 560, maxHeight: 900 }}>
 
       {/* Video — se mueve más lento que el scroll */}
       <video
@@ -91,7 +90,7 @@ export default function HeroParallax({ spaceCount }: Props) {
         <h1
           className="font-bold text-white mb-5"
           style={{
-            fontSize: 'clamp(2.8rem, 8vw, 5.5rem)',
+            fontSize: 'clamp(1.8rem, 8vw, 5.5rem)',
             lineHeight: 1.04,
             letterSpacing: '-0.045em',
             maxWidth: 900,
@@ -126,23 +125,23 @@ export default function HeroParallax({ spaceCount }: Props) {
         <HomepageSearch />
 
         {/* Métricas */}
-        <div className="flex items-center justify-center gap-8 md:gap-14 mt-10">
+        <div className="flex items-center justify-center gap-5 md:gap-14 mt-10">
           {[
             { value: `${spaceCount}+`, label: 'espacios' },
-            { value: '24h',            label: 'respuesta del host' },
-            { value: 'RD$0',           label: 'costo de registro' },
+            { value: '24h',            label: 'respuesta' },
+            { value: 'RD$0',           label: 'registro' },
           ].map((s, i) => (
             <div key={s.label} className="flex items-center">
               {i > 0 && (
-                <div className="w-px h-8 mr-8 md:mr-14"
+                <div className="hidden md:block w-px h-8 mr-14"
                   style={{ background: 'rgba(255,255,255,0.07)' }} />
               )}
-              <div>
+              <div className="text-center">
                 <div className="font-bold text-white"
-                  style={{ fontSize: 'clamp(1.4rem, 4vw, 2rem)', letterSpacing: '-0.04em' }}>
+                  style={{ fontSize: 'clamp(1.2rem, 4vw, 2rem)', letterSpacing: '-0.04em' }}>
                   {s.value}
                 </div>
-                <div className="text-xs tracking-wider"
+                <div className="text-[10px] md:text-xs tracking-wider"
                   style={{ color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
                   {s.label.toUpperCase()}
                 </div>

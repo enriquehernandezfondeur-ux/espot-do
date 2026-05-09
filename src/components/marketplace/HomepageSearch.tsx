@@ -262,7 +262,7 @@ export default function HomepageSearch() {
                 onFocus={() => { if (panel !== 'activity') openPanel('activity', actRef.current, 260) }}
                 placeholder="Cualquier evento"
                 className="w-full bg-transparent text-sm focus:outline-none"
-                style={{ color: '#111827', fontWeight: activity ? 500 : 400 }}
+                style={{ color: '#111827', fontWeight: activity ? 500 : 400, fontSize: 16 }}
               />
             </div>
             {(activity || actQ) && (
@@ -289,7 +289,7 @@ export default function HomepageSearch() {
                 onFocus={() => { if (panel !== 'city') openPanel('city', cityRef.current, 280) }}
                 placeholder="¿Dónde?"
                 className="w-full bg-transparent text-sm focus:outline-none"
-                style={{ color: '#111827', fontWeight: city ? 500 : 400 }}
+                style={{ color: '#111827', fontWeight: city ? 500 : 400, fontSize: 16 }}
               />
             </div>
             {(city || cityQ) && (
