@@ -118,7 +118,7 @@ function FallidoContent() {
               <CreditCard size={17} /> Intentar con otra tarjeta
             </Link>
           )}
-          <a href="mailto:soporte@espothub.com"
+          <a href="mailto:contacto@espot.do"
             className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-semibold text-sm"
             style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.65)', border: '1px solid rgba(255,255,255,0.09)' }}>
             <MessageCircle size={15} /> Contactar soporte
@@ -131,7 +131,7 @@ function FallidoContent() {
         </div>
 
         <p className="text-center text-xs mt-10" style={{ color: 'rgba(255,255,255,0.15)' }}>
-          EspotHub · Procesado por <span style={{ color: '#0057A8', fontWeight: 700 }}>azul</span> payments
+          espot.do · Procesado por <span style={{ color: '#0057A8', fontWeight: 700 }}>azul</span> payments
         </p>
       </div>
     </div>

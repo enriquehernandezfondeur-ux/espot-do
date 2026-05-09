@@ -115,7 +115,7 @@ function CanceladoContent() {
         </div>
 
         <p className="text-xs mt-10" style={{ color: 'rgba(255,255,255,0.15)' }}>
-          EspotHub · Pagos seguros por <span style={{ color: '#0057A8', fontWeight: 700 }}>azul</span>
+          espot.do · Pagos seguros por <span style={{ color: '#0057A8', fontWeight: 700 }}>azul</span>
         </p>
       </div>
     </div>

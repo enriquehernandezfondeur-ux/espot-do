@@ -235,7 +235,7 @@ function ExitoContent() {
         </div>
 
         <p className="text-center text-xs mt-8" style={{ color: 'rgba(255,255,255,0.2)' }}>
-          EspotHub · Procesado por <span style={{ color: '#0057A8', fontWeight: 700 }}>azul</span> payments
+          espot.do · Procesado por <span style={{ color: '#0057A8', fontWeight: 700 }}>azul</span> payments
         </p>
       </div>
     </div>

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: 'Reserva el espacio perfecto para tu evento en República Dominicana',
   description: 'Encuentra y reserva salones, rooftops, restaurantes, villas y más para cumpleaños, bodas, eventos corporativos y celebraciones en República Dominicana.',
   openGraph: {
-    title: 'EspotHub — Espacios para eventos en República Dominicana',
+    title: 'espot.do — Espacios para eventos en República Dominicana',
     description: 'Salones, rooftops, restaurantes y más para eventos en RD.',
     type: 'website',
   },

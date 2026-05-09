@@ -112,7 +112,7 @@ export default function MigracionPage() {
           Migración de Espots
         </h1>
         <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-          Importa espacios desde espot.do u otras fuentes hacia EspotHub.
+          Importa espacios desde espot.do u otras fuentes hacia espot.do.
           Descarga la plantilla, complétala con tus datos y sube el archivo.
         </p>
       </div>

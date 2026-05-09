@@ -1,5 +1,5 @@
 /**
- * Sistema centralizado de emails para EspotHub.
+ * Sistema centralizado de emails para espot.do.
  * Un único template base, consistente con la identidad de marca.
  */
 
@@ -12,7 +12,7 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
 function logo() {
   return `
     <div style="text-align:center;margin-bottom:36px;">
-      <img src="${SITE}/logo-dark.svg" alt="EspotHub" height="26"
+      <img src="${SITE}/logo-dark.svg" alt="espot.do" height="26"
         style="height:26px;width:auto;display:inline-block;" />
     </div>`
 }
@@ -98,7 +98,7 @@ export function emailBase({
     <!-- Pie de página -->
     <div style="text-align:center;margin-top:28px;">
       <p style="color:#9CA3AF;font-size:12px;margin:0 0 4px;">
-        EspotHub · Espacios para eventos en República Dominicana
+        espot.do · Espacios para eventos en República Dominicana
       </p>
       <p style="color:#CBD5E1;font-size:11px;margin:0;">
         © 2026 ESPOT, S.R.L. · Si tienes dudas escríbenos a
@@ -155,22 +155,29 @@ export function tplSolicitudCliente(d: BookingData) {
 }
 
 /** Propietario: nueva solicitud */
-export function tplSolicitudHost(d: BookingData) {
+export function tplSolicitudHost(d: BookingData & { isQuote?: boolean }) {
   const rows = [
     { label: 'Cliente',        value: `${d.guestName}${d.guestEmail ? ` · ${d.guestEmail}` : ''}` },
     { label: 'Tipo de evento', value: d.eventType },
     { label: 'Fecha',          value: formatDate(d.eventDate) },
     { label: 'Horario',        value: `${formatTime(d.startTime)} – ${formatTime(d.endTime)}` },
     { label: 'Personas',       value: `${d.guestCount}` },
-    { label: 'Total del evento', value: formatCurrency(d.totalAmount) },
+    ...(d.isQuote ? [] : [{ label: 'Total del evento', value: formatCurrency(d.totalAmount) }]),
     ...(d.selectedAddons.length > 0 ? [{ label: 'Adicionales', value: d.selectedAddons.map(a => a.name).join(', ') }] : []),
   ]
+  const title = d.isQuote ? 'Nueva solicitud de cotización' : 'Nueva solicitud de reserva'
+  const subtitle = d.isQuote
+    ? `${d.guestName} te está solicitando una cotización para ${d.spaceName}.`
+    : `${d.guestName} quiere reservar ${d.spaceName}.`
+  const bodyText = d.isQuote
+    ? 'Un cliente quiere conocer el precio para su evento. Revisa los detalles y responde con una propuesta desde tu panel.'
+    : 'Alguien quiere celebrar en tu espacio. Revisa los detalles y confirma disponibilidad desde tu panel.'
   return emailBase({
-    title: 'Nueva solicitud de reserva',
-    subtitle: `${d.guestName} quiere reservar ${d.spaceName}.`,
+    title,
+    subtitle,
     accentColor: '#35C493',
     body: `
-      <p style="color:#374151;margin:0 0 16px;">Alguien quiere celebrar en tu espacio. Revisa los detalles y confirma disponibilidad desde tu panel.</p>
+      <p style="color:#374151;margin:0 0 16px;">${bodyText}</p>
       ${infoBox(rows)}`,
     cta: { text: 'Ver solicitud en mi panel', url: `${SITE}/dashboard/host/reservas` },
   })
@@ -230,7 +237,7 @@ export function tplConfirmadaHost(d: BookingData) {
     { label: 'Horario',        value: `${formatTime(d.startTime)} – ${formatTime(d.endTime)}` },
     { label: 'Personas',       value: `${d.guestCount}` },
     { label: 'Total del evento', value: formatCurrency(d.totalAmount) },
-    { label: 'Comisión EspotHub', value: formatCurrency(d.platformFee) },
+    { label: 'Comisión espot.do', value: formatCurrency(d.platformFee) },
   ]
   return emailBase({
     title: 'Reserva confirmada y pagada',
@@ -298,7 +305,7 @@ export function tplPagoCompletado(data: {
     { label: 'Cliente',           value: data.guestName },
     { label: 'Evento',            value: data.eventInfo },
     { label: 'Total del evento',  value: formatCurrency(data.totalAmount) },
-    { label: 'Comisión EspotHub', value: formatCurrency(data.commissionAmount) },
+    { label: 'Comisión espot.do', value: formatCurrency(data.commissionAmount) },
     { label: 'Neto al propietario', value: formatCurrency(data.netAmount) },
     ...(data.azulOrderId ? [{ label: 'ID transacción Azul', value: data.azulOrderId }] : []),
   ]

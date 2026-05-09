@@ -38,7 +38,7 @@ export default function PagoPage({ params }: { params: Promise<{ bookingId: stri
     <div className="min-h-dvh flex flex-col items-center justify-center px-4"
       style={{ background: '#F4F6F8' }}>
       <div className="text-center">
-        <img src="/logo-dark.svg" alt="EspotHub"
+        <img src="/logo-dark.svg" alt="espot.do"
           style={{ height: 26, width: 'auto', margin: '0 auto 32px' }} />
         <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
           style={{ background: 'rgba(0,87,168,0.08)', border: '2px solid rgba(0,87,168,0.12)' }}>

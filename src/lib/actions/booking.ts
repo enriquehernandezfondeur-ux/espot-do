@@ -188,13 +188,13 @@ export async function createBooking(payload: CreateBookingPayload) {
   await Promise.all([
     guestEmail && sendEmail({
       to: guestEmail,
-      subject: `Solicitud recibida — ${spaceName}`,
+      subject: isQuote ? `Solicitud de cotización recibida — ${spaceName}` : `Solicitud recibida — ${spaceName}`,
       html: tplSolicitudCliente(bookingData),
     }),
     hostEmail && sendEmail({
       to: hostEmail,
-      subject: `Nueva solicitud de reserva — ${spaceName}`,
-      html: tplSolicitudHost(bookingData),
+      subject: isQuote ? `Nueva solicitud de cotización — ${spaceName}` : `Nueva solicitud de reserva — ${spaceName}`,
+      html: tplSolicitudHost({ ...bookingData, isQuote }),
     }),
   ])
 

@@ -131,6 +131,7 @@ export default function EspacioPage() {
   const [currentStep, setCurrentStep] = useState(1)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
+  const [publishedPending, setPublishedPending] = useState(false)
   const [pendingPhotos, setPendingPhotos] = useState<{ url: string; path: string; isCover: boolean }[]>([])
   const [videoUrl,      setVideoUrl]      = useState('')
   const [menuUrl,       setMenuUrl]       = useState('')
@@ -237,6 +238,14 @@ export default function EspacioPage() {
     setSaving(true)
     setSaveError('')
 
+    // Validar que hay al menos 1 foto subida antes de publicar
+    const hasImages = pendingPhotos.length > 0
+    if (!hasImages) {
+      setSaveError('Debes subir al menos una foto del espacio antes de publicar.')
+      setSaving(false)
+      return
+    }
+
     const payload = {
       name, category, description, address, sector, lat, lng, capacityMin, capacityMax, videoUrl, menuUrl, menuFileName,
       primaryActivity, secondaryActivities,
@@ -277,12 +286,16 @@ export default function EspacioPage() {
         return
       }
       spaceId = result.spaceId
-      // Publicar automáticamente solo en creación
+      // Enviar a revisión (no publica directamente)
       const pub = await publishSpace(spaceId)
       if ('error' in pub) {
-        setSaveError(pub.error ?? 'Error al publicar')
+        setSaveError(pub.error ?? 'Error al enviar para revisión')
         setSaving(false)
         return
+      }
+      // Mostrar mensaje de revisión pendiente si aplica
+      if ('pending' in pub && pub.pending) {
+        setPublishedPending(true)
       }
     }
 
@@ -408,6 +421,23 @@ export default function EspacioPage() {
   if (view === 'list') {
     return (
       <div className="p-4 md:p-6 max-w-6xl mx-auto">
+        {publishedPending && (
+          <div className="mb-6 rounded-2xl px-5 py-4 flex items-start gap-3"
+            style={{ background: 'rgba(53,196,147,0.08)', border: '1px solid rgba(53,196,147,0.25)' }}>
+            <CheckCircle size={20} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: 2 }} />
+            <div>
+              <p className="font-semibold text-sm mb-0.5" style={{ color: '#0A7A50' }}>
+                ¡Espacio enviado para revisión!
+              </p>
+              <p className="text-sm" style={{ color: '#166534' }}>
+                Nuestro equipo verificará tu espacio antes de que aparezca en el marketplace. Te notificaremos por email cuando sea aprobado.
+              </p>
+            </div>
+            <button onClick={() => setPublishedPending(false)} className="ml-auto shrink-0" style={{ color: '#6B7280' }}>
+              <X size={16} />
+            </button>
+          </div>
+        )}
         <div className="flex items-center justify-between mb-5 md:mb-8">
           <div>
             <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
@@ -519,11 +549,13 @@ export default function EspacioPage() {
                       {!space.is_published && (
                         <button
                           onClick={async () => {
-                            await publishSpace(space.id)
-                            setSpaces(prev => prev.map((s: any) => s.id === space.id ? { ...s, is_published: true } : s))
+                            const result = await publishSpace(space.id)
+                            if ('pending' in result && result.pending) {
+                              setPublishedPending(true)
+                            }
                           }}
                           className="btn-brand flex-1 flex items-center justify-center gap-1.5 text-sm font-medium py-2 rounded-xl">
-                          <Eye size={13} /> Publicar
+                          <Eye size={13} /> Enviar a revisión
                         </button>
                       )}
                     </div>
@@ -709,6 +741,9 @@ export default function EspacioPage() {
                 Fotos del espacio
               </label>
               <PhotoUploader onChange={photos => setPendingPhotos(photos)} />
+              <p className="text-xs mt-1.5" style={{ color: pendingPhotos.length === 0 ? '#EF4444' : 'var(--text-muted)' }}>
+                * Obligatorio: al menos una foto para publicar
+              </p>
             </div>
 
             {/* Video opcional */}
@@ -854,7 +889,7 @@ export default function EspacioPage() {
                 </div>
                 <div className="rounded-lg p-3 text-xs" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
                   💡 El cliente reserva el horario y se compromete a consumir mínimo <strong style={{ color: 'var(--text-primary)' }}>{minConsumption ? formatCurrency(Number(minConsumption)) : 'ese monto'}</strong> en comida y bebidas.
-                  Si consumen más, lo pagan directo en tu local. EspotHub cobra el mínimo como garantía.
+                  Si consumen más, lo pagan directo en tu local. espot.do cobra el mínimo como garantía.
                 </div>
               </div>
             )}

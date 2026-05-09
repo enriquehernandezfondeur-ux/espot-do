@@ -268,12 +268,14 @@ export async function publishSpace(spaceId: string) {
   const { data: space } = await supabase.from('spaces').select('host_id').eq('id', spaceId).single()
   if (!space || space.host_id !== user.id) return { error: 'No autorizado' }
 
+  // El espacio queda en revisión: is_active = true, is_published = false (sin cambiar)
+  // El equipo de espot.do aprueba manualmente y activa is_published cuando sea apropiado
   const { error } = await supabase
     .from('spaces')
-    .update({ is_published: true })
+    .update({ is_active: true })
     .eq('id', spaceId)
   if (!error) revalidatePath('/buscar')
-  return error ? { error: error.message } : { success: true }
+  return error ? { error: error.message } : { success: true, pending: true }
 }
 
 export async function getMySpaces() {

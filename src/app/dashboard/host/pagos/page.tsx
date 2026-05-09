@@ -128,7 +128,7 @@ export default function HostPagosPage() {
         style={{ background: 'rgba(37,99,235,0.04)', border: '1px solid rgba(37,99,235,0.12)' }}>
         <Info size={15} style={{ color: '#2563EB', flexShrink: 0, marginTop: 1 }} />
         <p className="text-sm" style={{ color: '#1E40AF', lineHeight: 1.6 }}>
-          EspotHub cobra el 100% de cada reserva al cliente y te transfiere el neto después de descontar la comisión de la plataforma. Las liquidaciones se procesan manualmente y recibirás una notificación por email cuando se complete la transferencia.
+          espot.do cobra el 100% de cada reserva al cliente y te transfiere el neto después de descontar la comisión de la plataforma. Las liquidaciones se procesan manualmente y recibirás una notificación por email cuando se complete la transferencia.
         </p>
       </div>
 

@@ -114,8 +114,8 @@ const pricingTypeLabel: Record<string, string> = {
 
 const termLabel: Record<string, string> = {
   platform_guarantee: 'Pago de confirmación al reservar · Saldo en el lugar',
-  split_advance:      'Pago dividido en etapas gestionado por EspotHub',
-  full_prepaid:       '100% al reservar por EspotHub',
+  split_advance:      'Pago dividido en etapas gestionado por espot.do',
+  full_prepaid:       '100% al reservar por espot.do',
   quote_only:         'Cotización personalizada · Pago al confirmar',
 }
 
@@ -261,7 +261,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   const url = window.location.href
                   // En móvil con Web Share API → share sheet nativo (WhatsApp, Instagram, SMS...)
                   if (navigator.share) {
-                    navigator.share({ title: space.name, text: `¡Mira este Espot en EspotHub! ${space.name}`, url })
+                    navigator.share({ title: space.name, text: `¡Mira este Espot en espot.do! ${space.name}`, url })
                   } else {
                     setShowShareMenu(s => !s)
                   }

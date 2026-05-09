@@ -150,7 +150,7 @@ export async function createBookingEvent(
       `Cliente: ${guestName}`,
       `Personas: ${booking.guest_count}`,
       `Estado: Confirmada`,
-      `Reservado en EspotHub`,
+      `Reservado en espot.do`,
     ].join('\n')
 
     return await createEvent(accessToken, {
