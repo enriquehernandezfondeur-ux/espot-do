@@ -126,7 +126,12 @@ export default function HostReservasPage() {
         {/* Lista */}
         <div className="flex-1 min-w-0 rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
           {filtered.length === 0 ? (
-            <div className="text-center py-16" style={{ color: 'var(--text-muted)' }}>Sin reservas</div>
+            <div className="text-center py-16 px-4">
+              <p className="font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Sin reservas</p>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                {filter === 'all' ? 'Aún no tienes reservas. Aparecerán aquí cuando los clientes reserven tu espacio.' : 'No hay reservas en este estado.'}
+              </p>
+            </div>
           ) : (
             <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
               {filtered.map((bk: any) => {

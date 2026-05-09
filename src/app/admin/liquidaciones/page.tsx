@@ -165,8 +165,9 @@ export default function AdminLiquidacionesPage() {
 
       {/* Table */}
       <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+        <div className="overflow-x-auto scrollbar-hide">
         <div className="grid gap-3 px-6 py-3 text-[11px] font-bold uppercase tracking-widest"
-          style={{ gridTemplateColumns: '2fr 1.4fr 0.8fr 0.9fr 2fr 1fr', background: '#FAFBFC', borderBottom: '1px solid #F0F2F5', color: '#94A3B8' }}>
+          style={{ gridTemplateColumns: '2fr 1.4fr 0.8fr 0.9fr 2fr 1fr', minWidth: 700, background: '#FAFBFC', borderBottom: '1px solid #F0F2F5', color: '#94A3B8' }}>
           <span>Espacio · Propietario</span>
           <span>Evento</span>
           <span>Total</span>
@@ -197,7 +198,7 @@ export default function AdminLiquidacionesPage() {
               return (
                 <div key={bk.id}>
                   <div className="grid gap-3 px-6 py-4 items-center hover:bg-slate-50 transition-colors"
-                    style={{ gridTemplateColumns: '2fr 1.4fr 0.8fr 0.9fr 2fr 1fr' }}>
+                    style={{ gridTemplateColumns: '2fr 1.4fr 0.8fr 0.9fr 2fr 1fr', minWidth: 700 }}>
 
                     {/* Space + host */}
                     <div>
@@ -285,6 +286,7 @@ export default function AdminLiquidacionesPage() {
             })}
           </div>
         )}
+        </div>{/* end overflow-x-auto */}
       </div>
     </div>
   )

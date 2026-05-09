@@ -1008,6 +1008,11 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
 
             {activeTab === 'rules' && (
               <div className="space-y-6 md:space-y-8">
+                {!conditions && (
+                  <p className="text-sm py-8 text-center" style={{ color: 'var(--text-muted)' }}>
+                    Este espacio no tiene reglas especiales configuradas.
+                  </p>
+                )}
                 {conditions && (
                   <>
                     <div>

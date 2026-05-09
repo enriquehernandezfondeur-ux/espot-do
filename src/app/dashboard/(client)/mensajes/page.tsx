@@ -186,7 +186,7 @@ export default function ClientMensajesPage() {
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
                 placeholder="Escribe un mensaje..." rows={1}
                 className="flex-1 resize-none text-sm px-4 py-3 rounded-2xl focus:outline-none"
-                style={{ background: 'var(--bg-base)', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)', maxHeight: 120 }} />
+                style={{ background: 'var(--bg-base)', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)', maxHeight: 120, fontSize: 16 }} />
               <button onClick={handleSend} disabled={!body.trim() || sending}
                 className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 disabled:opacity-40 transition-all"
                 style={{ background: 'var(--brand)', color: '#fff' }}>

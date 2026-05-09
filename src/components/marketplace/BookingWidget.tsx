@@ -935,7 +935,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                 style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.15)' }}>
                 <Info size={13} style={{ color: '#2563EB', flexShrink: 0, marginTop: 1 }} />
                 <p className="text-xs" style={{ color: '#1D4ED8', lineHeight: 1.6 }}>
-                  espot.do cobra el consumo mínimo como garantía. Si tu grupo consume más en el evento, lo pagas directo al lugar.
+                  Espot cobra el consumo mínimo como garantía. Si tu grupo consume más en el evento, lo pagas directo al lugar.
                 </p>
               </div>
             )}
