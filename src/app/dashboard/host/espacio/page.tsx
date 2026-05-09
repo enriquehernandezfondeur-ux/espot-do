@@ -33,7 +33,6 @@ const categories: { value: SpaceCategory; label: string; icon: React.ElementType
   { value: 'estudio',    label: 'Estudio',            icon: Camera },
   { value: 'coworking',  label: 'Coworking',          icon: Briefcase },
   { value: 'hotel',      label: 'Hotel / Villa',      icon: Building2 },
-  { value: 'villa',      label: 'Villa',              icon: Home },
   { value: 'otro',       label: 'Otro',               icon: MapPin },
 ]
 
