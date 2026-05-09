@@ -43,7 +43,7 @@ export default function HeroParallax({ spaceCount }: Props) {
         autoPlay muted loop playsInline
         style={{
           position: 'absolute', inset: 0,
-          width: '100%', height: '115%',
+          width: '100%', height: '115%', // más alto para el parallax
           objectFit: 'cover', zIndex: 0,
           willChange: 'transform',
         }}>
@@ -73,7 +73,7 @@ export default function HeroParallax({ spaceCount }: Props) {
         zIndex: 1, pointerEvents: 'none',
       }} />
 
-      {/* Contenido */}
+      {/* Contenido — se mueve y desvanece al scrollear */}
       <div
         ref={contentRef}
         className="relative flex flex-col items-center justify-center text-center px-4 md:px-6"
@@ -160,6 +160,7 @@ export default function HeroParallax({ spaceCount }: Props) {
             SCROLL
           </span>
         </div>
+
       </div>
     </section>
   )
