@@ -202,13 +202,6 @@ export function SpaceCard({
           <h3 className="font-semibold text-sm leading-snug truncate"
             style={{ color: '#0F1623', letterSpacing: '-0.01em' }}>
             {space.name}
-            {space.is_verified && (
-              <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full ml-1.5 relative top-[-1px]"
-                style={{ background: 'var(--brand)', boxShadow: '0 0 0 1.5px #fff' }}
-                title="Verificado">
-                <Check size={8} className="text-white" strokeWidth={3} />
-              </span>
-            )}
           </h3>
 
           {/* Ubicación + categoría + rating — todo en una línea */}
@@ -229,35 +222,32 @@ export function SpaceCard({
             )}
           </div>
 
-          {/* Precio · badge tipo · spacer · capacidad · flecha */}
+          {/* Precio · badge tipo · capacidad */}
           <div className="flex items-center gap-2 pt-2.5 mt-auto"
             style={{ borderTop: '1px solid #F0F2F5' }}>
 
-            {priceInfo?.amount ? (
-              <span className="font-bold text-sm shrink-0" style={{ color: '#0F1623' }}>
-                {priceInfo.amount}
-              </span>
-            ) : (
-              <span className="text-sm font-semibold shrink-0" style={{ color: 'var(--text-muted)' }}>Cotizar</span>
-            )}
+            {/* Grupo izquierdo: precio + badge — cede si hay poco espacio */}
+            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+              {priceInfo?.amount ? (
+                <span className="font-bold text-sm shrink-0" style={{ color: '#0F1623' }}>
+                  {priceInfo.amount}
+                </span>
+              ) : (
+                <span className="text-sm font-semibold shrink-0" style={{ color: 'var(--text-muted)' }}>Cotizar</span>
+              )}
+              {pricingDef?.value && (
+                <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap overflow-hidden"
+                  style={{ background: pricingDef.bg, color: pricingDef.text, border: `1px solid ${pricingDef.border}` }}>
+                  {pricingDef.label}
+                </span>
+              )}
+            </div>
 
-            {pricingDef?.value && (
-              <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md shrink-0 whitespace-nowrap"
-                style={{ background: pricingDef.bg, color: pricingDef.text, border: `1px solid ${pricingDef.border}` }}>
-                {pricingDef.label}
-              </span>
-            )}
-
-            <div className="flex-1" />
-
+            {/* Capacidad — siempre visible */}
             <span className="flex items-center gap-1 text-xs font-medium shrink-0" style={{ color: 'var(--text-muted)' }}>
               <Users size={11} style={{ color: '#35C493', flexShrink: 0 }} />
               {space.capacity_max}
             </span>
-
-            <ArrowRight size={14}
-              className="transition-transform duration-200 group-hover:translate-x-1 shrink-0"
-              style={{ color: '#35C493' }} />
           </div>
 
         </div>
