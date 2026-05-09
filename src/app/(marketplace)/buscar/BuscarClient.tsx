@@ -1279,11 +1279,14 @@ function SpaceCard({
             )}
           </h3>
 
-          {/* Ubicación + rating */}
+          {/* Ubicación + categoría + rating — todo en una línea */}
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1 text-xs min-w-0 truncate" style={{ color: 'var(--text-muted)' }}>
+            <div className="flex items-center gap-1 text-xs min-w-0" style={{ color: 'var(--text-muted)' }}>
               <MapPin size={10} className="shrink-0" />
               <span className="truncate">{space.sector ? `${space.sector}, ` : ''}{space.city}</span>
+              <span className="shrink-0" style={{ color: '#D1D5DB' }}>·</span>
+              <CatIcon size={10} className="shrink-0" />
+              <span className="shrink-0 whitespace-nowrap">{catLabel}</span>
             </div>
             {rating && (
               <div className="flex items-center gap-0.5 shrink-0">
@@ -1294,49 +1297,35 @@ function SpaceCard({
             )}
           </div>
 
-          {/* Categoría */}
-          <span className="flex items-center gap-1 text-xs font-medium w-fit px-2 py-0.5 rounded-md"
-            style={{ background: '#F4F6F8', color: '#6B7280' }}>
-            <CatIcon size={10} /> {catLabel}
-          </span>
-
-          {/* Precio + capacidad + flecha */}
-          <div className="flex items-center justify-between gap-2 pt-2.5 mt-auto"
+          {/* Precio · badge tipo · spacer · capacidad · flecha */}
+          <div className="flex items-center gap-2 pt-2.5 mt-auto"
             style={{ borderTop: '1px solid #F0F2F5' }}>
 
-            {/* Precio + badge tipo */}
-            <div className="min-w-0">
-              {priceInfo?.amount ? (
-                <>
-                  <p className="font-bold text-sm leading-snug" style={{ color: '#0F1623' }}>
-                    {priceInfo.amount}
-                  </p>
-                  {pricingDef?.value && (
-                    <span className="inline-flex items-center text-[11px] font-semibold px-1.5 py-0.5 rounded-md mt-1 whitespace-nowrap"
-                      style={{ background: pricingDef.bg, color: pricingDef.text, border: `1px solid ${pricingDef.border}` }}>
-                      {pricingDef.label}
-                    </span>
-                  )}
-                </>
-              ) : (
-                <span className="text-sm font-semibold" style={{ color: 'var(--text-muted)' }}>Cotizar</span>
-              )}
-            </div>
+            {priceInfo?.amount ? (
+              <span className="font-bold text-sm shrink-0" style={{ color: '#0F1623' }}>
+                {priceInfo.amount}
+              </span>
+            ) : (
+              <span className="text-sm font-semibold shrink-0" style={{ color: 'var(--text-muted)' }}>Cotizar</span>
+            )}
 
-            {/* Capacidad + flecha */}
-            <div className="flex items-center gap-2 shrink-0">
-              <div className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl"
-                style={{ background: '#F4F6F8', border: '1px solid #E8ECF0' }}>
-                <Users size={12} style={{ color: '#35C493' }} />
-                <div>
-                  <p className="font-bold text-xs leading-none" style={{ color: '#0F1623' }}>{space.capacity_max}</p>
-                  <p className="text-[10px] leading-none mt-0.5" style={{ color: '#94A3B8' }}>pers. máx.</p>
-                </div>
-              </div>
-              <ArrowRight size={14}
-                className="transition-transform duration-200 group-hover:translate-x-1"
-                style={{ color: '#35C493' }} />
-            </div>
+            {pricingDef?.value && (
+              <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md shrink-0 whitespace-nowrap"
+                style={{ background: pricingDef.bg, color: pricingDef.text, border: `1px solid ${pricingDef.border}` }}>
+                {pricingDef.label}
+              </span>
+            )}
+
+            <div className="flex-1" />
+
+            <span className="flex items-center gap-1 text-xs font-medium shrink-0" style={{ color: 'var(--text-muted)' }}>
+              <Users size={11} style={{ color: '#35C493', flexShrink: 0 }} />
+              {space.capacity_max}
+            </span>
+
+            <ArrowRight size={14}
+              className="transition-transform duration-200 group-hover:translate-x-1 shrink-0"
+              style={{ color: '#35C493' }} />
           </div>
 
         </div>
