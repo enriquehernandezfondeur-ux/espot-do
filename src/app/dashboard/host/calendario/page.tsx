@@ -353,7 +353,7 @@ export default function CalendarioPage() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 gap-3 mb-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
             <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
               <div className="text-lg font-bold" style={{ color: 'var(--brand)' }}>{formatCurrency(monthRevenue)}</div>
               <div className="text-xs" style={{ color: 'var(--text-muted)' }}>ingresos confirmados</div>
@@ -466,7 +466,7 @@ export default function CalendarioPage() {
                   </div>
 
                   {/* Selector de horas con selects limpios */}
-                  <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                     <div>
                       <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                         Desde

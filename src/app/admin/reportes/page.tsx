@@ -20,7 +20,7 @@ export default async function AdminReportesPage() {
         <p className="text-sm text-slate-500 mt-0.5">Métricas de rendimiento del marketplace</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {/* Ingresos mensuales */}
         <div className="rounded-2xl p-6" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <div className="flex items-center gap-2 mb-5">

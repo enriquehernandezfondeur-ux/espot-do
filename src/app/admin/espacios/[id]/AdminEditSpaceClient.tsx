@@ -272,7 +272,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
                 rows={4} className={inputCls + ' resize-none'} style={inputStyle}
                 placeholder="Descripción completa del espacio..." />
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Categoría</label>
                 <select value={category} onChange={e => setCategory(e.target.value)}
@@ -295,7 +295,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
                   className={inputCls} style={inputStyle} placeholder="200" />
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Dirección</label>
                 <input value={address} onChange={e => setAddress(e.target.value)} className={inputCls} style={inputStyle} placeholder="Av. Lincoln #123" />
@@ -324,7 +324,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
           <div className="p-6 space-y-5">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-widest mb-3 text-slate-400">Tipo de precio</label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {PRICING_TYPES.map(pt => (
                   <button key={pt.value} onClick={() => setPricingType(pt.value)}
                     className="px-4 py-3 rounded-xl text-sm font-medium text-left transition-all border"
@@ -338,7 +338,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
             </div>
 
             {pricingType === 'hourly' && (
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Precio / hora (RD$)</label>
                   <input type="number" value={hourlyPrice} onChange={e => setHourlyPrice(e.target.value)} className={inputCls} style={inputStyle} placeholder="5000" />
@@ -355,7 +355,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
             )}
 
             {pricingType === 'minimum_consumption' && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Consumo mínimo (RD$)</label>
                   <input type="number" value={minConsumption} onChange={e => setMinConsumption(e.target.value)} className={inputCls} style={inputStyle} placeholder="60000" />
@@ -368,7 +368,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
             )}
 
             {pricingType === 'fixed_package' && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Precio del paquete (RD$)</label>
                   <input type="number" value={fixedPrice} onChange={e => setFixedPrice(e.target.value)} className={inputCls} style={inputStyle} placeholder="35000" />
@@ -431,7 +431,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
           {/* Add new addon */}
           <div className="px-6 py-5 space-y-4" style={{ borderTop: '1px solid #F0F2F5', background: '#FAFBFC' }}>
             <div className="text-xs font-semibold uppercase tracking-widest text-slate-400">Agregar adicional</div>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div className="col-span-2">
                 <input value={newAddon.name} onChange={e => setNewAddon(p => ({ ...p, name: e.target.value }))}
                   placeholder="Nombre del adicional"
@@ -494,7 +494,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
             </div>
 
             {/* Música y cancelación */}
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Hora límite de música</label>
                 <input type="time" value={musicCutoff} onChange={e => setMusicCutoff(e.target.value)}

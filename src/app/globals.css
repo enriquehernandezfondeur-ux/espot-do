@@ -117,6 +117,7 @@ body {
   background: var(--bg-surface);
   border: 1.5px solid var(--border-medium);
   color: var(--text-primary);
+  font-size: 16px; /* Previene zoom automático en iOS Safari */
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .input-base::placeholder { color: var(--text-muted); }
