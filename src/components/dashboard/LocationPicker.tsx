@@ -30,11 +30,18 @@ interface Props {
   onCoords:  (lat: string, lng: string) => void
 }
 
-interface Suggestion {
-  display_name: string
-  lat: string
-  lon: string
-  address?: { road?: string; suburb?: string }
+interface PhotonFeature {
+  geometry: { coordinates: [number, number] }
+  properties: {
+    name?: string
+    street?: string
+    housenumber?: string
+    suburb?: string
+    district?: string
+    city?: string
+    state?: string
+    country?: string
+  }
 }
 
 export default function LocationPicker({ address, sector, lat, lng, onAddress, onSector, onCoords }: Props) {
@@ -45,7 +52,7 @@ export default function LocationPicker({ address, sector, lat, lng, onAddress, o
   onCoordsRef.current = onCoords
 
   const [hasPin,      setHasPin]      = useState(!!(lat && lng))
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([])
+  const [suggestions, setSuggestions] = useState<PhotonFeature[]>([])
   const [loading,     setLoading]     = useState(false)
   const debounceRef   = useRef<ReturnType<typeof setTimeout> | null>(null)
   const inputRef      = useRef<HTMLInputElement>(null)
@@ -116,20 +123,21 @@ export default function LocationPicker({ address, sector, lat, lng, onAddress, o
     onAddress(val)
     setSuggestions([])
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    if (val.trim().length < 4) return
-    debounceRef.current = setTimeout(() => doSearch(val), 450)
+    if (val.trim().length < 3) return
+    debounceRef.current = setTimeout(() => doSearch(val), 250)
   }
 
   async function doSearch(query: string) {
     setLoading(true)
     try {
-      const q = [query, sector, 'República Dominicana'].filter(Boolean).join(', ')
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5&countrycodes=do&addressdetails=1`,
-        { headers: { 'User-Agent': 'Espot/1.0' } }
-      )
-      const data: Suggestion[] = await res.json()
-      setSuggestions(data.slice(0, 5))
+      // Photon: más rápido que Nominatim, retorna números de calle
+      // bbox restringido a República Dominicana: W=-72.0, S=17.5, E=-68.3, N=19.9
+      const q = [query, sector].filter(Boolean).join(' ')
+      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lang=es&limit=5&bbox=-72.0,17.5,-68.3,19.9`
+      const res  = await fetch(url)
+      const data = await res.json()
+      const features: PhotonFeature[] = data.features ?? []
+      setSuggestions(features.slice(0, 5))
     } catch {
       setSuggestions([])
     } finally {
@@ -137,17 +145,22 @@ export default function LocationPicker({ address, sector, lat, lng, onAddress, o
     }
   }
 
-  function pickSuggestion(s: Suggestion) {
-    // Dirección corta para el campo
-    const short = s.address?.road
-      ? [s.address.road, s.address.suburb].filter(Boolean).join(', ')
-      : s.display_name.split(',').slice(0, 2).join(',').trim()
-    onAddress(short)
-    if (s.address?.suburb && !sector) onSector(s.address.suburb)
+  function formatSuggestion(f: PhotonFeature): string {
+    const p = f.properties
+    const street = [p.name || p.street, p.housenumber ? `#${p.housenumber}` : null].filter(Boolean).join(' ')
+    const area   = p.suburb || p.district || ''
+    const city   = p.city || p.state || ''
+    return [street, area, city].filter(Boolean).join(', ')
+  }
+
+  function pickSuggestion(f: PhotonFeature) {
+    const p = f.properties
+    const street = [p.name || p.street, p.housenumber ? `#${p.housenumber}` : null].filter(Boolean).join(' ')
+    onAddress(street || formatSuggestion(f).split(',')[0])
+    if ((p.suburb || p.district) && !sector) onSector(p.suburb || p.district || '')
     setSuggestions([])
 
-    const gLat = parseFloat(s.lat)
-    const gLng = parseFloat(s.lon)
+    const [gLng, gLat] = f.geometry.coordinates  // Photon usa [lon, lat]
     onCoordsRef.current(gLat.toFixed(6), gLng.toFixed(6))
     import('leaflet').then(({ default: L }) => {
       placeMarker(L, gLat, gLng)
@@ -185,20 +198,23 @@ export default function LocationPicker({ address, sector, lat, lng, onAddress, o
             {suggestions.length > 0 && (
               <ul className="absolute left-0 right-0 top-full mt-1 z-[9999] rounded-xl overflow-hidden"
                 style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
-                {suggestions.map((s, i) => (
-                  <li key={i}>
-                    <button
-                      type="button"
-                      onMouseDown={e => { e.preventDefault(); pickSuggestion(s) }}
-                      className="w-full text-left px-4 py-2.5 text-sm flex items-start gap-2 transition-colors hover:bg-[var(--bg-elevated)]"
-                      style={{ borderBottom: i < suggestions.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
-                      <MapPin size={13} style={{ color: '#35C493', flexShrink: 0, marginTop: 2 }} />
-                      <span className="truncate leading-snug" style={{ color: 'var(--text-primary)' }}>
-                        {s.display_name.split(',').slice(0, 3).join(', ')}
-                      </span>
-                    </button>
-                  </li>
-                ))}
+                {suggestions.map((s, i) => {
+                  const label = formatSuggestion(s)
+                  return (
+                    <li key={i}>
+                      <button
+                        type="button"
+                        onMouseDown={e => { e.preventDefault(); pickSuggestion(s) }}
+                        className="w-full text-left px-4 py-2.5 text-sm flex items-start gap-2 transition-colors hover:bg-[var(--bg-elevated)]"
+                        style={{ borderBottom: i < suggestions.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
+                        <MapPin size={13} style={{ color: '#35C493', flexShrink: 0, marginTop: 2 }} />
+                        <span className="leading-snug" style={{ color: 'var(--text-primary)' }}>
+                          {label}
+                        </span>
+                      </button>
+                    </li>
+                  )
+                })}
               </ul>
             )}
           </div>
