@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
     paid_at:        new Date().toISOString(),
   })
 
-  const SITE       = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
+  const SITE       = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
   const spaceName  = space?.name       ?? 'Espacio'
   const guestName  = guest?.full_name  ?? 'Cliente'
   const guestEmail = guest?.email      ?? user.email ?? ''

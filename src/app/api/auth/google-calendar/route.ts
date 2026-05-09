@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
   if (!isGoogleCalendarConfigured()) {
     return NextResponse.redirect(
-      new URL('/dashboard/host/ajustes?error=google_not_configured', process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'),
+      new URL('/dashboard/host/ajustes?error=google_not_configured', process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'),
     )
   }
 
@@ -16,7 +16,7 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     return NextResponse.redirect(
-      new URL('/auth', process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'),
+      new URL('/auth', process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'),
     )
   }
 

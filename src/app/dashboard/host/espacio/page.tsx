@@ -497,8 +497,14 @@ export default function EspacioPage() {
                     <div className="absolute top-3 right-3 flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
                       style={space.is_published
                         ? { background: 'rgba(22,163,74,0.9)', color: '#fff' }
-                        : { background: 'rgba(0,0,0,0.6)', color: '#fff' }}>
-                      {space.is_published ? <><Eye size={10} /> Publicado</> : <><EyeOff size={10} /> Borrador</>}
+                        : space.is_active
+                          ? { background: 'rgba(217,119,6,0.9)', color: '#fff' }
+                          : { background: 'rgba(0,0,0,0.6)', color: '#fff' }}>
+                      {space.is_published
+                        ? <><Eye size={10} /> Publicado</>
+                        : space.is_active
+                          ? <><Clock size={10} /> Pendiente revisión</>
+                          : <><EyeOff size={10} /> Borrador</>}
                     </div>
                   </div>
                   <div className="p-5">

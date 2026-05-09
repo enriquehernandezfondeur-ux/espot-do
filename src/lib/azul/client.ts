@@ -25,7 +25,7 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
   const MERCHANT_ID   = process.env.AZUL_MERCHANT_ID   ?? ''
   const MERCHANT_NAME = process.env.AZUL_MERCHANT_NAME ?? 'ESPOT, S.R.L.'
   const PRIVATE_KEY   = process.env.AZUL_PRIVATE_KEY   ?? ''
-  const SITE          = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
+  const SITE          = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
   const IS_PROD       = process.env.NODE_ENV === 'production'
   const PAGE_URL      = process.env.AZUL_PAYMENT_PAGE_URL
     ?? (IS_PROD

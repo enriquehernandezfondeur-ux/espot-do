@@ -98,7 +98,7 @@ export default function HostMensajesPage() {
               <MessageCircle size={28} className="mb-3" style={{ color: 'var(--text-muted)' }} />
               <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Sin mensajes aún</p>
               <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-                Los clientes podrán contactarte desde el marketplace
+                Los mensajes aparecen aquí cuando un cliente te contacte desde la página de tu espacio en el marketplace.
               </p>
             </div>
           ) : (

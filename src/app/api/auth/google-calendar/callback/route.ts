@@ -4,7 +4,7 @@ import { exchangeCode } from '@/lib/google-calendar'
 
 export const dynamic = 'force-dynamic'
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
+const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 
 /** Callback de OAuth — Google redirige aquí con el code */
 export async function GET(req: NextRequest) {

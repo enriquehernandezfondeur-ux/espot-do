@@ -11,7 +11,7 @@ import {
 import { createBookingEvent, deleteBookingEvent } from '@/lib/google-calendar'
 export type { BookingStatus } from '@/lib/bookingConfig'
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 
 // ── CREAR RESERVA CON VALIDACIÓN ANTI-DOBLE ───────────────
 export interface CreateBookingPayload {

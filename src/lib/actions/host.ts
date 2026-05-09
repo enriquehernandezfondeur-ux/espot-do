@@ -2,6 +2,9 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { acceptBooking, rejectBooking, confirmPayment, cancelBooking } from './booking'
+import { sendEmail } from '@/lib/email/send'
+import { emailBase, infoBox } from '@/lib/email/templates'
+import { formatCurrency } from '@/lib/utils'
 
 export { acceptBooking, rejectBooking, confirmPayment as confirmBooking, cancelBooking }
 
@@ -339,7 +342,7 @@ export async function respondToQuote(bookingId: string, quotedPrice: number, mes
 
   const { data: bk } = await supabase
     .from('bookings')
-    .select('space_id, spaces!space_id(host_id)')
+    .select('space_id, event_date, profiles!guest_id(full_name, email), spaces!space_id(host_id, name)')
     .eq('id', bookingId)
     .single()
   if (!bk || (bk.spaces as any)?.host_id !== user.id) return { error: 'No autorizado' }
@@ -356,7 +359,34 @@ export async function respondToQuote(bookingId: string, quotedPrice: number, mes
     .eq('id', bookingId)
     .eq('status', 'quote_requested')
 
-  return error ? { error: error.message } : { success: true }
+  if (error) return { error: error.message }
+
+  // Notificar al cliente que hay una propuesta esperándole
+  const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
+  const guest = bk.profiles as any
+  const space = bk.spaces as any
+  if (guest?.email) {
+    await sendEmail({
+      to: guest.email,
+      subject: `El propietario respondió tu cotización — ${space?.name}`,
+      html: emailBase({
+        title: 'Tienes una propuesta de precio',
+        subtitle: `${space?.name} respondió a tu solicitud de cotización.`,
+        accentColor: '#2563EB',
+        body: `
+          <p style="color:#374151;margin:0 0 16px;">Hola <strong>${guest?.full_name ?? 'Cliente'}</strong>, el propietario de <strong>${space?.name}</strong> revisó tu solicitud y tiene una propuesta para ti.</p>
+          ${infoBox([
+            { label: 'Espacio', value: space?.name ?? '' },
+            { label: 'Fecha', value: bk?.event_date ?? '' },
+            { label: 'Precio propuesto', value: formatCurrency(quotedPrice) },
+          ])}
+          <p style="color:#6B7280;font-size:13px;margin:0;">Ingresa a tu panel para revisar la propuesta y confirmar tu reserva.</p>`,
+        cta: { text: 'Ver mi cotización', url: `${SITE}/dashboard/reservas` },
+      }),
+    })
+  }
+
+  return { success: true }
 }
 
 // ── Marcar evento como completado ─────────────────────────

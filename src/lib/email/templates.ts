@@ -5,7 +5,7 @@
 
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 
 // ── Componentes reutilizables ────────────────────────────
 

@@ -9,7 +9,16 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const supabase = await createClient()
-    await supabase.auth.exchangeCodeForSession(code)
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    if (error) {
+      return NextResponse.redirect(`${origin}/auth?error=callback_failed`)
+    }
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    if (userError || !user) {
+      return NextResponse.redirect(`${origin}/auth?error=callback_failed`)
+    }
+  } else {
+    return NextResponse.redirect(`${origin}/auth?error=callback_failed`)
   }
 
   return NextResponse.redirect(`${origin}${redirect}`)
