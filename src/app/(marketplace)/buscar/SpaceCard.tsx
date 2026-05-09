@@ -164,7 +164,7 @@ export function SpaceCard({
             <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 z-20">
               {images.slice(0, 8).map((_, i) => (
                 <button type="button" key={i} onClick={e => dotClick(e, i)}
-                  style={{ width: i === photoIdx ? 16 : 5, height: 5, borderRadius: 3, padding: 0, border: 'none', cursor: 'pointer',
+                  style={{ width: i === photoIdx ? 20 : 7, height: 7, borderRadius: 4, padding: 0, border: 'none', cursor: 'pointer',
                     background: i === photoIdx ? '#fff' : 'rgba(255,255,255,0.55)', transition: 'all 0.3s ease' }} />
               ))}
             </div>

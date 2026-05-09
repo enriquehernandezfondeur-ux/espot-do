@@ -228,7 +228,7 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
                   style={{ background: active ? 'var(--brand-dim)' : 'transparent' }}>
                   <Icon size={18} />
                 </div>
-                <span className="text-[10px] font-semibold leading-none">{label}</span>
+                <span className="text-[11px] font-semibold leading-none">{label}</span>
               </Link>
             )
           })}

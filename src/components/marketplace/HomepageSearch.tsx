@@ -517,7 +517,7 @@ export default function HomepageSearch() {
                       style={{ color: '#111827', fontSize: 16 }}
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {filteredActivities.map(act => (
                       <button key={act.key} type="button" onClick={() => pickActivity(act.key, act.label)}
                         className="flex items-center gap-2 px-4 py-3.5 rounded-xl text-left text-sm font-medium transition-all"

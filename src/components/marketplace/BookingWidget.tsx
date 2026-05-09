@@ -508,7 +508,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                       : { background: 'var(--border-medium)', color: 'var(--text-muted)' }}>
                     {isComplete ? <CheckCircle size={11} /> : s.id}
                   </div>
-                  <span className="text-xs font-medium leading-none"
+                  <span className="hidden sm:block text-xs font-medium leading-none"
                     style={{ color: isActive ? '#0F1623' : isComplete ? 'var(--brand)' : 'var(--text-muted)', maxWidth: 44, textAlign: 'center' }}>
                     {s.label}
                   </span>
@@ -746,7 +746,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                   onChange={e => handleCountInput(e.target.value)}
                   onBlur={() => setCountInput(String(guestCount))}
                   className="text-3xl font-bold text-center bg-transparent focus:outline-none w-24 tabular-nums"
-                  style={{ color: 'var(--text-primary)' }}
+                  style={{ color: 'var(--text-primary)', fontSize: 16 }}
                   min={space.capacity_min ?? 1} max={space.capacity_max} />
                 <span className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>personas</span>
               </div>
@@ -791,7 +791,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             {eventType === 'Otro' && (
               <div className="space-y-3">
                 <input value={customEventType} onChange={e => setCustomEventType(e.target.value)}
-                  placeholder="Describe tu evento..." className="input-base w-full rounded-xl px-4 py-3 text-sm" autoFocus />
+                  placeholder="Describe tu evento..." className="input-base w-full rounded-xl px-4 py-3 text-sm" autoFocus style={{ fontSize: 16 }} />
                 <textarea value={guestNote} onChange={e => setGuestNote(e.target.value)}
                   placeholder="Cuéntale más al propietario (opcional)..."
                   rows={2} className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none" />
@@ -821,7 +821,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                   onChange={e => setGuestCedula(e.target.value)}
                   placeholder="001-1234567-8"
                   className="input-base w-full rounded-xl px-4 py-3 text-sm"
-                  style={{ color: 'var(--text-primary)' }}
+                  style={{ color: 'var(--text-primary)', fontSize: 16 }}
                 />
                 <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
                   Algunos espacios requieren verificación de identidad del reservante.

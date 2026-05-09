@@ -636,7 +636,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
 
             {/* Tabs */}
             <div className="mb-6 md:mb-8">
-              <div className="flex gap-1 p-1 rounded-2xl w-full md:w-fit" style={{ background: 'var(--bg-elevated)' }}>
+              <div className="flex gap-1 p-1 rounded-2xl overflow-x-auto scrollbar-hide w-full md:w-fit" style={{ background: 'var(--bg-elevated)' }}>
                 {([
                   { id: 'info',    label: 'Descripción' },
                   { id: 'addons',  label: `Adicionales${addons.length ? ` (${addons.length})` : ''}` },
@@ -699,7 +699,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   <h3 className="text-base md:text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
                     Facilidades
                   </h3>
-                  <div className="grid grid-cols-4 sm:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
                     {facilities.map(({ icon, label }) => (
                       <div key={label} className="flex flex-col items-center gap-2 p-3 md:p-4 rounded-xl text-center"
                         style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>

@@ -494,7 +494,7 @@ export default function EspacioPage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {spaces.map((space: any) => {
               const pricing = space.space_pricing?.find((p: any) => p.is_active) ?? space.space_pricing?.[0]
               const cover   = space.space_images?.find((i: any) => i.is_cover)?.url ?? space.space_images?.[0]?.url
@@ -719,7 +719,7 @@ export default function EspacioPage() {
               onCoords={(la, lo) => { setLat(la); setLng(lo) }}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Capacidad mínima</label>
                 <input
@@ -821,7 +821,7 @@ export default function EspacioPage() {
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>¿Cómo quieres vender tu espacio?</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {pricingOptions.map(option => (
                 <button
                   key={option.value}
@@ -919,7 +919,7 @@ export default function EspacioPage() {
             {pricingType === 'fixed_package' && (
               <div className="bg-[rgba(53,196,147,0.07)] border border-[rgba(53,196,147,0.20)] rounded-xl p-5 space-y-4">
                 <h3 className="font-semibold text-sm" style={{ color: 'var(--brand)' }}>Configuración del paquete</h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Nombre del paquete</label>
                     <input value={packageName} onChange={e => setPackageName(e.target.value)}
@@ -1025,7 +1025,7 @@ export default function EspacioPage() {
                   </span>
                 )}
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 {addonSuggestions.map(addon => {
                   const selected = addons.find(a => a.name === addon.name)
                   return (
@@ -1138,7 +1138,7 @@ export default function EspacioPage() {
               <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>Indica qué incluye tu espacio. Los clientes podrán filtrar por esto.</p>
 
               {/* Grid de facilidades booleanas */}
-              <div className="grid grid-cols-2 gap-2 mb-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-5">
                 {([
                   { label: 'Estacionamiento',    icon: Car,             value: hasParkingFac,   setter: setHasParkingFac },
                   { label: 'Valet parking',       icon: Car,             value: hasValetParking, setter: setHasValetParking },
@@ -1176,7 +1176,7 @@ export default function EspacioPage() {
             {/* ─── 1. PERMISOS GENERALES ─── */}
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Permisos generales</p>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {([
                   { label: 'Decoración externa',    desc: 'Globos, flores, mantelería', value: allowsDecoration,  setter: setAllowsDecoration },
                   { label: 'Comida externa',         desc: 'Catering o comida propia',   value: allowsFood,        setter: setAllowsFood },
@@ -1371,7 +1371,7 @@ export default function EspacioPage() {
             </div>
 
             {/* Summary */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                 <div className="text-xs mb-2 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Espacio</div>
                 <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>{name || 'Sin nombre'}</div>
