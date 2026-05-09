@@ -371,7 +371,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             ¡Solicitud enviada!
           </h3>
           <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-            El propietario revisará tu solicitud y responderá en menos de 24 horas.
+            El propietario revisará tu solicitud y confirmará disponibilidad.
           </p>
           <div className="flex items-start gap-2.5 text-left px-4 py-3 rounded-xl mb-5"
             style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.18)' }}>
@@ -945,7 +945,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                 style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.15)' }}>
                 <ShieldCheck size={16} style={{ color: 'var(--brand)', flexShrink: 0 }} />
                 <p className="text-xs" style={{ color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                  El propietario tiene 24 horas para aceptar. Solo pagarás cuando confirme tu solicitud.
+                  Solo pagarás cuando el propietario confirme tu solicitud.
                 </p>
               </div>
             )}

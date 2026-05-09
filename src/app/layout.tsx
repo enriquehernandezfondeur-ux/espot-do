@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     icon: '/icon.svg',
     apple: '/icon.svg',
   },
-  description: 'Reserva salones, rooftops, restaurantes y más para tu próximo evento en República Dominicana. Confirmación en 24h, pago del 10% para asegurar tu fecha.',
+  description: 'Reserva salones, rooftops, restaurantes y más para tu próximo evento en República Dominicana. Explora los mejores espacios y reserva el que más te convenga.',
   keywords: ['espacios para eventos', 'salones de eventos', 'reservar espacio Santo Domingo', 'rooftop RD', 'venue República Dominicana'],
   openGraph: {
     type:        'website',
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     url:          BASE_URL,
     siteName:    'espot.do',
     title:       'espot.do — Espacios a tu alcance en RD',
-    description: 'Salones, rooftops, restaurantes y más. Confirma en 24h, paga solo el 10% para asegurar tu fecha.',
+    description: 'Salones, rooftops, restaurantes y más para eventos en República Dominicana.',
     images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'espot.do' }],
   },
   twitter: {

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: 'Encuentra salones, rooftops, restaurantes, villas y más para tu próximo evento en Santo Domingo y toda la RD. Filtra por sector, capacidad, fecha y tipo de evento.',
   openGraph: {
     title: 'Explorar espacios — espot.do',
-    description: 'Salones, rooftops, villas y más para eventos en RD. Confirma en 24 horas.',
+    description: 'Salones, rooftops, villas y más para eventos en RD.',
   },
 }
 

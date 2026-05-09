@@ -826,7 +826,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                           )}
                         </div>
                         <div className="text-xs mt-0.5 font-medium" style={{ color: 'var(--brand)' }}>
-                          Propietario · Responde en menos de 24h
+                          Propietario · Confirma disponibilidad
                         </div>
                       </div>
 
@@ -882,7 +882,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                       </button>
 
                       <p className="text-xs text-center mt-2.5" style={{ color: 'var(--text-muted)' }}>
-                        Sin compromiso · Respuesta en menos de 24 horas
+                        Sin compromiso · El propietario confirma disponibilidad
                       </p>
                     </div>
                   </div>

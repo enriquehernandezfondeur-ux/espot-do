@@ -427,8 +427,8 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
           <div ref={howSection.ref} className="grid md:grid-cols-3 gap-6 md:gap-8">
             {[
               { num: '01', icon: Search,     title: 'Busca tu espacio',     desc: 'Filtra por sector, tipo y capacidad. Todos los espacios son verificados por nuestro equipo antes de publicarse.' },
-              { num: '02', icon: Clock,      title: 'Elige fecha y horario', desc: 'Selecciona el día, horario y adicionales. El propietario confirma en menos de 24 horas.' },
-              { num: '03', icon: CreditCard, title: 'Paga y asegura tu fecha', desc: 'Una vez aceptada, paga el depósito de forma segura con Azul Payments. El precio que ves es el que pagas.' },
+              { num: '02', icon: Clock,      title: 'Elige fecha y horario', desc: 'Selecciona el día, horario y adicionales. El propietario revisará tu solicitud y confirmará disponibilidad.' },
+              { num: '03', icon: CreditCard, title: 'Paga y asegura tu fecha', desc: 'Una vez confirmada tu reserva, paga de forma segura con Azul Payments. El precio que ves es el que pagas.' },
             ].map((step, i) => {
               const Icon = step.icon
               return (
