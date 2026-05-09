@@ -10,6 +10,8 @@ import { STATUS_LABELS, STATUS_COLORS, isPaid } from '@/lib/bookingConfig'
 import { cn } from '@/lib/utils'
 import { submitReview, getUserReviewedBookings } from '@/lib/actions/reviews'
 import { cancelBooking } from '@/lib/actions/booking'
+import { getInstallments, type BookingInstallment } from '@/lib/actions/installments'
+import { countdownLabel } from '@/lib/payments/schedule'
 
 type Booking = Awaited<ReturnType<typeof getClientBookings>>[0]
 
@@ -30,6 +32,7 @@ export default function MisReservasPage() {
   const [cancelModal, setCancelModal] = useState<Booking | null>(null)
   const [cancelReason, setCancelReason] = useState('')
   const [cancelling, setCancelling]   = useState(false)
+  const [installments, setInstallments] = useState<BookingInstallment[]>([])
   const router = useRouter()
 
   async function handleCancel() {
@@ -166,7 +169,15 @@ export default function MisReservasPage() {
               <div key={bk.id} className="rounded-2xl overflow-hidden transition-all"
                 style={{ background: '#fff', border: `1.5px solid ${isSelected ? 'var(--brand)' : bk.status === 'accepted' ? 'rgba(37,99,235,0.3)' : 'var(--border-subtle)'}` }}>
 
-                <button className="w-full text-left" onClick={() => setSelected(isSelected ? null : bk)}>
+                <button className="w-full text-left" onClick={() => {
+                  const next = isSelected ? null : bk
+                  setSelected(next)
+                  if (next && (next.status === 'accepted' || next.status === 'confirmed')) {
+                    getInstallments(next.id).then(setInstallments)
+                  } else {
+                    setInstallments([])
+                  }
+                }}>
                   <div className="flex items-center gap-3 p-4">
                     {/* Imagen */}
                     <div className="w-16 h-14 md:w-20 md:h-16 rounded-xl overflow-hidden shrink-0" style={{ background: 'var(--bg-elevated)' }}>
@@ -293,6 +304,75 @@ export default function MisReservasPage() {
                             : '⏳ Pago pendiente'}
                         </div>
                       </div>
+
+                      {/* Timeline de cuotas — solo si hay installments */}
+                      {isSelected && installments.length > 0 && (
+                        <div className="rounded-2xl overflow-hidden mt-3"
+                          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                          <div className="px-4 py-3 flex items-center justify-between"
+                            style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                              Plan de pagos
+                            </span>
+                            <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                              style={{ background: 'var(--brand-dim)', color: 'var(--brand)' }}>
+                              {installments.length} cuota{installments.length !== 1 ? 's' : ''}
+                            </span>
+                          </div>
+                          <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
+                            {installments.map((inst, i) => {
+                              const isPaidInst = inst.status === 'paid'
+                              const isOverdue  = inst.status === 'overdue'
+                              const isNext     = !isPaidInst && installments.slice(0, i).every(x => x.status === 'paid')
+                              return (
+                                <div key={inst.id} className="flex items-center gap-3 px-4 py-3">
+                                  {/* Icono estado */}
+                                  <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
+                                    style={{
+                                      background: isPaidInst ? 'rgba(22,163,74,0.1)' : isOverdue ? 'rgba(220,38,38,0.1)' : isNext ? 'rgba(53,196,147,0.1)' : 'var(--bg-base)',
+                                      color: isPaidInst ? '#16A34A' : isOverdue ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)',
+                                      border: `1.5px solid ${isPaidInst ? '#16A34A' : isOverdue ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--border-medium)'}`,
+                                    }}>
+                                    {isPaidInst ? '✓' : inst.installment_number}
+                                  </div>
+                                  {/* Info */}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center justify-between gap-2">
+                                      <span className="text-xs font-semibold" style={{ color: isPaidInst ? '#16A34A' : 'var(--text-primary)' }}>
+                                        {inst.label ?? `Cuota ${inst.installment_number}`}
+                                      </span>
+                                      <span className="text-xs font-bold shrink-0" style={{ color: 'var(--text-primary)' }}>
+                                        {formatCurrency(inst.amount)}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-2 mt-0.5">
+                                      <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                                        {isPaidInst ? `Pagado${inst.paid_at ? ' · ' + formatDate(inst.paid_at.split('T')[0]) : ''}` : formatDate(inst.due_date)}
+                                      </span>
+                                      {!isPaidInst && (
+                                        <span className="text-[11px] font-semibold"
+                                          style={{ color: isOverdue ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)' }}>
+                                          {countdownLabel(inst.due_date)}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
+                          {/* Botón pagar si hay cuota pendiente */}
+                          {installments.some(i => i.status !== 'paid') && (
+                            <div className="px-4 py-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                              <Link href={`/pago/${selected?.id}?cuota=${installments.find(i => i.status !== 'paid')?.id}`}
+                                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-bold transition-all"
+                                style={{ background: 'var(--brand)', color: '#fff' }}>
+                                Pagar siguiente cuota →
+                              </Link>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     {/* Guías por estado */}

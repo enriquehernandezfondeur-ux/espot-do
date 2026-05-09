@@ -285,6 +285,73 @@ export function tplCancelada(data: {
   })
 }
 
+/** Recordatorio de cuota próxima */
+export function tplRecordatorioCuota(data: {
+  guestName: string
+  spaceName: string
+  eventDate: string
+  installmentNumber: number
+  totalInstallments: number
+  amount: number
+  dueDate: string
+  daysLeft: number
+  paymentUrl: string
+}) {
+  return emailBase({
+    title: `Recordatorio de pago — Cuota ${data.installmentNumber} de ${data.totalInstallments}`,
+    subtitle: `${data.spaceName} · ${formatDate(data.eventDate)}`,
+    accentColor: '#D97706',
+    body: `
+      <p style="color:#374151;margin:0 0 16px;">Hola <strong>${data.guestName}</strong>, te recordamos que tienes un pago próximo para asegurar tu reserva.</p>
+      ${infoBox([
+        { label: 'Espacio',         value: data.spaceName },
+        { label: 'Fecha del evento', value: formatDate(data.eventDate) },
+        { label: 'Cuota',           value: `${data.installmentNumber} de ${data.totalInstallments}` },
+        { label: 'Monto a pagar',   value: formatCurrency(data.amount) },
+        { label: 'Fecha límite',    value: formatDate(data.dueDate) },
+        { label: 'Tiempo restante', value: data.daysLeft <= 1 ? '¡Vence hoy!' : `Faltan ${data.daysLeft} días` },
+      ])}
+      <p style="color:#6B7280;font-size:13px;margin:0;">Si no realizas el pago antes de la fecha límite, la reserva podría cancelarse automáticamente.</p>`,
+    cta: { text: `Pagar cuota ${data.installmentNumber} →`, url: data.paymentUrl },
+  })
+}
+
+/** Cuota pagada — confirmación */
+export function tplCuotaPagada(data: {
+  guestName: string
+  spaceName: string
+  eventDate: string
+  installmentNumber: number
+  totalInstallments: number
+  amountPaid: number
+  remainingAmount: number
+  nextDueDate?: string
+  nextDueAmount?: number
+}) {
+  const rows = [
+    { label: 'Espacio',           value: data.spaceName },
+    { label: 'Fecha del evento',   value: formatDate(data.eventDate) },
+    { label: 'Cuota pagada',       value: `${data.installmentNumber} de ${data.totalInstallments}` },
+    { label: 'Monto pagado',       value: formatCurrency(data.amountPaid) },
+  ]
+  if (data.remainingAmount > 0 && data.nextDueDate && data.nextDueAmount) {
+    rows.push({ label: 'Saldo pendiente', value: formatCurrency(data.remainingAmount) })
+    rows.push({ label: 'Próximo pago',    value: `${formatCurrency(data.nextDueAmount)} · ${formatDate(data.nextDueDate)}` })
+  }
+
+  return emailBase({
+    title: data.remainingAmount <= 0 ? '¡Todo pagado! Reserva confirmada' : `Cuota ${data.installmentNumber} pagada`,
+    subtitle: data.remainingAmount <= 0
+      ? 'Tu reserva está completamente pagada. ¡Nos vemos!'
+      : 'Próximo pago programado.',
+    accentColor: '#35C493',
+    body: `
+      <p style="color:#374151;margin:0 0 16px;">Hola <strong>${data.guestName}</strong>, recibimos tu pago correctamente.</p>
+      ${infoBox(rows)}`,
+    cta: { text: 'Ver mis reservas', url: `${SITE}/dashboard/reservas` },
+  })
+}
+
 /** Pago completado — para admin y notificaciones de Azul */
 export function tplPagoCompletado(data: {
   recipientName: string

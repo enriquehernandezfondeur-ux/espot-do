@@ -6,6 +6,60 @@ import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getHostBookings, acceptBooking, rejectBooking, completeBooking } from '@/lib/actions/host'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
 
+function HostInstallmentStatus({ bookingId, totalAmount }: { bookingId: string; totalAmount: number }) {
+  const [insts, setInsts] = useState<any[]>([])
+  useEffect(() => {
+    import('@/lib/actions/installments').then(m => m.getInstallments(bookingId)).then(setInsts)
+  }, [bookingId])
+
+  if (!insts.length) return null
+
+  const paid    = insts.filter((i: any) => i.status === 'paid').reduce((s: number, i: any) => s + Number(i.amount), 0)
+
+  return (
+    <div className="rounded-xl overflow-hidden mt-3" style={{ border: '1px solid var(--border-subtle)' }}>
+      <div className="px-4 py-2.5 flex items-center justify-between"
+        style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
+        <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Cobros</span>
+        <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>
+          {insts.filter((i: any) => i.status === 'paid').length}/{insts.length} pagados
+        </span>
+      </div>
+      {insts.map((inst: any) => (
+        <div key={inst.id} className="flex items-center justify-between px-4 py-2.5"
+          style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+          <div>
+            <div className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
+              Cuota {inst.installment_number} — {inst.label ?? ''}
+            </div>
+            <div className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+              Vence: {inst.due_date}
+              {inst.status !== 'paid' && (
+                <span className="ml-2 font-semibold" style={{ color: inst.status === 'overdue' ? '#DC2626' : 'var(--text-muted)' }}>
+                  {inst.status === 'overdue' ? 'Vencida' : `Faltan ${Math.max(0, Math.floor((new Date(inst.due_date).getTime() - Date.now()) / 86400000))} días`}
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>
+              {formatCurrency(Number(inst.amount))}
+            </div>
+            <div className="text-[11px] font-semibold"
+              style={{ color: inst.status === 'paid' ? '#16A34A' : inst.status === 'overdue' ? '#DC2626' : 'var(--text-muted)' }}>
+              {inst.status === 'paid' ? 'Recibido' : inst.status === 'overdue' ? 'Vencido' : 'Pendiente'}
+            </div>
+          </div>
+        </div>
+      ))}
+      <div className="flex items-center justify-between px-4 py-3">
+        <span className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Cobrado hasta ahora</span>
+        <span className="text-sm font-bold" style={{ color: '#16A34A' }}>{formatCurrency(paid)}</span>
+      </div>
+    </div>
+  )
+}
+
 type Booking = Awaited<ReturnType<typeof getHostBookings>>[0]
 
 const FILTERS = [
@@ -309,6 +363,11 @@ export default function HostReservasPage() {
                   <span>{formatCurrency(Number(selected.platform_fee))}</span>
                 </div>
               </div>
+
+              {/* Estado de cuotas — solo lectura para el host */}
+              {(selected.status === 'accepted' || selected.status === 'confirmed') && (
+                <HostInstallmentStatus bookingId={selected.id} totalAmount={Number(selected.total_amount)} />
+              )}
 
               {/* Acciones */}
               {selected.status === 'pending' && !showRejectForm && (

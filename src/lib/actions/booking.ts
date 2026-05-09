@@ -9,6 +9,7 @@ import {
   tplRechazadaCliente, tplCancelada,
 } from '@/lib/email/templates'
 import { createBookingEvent, deleteBookingEvent } from '@/lib/google-calendar'
+import { createInstallments } from '@/lib/actions/installments'
 export type { BookingStatus } from '@/lib/bookingConfig'
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
@@ -225,6 +226,9 @@ export async function acceptBooking(bookingId: string) {
     .in('status', ['pending', 'quote_requested'])
 
   if (error) return { error: error.message }
+
+  // Crear schedule de cuotas al aceptar
+  await createInstallments(bookingId, bk.event_date, Number(bk.total_amount))
 
   const guest = bk.profiles as any
   const depositAmount = formatCurrency(Number(bk.platform_fee))
