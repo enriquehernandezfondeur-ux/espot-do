@@ -228,13 +228,13 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                     }}>
                     <div className="rounded-2xl overflow-hidden h-full flex flex-col"
                       style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 2px 12px rgba(0,0,0,0.05)', transition: 'box-shadow 0.3s ease, transform 0.3s ease' }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 12px 40px rgba(0,0,0,0.12)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)' }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 12px rgba(0,0,0,0.05)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)' }}>
+                      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 12px 40px rgba(0,0,0,0.12)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(53,196,147,0.4)' }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 12px rgba(0,0,0,0.05)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLDivElement).style.borderColor = '#E8ECF0' }}>
 
                       <div className="relative overflow-hidden" style={{ aspectRatio: '16/10', flexShrink: 0 }}>
                         {cover ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={cover} alt={space.name}
+                          <img src={cover} alt={space.name} loading="lazy"
                             className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center"
@@ -242,23 +242,34 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                             <Icon size={40} className="text-white opacity-70" />
                           </div>
                         )}
+
+                        {/* Precio — bottom left */}
                         {priceInfo && (
-                          <div className="absolute bottom-3 left-3 text-xs font-bold px-3 py-1.5 rounded-full"
+                          <div className="absolute bottom-3 left-3 z-10 text-xs font-bold px-3 py-1.5 rounded-full"
                             style={{ background: 'rgba(0,0,0,0.72)', color: '#fff', backdropFilter: 'blur(8px)' }}>
                             {priceInfo.price}
-                            {priceInfo.unit && <span className="opacity-70 ml-1">{priceInfo.unit}</span>}
+                            {priceInfo.unit && <span className="opacity-70 font-normal ml-1">· {priceInfo.unit}</span>}
                           </div>
                         )}
-                        <div className="absolute bottom-3 right-3 flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-full"
+
+                        {/* Capacidad — bottom right */}
+                        <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-full"
                           style={{ background: 'rgba(0,0,0,0.6)', color: '#fff', backdropFilter: 'blur(8px)' }}>
                           <Users size={10} /> {space.capacity_max}
                         </div>
-                        {space.is_verified && (
-                          <div className="absolute top-3 left-3 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
+
+                        {/* Badge top-left: instantánea > verificado */}
+                        {space.instant_booking ? (
+                          <span className="absolute top-3 left-3 z-10 flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full"
+                            style={{ background: 'rgba(37,99,235,0.88)', color: '#fff' }}>
+                            ⚡ Instantánea
+                          </span>
+                        ) : space.is_verified ? (
+                          <span className="absolute top-3 left-3 z-10 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
                             style={{ background: 'rgba(53,196,147,0.9)', color: '#fff' }}>
                             <Shield size={9} /> Verificado
-                          </div>
-                        )}
+                          </span>
+                        ) : null}
                       </div>
 
                       <div className="p-4 flex flex-col flex-1">
@@ -272,9 +283,9 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                         </div>
                         <div className="mt-auto pt-3 flex items-center justify-between"
                           style={{ borderTop: '1px solid #F0F2F5', marginTop: 12 }}>
-                          <span className="text-xs font-medium capitalize px-2.5 py-1 rounded-lg"
+                          <span className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg"
                             style={{ background: '#F4F6F8', color: '#6B7280' }}>
-                            {catDef?.label ?? space.category}
+                            <Icon size={10} /> {catDef?.label ?? space.category}
                           </span>
                           <ArrowRight size={14} style={{ color: '#35C493', transition: 'transform 0.2s' }}
                             className="group-hover:translate-x-1" />
