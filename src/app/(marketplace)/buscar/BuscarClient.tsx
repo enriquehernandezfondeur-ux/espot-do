@@ -109,6 +109,16 @@ function getCover(space: any) {
       ?? null
 }
 
+function getImages(space: any): string[] {
+  const imgs: any[] = space.space_images ?? []
+  const sorted = [...imgs].sort((a, b) => {
+    if (a.is_cover && !b.is_cover) return -1
+    if (!a.is_cover && b.is_cover) return 1
+    return (a.position ?? 99) - (b.position ?? 99)
+  })
+  return sorted.map((i: any) => i.url).filter(Boolean)
+}
+
 function getSpaceRating(space: any): { avg: number; count: number } | null {
   const reviews = (space.reviews ?? []).filter((r: any) => r.is_public && r.rating > 0)
   if (!reviews.length) return null
@@ -1190,7 +1200,7 @@ function SpaceCard({
   timeFilter?: string
   isAvailable?: boolean
 }) {
-  const cover      = getCover(space)
+  const images     = getImages(space)
   const priceInfo  = getPriceInfo(space)
   const rating     = getSpaceRating(space)
   const catLabel   = CATEGORIES.find(c => c.value === space.category)?.label ?? space.category
@@ -1202,6 +1212,32 @@ function SpaceCard({
   const href = dateFilter
     ? `/espacios/${space.slug}?fecha=${dateFilter}${timeFilter ? `&hora=${timeFilter}` : ''}`
     : `/espacios/${space.slug}`
+
+  const [photoIdx, setPhotoIdx] = useState(0)
+  const touchX = useRef<number | null>(null)
+
+  function prevPhoto(e: React.MouseEvent) {
+    e.preventDefault(); e.stopPropagation()
+    setPhotoIdx(i => (i - 1 + images.length) % images.length)
+  }
+  function nextPhoto(e: React.MouseEvent) {
+    e.preventDefault(); e.stopPropagation()
+    setPhotoIdx(i => (i + 1) % images.length)
+  }
+  function dotClick(e: React.MouseEvent, idx: number) {
+    e.preventDefault(); e.stopPropagation()
+    setPhotoIdx(idx)
+  }
+  function onTouchStart(e: React.TouchEvent) { touchX.current = e.touches[0].clientX }
+  function onTouchEnd(e: React.TouchEvent) {
+    if (touchX.current === null) return
+    const dx = e.changedTouches[0].clientX - touchX.current
+    if (Math.abs(dx) > 40) {
+      e.preventDefault(); e.stopPropagation()
+      setPhotoIdx(i => dx < 0 ? (i + 1) % images.length : (i - 1 + images.length) % images.length)
+    }
+    touchX.current = null
+  }
 
   function trackRecent() {
     try {
@@ -1225,38 +1261,70 @@ function SpaceCard({
         onMouseEnter={() => onHover(space.id)}
         onMouseLeave={() => onHover(null)}
       >
-        {/* ── Foto limpia ── */}
-        <div className="relative overflow-hidden" style={{ aspectRatio: '16/10', flexShrink: 0 }}>
-          {cover ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={cover} alt={space.name}
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center"
+        {/* ── Foto con slider ── */}
+        <div className="relative overflow-hidden" style={{ aspectRatio: '16/10', flexShrink: 0 }}
+          onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+
+          {images.length === 0 ? (
+            <div className="absolute inset-0 flex items-center justify-center"
               style={{ background: 'linear-gradient(135deg,#667eea,#764ba2)' }}>
               <CatIcon size={36} className="text-white opacity-60" />
+            </div>
+          ) : images.map((url, i) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img key={i} src={url} alt={space.name} loading="lazy"
+              className="absolute inset-0 w-full h-full object-cover transition-opacity duration-400"
+              style={{ opacity: i === photoIdx ? 1 : 0, zIndex: i === photoIdx ? 1 : 0,
+                transform: i === photoIdx && isHovered ? 'scale(1.06)' : 'scale(1)',
+                transition: 'opacity 0.35s ease, transform 0.7s ease' }} />
+          ))}
+
+          {/* Flechas prev/next — visibles en hover si hay >1 foto */}
+          {images.length > 1 && isHovered && (
+            <>
+              <button type="button" onClick={prevPhoto}
+                className="absolute left-2 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center rounded-full"
+                style={{ width: 28, height: 28, background: 'rgba(255,255,255,0.92)', boxShadow: '0 2px 8px rgba(0,0,0,0.18)' }}>
+                <ChevronLeft size={15} style={{ color: '#0F1623' }} />
+              </button>
+              <button type="button" onClick={nextPhoto}
+                className="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center rounded-full"
+                style={{ width: 28, height: 28, background: 'rgba(255,255,255,0.92)', boxShadow: '0 2px 8px rgba(0,0,0,0.18)' }}>
+                <ChevronRight size={15} style={{ color: '#0F1623' }} />
+              </button>
+            </>
+          )}
+
+          {/* Dots — visibles si hay >1 foto */}
+          {images.length > 1 && (
+            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 z-20">
+              {images.slice(0, 8).map((_, i) => (
+                <button type="button" key={i} onClick={e => dotClick(e, i)}
+                  style={{ width: i === photoIdx ? 16 : 5, height: 5, borderRadius: 3, padding: 0, border: 'none', cursor: 'pointer',
+                    background: i === photoIdx ? '#fff' : 'rgba(255,255,255,0.55)', transition: 'all 0.3s ease' }} />
+              ))}
             </div>
           )}
 
           {/* Favorito — top right */}
-          <div className="absolute top-3 right-3 z-10">
+          <div className="absolute top-3 right-3 z-20">
             <FavoriteButton spaceId={space.id} size="sm" />
           </div>
 
           {/* Badge top-left: disponibilidad > instantánea > verificado */}
           {isAvailable !== undefined ? (
-            <span className="absolute top-3 left-3 z-10 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
+            <span className="absolute top-3 left-3 z-20 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
               style={{ background: isAvailable ? 'rgba(53,196,147,0.92)' : 'rgba(220,38,38,0.85)', color: '#fff', backdropFilter: 'blur(8px)' }}>
               {isAvailable ? <Check size={9} /> : <X size={9} />}
               {isAvailable ? 'Disponible' : 'No disponible'}
             </span>
           ) : space.instant_booking ? (
-            <span className="absolute top-3 left-3 z-10 flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full"
+            <span className="absolute top-3 left-3 z-20 flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full"
               style={{ background: 'rgba(37,99,235,0.9)', color: '#fff', backdropFilter: 'blur(8px)' }}>
               ⚡ Instantánea
             </span>
           ) : space.is_verified ? (
-            <span className="absolute top-3 left-3 z-10 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
+            <span className="absolute top-3 left-3 z-20 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
               style={{ background: 'rgba(53,196,147,0.9)', color: '#fff', backdropFilter: 'blur(8px)' }}>
               <Check size={9} /> Verificado
             </span>
