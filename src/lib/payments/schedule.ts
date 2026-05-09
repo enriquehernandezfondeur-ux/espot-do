@@ -25,12 +25,20 @@ function addDays(date: string, days: number): string {
   return d.toISOString().split('T')[0]
 }
 
-/** Días entre hoy y la fecha del evento */
+/** Días entre hoy y la fecha del evento (positivo = futuro, negativo = pasado) */
 export function daysUntilEvent(eventDate: string): number {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const event = new Date(eventDate + 'T12:00:00')
-  return Math.max(0, Math.floor((event.getTime() - today.getTime()) / 86400000))
+  return Math.floor((event.getTime() - today.getTime()) / 86400000)
+}
+
+/** Días hasta una fecha de vencimiento (puede ser negativo si ya venció) */
+export function daysUntilDate(dateStr: string): number {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const due = new Date(dateStr + 'T12:00:00')
+  return Math.floor((due.getTime() - today.getTime()) / 86400000)
 }
 
 /** Genera el schedule de cuotas según los días al evento */
@@ -39,7 +47,7 @@ export function buildSchedule(
   totalAmount: number,
   existingInstallments?: { number: number; status: string; paid_at?: string | null; amount: number }[]
 ): PaymentSchedule {
-  const days  = daysUntilEvent(eventDate)
+  const days  = Math.max(0, daysUntilEvent(eventDate)) // siempre >= 0 para el schedule
   const today = new Date().toISOString().split('T')[0]
 
   type ScheduleDef = { pct: number; daysOffset: number; label: string }[]
@@ -115,16 +123,11 @@ export function scheduleModelLabel(model: PaymentSchedule['model']): string {
   }[model]
 }
 
-/** Días restantes hasta una fecha — para el countdown */
-export function daysUntilDate(dateStr: string): number {
-  return daysUntilEvent(dateStr)
-}
-
 /** Formato de countdown tipo "faltan X días" */
 export function countdownLabel(dateStr: string): string {
   const days = daysUntilDate(dateStr)
+  if (days < 0)  return `Venció hace ${Math.abs(days)} día${Math.abs(days) !== 1 ? 's' : ''}`
   if (days === 0) return 'Vence hoy'
   if (days === 1) return 'Vence mañana'
-  if (days < 0)  return `Venció hace ${Math.abs(days)} días`
   return `Faltan ${days} día${days !== 1 ? 's' : ''}`
 }

@@ -1,14 +1,16 @@
 'use client'
 
 import { useEffect, use } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { Suspense } from 'react'
 
-export default function PagoPage({ params }: { params: Promise<{ bookingId: string }> }) {
-  const { bookingId } = use(params)
-  const router = useRouter()
+function PagoContent({ bookingId }: { bookingId: string }) {
+  const router       = useRouter()
+  const searchParams = useSearchParams()
+  const cuotaId      = searchParams.get('cuota') // ID de la cuota específica (installment)
 
   useEffect(() => {
     async function load() {
@@ -16,9 +18,29 @@ export default function PagoPage({ params }: { params: Promise<{ bookingId: stri
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/auth'); return }
 
+      // Si viene con cuotaId → es un pago de cuota específica
+      if (cuotaId) {
+        const { data: installment } = await supabase
+          .from('booking_installments')
+          .select('id, amount, status, booking_id')
+          .eq('id', cuotaId)
+          .single()
+
+        if (!installment) { router.push('/dashboard/reservas'); return }
+        if (installment.status === 'paid') {
+          router.push(`/pago/exitoso?b=${bookingId}`)
+          return
+        }
+
+        // Redirigir a Azul con el monto de esta cuota + cuotaId en el OrderNumber
+        window.location.href = `/api/payments/redirect/${bookingId}?amount=${installment.amount}&cuota=${cuotaId}`
+        return
+      }
+
+      // Pago normal (primera cuota o pago único)
       const { data } = await supabase
         .from('bookings')
-        .select('total_amount, payment_status')
+        .select('total_amount, payment_status, booking_installments(amount, status, installment_number)')
         .eq('id', bookingId)
         .eq('guest_id', user.id)
         .single()
@@ -28,11 +50,19 @@ export default function PagoPage({ params }: { params: Promise<{ bookingId: stri
       const { isPaid } = await import('@/lib/bookingConfig')
       if (isPaid(data.payment_status)) { router.push(`/pago/exitoso?b=${bookingId}`); return }
 
-      // Pasar el monto en la URL para evitar llamadas a Supabase en el servidor
-      window.location.href = `/api/payments/redirect/${bookingId}?amount=${data.total_amount}`
+      // Si hay cuotas, pagar la primera pendiente
+      const insts = (data as any).booking_installments ?? []
+      const nextInst = insts
+        .sort((a: any, b: any) => a.installment_number - b.installment_number)
+        .find((i: any) => i.status !== 'paid')
+
+      const amount = nextInst ? nextInst.amount : data.total_amount
+      const cuotaParam = nextInst ? `&cuota=${nextInst.id}` : ''
+
+      window.location.href = `/api/payments/redirect/${bookingId}?amount=${amount}${cuotaParam}`
     }
     load()
-  }, [bookingId])
+  }, [bookingId, cuotaId])
 
   return (
     <div className="min-h-dvh flex flex-col items-center justify-center px-4"
@@ -56,5 +86,14 @@ export default function PagoPage({ params }: { params: Promise<{ bookingId: stri
         </Link>
       </div>
     </div>
+  )
+}
+
+export default function PagoPage({ params }: { params: Promise<{ bookingId: string }> }) {
+  const { bookingId } = use(params)
+  return (
+    <Suspense fallback={null}>
+      <PagoContent bookingId={bookingId} />
+    </Suspense>
   )
 }

@@ -11,6 +11,7 @@ function ExitoContent() {
   const sp        = useSearchParams()
   const router    = useRouter()
   const bookingId = sp.get('b')
+  const cuotaId   = sp.get('cuota') // ID de la cuota si aplica
 
   // Parámetros que Azul envía al redirigir al ApprovedUrl
   const orderNumber       = sp.get('OrderNumber') ?? sp.get('ordernumber') ?? ''
@@ -62,6 +63,7 @@ function ExitoContent() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               bookingId,
+              cuotaId: cuotaId || undefined,  // si aplica, marcar cuota específica
               OrderNumber:       orderNumber,
               Amount:            amount,
               ITBIS:             itbis,

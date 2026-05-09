@@ -4,6 +4,7 @@ import { verifyResponseHash, type AzulResponseParams } from '@/lib/azul/client'
 import { sendEmail } from '@/lib/email/send'
 import { tplPagoCompletado } from '@/lib/email/templates'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
+import { markInstallmentPaid } from '@/lib/actions/installments'
 
 // POST /api/payments/confirm
 // Body: los query params que Azul envió al ApprovedUrl
@@ -13,12 +14,12 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
 
-  let body: AzulResponseParams & { bookingId: string }
+  let body: AzulResponseParams & { bookingId: string; cuotaId?: string }
   try { body = await req.json() } catch {
     return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 })
   }
 
-  const { bookingId, ...azulParams } = body
+  const { bookingId, cuotaId, ...azulParams } = body
   if (!bookingId) return NextResponse.json({ error: 'bookingId requerido' }, { status: 400 })
 
   // Verificar que IsoCode sea "00" (aprobado)
@@ -61,6 +62,11 @@ export async function POST(req: NextRequest) {
   const totalAmount   = Number(booking.total_amount)
   const commissionPct = totalAmount > 0 ? Math.round((commissionAmt / totalAmount) * 100) : 10
   const netToHost     = Math.round((totalAmount - commissionAmt) * 100) / 100
+
+  // Si es pago de cuota específica, marcarla como pagada
+  if (cuotaId) {
+    await markInstallmentPaid(cuotaId, azulParams.AzulOrderId)
+  }
 
   // Confirmar booking
   await supabase.from('bookings').update({
