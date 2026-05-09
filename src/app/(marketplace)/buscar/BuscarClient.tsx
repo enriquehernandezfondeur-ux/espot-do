@@ -796,41 +796,6 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
       {/* ── Contenido principal ── */}
       <div className="max-w-screen-2xl mx-auto px-4 md:px-6 w-full">
 
-        {/* ── Vistos recientemente — solo sin filtros activos ── */}
-        {activeFiltersCount === 0 && !q && recentIds.length > 0 && (() => {
-          const recentSpaces = recentIds.map(id => spaces.find((s: any) => s.id === id)).filter(Boolean)
-          if (!recentSpaces.length) return null
-          return (
-            <div className="pt-3 pb-1">
-              <p className="text-xs font-semibold uppercase tracking-widest mb-2.5" style={{ color: 'var(--text-muted)' }}>
-                Vistos recientemente
-              </p>
-              <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
-                {recentSpaces.map((space: any) => {
-                  const cover = getCover(space)
-                  const CatIcon = CATEGORIES.find(c => c.value === space.category)?.icon ?? Building2
-                  return (
-                    <Link key={space.id} href={`/espacios/${space.slug}`}
-                      className="group shrink-0 flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all"
-                      style={{ background: '#fff', border: '1px solid var(--border-subtle)', minWidth: 180 }}>
-                      <div className="w-9 h-9 rounded-lg overflow-hidden shrink-0"
-                        style={{ background: 'linear-gradient(135deg,#667eea,#764ba2)' }}>
-                        {cover
-                          ? <img src={cover} alt={space.name} className="w-full h-full object-cover" loading="lazy" />
-                          : <div className="w-full h-full flex items-center justify-center"><CatIcon size={14} className="text-white opacity-60" /></div>
-                        }
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{space.name}</p>
-                        <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{space.sector || space.city}</p>
-                      </div>
-                    </Link>
-                  )
-                })}
-              </div>
-            </div>
-          )
-        })()}
 
         {/* Header de resultados */}
         <div className="py-3 md:py-4">
@@ -1314,14 +1279,11 @@ function SpaceCard({
             )}
           </h3>
 
-          {/* Ubicación + categoría + rating */}
+          {/* Ubicación + rating */}
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1 text-xs min-w-0 truncate" style={{ color: 'var(--text-muted)' }}>
               <MapPin size={10} className="shrink-0" />
               <span className="truncate">{space.sector ? `${space.sector}, ` : ''}{space.city}</span>
-              <span className="shrink-0" style={{ color: '#D1D5DB' }}>·</span>
-              <CatIcon size={10} className="shrink-0" />
-              <span className="truncate">{catLabel}</span>
             </div>
             {rating && (
               <div className="flex items-center gap-0.5 shrink-0">
@@ -1331,6 +1293,12 @@ function SpaceCard({
               </div>
             )}
           </div>
+
+          {/* Categoría */}
+          <span className="flex items-center gap-1 text-xs font-medium w-fit px-2 py-0.5 rounded-md"
+            style={{ background: '#F4F6F8', color: '#6B7280' }}>
+            <CatIcon size={10} /> {catLabel}
+          </span>
 
           {/* Precio + capacidad + flecha */}
           <div className="flex items-center justify-between gap-2 pt-2.5 mt-auto"
