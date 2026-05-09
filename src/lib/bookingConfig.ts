@@ -29,8 +29,8 @@ export const STATUS_LABELS: Record<BookingStatus, string> = {
   accepted:         'Pendiente de pago',
   confirmed:        'Confirmada',
   rejected:         'Rechazada',
-  cancelled_guest:  'Cancelada',
-  cancelled_host:   'Cancelada',
+  cancelled_guest:  'Cancelada por cliente',
+  cancelled_host:   'Cancelada por propietario',
   completed:        'Completada',
   quote_requested:  'Cotización',
 }

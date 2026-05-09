@@ -193,11 +193,11 @@ function ExitoContent() {
 
             <div className="px-6 py-5 space-y-3">
               <div className="flex justify-between text-sm">
-                <span style={{ color: 'rgba(255,255,255,0.5)' }}>Depósito pagado hoy</span>
+                <span style={{ color: 'rgba(255,255,255,0.5)' }}>Pago de confirmación</span>
                 <span className="font-bold text-white">{formatCurrency(fee)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span style={{ color: 'rgba(255,255,255,0.5)' }}>Resta pagar en el espacio</span>
+                <span style={{ color: 'rgba(255,255,255,0.5)' }}>Saldo en el lugar</span>
                 <span style={{ color: 'rgba(255,255,255,0.5)' }}>{formatCurrency(remaining)}</span>
               </div>
               <div className="flex justify-between text-sm pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>

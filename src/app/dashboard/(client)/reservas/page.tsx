@@ -13,7 +13,7 @@ import { cancelBooking } from '@/lib/actions/booking'
 
 type Booking = Awaited<ReturnType<typeof getClientBookings>>[0]
 
-const FILTERS = ['Todas', 'Pendientes', 'Aceptadas', 'Confirmadas', 'Completadas', 'Canceladas']
+const FILTERS = ['Todas', 'Pendientes', 'Por pagar', 'Confirmadas', 'Completadas', 'Canceladas']
 
 export default function MisReservasPage() {
   const [bookings, setBookings]   = useState<Booking[]>([])
@@ -61,7 +61,7 @@ export default function MisReservasPage() {
     const matchFilter =
       filter === 'Todas'      ||
       (filter === 'Pendientes'  && b.status === 'pending') ||
-      (filter === 'Aceptadas'   && b.status === 'accepted') ||
+      (filter === 'Por pagar'   && b.status === 'accepted') ||
       (filter === 'Confirmadas' && b.status === 'confirmed') ||
       (filter === 'Completadas' && b.status === 'completed') ||
       (filter === 'Canceladas'  && b.status.startsWith('cancelled'))
@@ -111,7 +111,7 @@ export default function MisReservasPage() {
               Completa el pago para confirmar tu fecha.
             </div>
           </div>
-          <button onClick={() => setFilter('Aceptadas')}
+          <button onClick={() => setFilter('Por pagar')}
             className="text-xs font-semibold px-4 py-2 rounded-xl shrink-0"
             style={{ background: '#2563EB', color: '#fff' }}>
             Ver ahora
@@ -278,19 +278,19 @@ export default function MisReservasPage() {
                           <span>{formatCurrency(Number(bk.total_amount))}</span>
                         </div>
                         <div className="flex justify-between text-xs" style={{ color: 'var(--text-secondary)' }}>
-                          <span>Pago inicial (10%) · ahora</span>
+                          <span>Pago de confirmación</span>
                           <span>{formatCurrency(Number(bk.platform_fee))}</span>
                         </div>
                         <div className="flex justify-between font-bold text-sm pt-2"
                           style={{ borderTop: '1px solid var(--border-medium)', color: 'var(--text-primary)' }}>
-                          <span>Balance pendiente</span>
+                          <span>Saldo en el lugar</span>
                           <span>{formatCurrency(Number(bk.total_amount) - Number(bk.platform_fee))}</span>
                         </div>
                         <div className="flex items-center gap-1 text-xs font-semibold mt-1"
                           style={{ color: isPaid(bk.payment_status) ? '#16A34A' : '#D97706' }}>
                           {isPaid(bk.payment_status)
-                            ? <><CheckCircle size={11} /> Pago inicial confirmado</>
-                            : '⏳ Pago inicial pendiente'}
+                            ? <><CheckCircle size={11} /> Pago realizado</>
+                            : '⏳ Pago pendiente'}
                         </div>
                       </div>
                     </div>
@@ -300,7 +300,7 @@ export default function MisReservasPage() {
                       <div className="mt-4 space-y-3">
                         <div className="px-4 py-3 rounded-xl text-sm"
                           style={{ background: 'rgba(217,119,6,0.05)', border: '1px solid rgba(217,119,6,0.15)', color: '#92400E' }}>
-                          El propietario tiene 24 horas para aceptar o rechazar tu solicitud.
+                          El propietario revisará tu solicitud y confirmará disponibilidad.
                         </div>
                         <button onClick={() => setCancelModal(bk)}
                           className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
@@ -312,7 +312,7 @@ export default function MisReservasPage() {
                     {bk.status === 'confirmed' && (
                       <div className="mt-4 px-4 py-3 rounded-xl text-sm"
                         style={{ background: 'rgba(22,163,74,0.05)', border: '1px solid rgba(22,163,74,0.15)', color: '#166534' }}>
-                        Reserva confirmada. El balance restante de {formatCurrency(Number(bk.total_amount) - Number(bk.platform_fee))} será procesado por Espot próximamente.
+                        Reserva confirmada. El saldo de {formatCurrency(Number(bk.total_amount) - Number(bk.platform_fee))} se paga directamente en el espacio el día del evento.
                       </div>
                     )}
                     {bk.status === 'rejected' && (
@@ -455,7 +455,7 @@ export default function MisReservasPage() {
                     ¿Cancelar reserva?
                   </h3>
                   <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                    Esta acción no se puede deshacer. Si ya pagaste el depósito, aplica la política de cancelación del espacio.
+                    Esta acción no se puede deshacer. Si ya realizaste el pago, aplica la política de cancelación del espacio.
                   </p>
                 </div>
               </div>

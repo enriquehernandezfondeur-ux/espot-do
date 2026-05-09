@@ -7,7 +7,7 @@ import { getClientBookings } from '@/lib/actions/client'
 
 const paymentStatusConfig: Record<string, { label: string; color: string; bg: string; icon: any }> = {
   unpaid:  { label: 'Sin pago',    color: '#D97706', bg: 'rgba(217,119,6,0.08)',  icon: Clock },
-  partial: { label: '10% pagado',  color: '#2563EB', bg: 'rgba(37,99,235,0.08)', icon: CreditCard },
+  partial: { label: 'Pago parcial', color: '#2563EB', bg: 'rgba(37,99,235,0.08)', icon: CreditCard },
   advance: { label: 'Anticipo',    color: '#7C3AED', bg: 'rgba(124,58,237,0.08)',icon: CreditCard },
   paid:    { label: 'Pagado',      color: '#16A34A', bg: 'rgba(22,163,74,0.08)', icon: CheckCircle },
 }
