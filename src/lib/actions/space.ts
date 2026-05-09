@@ -5,9 +5,18 @@ import { generateSlug, num, int } from '@/lib/utils'
 import { revalidatePath } from 'next/cache'
 import type { PricingType, PaymentTermType } from '@/types'
 
-const PLATFORM_FEE_PCT = 10
 const DEFAULT_CANCELLATION_HOURS = 72
 const DEFAULT_CANCELLATION_REFUND_PCT = 50
+
+async function getPlatformFeePct(): Promise<number> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('marketplace_config')
+    .select('value')
+    .eq('key', 'platform_fee_pct')
+    .single()
+  return Number(data?.value ?? 10)
+}
 
 const VENUE_PCT_BY_TERM: Record<PaymentTermType, number> = {
   platform_guarantee: 90,
@@ -231,7 +240,7 @@ export async function saveSpace(payload: SaveSpacePayload) {
       ? supabase.from('space_payment_terms').insert({
           space_id: spaceId,
           term_type: payload.paymentTerm,
-          platform_fee_pct: PLATFORM_FEE_PCT,
+          platform_fee_pct: await getPlatformFeePct(),
           venue_pct: VENUE_PCT_BY_TERM[payload.paymentTerm] ?? 90,
           advance_pct: payload.paymentTerm === 'split_advance' ? 40 : null,
           day_of_event_pct: payload.paymentTerm === 'split_advance' ? 50 : null,

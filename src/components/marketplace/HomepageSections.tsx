@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import {
   ArrowRight, Shield, Users, Search, Clock, CreditCard,
@@ -148,9 +149,9 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                   transform: evSection.on ? 'translateY(0) scale(1)' : 'translateY(24px) scale(0.97)',
                   transition: `opacity 0.6s ease ${i * 80}ms, transform 0.6s ease ${i * 80}ms`,
                 }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={et.img} alt={et.label}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" />
+                <Image src={et.img} alt={et.label} fill
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
+                  sizes="(max-width: 768px) 50vw, 33vw" />
                 <div className="absolute inset-0"
                   style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.05) 60%, transparent 100%)' }} />
                 <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5 flex items-end justify-between">
@@ -233,9 +234,9 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
 
                       <div className="relative overflow-hidden" style={{ aspectRatio: '16/10', flexShrink: 0 }}>
                         {cover ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={cover} alt={space.name} loading="lazy"
-                            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" />
+                          <Image src={cover} alt={space.name} fill
+                            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center"
                             style={{ background: 'linear-gradient(135deg,#667eea,#764ba2)' }}>
