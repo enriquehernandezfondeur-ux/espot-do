@@ -90,7 +90,7 @@ export default function HeroParallax({ spaceCount }: Props) {
         <h1
           className="font-bold text-white mb-5"
           style={{
-            fontSize: 'clamp(1.8rem, 8vw, 5.5rem)',
+            fontSize: 'clamp(1.8rem, 5vw, 3.5rem)',
             lineHeight: 1.04,
             letterSpacing: '-0.045em',
             maxWidth: 900,
