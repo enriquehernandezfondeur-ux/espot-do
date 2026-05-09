@@ -541,56 +541,17 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
 
             {/* Mensaje informativo por modelo */}
             {isConsumption && (
-              <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(37,99,235,0.18)' }}>
-                <div className="flex items-center justify-between px-4 py-3"
-                  style={{ background: 'rgba(37,99,235,0.06)', borderBottom: '1px solid rgba(37,99,235,0.12)' }}>
-                  <span className="text-xs font-bold uppercase tracking-wide" style={{ color: '#2563EB' }}>
-                    Consumo mínimo garantizado
-                  </span>
-                  <span className="text-base font-bold" style={{ color: '#1D4ED8' }}>
-                    {formatCurrency(pricing.minimum_consumption)}
-                  </span>
-                </div>
-                <div className="px-4 py-3 text-xs" style={{ color: '#374151', lineHeight: 1.7 }}>
-                  Tu grupo garantiza consumir este monto en el espacio (comida y bebidas).
-                  Lo que exceda, se paga directamente en el lugar.
-                  {(fixedDuration > 0) && (
-                    <span className="block mt-1 font-semibold" style={{ color: '#1D4ED8' }}>
-                      Duración de la sesión: {fixedDuration} hora{fixedDuration !== 1 ? 's' : ''}
-                    </span>
-                  )}
-                  {(!fixedDuration && (minHours > 0 || maxHours > 0)) && (
-                    <span className="block mt-1 font-semibold" style={{ color: '#1D4ED8' }}>
-                      {minHours > 0 && maxHours > 0
-                        ? `Puedes quedarte entre ${minHours} y ${maxHours} horas`
-                        : minHours > 0 ? `Mínimo ${minHours} hora${minHours > 1 ? 's' : ''}`
-                        : `Máximo ${maxHours} horas`}
-                    </span>
-                  )}
-                </div>
+              <div className="rounded-xl px-4 py-3 text-xs" style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.15)', color: '#374151', lineHeight: 1.7 }}>
+                Tu grupo garantiza consumir este monto en comida y bebidas en el espacio.
+                Lo que exceda, se paga directamente en el lugar.
               </div>
             )}
 
-            {isPackage && (
-              <div className="rounded-xl overflow-hidden"
-                style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid rgba(53,196,147,0.15)' }}>
-                <div className="flex items-start gap-2.5 px-4 py-3">
-                  <Info size={14} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: 1 }} />
-                  <div className="text-xs" style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                    <strong>Paquete: {formatCurrency(pricing.fixed_price)}</strong>
-                    {packageHours > 0 && <span> · {packageHours} horas incluidas</span>}
-                    {pricing.extra_hour_price > 0 && (
-                      <span> · Hora adicional: {formatCurrency(pricing.extra_hour_price)}</span>
-                    )}
-                  </div>
-                </div>
-                {pricing.package_includes && (
-                  <div className="px-4 pb-3 text-xs whitespace-pre-line"
-                    style={{ borderTop: '1px solid rgba(53,196,147,0.15)', paddingTop: 10, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-                    <span className="font-semibold block mb-1" style={{ color: 'var(--brand)' }}>Incluye:</span>
-                    {pricing.package_includes}
-                  </div>
-                )}
+            {isPackage && pricing.package_includes && (
+              <div className="rounded-xl px-4 py-3 text-xs"
+                style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid rgba(53,196,147,0.15)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                <span className="font-semibold block mb-1" style={{ color: 'var(--brand)' }}>El paquete incluye:</span>
+                <span className="whitespace-pre-line">{pricing.package_includes}</span>
               </div>
             )}
 
