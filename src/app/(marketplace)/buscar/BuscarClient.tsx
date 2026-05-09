@@ -1314,11 +1314,14 @@ function SpaceCard({
             )}
           </h3>
 
-          {/* Ubicación + rating */}
+          {/* Ubicación + categoría + rating */}
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1 text-xs min-w-0 truncate" style={{ color: 'var(--text-muted)' }}>
               <MapPin size={10} className="shrink-0" />
               <span className="truncate">{space.sector ? `${space.sector}, ` : ''}{space.city}</span>
+              <span className="shrink-0" style={{ color: '#D1D5DB' }}>·</span>
+              <CatIcon size={10} className="shrink-0" />
+              <span className="truncate">{catLabel}</span>
             </div>
             {rating && (
               <div className="flex items-center gap-0.5 shrink-0">
@@ -1329,11 +1332,11 @@ function SpaceCard({
             )}
           </div>
 
-          {/* Precio + capacidad — fila compacta con divisor */}
-          <div className="flex items-center justify-between gap-3 pt-2.5 mt-0.5"
+          {/* Precio + capacidad + flecha */}
+          <div className="flex items-center justify-between gap-2 pt-2.5 mt-auto"
             style={{ borderTop: '1px solid #F0F2F5' }}>
 
-            {/* Precio */}
+            {/* Precio + badge tipo */}
             <div className="min-w-0">
               {priceInfo?.amount ? (
                 <>
@@ -1352,26 +1355,20 @@ function SpaceCard({
               )}
             </div>
 
-            {/* Capacidad */}
-            <div className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl shrink-0"
-              style={{ background: '#F4F6F8', border: '1px solid #E8ECF0' }}>
-              <Users size={12} style={{ color: '#35C493' }} />
-              <div>
-                <p className="font-bold text-xs leading-none" style={{ color: '#0F1623' }}>{space.capacity_max}</p>
-                <p className="text-[10px] leading-none mt-0.5" style={{ color: '#94A3B8' }}>pers. máx.</p>
+            {/* Capacidad + flecha */}
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl"
+                style={{ background: '#F4F6F8', border: '1px solid #E8ECF0' }}>
+                <Users size={12} style={{ color: '#35C493' }} />
+                <div>
+                  <p className="font-bold text-xs leading-none" style={{ color: '#0F1623' }}>{space.capacity_max}</p>
+                  <p className="text-[10px] leading-none mt-0.5" style={{ color: '#94A3B8' }}>pers. máx.</p>
+                </div>
               </div>
+              <ArrowRight size={14}
+                className="transition-transform duration-200 group-hover:translate-x-1"
+                style={{ color: '#35C493' }} />
             </div>
-          </div>
-
-          {/* Footer: categoría + flecha */}
-          <div className="flex items-center justify-between mt-auto pt-1">
-            <span className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg"
-              style={{ background: '#F4F6F8', color: '#6B7280' }}>
-              <CatIcon size={10} /> {catLabel}
-            </span>
-            <ArrowRight size={14}
-              className="transition-transform duration-200 group-hover:translate-x-1 shrink-0"
-              style={{ color: '#35C493' }} />
           </div>
 
         </div>
