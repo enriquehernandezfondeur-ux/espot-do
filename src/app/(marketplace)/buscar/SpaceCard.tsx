@@ -226,8 +226,8 @@ export function SpaceCard({
           <div className="flex items-center gap-2 pt-2.5 mt-auto"
             style={{ borderTop: '1px solid #F0F2F5' }}>
 
-            {/* Grupo izquierdo: precio + badge — cede si hay poco espacio */}
-            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            {/* Grupo izquierdo: precio + badge */}
+            <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-hidden">
               {priceInfo?.amount ? (
                 <span className="font-bold text-sm shrink-0" style={{ color: '#0F1623' }}>
                   {priceInfo.amount}
@@ -236,9 +236,9 @@ export function SpaceCard({
                 <span className="text-sm font-semibold shrink-0" style={{ color: 'var(--text-muted)' }}>Cotizar</span>
               )}
               {pricingDef?.value && (
-                <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap overflow-hidden"
+                <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
                   style={{ background: pricingDef.bg, color: pricingDef.text, border: `1px solid ${pricingDef.border}` }}>
-                  {pricingDef.label}
+                  {pricingDef.value === 'minimum_consumption' ? 'Cons. mínimo' : pricingDef.label}
                 </span>
               )}
             </div>
