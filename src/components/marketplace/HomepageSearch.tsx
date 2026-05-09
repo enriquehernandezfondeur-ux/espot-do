@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { CalendarDays, MapPin, X, ChevronLeft, ChevronRight, Search, ChevronDown } from 'lucide-react'
 
@@ -113,6 +114,10 @@ export default function HomepageSearch() {
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)
   }, [])
+
+  // mounted: evita usar createPortal en SSR
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
   // Bloquear scroll cuando hay modal móvil abierto
   useEffect(() => {
@@ -267,7 +272,7 @@ export default function HomepageSearch() {
       {/* ───────────────────────────────────────────────────────
           DESKTOP: Barra horizontal con dropdowns flotantes
           ─────────────────────────────────────────────────── */}
-      <div ref={wrapperRef} className="hidden md:block max-w-3xl" style={{ position: 'relative', zIndex: 10000 }}>
+      <div ref={wrapperRef} className="hidden md:block max-w-3xl">
         <div className="flex items-stretch rounded-2xl"
           style={{ background: '#fff', boxShadow: '0 20px 60px rgba(0,0,0,0.28)', overflow: 'hidden' }}>
 
@@ -422,9 +427,9 @@ export default function HomepageSearch() {
           DESKTOP: Dropdowns flotantes
           ─────────────────────────────────────────────────── */}
 
-      {/* Actividad */}
-      {!isMobile && panel === 'activity' && filteredActivities.length > 0 && (
-        <div data-ep-panel style={{ ...dropBase, width: 260, zIndex: 9998, animation: 'dropIn 0.15s ease-out' }}>
+      {/* Portals — se renderizan en document.body, fuera de cualquier stacking context */}
+      {mounted && !isMobile && panel === 'activity' && filteredActivities.length > 0 && createPortal(
+        <div data-ep-panel style={{ ...dropBase, width: 260, zIndex: 99999, animation: 'dropIn 0.15s ease-out' }}>
           <style>{`@keyframes dropIn { from { opacity:0; transform:translateY(-5px) } to { opacity:1; transform:translateY(0) } }`}</style>
           <div className="py-1.5" style={{ maxHeight: 280, overflowY: 'auto' }}>
             {filteredActivities.map(act => (
@@ -438,12 +443,12 @@ export default function HomepageSearch() {
               </button>
             ))}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* Ciudad */}
-      {!isMobile && panel === 'city' && filteredSectors.length > 0 && (
-        <div data-ep-panel style={{ ...dropBase, width: 280, zIndex: 9998, animation: 'dropIn 0.15s ease-out' }}>
+      {mounted && !isMobile && panel === 'city' && filteredSectors.length > 0 && createPortal(
+        <div data-ep-panel style={{ ...dropBase, width: 280, zIndex: 99999, animation: 'dropIn 0.15s ease-out' }}>
           <div className="py-1.5" style={{ maxHeight: 260, overflowY: 'auto' }}>
             {filteredSectors.map(s => (
               <button key={s} type="button" onClick={() => pickCity(s)}
@@ -456,14 +461,15 @@ export default function HomepageSearch() {
               </button>
             ))}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* Fecha */}
-      {!isMobile && panel === 'date' && (
-        <div data-ep-panel style={{ ...dropBase, width: 308, zIndex: 9998, animation: 'dropIn 0.15s ease-out' }}>
+      {mounted && !isMobile && panel === 'date' && createPortal(
+        <div data-ep-panel style={{ ...dropBase, width: 308, zIndex: 99999, animation: 'dropIn 0.15s ease-out' }}>
           <CalendarContent />
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ──────────────────────────────────────────────────────
@@ -472,11 +478,11 @@ export default function HomepageSearch() {
       {mobileModal && (
         <>
           {/* Backdrop */}
-          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+          <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm"
             onClick={() => setMobileModal(null)} />
 
           {/* Sheet */}
-          <div className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl overflow-hidden slide-in-bottom"
+          <div className="fixed inset-x-0 bottom-0 z-[9999] rounded-t-3xl overflow-hidden slide-in-bottom"
             style={{ background: '#fff', maxHeight: '85dvh', display: 'flex', flexDirection: 'column' }}>
 
             {/* Header del sheet */}
