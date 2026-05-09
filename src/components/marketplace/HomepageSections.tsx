@@ -31,18 +31,7 @@ function InstagramSection() {
   }, [feedId])
 
   return (
-    <section className="py-14 md:py-20" style={{ background: '#060D09', position: 'relative', overflow: 'hidden' }}>
-      {/* Fondo grid sutil igual que el hero */}
-      <div style={{
-        position: 'absolute', inset: 0, pointerEvents: 'none',
-        backgroundImage:
-          'linear-gradient(rgba(53,196,147,0.03) 1px, transparent 1px),' +
-          'linear-gradient(90deg, rgba(53,196,147,0.03) 1px, transparent 1px)',
-        backgroundSize: '50px 50px',
-        maskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%)',
-        WebkitMaskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%)',
-      }} />
-
+    <section className="py-14 md:py-20" style={{ background: '#F8FAFC', position: 'relative', overflow: 'hidden' }}>
       <div className="max-w-7xl mx-auto px-4 md:px-6 relative">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
@@ -50,11 +39,12 @@ function InstagramSection() {
             <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: '#35C493' }}>
               @espot.do
             </p>
-            <h2 className="font-bold text-white" style={{ fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
+            <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
               Espacios reales,{' '}
               <span style={{
                 background: 'linear-gradient(95deg, #35C493, #5CE8BC)',
                 WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                backgroundSize: '300% auto', animation: 'shimmerGrad 5s ease infinite',
               }}>
                 momentos reales
               </span>
@@ -62,7 +52,7 @@ function InstagramSection() {
           </div>
           <a href="https://www.instagram.com/espot.do/" target="_blank" rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold shrink-0 transition-all hover:opacity-80"
-            style={{ background: 'rgba(53,196,147,0.1)', border: '1px solid rgba(53,196,147,0.2)', color: '#6EE7C7' }}>
+            style={{ background: 'rgba(53,196,147,0.1)', border: '1px solid rgba(53,196,147,0.3)', color: '#35C493' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
             </svg>
@@ -79,17 +69,17 @@ function InstagramSection() {
             {Array.from({ length: 6 }).map((_, i) => (
               <a key={i} href="https://www.instagram.com/espot.do/" target="_blank" rel="noopener noreferrer"
                 className="group relative overflow-hidden rounded-xl md:rounded-2xl"
-                style={{ aspectRatio: '1/1', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                style={{ aspectRatio: '1/1', background: '#fff', border: '1px solid #E8ECF0' }}>
                 <div className="absolute inset-0 flex items-center justify-center transition-all group-hover:scale-105"
                   style={{
                     background: `linear-gradient(135deg, rgba(53,196,147,${0.04 + i * 0.015}), rgba(53,196,147,0.01))`,
                   }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(53,196,147,0.25)">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(53,196,147,0.4)">
                     <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                   </svg>
                 </div>
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                  style={{ background: 'rgba(53,196,147,0.08)' }}>
+                  style={{ background: 'rgba(53,196,147,0.06)' }}>
                   <span className="text-xs font-semibold" style={{ color: '#35C493' }}>Ver post</span>
                 </div>
               </a>
@@ -191,6 +181,31 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
 
   return (
     <div style={{ background: '#fff' }}>
+      <style>{`
+        @keyframes shimmerGrad {
+          0%,100% { background-position: 0% 50% }
+          50%      { background-position: 100% 50% }
+        }
+        @keyframes glowPulse {
+          0%,100% { box-shadow: 0 0 0 0 rgba(53,196,147,0) }
+          50%     { box-shadow: 0 0 18px 4px rgba(53,196,147,0.18) }
+        }
+        @keyframes lineGrow {
+          from { width: 0 }
+          to   { width: 100% }
+        }
+        @keyframes stepIn {
+          from { opacity:0; transform:translateY(16px) scale(0.96) }
+          to   { opacity:1; transform:translateY(0) scale(1) }
+        }
+        @keyframes cardHover {
+          from { transform: translateY(0) }
+          to   { transform: translateY(-4px) }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          [data-section-anim] { animation: none !important; }
+        }
+      `}</style>
 
       {/* ── TICKER ── */}
       <Ticker />
@@ -206,7 +221,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
               </p>
               <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
                 ¿Qué estás{' '}
-                <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundSize: '300% auto', animation: 'shimmerGrad 5s ease infinite' }}>
                   celebrando?
                 </span>
               </h2>
@@ -221,6 +236,8 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
             {eventTypes.map((et, i) => (
               <Link key={et.slug} href={`/buscar?activity=${et.slug}`}
                 className="group relative block overflow-hidden"
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 24px rgba(53,196,147,0.25), 0 0 0 2px rgba(53,196,147,0.2)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 24px rgba(0,0,0,0.10)' }}
                 style={{
                   borderRadius: 20,
                   aspectRatio: '4/3',
@@ -268,7 +285,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
               <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
                 {spaces.length > 0 ? (
                   <>{spaces.length}{' '}
-                    <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                    <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundSize: '300% auto', animation: 'shimmerGrad 5s ease infinite' }}>
                       espacio{spaces.length !== 1 ? 's' : ''}
                     </span>
                     {' '}en República Dominicana</>
@@ -328,7 +345,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
             </p>
             <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
               Explora{' '}
-              <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundSize: '300% auto', animation: 'shimmerGrad 5s ease infinite' }}>
                 tu opción
               </span>
             </h2>
@@ -340,6 +357,8 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
               return (
                 <Link key={cat.value} href={`/buscar?categoria=${cat.value}`}
                   className="group flex flex-col items-center gap-2.5 p-3 md:p-4 rounded-2xl text-center"
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 0 0 2px rgba(53,196,147,0.35), 0 4px 16px rgba(53,196,147,0.12)' }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)' }}
                   style={{
                     border: '1px solid #E8ECF0',
                     background: '#fff',
@@ -417,7 +436,11 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                   {/* Línea conectora */}
                   {i < 2 && (
                     <div className="hidden md:block absolute top-6 left-full w-8 h-px"
-                      style={{ background: 'rgba(53,196,147,0.2)', zIndex: 1 }} />
+                      style={{
+                        background: 'rgba(53,196,147,0.2)',
+                        zIndex: 1,
+                        animation: howSection.on ? `lineGrow 0.6s ease ${i * 150 + 300}ms both` : 'none',
+                      }} />
                   )}
 
                   <div className="relative p-6 md:p-8 rounded-2xl"
@@ -478,7 +501,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                 <div className="flex flex-col gap-3 shrink-0">
                   <Link href="/auth?mode=register&redirect=/dashboard/host/espacio"
                     className="inline-flex items-center justify-center gap-2 font-bold px-8 py-4 rounded-2xl text-sm whitespace-nowrap"
-                    style={{ background: '#35C493', color: '#060D09', boxShadow: '0 4px 24px rgba(53,196,147,0.3)' }}>
+                    style={{ background: '#35C493', color: '#060D09', boxShadow: '0 4px 24px rgba(53,196,147,0.3)', animation: 'glowPulse 3s ease-in-out infinite' }}>
                     Publicar espacio gratis <ArrowRight size={15} />
                   </Link>
                   <Link href="/auth?mode=login"
