@@ -473,6 +473,68 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
         </div>
       </section>
 
+      {/* ── GUÍAS ── */}
+      <section className="py-10 md:py-14" style={{ background: '#fff' }}>
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <Reveal>
+            <p className="text-xs font-bold tracking-widest uppercase mb-6 text-center" style={{ color: '#35C493' }}>
+              Conoce la plataforma
+            </p>
+            <div className="grid md:grid-cols-2 gap-4">
+
+              {/* Card clientes */}
+              <Link href="/para-clientes"
+                className="group relative overflow-hidden rounded-3xl p-7 flex flex-col gap-4 transition-all"
+                style={{ background: '#F8FAFC', border: '1px solid #E5EAE8' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #35C493, #4DD9A7)', borderRadius: '12px 12px 0 0' }} />
+                <div className="flex items-center justify-between">
+                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
+                    style={{ background: 'rgba(53,196,147,0.1)', color: '#35C493' }}>
+                    <Search size={18} />
+                  </div>
+                  <ArrowRight size={16} style={{ color: '#35C493', transition: 'transform 0.2s' }}
+                    className="group-hover:translate-x-1" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: '#35C493' }}>Para clientes</p>
+                  <h3 className="font-bold text-lg mb-2" style={{ color: '#03313C', letterSpacing: '-0.025em' }}>
+                    ¿Cómo reservar un espacio?
+                  </h3>
+                  <p className="text-sm leading-relaxed" style={{ color: '#527068' }}>
+                    Aprende a buscar, filtrar, reservar y pagar. Conoce cómo funciona el plan de cuotas según la fecha de tu evento.
+                  </p>
+                </div>
+              </Link>
+
+              {/* Card propietarios */}
+              <Link href="/para-propietarios"
+                className="group relative overflow-hidden rounded-3xl p-7 flex flex-col gap-4 transition-all"
+                style={{ background: '#060D09', border: '1px solid rgba(53,196,147,0.15)' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #35C493, #28A87C)', borderRadius: '12px 12px 0 0' }} />
+                <div className="flex items-center justify-between">
+                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
+                    style={{ background: 'rgba(53,196,147,0.12)', color: '#35C493' }}>
+                    <Building2 size={18} />
+                  </div>
+                  <ArrowRight size={16} style={{ color: '#35C493', transition: 'transform 0.2s' }}
+                    className="group-hover:translate-x-1" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: '#35C493' }}>Para propietarios</p>
+                  <h3 className="font-bold text-lg mb-2" style={{ color: '#fff', letterSpacing: '-0.025em' }}>
+                    ¿Cómo publicar mi espacio?
+                  </h3>
+                  <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                    Publica tu salón, rooftop o villa, configura precios y disponibilidad, y empieza a recibir reservas sin costo fijo.
+                  </p>
+                </div>
+              </Link>
+
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
       {/* ── CTA PROPIETARIOS ── */}
       <section className="py-10 md:py-14" style={{ background: '#F8FAFC' }}>
         <div className="max-w-7xl mx-auto px-4 md:px-6">

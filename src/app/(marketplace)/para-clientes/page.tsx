@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import {
-  Search, CalendarCheck, CreditCard, Star, MessageSquare,
+  Search, CalendarCheck, CreditCard, Star,
   Check, ChevronDown, Building2, UtensilsCrossed, Sunset,
   Trees, Wine, Hotel, Home, Camera, Briefcase, LayoutGrid,
   Cake, Heart, GraduationCap, Users, Baby, Zap,
@@ -61,14 +61,6 @@ const spaceCategories = [
   { icon: LayoutGrid,      label: 'Ver todos',     value: '' },
 ]
 
-const benefits = [
-  { icon: Search,        title: 'Búsqueda inteligente',       body: 'Filtra por tipo, sector, capacidad, fecha y precio. Solo ves espacios disponibles en tu fecha.' },
-  { icon: MessageSquare, title: 'Chat directo con el anfitrión', body: 'Coordina detalles y resuelve dudas sin salir de la plataforma. Sin llamadas ni grupos de WhatsApp.' },
-  { icon: CreditCard,    title: 'Pago seguro con Azul',       body: 'Tu primer pago se procesa con Azul, el procesador bancario líder en RD. Tus datos de tarjeta nunca se almacenan en espot.do.' },
-  { icon: Star,          title: 'Reseñas verificadas',        body: 'Todas las calificaciones son de personas que realmente usaron el espacio. Sin opiniones falsas.' },
-  { icon: CalendarCheck, title: 'Confirmación inmediata',     body: 'Una vez pagada la primera cuota, tu reserva queda confirmada y recibes comprobante por correo.' },
-  { icon: Check,         title: 'Servicios adicionales',      body: 'Muchos espacios ofrecen DJ, barra, decoración, catering y más. Todo configurable al reservar.' },
-]
 
 const paymentModels = [
   {
@@ -250,31 +242,6 @@ export default function ParaClientesPage() {
                   <h3 className="font-bold text-base mb-1.5" style={{ color: 'var(--text-primary)' }}>{title}</h3>
                   <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{body}</p>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── BENEFICIOS ────────────────────────────────────────── */}
-      <section style={{ background: 'var(--bg-base)' }}>
-        <div className="max-w-5xl mx-auto px-5 py-20">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-3"
-              style={{ color: 'var(--text-primary)', letterSpacing: '-0.025em' }}>
-              Todo lo que necesitas para reservar con confianza
-            </h2>
-          </div>
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5">
-            {benefits.map(({ icon: Icon, title, body }) => (
-              <div key={title} className="p-6 rounded-3xl"
-                style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-                  style={{ background: 'var(--brand-dim)', color: 'var(--brand)' }}>
-                  <Icon size={19} />
-                </div>
-                <h3 className="font-bold text-sm mb-1.5" style={{ color: 'var(--text-primary)' }}>{title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{body}</p>
               </div>
             ))}
           </div>
