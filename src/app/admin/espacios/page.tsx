@@ -15,11 +15,17 @@ const filters = [
 ]
 
 export default function AdminSpacesPage() {
-  const [spaces, setSpaces]   = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [filter, setFilter]   = useState('all')
-  const [search, setSearch]   = useState('')
+  const [spaces, setSpaces]     = useState<any[]>([])
+  const [loading, setLoading]   = useState(true)
+  const [filter, setFilter]     = useState('all')
+  const [search, setSearch]     = useState('')
   const [actionId, setActionId] = useState<string | null>(null)
+  const [toast, setToast]       = useState<{ msg: string; ok: boolean } | null>(null)
+
+  function showToast(msg: string, ok = true) {
+    setToast({ msg, ok })
+    setTimeout(() => setToast(null), 2500)
+  }
 
   useEffect(() => {
     getAdminSpaces({ status: filter === 'all' ? undefined : filter, search: search || undefined })
@@ -29,20 +35,30 @@ export default function AdminSpacesPage() {
   async function toggle(spaceId: string, field: string, current: boolean) {
     setActionId(spaceId + field)
     const result = await updateSpaceStatus(spaceId, { [field]: !current })
-    if (!('error' in result)) {
+    if (result && 'error' in result) {
+      showToast(result.error ?? 'Error al guardar', false)
+    } else {
       setSpaces(prev => prev.map(s => s.id === spaceId ? { ...s, [field]: !current } : s))
+      showToast(field === 'is_verified' ? (!current ? 'Verificado ✓' : 'Verificación quitada') :
+                field === 'is_published' ? (!current ? 'Publicado ✓' : 'Despublicado') :
+                field === 'is_featured' ? (!current ? 'Destacado ✓' : 'Destacado quitado') :
+                (!current ? 'Activado ✓' : 'Desactivado'))
     }
     setActionId(null)
   }
 
   async function verifyAll() {
-    setActionId('bulk')
     const unverified = spaces.filter(s => !s.is_verified)
+    if (unverified.length === 0) return
+    setActionId('bulk')
+    let ok = 0
     for (const s of unverified) {
-      await updateSpaceStatus(s.id, { is_verified: true })
+      const result = await updateSpaceStatus(s.id, { is_verified: true })
+      if (!result || !('error' in result)) ok++
     }
     setSpaces(prev => prev.map(s => ({ ...s, is_verified: true })))
     setActionId(null)
+    showToast(`${ok} espacio${ok !== 1 ? 's' : ''} verificado${ok !== 1 ? 's' : ''} ✓`)
   }
 
   function getPrice(space: any) {
@@ -56,6 +72,15 @@ export default function AdminSpacesPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg flex items-center gap-2"
+          style={{ background: toast.ok ? '#0F1623' : '#DC2626', color: '#fff', animation: 'fadeIn 0.2s ease' }}>
+          {toast.ok ? <CheckCircle size={15} /> : null} {toast.msg}
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Espacios</h1>
@@ -64,11 +89,18 @@ export default function AdminSpacesPage() {
         <button
           onClick={verifyAll}
           disabled={actionId === 'bulk' || spaces.every(s => s.is_verified)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
-          style={{ background: '#2563EB', color: '#fff' }}>
+          title={spaces.every(s => s.is_verified) ? 'Todos los espacios ya están verificados' : 'Verificar todos los espacios visibles'}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+          style={{
+            background: spaces.every(s => s.is_verified) ? 'rgba(37,99,235,0.1)' : '#2563EB',
+            color: spaces.every(s => s.is_verified) ? '#2563EB' : '#fff',
+            cursor: spaces.every(s => s.is_verified) ? 'default' : 'pointer',
+          }}>
           {actionId === 'bulk'
             ? <><Loader2 size={14} className="animate-spin" /> Verificando...</>
-            : <><Shield size={14} /> Verificar todos</>}
+            : spaces.every(s => s.is_verified)
+            ? <><Shield size={14} /> Todos verificados ✓</>
+            : <><Shield size={14} /> Verificar todos ({spaces.filter(s => !s.is_verified).length})</>}
         </button>
       </div>
 

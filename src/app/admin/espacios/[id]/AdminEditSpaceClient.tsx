@@ -9,8 +9,8 @@ import {
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 import {
-  adminUpdateSpace, adminUpdatePricing, adminUpdateConditions,
-  adminUpdatePaymentTerms, adminUpsertAddon, adminDeleteAddon, updateSpaceStatus,
+  adminUpdateSpace, adminUpsertPricing, adminUpsertConditions,
+  adminUpsertPaymentTerms, adminUpsertAddon, adminDeleteAddon, updateSpaceStatus,
 } from '@/lib/actions/admin'
 
 const CATEGORIES = [
@@ -23,10 +23,9 @@ const PRICING_TYPES = [
   { value: 'custom_quote',        label: 'Cotización personalizada' },
 ]
 const PAYMENT_TERMS = [
-  { value: 'platform_guarantee', label: '10% Espot + 90% en el espacio' },
-  { value: 'split_advance',      label: '10% + 40% antes + 50% el día' },
-  { value: 'full_prepaid',       label: 'Pago completo online' },
-  { value: 'quote_only',         label: 'Solo cotización' },
+  { value: 'platform_guarantee', label: 'Cuotas automáticas (plan según días al evento)' },
+  { value: 'full_prepaid',       label: 'Pago único completo al confirmar' },
+  { value: 'quote_only',         label: 'Solo cotización, sin cobro online' },
 ]
 
 type Tab = 'info' | 'precio' | 'adicionales' | 'reglas' | 'cobros'
@@ -48,7 +47,11 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
   const [activeTab, setActiveTab] = useState<Tab>('info')
   const [saving, setSaving]       = useState<string | null>(null)
   const [saved, setSaved]         = useState<string | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [addons, setAddons]       = useState<any[]>(space.space_addons ?? [])
+  const [pricingId, setPricingId]     = useState<string | null>(pricing?.id ?? null)
+  const [conditionsId, setConditionsId] = useState<string | null>(conditions?.id ?? null)
+  const [payTermsId, setPayTermsId]   = useState<string | null>(payTerms?.id ?? null)
 
   // Info fields
   const [name, setName]             = useState(space.name ?? '')
@@ -94,11 +97,22 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
 
   async function save(key: string, fn: () => Promise<any>) {
     setSaving(key)
-    const result = await fn()
-    setSaving(null)
-    if (!('error' in result)) {
-      setSaved(key)
-      setTimeout(() => setSaved(null), 2000)
+    setSaveError(null)
+    try {
+      const result = await fn()
+      setSaving(null)
+      if (result && 'error' in result) {
+        setSaveError(result.error)
+        setTimeout(() => setSaveError(null), 4000)
+      } else {
+        setSaved(key)
+        setTimeout(() => setSaved(null), 2000)
+        return result
+      }
+    } catch (e: any) {
+      setSaving(null)
+      setSaveError(e.message ?? 'Error inesperado')
+      setTimeout(() => setSaveError(null), 4000)
     }
   }
 
@@ -112,27 +126,26 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
   }
 
   async function handleSavePricing() {
-    if (!pricing?.id) return
     const payload: Record<string, unknown> = { pricing_type: pricingType }
     if (pricingType === 'hourly') {
-      payload.hourly_price = parseFloat(hourlyPrice)
+      payload.hourly_price = parseFloat(hourlyPrice) || 0
       payload.min_hours = parseInt(minHours) || 1
       if (maxHours) payload.max_hours = parseInt(maxHours)
     }
     if (pricingType === 'minimum_consumption') {
-      payload.minimum_consumption = parseFloat(minConsumption)
+      payload.minimum_consumption = parseFloat(minConsumption) || 0
       if (sessionHours) payload.session_hours = parseInt(sessionHours)
     }
     if (pricingType === 'fixed_package') {
-      payload.fixed_price = parseFloat(fixedPrice)
+      payload.fixed_price = parseFloat(fixedPrice) || 0
       payload.package_name = packageName
     }
-    await save('pricing', () => adminUpdatePricing(pricing.id, payload))
+    const result = await save('pricing', () => adminUpsertPricing(space.id, pricingId, payload))
+    if (result && !('error' in result) && result.id) setPricingId(result.id)
   }
 
   async function handleSaveConditions() {
-    if (!conditions?.id) return
-    await save('conditions', () => adminUpdateConditions(conditions.id, {
+    const payload = {
       music_cutoff_time: musicCutoff || null,
       allows_external_decoration: allowDeco,
       allows_external_food: allowFood,
@@ -141,12 +154,14 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
       cancellation_hours_before: parseInt(cancelHours),
       cancellation_refund_pct: parseFloat(cancelRefund),
       custom_rules: customRules || null,
-    }))
+    }
+    const result = await save('conditions', () => adminUpsertConditions(space.id, conditionsId, payload))
+    if (result && !('error' in result) && result.id) setConditionsId(result.id)
   }
 
   async function handleSavePaymentTerms() {
-    if (!payTerms?.id) return
-    await save('terms', () => adminUpdatePaymentTerms(payTerms.id, { term_type: termType }))
+    const result = await save('terms', () => adminUpsertPaymentTerms(space.id, payTermsId, { term_type: termType }))
+    if (result && !('error' in result) && result.id) setPayTermsId(result.id)
   }
 
   async function handleToggle(field: string, current: boolean, setter: (v: boolean) => void) {
@@ -179,12 +194,18 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
   }
 
   function SaveBtn({ id, onClick }: { id: string; onClick: () => void }) {
+    const isSaving = saving === id
+    const isSaved  = saved === id
     return (
-      <button onClick={onClick} disabled={saving === id}
+      <button onClick={onClick} disabled={isSaving}
         className="flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-xl transition-all"
-        style={{ background: saved === id ? 'rgba(22,163,74,0.1)' : 'var(--brand)', color: saved === id ? '#16A34A' : '#fff' }}>
-        {saving === id ? <Loader2 size={15} className="animate-spin" /> : saved === id ? <CheckCircle size={15} /> : <Save size={15} />}
-        {saved === id ? 'Guardado' : 'Guardar'}
+        style={{
+          background: isSaved ? 'rgba(22,163,74,0.1)' : 'var(--brand)',
+          color: isSaved ? '#16A34A' : '#fff',
+          opacity: isSaving ? 0.7 : 1,
+        }}>
+        {isSaving ? <Loader2 size={15} className="animate-spin" /> : isSaved ? <CheckCircle size={15} /> : <Save size={15} />}
+        {isSaving ? 'Guardando...' : isSaved ? 'Guardado ✓' : 'Guardar'}
       </button>
     )
   }
@@ -238,6 +259,14 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
           </Link>
         </div>
       </div>
+
+      {/* Error banner */}
+      {saveError && (
+        <div className="mb-6 px-4 py-3 rounded-xl text-sm flex items-center gap-2"
+          style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.2)', color: '#DC2626' }}>
+          <X size={15} className="shrink-0" /> {saveError}
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-1 p-1 rounded-2xl mb-8 w-fit"
