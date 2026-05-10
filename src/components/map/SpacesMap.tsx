@@ -278,15 +278,18 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
 function buildIcon(L: any, _label: string, active: boolean) {
   const color  = active ? '#0F1623' : '#35C493'
   const shadow = active
-    ? '0 4px 16px rgba(15,22,35,0.45)'
-    : '0 2px 10px rgba(53,196,147,0.4)'
+    ? 'drop-shadow(0 3px 8px rgba(15,22,35,0.5))'
+    : 'drop-shadow(0 2px 6px rgba(53,196,147,0.45))'
   return L.divIcon({
     html: `
       <div style="position:relative;width:28px;height:36px;cursor:pointer;
-                  transition:transform 0.15s;transform:${active ? 'scale(1.25)' : 'scale(1)'}">
+                  will-change:transform;
+                  transition:transform 0.15s ease, filter 0.15s ease;
+                  transform:${active ? 'scale(1.25) translateZ(0)' : 'scale(1) translateZ(0)'};
+                  filter:${shadow}">
         <svg width="28" height="36" viewBox="0 0 28 36" fill="none"
              xmlns="http://www.w3.org/2000/svg"
-             style="filter:drop-shadow(${shadow})">
+             shape-rendering="geometricPrecision">
           <path d="M14 0C6.3 0 0 6.3 0 14c0 5.2 2.8 9.7 7 12.2L14 36l7-9.8C25.2 23.7 28 19.2 28 14 28 6.3 21.7 0 14 0z"
                 fill="${color}"/>
           <circle cx="14" cy="13" r="6" fill="white"/>
