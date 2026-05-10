@@ -473,6 +473,53 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
         </div>
       </section>
 
+      {/* ── CTA PROPIETARIOS ── */}
+      <section className="py-10 md:py-14" style={{ background: '#F8FAFC' }}>
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <Reveal>
+            <div className="relative overflow-hidden rounded-3xl"
+              style={{ background: 'linear-gradient(140deg, #060D09 0%, #0D2318 50%, #1A4D38 100%)' }}>
+
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl"
+                  style={{ background: 'rgba(53,196,147,0.08)', transform: 'translate(30%,-30%)' }} />
+                <div className="absolute bottom-0 left-1/3 w-72 h-72 rounded-full blur-3xl"
+                  style={{ background: 'rgba(53,196,147,0.06)', transform: 'translateY(35%)' }} />
+              </div>
+
+              <div className="relative grid md:grid-cols-[1fr_auto] items-center gap-6 md:gap-10 px-8 py-10 md:px-14 md:py-14">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-5 text-xs font-semibold"
+                    style={{ background: 'rgba(53,196,147,0.12)', color: '#6EE7C7', border: '1px solid rgba(53,196,147,0.18)' }}>
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#35C493' }} />
+                    Para propietarios
+                  </div>
+                  <h2 className="font-bold text-white mb-3"
+                    style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', letterSpacing: '-0.04em', lineHeight: 1.12 }}>
+                    ¿Tienes un espacio<br className="hidden md:block" /> para eventos?
+                  </h2>
+                  <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.95rem', lineHeight: 1.75, maxWidth: 460 }}>
+                    Publica tu salón, restaurante, rooftop o villa. Recibe reservas online y gestiona todo desde tu panel.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-3 shrink-0">
+                  <Link href="/auth?mode=register&redirect=/dashboard/host/espacio"
+                    className="inline-flex items-center justify-center gap-2 font-bold px-8 py-4 rounded-2xl text-sm whitespace-nowrap"
+                    style={{ background: '#35C493', color: '#060D09', boxShadow: '0 4px 24px rgba(53,196,147,0.3)' }}>
+                    Publicar espacio gratis <ArrowRight size={15} />
+                  </Link>
+                  <Link href="/auth?mode=login"
+                    className="inline-flex items-center justify-center gap-2 font-medium px-8 py-4 rounded-2xl text-sm whitespace-nowrap"
+                    style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    Ya tengo cuenta
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
       {/* ── GUÍAS ── */}
       <section className="py-10 md:py-14" style={{ background: '#fff' }}>
         <div className="max-w-7xl mx-auto px-4 md:px-6">
@@ -534,54 +581,6 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
           </Reveal>
         </div>
       </section>
-
-      {/* ── CTA PROPIETARIOS ── */}
-      <section className="py-10 md:py-14" style={{ background: '#F8FAFC' }}>
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <Reveal>
-            <div className="relative overflow-hidden rounded-3xl"
-              style={{ background: 'linear-gradient(140deg, #060D09 0%, #0D2318 50%, #1A4D38 100%)' }}>
-
-              <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl"
-                  style={{ background: 'rgba(53,196,147,0.08)', transform: 'translate(30%,-30%)' }} />
-                <div className="absolute bottom-0 left-1/3 w-72 h-72 rounded-full blur-3xl"
-                  style={{ background: 'rgba(53,196,147,0.06)', transform: 'translateY(35%)' }} />
-              </div>
-
-              <div className="relative grid md:grid-cols-[1fr_auto] items-center gap-6 md:gap-10 px-8 py-10 md:px-14 md:py-14">
-                <div>
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-5 text-xs font-semibold"
-                    style={{ background: 'rgba(53,196,147,0.12)', color: '#6EE7C7', border: '1px solid rgba(53,196,147,0.18)' }}>
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#35C493' }} />
-                    Para propietarios
-                  </div>
-                  <h2 className="font-bold text-white mb-3"
-                    style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', letterSpacing: '-0.04em', lineHeight: 1.12 }}>
-                    ¿Tienes un espacio<br className="hidden md:block" /> para eventos?
-                  </h2>
-                  <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.95rem', lineHeight: 1.75, maxWidth: 460 }}>
-                    Publica tu salón, restaurante, rooftop o villa. Recibe reservas online y gestiona todo desde tu panel.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-3 shrink-0">
-                  <Link href="/auth?mode=register&redirect=/dashboard/host/espacio"
-                    className="inline-flex items-center justify-center gap-2 font-bold px-8 py-4 rounded-2xl text-sm whitespace-nowrap"
-                    style={{ background: '#35C493', color: '#060D09', boxShadow: '0 4px 24px rgba(53,196,147,0.3)' }}>
-                    Publicar espacio gratis <ArrowRight size={15} />
-                  </Link>
-                  <Link href="/auth?mode=login"
-                    className="inline-flex items-center justify-center gap-2 font-medium px-8 py-4 rounded-2xl text-sm whitespace-nowrap"
-                    style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    Ya tengo cuenta
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
 
     </div>
   )
