@@ -75,7 +75,7 @@ En estos casos, Espot podrá facilitar la comunicación entre las partes, sin as
 export default function ReembolsoPage() {
   return (
     <div style={{ background: 'var(--bg-base)', minHeight: '100dvh' }}>
-      <div className="max-w-3xl mx-auto px-6 py-12">
+      <div className="max-w-3xl mx-auto px-4 md:px-6 py-8 md:py-12">
 
         <Link href="/" className="inline-flex items-center gap-1.5 text-sm mb-8"
           style={{ color: 'var(--text-muted)' }}>
@@ -93,7 +93,7 @@ export default function ReembolsoPage() {
 
         <div className="space-y-6">
           {sections.map(s => (
-            <div key={s.num} className="rounded-2xl p-6"
+            <div key={s.num} className="rounded-2xl p-4 md:p-6"
               style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
               <h2 className="font-bold text-base mb-3" style={{ color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
                 <span className="text-xs font-bold mr-2 px-2 py-0.5 rounded-lg"

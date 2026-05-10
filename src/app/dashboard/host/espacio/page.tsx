@@ -617,7 +617,7 @@ export default function EspacioPage() {
       </div>
 
       {/* Progress Steps */}
-      <div className="flex items-center gap-1 mb-8 overflow-x-auto pb-1">
+      <div className="flex items-center gap-0.5 mb-8 overflow-x-auto pb-1 scrollbar-hide">
         {steps.map((step, i) => {
           const Icon = step.icon
           const isActive = currentStep === step.id

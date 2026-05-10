@@ -116,12 +116,15 @@ export default function TimePicker({
     if (disabled) return
     if (!open && wrapperRef.current) {
       const r = wrapperRef.current.getBoundingClientRect()
-      const panelW = r.width
-      const left   = Math.min(r.left, window.innerWidth - panelW - 8)
+      const isMobile = window.innerWidth < 640
+      const panelW = isMobile ? Math.min(r.width, window.innerWidth - 16) : r.width
+      const left = isMobile
+        ? Math.max(8, (window.innerWidth - panelW) / 2)
+        : Math.min(r.left, window.innerWidth - panelW - 8)
       const spaceBelow = window.innerHeight - r.bottom
       const panelH     = 320
       const top = spaceBelow >= panelH ? r.bottom + 6 : r.top - panelH - 6
-      setDropPos({ top, left, width: r.width })
+      setDropPos({ top, left, width: panelW })
     }
     setOpen(o => !o)
   }
@@ -261,7 +264,7 @@ export default function TimePicker({
                         onClick={() => { onChange(slot.v); setOpen(false) }}
                         style={{
                           width: '100%', display: 'flex', alignItems: 'center',
-                          justifyContent: 'space-between', padding: '10px 16px',
+                          justifyContent: 'space-between', padding: '12px 16px',
                           border: 'none', background: isSel ? 'rgba(53,196,147,0.08)' : 'transparent',
                           cursor: 'pointer', transition: 'background 0.1s',
                           borderLeft: isSel ? '3px solid #35C493' : '3px solid transparent',

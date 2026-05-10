@@ -106,7 +106,7 @@ export default function AdminUsersPage() {
                       <button key={role}
                         onClick={() => handleRoleChange(user.id, role)}
                         disabled={updating === user.id || user.role === role}
-                        className="text-xs px-2.5 py-1.5 rounded-lg font-medium transition-all disabled:opacity-40"
+                        className="text-xs px-3 py-2 rounded-lg font-medium transition-all disabled:opacity-40"
                         style={user.role === role
                           ? { background: cfg.bg, color: cfg.color }
                           : { background: '#F4F6F8', color: '#9CA3AF' }}>

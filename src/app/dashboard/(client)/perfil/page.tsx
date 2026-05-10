@@ -113,7 +113,7 @@ export default function PerfilPage() {
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
               title="Cambiar foto de perfil"
-              className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-xl flex items-center justify-center text-white shadow-md transition-opacity hover:opacity-80 disabled:opacity-50"
+              className="absolute -bottom-2 -right-2 w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-md transition-opacity hover:opacity-80 disabled:opacity-50"
               style={{ background: 'var(--brand)' }}
             >
               {uploading

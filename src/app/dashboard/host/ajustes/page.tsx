@@ -363,7 +363,7 @@ function AjustesInner() {
                   <span className="truncate">{icalUrl}</span>
                 </div>
                 <button onClick={copyIcalUrl}
-                  className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-semibold shrink-0 transition-all"
+                  className="flex items-center gap-1.5 px-4 py-3 rounded-xl text-xs font-semibold shrink-0 transition-all"
                   style={icalCopied
                     ? { background: 'rgba(22,163,74,0.1)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)' }
                     : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
