@@ -6,7 +6,7 @@ import {
 } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Publica tu espacio y genera ingresos — EspotHub',
+  title: 'Publica tu espacio y genera ingresos — espot.do',
   description:
     'Convierte tu salón, rooftop, villa o restaurant en una fuente de ingresos. Herramientas de gestión completas, pagos seguros con Azul y soporte dedicado en República Dominicana.',
 }
@@ -80,7 +80,7 @@ const faqs = [
   },
   {
     q: '¿Cómo recibo mis pagos?',
-    a: 'El cliente paga un anticipo de confirmación vía Azul al reservar. Ese monto, menos la comisión de EspotHub, se te transfiere a tu cuenta bancaria. El saldo restante lo cobras directamente el día del evento.',
+    a: 'El cliente paga un anticipo de confirmación vía Azul al reservar. Ese monto, menos la comisión de espot.do, se te transfiere a tu cuenta bancaria. El saldo restante lo cobras directamente el día del evento.',
   },
   {
     q: '¿Puedo rechazar una reserva?',
@@ -310,7 +310,7 @@ export default function ParaPropietariosPage() {
               },
               {
                 pct: '10%',
-                label: 'EspotHub',
+                label: 'espot.do',
                 sub: 'Plataforma, soporte y procesamiento de pago',
                 highlight: false,
               },

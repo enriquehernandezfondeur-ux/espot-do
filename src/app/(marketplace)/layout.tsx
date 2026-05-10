@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Search, Menu, X, User, ChevronDown, LogOut, Settings, LayoutDashboard, MapPin } from 'lucide-react'
+import { Search, Menu, X, User, ChevronDown, LogOut, Settings, LayoutDashboard, MapPin, Building2 } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -321,6 +321,24 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                 </div>
                 Explorar espacios
               </Link>
+              <Link href="/para-clientes" onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-3.5 rounded-xl text-sm font-medium transition-colors"
+                style={{ color: 'var(--text-primary)' }}>
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                  style={{ background: 'var(--bg-elevated)' }}>
+                  <Search size={16} style={{ color: 'var(--text-secondary)' }} />
+                </div>
+                Cómo reservar
+              </Link>
+              <Link href="/para-propietarios" onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-3.5 rounded-xl text-sm font-medium transition-colors"
+                style={{ color: 'var(--text-primary)' }}>
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                  style={{ background: 'var(--bg-elevated)' }}>
+                  <Building2 size={16} style={{ color: 'var(--text-secondary)' }} />
+                </div>
+                Publicar mi espacio
+              </Link>
             </div>
 
             {/* Usuario */}
@@ -419,9 +437,10 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
               <img src="/logo-dark.svg" alt="espot.do" style={{ height: 22, width: 'auto' }} />
             </Link>
             <div className="flex items-center gap-4 md:gap-5 text-sm flex-wrap justify-center" style={{ color: 'var(--text-muted)' }}>
-              <Link href="/buscar"    className="link-muted">Explorar</Link>
-              <Link href="/para-propietarios" className="link-muted">Para propietarios</Link>
-              <Link href="/terminos"  className="link-muted">Términos</Link>
+              <Link href="/buscar"             className="link-muted">Explorar</Link>
+              <Link href="/para-clientes"      className="link-muted">Para clientes</Link>
+              <Link href="/para-propietarios"  className="link-muted">Para propietarios</Link>
+              <Link href="/terminos"           className="link-muted">Términos</Link>
               <Link href="/reembolso" className="link-muted">Reembolso</Link>
               <Link href="/cookies"   className="link-muted">Cookies</Link>
               <a href="mailto:contacto@espot.do" className="link-muted">Contacto</a>
