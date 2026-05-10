@@ -10,19 +10,19 @@ export const metadata: Metadata = {
 const sections = [
   {
     num: '1', title: 'Alcance de esta Política',
-    content: `Esta Política de Reembolso regula las devoluciones relacionadas con pagos realizados a través de EspotHub (espot.do), plataforma de ESPOT, S.R.L. que conecta propietarios de espacios (Anfitriones) con quienes los reservan para eventos (Huéspedes).
+    content: `Esta Política de Reembolso regula las devoluciones relacionadas con pagos realizados a través de espot.do, plataforma de ESPOT, S.R.L. que conecta propietarios de espacios (Anfitriones) con quienes los reservan para eventos (Huéspedes).
 
 Al utilizar Espot.do, el usuario acepta esta política como parte integral de los Términos y Condiciones.`,
   },
   {
     num: '2', title: 'Qué cobra Espot',
-    content: `Espot procesa todos los pagos de cada reserva a través de Azul, incluyendo todas las cuotas del plan de pago. De cada pago procesado, Espot descuenta su comisión del 10% sobre el valor total de la reserva y transfiere el neto al Anfitrión en su cuenta bancaria registrada.
+    content: `Espot procesa todos los pagos de cada reserva a través de Azul, incluyendo todas las cuotas del plan. De cada cuota, Espot descuenta el 10% proporcional de ese pago como comisión y transfiere el 90% restante al Anfitrión en su cuenta bancaria registrada.
 
-El monto de cada cuota varía según el plan generado automáticamente (basado en los días que faltan para el evento), pero la comisión total de Espot es siempre el 10% del valor total de la reserva.`,
+La comisión total de Espot es siempre el 10% del valor total de la reserva, independientemente del número de cuotas. El monto de cada cuota varía según el plan generado automáticamente en función de los días que faltan para el evento.`,
   },
   {
     num: '3', title: 'Comisión No Reembolsable',
-    content: `El anticipo del 10% pagado a Espot no es reembolsable, salvo en los siguientes casos excepcionales:
+    content: `La comisión cobrada por Espot (10% del valor total de la reserva, deducida de cada pago) no es reembolsable, salvo en los siguientes casos excepcionales:
 
 • Error técnico comprobable imputable directamente a Espot o a Azul (ej. cobro duplicado).
 • Falla del sistema que impidió completar la reserva pero el cargo fue procesado igualmente.
@@ -31,7 +31,7 @@ En estos casos, el usuario debe contactar a contacto@espot.do dentro de los 7 d�
   },
   {
     num: '4', title: 'Planes de Pago en Cuotas',
-    content: `Algunas reservas permiten dividir el anticipo en cuotas programadas. En estos casos:
+    content: `El valor total de una reserva se paga en cuotas programadas según los días que faltan para el evento. En estos casos:
 
 • Cada cuota tiene una fecha de vencimiento definida al momento de confirmar la reserva.
 • El incumplimiento de una cuota puede resultar en la cancelación automática de la reserva según la política del Anfitrión.

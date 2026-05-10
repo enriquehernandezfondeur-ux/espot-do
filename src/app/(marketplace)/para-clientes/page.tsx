@@ -82,7 +82,7 @@ const paymentModels = [
 const faqs = [
   {
     q: '¿Cuánto tengo que pagar para confirmar?',
-    a: 'Depende de cuántos días faltan para tu evento. Más de 60 días: 25%. Entre 31–60 días: 30%. Entre 7–30 días: 50%. Menos de 7 días: 100%. El resto se paga en cuotas programadas.',
+    a: 'Depende de cuántos días faltan. Más de 60 días: 25% ahora. Entre 31–60 días: 30% ahora. Entre 7–30 días: 50% ahora. Menos de 7 días: 100% completo. Las cuotas siguientes las genera la plataforma automáticamente y se pagan también a través de espot.do.',
   },
   {
     q: '¿Cómo funciona el plan de cuotas?',

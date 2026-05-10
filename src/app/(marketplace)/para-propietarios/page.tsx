@@ -24,7 +24,7 @@ const features = [
   { icon: CalendarCheck, title: 'Calendario inteligente',   body: 'Vista mensual, bloques de tiempo, Google Calendar e iCal incluidos.' },
   { icon: MessageSquare, title: 'Chat con clientes',        body: 'Mensajería en tiempo real. Sin WhatsApp ni llamadas frías.' },
   { icon: BarChart3,     title: 'Finanzas y analytics',    body: 'Ingresos, comisiones, eventos por mes y exportación a CSV.' },
-  { icon: Shield,        title: 'Pagos protegidos',        body: 'Azul procesa el primer pago. Tus datos y los del cliente, seguros.' },
+  { icon: Shield,        title: 'Pagos protegidos',        body: 'Todos los cobros pasan por Azul. Tus datos y los del cliente, protegidos.' },
   { icon: Clock,         title: 'Control total de agenda', body: 'Tú decides cuándo estás disponible, desde cualquier dispositivo.' },
   { icon: Star,          title: 'Reseñas verificadas',     body: 'Los clientes valoran su experiencia. Tu reputación crece sola.' },
 ]
@@ -32,11 +32,11 @@ const features = [
 const faqs = [
   {
     q: '¿Cuánto cuesta publicar mi espacio?',
-    a: 'Publicar es completamente gratis. Cobramos una comisión del 10% sobre el valor total de la reserva, descontada del primer pago. Sin costos fijos ni mensualidades.',
+    a: 'Publicar es completamente gratis. Cobramos el 10% del valor total de cada reserva confirmada, descontado proporcionalmente de cada pago procesado. Sin costos fijos ni mensualidades.',
   },
   {
     q: '¿Cómo recibo mis pagos?',
-    a: 'Todos los pagos del cliente se procesan a través de espot.do vía Azul, incluidas todas las cuotas. De cada pago, espot.do descuenta la comisión del 10% sobre el total de la reserva y transfiere tu neto a tu cuenta bancaria registrada.',
+    a: 'Todos los pagos del cliente pasan por espot.do vía Azul, incluidas todas las cuotas. De cada pago espot.do descuenta el 10% proporcional de ese pago como comisión, y transfiere el 90% restante a tu cuenta bancaria registrada.',
   },
   {
     q: '¿Puedo rechazar una reserva?',
