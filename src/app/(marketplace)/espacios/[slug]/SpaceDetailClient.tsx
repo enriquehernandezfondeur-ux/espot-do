@@ -518,7 +518,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
 
             {/* Cerrar */}
             <button onClick={() => setShowLightbox(false)}
-              className="absolute top-5 right-5 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110"
+              className="absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110"
               style={{ background: 'rgba(255,255,255,0.12)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>
               <X size={18} />
             </button>
@@ -644,7 +644,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   { id: 'reviews', label: reviewsData?.total ? `Reseñas (${reviewsData.total})` : 'Reseñas' },
                 ] as const).map(tab => (
                   <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                    className="flex-1 md:flex-none px-4 md:px-5 py-3 rounded-xl text-sm font-medium transition-all duration-200"
+                    className="flex-1 md:flex-none px-3 md:px-5 py-3 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap"
                     style={activeTab === tab.id ? {
                       background: '#fff', color: 'var(--text-primary)',
                       boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
@@ -1248,9 +1248,9 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
           boxShadow: '0 -4px 24px rgba(0,0,0,0.10)',
         }}>
         <div className="flex items-center gap-4">
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 overflow-hidden">
             {priceDisplay && (
-              <div className="font-bold text-base leading-tight" style={{ color: 'var(--text-primary)' }}>
+              <div className="font-bold text-base leading-tight truncate" style={{ color: 'var(--text-primary)' }}>
                 {priceDisplay}
               </div>
             )}
@@ -1260,7 +1260,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
           </div>
           <button
             onClick={() => setShowMobileWidget(true)}
-            className="btn-brand flex items-center gap-2 px-6 py-3.5 rounded-2xl text-sm font-bold shrink-0"
+            className="btn-brand flex items-center gap-2 px-6 py-4 rounded-2xl text-sm font-bold shrink-0"
             style={{ boxShadow: '0 4px 16px rgba(53,196,147,0.35)' }}>
             Reservar
             <ChevronDown size={16} style={{ transform: 'rotate(-90deg)' }} />

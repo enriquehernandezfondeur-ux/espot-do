@@ -338,7 +338,7 @@ export default function MisReservasPage() {
                                   {/* Info */}
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between gap-2">
-                                      <span className="text-xs font-semibold" style={{ color: isPaidInst ? '#16A34A' : 'var(--text-primary)' }}>
+                                      <span className="text-xs font-semibold truncate min-w-0" style={{ color: isPaidInst ? '#16A34A' : 'var(--text-primary)' }}>
                                         {inst.label ?? `Cuota ${inst.installment_number}`}
                                       </span>
                                       <span className="text-xs font-bold shrink-0" style={{ color: 'var(--text-primary)' }}>
@@ -549,7 +549,7 @@ export default function MisReservasPage() {
                   onChange={e => setCancelReason(e.target.value)}
                   placeholder="Ej: Cambio de fecha, evento cancelado..."
                   rows={3}
-                  className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none"
+                  className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none min-h-[80px]"
                 />
               </div>
 

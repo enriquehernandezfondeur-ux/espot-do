@@ -692,9 +692,10 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
 
             {/* Error de horas */}
             {hoursError && (
-              <div className="px-4 py-3 rounded-xl text-sm"
+              <div className="flex items-start gap-2 px-4 py-3 rounded-xl"
                 style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.2)', color: '#DC2626' }}>
-                {hoursError}
+                <span className="shrink-0 mt-0.5 text-base">⚠</span>
+                <span className="text-xs md:text-sm leading-snug">{hoursError}</span>
               </div>
             )}
 
@@ -996,13 +997,13 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         <div className="flex items-center gap-2 pb-2">
           {step > 1 && (
             <button onClick={back}
-              className="flex items-center gap-1.5 text-xs font-medium px-4 py-2.5 rounded-xl flex-1 justify-center"
+              className="flex items-center gap-1.5 text-xs font-medium px-4 py-3 rounded-xl flex-1 justify-center"
               style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-medium)', background: '#fff' }}>
               <ChevronLeft size={13} /> Atrás
             </button>
           )}
           <button onClick={onChat}
-            className={cn('flex items-center gap-1.5 text-xs font-medium px-4 py-2.5 rounded-xl transition-all', step > 1 ? 'flex-1 justify-center' : 'w-full justify-center')}
+            className={cn('flex items-center gap-1.5 text-xs font-medium px-4 py-3 rounded-xl transition-all', step > 1 ? 'flex-1 justify-center' : 'w-full justify-center')}
             style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-medium)', background: '#fff' }}>
             <MessageCircle size={13} /> Consultar al propietario
           </button>

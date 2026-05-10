@@ -257,7 +257,7 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
                   style={{ background: active ? 'var(--brand-dim)' : 'transparent' }}>
                   <Icon size={18} />
                 </div>
-                <span className="text-[11px] font-semibold leading-none">{label}</span>
+                <span className="text-xs font-semibold leading-tight">{label}</span>
               </Link>
             )
           })}
@@ -269,7 +269,7 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
             <div className="w-8 h-8 flex items-center justify-center rounded-xl">
               <Menu size={18} />
             </div>
-            <span className="text-[11px] font-semibold leading-none">Más</span>
+            <span className="text-xs font-semibold leading-tight">Más</span>
           </button>
         </div>
       </div>
