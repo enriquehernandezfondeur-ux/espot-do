@@ -34,7 +34,7 @@ export default function FinanzasPage() {
   useEffect(() => {
     Promise.all([getHostBookings(), getHostStats()]).then(([b, s]) => {
       setBookings(b); setStats(s); setLoading(false)
-    })
+    }).catch(() => setLoading(false))
   }, [])
 
   const active = bookings.filter(b =>

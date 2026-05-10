@@ -17,8 +17,10 @@ export default function FavoritosPage() {
 
   async function handleRemove(favId: string) {
     setRemoving(favId)
-    await removeFavorite(favId)
-    setFavorites(prev => prev.filter(f => f.id !== favId))
+    const result = await removeFavorite(favId)
+    if (!result || !('error' in result)) {
+      setFavorites(prev => prev.filter(f => f.id !== favId))
+    }
     setRemoving(null)
   }
 

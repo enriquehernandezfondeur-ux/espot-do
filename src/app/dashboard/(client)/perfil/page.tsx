@@ -54,7 +54,8 @@ export default function PerfilPage() {
         .getPublicUrl(path)
 
       setAvatarUrl(publicUrl)
-      await updateClientProfile({ avatar_url: publicUrl })
+      const profileResult = await updateClientProfile({ avatar_url: publicUrl })
+      if (profileResult && 'error' in profileResult) throw new Error(profileResult.error ?? 'Error al guardar perfil')
     } catch {
       setError('No se pudo subir la foto. Intenta de nuevo.')
     } finally {

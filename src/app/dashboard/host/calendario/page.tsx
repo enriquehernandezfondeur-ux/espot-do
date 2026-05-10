@@ -120,8 +120,8 @@ export default function CalendarioPage() {
 
   async function handleDisconnectGcal() {
     setGcalDisconnecting(true)
-    await disconnectGoogleCalendar()
-    setGcalConnected(false)
+    const result = await disconnectGoogleCalendar()
+    if (result?.success) setGcalConnected(false)
     setGcalDisconnecting(false)
   }
 

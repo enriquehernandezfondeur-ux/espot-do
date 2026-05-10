@@ -25,9 +25,11 @@ export default function AdminConfigPage() {
 
   async function handleSave(key: string, value: string) {
     setSaving(key)
-    await updateConfig(key, value)
-    setSaved(key)
-    setTimeout(() => setSaved(null), 2000)
+    const result = await updateConfig(key, value)
+    if (!result || !('error' in result)) {
+      setSaved(key)
+      setTimeout(() => setSaved(null), 2000)
+    }
     setSaving(null)
   }
 

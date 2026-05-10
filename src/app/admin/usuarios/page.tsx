@@ -31,8 +31,10 @@ export default function AdminUsersPage() {
     const label = roleConfig[role]?.label ?? role
     if (!window.confirm(`¿Cambiar el rol de este usuario a "${label}"?`)) return
     setUpdating(userId)
-    await updateUserRole(userId, role)
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, role } : u))
+    const result = await updateUserRole(userId, role)
+    if (!result || !('error' in result)) {
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, role } : u))
+    }
     setUpdating(null)
   }
 

@@ -317,7 +317,12 @@ export default function EspacioPage() {
 
     // Guardar fotos si hay pendientes
     if (pendingPhotos.length > 0) {
-      await saveSpaceImages(spaceId, pendingPhotos)
+      const imgResult = await saveSpaceImages(spaceId, pendingPhotos)
+      if (imgResult && 'error' in imgResult) {
+        setSaveError(imgResult.error ?? 'Error al guardar fotos')
+        setSaving(false)
+        return
+      }
     }
 
     setSaving(false)

@@ -53,7 +53,7 @@ export default function HostPagosPage() {
         setBankStatus(bank.status ?? 'pending')
       }
       setLoading(false)
-    })
+    }).catch(() => setLoading(false))
   }, [])
 
   const paid    = bookings.filter(b => b.payment_status === 'paid' && ['confirmed','completed'].includes(b.status))

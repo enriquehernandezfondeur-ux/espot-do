@@ -57,7 +57,7 @@ function AjustesInner() {
       }
       setGcalConnected(gcal.connected)
       setLoading(false)
-    })
+    }).catch(() => setLoading(false))
   }, [])
 
   // Leer mensajes del callback de OAuth
@@ -86,7 +86,8 @@ function AjustesInner() {
       if (upErr) throw upErr
       const { data: { publicUrl } } = supabase.storage.from('space-images').getPublicUrl(path)
       setAvatarUrl(publicUrl)
-      await updateClientProfile({ avatar_url: publicUrl })
+      const profileResult = await updateClientProfile({ avatar_url: publicUrl })
+      if (profileResult && 'error' in profileResult) throw new Error(profileResult.error ?? 'Error al guardar perfil')
     } catch {
       setError('No se pudo subir la foto. Intenta de nuevo.')
     } finally {

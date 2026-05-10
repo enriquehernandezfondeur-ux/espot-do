@@ -88,8 +88,8 @@ export default function AdminLiquidacionesPage() {
   async function handlePay(bookingId: string) {
     setPaying(bookingId)
     startTransition(async () => {
-      await markPayoutPaid(bookingId)
-      await load()
+      const result = await markPayoutPaid(bookingId)
+      if (!result || !('error' in result)) await load()
       setPaying(null)
     })
   }

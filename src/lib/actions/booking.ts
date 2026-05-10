@@ -61,8 +61,8 @@ export async function createBooking(payload: CreateBookingPayload) {
 
     if (pricingCheck) {
       // Calcular horas seleccionadas (maneja medianoche)
-      const sh = parseInt(payload.startTime.split(':')[0])
-      const eh = parseInt(payload.endTime.split(':')[0])
+      const sh = parseInt(payload.startTime.split(':')[0] || '0')
+      const eh = parseInt(payload.endTime.split(':')[0] || '0')
       const sn = (sh < 6 ? sh + 24 : sh) * 60 + parseInt(payload.startTime.split(':')[1] || '0')
       const en = (eh < 6 ? eh + 24 : eh) * 60 + parseInt(payload.endTime.split(':')[1] || '0')
       const selectedH = Math.max(0, (en - sn) / 60)

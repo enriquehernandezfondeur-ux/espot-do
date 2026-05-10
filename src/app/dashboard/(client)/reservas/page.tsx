@@ -57,7 +57,7 @@ export default function MisReservasPage() {
       setBookings(bookingsData)
       setReviewed(reviewedIds)
       setLoading(false)
-    })
+    }).catch(() => setLoading(false))
   }, [])
 
   const filtered = bookings.filter(b => {

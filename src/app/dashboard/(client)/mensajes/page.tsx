@@ -61,8 +61,8 @@ export default function ClientMensajesPage() {
   async function handleSend() {
     if (!body.trim() || sending || !active || !hostId) return
     setSending(true)
-    await sendMessage(active.spaceId, hostId, body)
-    setBody('')
+    const result = await sendMessage(active.spaceId, hostId, body)
+    if (!result || !('error' in result)) setBody('')
     setSending(false)
   }
 
