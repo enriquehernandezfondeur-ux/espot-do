@@ -48,6 +48,12 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
   const [saving, setSaving]       = useState<string | null>(null)
   const [saved, setSaved]         = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [toast, setToast]         = useState<{ msg: string; ok: boolean } | null>(null)
+
+  function showToast(msg: string, ok = true) {
+    setToast({ msg, ok })
+    setTimeout(() => setToast(null), 2500)
+  }
   const [addons, setAddons]       = useState<any[]>(space.space_addons ?? [])
   const [pricingId, setPricingId]     = useState<string | null>(pricing?.id ?? null)
   const [conditionsId, setConditionsId] = useState<string | null>(conditions?.id ?? null)
@@ -166,9 +172,21 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
 
   async function handleToggle(field: string, current: boolean, setter: (v: boolean) => void) {
     setSaving(field)
-    await updateSpaceStatus(space.id, { [field]: !current })
-    setter(!current)
+    const result = await updateSpaceStatus(space.id, { [field]: !current })
     setSaving(null)
+    if (result && 'error' in result) {
+      showToast(`Error: ${result.error}`, false)
+    } else {
+      setter(!current)
+      const labels: Record<string, [string, string]> = {
+        is_published: ['Publicado ✓', 'Despublicado'],
+        is_verified:  ['Verificado ✓', 'Verificación quitada'],
+        is_featured:  ['Destacado ✓',  'Destacado quitado'],
+        is_active:    ['Activado ✓',   'Desactivado'],
+      }
+      const [onLabel, offLabel] = labels[field] ?? ['Guardado ✓', 'Cambiado']
+      showToast(!current ? onLabel : offLabel)
+    }
   }
 
   async function handleAddAddon() {
@@ -215,6 +233,14 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
 
   return (
     <div className="p-4 md:p-6 max-w-5xl mx-auto">
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-xl flex items-center gap-2"
+          style={{ background: toast.ok ? '#0F1623' : '#DC2626', color: '#fff' }}>
+          {toast.ok ? <CheckCircle size={15} /> : <X size={15} />} {toast.msg}
+        </div>
+      )}
 
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">

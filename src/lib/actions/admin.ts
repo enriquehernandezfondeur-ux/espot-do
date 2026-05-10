@@ -60,6 +60,10 @@ export async function adminUpdateSpace(spaceId: string, payload: {
   const supabase = await requireAdmin()
   if (!supabase) return { error: 'No autorizado' }
   const { error } = await supabase.from('spaces').update(payload).eq('id', spaceId)
+  if (!error) {
+    revalidatePath('/buscar')
+    revalidatePath('/', 'layout')
+  }
   return error ? { error: error.message } : { success: true }
 }
 
@@ -212,7 +216,10 @@ export async function updateSpaceStatus(spaceId: string, updates: {
   const supabase = await requireAdmin()
   if (!supabase) return { error: 'No autorizado' }
   const { error } = await supabase.from('spaces').update(updates).eq('id', spaceId)
-  if (!error) revalidatePath('/buscar')
+  if (!error) {
+    revalidatePath('/buscar')
+    revalidatePath('/', 'layout')
+  }
   return error ? { error: error.message } : { success: true }
 }
 
