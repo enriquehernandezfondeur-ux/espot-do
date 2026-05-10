@@ -17,7 +17,7 @@ const steps = [
   { n: '01', title: 'Crea tu perfil y publica',         body: 'Fotos, descripción, capacidad, precios y servicios en minutos. Sin tecnicismos.' },
   { n: '02', title: 'Configura disponibilidad',          body: 'Define horarios, bloquea fechas y sincroniza con Google Calendar o iCal.' },
   { n: '03', title: 'Gestiona reservas y mensajes',      body: 'Acepta o rechaza solicitudes, chatea con clientes y controla cada evento desde tu dashboard.' },
-  { n: '04', title: 'Cobra de forma segura',             body: 'El primer pago llega vía Azul. El resto lo cobras directamente el día del evento.' },
+  { n: '04', title: 'Recibe tus pagos',                  body: 'Todos los pagos del cliente pasan por la plataforma vía Azul. Recibes tu neto en tu cuenta bancaria registrada.' },
 ]
 
 const features = [
@@ -36,7 +36,7 @@ const faqs = [
   },
   {
     q: '¿Cómo recibo mis pagos?',
-    a: 'El cliente paga en cuotas según los días que faltan para el evento. El primer pago va vía Azul — de ahí se descuenta la comisión de espot.do (10%) y el neto se transfiere a tu cuenta. Los pagos siguientes los recibes directamente del cliente.',
+    a: 'Todos los pagos del cliente se procesan a través de espot.do vía Azul, incluidas todas las cuotas. De cada pago, espot.do descuenta la comisión del 10% sobre el total de la reserva y transfiere tu neto a tu cuenta bancaria registrada.',
   },
   {
     q: '¿Puedo rechazar una reserva?',

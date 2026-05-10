@@ -15,12 +15,10 @@ const sections = [
 Al utilizar Espot.do, el usuario acepta esta política como parte integral de los Términos y Condiciones.`,
   },
   {
-    num: '2', title: 'Qué cobra Espot y qué no',
-    content: `Espot procesa únicamente el primer pago de cada reserva a través de Azul. De ese pago, Espot descuenta su comisión del 10% sobre el valor total de la reserva.
+    num: '2', title: 'Qué cobra Espot',
+    content: `Espot procesa todos los pagos de cada reserva a través de Azul, incluyendo todas las cuotas del plan de pago. De cada pago procesado, Espot descuenta su comisión del 10% sobre el valor total de la reserva y transfiere el neto al Anfitrión en su cuenta bancaria registrada.
 
-El monto del primer pago varía según los días que faltan para el evento (25%, 30%, 50% o 100%), pero la comisión de Espot es siempre el 10% del valor total.
-
-Los pagos posteriores al primero se coordinan directamente entre Huésped y Anfitrión. Espot no cobra, retiene ni administra esos montos. Cualquier disputa o reembolso sobre esos pagos debe resolverse entre las partes.`,
+El monto de cada cuota varía según el plan generado automáticamente (basado en los días que faltan para el evento), pero la comisión total de Espot es siempre el 10% del valor total de la reserva.`,
   },
   {
     num: '3', title: 'Comisión No Reembolsable',
@@ -44,8 +42,8 @@ En estos casos, el usuario debe contactar a contacto@espot.do dentro de los 7 d�
     num: '5', title: 'Cancelaciones y Política del Anfitrión',
     content: `Cada Anfitrión define su propia política de cancelación (flexible, moderada o estricta), que es visible antes de confirmar la reserva. El Huésped acepta estas condiciones al completar el pago.
 
-• Si el Huésped cancela: se aplica la política del Anfitrión. Espot no interviene en la devolución del saldo.
-• Si el Anfitrión cancela: el Anfitrión es responsable de gestionar la devolución del saldo conforme a su propia política.
+• Si el Huésped cancela: se aplica la política de cancelación del Anfitrión sobre los pagos ya procesados. Espot gestionará la devolución si aplica según dicha política.
+• Si el Anfitrión cancela: Espot procederá a reembolsar los pagos procesados al Huésped, descontando la comisión de plataforma no reembolsable.
 • Espot no actúa como árbitro en disputas entre Anfitrión y Huésped.`,
   },
   {
@@ -71,10 +69,9 @@ En estos casos, Espot puede facilitar la comunicación entre las partes sin asum
   },
   {
     num: '8', title: 'Limitación de Responsabilidad',
-    content: `• Espot no garantiza la devolución de montos no cobrados por la plataforma.
-• Espot no responde con fondos propios por incumplimientos del Anfitrión.
-• Cualquier reclamo sobre el saldo de la reserva (90%) debe resolverse directamente entre Huésped y Anfitrión.
-• La responsabilidad máxima de Espot se limita al monto efectivamente cobrado por la plataforma.`,
+    content: `• Espot no responde con fondos propios ante incumplimientos del Anfitrión.
+• La responsabilidad máxima de Espot se limita al monto efectivamente procesado por la plataforma.
+• Espot no garantiza reembolsos sobre montos en disputa entre Anfitrión y Huésped derivados del incumplimiento del servicio del espacio.`,
   },
   {
     num: '9', title: 'Ley Aplicable',

@@ -521,8 +521,58 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
       </section>
 
       {/* ── GUÍAS ── */}
-      <section className="py-10 md:py-14" style={{ background: '#fff' }}>
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
+      <section className="py-10 md:py-14" style={{ background: '#fff', position: 'relative', overflow: 'hidden' }}>
+        {/* Dot grid decorativo */}
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none',
+          backgroundImage: 'radial-gradient(circle, rgba(53,196,147,0.08) 1px, transparent 1px)',
+          backgroundSize: '28px 28px',
+          maskImage: 'radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 100%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 100%)',
+        }} />
+
+        <style>{`
+          @keyframes guide-shimmer {
+            0%   { background-position: -200% center; }
+            100% { background-position:  200% center; }
+          }
+          @keyframes guide-ping {
+            0%        { transform: scale(1);   opacity: 0.5; }
+            70%, 100% { transform: scale(2.4); opacity: 0;   }
+          }
+          .guide-card {
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+          }
+          .guide-card-light:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 24px 56px rgba(53,196,147,0.18), 0 4px 16px rgba(0,0,0,0.07);
+            border-color: rgba(53,196,147,0.45) !important;
+          }
+          .guide-card-dark:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 24px 56px rgba(53,196,147,0.3);
+            border-color: rgba(53,196,147,0.5) !important;
+          }
+          .guide-arrow { transition: transform 0.18s ease; }
+          .guide-card-light:hover .guide-arrow,
+          .guide-card-dark:hover .guide-arrow  { transform: translateX(6px); }
+          .guide-shimmer {
+            background: linear-gradient(90deg, #35C493 0%, #4DD9A7 35%, #D4FF58 50%, #4DD9A7 65%, #35C493 100%);
+            background-size: 200% 100%;
+            animation: guide-shimmer 2.6s ease-in-out infinite;
+          }
+          .guide-icon-wrap { position: relative; }
+          .guide-icon-wrap::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 14px;
+            border: 1.5px solid rgba(53,196,147,0.45);
+            animation: guide-ping 2.2s ease-out infinite;
+          }
+        `}</style>
+
+        <div className="relative max-w-7xl mx-auto px-4 md:px-6">
           <Reveal>
             <p className="text-xs font-bold tracking-widest uppercase mb-6 text-center" style={{ color: '#35C493' }}>
               Conoce la plataforma
@@ -531,16 +581,16 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
 
               {/* Card clientes */}
               <Link href="/para-clientes"
-                className="group relative overflow-hidden rounded-3xl p-7 flex flex-col gap-4 transition-all"
+                className="guide-card guide-card-light relative overflow-hidden rounded-3xl p-7 flex flex-col gap-4"
                 style={{ background: '#F8FAFC', border: '1px solid #E5EAE8' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #35C493, #4DD9A7)', borderRadius: '12px 12px 0 0' }} />
+                {/* Borde superior animado */}
+                <div className="guide-shimmer" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, borderRadius: '12px 12px 0 0' }} />
                 <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
+                  <div className="guide-icon-wrap w-10 h-10 rounded-2xl flex items-center justify-center"
                     style={{ background: 'rgba(53,196,147,0.1)', color: '#35C493' }}>
                     <Search size={18} />
                   </div>
-                  <ArrowRight size={16} style={{ color: '#35C493', transition: 'transform 0.2s' }}
-                    className="group-hover:translate-x-1" />
+                  <ArrowRight size={16} className="guide-arrow" style={{ color: '#35C493' }} />
                 </div>
                 <div>
                   <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: '#35C493' }}>Para clientes</p>
@@ -555,16 +605,16 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
 
               {/* Card propietarios */}
               <Link href="/para-propietarios"
-                className="group relative overflow-hidden rounded-3xl p-7 flex flex-col gap-4 transition-all"
+                className="guide-card guide-card-dark relative overflow-hidden rounded-3xl p-7 flex flex-col gap-4"
                 style={{ background: '#060D09', border: '1px solid rgba(53,196,147,0.15)' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #35C493, #28A87C)', borderRadius: '12px 12px 0 0' }} />
+                {/* Borde superior animado */}
+                <div className="guide-shimmer" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, borderRadius: '12px 12px 0 0' }} />
                 <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
+                  <div className="guide-icon-wrap w-10 h-10 rounded-2xl flex items-center justify-center"
                     style={{ background: 'rgba(53,196,147,0.12)', color: '#35C493' }}>
                     <Building2 size={18} />
                   </div>
-                  <ArrowRight size={16} style={{ color: '#35C493', transition: 'transform 0.2s' }}
-                    className="group-hover:translate-x-1" />
+                  <ArrowRight size={16} className="guide-arrow" style={{ color: '#35C493' }} />
                 </div>
                 <div>
                   <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: '#35C493' }}>Para propietarios</p>

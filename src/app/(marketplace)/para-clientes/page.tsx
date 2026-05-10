@@ -90,7 +90,7 @@ const faqs = [
   },
   {
     q: '¿Puedo cancelar mi reserva?',
-    a: 'Sí. Cada espacio tiene su política de cancelación (flexible, moderada o estricta), visible antes de confirmar. El primer pago vía Azul no es reembolsable; los siguientes dependen de la política del anfitrión.',
+    a: 'Sí. Cada espacio tiene su política de cancelación (flexible, moderada o estricta), visible antes de confirmar. Los pagos ya procesados por Azul no son reembolsables por espot.do; para cuotas futuras aplica la política del anfitrión.',
   },
   {
     q: '¿Qué pasa si no pago una cuota a tiempo?',
@@ -287,8 +287,7 @@ export default function ParaClientesPage() {
             style={{ background: 'rgba(53,196,147,0.07)', border: '1px solid rgba(53,196,147,0.18)' }}>
             <Check size={15} style={{ color: '#35C493', flexShrink: 0, marginTop: 2 }} />
             <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.55)' }}>
-              El primer pago se procesa con <strong style={{ color: 'rgba(255,255,255,0.75)' }}>Azul</strong>.
-              Los siguientes se coordinan directamente con el anfitrión según las fechas de tu plan.
+              Todos los pagos del plan se procesan a través de <strong style={{ color: 'rgba(255,255,255,0.75)' }}>espot.do</strong> vía <strong style={{ color: 'rgba(255,255,255,0.75)' }}>Azul</strong>. Recibirás un recordatorio por correo antes de cada vencimiento.
             </p>
           </div>
         </div>

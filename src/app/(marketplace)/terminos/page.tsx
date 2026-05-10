@@ -51,9 +51,9 @@ El Anfitrión puede aceptar o rechazar cualquier solicitud antes de que el Hués
 • De 31 a 60 días: 30% al confirmar y 70% en las 48 horas previas.
 • Más de 60 días: 25% al confirmar, 50% a los 60 días del evento, y 25% en las 48 horas previas.
 
-El primer pago se procesa mediante Azul. De ese pago, Espot descuenta su comisión del 10% sobre el valor total de la reserva. Los pagos restantes se coordinan directamente entre Huésped y Anfitrión según las fechas del plan.
+Todos los pagos del plan de cuotas se procesan a través de espot.do vía Azul. De cada pago, Espot descuenta su comisión del 10% sobre el valor total de la reserva y transfiere el neto correspondiente al Anfitrión en su cuenta bancaria registrada.
 
-Espot no retiene ni administra los pagos posteriores al primero. Los datos sensibles de tarjetas no se almacenan en la plataforma.`,
+Espot no almacena datos sensibles de tarjetas. Todos los cobros son gestionados por Azul bajo sus propios estándares de seguridad.`,
   },
   {
     num: '5', title: 'Cancelaciones',
