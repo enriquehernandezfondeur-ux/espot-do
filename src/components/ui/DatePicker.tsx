@@ -16,7 +16,7 @@ interface Props {
 
 export default function DatePicker({ value, onChange, minDate, placeholder = 'Seleccionar fecha' }: Props) {
   const [open, setOpen]   = useState(false)
-  const [calPos, setCalPos] = useState({ top: 0, left: 0, width: 0 })
+  const [calPos, setCalPos] = useState({ top: 0, left: 0, width: 0, above: false })
   const triggerRef          = useRef<HTMLButtonElement>(null)
 
   const today = new Date()
@@ -38,8 +38,24 @@ export default function DatePicker({ value, onChange, minDate, placeholder = 'Se
     if (!triggerRef.current) return
     const r   = triggerRef.current.getBoundingClientRect()
     const w   = Math.max(r.width, 300)
-    const left = Math.min(r.left, window.innerWidth - w - 8)
-    setCalPos({ top: r.bottom + 6, left, width: w })
+    const CAL_H = 360 // altura aproximada del calendario
+
+    // En mobile: ancho casi completo de pantalla, centrado
+    const isMobile = window.innerWidth < 640
+    const effectiveW = isMobile ? Math.min(w, window.innerWidth - 16) : w
+    const left = isMobile
+      ? Math.max(8, (window.innerWidth - effectiveW) / 2)
+      : Math.min(r.left, window.innerWidth - effectiveW - 8)
+
+    // Si no cabe abajo, mostrar arriba
+    const spaceBelow = window.innerHeight - r.bottom
+    const above = spaceBelow < CAL_H + 8
+
+    const top = above
+      ? Math.max(8, r.top - CAL_H - 6)
+      : r.bottom + 6
+
+    setCalPos({ top, left, width: effectiveW, above })
     setOpen(true)
   }
 

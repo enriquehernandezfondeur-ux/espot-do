@@ -506,7 +506,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                       ? { background: 'var(--brand)', color: '#fff' }
                       : isActive ? { background: '#0F1623', color: '#fff' }
                       : { background: 'var(--border-medium)', color: 'var(--text-muted)' }}>
-                    {isComplete ? <CheckCircle size={11} /> : s.id}
+                    {isComplete ? <CheckCircle size={11} /> : i + 1}
                   </div>
                   <span className="hidden sm:block text-xs font-medium leading-none"
                     style={{ color: isActive ? '#0F1623' : isComplete ? 'var(--brand)' : 'var(--text-muted)', maxWidth: 44, textAlign: 'center' }}>
