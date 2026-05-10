@@ -68,13 +68,15 @@ export async function POST(req: NextRequest) {
     await markInstallmentPaid(cuotaId, azulParams.AzulOrderId)
   }
 
-  // Confirmar booking
+  // Actualizar booking — solo sobrescribir confirmed_at si es el PRIMER pago
+  // (evitar que cuotas 2 y 3 reseteen la fecha de confirmación original)
+  const isFirstConfirmation = booking.status !== 'confirmed'
   await supabase.from('bookings').update({
     status:             'confirmed',
     payment_status:     'advance',
     paid_amount:        commissionAmt,
     paid_at:            new Date().toISOString(),
-    confirmed_at:       new Date().toISOString(),
+    ...(isFirstConfirmation ? { confirmed_at: new Date().toISOString() } : {}),
     platform_fee:       commissionAmt,
     azul_order_id:      azulParams.AzulOrderId,
     azul_auth_code:     azulParams.AuthorizationCode,

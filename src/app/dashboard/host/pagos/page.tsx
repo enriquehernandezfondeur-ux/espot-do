@@ -102,7 +102,7 @@ export default function HostPagosPage() {
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {[
           { label: 'Balance pendiente', value: pendingPayout, icon: Clock,       color: '#F59E0B', sub: 'Por liquidar' },
           { label: 'Total generado',    value: totalNet,      icon: TrendingUp,  color: '#35C493', sub: 'Neto de comisiones' },

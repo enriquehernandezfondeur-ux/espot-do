@@ -176,7 +176,7 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, onClo
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-4"
           style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-          <button onClick={onClose} className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-gray-100"
+          <button onClick={onClose} className="w-11 h-11 rounded-xl flex items-center justify-center hover:bg-gray-100"
             style={{ color: 'var(--text-secondary)' }}>
             <X size={18} />
           </button>
@@ -339,7 +339,7 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, onClo
               <button
                 onClick={() => fileRef.current?.click()}
                 disabled={sending || uploading}
-                className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 transition-all disabled:opacity-40"
+                className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-all disabled:opacity-40"
                 style={{ background: 'var(--bg-elevated)', color: attachment ? 'var(--brand)' : 'var(--text-muted)', border: attachment ? '1.5px solid var(--brand-border)' : '1.5px solid var(--border-medium)' }}>
                 <Paperclip size={18} />
               </button>
@@ -370,7 +370,7 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, onClo
               <button
                 onClick={handleSend}
                 disabled={!canSend}
-                className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 transition-all disabled:opacity-40"
+                className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-all disabled:opacity-40"
                 style={{ background: 'var(--brand)', color: '#fff', boxShadow: canSend ? '0 2px 8px rgba(53,196,147,0.3)' : 'none' }}>
                 {(sending || uploading) ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
               </button>

@@ -11,7 +11,13 @@ export async function sendEmail({
   subject: string
   html: string
 }) {
-  if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 'TU_RESEND_API_KEY_AQUI') {
+  const missingKey = !process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 'TU_RESEND_API_KEY_AQUI'
+  if (missingKey) {
+    // En desarrollo: simular OK. En producción: fallar explícitamente para detectar el problema
+    if (process.env.NODE_ENV === 'production') {
+      console.error('[sendEmail] RESEND_API_KEY no configurada en producción. Email NO enviado a:', to)
+      return { success: false, error: 'RESEND_API_KEY no configurada' }
+    }
     return { success: true, simulated: true }
   }
 
