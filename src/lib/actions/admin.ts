@@ -6,14 +6,25 @@ import { revalidatePath } from 'next/cache'
 const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
 
 async function requireAdmin() {
+  // Verificar identidad con cliente anon (lee la sesión del usuario)
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
-  // Acceso por email de superadmin o por rol admin en profiles
+
   if (user.email !== SUPERADMIN_EMAIL) {
     const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single()
     if (data?.role !== 'admin') return null
   }
+
+  // Para operaciones de escritura, usar service_role para bypassar RLS
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (serviceKey) {
+    const { createClient: sc } = await import('@supabase/supabase-js')
+    return sc(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    })
+  }
+
   return supabase
 }
 
