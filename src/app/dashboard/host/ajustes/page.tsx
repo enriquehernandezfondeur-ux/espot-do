@@ -111,14 +111,24 @@ function AjustesInner() {
   async function handleGetIcal() {
     setIcalLoading(true)
     const token = await getOrCreateIcalToken()
-    setIcalToken(token)
+    if (token) {
+      setIcalToken(token)
+    } else {
+      setGcalMessage('Error al generar el enlace iCal. Intenta de nuevo.')
+      setTimeout(() => setGcalMessage(''), 3000)
+    }
     setIcalLoading(false)
   }
 
   async function handleRegenerate() {
     setRegenerating(true)
     const token = await regenerateIcalToken()
-    setIcalToken(token)
+    if (token) {
+      setIcalToken(token)
+    } else {
+      setGcalMessage('Error al regenerar el enlace. Intenta de nuevo.')
+      setTimeout(() => setGcalMessage(''), 3000)
+    }
     setRegenerating(false)
     setConfirmRegen(false)
   }
@@ -135,9 +145,13 @@ function AjustesInner() {
 
   async function handleDisconnectGcal() {
     setGcalDisconnecting(true)
-    await disconnectGoogleCalendar()
-    setGcalConnected(false)
-    setGcalMessage('Google Calendar desconectado.')
+    const result = await disconnectGoogleCalendar()
+    if (result.success) {
+      setGcalConnected(false)
+      setGcalMessage('Google Calendar desconectado.')
+    } else {
+      setGcalMessage('Error al desconectar. Intenta de nuevo.')
+    }
     setTimeout(() => setGcalMessage(''), 3000)
     setGcalDisconnecting(false)
   }

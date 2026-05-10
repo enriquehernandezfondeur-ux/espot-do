@@ -108,19 +108,23 @@ export default function HostReservasPage() {
 
   async function doReject(id: string) {
     setActionId(id + 'r')
-    await rejectBooking(id, rejectReason || undefined)
-    setBookings(p => p.map(b => b.id === id ? { ...b, status: 'rejected' as const } : b))
-    if (selected?.id === id) setSelected((p: Booking | null) => p ? { ...p, status: 'rejected' as const } : null)
-    setShowRejectForm(false)
-    setRejectReason('')
+    const r = await rejectBooking(id, rejectReason || undefined)
+    if (!('error' in r)) {
+      setBookings(p => p.map(b => b.id === id ? { ...b, status: 'rejected' as const } : b))
+      if (selected?.id === id) setSelected((p: Booking | null) => p ? { ...p, status: 'rejected' as const } : null)
+      setShowRejectForm(false)
+      setRejectReason('')
+    }
     setActionId(null)
   }
 
   async function doComplete(id: string) {
     setActionId(id + 'c')
-    await completeBooking(id)
-    setBookings(p => p.map(b => b.id === id ? { ...b, status: 'completed' as const } : b))
-    if (selected?.id === id) setSelected((p: Booking | null) => p ? { ...p, status: 'completed' as const } : null)
+    const r = await completeBooking(id)
+    if (!('error' in r)) {
+      setBookings(p => p.map(b => b.id === id ? { ...b, status: 'completed' as const } : b))
+      if (selected?.id === id) setSelected((p: Booking | null) => p ? { ...p, status: 'completed' as const } : null)
+    }
     setActionId(null)
   }
 

@@ -173,7 +173,7 @@ export default function MisReservasPage() {
                   const next = isSelected ? null : bk
                   setSelected(next)
                   if (next && (next.status === 'accepted' || next.status === 'confirmed')) {
-                    getInstallments(next.id).then(setInstallments)
+                    getInstallments(next.id).then(setInstallments).catch(() => setInstallments([]))
                   } else {
                     setInstallments([])
                   }

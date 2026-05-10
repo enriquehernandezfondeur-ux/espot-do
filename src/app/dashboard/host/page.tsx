@@ -95,18 +95,22 @@ export default function DashboardPage() {
   useEffect(() => {
     Promise.all([getHostStats(), getHostBookings()]).then(([s, b]) => {
       setStats(s); setBookings(b); setLoading(false)
-    })
+    }).catch(() => setLoading(false))
   }, [])
 
   async function handleConfirm(id: string) {
-    await acceptBooking(id)
-    setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'accepted' } : b))
-    setStats(prev => prev ? { ...prev, pendingCount: Math.max(0, prev.pendingCount - 1), confirmedCount: prev.confirmedCount + 1 } : prev)
+    const r = await acceptBooking(id)
+    if (!('error' in r)) {
+      setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'accepted' } : b))
+      setStats(prev => prev ? { ...prev, pendingCount: Math.max(0, prev.pendingCount - 1), confirmedCount: prev.confirmedCount + 1 } : prev)
+    }
   }
   async function handleReject(id: string) {
-    await rejectBooking(id)
-    setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'cancelled_host' } : b))
-    setStats(prev => prev ? { ...prev, pendingCount: Math.max(0, prev.pendingCount - 1) } : prev)
+    const r = await rejectBooking(id)
+    if (!('error' in r)) {
+      setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'cancelled_host' } : b))
+      setStats(prev => prev ? { ...prev, pendingCount: Math.max(0, prev.pendingCount - 1) } : prev)
+    }
   }
 
   const growth = stats && stats.revenuePrevMonth > 0

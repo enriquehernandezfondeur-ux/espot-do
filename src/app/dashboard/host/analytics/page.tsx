@@ -24,7 +24,7 @@ export default function AnalyticsPage() {
       setStats(s)
       setBookings(b)
       setLoading(false)
-    })
+    }).catch(() => setLoading(false))
   }, [])
 
   if (loading) return (

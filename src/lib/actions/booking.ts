@@ -337,8 +337,8 @@ export async function confirmPayment(bookingId: string) {
 
   if (error) return { error: error.message }
 
-  // Registrar el pago
-  await supabase.from('payments').insert({
+  // Registrar el pago (no bloquea si falla — el booking ya está confirmado)
+  const { error: payErr } = await supabase.from('payments').insert({
     booking_id:     bookingId,
     amount:         bk.platform_fee,
     currency:       'DOP',
@@ -347,6 +347,7 @@ export async function confirmPayment(bookingId: string) {
     status:         'completed',
     paid_at:        new Date().toISOString(),
   })
+  if (payErr) console.error('[completeBooking] payments insert failed:', payErr.message)
 
   const space  = bk.spaces as any
   const host   = space?.profiles as any

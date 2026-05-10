@@ -19,7 +19,7 @@ export default function ClientDashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getClientStats().then(s => { setStats(s); setLoading(false) })
+    getClientStats().then(s => { setStats(s); setLoading(false) }).catch(() => setLoading(false))
   }, [])
 
   if (loading) return (

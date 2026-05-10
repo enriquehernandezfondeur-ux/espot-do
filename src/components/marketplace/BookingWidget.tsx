@@ -78,7 +78,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   const [customEventType,setCustomEventType]= useState('')
   const [selectedAddons, setSelectedAddons] = useState<string[]>([])
   const [guestNote,      setGuestNote]      = useState('')
-  const [guestCedula,    setGuestCedula]    = useState('')
+
   const [showNote,       setShowNote]       = useState(false)
   const [booking,        setBooking]        = useState(false)
   const [success,        setSuccess]        = useState(false)
@@ -299,7 +299,6 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         eventDate, startTime: effectiveStartTime, endTime: realEndTime,
         guestCount, eventType: finalEventType,
         eventNotes: guestNote || undefined,
-        guestCedula: guestCedula || undefined,
         selectedAddonIds: selectedAddons,
         basePrice, addonsTotal, platformFee,
         totalAmount: subtotal,
