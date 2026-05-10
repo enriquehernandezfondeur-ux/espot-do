@@ -1,9 +1,9 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Building2, Clock, DollarSign, Plus, Gift, Shield, CreditCard, CheckCircle, ChevronRight, ChevronLeft, X, Loader2, Eye, EyeOff, MapPin, Users, Pencil, PlusCircle, Wine, UtensilsCrossed, Sunset, Trees, Camera, Briefcase, Home, Package, MessageSquare, Music2, Volume2, Sun, Car, Wifi, Wind, Waves, Monitor, Zap, ShowerHead, Sparkles } from 'lucide-react'
+import { Building2, Clock, DollarSign, Plus, Gift, Shield, CreditCard, CheckCircle, ChevronRight, ChevronLeft, X, Loader2, Eye, EyeOff, MapPin, Users, Pencil, PlusCircle, Wine, UtensilsCrossed, Sunset, Trees, Camera, Briefcase, Home, Package, MessageSquare, Music2, Volume2, Sun, Car, Wifi, Wind, Waves, Monitor, Zap, ShowerHead, Sparkles, Trash2, Save } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
-import { saveSpace, publishSpace, getMySpaces, saveSpaceImages, updateSpace } from '@/lib/actions/space'
+import { saveSpace, publishSpace, getMySpaces, saveSpaceImages, updateSpace, deactivateSpace, deleteSpaceByHost } from '@/lib/actions/space'
 import PhotoUploader from '@/components/dashboard/PhotoUploader'
 import WeeklySchedule from '@/components/dashboard/WeeklySchedule'
 import ActivityPicker from '@/components/dashboard/ActivityPicker'
@@ -562,13 +562,14 @@ export default function EspacioPage() {
                         )}
                       </div>
                     )}
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       <button onClick={() => loadSpaceForEdit(space)}
                         className="flex-1 flex items-center justify-center gap-1.5 text-sm font-medium py-2 rounded-xl transition-colors"
                         style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
                         <Pencil size={13} /> Editar
                       </button>
-                      {!space.is_published && (
+
+                      {!space.is_published && space.is_active && (
                         <button
                           onClick={async () => {
                             const result = await publishSpace(space.id)
@@ -578,6 +579,32 @@ export default function EspacioPage() {
                           }}
                           className="btn-brand flex-1 flex items-center justify-center gap-1.5 text-sm font-medium py-2 rounded-xl">
                           <Eye size={13} /> Enviar a revisión
+                        </button>
+                      )}
+
+                      {space.is_published && (
+                        <button
+                          onClick={async () => {
+                            const r = await deactivateSpace(space.id)
+                            if (!('error' in r)) setSpaces(prev => prev.map(s => s.id === space.id ? { ...s, is_published: false, is_active: false } : s))
+                          }}
+                          className="flex items-center justify-center gap-1.5 text-sm font-medium py-2 px-3 rounded-xl transition-colors"
+                          style={{ background: 'rgba(217,119,6,0.08)', color: '#D97706', border: '1px solid rgba(217,119,6,0.2)' }}>
+                          <EyeOff size={13} /> Despublicar
+                        </button>
+                      )}
+
+                      {!space.is_published && (
+                        <button
+                          onClick={async () => {
+                            if (!window.confirm(`¿Eliminar "${space.name}"? Esta acción no se puede deshacer.`)) return
+                            const r = await deleteSpaceByHost(space.id)
+                            if ('error' in r) { alert(r.error); return }
+                            setSpaces(prev => prev.filter(s => s.id !== space.id))
+                          }}
+                          className="flex items-center justify-center gap-1.5 text-sm font-medium py-2 px-3 rounded-xl transition-colors"
+                          style={{ background: 'rgba(220,38,38,0.08)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.2)' }}>
+                          <Trash2 size={13} /> Eliminar
                         </button>
                       )}
                     </div>
@@ -1435,7 +1462,11 @@ export default function EspacioPage() {
                 disabled={saving || !name || !category || !capacityMax || !pricingType || !paymentTerm}
                 className="btn-brand flex-1 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed font-semibold py-3 px-6 rounded-xl transition-all"
               >
-                {saving ? <><Loader2 size={18} className="animate-spin" /> Guardando...</> : '🚀 Publicar mi Espot'}
+                {saving
+                  ? <><Loader2 size={18} className="animate-spin" /> Guardando...</>
+                  : editingSpaceId
+                    ? <><Save size={16} /> Guardar cambios</>
+                    : <><CheckCircle size={16} /> Publicar mi Espot</>}
               </button>
             </div>
 
@@ -1446,7 +1477,7 @@ export default function EspacioPage() {
         )}
 
         {/* Navigation buttons */}
-        <div className="flex items-center justify-between mt-8 pt-6 border-t">
+        <div className="flex items-center justify-between mt-8 pt-6 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
           <button
             onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
             disabled={currentStep === 1}
@@ -1457,14 +1488,29 @@ export default function EspacioPage() {
 
           <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Paso {currentStep} de {steps.length}</span>
 
-          {currentStep < 7 && (
-            <button
-              onClick={() => setCurrentStep(Math.min(7, currentStep + 1))}
-              className="flex items-center gap-2 bg-[#35C493] hover:bg-[#4DD9A7] text-white text-sm font-medium px-5 py-3 rounded-xl transition-colors"
-            >
-              Siguiente <ChevronRight size={18} />
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {/* Guardar cambios visible desde cualquier paso cuando se está editando */}
+            {editingSpaceId && currentStep < 7 && (
+              <button
+                onClick={handlePublish}
+                disabled={saving}
+                className="flex items-center gap-1.5 text-sm font-semibold px-4 py-3 rounded-xl transition-all disabled:opacity-50"
+                style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
+                {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                Guardar cambios
+              </button>
+            )}
+
+            {currentStep < 7 && (
+              <button
+                onClick={() => setCurrentStep(Math.min(7, currentStep + 1))}
+                className="flex items-center gap-2 text-white text-sm font-medium px-5 py-3 rounded-xl transition-colors"
+                style={{ background: 'var(--brand)' }}
+              >
+                Siguiente <ChevronRight size={18} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

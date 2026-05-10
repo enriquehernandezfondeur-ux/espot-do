@@ -260,6 +260,29 @@ export async function saveSpace(payload: SaveSpacePayload) {
   return { success: true, spaceId }
 }
 
+export async function deactivateSpace(spaceId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+  const { data: space } = await supabase.from('spaces').select('host_id').eq('id', spaceId).single()
+  if (!space || space.host_id !== user.id) return { error: 'No autorizado' }
+  const { error } = await supabase.from('spaces').update({ is_published: false, is_active: false }).eq('id', spaceId)
+  if (!error) revalidatePath('/buscar')
+  return error ? { error: error.message } : { success: true }
+}
+
+export async function deleteSpaceByHost(spaceId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+  const { data: space } = await supabase.from('spaces').select('host_id, is_published').eq('id', spaceId).single()
+  if (!space || space.host_id !== user.id) return { error: 'No autorizado' }
+  if (space.is_published) return { error: 'Debes despublicar el espacio antes de eliminarlo.' }
+  const { error } = await supabase.from('spaces').delete().eq('id', spaceId)
+  if (!error) revalidatePath('/buscar')
+  return error ? { error: error.message } : { success: true }
+}
+
 export async function publishSpace(spaceId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
