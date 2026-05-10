@@ -4,15 +4,16 @@ import { createClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/email/send'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import {
-  tplSolicitudCliente, tplSolicitudHost,
+  tplSolicitudCliente, tplSolicitudCotizacionCliente, tplSolicitudHost,
   tplAceptadaCliente, tplConfirmadaCliente, tplConfirmadaHost,
-  tplRechazadaCliente, tplCancelada,
+  tplRechazadaCliente, tplCancelada, tplReembolsoPendiente, tplReembolsoPendienteAdmin,
 } from '@/lib/email/templates'
 import { createBookingEvent, deleteBookingEvent } from '@/lib/google-calendar'
 import { createInstallments } from '@/lib/actions/installments'
 export type { BookingStatus } from '@/lib/bookingConfig'
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
+const SITE        = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'contacto@espot.do'
 
 // ── CREAR RESERVA CON VALIDACIÓN ANTI-DOBLE ───────────────
 export interface CreateBookingPayload {
@@ -61,10 +62,9 @@ export async function createBooking(payload: CreateBookingPayload) {
 
     if (pricingCheck) {
       // Calcular horas seleccionadas (maneja medianoche)
-      const sh = parseInt(payload.startTime.split(':')[0] || '0')
-      const eh = parseInt(payload.endTime.split(':')[0] || '0')
-      const sn = (sh < 6 ? sh + 24 : sh) * 60 + parseInt(payload.startTime.split(':')[1] || '0')
-      const en = (eh < 6 ? eh + 24 : eh) * 60 + parseInt(payload.endTime.split(':')[1] || '0')
+      const sn = parseInt(payload.startTime.split(':')[0] || '0') * 60 + parseInt(payload.startTime.split(':')[1] || '0')
+      let   en = parseInt(payload.endTime.split(':')[0]   || '0') * 60 + parseInt(payload.endTime.split(':')[1]   || '0')
+      if (en <= sn) en += 24 * 60  // cruce de medianoche
       const selectedH = Math.max(0, (en - sn) / 60)
 
       const minH  = pricingCheck.min_hours    ?? 0
@@ -189,8 +189,8 @@ export async function createBooking(payload: CreateBookingPayload) {
   await Promise.all([
     guestEmail && sendEmail({
       to: guestEmail,
-      subject: isQuote ? `Solicitud de cotización recibida — ${spaceName}` : `Solicitud recibida — ${spaceName}`,
-      html: tplSolicitudCliente(bookingData),
+      subject: isQuote ? `Cotización solicitada — ${spaceName}` : `Solicitud recibida — ${spaceName}`,
+      html: isQuote ? tplSolicitudCotizacionCliente(bookingData) : tplSolicitudCliente(bookingData),
     }),
     hostEmail && sendEmail({
       to: hostEmail,
@@ -274,6 +274,14 @@ export async function rejectBooking(bookingId: string, reason?: string) {
   const space = bk.spaces as any
   if (space?.host_id !== user.id) return { error: 'No autorizado' }
 
+  // Verificar si hay cuotas ya pagadas
+  const { data: paidInstalls } = await supabase
+    .from('booking_installments')
+    .select('amount')
+    .eq('booking_id', bookingId)
+    .eq('status', 'paid')
+  const paidAmount = paidInstalls?.reduce((sum, i) => sum + Number(i.amount), 0) ?? 0
+
   const { error } = await supabase
     .from('bookings')
     .update({
@@ -291,13 +299,45 @@ export async function rejectBooking(bookingId: string, reason?: string) {
     await deleteBookingEvent(host.google_refresh_token, (bk as any).google_calendar_event_id)
   }
 
-  const guest = bk.profiles as any
-  if (guest?.email) {
+  const guest      = bk.profiles as any
+  const guestEmail = guest?.email ?? ''
+  const guestName  = guest?.full_name ?? 'Cliente'
+  const hostName   = host?.full_name ?? 'Propietario'
+
+  if (paidAmount > 0) {
+    // Reserva ya pagada rechazada → reembolso pendiente
+    await Promise.all([
+      guestEmail && sendEmail({
+        to: guestEmail,
+        subject: `Reembolso en proceso — ${space?.name}`,
+        html: tplReembolsoPendiente({
+          guestName,
+          spaceName: space?.name ?? '',
+          eventDate: bk.event_date,
+          paidAmount,
+          bookingId,
+        }),
+      }),
+      sendEmail({
+        to: ADMIN_EMAIL,
+        subject: `⚠️ Reembolso pendiente (rechazo) — ${space?.name} (${bookingId.slice(0, 8).toUpperCase()})`,
+        html: tplReembolsoPendienteAdmin({
+          guestName,
+          guestEmail,
+          spaceName: space?.name ?? '',
+          eventDate: bk.event_date,
+          paidAmount,
+          bookingId,
+          cancelledBy: `Propietario (${hostName}) — rechazo`,
+        }),
+      }),
+    ])
+  } else if (guestEmail) {
     await sendEmail({
-      to: guest.email,
+      to: guestEmail,
       subject: `El espacio no está disponible — ${space?.name}`,
       html: tplRechazadaCliente({
-        guestName: guest?.full_name ?? 'Cliente',
+        guestName,
         spaceName: space?.name ?? '',
         eventDate: bk.event_date,
         reason,
@@ -426,6 +466,14 @@ export async function cancelBooking(bookingId: string, reason?: string) {
 
   if (!isGuest && !isHost) return { error: 'No autorizado' }
 
+  // Verificar si hay cuotas ya pagadas (para gestionar reembolso)
+  const { data: paidInstallments } = await supabase
+    .from('booking_installments')
+    .select('amount')
+    .eq('booking_id', bookingId)
+    .eq('status', 'paid')
+  const paidAmount = paidInstallments?.reduce((sum, i) => sum + Number(i.amount), 0) ?? 0
+
   const newStatus = isGuest ? 'cancelled_guest' : 'cancelled_host'
 
   const { error } = await supabase
@@ -446,26 +494,71 @@ export async function cancelBooking(bookingId: string, reason?: string) {
     await deleteBookingEvent(hostProfile.google_refresh_token, (bk as any).google_calendar_event_id)
   }
 
-  // Email de cancelación al otro participante
-  const guest = bk.profiles as any
-  const host  = space?.profiles as any
+  const guest       = bk.profiles as any
+  const host        = space?.profiles as any
+  const guestEmail  = guest?.email ?? ''
+  const guestName   = guest?.full_name ?? 'Cliente'
   const notifyEmail = isGuest ? host?.email : guest?.email
   const notifyName  = isGuest ? host?.full_name : guest?.full_name
-  const cancelledBy = isGuest ? guest?.full_name : host?.full_name
+  const cancelledBy = isGuest ? guestName : (host?.full_name ?? 'Propietario')
 
-  if (notifyEmail) {
-    await sendEmail({
-      to: notifyEmail,
-      subject: `Reserva cancelada — ${space?.name}`,
-      html: tplCancelada({
-        recipientName: notifyName ?? '',
-        cancelledBy: cancelledBy ?? '',
-        spaceName: space?.name ?? '',
-        eventDate: bk.event_date,
-        reason,
-        isGuest: !isGuest, // El que recibe es el opuesto
+  // Si hay cuotas pagadas → email de reembolso al cliente + alerta al admin
+  if (paidAmount > 0) {
+    await Promise.all([
+      guestEmail && sendEmail({
+        to: guestEmail,
+        subject: `Reembolso en proceso — ${space?.name}`,
+        html: tplReembolsoPendiente({
+          guestName,
+          spaceName: space?.name ?? '',
+          eventDate: bk.event_date,
+          paidAmount,
+          bookingId,
+        }),
       }),
-    })
+      sendEmail({
+        to: ADMIN_EMAIL,
+        subject: `⚠️ Reembolso pendiente — ${space?.name} (${bookingId.slice(0, 8).toUpperCase()})`,
+        html: tplReembolsoPendienteAdmin({
+          guestName,
+          guestEmail,
+          spaceName: space?.name ?? '',
+          eventDate: bk.event_date,
+          paidAmount,
+          bookingId,
+          cancelledBy,
+        }),
+      }),
+      // Notificar al otro participante (host si cancela guest, viceversa)
+      notifyEmail && sendEmail({
+        to: notifyEmail,
+        subject: `Reserva cancelada — ${space?.name}`,
+        html: tplCancelada({
+          recipientName: notifyName ?? '',
+          cancelledBy,
+          spaceName: space?.name ?? '',
+          eventDate: bk.event_date,
+          reason,
+          isGuest: !isGuest,
+        }),
+      }),
+    ])
+  } else {
+    // Sin pagos — email de cancelación estándar
+    if (notifyEmail) {
+      await sendEmail({
+        to: notifyEmail,
+        subject: `Reserva cancelada — ${space?.name}`,
+        html: tplCancelada({
+          recipientName: notifyName ?? '',
+          cancelledBy,
+          spaceName: space?.name ?? '',
+          eventDate: bk.event_date,
+          reason,
+          isGuest: !isGuest,
+        }),
+      })
+    }
   }
 
   return { success: true }

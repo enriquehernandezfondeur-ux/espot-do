@@ -80,10 +80,11 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   const [guestNote,      setGuestNote]      = useState('')
 
   const [showNote,       setShowNote]       = useState(false)
-  const [booking,        setBooking]        = useState(false)
-  const [success,        setSuccess]        = useState(false)
-  const [successType,    setSuccessType]    = useState<'pending' | 'quote'>('pending')
-  const [error,          setError]          = useState('')
+  const [booking,          setBooking]          = useState(false)
+  const [success,          setSuccess]          = useState(false)
+  const [successType,      setSuccessType]      = useState<'pending' | 'quote' | 'instant'>('pending')
+  const [createdBookingId, setCreatedBookingId] = useState<string | null>(null)
+  const [error,            setError]            = useState('')
 
   const finalEventType = eventType === 'Otro' ? (customEventType.trim() || 'Otro') : eventType
 
@@ -101,6 +102,15 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     const h = Math.floor(mins / 60) % 24
     const m = mins % 60
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+  }
+
+  // Convierte el tiempo de cierre de un bloque a minutos, manejando cruces de medianoche.
+  // Si el cierre es menor o igual al inicio (ej: 22:00 → 02:00), suma 24h.
+  function blockEndToMins(endTime: string, startTime: string): number {
+    if (endTime === '00:00') return 24 * 60
+    const endM   = timeToMins(endTime)
+    const startM = timeToMins(startTime)
+    return endM <= startM ? endM + 24 * 60 : endM
   }
 
   function calcHours(start: string, end: string): number {
@@ -121,8 +131,8 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     if (!active.length) return null
     // Elegir el bloque más largo del día (fix: usaba b.end_time para calcular aLen)
     const sorted = [...active].sort((a: any, b: any) => {
-      const aLen = timeToMins(a.end_time === '00:00' ? '24:00' : a.end_time) - timeToMins(a.start_time)
-      const bLen = timeToMins(b.end_time === '00:00' ? '24:00' : b.end_time) - timeToMins(b.start_time)
+      const aLen = blockEndToMins(a.end_time, a.start_time) - timeToMins(a.start_time)
+      const bLen = blockEndToMins(b.end_time, b.start_time) - timeToMins(b.start_time)
       return bLen - aLen
     })
     return { start: sorted[0].start_time as string, end: sorted[0].end_time as string }
@@ -146,7 +156,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   // Para duración fija, restringir el picker de inicio
   const startPickerRange = useMemo(() => {
     if (!allowedTimeRange || fixedDuration <= 0) return allowedTimeRange
-    const blockEndMins    = timeToMins(allowedTimeRange.end === '00:00' ? '24:00' : allowedTimeRange.end)
+    const blockEndMins    = blockEndToMins(allowedTimeRange.end, allowedTimeRange.start)
     const latestStartMins = blockEndMins - fixedDuration * 60
     if (latestStartMins < timeToMins(allowedTimeRange.start)) return null
     return { start: allowedTimeRange.start, end: minsToTime(latestStartMins + SLOT_MINS) }
@@ -155,7 +165,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   // Rango para picker de salida: incluye la hora exacta de cierre del bloque
   const endPickerAllowedRange = useMemo(() => {
     if (!allowedTimeRange) return allowedTimeRange
-    const blockEndMins = timeToMins(allowedTimeRange.end === '00:00' ? '24:00' : allowedTimeRange.end)
+    const blockEndMins = blockEndToMins(allowedTimeRange.end, allowedTimeRange.start)
     return { start: allowedTimeRange.start, end: minsToTime(blockEndMins + SLOT_MINS) }
   }, [allowedTimeRange])
 
@@ -167,7 +177,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   const singleTurno = useMemo(() => {
     if (!fixedDuration || !startPickerRange || !allowedTimeRange) return null
     const sStart = timeToMins(startPickerRange.start)
-    const sEnd   = timeToMins(startPickerRange.end === '00:00' ? '24:00' : startPickerRange.end)
+    const sEnd   = blockEndToMins(startPickerRange.end, startPickerRange.start)
     // Si solo cabe un slot de inicio (diferencia < 2 slots) → turno único
     if (sEnd - sStart <= SLOT_MINS) return allowedTimeRange.start
     return null
@@ -184,7 +194,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   // Minutos disponibles desde efectiveStartTime hasta el cierre del bloque (para end picker)
   const minsUntilBlockEnd = useMemo(() => {
     if (!allowedTimeRange || !effectiveStartTime) return undefined
-    const blockEndMins = timeToMins(allowedTimeRange.end === '00:00' ? '24:00' : allowedTimeRange.end)
+    const blockEndMins = blockEndToMins(allowedTimeRange.end, allowedTimeRange.start)
     return blockEndMins - timeToMins(effectiveStartTime)
   }, [allowedTimeRange, effectiveStartTime])
 
@@ -205,7 +215,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
       return `Este Espot permite máximo ${maxHours} hora${maxHours > 1 ? 's' : ''} de reserva`
     if (allowedTimeRange) {
       const endMins      = timeToMins(realEndTime)
-      const blockEndMins = timeToMins(allowedTimeRange.end === '00:00' ? '24:00' : allowedTimeRange.end)
+      const blockEndMins = blockEndToMins(allowedTimeRange.end, allowedTimeRange.start)
       if (endMins > blockEndMins)
         return `El horario excede el cierre del espacio (${formatTime(allowedTimeRange.end)}). Elige una hora de llegada más temprana.`
     }
@@ -306,7 +316,12 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
       if ('error' in result) {
         setError(result.error ?? 'Error al procesar la solicitud')
       } else {
-        setSuccessType(result.status === 'quote_requested' ? 'quote' : 'pending')
+        setCreatedBookingId(result.bookingId ?? null)
+        setSuccessType(
+          result.status === 'quote_requested' ? 'quote' :
+          result.status === 'accepted'        ? 'instant' :
+          'pending'
+        )
         setSuccess(true)
       }
     } catch {
@@ -360,11 +375,60 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     <div className="rounded-3xl p-7 text-center"
       style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 40px rgba(0,0,0,0.08)' }}>
       <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
-        style={{ background: 'rgba(53,196,147,0.1)' }}>
-        <CheckCircle size={32} style={{ color: 'var(--brand)' }} />
+        style={{ background: successType === 'instant' ? 'rgba(37,99,235,0.1)' : successType === 'quote' ? 'rgba(8,145,178,0.1)' : 'rgba(53,196,147,0.1)' }}>
+        <CheckCircle size={32} style={{ color: successType === 'instant' ? '#2563EB' : successType === 'quote' ? '#0891B2' : 'var(--brand)' }} />
       </div>
 
-      {successType === 'pending' ? (
+      {successType === 'instant' ? (
+        <>
+          <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+            ¡Reserva aceptada automáticamente!
+          </h3>
+          <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            Este espacio tiene <strong>confirmación instantánea</strong>. Tu fecha está pre-reservada — completa el pago para asegurarla.
+          </p>
+          <div className="flex items-start gap-2.5 text-left px-4 py-3 rounded-xl mb-5"
+            style={{ background: 'rgba(37,99,235,0.06)', border: '1px solid rgba(37,99,235,0.2)' }}>
+            <span style={{ fontSize: 16 }}>⏱️</span>
+            <p className="text-xs" style={{ color: '#1E40AF', lineHeight: 1.6 }}>
+              <strong>Tienes 24 horas para completar el pago.</strong>{' '}
+              Si no pagas en ese tiempo, la fecha se liberará automáticamente.
+            </p>
+          </div>
+          <Link href={createdBookingId ? `/pago/${createdBookingId}` : '/dashboard/reservas'}
+            className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-3 rounded-xl"
+            style={{ background: '#2563EB', color: '#fff' }}>
+            Completar pago ahora <ChevronRight size={15} />
+          </Link>
+          <div className="mt-3">
+            <Link href="/dashboard/reservas" className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              Pagar después desde mis reservas
+            </Link>
+          </div>
+        </>
+      ) : successType === 'quote' ? (
+        <>
+          <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+            ¡Cotización enviada!
+          </h3>
+          <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            El propietario recibirá los detalles de tu evento y te enviará una propuesta de precio.
+          </p>
+          <div className="flex items-start gap-2.5 text-left px-4 py-3 rounded-xl mb-5"
+            style={{ background: 'rgba(8,145,178,0.06)', border: '1px solid rgba(8,145,178,0.2)' }}>
+            <span style={{ fontSize: 16 }}>📩</span>
+            <p className="text-xs" style={{ color: '#0C4A6E', lineHeight: 1.6 }}>
+              <strong>Plazo de respuesta: 48 horas hábiles.</strong>{' '}
+              Recibirás un email cuando el propietario envíe su propuesta. Puedes escribirle directamente desde el chat mientras tanto.
+            </p>
+          </div>
+          <Link href="/dashboard/reservas"
+            className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-3 rounded-xl"
+            style={{ background: '#0891B2', color: '#fff' }}>
+            Ver mi cotización <ChevronRight size={15} />
+          </Link>
+        </>
+      ) : (
         <>
           <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
             ¡Solicitud enviada!
@@ -380,23 +444,13 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               Recibirás un email con el enlace de pago una vez que confirme tu reserva.
             </p>
           </div>
-        </>
-      ) : (
-        <>
-          <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-            ¡Cotización solicitada!
-          </h3>
-          <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-            El propietario te enviará un precio personalizado. Revisa tu email.
-          </p>
+          <Link href="/dashboard/reservas"
+            className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-3 rounded-xl"
+            style={{ background: 'var(--brand)', color: '#fff' }}>
+            Ver mis solicitudes <ChevronRight size={15} />
+          </Link>
         </>
       )}
-
-      <Link href="/dashboard/reservas"
-        className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-3 rounded-xl"
-        style={{ background: 'var(--brand)', color: '#fff' }}>
-        Ver mis solicitudes <ChevronRight size={15} />
-      </Link>
     </div>
   )
 

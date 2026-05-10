@@ -352,6 +352,84 @@ export function tplCuotaPagada(data: {
   })
 }
 
+/** Cliente: cotización solicitada (distinto a solicitud normal) */
+export function tplSolicitudCotizacionCliente(d: BookingData) {
+  const rows = [
+    { label: 'Espacio',        value: d.spaceName },
+    { label: 'Tipo de evento', value: d.eventType },
+    { label: 'Fecha',          value: formatDate(d.eventDate) },
+    ...(d.startTime ? [{ label: 'Horario referencial', value: `${formatTime(d.startTime)} – ${formatTime(d.endTime)}` }] : []),
+    { label: 'Personas',       value: `${d.guestCount}` },
+    { label: 'Referencia',     value: d.bookingId.slice(0, 8).toUpperCase() },
+  ]
+  return emailBase({
+    title: 'Cotización solicitada',
+    subtitle: `Hola ${d.guestName}, recibimos tu solicitud para ${d.spaceName}.`,
+    accentColor: '#0891B2',
+    body: `
+      <p style="color:#374151;margin:0 0 16px;">El propietario revisará los detalles de tu evento y te enviará una <strong>propuesta de precio personalizada</strong>.</p>
+      ${infoBox(rows)}
+      <p style="color:#374151;margin:8px 0 16px;">⏱️ <strong>Plazo de respuesta: 48 horas hábiles.</strong> Recibirás un email con la propuesta en cuanto el propietario la envíe.</p>
+      <p style="color:#6B7280;font-size:13px;margin:0;">Si el propietario no responde en ese plazo, puedes escribirle directamente desde el chat o contactar a <a href="mailto:contacto@espot.do" style="color:#35C493;">contacto@espot.do</a>.</p>`,
+    cta: { text: 'Ver mi cotización', url: `${SITE}/dashboard/reservas` },
+    note: 'No se realizará ningún cobro hasta que aceptes la propuesta del propietario.',
+  })
+}
+
+/** Cliente: reembolso en proceso tras cancelación con pago */
+export function tplReembolsoPendiente(data: {
+  guestName: string
+  spaceName: string
+  eventDate: string
+  paidAmount: number
+  bookingId: string
+}) {
+  return emailBase({
+    title: 'Tu reembolso está en proceso',
+    subtitle: `Reserva cancelada en ${data.spaceName}`,
+    accentColor: '#D97706',
+    body: `
+      <p style="color:#374151;margin:0 0 16px;">Hola <strong>${data.guestName}</strong>, tu reserva en <strong>${data.spaceName}</strong> para el ${formatDate(data.eventDate)} fue cancelada.</p>
+      ${infoBox([
+        { label: 'Monto pagado',      value: formatCurrency(data.paidAmount) },
+        { label: 'Estado reembolso',  value: 'En proceso' },
+        { label: 'Tiempo estimado',   value: '3–5 días hábiles' },
+        { label: 'Referencia',        value: data.bookingId.slice(0, 8).toUpperCase() },
+      ])}
+      <p style="color:#374151;margin:0 0 12px;">El reembolso se procesará automáticamente hacia el método de pago original (Azul Payments). El tiempo de acreditación depende de tu banco.</p>
+      <p style="color:#6B7280;font-size:13px;margin:0;">¿Dudas? Escríbenos a <a href="mailto:contacto@espot.do" style="color:#35C493;">contacto@espot.do</a> con la referencia <strong>${data.bookingId.slice(0, 8).toUpperCase()}</strong>.</p>`,
+    cta: { text: 'Ver mis reservas', url: `${SITE}/dashboard/reservas` },
+  })
+}
+
+/** Admin: alerta de cancelación con reembolso pendiente */
+export function tplReembolsoPendienteAdmin(data: {
+  guestName: string
+  guestEmail: string
+  spaceName: string
+  eventDate: string
+  paidAmount: number
+  bookingId: string
+  cancelledBy: string
+}) {
+  return emailBase({
+    title: '⚠️ Cancelación con reembolso pendiente',
+    subtitle: `Reserva ${data.bookingId.slice(0, 8).toUpperCase()} — Acción requerida`,
+    accentColor: '#DC2626',
+    body: `
+      <p style="color:#374151;margin:0 0 16px;">Una reserva con pagos procesados fue cancelada. <strong>Es necesario procesar el reembolso manualmente en Azul Payments.</strong></p>
+      ${infoBox([
+        { label: 'Reserva ID',          value: data.bookingId },
+        { label: 'Cliente',             value: `${data.guestName} · ${data.guestEmail}` },
+        { label: 'Espacio',             value: data.spaceName },
+        { label: 'Fecha del evento',    value: formatDate(data.eventDate) },
+        { label: 'Monto a reembolsar',  value: formatCurrency(data.paidAmount) },
+        { label: 'Cancelado por',       value: data.cancelledBy },
+      ])}`,
+    cta: { text: 'Ver en panel admin', url: `${SITE}/admin/liquidaciones` },
+  })
+}
+
 /** Pago completado — para admin y notificaciones de Azul */
 export function tplPagoCompletado(data: {
   recipientName: string
