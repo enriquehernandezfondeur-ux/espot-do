@@ -228,12 +228,26 @@ export default function MisReservasPage() {
                   <div className="mx-4 mb-4 px-4 py-4 rounded-2xl"
                     style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.2)' }}>
                     <div className="mb-3">
-                      <div className="text-sm font-semibold" style={{ color: '#1D4ED8' }}>
-                        🎉 ¡El propietario aceptó tu reserva!
-                      </div>
-                      <div className="text-xs mt-0.5" style={{ color: '#3B82F6' }}>
-                        Completa el pago para confirmar tu fecha
-                      </div>
+                      {/* Diferenciar cotización respondida de reserva normal aceptada */}
+                      {(bk as any).event_notes?.startsWith('[Cotización]') ? (
+                        <>
+                          <div className="text-sm font-semibold" style={{ color: '#1D4ED8' }}>
+                            Cotización respondida — precio confirmado
+                          </div>
+                          <div className="text-xs mt-0.5" style={{ color: '#3B82F6' }}>
+                            El propietario fijó el precio en {formatCurrency(Number(bk.total_amount))}. Paga la primera cuota para reservar.
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="text-sm font-semibold" style={{ color: '#1D4ED8' }}>
+                            El propietario aceptó tu reserva
+                          </div>
+                          <div className="text-xs mt-0.5" style={{ color: '#3B82F6' }}>
+                            Completa el pago para confirmar tu fecha
+                          </div>
+                        </>
+                      )}
                     </div>
                     <button
                       onClick={() => handlePay(bk.id)}

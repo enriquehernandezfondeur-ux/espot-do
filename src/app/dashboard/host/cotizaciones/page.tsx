@@ -1,13 +1,35 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CalendarDays, Users, MessageSquare, X, Send, Loader2 } from 'lucide-react'
+import { CalendarDays, Users, MessageSquare, X, Send, Loader2, CheckCircle } from 'lucide-react'
 import { formatDate, formatCurrency } from '@/lib/utils'
 import { getHostQuotes, respondToQuote } from '@/lib/actions/host'
 import { rejectBooking } from '@/lib/actions/booking'
+import { buildSchedule, daysUntilEvent } from '@/lib/payments/schedule'
 import { cn } from '@/lib/utils'
 
 type Quote = Awaited<ReturnType<typeof getHostQuotes>>[0]
+
+// Preview del plan de cuotas que verá el cliente
+function QuoteSchedulePreview({ price, eventDate }: { price: number; eventDate: string }) {
+  if (!eventDate || !price) return null
+  const schedule = buildSchedule(eventDate, price)
+  return (
+    <div className="rounded-xl overflow-hidden mt-1" style={{ border: '1px solid var(--border-subtle)' }}>
+      <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest"
+        style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-subtle)' }}>
+        Plan de cuotas que recibirá el cliente
+      </div>
+      {schedule.installments.map((inst, i) => (
+        <div key={i} className="flex items-center justify-between px-3 py-2 text-xs"
+          style={{ borderBottom: i < schedule.installments.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
+          <span style={{ color: 'var(--text-secondary)' }}>{inst.label}</span>
+          <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{formatCurrency(inst.amount)}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 export default function CotizacionesPage() {
   const [quotes, setQuotes]       = useState<Quote[]>([])
@@ -161,10 +183,13 @@ export default function CotizacionesPage() {
                       placeholder="Ej: 85000"
                       className="input-base w-full rounded-xl px-4 py-3 text-sm"
                       style={{ fontSize: 16 }} />
-                    {price && (
-                      <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-                        Comisión Espot: {formatCurrency(parseFloat(price) * 0.10)} · Recibes: {formatCurrency(parseFloat(price) * 0.90)}
-                      </p>
+                    {price && !isNaN(parseFloat(price)) && (
+                      <div className="mt-2 space-y-1">
+                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                          Comisión espot.do (10%): {formatCurrency(parseFloat(price) * 0.10)} · <strong>Recibes: {formatCurrency(parseFloat(price) * 0.90)}</strong>
+                        </p>
+                        <QuoteSchedulePreview price={parseFloat(price)} eventDate={selected?.event_date ?? ''} />
+                      </div>
                     )}
                   </div>
 
@@ -195,7 +220,7 @@ export default function CotizacionesPage() {
                   </div>
 
                   <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
-                    Al enviar la cotización, el cliente recibirá un email con tu propuesta de precio.
+                    Al enviar, el cliente recibirá el precio y el plan de cuotas por email. La reserva queda lista para pago.
                   </p>
                 </div>
               </div>
