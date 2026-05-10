@@ -1,113 +1,140 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import {
-  Search, CalendarCheck, CreditCard, Star,
-  MessageSquare, Check, ChevronDown,
-  Cake, Briefcase, GraduationCap, Heart,
-  Camera, Users, Baby, PartyPopper,
+  Search, CalendarCheck, CreditCard, Star, MessageSquare,
+  Check, ChevronDown, Building2, UtensilsCrossed, Sunset,
+  Trees, Wine, Hotel, Home, Camera, Briefcase, LayoutGrid,
+  Cake, Heart, GraduationCap, Users, Baby, Zap,
+  Clock, CalendarDays, CalendarRange,
 } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Encuentra el espacio perfecto para tu evento — espot.do',
   description:
-    'Salones, rooftops, villas, restaurantes y más en República Dominicana. Busca, reserva y paga de forma segura con Azul. Cumpleaños, bodas, graduaciones y eventos corporativos.',
+    'Salones, rooftops, villas, restaurantes y más en República Dominicana. Busca, reserva y paga de forma segura. Cumpleaños, bodas, graduaciones y eventos corporativos.',
 }
 
 const steps = [
   {
-    n: '01',
-    icon: Search,
+    n: '01', icon: Search,
     title: 'Busca y filtra',
-    body: 'Filtra por tipo de espacio, sector, capacidad, fecha y presupuesto. Encuentra el lugar exacto para tu evento.',
+    body: 'Filtra por tipo de espacio, sector, capacidad, fecha y presupuesto. Resultados en tiempo real.',
   },
   {
-    n: '02',
-    icon: CalendarCheck,
+    n: '02', icon: CalendarCheck,
     title: 'Elige y reserva',
-    body: 'Revisa fotos, precios, servicios adicionales y reseñas. Reserva al instante o solicita una cotización personalizada.',
+    body: 'Revisa fotos, precios, servicios adicionales y reseñas. Reserva al instante o solicita cotización personalizada.',
   },
   {
-    n: '03',
-    icon: CreditCard,
-    title: 'Confirma con un anticipo',
-    body: 'Paga el 10% de confirmación de forma segura vía Azul. El resto lo liquidas directamente en el lugar el día del evento.',
+    n: '03', icon: CreditCard,
+    title: 'Confirma con tu primer pago',
+    body: 'El primer pago depende de cuántos días faltan para tu evento. Más tiempo = más flexibilidad. Pago seguro con Azul.',
   },
   {
-    n: '04',
-    icon: Star,
+    n: '04', icon: Star,
     title: 'Disfruta y opina',
-    body: 'Celebra tu evento con todo listo. Después deja tu reseña y ayuda a otros a encontrar el espacio ideal.',
+    body: 'Celebra tu evento. Después deja tu reseña y ayuda a otros a encontrar el espacio ideal.',
   },
 ]
 
 const eventTypes = [
-  { icon: Cake,        label: 'Cumpleaños' },
-  { icon: Heart,       label: 'Bodas' },
-  { icon: PartyPopper, label: 'Quinceañeras' },
-  { icon: GraduationCap, label: 'Graduaciones' },
-  { icon: Briefcase,   label: 'Eventos corporativos' },
-  { icon: Users,       label: 'Reuniones' },
-  { icon: Camera,      label: 'Sesiones fotográficas' },
-  { icon: Baby,        label: 'Baby showers' },
+  { icon: Cake,           label: 'Cumpleaños' },
+  { icon: Heart,          label: 'Bodas' },
+  { icon: Star,           label: 'Quinceañeras' },
+  { icon: GraduationCap,  label: 'Graduaciones' },
+  { icon: Briefcase,      label: 'Corporativos' },
+  { icon: Users,          label: 'Reuniones' },
+  { icon: Camera,         label: 'Fotografía' },
+  { icon: Baby,           label: 'Baby showers' },
+]
+
+const spaceCategories = [
+  { icon: Building2,       label: 'Salones',       value: 'salon' },
+  { icon: Sunset,          label: 'Rooftops',      value: 'rooftop' },
+  { icon: Home,            label: 'Villas',        value: 'villa' },
+  { icon: UtensilsCrossed, label: 'Restaurantes',  value: 'restaurante' },
+  { icon: Trees,           label: 'Terrazas',      value: 'terraza' },
+  { icon: Wine,            label: 'Bares',         value: 'bar' },
+  { icon: Hotel,           label: 'Hoteles',       value: 'hotel' },
+  { icon: Camera,          label: 'Estudios',      value: 'estudio' },
+  { icon: Briefcase,       label: 'Coworking',     value: 'coworking' },
+  { icon: LayoutGrid,      label: 'Ver todos',     value: '' },
 ]
 
 const benefits = [
+  { icon: Search,        title: 'Búsqueda inteligente',       body: 'Filtra por tipo, sector, capacidad, fecha y precio. Solo ves espacios disponibles en tu fecha.' },
+  { icon: MessageSquare, title: 'Chat directo con el anfitrión', body: 'Coordina detalles y resuelve dudas sin salir de la plataforma. Sin llamadas ni grupos de WhatsApp.' },
+  { icon: CreditCard,    title: 'Pago seguro con Azul',       body: 'Tu primer pago se procesa con Azul, el procesador bancario líder en RD. Tus datos de tarjeta nunca se almacenan en espot.do.' },
+  { icon: Star,          title: 'Reseñas verificadas',        body: 'Todas las calificaciones son de personas que realmente usaron el espacio. Sin opiniones falsas.' },
+  { icon: CalendarCheck, title: 'Confirmación inmediata',     body: 'Una vez pagada la primera cuota, tu reserva queda confirmada y recibes comprobante por correo.' },
+  { icon: Check,         title: 'Servicios adicionales',      body: 'Muchos espacios ofrecen DJ, barra, decoración, catering y más. Todo configurable al reservar.' },
+]
+
+const paymentModels = [
   {
-    icon: Search,
-    title: 'Búsqueda inteligente',
-    body: 'Filtra por tipo de espacio, sector de Santo Domingo, capacidad, fecha y precio. Resultados en tiempo real.',
+    icon: Zap,
+    label: 'Menos de 7 días',
+    model: 'Pago único',
+    desc: 'El evento es muy próximo, se requiere el total al confirmar.',
+    bars: [{ pct: 100, label: 'Al confirmar', color: '#35C493' }],
   },
   {
-    icon: CalendarCheck,
-    title: 'Disponibilidad en tiempo real',
-    body: 'Solo ves espacios disponibles en tu fecha. Sin llamadas ni mensajes para preguntar si está libre.',
+    icon: Clock,
+    label: '7 a 30 días',
+    model: '2 cuotas — 50/50',
+    desc: 'La mitad al confirmar, la otra mitad 48 horas antes del evento.',
+    bars: [
+      { pct: 50, label: 'Al confirmar', color: '#35C493' },
+      { pct: 50, label: '48h antes',    color: '#4DD9A7' },
+    ],
   },
   {
-    icon: MessageSquare,
-    title: 'Chat directo con el anfitrión',
-    body: 'Coordina detalles, resuelve dudas y confirma el setup de tu evento sin salir de la plataforma.',
+    icon: CalendarDays,
+    label: '31 a 60 días',
+    model: '2 cuotas — 30/70',
+    desc: 'El 30% asegura la fecha. El 70% se paga 48 horas antes del evento.',
+    bars: [
+      { pct: 30, label: 'Al confirmar', color: '#35C493' },
+      { pct: 70, label: '48h antes',    color: '#4DD9A7' },
+    ],
   },
   {
-    icon: CreditCard,
-    title: 'Pago seguro con Azul',
-    body: 'Tu anticipo se procesa con Azul, el procesador bancario #1 de RD. Tus datos de tarjeta nunca se almacenan en espot.do.',
-  },
-  {
-    icon: Star,
-    title: 'Reseñas verificadas',
-    body: 'Todas las calificaciones son de personas que realmente usaron el espacio. Sin reviews falsos.',
-  },
-  {
-    icon: Check,
-    title: 'Servicios adicionales incluibles',
-    body: 'Muchos espacios ofrecen DJ, barra, decoración, catering y más. Todo en un solo lugar.',
+    icon: CalendarRange,
+    label: 'Más de 60 días',
+    model: '3 cuotas — 25/50/25',
+    desc: 'El plan más flexible. Distribuye el pago en tres momentos clave.',
+    bars: [
+      { pct: 25, label: 'Al confirmar',    color: '#35C493' },
+      { pct: 50, label: '60 días antes',   color: '#4DD9A7' },
+      { pct: 25, label: '48h antes',       color: '#28A87C' },
+    ],
   },
 ]
 
 const faqs = [
   {
-    q: '¿Cómo reservo un espacio?',
-    a: 'Busca en espot.do, elige el espacio que te guste, selecciona tu fecha y horario, y confirma con el pago del anticipo (10% del total). Recibirás una confirmación por correo electrónico de inmediato.',
+    q: '¿Cuánto tengo que pagar para confirmar?',
+    a: 'Depende de cuántos días faltan para tu evento. Si faltan más de 60 días pagas el 25% ahora. Entre 31–60 días, el 30%. Entre 7–30 días, el 50%. Si faltan menos de 7 días, se requiere el 100%. El resto se paga en cuotas programadas.',
   },
   {
-    q: '¿Cuánto tengo que pagar para confirmar la reserva?',
-    a: 'Solo el 10% del valor total, procesado de forma segura vía Azul. El 90% restante lo pagas directamente al anfitrión el día del evento o según lo que acuerden.',
+    q: '¿Cómo funciona el plan de cuotas?',
+    a: 'Al confirmar la reserva el sistema genera automáticamente tu plan de pago según la fecha del evento. Recibirás un recordatorio antes de cada vencimiento. Puedes ver tu plan completo en tu panel de reservas.',
   },
   {
     q: '¿Puedo cancelar mi reserva?',
-    a: 'Sí. Cada espacio tiene su propia política de cancelación (flexible, moderada o estricta), visible antes de confirmar. El anticipo del 10% pagado a espot.do no es reembolsable, pero el anfitrión puede devolverte el saldo según su política.',
+    a: 'Sí. Cada espacio tiene su propia política de cancelación (flexible, moderada o estricta), visible antes de confirmar. El primer pago procesado vía Azul no es reembolsable, pero el anfitrión puede devolverte pagos posteriores según su política.',
   },
   {
-    q: '¿Qué pasa si el espacio no es como en las fotos?',
-    a: 'Puedes contactar al anfitrión directamente desde el chat antes del evento para coordinar y confirmar los detalles. Si encuentras una irregularidad grave, escríbenos a contacto@espot.do.',
+    q: '¿Qué pasa si no pago una cuota a tiempo?',
+    a: 'Recibirás recordatorios por correo antes del vencimiento. Si una cuota vence sin pagar, la reserva puede quedar en riesgo según los términos del anfitrión. Te recomendamos contactar al anfitrión si tienes un inconveniente.',
   },
   {
-    q: '¿Puedo pedir una cotización si no veo precio fijo?',
-    a: 'Sí. Algunos espacios operan con cotización personalizada. Envías tu solicitud con los detalles del evento y el anfitrión te responde con un precio y plan de pago.',
+    q: '¿Puedo solicitar una cotización personalizada?',
+    a: 'Sí. Algunos espacios operan con cotización. Envías tu solicitud con los detalles del evento, el anfitrión te responde con un precio y plan de pago, y tú decides si aceptas.',
   },
   {
-    q: '¿Puedo agregar servicios como DJ, barra o decoración?',
-    a: 'Muchos espacios ofrecen servicios adicionales (addons) que puedes agregar al reservar. Se muestran en la página del espacio con su precio unitario.',
+    q: '¿Los espacios están verificados?',
+    a: 'Cada espacio pasa por una revisión antes de publicarse. Las fotos, precios y capacidad deben ser reales. Además, las reseñas son solo de clientes que completaron su reserva.',
   },
 ]
 
@@ -116,61 +143,38 @@ export default function ParaClientesPage() {
     <div>
 
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <section
-        style={{
-          background: 'linear-gradient(160deg, #03313C 0%, #071A18 100%)',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
+      <section style={{ background: 'linear-gradient(160deg, #03313C 0%, #071A18 100%)', position: 'relative', overflow: 'hidden' }}>
         <div style={{
           position: 'absolute', inset: 0,
           background: 'radial-gradient(ellipse 70% 50% at 50% -5%, rgba(53,196,147,0.18) 0%, transparent 65%)',
           pointerEvents: 'none',
         }} />
         <div className="relative max-w-5xl mx-auto px-5 py-20 md:py-32 text-center">
-          <div
-            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-6 text-xs font-semibold"
-            style={{ background: 'rgba(53,196,147,0.12)', color: '#35C493', border: '1px solid rgba(53,196,147,0.25)' }}
-          >
+          <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-6 text-xs font-semibold"
+            style={{ background: 'rgba(53,196,147,0.12)', color: '#35C493', border: '1px solid rgba(53,196,147,0.25)' }}>
             Para quienes organizan eventos en República Dominicana
           </div>
-
-          <h1
-            className="text-4xl md:text-6xl font-bold text-white mb-5"
-            style={{ letterSpacing: '-0.03em', lineHeight: 1.1 }}
-          >
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-5"
+            style={{ letterSpacing: '-0.03em', lineHeight: 1.1 }}>
             El espacio perfecto<br />
             <span style={{ color: '#35C493' }}>para tu evento</span>
           </h1>
-
-          <p
-            className="text-lg md:text-xl mb-10 max-w-xl mx-auto"
-            style={{ color: 'rgba(255,255,255,0.6)', lineHeight: 1.65 }}
-          >
-            Salones, rooftops, villas, restaurantes y más. Busca, reserva y paga seguro.
-            Todo en un solo lugar.
+          <p className="text-lg md:text-xl mb-10 max-w-xl mx-auto"
+            style={{ color: 'rgba(255,255,255,0.6)', lineHeight: 1.65 }}>
+            Salones, rooftops, villas, restaurantes y más. Busca, reserva y paga seguro. Todo en un solo lugar.
           </p>
-
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              href="/buscar"
-              className="px-8 py-4 rounded-2xl font-bold text-base"
-              style={{ background: '#35C493', color: '#03313C', boxShadow: '0 4px 24px rgba(53,196,147,0.3)' }}
-            >
+            <Link href="/buscar" className="px-8 py-4 rounded-2xl font-bold text-base"
+              style={{ background: '#35C493', color: '#03313C', boxShadow: '0 4px 24px rgba(53,196,147,0.3)' }}>
               Explorar espacios →
             </Link>
-            <Link
-              href="/auth?mode=register"
-              className="px-8 py-4 rounded-2xl font-semibold text-sm"
-              style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.75)', border: '1px solid rgba(255,255,255,0.12)' }}
-            >
+            <Link href="/auth?mode=register" className="px-8 py-4 rounded-2xl font-semibold text-sm"
+              style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.75)', border: '1px solid rgba(255,255,255,0.12)' }}>
               Crear cuenta gratis
             </Link>
           </div>
-
           <p className="mt-6 text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
-            Sin comisiones para el cliente · Pago seguro con Azul · Confirmación inmediata
+            Sin comisiones para el cliente · Plan de pago flexible · Confirmación inmediata
           </p>
         </div>
       </section>
@@ -178,17 +182,14 @@ export default function ParaClientesPage() {
       {/* ── TIPOS DE EVENTO ───────────────────────────────────── */}
       <section style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-subtle)' }}>
         <div className="max-w-4xl mx-auto px-5 py-14">
-          <p className="text-center text-xs font-bold uppercase tracking-widest mb-8"
-            style={{ color: 'var(--text-muted)' }}>
+          <p className="text-center text-xs font-bold uppercase tracking-widest mb-8" style={{ color: 'var(--text-muted)' }}>
             Para todo tipo de celebración
           </p>
           <div className="grid grid-cols-4 md:grid-cols-8 gap-4">
             {eventTypes.map(({ icon: Icon, label }) => (
               <div key={label} className="flex flex-col items-center gap-2 text-center">
-                <div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                  style={{ background: 'var(--bg-elevated)', color: 'var(--brand)' }}
-                >
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                  style={{ background: 'var(--bg-elevated)', color: 'var(--brand)' }}>
                   <Icon size={20} />
                 </div>
                 <span className="text-xs font-medium leading-tight" style={{ color: 'var(--text-secondary)' }}>
@@ -200,7 +201,7 @@ export default function ParaClientesPage() {
         </div>
       </section>
 
-      {/* ── TIPOS DE ESPACIO ──────────────────────────────────── */}
+      {/* ── CATEGORÍAS DE ESPACIO ─────────────────────────────── */}
       <section style={{ background: 'var(--bg-base)' }}>
         <div className="max-w-5xl mx-auto px-5 py-20">
           <div className="text-center mb-12">
@@ -213,29 +214,12 @@ export default function ParaClientesPage() {
             </p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            {[
-              { label: 'Salones',      emoji: '🏛️' },
-              { label: 'Rooftops',     emoji: '🌆' },
-              { label: 'Villas',       emoji: '🏡' },
-              { label: 'Restaurantes', emoji: '🍽️' },
-              { label: 'Terrazas',     emoji: '🌿' },
-              { label: 'Bares',        emoji: '🍸' },
-              { label: 'Hoteles',      emoji: '🏨' },
-              { label: 'Estudios',     emoji: '📸' },
-              { label: 'Coworking',    emoji: '💼' },
-              { label: 'Y más...',     emoji: '✨' },
-            ].map(({ label, emoji }) => (
-              <Link
-                key={label}
-                href={`/buscar?categoria=${label === 'Y más...' ? '' : label.toLowerCase()}`}
+            {spaceCategories.map(({ icon: Icon, label, value }) => (
+              <Link key={label}
+                href={value ? `/buscar?categoria=${value}` : '/buscar'}
                 className="flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all"
-                style={{
-                  background: 'var(--bg-surface)',
-                  border: '1px solid var(--border-subtle)',
-                  color: 'var(--text-primary)',
-                }}
-              >
-                <span className="text-xl">{emoji}</span>
+                style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}>
+                <Icon size={17} style={{ color: 'var(--brand)', flexShrink: 0 }} />
                 <span className="text-sm font-semibold">{label}</span>
               </Link>
             ))}
@@ -251,9 +235,7 @@ export default function ParaClientesPage() {
               style={{ color: 'var(--text-primary)', letterSpacing: '-0.025em' }}>
               Reserva en 4 pasos
             </h2>
-            <p className="text-base" style={{ color: 'var(--text-secondary)' }}>
-              De la búsqueda al evento en minutos
-            </p>
+            <p className="text-base" style={{ color: 'var(--text-secondary)' }}>De la búsqueda al evento en minutos</p>
           </div>
           <div className="grid md:grid-cols-2 gap-5">
             {steps.map(({ n, icon: Icon, title, body }) => (
@@ -299,44 +281,82 @@ export default function ParaClientesPage() {
         </div>
       </section>
 
-      {/* ── OPCIONES DE PRECIO ────────────────────────────────── */}
-      <section style={{ background: '#03313C' }}>
-        <div className="max-w-3xl mx-auto px-5 py-20 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4"
-            style={{ letterSpacing: '-0.025em' }}>
-            Para cualquier presupuesto
-          </h2>
-          <p className="text-base mb-12" style={{ color: 'rgba(255,255,255,0.5)' }}>
-            Cuatro modalidades de precio según el espacio
-          </p>
-          <div className="grid sm:grid-cols-2 gap-4 mb-12">
-            {[
-              { label: 'Por hora',           desc: 'Paga exactamente por el tiempo que necesitas. Ideal para reuniones y sesiones cortas.',       highlight: false },
-              { label: 'Paquete fijo',        desc: 'Precio cerrado que incluye horas, servicios y todo lo acordado. Sin sorpresas.',              highlight: true  },
-              { label: 'Consumo mínimo',      desc: 'Aplica en bares y restaurantes. Llegas con tu grupo y consumes desde el mínimo acordado.',   highlight: false },
-              { label: 'Cotización',          desc: 'Para eventos especiales. Describe tu evento y el anfitrión te envía una propuesta a medida.', highlight: false },
-            ].map(({ label, desc, highlight }) => (
-              <div key={label} className="rounded-3xl p-6 text-left"
-                style={{
-                  background: highlight ? 'rgba(53,196,147,0.12)' : 'rgba(255,255,255,0.04)',
-                  border: highlight ? '1px solid rgba(53,196,147,0.3)' : '1px solid rgba(255,255,255,0.08)',
-                }}>
-                <p className="font-bold text-sm mb-2"
-                  style={{ color: highlight ? '#35C493' : 'rgba(255,255,255,0.85)' }}>
-                  {label}
-                  {highlight && <span className="ml-2 text-xs font-semibold px-2 py-0.5 rounded-full"
-                    style={{ background: 'rgba(53,196,147,0.2)', color: '#35C493' }}>Popular</span>}
-                </p>
-                <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>{desc}</p>
+      {/* ── GUÍA DE PAGOS — SECCIÓN TECH ──────────────────────── */}
+      <section style={{ background: '#03313C', position: 'relative', overflow: 'hidden' }}>
+        {/* Grid decorativo de fondo */}
+        <div style={{
+          position: 'absolute', inset: 0, opacity: 0.04,
+          backgroundImage: 'linear-gradient(rgba(53,196,147,1) 1px, transparent 1px), linear-gradient(90deg, rgba(53,196,147,1) 1px, transparent 1px)',
+          backgroundSize: '48px 48px',
+          pointerEvents: 'none',
+        }} />
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'radial-gradient(ellipse 60% 50% at 50% 100%, rgba(53,196,147,0.1) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }} />
+
+        <div className="relative max-w-5xl mx-auto px-5 py-20">
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 mb-5 text-xs font-semibold"
+              style={{ background: 'rgba(53,196,147,0.1)', color: '#35C493', border: '1px solid rgba(53,196,147,0.2)' }}>
+              Guía de pagos
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4"
+              style={{ letterSpacing: '-0.025em' }}>
+              Tu plan de pago se ajusta automáticamente
+            </h2>
+            <p className="text-base max-w-lg mx-auto" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              Mientras más anticipación tengas, más flexible es tu plan. El sistema calcula todo solo.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            {paymentModels.map(({ icon: Icon, label, model, desc, bars }) => (
+              <div key={label} className="rounded-3xl p-6"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ background: 'rgba(53,196,147,0.12)', color: '#35C493' }}>
+                    <Icon size={17} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold" style={{ color: '#35C493' }}>{label}</p>
+                    <p className="text-sm font-bold text-white">{model}</p>
+                  </div>
+                </div>
+
+                {/* Barras de progreso */}
+                <div className="space-y-2.5 mb-4">
+                  {bars.map(bar => (
+                    <div key={bar.label}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{bar.label}</span>
+                        <span className="text-xs font-bold" style={{ color: bar.color }}>{bar.pct}%</span>
+                      </div>
+                      <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
+                        <div className="h-full rounded-full transition-all"
+                          style={{ width: `${bar.pct}%`, background: bar.color, opacity: 0.85 }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.4)' }}>{desc}</p>
               </div>
             ))}
           </div>
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
-            {['Sin comisión para el cliente', 'Anticipo del 10% al reservar', 'Saldo el día del evento'].map(item => (
-              <div key={item} className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                <Check size={14} style={{ color: '#35C493' }} /> {item}
-              </div>
-            ))}
+
+          {/* Nota al pie */}
+          <div className="mt-8 rounded-2xl px-6 py-4 flex items-start gap-3"
+            style={{ background: 'rgba(53,196,147,0.07)', border: '1px solid rgba(53,196,147,0.18)' }}>
+            <Check size={15} style={{ color: '#35C493', flexShrink: 0, marginTop: 2 }} />
+            <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.55)' }}>
+              El primer pago de cada reserva se procesa de forma segura a través de <strong style={{ color: 'rgba(255,255,255,0.75)' }}>Azul</strong>.
+              Los pagos siguientes se coordinan directamente con el anfitrión según las fechas de vencimiento de tu plan.
+            </p>
           </div>
         </div>
       </section>
@@ -360,13 +380,10 @@ export default function ParaClientesPage() {
             {faqs.map(({ q, a }) => (
               <details key={q} className="faq-client rounded-2xl overflow-hidden"
                 style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
-                <summary
-                  className="flex items-center justify-between gap-4 px-6 py-5 cursor-pointer select-none font-semibold text-sm"
-                  style={{ color: 'var(--text-primary)' }}
-                >
+                <summary className="flex items-center justify-between gap-4 px-6 py-5 cursor-pointer select-none font-semibold text-sm"
+                  style={{ color: 'var(--text-primary)' }}>
                   {q}
-                  <ChevronDown size={16} className="faq-client-icon"
-                    style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                  <ChevronDown size={16} className="faq-client-icon" style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
                 </summary>
                 <div className="px-6 pb-5 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                   {a}
@@ -387,11 +404,9 @@ export default function ParaClientesPage() {
           <p className="text-base mb-8" style={{ color: 'var(--text-secondary)' }}>
             Encuentra el espacio ideal en República Dominicana y resérvalo hoy.
           </p>
-          <Link
-            href="/buscar"
+          <Link href="/buscar"
             className="inline-flex items-center gap-2 px-10 py-4 rounded-2xl font-bold text-base"
-            style={{ background: '#35C493', color: '#03313C', boxShadow: '0 4px 24px rgba(53,196,147,0.25)' }}
-          >
+            style={{ background: '#35C493', color: '#03313C', boxShadow: '0 4px 24px rgba(53,196,147,0.25)' }}>
             Ver todos los espacios →
           </Link>
           <p className="mt-5 text-xs" style={{ color: 'var(--text-muted)' }}>

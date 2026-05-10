@@ -16,13 +16,11 @@ Al utilizar Espot.do, el usuario acepta esta política como parte integral de lo
   },
   {
     num: '2', title: 'Qué cobra Espot y qué no',
-    content: `Espot solo cobra el anticipo de confirmación, equivalente al 10% del valor total de la reserva. Este monto:
+    content: `Espot procesa únicamente el primer pago de cada reserva a través de Azul. De ese pago, Espot descuenta su comisión del 10% sobre el valor total de la reserva.
 
-• Es procesado de forma segura a través de Azul, el proveedor de pagos.
-• Corresponde íntegramente a la comisión de Espot por el uso de la plataforma.
-• No incluye el saldo restante de la reserva (90%), que se paga directamente al Anfitrión.
+El monto del primer pago varía según los días que faltan para el evento (25%, 30%, 50% o 100%), pero la comisión de Espot es siempre el 10% del valor total.
 
-Espot no cobra, retiene ni administra el 90% restante. Cualquier disputa o reembolso sobre ese monto debe resolverse directamente entre Huésped y Anfitrión.`,
+Los pagos posteriores al primero se coordinan directamente entre Huésped y Anfitrión. Espot no cobra, retiene ni administra esos montos. Cualquier disputa o reembolso sobre esos pagos debe resolverse entre las partes.`,
   },
   {
     num: '3', title: 'Comisión No Reembolsable',

@@ -76,11 +76,11 @@ const features = [
 const faqs = [
   {
     q: '¿Cuánto cuesta publicar mi espacio?',
-    a: 'Publicar es completamente gratis. Solo cobramos una comisión del 10% sobre el pago de confirmación cuando se concreta una reserva. Sin costos fijos, sin mensualidades.',
+    a: 'Publicar es completamente gratis. Cobramos una comisión del 10% sobre el valor total de la reserva, descontada del primer pago. Sin costos fijos, sin mensualidades.',
   },
   {
     q: '¿Cómo recibo mis pagos?',
-    a: 'El cliente paga un anticipo de confirmación vía Azul al reservar. Ese monto, menos la comisión de espot.do, se te transfiere a tu cuenta bancaria. El saldo restante lo cobras directamente el día del evento.',
+    a: 'El cliente paga en cuotas según los días que faltan para el evento. El primer pago va vía Azul — de ahí se descuenta la comisión de espot.do (10%) y el resto se transfiere a tu cuenta. Los pagos siguientes los recibes directamente del cliente.',
   },
   {
     q: '¿Puedo rechazar una reserva?',
@@ -297,7 +297,7 @@ export default function ParaPropietariosPage() {
             Sin sorpresas.<br />Solo una comisión justa.
           </h2>
           <p className="text-base mb-12" style={{ color: 'rgba(255,255,255,0.5)' }}>
-            Así se distribuye cada pago de confirmación
+            Así se distribuye el valor total de cada reserva
           </p>
 
           <div className="grid md:grid-cols-3 gap-4 mb-12">

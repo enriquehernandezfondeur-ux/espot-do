@@ -44,14 +44,16 @@ El Anfitrión puede aceptar o rechazar cualquier solicitud antes de que el Hués
   },
   {
     num: '4', title: 'Pagos, Comisión y Cuotas',
-    content: `Al confirmar una reserva, el Huésped paga online el anticipo de confirmación, que equivale a la comisión de Espot (10% del valor total). Este pago:
+    content: `El plan de pago de una reserva se genera automáticamente según los días que faltan para el evento:
 
-• Asegura la fecha y las horas reservadas.
-• Corresponde íntegramente a la comisión de Espot por el uso de la plataforma.
+• Menos de 7 días: pago único del 100% al confirmar.
+• De 7 a 30 días: 50% al confirmar y 50% en las 48 horas previas al evento.
+• De 31 a 60 días: 30% al confirmar y 70% en las 48 horas previas.
+• Más de 60 días: 25% al confirmar, 50% a los 60 días del evento, y 25% en las 48 horas previas.
 
-Para reservas de mayor valor, el sistema puede ofrecer un plan de pago en cuotas. En ese caso, el Huésped realiza pagos parciales en fechas establecidas. El incumplimiento de una cuota puede resultar en la cancelación de la reserva según la política del Anfitrión.
+El primer pago se procesa mediante Azul. De ese pago, Espot descuenta su comisión del 10% sobre el valor total de la reserva. Los pagos restantes se coordinan directamente entre Huésped y Anfitrión según las fechas del plan.
 
-El 90% restante no es cobrado por Espot y debe pagarse directamente al Anfitrión el día del evento o según lo acordado. Espot no retiene ni transfiere fondos del Anfitrión. Los pagos se procesan mediante Azul. Espot no almacena datos sensibles de tarjetas.`,
+Espot no retiene ni administra los pagos posteriores al primero. Los datos sensibles de tarjetas no se almacenan en la plataforma.`,
   },
   {
     num: '5', title: 'Cancelaciones',
