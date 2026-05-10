@@ -38,10 +38,17 @@ export async function POST(req: NextRequest) {
   const results: { name: string; slug: string; status: 'ok' | 'skip' | 'error'; reason?: string }[] = []
 
   // Usar service_role desde el server-side para bypasear RLS en la migración
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!serviceKey) {
+    return NextResponse.json(
+      { error: 'SUPABASE_SERVICE_ROLE_KEY no está configurada en las variables de entorno. Agrégala en Vercel → Settings → Environment Variables.' },
+      { status: 500 }
+    )
+  }
   const { createClient: createServiceClient } = await import('@supabase/supabase-js')
   const sb = createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    serviceKey,
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
 
