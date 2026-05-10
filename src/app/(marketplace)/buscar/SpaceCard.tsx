@@ -35,9 +35,21 @@ export function getSpaceRating(space: any): { avg: number; count: number } | nul
 export function getPriceInfo(space: any) {
   const p = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
   if (!p) return null
-  if (p.pricing_type === 'hourly')              return { type: 'Por hora',       unit: '/ hora',     amount: formatCurrency(p.hourly_price),        full: `${formatCurrency(p.hourly_price)} / hora` }
-  if (p.pricing_type === 'minimum_consumption') return { type: 'Cons. mín.',    unit: 'cons. mín.', amount: formatCurrency(p.minimum_consumption), full: `Desde ${formatCurrency(p.minimum_consumption)}` }
-  if (p.pricing_type === 'fixed_package')       return { type: 'Paquete',       unit: 'paquete',    amount: formatCurrency(p.fixed_price),         full: formatCurrency(p.fixed_price) }
+  if (p.pricing_type === 'hourly') {
+    const v = p.hourly_price
+    if (!v) return { type: 'Por hora', unit: '/ hora', amount: null, full: 'Cotizar precio' }
+    return { type: 'Por hora', unit: '/ hora', amount: formatCurrency(v), full: `${formatCurrency(v)} / hora` }
+  }
+  if (p.pricing_type === 'minimum_consumption') {
+    const v = p.minimum_consumption
+    if (!v) return { type: 'Cons. mín.', unit: 'cons. mín.', amount: null, full: 'Cotizar precio' }
+    return { type: 'Cons. mín.', unit: 'cons. mín.', amount: formatCurrency(v), full: `Desde ${formatCurrency(v)}` }
+  }
+  if (p.pricing_type === 'fixed_package') {
+    const v = p.fixed_price
+    if (!v) return { type: 'Paquete', unit: 'paquete', amount: null, full: 'Cotizar precio' }
+    return { type: 'Paquete', unit: 'paquete', amount: formatCurrency(v), full: formatCurrency(v) }
+  }
   return { type: 'Cotizar', unit: '', amount: null, full: 'Cotizar precio' }
 }
 
@@ -54,7 +66,7 @@ export function SpaceCard({
   const images     = getImages(space)
   const priceInfo  = getPriceInfo(space)
   const rating     = getSpaceRating(space)
-  const catLabel   = CATEGORIES.find(c => c.value === space.category)?.label ?? space.category
+  const catLabel   = CATEGORIES.find(c => c.value === space.category)?.label ?? (space.category || 'Espacio')
   const CatIcon    = CATEGORIES.find(c => c.value === space.category)?.icon ?? Building2
   const pricingDef = PRICING_TYPES.find(p => {
     const pt = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
@@ -208,7 +220,7 @@ export function SpaceCard({
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1 text-xs min-w-0" style={{ color: 'var(--text-muted)' }}>
               <MapPin size={10} className="shrink-0" />
-              <span className="truncate">{space.sector ? `${space.sector}, ` : ''}{space.city}</span>
+              <span className="truncate">{[space.sector, space.city].filter(Boolean).join(', ') || 'Santo Domingo'}</span>
               <span className="shrink-0" style={{ color: '#D1D5DB' }}>·</span>
               <CatIcon size={10} className="shrink-0" />
               <span className="shrink-0 whitespace-nowrap">{catLabel}</span>
@@ -246,7 +258,7 @@ export function SpaceCard({
             {/* Capacidad — siempre visible */}
             <span className="flex items-center gap-1 text-xs font-medium shrink-0" style={{ color: 'var(--text-muted)' }}>
               <Users size={11} style={{ color: '#35C493', flexShrink: 0 }} />
-              {space.capacity_max}
+              {space.capacity_max ?? '—'}
             </span>
           </div>
 
