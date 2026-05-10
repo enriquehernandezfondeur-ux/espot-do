@@ -57,11 +57,7 @@ export async function POST(req: NextRequest) {
     const slug = raw.slug ?? generateSlug(raw.name)
 
     try {
-      // Detectar duplicados
-      if (raw._source_id) {
-        const { data: dup } = await sb.from('spaces').select('id').eq('source_id', raw._source_id).single()
-        if (dup) { results.push({ name: raw.name, slug, status: 'skip', reason: 'source_id ya existe' }); continue }
-      }
+      // Detectar duplicados por slug (source_id no existe en la tabla)
       const { data: dupSlug } = await sb.from('spaces').select('id').eq('slug', slug).single()
       if (dupSlug) { results.push({ name: raw.name, slug, status: 'skip', reason: `slug "${slug}" ya existe` }); continue }
 
@@ -90,9 +86,6 @@ export async function POST(req: NextRequest) {
         primary_activity: raw.primary_activity ?? null,
         secondary_activities: raw.secondary_activities ?? [],
       }
-      if (raw._source_id)  spaceData.source_id  = raw._source_id
-      if (raw._source_url) spaceData.source_url = raw._source_url
-
       const { data: space, error: spaceErr } = await sb.from('spaces').insert(spaceData).select('id').single()
       if (spaceErr) { results.push({ name: raw.name, slug, status: 'error', reason: spaceErr.message }); continue }
       const sid = space.id
