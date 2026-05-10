@@ -811,24 +811,6 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               )
             )}
 
-            {/* Cédula / identificación — opcional */}
-            {eventType && (
-              <div className="pt-2 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
-                <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
-                  Cédula o pasaporte <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(opcional)</span>
-                </label>
-                <input
-                  type="text" value={guestCedula}
-                  onChange={e => setGuestCedula(e.target.value)}
-                  placeholder="001-1234567-8"
-                  className="input-base w-full rounded-xl px-4 py-3 text-sm"
-                  style={{ color: 'var(--text-primary)', fontSize: 16 }}
-                />
-                <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
-                  Algunos espacios requieren verificación de identidad del reservante.
-                </p>
-              </div>
-            )}
           </div>
         )}
 

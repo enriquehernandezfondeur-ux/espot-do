@@ -28,8 +28,20 @@ export default function AdminSpacesPage() {
 
   async function toggle(spaceId: string, field: string, current: boolean) {
     setActionId(spaceId + field)
-    await updateSpaceStatus(spaceId, { [field]: !current })
-    setSpaces(prev => prev.map(s => s.id === spaceId ? { ...s, [field]: !current } : s))
+    const result = await updateSpaceStatus(spaceId, { [field]: !current })
+    if (!('error' in result)) {
+      setSpaces(prev => prev.map(s => s.id === spaceId ? { ...s, [field]: !current } : s))
+    }
+    setActionId(null)
+  }
+
+  async function verifyAll() {
+    setActionId('bulk')
+    const unverified = spaces.filter(s => !s.is_verified)
+    for (const s of unverified) {
+      await updateSpaceStatus(s.id, { is_verified: true })
+    }
+    setSpaces(prev => prev.map(s => ({ ...s, is_verified: true })))
     setActionId(null)
   }
 
@@ -49,6 +61,15 @@ export default function AdminSpacesPage() {
           <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Espacios</h1>
           <p className="text-sm text-slate-500 mt-0.5">{spaces.length} espacio{spaces.length !== 1 ? 's' : ''}</p>
         </div>
+        <button
+          onClick={verifyAll}
+          disabled={actionId === 'bulk' || spaces.every(s => s.is_verified)}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all disabled:opacity-40"
+          style={{ background: '#2563EB', color: '#fff' }}>
+          {actionId === 'bulk'
+            ? <><Loader2 size={14} className="animate-spin" /> Verificando...</>
+            : <><Shield size={14} /> Verificar todos</>}
+        </button>
       </div>
 
       {/* Filters */}

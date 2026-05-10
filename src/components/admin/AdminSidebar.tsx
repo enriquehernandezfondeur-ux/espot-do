@@ -150,7 +150,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
           <span className="flex-1">Panel propietario</span>
           <ChevronRight size={11} />
         </Link>
-        <Link href="/dashboard" onClick={onClose}
+        <Link href="/dashboard/reservas" onClick={onClose}
           className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all"
           style={{ color: 'rgba(255,255,255,0.35)' }}>
           <Users size={14} />
