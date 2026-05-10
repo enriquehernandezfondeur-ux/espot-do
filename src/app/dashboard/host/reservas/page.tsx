@@ -9,7 +9,7 @@ import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
 function HostInstallmentStatus({ bookingId, totalAmount }: { bookingId: string; totalAmount: number }) {
   const [insts, setInsts] = useState<any[]>([])
   useEffect(() => {
-    import('@/lib/actions/installments').then(m => m.getInstallments(bookingId)).then(setInsts)
+    import('@/lib/actions/installments').then(m => m.getInstallments(bookingId)).then(setInsts).catch(() => {})
   }, [bookingId])
 
   if (!insts.length) return null

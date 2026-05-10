@@ -10,31 +10,43 @@ export const metadata: Metadata = {
 const sections = [
   {
     num: '1', title: '¿Qué son las cookies?',
-    content: 'Las cookies son pequeños archivos de texto que se almacenan en tu dispositivo (ordenador, móvil o tablet) cuando visitas un sitio web. Sirven para recordar tus preferencias y para ayudarnos a entender cómo interactúas con nuestra plataforma.',
+    content: 'Las cookies son pequeños archivos de texto que se almacenan en tu dispositivo cuando visitas un sitio web. Permiten que la plataforma recuerde tu sesión, preferencias y configuración entre visitas.',
   },
   {
-    num: '2', title: '¿Qué cookies utilizamos en Espot.do?',
-    content: `Actualmente utilizamos únicamente cookies analíticas de Google Analytics, que nos permiten:
+    num: '2', title: 'Cookies esenciales de autenticación',
+    content: `Espot.do utiliza cookies de sesión proporcionadas por Supabase, nuestro servicio de autenticación, que son estrictamente necesarias para el funcionamiento de la plataforma:
 
-• Saber qué páginas visitan nuestros usuarios.
-• Medir la frecuencia de visitas y el tiempo de permanencia en la plataforma.
-• Identificar tendencias generales de navegación con fines estadísticos.
+• sb-access-token — Almacena el token de acceso de tu sesión activa. Sin esta cookie no es posible iniciar sesión ni acceder a tu cuenta.
+• sb-refresh-token — Permite renovar tu sesión automáticamente sin tener que volver a introducir tus credenciales.
 
-Estas cookies no recogen información que te identifique directamente como persona.`,
+Estas cookies se eliminan al cerrar sesión o al expirar el tiempo de inactividad. No pueden desactivarse si deseas utilizar la plataforma como usuario registrado.`,
   },
   {
-    num: '3', title: 'Gestión de cookies',
-    content: `Al acceder y navegar en Espot.do, aceptas el uso de cookies según esta política. Por el momento, mostramos un aviso informativo sobre el uso de cookies al entrar en la plataforma.
+    num: '3', title: 'Cookies de preferencias',
+    content: `La plataforma puede almacenar en tu dispositivo pequeñas preferencias de navegación (como el último espacio visto o filtros de búsqueda) mediante cookies de corta duración o almacenamiento local del navegador.
 
-Puedes configurar tu navegador para bloquear o eliminar cookies si lo prefieres. Ten en cuenta que, si decides bloquear las cookies, algunas funcionalidades de la plataforma podrían verse limitadas.`,
+Estas cookies no contienen información personal identificable y se utilizan únicamente para mejorar tu experiencia dentro de la sesión.`,
   },
   {
-    num: '4', title: 'Cambios en la Política de Cookies',
-    content: 'Podemos actualizar esta Política de Cookies en cualquier momento para reflejar cambios en la normativa o en la forma en que usamos cookies. Publicaremos la versión actualizada en esta misma página con la fecha de la última modificación.',
+    num: '4', title: 'Cookies de terceros',
+    content: `Espot.do no instala cookies de terceros con fines publicitarios ni de seguimiento entre sitios.
+
+Los pagos son procesados por Azul a través de su propia página de pago. Durante ese proceso, Azul puede utilizar sus propias cookies bajo sus términos y condiciones, sobre las cuales Espot no tiene control.`,
   },
   {
-    num: '5', title: 'Contacto',
-    content: 'Si tienes dudas o comentarios sobre esta Política de Cookies, puedes escribirnos a: contacto@espot.do',
+    num: '5', title: 'Gestión y desactivación',
+    content: `Puedes configurar tu navegador para bloquear o eliminar cookies en cualquier momento. Sin embargo, ten en cuenta que:
+
+• Bloquear las cookies esenciales de sesión impedirá que puedas iniciar sesión o usar funciones como reservar espacios, gestionar tu dashboard o enviar mensajes.
+• Las cookies de preferencias pueden eliminarse sin afectar el funcionamiento principal de la plataforma.
+
+La configuración de cookies se realiza desde los ajustes de tu navegador (Chrome, Safari, Firefox, etc.).`,
+  },
+  {
+    num: '6', title: 'Actualizaciones y Contacto',
+    content: `Podemos actualizar esta política en cualquier momento para reflejar cambios técnicos o normativos. La versión vigente siempre estará disponible en esta página con la fecha de la última modificación.
+
+Para cualquier duda sobre el uso de cookies en Espot.do, escríbenos a: contacto@espot.do`,
   },
 ]
 
@@ -53,15 +65,15 @@ export default function CookiesPage() {
             Política de Cookies
           </h1>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            Última actualización: 16 de septiembre de 2025
+            Última actualización: 10 de mayo de 2026
           </p>
         </div>
 
         <div className="rounded-2xl p-6 mb-6"
           style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
           <p className="text-sm" style={{ color: 'var(--text-primary)' }}>
-            En <strong>ESPOT, S.R.L.</strong> utilizamos cookies para mejorar la experiencia de navegación
-            de nuestros usuarios. Esta política explica qué son las cookies, qué tipo usamos y cómo puedes gestionarlas.
+            En <strong>EspotHub (espot.do)</strong>, propiedad de <strong>ESPOT, S.R.L.</strong>, utilizamos
+            cookies esenciales para el funcionamiento de la plataforma. Esta política explica qué cookies usamos y cómo puedes gestionarlas.
           </p>
         </div>
 

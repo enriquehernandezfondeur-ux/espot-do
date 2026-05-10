@@ -3,6 +3,13 @@ import { createClient } from '@/lib/supabase/server'
 
 // GET /api/availability?date=YYYY-MM-DD[&time=HH:MM]
 // Returns { blockedSpaceIds: string[] }
+
+// Handles midnight-crossing ranges (e.g. 22:00–02:00)
+function timeInRange(time: string, start: string, end: string): boolean {
+  if (end <= start) return time >= start || time < end
+  return time >= start && time < end
+}
+
 export async function GET(req: NextRequest) {
   const date = req.nextUrl.searchParams.get('date')
   const time = req.nextUrl.searchParams.get('time') // optional HH:MM
@@ -30,7 +37,7 @@ export async function GET(req: NextRequest) {
     } else {
       const start = b.start_time ? b.start_time.slice(0, 5) : null
       const end   = b.end_time   ? b.end_time.slice(0, 5)   : null
-      if (!start || !end || (time >= start && time < end)) {
+      if (!start || !end || timeInRange(time, start, end)) {
         ids.add(b.space_id)
       }
     }
@@ -46,7 +53,7 @@ export async function GET(req: NextRequest) {
     } else {
       const bStart = b.start_time.slice(0, 5)
       const bEnd   = b.end_time.slice(0, 5)
-      if (time >= bStart && time < bEnd) {
+      if (timeInRange(time, bStart, bEnd)) {
         ids.add(b.space_id)
       }
     }

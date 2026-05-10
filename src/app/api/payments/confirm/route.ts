@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
   // Actualizar booking — solo sobrescribir confirmed_at si es el PRIMER pago
   // (evitar que cuotas 2 y 3 reseteen la fecha de confirmación original)
   const isFirstConfirmation = booking.status !== 'confirmed'
-  await supabase.from('bookings').update({
+  const { error: updateError } = await supabase.from('bookings').update({
     status:             'confirmed',
     payment_status:     'advance',
     paid_amount:        commissionAmt,
@@ -84,9 +84,10 @@ export async function POST(req: NextRequest) {
     payout_status:      'pending',
     commission_status:  'collected',
   }).eq('id', bookingId)
+  if (updateError) return NextResponse.json({ error: 'Error al confirmar la reserva' }, { status: 500 })
 
   // Registrar en liquidaciones
-  await supabase.from('liquidaciones').upsert({
+  const { error: liqErr } = await supabase.from('liquidaciones').upsert({
     booking_id:       bookingId,
     host_id:          host?.id ?? space?.host_id,
     space_id:         space?.id,
@@ -96,9 +97,10 @@ export async function POST(req: NextRequest) {
     neto_propietario: netToHost,
     estado:           'pendiente',
   }, { onConflict: 'booking_id' })
+  if (liqErr) console.error('[confirm] liquidaciones upsert failed:', liqErr.message)
 
   // Registrar en payments
-  await supabase.from('payments').insert({
+  const { error: payErr } = await supabase.from('payments').insert({
     booking_id:     bookingId,
     amount:         commissionAmt,
     currency:       'DOP',
@@ -107,6 +109,7 @@ export async function POST(req: NextRequest) {
     status:         'completed',
     paid_at:        new Date().toISOString(),
   })
+  if (payErr) console.error('[confirm] payments insert failed:', payErr.message)
 
   const SITE       = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
   const spaceName  = space?.name       ?? 'Espacio'

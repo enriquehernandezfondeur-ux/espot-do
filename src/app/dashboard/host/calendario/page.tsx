@@ -186,7 +186,8 @@ export default function CalendarioPage() {
   }
 
   async function handleRemoveBlock(dateStr: string, blockId: string) {
-    await deleteAvailabilityBlock(blockId)
+    const result = await deleteAvailabilityBlock(blockId)
+    if ('error' in result) return
     setBlockedSlots(prev => ({
       ...prev,
       [dateStr]: (prev[dateStr] ?? []).filter(b => b.id !== blockId),

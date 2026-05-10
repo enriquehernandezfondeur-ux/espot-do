@@ -49,7 +49,7 @@ export async function createBooking(payload: CreateBookingPayload) {
   // Obtener perfil del guest
   const guestProfile = user ? await supabase
     .from('profiles').select('full_name, email, phone').eq('id', user.id).single()
-    .then(r => r.data) : null
+    .then(r => r.error ? null : r.data) : null
 
   // ── Validar min/max horas según configuración del pricing ──
   if (payload.pricingId && payload.startTime && payload.endTime) {

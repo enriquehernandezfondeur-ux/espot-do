@@ -63,9 +63,11 @@ export default function CotizacionesPage() {
 
   async function handleReject(id: string) {
     setActionId(id + 'r')
-    await rejectBooking(id)
-    setQuotes(prev => prev.filter(q => q.id !== id))
-    if (selected?.id === id) setSelected(null)
+    const result = await rejectBooking(id)
+    if (!('error' in result)) {
+      setQuotes(prev => prev.filter(q => q.id !== id))
+      if (selected?.id === id) setSelected(null)
+    }
     setActionId(null)
   }
 

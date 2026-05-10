@@ -139,7 +139,10 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
             </Link>
 
             {!authReady ? (
-              <div className="w-28 h-9 rounded-xl animate-pulse" style={{ background: 'var(--bg-elevated)' }} />
+              <>
+                <div className="w-28 h-9 rounded-xl animate-pulse" style={{ background: 'var(--bg-elevated)' }} />
+                <div className="w-36 h-9 rounded-full animate-pulse" style={{ background: 'var(--bg-elevated)' }} />
+              </>
             ) : user ? (
               <div className="relative" ref={dropdownRef}>
                 <button
@@ -213,14 +216,15 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                 )}
               </div>
             ) : (
-              <Link href="/auth" className="link-muted text-sm font-medium px-3 py-2 rounded-lg">
-                Iniciar sesión
-              </Link>
+              <>
+                <Link href="/auth" className="link-muted text-sm font-medium px-3 py-2 rounded-lg">
+                  Iniciar sesión
+                </Link>
+                <Link href="/para-propietarios" className="btn-brand text-sm font-semibold px-5 py-2.5 rounded-full">
+                  Publicar espacio
+                </Link>
+              </>
             )}
-
-            <Link href="/auth?mode=register&redirect=/dashboard/host" className="btn-brand text-sm font-semibold px-5 py-2.5 rounded-full">
-              Publicar espacio
-            </Link>
           </div>
 
           {/* Mobile: acciones rápidas + hamburger */}
@@ -389,15 +393,17 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
               )}
             </div>
 
-            {/* CTA */}
-            <div className="px-4 py-4" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-              <Link href="/auth?mode=register&redirect=/dashboard/host"
-                onClick={() => setMenuOpen(false)}
-                className="btn-brand block text-center text-sm font-bold px-5 py-4 rounded-2xl"
-                style={{ boxShadow: '0 4px 16px rgba(53,196,147,0.3)' }}>
-                Publicar espacio gratis
-              </Link>
-            </div>
+            {/* CTA — solo para usuarios no logueados */}
+            {authReady && !user && (
+              <div className="px-4 py-4" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                <Link href="/para-propietarios"
+                  onClick={() => setMenuOpen(false)}
+                  className="btn-brand block text-center text-sm font-bold px-5 py-4 rounded-2xl"
+                  style={{ boxShadow: '0 4px 16px rgba(53,196,147,0.3)' }}>
+                  Publicar espacio gratis
+                </Link>
+              </div>
+            )}
           </div>
         </>
       )}
@@ -414,7 +420,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
             </Link>
             <div className="flex items-center gap-4 md:gap-5 text-sm flex-wrap justify-center" style={{ color: 'var(--text-muted)' }}>
               <Link href="/buscar"    className="link-muted">Explorar</Link>
-              <Link href="/auth?mode=register&redirect=/dashboard/host" className="link-muted">Para propietarios</Link>
+              <Link href="/para-propietarios" className="link-muted">Para propietarios</Link>
               <Link href="/terminos"  className="link-muted">Términos</Link>
               <Link href="/reembolso" className="link-muted">Reembolso</Link>
               <Link href="/cookies"   className="link-muted">Cookies</Link>

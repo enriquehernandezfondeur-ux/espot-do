@@ -10,85 +10,115 @@ export const metadata: Metadata = {
 const sections = [
   {
     num: '1', title: 'Objeto de la Plataforma',
-    content: `Espot.do actúa únicamente como intermediario tecnológico, facilitando:
+    content: `EspotHub (espot.do) es una plataforma digital propiedad de ESPOT, S.R.L. que actúa como intermediario tecnológico entre propietarios de espacios (Anfitriones) y personas o empresas que los buscan para realizar eventos (Huéspedes).
 
-• La publicación de espacios disponibles.
-• La gestión de solicitudes y reservas.
-• El cobro online de la comisión de Espot.
+Los servicios que ofrece la plataforma incluyen:
 
-Espot no es propietario, arrendador ni administrador de los espacios, ni presta servicios de alquiler, logística, catering, seguridad, permisos o eventos. La relación contractual del alquiler se establece directamente entre el Anfitrión y el Huésped.`,
+• Publicación y gestión de espacios para eventos.
+• Búsqueda y reserva de espacios por hora o por jornada.
+• Cotizaciones personalizadas entre Anfitrión y Huésped.
+• Planes de pago en cuotas para reservas de alto valor.
+• Mensajería directa entre Anfitrión y Huésped.
+• Herramientas de gestión para Anfitriones (calendario, finanzas, analytics).
+
+Espot no es propietario, arrendador ni administrador de los espacios. La relación contractual del alquiler se establece directamente entre el Anfitrión y el Huésped.`,
   },
   {
     num: '2', title: 'Registro de Usuario',
-    content: `Para reservar o publicar un espacio es necesario crear una cuenta.
+    content: `Para reservar o publicar un espacio es necesario crear una cuenta en espot.do.
 
 • La información proporcionada debe ser veraz y actualizada.
 • El usuario es responsable de toda actividad realizada desde su cuenta.
+• Los Anfitriones deben registrarse con datos reales del espacio y del negocio.
 • Espot puede suspender o cancelar cuentas por uso indebido, información falsa o incumplimiento de estos términos.`,
   },
   {
-    num: '3', title: 'Pagos y Comisión de Espot',
-    content: `Al confirmar una reserva, el Huésped paga online únicamente el 10% del valor total, el cual:
+    num: '3', title: 'Reservas y Cotizaciones',
+    content: `Las reservas pueden realizarse de dos formas:
 
-• Sirve para asegurar la fecha y las horas reservadas.
-• Corresponde íntegramente a la comisión de Espot por el uso de la plataforma y la intermediación.
+Reserva directa: El Huésped selecciona fecha, horario y servicios adicionales, y confirma la reserva con el pago del anticipo.
 
-El 90% restante del valor de la reserva no es cobrado por Espot y deberá ser pagado directamente al Anfitrión, el día del uso o según las condiciones acordadas entre las partes.
+Cotización personalizada: El Huésped envía una solicitud al Anfitrión, quien responde con un precio. Una vez aceptado, el Huésped procede al pago del anticipo para confirmar.
 
-Espot no retiene, administra ni transfiere pagos correspondientes al Anfitrión. Los pagos se procesan a través del proveedor Azul. Espot no almacena datos sensibles de tarjetas.`,
+El Anfitrión puede aceptar o rechazar cualquier solicitud antes de que el Huésped realice el pago. Una vez confirmada la reserva, ambas partes quedan sujetos a los términos acordados y a la política de cancelación del espacio.`,
   },
   {
-    num: '4', title: 'Cancelaciones',
-    content: `Cada Anfitrión define su propia política de cancelación, la cual será visible antes de confirmar la reserva.
+    num: '4', title: 'Pagos, Comisión y Cuotas',
+    content: `Al confirmar una reserva, el Huésped paga online el anticipo de confirmación, que equivale a la comisión de Espot (10% del valor total). Este pago:
 
-• En caso de cancelación, la comisión pagada a Espot no es reembolsable, salvo que se indique expresamente lo contrario.
-• Cualquier devolución del monto restante corresponde exclusivamente al Anfitrión.
-• Espot no interviene en disputas entre Anfitrión y Huésped.`,
+• Asegura la fecha y las horas reservadas.
+• Corresponde íntegramente a la comisión de Espot por el uso de la plataforma.
+
+Para reservas de mayor valor, el sistema puede ofrecer un plan de pago en cuotas. En ese caso, el Huésped realiza pagos parciales en fechas establecidas. El incumplimiento de una cuota puede resultar en la cancelación de la reserva según la política del Anfitrión.
+
+El 90% restante no es cobrado por Espot y debe pagarse directamente al Anfitrión el día del evento o según lo acordado. Espot no retiene ni transfiere fondos del Anfitrión. Los pagos se procesan mediante Azul. Espot no almacena datos sensibles de tarjetas.`,
   },
   {
-    num: '5', title: 'Responsabilidades del Anfitrión',
-    content: `El Anfitrión declara que:
+    num: '5', title: 'Cancelaciones',
+    content: `Cada Anfitrión define su propia política de cancelación (flexible, moderada o estricta), visible antes de confirmar la reserva.
 
-• Cuenta con los permisos legales necesarios para alquilar su espacio.
-• Cumple con las obligaciones fiscales aplicables.
-• El espacio es seguro y apto para el uso ofrecido.
-
-El Anfitrión es el único responsable frente a terceros, autoridades y Huéspedes por cualquier incidente, daño o incumplimiento, liberando a ESPOT, S.R.L. de toda responsabilidad.`,
+• La comisión pagada a Espot (10%) no es reembolsable bajo ninguna circunstancia, salvo error técnico comprobable imputable a Espot.
+• Cualquier devolución del monto restante corresponde exclusivamente al Anfitrión según su política.
+• Espot no interviene en disputas entre Anfitrión y Huésped por cancelaciones o incumplimientos.`,
   },
   {
-    num: '6', title: 'Responsabilidades del Huésped',
+    num: '6', title: 'Mensajería y Comunicación',
+    content: `La plataforma incluye un sistema de mensajería directa entre Anfitrión y Huésped. Al utilizar este servicio:
+
+• Las comunicaciones deben ser respetuosas y relacionadas con la reserva.
+• Queda prohibido compartir información de contacto con el fin de eludir el uso de la plataforma.
+• Espot puede monitorear conversaciones para garantizar el cumplimiento de estos términos y la seguridad de los usuarios.`,
+  },
+  {
+    num: '7', title: 'Reseñas y Calificaciones',
+    content: `Tras la realización de un evento, el Huésped puede dejar una reseña y calificación del espacio.
+
+• Las reseñas deben ser verídicas y basadas en la experiencia real.
+• Espot puede eliminar reseñas que contengan lenguaje ofensivo, información falsa o spam.
+• El Anfitrión no puede solicitar la eliminación de reseñas negativas que sean legítimas.`,
+  },
+  {
+    num: '8', title: 'Responsabilidades del Anfitrión',
+    content: `El Anfitrión declara y garantiza que:
+
+• Cuenta con los permisos legales para alquilar su espacio para eventos.
+• Cumple con las obligaciones fiscales aplicables en la República Dominicana.
+• El espacio es seguro, legal y apto para el uso ofrecido.
+• La información publicada (fotos, precios, capacidad, horarios) es veraz y actualizada.
+
+El Anfitrión es el único responsable frente a Huéspedes, autoridades y terceros por cualquier incidente, daño o incumplimiento, liberando a ESPOT, S.R.L. de toda responsabilidad.`,
+  },
+  {
+    num: '9', title: 'Responsabilidades del Huésped',
     content: `El Huésped se compromete a:
 
-• Usar el espacio de forma responsable.
-• Respetar las normas del Anfitrión.
-• No realizar actividades ilegales o peligrosas.
-• Asumir los daños ocasionados durante la reserva.
+• Usar el espacio de forma responsable y según el uso declarado al reservar.
+• Respetar las normas, horarios y condiciones establecidos por el Anfitrión.
+• No realizar actividades ilegales, peligrosas o no autorizadas.
+• Asumir los daños causados al espacio durante la reserva.
 
-El Huésped libera de responsabilidad a ESPOT, S.R.L. por cualquier incidente relacionado con el uso del espacio.`,
+El Huésped libera de responsabilidad a ESPOT, S.R.L. por cualquier incidente ocurrido antes, durante o después del uso del espacio.`,
   },
   {
-    num: '7', title: 'Limitación de Responsabilidad',
+    num: '10', title: 'Limitación de Responsabilidad',
     content: `ESPOT, S.R.L.:
 
-• No garantiza la calidad, legalidad ni seguridad de los espacios.
-• No es responsable de accidentes, daños, pérdidas, lesiones o conflictos ocurridos antes, durante o después del uso del espacio.
-• Su función se limita exclusivamente a proveer la plataforma tecnológica y cobrar su comisión.`,
+• No garantiza la calidad, legalidad, seguridad ni disponibilidad de los espacios.
+• No es responsable de accidentes, daños, pérdidas, lesiones ni conflictos ocurridos en los espacios.
+• No garantiza la continuidad ininterrumpida de la plataforma.
+• Su función se limita a proveer la tecnología de intermediación y cobrar su comisión del 10%.`,
   },
   {
-    num: '8', title: 'Contenido Publicado',
-    content: 'El Anfitrión es responsable del contenido publicado. Espot puede eliminar contenido falso, engañoso o ilegal.',
+    num: '11', title: 'Contenido Publicado y Propiedad Intelectual',
+    content: `El Anfitrión es responsable de todo el contenido que publica (textos, fotos, videos). Espot puede eliminar contenido falso, engañoso o ilegal.
+
+Todos los derechos sobre la plataforma, su diseño, código y marca pertenecen a ESPOT, S.R.L. Queda prohibida su reproducción o uso sin autorización escrita.`,
   },
   {
-    num: '9', title: 'Propiedad Intelectual',
-    content: 'Todos los derechos de la plataforma pertenecen a ESPOT, S.R.L. Queda prohibido su uso sin autorización escrita.',
-  },
-  {
-    num: '10', title: 'Modificaciones',
-    content: 'Espot puede modificar estos términos en cualquier momento. Los cambios entran en vigor al ser publicados.',
-  },
-  {
-    num: '11', title: 'Ley Aplicable y Jurisdicción',
-    content: 'Estos términos se rigen por las leyes de la República Dominicana. Cualquier disputa será conocida por los tribunales del Distrito Nacional.',
+    num: '12', title: 'Modificaciones y Ley Aplicable',
+    content: `Espot puede modificar estos términos en cualquier momento. Los cambios entran en vigor al ser publicados en esta página. El uso continuado de la plataforma implica la aceptación de los términos vigentes.
+
+Estos términos se rigen por las leyes de la República Dominicana. Cualquier disputa será conocida por los tribunales del Distrito Nacional.`,
   },
 ]
 
@@ -107,7 +137,7 @@ export default function TerminosPage() {
             Términos y Condiciones
           </h1>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            Última actualización: 20 de enero de 2026
+            Última actualización: 10 de mayo de 2026
           </p>
         </div>
 

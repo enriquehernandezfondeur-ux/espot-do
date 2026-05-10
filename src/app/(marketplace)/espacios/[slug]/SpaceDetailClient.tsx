@@ -127,7 +127,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
   const [reviewsData,     setReviewsData]     = useState<ReviewsSummary | null>(null)
 
   useEffect(() => {
-    getSpaceReviews(space.id).then(setReviewsData)
+    getSpaceReviews(space.id).then(setReviewsData).catch(() => {})
   }, [space.id])
   const [showMobileWidget,setShowMobileWidget]= useState(false)
   const [showVideoModal,  setShowVideoModal]  = useState(false)

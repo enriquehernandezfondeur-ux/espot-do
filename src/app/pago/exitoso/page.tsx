@@ -75,6 +75,7 @@ function ExitoContent() {
               AuthHash:          authHash,
             }),
           })
+          if (!res.ok && res.status !== 400) throw new Error(`API error: ${res.status}`)
           const result = await res.json()
           if (result.success) {
             setConfirmed(true)

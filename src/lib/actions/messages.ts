@@ -17,13 +17,15 @@ export async function getConversation(spaceId: string) {
     .order('created_at', { ascending: true })
 
   // Obtener info del espacio y propietario
-  const { data: space } = await supabase
+  const { data: space, error: spaceErr } = await supabase
     .from('spaces')
     .select('id, name, host_id, profiles!host_id(id, full_name, avatar_url)')
     .eq('id', spaceId)
     .single()
 
-  return { messages: messages ?? [], space, userId: user.id }
+  if (spaceErr && spaceErr.code !== 'PGRST116') return null
+
+  return { messages: messages ?? [], space: space ?? null, userId: user.id }
 }
 
 export interface MessageAttachment {

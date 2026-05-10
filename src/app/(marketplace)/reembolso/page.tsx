@@ -9,65 +9,77 @@ export const metadata: Metadata = {
 
 const sections = [
   {
-    num: '1', title: 'Introducción',
-    content: `La presente Política de Reembolso regula los términos bajo los cuales los usuarios de Espot.do, plataforma propiedad de ESPOT, S.R.L., pueden solicitar devoluciones relacionadas con reservas de espacios realizadas a través de la plataforma.
+    num: '1', title: 'Alcance de esta Política',
+    content: `Esta Política de Reembolso regula las devoluciones relacionadas con pagos realizados a través de EspotHub (espot.do), plataforma de ESPOT, S.R.L. que conecta propietarios de espacios (Anfitriones) con quienes los reservan para eventos (Huéspedes).
 
-Al utilizar Espot.do, el usuario reconoce y acepta que esta política forma parte integral de los Términos y Condiciones.`,
+Al utilizar Espot.do, el usuario acepta esta política como parte integral de los Términos y Condiciones.`,
   },
   {
-    num: '2', title: 'Naturaleza de Espot',
-    content: `Espot actúa únicamente como intermediario tecnológico, facilitando la conexión entre anfitriones (propietarios o administradores de espacios) y huéspedes (usuarios que realizan reservas).
+    num: '2', title: 'Qué cobra Espot y qué no',
+    content: `Espot solo cobra el anticipo de confirmación, equivalente al 10% del valor total de la reserva. Este monto:
 
-Espot no es propietario, arrendador, operador ni administrador de los espacios, ni asume responsabilidad alguna sobre su estado, legalidad, permisos, seguridad, disponibilidad o condiciones de uso.`,
+• Es procesado de forma segura a través de Azul, el proveedor de pagos.
+• Corresponde íntegramente a la comisión de Espot por el uso de la plataforma.
+• No incluye el saldo restante de la reserva (90%), que se paga directamente al Anfitrión.
+
+Espot no cobra, retiene ni administra el 90% restante. Cualquier disputa o reembolso sobre ese monto debe resolverse directamente entre Huésped y Anfitrión.`,
   },
   {
-    num: '3', title: 'Procesamiento de Pagos',
-    content: `El pago realizado a través de Espot.do corresponde únicamente al 10% del valor total de la reserva, el cual funciona como señal para asegurar la fecha y las horas reservadas.
+    num: '3', title: 'Comisión No Reembolsable',
+    content: `El anticipo del 10% pagado a Espot no es reembolsable, salvo en los siguientes casos excepcionales:
 
-El 90% restante del valor de la reserva no es cobrado ni administrado por Espot y cualquier pago, devolución o reclamo sobre dicho monto deberá gestionarse directamente entre el Huésped y el Anfitrión.
+• Error técnico comprobable imputable directamente a Espot o a Azul (ej. cobro duplicado).
+• Falla del sistema que impidió completar la reserva pero el cargo fue procesado igualmente.
 
-Todos los pagos se procesan de forma segura a través del proveedor Azul, bajo sus propios términos y condiciones.`,
+En estos casos, el usuario debe contactar a contacto@espot.do dentro de los 7 días calendario siguientes al incidente, adjuntando el comprobante de pago y la descripción del problema.`,
   },
   {
-    num: '4', title: 'Montos No Reembolsables',
-    content: `El usuario reconoce expresamente que:
+    num: '4', title: 'Planes de Pago en Cuotas',
+    content: `Algunas reservas permiten dividir el anticipo en cuotas programadas. En estos casos:
 
-• El 10% pagado al momento de la reserva, correspondiente a la comisión de Espot, no es reembolsable bajo ninguna circunstancia.
-• Este monto solo podrá ser reembolsado en casos excepcionales de error técnico comprobable atribuible directamente a Espot o al proveedor de pagos, lo cual será evaluado caso por caso.`,
+• Cada cuota tiene una fecha de vencimiento definida al momento de confirmar la reserva.
+• El incumplimiento de una cuota puede resultar en la cancelación automática de la reserva según la política del Anfitrión.
+• Las cuotas ya pagadas no son reembolsables, excepto por error técnico comprobable.
+• El Huésped recibirá notificación por correo electrónico antes del vencimiento de cada cuota.`,
   },
   {
-    num: '5', title: 'Solicitudes de Reembolso',
-    content: `Toda solicitud deberá enviarse por escrito a contacto@espot.do, incluyendo los datos de la reserva y la justificación correspondiente.
+    num: '5', title: 'Cancelaciones y Política del Anfitrión',
+    content: `Cada Anfitrión define su propia política de cancelación (flexible, moderada o estricta), que es visible antes de confirmar la reserva. El Huésped acepta estas condiciones al completar el pago.
 
-En los casos aplicables, el proceso de revisión podrá tomar hasta 15 días laborables, sujeto a validaciones técnicas y a los tiempos del sistema bancario.
-
-Espot notificará el resultado de la solicitud por correo electrónico.`,
+• Si el Huésped cancela: se aplica la política del Anfitrión. Espot no interviene en la devolución del saldo.
+• Si el Anfitrión cancela: el Anfitrión es responsable de gestionar la devolución del saldo conforme a su propia política.
+• Espot no actúa como árbitro en disputas entre Anfitrión y Huésped.`,
   },
   {
-    num: '6', title: 'Responsabilidad del Anfitrión',
-    content: `Cada Anfitrión es responsable de definir y publicar su propia política de cancelación y reembolso, la cual será visible antes de confirmar la reserva.
+    num: '6', title: 'Proceso de Solicitud de Reembolso',
+    content: `Para solicitar un reembolso de la comisión de Espot (casos excepcionales):
 
-El Huésped acepta expresamente dichas condiciones al confirmar la reserva. Espot no interviene ni responde por disputas, incumplimientos o acuerdos entre Anfitrión y Huésped relacionados con cancelaciones o devoluciones.`,
+1. Enviar un correo a contacto@espot.do con el asunto "Solicitud de Reembolso".
+2. Incluir: nombre completo, correo de la cuenta, ID de la reserva y descripción del problema.
+3. Adjuntar comprobante del cobro (número de transacción Azul).
+
+El proceso de revisión puede tomar hasta 15 días laborables. Espot notificará el resultado por correo electrónico. Los reembolsos aprobados se procesan a través de Azul y pueden tardar entre 3 y 10 días hábiles adicionales según el banco emisor.`,
   },
   {
     num: '7', title: 'Fuerza Mayor',
-    content: `Espot no será responsable por reembolsos ni compensaciones en casos de fuerza mayor, incluyendo, pero no limitado a:
+    content: `Espot no será responsable por reembolsos en casos de fuerza mayor, incluyendo:
 
-• Desastres naturales (huracanes, tormentas, terremotos).
-• Pandemias, restricciones sanitarias o gubernamentales.
-• Fallas eléctricas, de telecomunicaciones o accesos.
-• Huelgas, disturbios sociales u órdenes de autoridad.
+• Desastres naturales (huracanes, terremotos, inundaciones).
+• Pandemias o restricciones sanitarias y gubernamentales.
+• Fallas generalizadas de telecomunicaciones o electricidad.
+• Huelgas, disturbios sociales u órdenes de autoridades.
 
-En estos casos, Espot podrá facilitar la comunicación entre las partes, sin asumir obligación de reembolso.`,
+En estos casos, Espot puede facilitar la comunicación entre las partes sin asumir obligación de reembolso.`,
   },
   {
     num: '8', title: 'Limitación de Responsabilidad',
-    content: `• Espot no garantiza la devolución de montos que no hayan sido cobrados por la plataforma.
-• Espot no responde con fondos propios ante solicitudes de reembolso.
-• Cualquier reclamo económico adicional deberá resolverse directamente entre Huésped y Anfitrión.`,
+    content: `• Espot no garantiza la devolución de montos no cobrados por la plataforma.
+• Espot no responde con fondos propios por incumplimientos del Anfitrión.
+• Cualquier reclamo sobre el saldo de la reserva (90%) debe resolverse directamente entre Huésped y Anfitrión.
+• La responsabilidad máxima de Espot se limita al monto efectivamente cobrado por la plataforma.`,
   },
   {
-    num: '9', title: 'Ley Aplicable y Jurisdicción',
+    num: '9', title: 'Ley Aplicable',
     content: 'Esta política se rige por las leyes de la República Dominicana. Cualquier controversia será sometida a los tribunales del Distrito Nacional.',
   },
 ]
@@ -87,7 +99,7 @@ export default function ReembolsoPage() {
             Política de Reembolso
           </h1>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            Última actualización: 20 de enero de 2026
+            Última actualización: 10 de mayo de 2026
           </p>
         </div>
 

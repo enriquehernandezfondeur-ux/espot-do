@@ -18,11 +18,12 @@ export async function POST(req: NextRequest) {
   if (!bookingId) return NextResponse.json({ ok: true })
 
   // Solo resetear si está en 'processing' — no tocar pagos completados
-  await supabase.from('bookings')
+  const { error } = await supabase.from('bookings')
     .update({ payment_status: 'payment_pending' })
     .eq('id', bookingId)
     .eq('guest_id', user.id)
     .eq('payment_status', 'processing')
 
+  if (error) return NextResponse.json({ error: 'No se pudo cancelar el pago' }, { status: 500 })
   return NextResponse.json({ ok: true })
 }

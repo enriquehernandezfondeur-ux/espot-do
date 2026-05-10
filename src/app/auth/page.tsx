@@ -37,23 +37,28 @@ function AuthContent() {
   const isHost     = redirectTo.includes('host') || searchParams.get('mode') === 'host'
   const defaultScreen: Screen = searchParams.get('mode') === 'register' ? 'register' : 'login'
 
-  const [screen,   setScreen]   = useState<Screen>(defaultScreen)
-  const [userType, setUserType] = useState<UserType>(isHost ? 'host' : null)
-  const [email,    setEmail]    = useState('')
-  const [password, setPassword] = useState('')
-  const [fullName, setFullName] = useState('')
-  const [phone,    setPhone]    = useState('')
-  const [showPwd,  setShowPwd]  = useState(false)
-  const [loading,  setLoading]  = useState(false)
+  const [screen,       setScreen]       = useState<Screen>(defaultScreen)
+  const [userType,     setUserType]     = useState<UserType>(isHost ? 'host' : null)
+  const [email,        setEmail]        = useState('')
+  const [password,     setPassword]     = useState('')
+  const [fullName,     setFullName]     = useState('')
+  const [phone,        setPhone]        = useState('')
+  const [showPwd,      setShowPwd]      = useState(false)
+  const [loading,      setLoading]      = useState(false)
   const [oauthLoading, setOauthLoading] = useState<'google' | 'apple' | null>(null)
-  const [error,    setError]    = useState('')
+  const [error,        setError]        = useState('')
+  const [authChecking, setAuthChecking] = useState(true)
   const router   = useRouter()
   const supabase = createClient()
 
-  // Si ya hay sesión activa, redirigir directamente al destino
+  // Si ya hay sesión activa, redirigir directamente al destino sin mostrar el formulario
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) router.replace(redirectTo)
+      if (user) {
+        router.replace(redirectTo)
+      } else {
+        setAuthChecking(false)
+      }
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -138,6 +143,14 @@ function AuthContent() {
     marginBottom: 6,
     color: 'rgba(255,255,255,0.6)',
   }
+
+  if (authChecking) return (
+    <div className="min-h-dvh flex items-center justify-center"
+      style={{ background: 'linear-gradient(145deg, #071410 0%, #0B0F0E 60%, #0a0d12 100%)' }}>
+      <div className="w-6 h-6 rounded-full border-2 animate-spin"
+        style={{ borderColor: 'rgba(53,196,147,0.3)', borderTopColor: '#35C493' }} />
+    </div>
+  )
 
   // ── "Email sent" / "Confirm your account" screen ────────
   if (screen === 'forgot_sent') {

@@ -24,7 +24,8 @@ export async function getOrCreateIcalToken(): Promise<string | null> {
 
   // Generar token único
   const token = crypto.randomUUID().replace(/-/g, '')
-  await supabase.from('profiles').update({ ical_token: token }).eq('id', user.id)
+  const { error: saveErr } = await supabase.from('profiles').update({ ical_token: token }).eq('id', user.id)
+  if (saveErr) return null
   return token
 }
 
@@ -35,7 +36,8 @@ export async function regenerateIcalToken(): Promise<string | null> {
   if (!user) return null
 
   const token = crypto.randomUUID().replace(/-/g, '')
-  await supabase.from('profiles').update({ ical_token: token }).eq('id', user.id)
+  const { error: saveErr } = await supabase.from('profiles').update({ ical_token: token }).eq('id', user.id)
+  if (saveErr) return null
   return token
 }
 
@@ -182,12 +184,12 @@ export async function disconnectGoogleCalendar(): Promise<{ success: boolean }> 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false }
 
-  await supabase
+  const { error } = await supabase
     .from('profiles')
     .update({ google_calendar_connected: false, google_refresh_token: null })
     .eq('id', user.id)
 
-  return { success: true }
+  return { success: !error }
 }
 
 // ── Todas las reservas del host ───────────────────────────
