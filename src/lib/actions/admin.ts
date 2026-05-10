@@ -135,8 +135,8 @@ export async function adminUpsertAddon(spaceId: string, addon: { id?: string; na
     const { error } = await supabase.from('space_addons').update(updateData).eq('id', id)
     return error ? { error: error.message } : { success: true }
   }
-  const { error } = await supabase.from('space_addons').insert({ ...addon, space_id: spaceId, is_available: true })
-  return error ? { error: error.message } : { success: true }
+  const { data, error } = await supabase.from('space_addons').insert({ ...addon, space_id: spaceId, is_available: true }).select('id').single()
+  return error ? { error: error.message } : { success: true, id: data?.id }
 }
 
 export async function adminDeleteAddon(addonId: string) {

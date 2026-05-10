@@ -37,7 +37,7 @@ export default async function AdminDashboard() {
   ])
 
   const pendingPayoutTotal = pendingPayouts.reduce(
-    (s, b: any) => s + (Number(b.total_amount) - Number(b.platform_fee)), 0
+    (s, b: any) => s + ((Number(b.total_amount) || 0) - (Number(b.platform_fee) || 0)), 0
   )
 
   const now = new Date()

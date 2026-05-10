@@ -125,8 +125,8 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
   async function handleSaveInfo() {
     await save('info', () => adminUpdateSpace(space.id, {
       name, description, category,
-      capacity_min: capacityMin ? parseInt(capacityMin) : null,
-      capacity_max: parseInt(capacityMax),
+      capacity_min: capacityMin ? (parseInt(capacityMin) || null) : null,
+      capacity_max: parseInt(capacityMax) || 1,
       address, sector, city,
     }))
   }
@@ -196,18 +196,24 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
       name: newAddon.name, price: parseFloat(newAddon.price),
       unit: newAddon.unit, category: newAddon.category,
     })
-    if (!('error' in result)) {
-      // refresh addons by re-fetching (simulate with optimistic)
-      setAddons(prev => [...prev, { id: Date.now(), ...newAddon, price: parseFloat(newAddon.price), is_available: true }])
+    if (result && 'error' in result) {
+      showToast(`Error: ${result.error}`, false)
+    } else if (result && 'id' in result) {
+      setAddons(prev => [...prev, { id: result.id, name: newAddon.name, price: parseFloat(newAddon.price), unit: newAddon.unit, category: newAddon.category, is_available: true }])
       setNewAddon({ name: '', price: '', unit: 'evento', category: 'personal' })
+      showToast('Adicional agregado ✓')
     }
     setSaving(null)
   }
 
   async function handleDeleteAddon(addonId: string) {
     setSaving('del-' + addonId)
-    await adminDeleteAddon(addonId)
-    setAddons(prev => prev.filter(a => a.id !== addonId))
+    const result = await adminDeleteAddon(addonId)
+    if (result && 'error' in result) {
+      showToast(`Error al eliminar: ${result.error}`, false)
+    } else {
+      setAddons(prev => prev.filter(a => a.id !== addonId))
+    }
     setSaving(null)
   }
 

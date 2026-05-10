@@ -125,7 +125,7 @@ export default function EspacioPage() {
   const [loadingSpaces, setLoadingSpaces] = useState(true)
 
   useEffect(() => {
-    getMySpaces().then(data => { setSpaces(data); setLoadingSpaces(false) })
+    getMySpaces().then(data => { setSpaces(data); setLoadingSpaces(false) }).catch(() => setLoadingSpaces(false))
   }, [])
 
   const [currentStep, setCurrentStep] = useState(1)

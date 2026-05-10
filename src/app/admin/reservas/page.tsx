@@ -33,7 +33,8 @@ export default function AdminReservasPage() {
 
   useEffect(() => {
     getAdminBookings({ status: filter === 'all' ? undefined : filter })
-      .then(d => { setBookings(d); setLoading(false) })
+      .then(d => { setBookings(d ?? []); setLoading(false) })
+      .catch(() => { setBookings([]); setLoading(false) })
   }, [filter])
 
   const filtered = bookings.filter(b =>
@@ -44,9 +45,11 @@ export default function AdminReservasPage() {
 
   async function handleStatusChange(bookingId: string, status: string) {
     setUpdating(bookingId)
-    await updateBookingStatus(bookingId, status)
-    setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status } : b))
-    if (selected?.id === bookingId) setSelected((p: any) => ({ ...p, status }))
+    const result = await updateBookingStatus(bookingId, status)
+    if (!result || !('error' in result)) {
+      setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status } : b))
+      if (selected?.id === bookingId) setSelected((p: any) => ({ ...p, status }))
+    }
     setUpdating(null)
   }
 

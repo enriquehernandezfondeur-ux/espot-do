@@ -158,7 +158,7 @@ export default function AdminSpacesPage() {
                       <div className="min-w-0">
                         <div className="font-semibold text-sm truncate" style={{ color: '#0F1623' }}>{space.name}</div>
                         <div className="text-xs text-slate-400 flex items-center gap-1">
-                          <MapPin size={10} /> {space.sector ?? space.city} · {host?.full_name}
+                          <MapPin size={10} /> {space.sector ?? space.city ?? '—'} · {host?.full_name ?? '—'}
                         </div>
                       </div>
                     </div>
