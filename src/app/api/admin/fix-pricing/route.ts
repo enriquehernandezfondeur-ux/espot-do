@@ -47,10 +47,9 @@ function buildPricingPayload(slug: string, spaceId: string) {
   if (!def) return null
 
   const base: Record<string, unknown> = {
-    space_id:         spaceId,
-    pricing_type:     def.type,
-    is_active:        true,
-    platform_fee_pct: 10,
+    space_id:     spaceId,
+    pricing_type: def.type,
+    is_active:    true,
   }
 
   if (def.type === 'hourly') {
