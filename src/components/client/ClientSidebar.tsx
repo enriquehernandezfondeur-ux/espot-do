@@ -77,16 +77,12 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <div className="text-xs font-bold truncate" style={{ color: 'var(--brand)' }}>
-              Panel de Cliente
-            </div>
-            <div className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>
+            <div className="text-xs font-bold truncate" style={{ color: 'var(--text-primary)' }}>
               {userName ?? 'Mi cuenta'}
             </div>
-          </div>
-          <div className="px-2 py-0.5 rounded-full text-xs font-bold shrink-0"
-            style={{ background: 'var(--brand)', color: '#fff' }}>
-            Cliente
+            <div className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>
+              Panel de Cliente
+            </div>
           </div>
         </div>
       </div>

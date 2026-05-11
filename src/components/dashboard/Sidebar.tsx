@@ -82,11 +82,7 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
           )}
           <div className="flex-1 min-w-0">
             <div className="text-xs font-bold text-white truncate">{userName ?? 'Propietario'}</div>
-            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>Panel de Negocio</div>
-          </div>
-          <div className="px-2 py-0.5 rounded-full text-xs font-bold shrink-0"
-            style={{ background: 'var(--brand)', color: '#fff' }}>
-            Negocio
+            <div className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.6)' }}>Panel de Propietario</div>
           </div>
         </div>
       </div>
