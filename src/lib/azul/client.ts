@@ -38,8 +38,15 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
   if (!MERCHANT_ID) throw new Error('Falta AZUL_MERCHANT_ID en las variables de entorno de Vercel.')
   if (!PRIVATE_KEY) throw new Error('Falta AZUL_PRIVATE_KEY en las variables de entorno de Vercel.')
 
+  // En RD, el ITBIS es 18%. Si el precio ya lo incluye (precio bruto),
+  // el ITBIS separado = floor(precio / 1.18 * 0.18)
+  // Si se pasa itbis explícito se usa ese valor; si no, se calcula del monto.
+  const ITBIS_RATE   = Number(process.env.AZUL_ITBIS_RATE ?? '0.18')
+  const itbisAmount  = params.itbis !== undefined
+    ? params.itbis
+    : ITBIS_RATE > 0 ? Math.floor(params.amount / (1 + ITBIS_RATE) * ITBIS_RATE * 100) / 100 : 0
   const amountStr = String(Math.round(params.amount * 100))
-  const itbisStr  = String(Math.round((params.itbis ?? 0) * 100))
+  const itbisStr  = String(Math.round(itbisAmount * 100))
 
   // AZUL_RETURN_BASE_URL permite usar un dominio diferente a NEXT_PUBLIC_SITE_URL
   // para las URLs de retorno — necesario cuando Azul tiene registrado un dominio
