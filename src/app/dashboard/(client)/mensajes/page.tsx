@@ -90,7 +90,7 @@ export default function ClientMensajesPage() {
             <Search size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
             <input value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Buscar conversación..."
-              className="bg-transparent text-sm flex-1 focus:outline-none" style={{ color: 'var(--text-primary)' }} />
+              className="bg-transparent text-sm flex-1 focus:outline-none" style={{ color: 'var(--text-primary)', fontSize: 16 }} />
           </div>
         </div>
 
@@ -158,7 +158,7 @@ export default function ClientMensajesPage() {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-3" style={{ background: '#FAFBFC' }}>
+          <div className="flex-1 overflow-y-auto min-h-0 px-6 py-5 space-y-3" style={{ background: '#FAFBFC' }}>
             {messages.map((msg, i) => {
               const isMe = msg.sender_id === userId
               return (

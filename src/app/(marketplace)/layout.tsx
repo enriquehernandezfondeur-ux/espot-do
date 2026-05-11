@@ -299,7 +299,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                   onKeyDown={e => { if (e.key === 'Enter') handleSearch(searchQ) }}
                   placeholder="Buscar espacios o eventos..."
                   className="flex-1 bg-transparent text-sm focus:outline-none"
-                  style={{ color: 'var(--text-primary)' }}
+                  style={{ color: 'var(--text-primary)', fontSize: 16 }}
                   autoFocus
                 />
                 {searchQ && (

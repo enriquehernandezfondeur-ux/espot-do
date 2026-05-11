@@ -89,7 +89,7 @@ export default function HostMensajesPage() {
             <Search size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
             <input value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Buscar..." className="bg-transparent text-sm flex-1 focus:outline-none"
-              style={{ color: 'var(--text-primary)' }} />
+              style={{ color: 'var(--text-primary)', fontSize: 16 }} />
           </div>
         </div>
         <div className="flex-1 overflow-y-auto">
@@ -149,7 +149,7 @@ export default function HostMensajesPage() {
             <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{active.spaceName}</div>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-3" style={{ background: 'var(--bg-base)' }}>
+          <div className="flex-1 overflow-y-auto min-h-0 px-6 py-5 space-y-3" style={{ background: 'var(--bg-base)' }}>
             {messages.map(msg => {
               const isMe = msg.sender_id === userId
               return (
@@ -176,7 +176,7 @@ export default function HostMensajesPage() {
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
                 placeholder="Responder al cliente..." rows={1}
                 className="flex-1 resize-none text-sm px-4 py-3 rounded-2xl focus:outline-none"
-                style={{ background: 'var(--bg-elevated)', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)', maxHeight: 120 }} />
+                style={{ background: 'var(--bg-elevated)', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)', maxHeight: 120, fontSize: 16 }} />
               <button onClick={handleSend} disabled={!body.trim() || sending}
                 className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 disabled:opacity-40 transition-all"
                 style={{ background: 'var(--brand)', color: '#fff' }}>

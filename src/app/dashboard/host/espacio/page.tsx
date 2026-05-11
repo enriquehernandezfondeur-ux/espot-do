@@ -1117,7 +1117,7 @@ export default function EspacioPage() {
                             setAddons(updated)
                           }}
                           className="w-24 rounded-lg px-3 py-1.5 text-sm focus:outline-none transition-colors"
-                          style={{ background: '#fff', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)' }}
+                          style={{ background: '#fff', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)', fontSize: 16 }}
                         />
                         <select
                           value={addon.unit}
@@ -1127,7 +1127,7 @@ export default function EspacioPage() {
                             setAddons(updated)
                           }}
                           className="rounded-lg px-2 py-1.5 text-xs focus:outline-none"
-                          style={{ background: '#fff', border: '1.5px solid var(--border-medium)', color: 'var(--text-secondary)' }}
+                          style={{ background: '#fff', border: '1.5px solid var(--border-medium)', color: 'var(--text-secondary)', fontSize: 16 }}
                         >
                           <option value="evento">/ evento</option>
                           <option value="hora">/ hora</option>

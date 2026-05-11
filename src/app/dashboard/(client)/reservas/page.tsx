@@ -140,7 +140,7 @@ export default function MisReservasPage() {
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Buscar..."
             className="bg-transparent text-sm focus:outline-none flex-1"
-            style={{ color: 'var(--text-primary)' }} />
+            style={{ color: 'var(--text-primary)', fontSize: 16 }} />
         </div>
       </div>
 

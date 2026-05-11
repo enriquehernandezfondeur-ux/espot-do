@@ -23,7 +23,7 @@ const PAYOUT_STATUS: Record<string, { label: string; color: string; bg: string }
 }
 
 const inputCls = "w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-all"
-const inputStyle: React.CSSProperties = { background: '#F8FAFC', border: '1.5px solid #E2E8F0', color: '#0F1623' }
+const inputStyle: React.CSSProperties = { background: '#F8FAFC', border: '1.5px solid #E2E8F0', color: '#0F1623', fontSize: 16 }
 
 export default function HostPagosPage() {
   const [bookings,   setBookings]   = useState<any[]>([])
