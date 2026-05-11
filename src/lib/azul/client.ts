@@ -52,6 +52,15 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
 
   const CURRENCY    = process.env.AZUL_CURRENCY_CODE ?? 'RD$'
 
+  // Campos de custom fields — se incluyen en el hash aunque estén vacíos
+  // para coincidir con la implementación del plugin WooCommerce de Azul
+  const useCustomField1    = '0'
+  const customField1Label  = ''
+  const customField1Value  = ''
+  const useCustomField2    = '0'
+  const customField2Label  = ''
+  const customField2Value  = ''
+
   const hashInput = [
     MERCHANT_ID,
     MERCHANT_NAME,
@@ -63,6 +72,12 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
     approvedUrl,
     declinedUrl,
     cancelUrl,
+    useCustomField1,
+    customField1Label,
+    customField1Value,
+    useCustomField2,
+    customField2Label,
+    customField2Value,
   ].join('')
 
   const authHash = createHmac('sha512', PRIVATE_KEY)
@@ -73,17 +88,23 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
   return {
     pageUrl: PAGE_URL,
     fields: {
-      MerchantId:   MERCHANT_ID,
-      MerchantName: MERCHANT_NAME,
-      MerchantType: MERCHANT_TYPE,
-      CurrencyCode: CURRENCY,
-      OrderNumber:  params.orderNumber,
-      Amount:       amountStr,
-      ITBIS:        itbisStr,
-      ApprovedUrl:  approvedUrl,
-      DeclinedUrl:  declinedUrl,
-      CancelUrl:    cancelUrl,
-      AuthHash:     authHash,
+      MerchantId:        MERCHANT_ID,
+      MerchantName:      MERCHANT_NAME,
+      MerchantType:      MERCHANT_TYPE,
+      CurrencyCode:      CURRENCY,
+      OrderNumber:       params.orderNumber,
+      Amount:            amountStr,
+      ITBIS:             itbisStr,
+      ApprovedUrl:       approvedUrl,
+      DeclinedUrl:       declinedUrl,
+      CancelUrl:         cancelUrl,
+      UseCustomField1:   useCustomField1,
+      CustomField1Label: customField1Label,
+      CustomField1Value: customField1Value,
+      UseCustomField2:   useCustomField2,
+      CustomField2Label: customField2Label,
+      CustomField2Value: customField2Value,
+      AuthHash:          authHash,
     },
   }
 }
