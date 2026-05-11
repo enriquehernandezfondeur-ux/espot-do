@@ -124,10 +124,8 @@ export default function ContactoPage() {
               { title: 'Otro',                           desc: 'Cualquier otra consulta o sugerencia' },
             ].map(item => (
               <a key={item.title} href={`mailto:contacto@espot.do?subject=${encodeURIComponent(item.title)}`}
-                className="flex flex-col gap-1 p-4 rounded-xl transition-all"
-                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--brand-border)'; (e.currentTarget as HTMLElement).style.background = 'var(--brand-dim)' }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border-subtle)'; (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}>
+                className="flex flex-col gap-1 p-4 rounded-xl transition-all hover:opacity-80"
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                 <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{item.title}</span>
                 <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{item.desc}</span>
               </a>
