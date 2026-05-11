@@ -68,6 +68,56 @@ export async function GET(
       .map(([k, v]) => `<input type="hidden" name="${k}" value="${escapeHtml(v)}">`)
       .join('\n    ')
 
+    // Modo test exacto: usa los valores del ejemplo oficial de Azul para verificar el hash
+    if (req.nextUrl.searchParams.get('test_exact') === '1') {
+      const { createHmac } = await import('crypto')
+      const PRIV = process.env.AZUL_PRIVATE_KEY ?? ''
+      const MERCHANT_ID   = process.env.AZUL_MERCHANT_ID   ?? ''
+      const MERCHANT_NAME = process.env.AZUL_MERCHANT_NAME ?? ''
+      const MERCHANT_TYPE = process.env.AZUL_MERCHANT_TYPE ?? ''
+      const CURRENCY      = process.env.AZUL_CURRENCY_CODE ?? '$'
+      const PAGE_URL      = process.env.AZUL_PAYMENT_PAGE_URL ?? 'https://pruebas.azul.com.do/PaymentPage/'
+
+      // Valores fijos del ejemplo — OrderNumber simple, URLs simples sin &
+      const ORDER   = 'TEST001'
+      const AMT     = '10000'
+      const ITBIS_V = '000'
+      const AURL    = 'https://espothub.com/pago/exitoso'
+      const DURL    = 'https://espothub.com/pago/fallido'
+      const CURL    = 'https://espothub.com/pago/cancelado'
+
+      const msg = [MERCHANT_ID, MERCHANT_NAME, MERCHANT_TYPE, CURRENCY,
+        ORDER, AMT, ITBIS_V, AURL, DURL, CURL, '0','','','0','','', PRIV].join('')
+      const hash = createHmac('sha512', PRIV).update(msg).digest('hex').toUpperCase()
+
+      const inputs = [
+        ['MerchantId', MERCHANT_ID], ['TrxType', 'Sale'],
+        ['MerchantName', MERCHANT_NAME], ['MerchantType', MERCHANT_TYPE],
+        ['CurrencyCode', CURRENCY], ['OrderNumber', ORDER],
+        ['Amount', AMT], ['ITBIS', ITBIS_V],
+        ['ApprovedUrl', AURL], ['DeclinedUrl', DURL], ['CancelUrl', CURL],
+        ['UseCustomField1','0'],['CustomField1Label',''],['CustomField1Value',''],
+        ['UseCustomField2','0'],['CustomField2Label',''],['CustomField2Value',''],
+        ['SaveToDataVault','0'], ['AuthHash', hash],
+      ].map(([k, v]) => `<input type="hidden" name="${k}" value="${v}">`).join('\n')
+
+      return new NextResponse(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>body{font-family:sans-serif;padding:32px;background:#F4F6F8}
+h2{color:#0F1623}p{color:#6B7280;font-size:13px}
+.btn{background:#16A34A;color:#fff;border:none;padding:14px 28px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px}
+pre{background:#fff;padding:12px;border-radius:8px;font-size:11px;word-break:break-all;white-space:pre-wrap}
+</style></head><body>
+<h2>🧪 Test con valores fijos (sin & en URLs)</h2>
+<p>MerchantName: <strong>${MERCHANT_NAME}</strong> · MerchantType: <strong>${MERCHANT_TYPE}</strong><br>
+OrderNumber: <strong>${ORDER}</strong> · Amount: <strong>${AMT}</strong> · ITBIS: <strong>${ITBIS_V}</strong></p>
+<pre>Hash: ${hash.slice(0,40)}...</pre>
+<form method="POST" action="${PAGE_URL}">
+  ${inputs}
+  <button class="btn" type="submit">🚀 Enviar a Azul ahora</button>
+</form>
+</body></html>`, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } })
+    }
+
     // Modo debug: prueba todas las combinaciones de MerchantName y MerchantType
     if (isDebug) {
       const { createHmac } = await import('crypto')
