@@ -1,17 +1,36 @@
 'use client'
 
-import { useEffect, use } from 'react'
+import React, { useEffect, use } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Suspense } from 'react'
 
+const TEST_MODE = process.env.NEXT_PUBLIC_PAYMENT_TEST_MODE === '1'
+
 function PagoContent({ bookingId }: { bookingId: string }) {
   const router       = useRouter()
   const searchParams = useSearchParams()
   const cuotaIdRaw   = searchParams.get('cuota')
   const cuotaId      = cuotaIdRaw && cuotaIdRaw !== 'undefined' ? cuotaIdRaw : null
+  const [testLoading, setTestLoading] = React.useState(false)
+
+  async function handleTestPay() {
+    setTestLoading(true)
+    const res = await fetch('/api/payments/test-confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bookingId, cuotaId: cuotaId || undefined }),
+    })
+    const data = await res.json()
+    if (data.success) {
+      router.push(`/pago/exitoso?b=${bookingId}${cuotaId ? `&cuota=${cuotaId}` : ''}`)
+    } else {
+      alert(data.error ?? 'Error al simular el pago')
+      setTestLoading(false)
+    }
+  }
 
   useEffect(() => {
     async function load() {
@@ -103,6 +122,17 @@ function PagoContent({ bookingId }: { bookingId: string }) {
           className="block mt-6 text-xs" style={{ color: '#CBD5E1', textDecoration: 'underline' }}>
           Cancelar
         </Link>
+
+        {/* Botón de prueba — solo visible en modo test */}
+        {TEST_MODE && (
+          <button
+            onClick={handleTestPay}
+            disabled={testLoading}
+            className="mt-4 px-5 py-2.5 rounded-xl text-sm font-bold disabled:opacity-50"
+            style={{ background: '#F59E0B', color: '#fff', border: '2px dashed rgba(255,255,255,0.3)' }}>
+            {testLoading ? '⏳ Procesando...' : '🧪 Simular pago exitoso (TEST)'}
+          </button>
+        )}
       </div>
     </div>
   )
