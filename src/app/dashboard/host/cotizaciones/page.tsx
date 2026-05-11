@@ -39,6 +39,7 @@ export default function CotizacionesPage() {
   const [price, setPrice]         = useState('')
   const [sending, setSending]     = useState(false)
   const [actionId, setActionId]   = useState<string | null>(null)
+  const [sendError, setSendError] = useState('')
 
   useEffect(() => {
     getHostQuotes().then(d => { setQuotes(d); setLoading(false) })
@@ -49,9 +50,10 @@ export default function CotizacionesPage() {
     const parsedPrice = parseFloat(price)
     if (isNaN(parsedPrice) || parsedPrice <= 0) return
     setSending(true)
+    setSendError('')
     const result = await respondToQuote(selected.id, parsedPrice, response || undefined)
     if ('error' in result) {
-      alert(`Error al enviar cotización: ${result.error}`)
+      setSendError(result.error ?? 'Error al enviar la cotización. Intenta de nuevo.')
     } else {
       setQuotes(prev => prev.filter(q => q.id !== selected.id))
       setSelected(null)
@@ -205,6 +207,13 @@ export default function CotizacionesPage() {
                       className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none"
                       style={{ fontSize: 16 }} />
                   </div>
+
+                  {sendError && (
+                    <div className="text-xs px-3 py-2 rounded-xl mb-2"
+                      style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.2)', color: '#DC2626' }}>
+                      {sendError}
+                    </div>
+                  )}
 
                   <div className="flex gap-3">
                     <button onClick={handleRespond}

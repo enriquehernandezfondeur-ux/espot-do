@@ -213,7 +213,7 @@ export function tplConfirmadaCliente(d: BookingData & { remainingAmount: number 
     { label: 'Horario',        value: `${formatTime(d.startTime)} – ${formatTime(d.endTime)}` },
     { label: 'Personas',       value: `${d.guestCount}` },
     { label: 'Pago realizado', value: formatCurrency(d.platformFee) },
-    { label: 'Saldo en el lugar', value: formatCurrency(d.remainingAmount) },
+    { label: 'Pendiente en cuotas', value: formatCurrency(d.remainingAmount) },
     { label: 'Referencia',     value: d.bookingId.slice(0, 8).toUpperCase() },
   ]
   return emailBase({
@@ -223,7 +223,7 @@ export function tplConfirmadaCliente(d: BookingData & { remainingAmount: number 
     body: `
       <p style="color:#374151;margin:0 0 16px;">Hola <strong>${d.guestName}</strong>, tu reserva está confirmada y tu fecha asegurada.</p>
       ${infoBox(rows)}
-      <p style="color:#6B7280;font-size:13px;margin:8px 0 0;">El saldo restante se paga directamente en el espacio el día del evento.</p>`,
+      <p style="color:#6B7280;font-size:13px;margin:8px 0 0;">Las cuotas restantes se cobrarán automáticamente según el plan de pagos. Todo a través de espot.do.</p>`,
     cta: { text: 'Ver mi reserva', url: `${SITE}/dashboard/reservas` },
   })
 }

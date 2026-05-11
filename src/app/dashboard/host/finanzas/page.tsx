@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { getHostBookings, getHostStats } from '@/lib/actions/host'
 import { Loader2, TrendingUp, CreditCard, DollarSign, Download, ArrowUpRight, Clock, CheckCircle, Building2, Banknote } from 'lucide-react'
@@ -17,9 +18,9 @@ const paymentLabel: Record<string, { label: string; color: string; bg: string }>
 // ── Estado de payout por reserva (simplificado) ───────────
 function getPayoutStatus(booking: any): { label: string; color: string; bg: string } {
   if (booking.status === 'completed' && booking.payment_status === 'paid')
-    return { label: 'Payout enviado',   color: '#16A34A', bg: 'rgba(22,163,74,0.08)' }
+    return { label: 'Pago recibido',    color: '#16A34A', bg: 'rgba(22,163,74,0.08)' }
   if (booking.status === 'confirmed')
-    return { label: 'Payout pendiente', color: '#D97706', bg: 'rgba(217,119,6,0.08)' }
+    return { label: 'Cuotas activas',   color: '#D97706', bg: 'rgba(217,119,6,0.08)' }
   if (['cancelled_guest', 'cancelled_host', 'rejected'].includes(booking.status))
     return { label: 'Cancelada',        color: '#DC2626', bg: 'rgba(220,38,38,0.08)' }
   return { label: 'En proceso',         color: '#6B7280', bg: 'rgba(107,114,128,0.08)' }
@@ -350,10 +351,11 @@ export default function FinanzasPage() {
             </p>
           </div>
         </div>
-        <button className="text-sm font-semibold px-4 py-2 rounded-xl shrink-0 transition-all"
-          style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+        <Link href="/dashboard/host/pagos"
+          className="text-sm font-semibold px-4 py-2 rounded-xl shrink-0 transition-all"
+          style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)', textDecoration: 'none' }}>
           Configurar cuenta
-        </button>
+        </Link>
       </div>
     </div>
   )

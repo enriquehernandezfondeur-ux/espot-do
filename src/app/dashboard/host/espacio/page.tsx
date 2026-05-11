@@ -604,7 +604,7 @@ export default function EspacioPage() {
                           onClick={async () => {
                             if (!window.confirm(`¿Eliminar "${space.name}"? Esta acción no se puede deshacer.`)) return
                             const r = await deleteSpaceByHost(space.id)
-                            if ('error' in r) { alert(r.error); return }
+                            if ('error' in r) { setSaveError(r.error ?? 'No se pudo eliminar el espacio'); return }
                             setSpaces(prev => prev.filter(s => s.id !== space.id))
                           }}
                           className="flex items-center justify-center gap-1.5 text-sm font-medium py-2 px-3 rounded-xl transition-colors"

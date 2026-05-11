@@ -253,7 +253,7 @@ export default function MisReservasPage() {
                       onClick={() => handlePay(bk.id)}
                       className="w-full flex items-center justify-center gap-1.5 text-sm font-bold px-4 py-3 rounded-xl transition-all"
                       style={{ background: '#2563EB', color: '#fff', boxShadow: '0 2px 8px rgba(37,99,235,0.3)' }}>
-                      <CreditCard size={15} /> Pagar ahora → {formatCurrency(Number(bk.total_amount))}
+                      <CreditCard size={15} /> Pagar primera cuota →
                     </button>
                   </div>
                 )}
@@ -299,22 +299,38 @@ export default function MisReservasPage() {
                       <div className="rounded-2xl p-4 space-y-2" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                         <div className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>Resumen de pago</div>
                         <div className="flex justify-between text-xs" style={{ color: 'var(--text-secondary)' }}>
-                          <span>Precio del evento</span>
-                          <span>{formatCurrency(Number(bk.total_amount))}</span>
+                          <span>Total del evento</span>
+                          <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{formatCurrency(Number(bk.total_amount))}</span>
                         </div>
-                        <div className="flex justify-between text-xs" style={{ color: 'var(--text-secondary)' }}>
-                          <span>Pago de confirmación</span>
-                          <span>{formatCurrency(Number(bk.platform_fee))}</span>
-                        </div>
-                        <div className="flex justify-between font-bold text-sm pt-2"
-                          style={{ borderTop: '1px solid var(--border-medium)', color: 'var(--text-primary)' }}>
-                          <span>Saldo en el lugar</span>
-                          <span>{formatCurrency(Number(bk.total_amount) - Number(bk.platform_fee))}</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-xs font-semibold mt-1"
-                          style={{ color: isPaid(bk.payment_status) ? '#16A34A' : '#D97706' }}>
+                        {/* Cuotas pagadas vs. pendientes */}
+                        {installments.length > 0 ? (() => {
+                          const paid    = installments.filter(i => i.status === 'paid').reduce((s, i) => s + Number(i.amount), 0)
+                          const pending = installments.filter(i => i.status !== 'paid').reduce((s, i) => s + Number(i.amount), 0)
+                          return (
+                            <>
+                              {paid > 0 && (
+                                <div className="flex justify-between text-xs" style={{ color: '#16A34A' }}>
+                                  <span>Pagado hasta ahora</span>
+                                  <span className="font-semibold">{formatCurrency(paid)}</span>
+                                </div>
+                              )}
+                              {pending > 0 && (
+                                <div className="flex justify-between text-xs" style={{ color: '#D97706' }}>
+                                  <span>Pendiente en cuotas</span>
+                                  <span className="font-semibold">{formatCurrency(pending)}</span>
+                                </div>
+                              )}
+                            </>
+                          )
+                        })() : (
+                          <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+                            <span>Todo se paga a través de espot.do en cuotas</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-1 text-xs font-semibold mt-1 pt-2"
+                          style={{ borderTop: '1px solid var(--border-medium)', color: isPaid(bk.payment_status) ? '#16A34A' : '#D97706' }}>
                           {isPaid(bk.payment_status)
-                            ? <><CheckCircle size={11} /> Pago realizado</>
+                            ? <><CheckCircle size={11} /> Pago completado</>
                             : '⏳ Pago pendiente'}
                         </div>
                       </div>
@@ -406,7 +422,7 @@ export default function MisReservasPage() {
                     {bk.status === 'confirmed' && (
                       <div className="mt-4 px-4 py-3 rounded-xl text-sm"
                         style={{ background: 'rgba(22,163,74,0.05)', border: '1px solid rgba(22,163,74,0.15)', color: '#166534' }}>
-                        Reserva confirmada. El saldo de {formatCurrency(Number(bk.total_amount) - Number(bk.platform_fee))} se paga directamente en el espacio el día del evento.
+                        Reserva confirmada. Las cuotas restantes se cobrarán automáticamente por espot.do según el plan de pagos.
                       </div>
                     )}
                     {bk.status === 'rejected' && (
