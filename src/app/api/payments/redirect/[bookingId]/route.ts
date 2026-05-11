@@ -11,7 +11,9 @@ export async function GET(
   { params }: { params: Promise<{ bookingId: string }> }
 ) {
   const { bookingId } = await params
-  const amount = Number(req.nextUrl.searchParams.get('amount') ?? '0')
+  const amount        = Number(req.nextUrl.searchParams.get('amount') ?? '0')
+  const cuotaRaw      = req.nextUrl.searchParams.get('cuota')
+  const cuotaId       = cuotaRaw && cuotaRaw !== 'undefined' ? cuotaRaw : null
 
   if (!amount || amount <= 0) {
     return new NextResponse(errorHtml('Monto de reserva inválido.'), {
@@ -55,6 +57,7 @@ export async function GET(
       itbis:       0,
       orderNumber,
       bookingId,
+      cuotaId:     cuotaId ?? undefined,
     })
 
     const hiddenInputs = Object.entries(fields)

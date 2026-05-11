@@ -10,7 +10,8 @@ import { Suspense } from 'react'
 function PagoContent({ bookingId }: { bookingId: string }) {
   const router       = useRouter()
   const searchParams = useSearchParams()
-  const cuotaId      = searchParams.get('cuota') // ID de la cuota específica (installment)
+  const cuotaIdRaw   = searchParams.get('cuota')
+  const cuotaId      = cuotaIdRaw && cuotaIdRaw !== 'undefined' ? cuotaIdRaw : null
 
   useEffect(() => {
     async function load() {
@@ -40,7 +41,7 @@ function PagoContent({ bookingId }: { bookingId: string }) {
       // Pago normal (primera cuota o pago único)
       const { data } = await supabase
         .from('bookings')
-        .select('total_amount, payment_status, booking_installments(amount, status, installment_number)')
+        .select('total_amount, payment_status, booking_installments(id, amount, status, installment_number)')
         .eq('id', bookingId)
         .eq('guest_id', user.id)
         .single()

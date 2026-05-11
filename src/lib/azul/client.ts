@@ -11,10 +11,11 @@ const MERCHANT_TYPE = process.env.AZUL_MERCHANT_TYPE ?? 'Marketplace'
 
 // ── Construir campos firmados para PaymentPage ────────────
 export interface AzulPageParams {
-  amount:      number  // en pesos RD$ (ej: 1500.00)
-  itbis?:      number  // ITBIS — 0 por defecto
-  orderNumber: string  // ID único de orden
-  bookingId:   string  // para construir las URLs de retorno
+  amount:      number   // en pesos RD$ (ej: 1500.00)
+  itbis?:      number   // ITBIS — 0 por defecto
+  orderNumber: string   // ID único de orden
+  bookingId:   string   // para construir las URLs de retorno
+  cuotaId?:    string   // ID de la cuota específica (installment) si aplica
 }
 
 export interface AzulPageFields {
@@ -44,9 +45,10 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
   // para las URLs de retorno — necesario cuando Azul tiene registrado un dominio
   // distinto al dominio principal de la app (ej: espot.do vs espothub.com).
   const BASE        = process.env.AZUL_RETURN_BASE_URL ?? SITE
-  const approvedUrl = `${BASE}/pago-exitoso/?b=${params.bookingId}`
-  const declinedUrl = `${BASE}/pago-declinado/?b=${params.bookingId}`
-  const cancelUrl   = `${BASE}/pago-cancelado/?b=${params.bookingId}`
+  const cuotaQuery  = params.cuotaId ? `&cuota=${params.cuotaId}` : ''
+  const approvedUrl = `${BASE}/pago-exitoso/?b=${params.bookingId}${cuotaQuery}`
+  const declinedUrl = `${BASE}/pago-declinado/?b=${params.bookingId}${cuotaQuery}`
+  const cancelUrl   = `${BASE}/pago-cancelado/?b=${params.bookingId}${cuotaQuery}`
 
   const hashInput = [
     MERCHANT_ID,
