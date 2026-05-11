@@ -1028,20 +1028,18 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             </label>
 
             {/* Logos de seguridad de pago */}
-            <div className="flex items-center justify-center gap-3 pt-1">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
-                style={{ background: '#F8FAFB', border: '1px solid #E8ECF0' }}>
-                <svg width="36" height="12" viewBox="0 0 36 12"><text x="0" y="10" fontFamily="Arial" fontWeight="900" fontSize="12" fill="#1A1F71">VISA</text></svg>
-                <div style={{ width: 1, height: 16, background: '#E8ECF0' }} />
-                <svg width="28" height="18" viewBox="0 0 28 18">
-                  <circle cx="10" cy="9" r="9" fill="#EB001B"/>
-                  <circle cx="18" cy="9" r="9" fill="#F79E1B"/>
-                  <path d="M14 3.5a9 9 0 0 1 0 11A9 9 0 0 1 14 3.5z" fill="#FF5F00"/>
-                </svg>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold"
+            <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/visa-logo.jpg" alt="Visa" style={{ height: 20, width: 'auto', borderRadius: 3, objectFit: 'contain' }} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/mastercard-logo.svg" alt="Mastercard" style={{ height: 20, width: 'auto' }} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/verified-by-visa.png" alt="Verified by Visa" style={{ height: 18, width: 'auto' }} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 18, width: 'auto' }} />
+              <div className="flex items-center gap-1 px-2 py-1 rounded text-[9px] font-semibold"
                 style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', color: '#1E40AF' }}>
-                🔒 Pago 3D Secure
+                🔒 3D Secure
               </div>
             </div>
 

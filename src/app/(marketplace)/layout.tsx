@@ -512,21 +512,16 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
           <div className="flex flex-col md:flex-row items-center justify-between gap-3 pt-4"
             style={{ borderTop: '1px solid var(--border-subtle)' }}>
 
-            <div className="flex items-center gap-2 flex-wrap justify-center">
-              <div className="px-2.5 py-1 rounded" style={{ background: '#1A1F71', height: 22 }}>
-                <svg width="30" height="10" viewBox="0 0 30 10"><text x="0" y="9" fontFamily="Arial" fontWeight="900" fontSize="10" fill="#fff">VISA</text></svg>
-              </div>
-              <div className="px-2 py-0.5 rounded flex items-center gap-0.5" style={{ background: '#252525', height: 22 }}>
-                <svg width="20" height="12" viewBox="0 0 20 12"><circle cx="7" cy="6" r="6" fill="#EB001B"/><circle cx="13" cy="6" r="6" fill="#F79E1B"/><path d="M10 1.8a6 6 0 0 1 0 8.4A6 6 0 0 1 10 1.8z" fill="#FF5F00"/></svg>
-              </div>
-              <div className="px-2 py-0.5 rounded flex items-center gap-0.5 text-[9px] font-bold" style={{ background: '#EEF2FF', color: '#1A1F71', height: 22, border: '1px solid #C7D2FE' }}>
-                <span style={{ fontWeight: 900 }}>V</span> Verified by Visa
-              </div>
-              <div className="px-2 py-0.5 rounded flex items-center gap-0.5 text-[9px] font-bold" style={{ background: '#FFF7ED', color: '#92400E', height: 22, border: '1px solid #FED7AA' }}>
-                <svg width="12" height="8" viewBox="0 0 12 8"><circle cx="4" cy="4" r="4" fill="#EB001B"/><circle cx="8" cy="4" r="4" fill="#F79E1B"/></svg>
-                ID Check
-              </div>
-              <div className="px-2 py-0.5 rounded flex items-center gap-0.5 text-[9px] font-bold text-white" style={{ background: '#0057A8', height: 22 }}>
+            <div className="flex items-center gap-2.5 flex-wrap justify-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/visa-logo.jpg" alt="Visa" style={{ height: 24, width: 'auto', borderRadius: 4, objectFit: 'contain' }} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/mastercard-logo.svg" alt="Mastercard" style={{ height: 24, width: 'auto' }} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/verified-by-visa.png" alt="Verified by Visa" style={{ height: 24, width: 'auto' }} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 24, width: 'auto' }} />
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold text-white" style={{ background: '#0057A8', height: 24 }}>
                 🔒 azul
               </div>
             </div>

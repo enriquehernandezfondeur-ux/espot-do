@@ -103,19 +103,14 @@ function PagoContent({ bookingId }: { bookingId: string }) {
 
         {/* Logos 3D Secure — requerido por Azul */}
         <div className="flex items-center justify-center gap-3 mt-6 flex-wrap">
-          <div className="px-3 py-1.5 rounded-lg" style={{ background: '#1A1F71' }}>
-            <svg width="36" height="12" viewBox="0 0 36 12"><text x="0" y="10" fontFamily="Arial" fontWeight="900" fontSize="12" fill="#fff">VISA</text></svg>
-          </div>
-          <div className="px-2 py-1 rounded-lg flex items-center gap-1" style={{ background: '#252525' }}>
-            <svg width="24" height="14" viewBox="0 0 24 14"><circle cx="8" cy="7" r="7" fill="#EB001B"/><circle cx="16" cy="7" r="7" fill="#F79E1B"/><path d="M12 2.1a7 7 0 0 1 0 9.8A7 7 0 0 1 12 2.1z" fill="#FF5F00"/></svg>
-          </div>
-          <div className="px-2.5 py-1 rounded-lg text-[10px] font-bold" style={{ background: '#EEF2FF', color: '#1A1F71', border: '1px solid #C7D2FE' }}>
-            Verified by Visa
-          </div>
-          <div className="px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1" style={{ background: '#FFF7ED', color: '#92400E', border: '1px solid #FED7AA' }}>
-            <svg width="12" height="8" viewBox="0 0 12 8"><circle cx="4" cy="4" r="4" fill="#EB001B"/><circle cx="8" cy="4" r="4" fill="#F79E1B"/></svg>
-            ID Check
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/visa-logo.jpg" alt="Visa" style={{ height: 22, width: 'auto', borderRadius: 4, objectFit: 'contain' }} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/mastercard-logo.svg" alt="Mastercard" style={{ height: 22, width: 'auto' }} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/verified-by-visa.png" alt="Verified by Visa" style={{ height: 20, width: 'auto' }} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 20, width: 'auto' }} />
         </div>
 
         <Link href={`/pago/cancelado?b=${bookingId}`}

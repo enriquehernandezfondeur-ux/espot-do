@@ -44,27 +44,22 @@ export default function SeguridadPage() {
           <p className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: 'var(--text-muted)' }}>
             Pagos protegidos con autenticación 3D Secure
           </p>
-          <div className="flex items-center justify-center gap-6 flex-wrap">
-            {/* Visa */}
+          <div className="flex items-center justify-center gap-8 flex-wrap">
+            {/* Visa + Verified by Visa */}
             <div className="flex flex-col items-center gap-2">
-              <div className="px-4 py-2 rounded-xl" style={{ background: '#1A1F71' }}>
-                <svg width="52" height="17" viewBox="0 0 52 17">
-                  <text x="0" y="14" fontFamily="Arial" fontWeight="900" fontSize="17" fill="#fff">VISA</text>
-                </svg>
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/visa-logo.jpg" alt="Visa" style={{ height: 36, width: 'auto', borderRadius: 8, objectFit: 'contain' }} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/verified-by-visa.png" alt="Verified by Visa" style={{ height: 28, width: 'auto' }} />
               <span className="text-xs font-semibold" style={{ color: '#1A1F71' }}>Verified by Visa</span>
             </div>
 
-            {/* Mastercard */}
+            {/* Mastercard ID Check */}
             <div className="flex flex-col items-center gap-2">
-              <div className="flex items-center gap-1 px-4 py-2 rounded-xl" style={{ background: '#252525' }}>
-                <svg width="32" height="20" viewBox="0 0 32 20">
-                  <circle cx="11" cy="10" r="10" fill="#EB001B"/>
-                  <circle cx="21" cy="10" r="10" fill="#F79E1B"/>
-                  <path d="M16 3a10 10 0 0 1 0 14A10 10 0 0 1 16 3z" fill="#FF5F00"/>
-                </svg>
-                <span style={{ fontFamily: 'Arial', fontWeight: '900', fontSize: 11, color: '#fff', letterSpacing: '0.02em' }}>ID Check</span>
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/mastercard-logo.svg" alt="Mastercard" style={{ height: 36, width: 'auto' }} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 28, width: 'auto' }} />
               <span className="text-xs font-semibold" style={{ color: '#252525' }}>Mastercard ID Check</span>
             </div>
 
