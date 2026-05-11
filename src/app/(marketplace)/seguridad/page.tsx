@@ -65,10 +65,8 @@ export default function SeguridadPage() {
 
             {/* Azul */}
             <div className="flex flex-col items-center gap-2">
-              <div className="px-4 py-2 rounded-xl flex items-center gap-2" style={{ background: '#0057A8' }}>
-                <Lock size={14} color="#fff" />
-                <span style={{ fontFamily: 'Arial', fontWeight: '700', fontSize: 13, color: '#fff' }}>azul</span>
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/azul-logo.jpg" alt="Azul Payments" style={{ height: 36, width: 'auto', borderRadius: 8, objectFit: 'contain' }} />
               <span className="text-xs font-semibold" style={{ color: '#0057A8' }}>Azul Payments RD</span>
             </div>
           </div>

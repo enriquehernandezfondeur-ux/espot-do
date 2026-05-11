@@ -521,9 +521,8 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
               <img src="/verified-by-visa.png" alt="Verified by Visa" style={{ height: 24, width: 'auto' }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 24, width: 'auto' }} />
-              <div className="flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold text-white" style={{ background: '#0057A8', height: 24 }}>
-                🔒 azul
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/azul-logo.jpg" alt="Azul Payments" style={{ height: 24, width: 'auto', borderRadius: 4, objectFit: 'contain' }} />
             </div>
 
             <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>

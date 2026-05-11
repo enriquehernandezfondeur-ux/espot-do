@@ -1037,10 +1037,8 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               <img src="/verified-by-visa.png" alt="Verified by Visa" style={{ height: 18, width: 'auto' }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 18, width: 'auto' }} />
-              <div className="flex items-center gap-1 px-2 py-1 rounded text-[9px] font-semibold"
-                style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', color: '#1E40AF' }}>
-                🔒 3D Secure
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/azul-logo.jpg" alt="Azul Payments" style={{ height: 18, width: 'auto', borderRadius: 3, objectFit: 'contain' }} />
             </div>
 
             {error && (
