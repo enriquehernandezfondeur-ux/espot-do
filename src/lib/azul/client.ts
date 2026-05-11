@@ -5,7 +5,9 @@
 
 import { createHmac } from 'crypto'
 
-const MERCHANT_TYPE = 'Marketplace'
+// MerchantType debe coincidir EXACTAMENTE con lo registrado en Azul (ej: 'E-Commerce', 'Retail', 'Marketplace')
+// Configura AZUL_MERCHANT_TYPE en Vercel si 'Marketplace' no funciona.
+const MERCHANT_TYPE = process.env.AZUL_MERCHANT_TYPE ?? 'Marketplace'
 
 // ── Construir campos firmados para PaymentPage ────────────
 export interface AzulPageParams {

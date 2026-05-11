@@ -11,9 +11,10 @@ export async function GET() {
     return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
   }
 
-  const MERCHANT_ID   = process.env.AZUL_MERCHANT_ID   ?? ''
-  const MERCHANT_NAME = process.env.AZUL_MERCHANT_NAME ?? ''
-  const PRIVATE_KEY   = process.env.AZUL_PRIVATE_KEY   ?? ''
+  const MERCHANT_ID   = process.env.AZUL_MERCHANT_ID    ?? ''
+  const MERCHANT_NAME = process.env.AZUL_MERCHANT_NAME  ?? ''
+  const MERCHANT_TYPE = process.env.AZUL_MERCHANT_TYPE  ?? 'Marketplace'
+  const PRIVATE_KEY   = process.env.AZUL_PRIVATE_KEY    ?? ''
   const PAGE_URL      = process.env.AZUL_PAYMENT_PAGE_URL ?? ''
   const SITE          = process.env.NEXT_PUBLIC_SITE_URL ?? ''
   const NODE_ENV      = process.env.NODE_ENV ?? ''
@@ -26,7 +27,7 @@ export async function GET() {
     const testInput = [
       MERCHANT_ID,
       MERCHANT_NAME || 'ESPOT, S.R.L.',
-      'Marketplace',
+      MERCHANT_TYPE,
       '$',
       'TEST-ORDER-001',
       '100000', // RD$1,000.00 en centavos
@@ -59,9 +60,10 @@ export async function GET() {
       NODE_ENV,
     },
     resolvedValues: {
-      pageUrl:      resolvedPageUrl,
-      merchantType: 'Marketplace',
-      currencyCode: '$',
+      pageUrl:        resolvedPageUrl,
+      merchantType:   MERCHANT_TYPE,
+      merchantTypeEnv: process.env.AZUL_MERCHANT_TYPE ? '✅ Desde AZUL_MERCHANT_TYPE' : '⚠️  Usando default "Marketplace" — confirma con Azul',
+      currencyCode:   '$',
     },
     hashTest: {
       generated: testHash || null,
