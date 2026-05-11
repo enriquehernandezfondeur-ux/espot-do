@@ -55,7 +55,8 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
     itbisCents  = 0
   }
   const amountStr = String(amountCents)
-  const itbisStr  = String(itbisCents)
+  // ITBIS=0 se envía como "000" (formato requerido por Azul)
+  const itbisStr  = itbisCents === 0 ? '000' : String(itbisCents)
 
   // AZUL_RETURN_BASE_URL permite usar un dominio diferente a NEXT_PUBLIC_SITE_URL
   // para las URLs de retorno — necesario cuando Azul tiene registrado un dominio
@@ -68,7 +69,7 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
 
   const CURRENCY    = process.env.AZUL_CURRENCY_CODE ?? 'RD$'
 
-  // Campos de custom fields — van en el formulario pero NO en el hash
+  // Custom fields — siempre incluidos en hash (requerido por Azul)
   const useCustomField1    = '0'
   const customField1Label  = ''
   const customField1Value  = ''
@@ -76,8 +77,9 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
   const customField2Label  = ''
   const customField2Value  = ''
 
-  // Hash con solo los 10 campos base (sin custom fields)
-  const hashInputBase = [
+  // El hash incluye todos los campos + el private key al final del mensaje
+  // (según documentación oficial de Azul PaymentPage)
+  const hashInput = [
     MERCHANT_ID,
     MERCHANT_NAME,
     MERCHANT_TYPE,
@@ -88,14 +90,14 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
     approvedUrl,
     declinedUrl,
     cancelUrl,
+    useCustomField1,
+    customField1Label,
+    customField1Value,
+    useCustomField2,
+    customField2Label,
+    customField2Value,
+    PRIVATE_KEY,
   ].join('')
-
-  // Hash alternativo con custom fields incluidos (algunas versiones del plugin lo requieren)
-  const hashInputWithCustom = hashInputBase + useCustomField1 + customField1Label + customField1Value + useCustomField2 + customField2Label + customField2Value
-
-  // Usar el que está configurado (por defecto: sin custom fields = más compatible)
-  const useCustomInHash = process.env.AZUL_HASH_INCLUDE_CUSTOM === '1'
-  const hashInput       = useCustomInHash ? hashInputWithCustom : hashInputBase
 
   const authHash = createHmac('sha512', PRIVATE_KEY)
     .update(hashInput)
@@ -106,12 +108,13 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
     pageUrl: PAGE_URL,
     fields: {
       MerchantId:        MERCHANT_ID,
+      TrxType:           'Sale',
       MerchantName:      MERCHANT_NAME,
       MerchantType:      MERCHANT_TYPE,
       CurrencyCode:      CURRENCY,
       OrderNumber:       params.orderNumber,
       Amount:            amountStr,
-      Itbis:             itbisStr,
+      ITBIS:             itbisStr,
       ApprovedUrl:       approvedUrl,
       DeclinedUrl:       declinedUrl,
       CancelUrl:         cancelUrl,
@@ -121,6 +124,7 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
       UseCustomField2:   useCustomField2,
       CustomField2Label: customField2Label,
       CustomField2Value: customField2Value,
+      SaveToDataVault:   '0',
       AuthHash:          authHash,
     },
   }
