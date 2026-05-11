@@ -40,9 +40,13 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
   const amountStr = String(Math.round(params.amount * 100))
   const itbisStr  = String(Math.round((params.itbis ?? 0) * 100))
 
-  const approvedUrl = `${SITE}/pago/exitoso?b=${params.bookingId}`
-  const declinedUrl = `${SITE}/pago/fallido?b=${params.bookingId}`
-  const cancelUrl   = `${SITE}/pago/cancelado?b=${params.bookingId}`
+  // AZUL_RETURN_BASE_URL permite usar un dominio diferente a NEXT_PUBLIC_SITE_URL
+  // para las URLs de retorno — necesario cuando Azul tiene registrado un dominio
+  // distinto al dominio principal de la app (ej: espot.do vs espothub.com).
+  const BASE        = process.env.AZUL_RETURN_BASE_URL ?? SITE
+  const approvedUrl = `${BASE}/pago-exitoso/?b=${params.bookingId}`
+  const declinedUrl = `${BASE}/pago-declinado/?b=${params.bookingId}`
+  const cancelUrl   = `${BASE}/pago-cancelado/?b=${params.bookingId}`
 
   const hashInput = [
     MERCHANT_ID,

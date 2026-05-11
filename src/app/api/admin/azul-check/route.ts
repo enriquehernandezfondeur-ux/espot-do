@@ -56,8 +56,14 @@ export async function GET() {
       AZUL_MERCHANT_NAME:     MERCHANT_NAME || '⚠️  No configurada (usará "ESPOT, S.R.L.")',
       AZUL_PRIVATE_KEY:       PRIVATE_KEY   ? `${PRIVATE_KEY.slice(0, 6)}... (${PRIVATE_KEY.length} chars)` : '❌ NO CONFIGURADA',
       AZUL_PAYMENT_PAGE_URL:  PAGE_URL      || `⚠️  No configurada (usará: ${resolvedPageUrl})`,
+      AZUL_RETURN_BASE_URL:   process.env.AZUL_RETURN_BASE_URL || `⚠️  No configurada (usará NEXT_PUBLIC_SITE_URL: ${SITE})`,
       NEXT_PUBLIC_SITE_URL:   SITE          || '❌ NO CONFIGURADA',
       NODE_ENV,
+    },
+    returnUrls: {
+      approved: `${process.env.AZUL_RETURN_BASE_URL ?? SITE}/pago-exitoso/?b={bookingId}`,
+      declined: `${process.env.AZUL_RETURN_BASE_URL ?? SITE}/pago-declinado/?b={bookingId}`,
+      cancel:   `${process.env.AZUL_RETURN_BASE_URL ?? SITE}/pago-cancelado/?b={bookingId}`,
     },
     resolvedValues: {
       pageUrl:        resolvedPageUrl,
