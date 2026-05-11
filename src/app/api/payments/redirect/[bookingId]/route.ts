@@ -61,8 +61,11 @@ export async function GET(
       cuotaId:     cuotaId ?? undefined,
     })
 
+    function escapeHtml(s: string) {
+      return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    }
     const hiddenInputs = Object.entries(fields)
-      .map(([k, v]) => `<input type="hidden" name="${k}" value="${v.replace(/"/g, '&quot;')}">`)
+      .map(([k, v]) => `<input type="hidden" name="${k}" value="${escapeHtml(v)}">`)
       .join('\n    ')
 
     // Modo debug: prueba todas las combinaciones de MerchantName y MerchantType

@@ -19,69 +19,51 @@ export async function GET() {
   const SITE          = process.env.NEXT_PUBLIC_SITE_URL ?? ''
   const NODE_ENV      = process.env.NODE_ENV ?? ''
 
-  // Generar un hash de prueba para confirmar que la firma funciona
-  let testHash = ''
+  // Verificar hash con valores EXACTOS del ejemplo oficial de Azul
+  const EXPECTED = '6662f1e52260cf845a848845e6769ece7ef173c2809ea215f1fc8907442a21f395bdfbb8422eb4d6ce8673eb6961beb730d97842e8030668516beba717ffff5b'
+  let hashOk = false
+  let computedHash = ''
   let hashError = ''
   try {
     const { createHmac } = await import('crypto')
-    const testInput = [
-      MERCHANT_ID,
-      MERCHANT_NAME || 'ESPOT, S.R.L.',
-      MERCHANT_TYPE,
-      '$',
-      'TEST-ORDER-001',
-      '100000', // RD$1,000.00 en centavos
-      '0',
-      `${SITE}/pago/exitoso?b=test`,
-      `${SITE}/pago/fallido?b=test`,
-      `${SITE}/pago/cancelado?b=test`,
+    const msg = [
+      '39038540035', 'Prueba AZUL', 'ECommerce', '$',
+      '001', '10000', '000',
+      'https://google.com', 'https://google.com', 'https://google.com',
+      '0', '', '', '0', '', '',
+      PRIVATE_KEY,
     ].join('')
-
-    testHash = createHmac('sha512', PRIVATE_KEY)
-      .update(testInput)
-      .digest('hex')
-      .toUpperCase()
-      .slice(0, 16) + '...' // Solo primeros 16 chars por seguridad
+    computedHash = createHmac('sha512', PRIVATE_KEY).update(msg).digest('hex')
+    hashOk = computedHash === EXPECTED
   } catch (e: any) {
     hashError = e.message
   }
 
-  const resolvedPageUrl = PAGE_URL || (NODE_ENV === 'production'
-    ? 'https://pagos.azul.com.do/PaymentPage/Default.aspx'
-    : 'https://pruebas.azul.com.do/paymentpage/Default.aspx')
-
   return NextResponse.json({
-    variables: {
-      AZUL_MERCHANT_ID:       MERCHANT_ID   ? `${MERCHANT_ID.slice(0, 4)}...` : '❌ NO CONFIGURADA',
-      AZUL_MERCHANT_NAME:     MERCHANT_NAME || '⚠️  No configurada (usará "ESPOT, S.R.L.")',
-      AZUL_PRIVATE_KEY:       PRIVATE_KEY   ? `${PRIVATE_KEY.slice(0, 6)}... (${PRIVATE_KEY.length} chars)` : '❌ NO CONFIGURADA',
-      AZUL_PAYMENT_PAGE_URL:  PAGE_URL      || `⚠️  No configurada (usará: ${resolvedPageUrl})`,
-      AZUL_RETURN_BASE_URL:   process.env.AZUL_RETURN_BASE_URL || `⚠️  No configurada (usará NEXT_PUBLIC_SITE_URL: ${SITE})`,
-      NEXT_PUBLIC_SITE_URL:   SITE          || '❌ NO CONFIGURADA',
-      NODE_ENV,
+    config: {
+      MERCHANT_ID,
+      MERCHANT_NAME,
+      MERCHANT_TYPE,
+      CURRENCY:     process.env.AZUL_CURRENCY_CODE ?? '(no set)',
+      PAGE_URL:     PAGE_URL || '(no set)',
+      PRIVATE_KEY_LENGTH: PRIVATE_KEY.length,
+      PRIVATE_KEY_PREVIEW: PRIVATE_KEY.slice(0, 12) + '...',
     },
-    returnUrls: {
-      approved: `${process.env.AZUL_RETURN_BASE_URL ?? SITE}/pago-exitoso/?b={bookingId}`,
-      declined: `${process.env.AZUL_RETURN_BASE_URL ?? SITE}/pago-declinado/?b={bookingId}`,
-      cancel:   `${process.env.AZUL_RETURN_BASE_URL ?? SITE}/pago-cancelado/?b={bookingId}`,
+    hashVerification: {
+      ok:            hashOk,
+      computed:      computedHash.slice(0, 32) + '...',
+      expected:      EXPECTED.slice(0, 32) + '...',
+      result:        hashOk
+        ? '✅ PRIVATE_KEY correcta — hash coincide con el ejemplo de Azul'
+        : '❌ PRIVATE_KEY incorrecta o tiene caracteres extra — hash NO coincide',
     },
-    resolvedValues: {
-      pageUrl:        resolvedPageUrl,
-      merchantType:   MERCHANT_TYPE,
-      merchantTypeEnv: process.env.AZUL_MERCHANT_TYPE ? '✅ Desde AZUL_MERCHANT_TYPE' : '⚠️  Usando default "Marketplace" — confirma con Azul',
-      currencyCode:   '$',
+    fieldChecks: {
+      merchantName:  MERCHANT_NAME === 'Prueba AZUL' ? '✅ Correcto' : `❌ Incorrecto — tienes "${MERCHANT_NAME}", debe ser "Prueba AZUL"`,
+      merchantType:  MERCHANT_TYPE === 'ECommerce'   ? '✅ Correcto' : `❌ Incorrecto — tienes "${MERCHANT_TYPE}", debe ser "ECommerce"`,
+      merchantId:    MERCHANT_ID   === '39038540035' ? '✅ Correcto' : `❌ Incorrecto — tienes "${MERCHANT_ID}"`,
+      currency:      (process.env.AZUL_CURRENCY_CODE ?? '') === '$' ? '✅ Correcto' : `❌ Incorrecto — debe ser "$"`,
     },
-    hashTest: {
-      generated: testHash || null,
-      error:     hashError || null,
-      note:      testHash ? '✅ La firma HMAC funciona correctamente' : '❌ Error generando firma',
-    },
-    issues: [
-      !MERCHANT_ID   && 'AZUL_MERCHANT_ID no está configurada en Vercel',
-      !PRIVATE_KEY   && 'AZUL_PRIVATE_KEY no está configurada en Vercel',
-      !SITE          && 'NEXT_PUBLIC_SITE_URL no está configurada',
-      MERCHANT_ID && MERCHANT_ID.includes(' ') && 'AZUL_MERCHANT_ID tiene espacios — copiala sin espacios',
-      PRIVATE_KEY && PRIVATE_KEY.includes(' ') && 'AZUL_PRIVATE_KEY tiene espacios — copiala sin espacios',
-    ].filter(Boolean),
+    readyToPay: hashOk && MERCHANT_NAME === 'Prueba AZUL' && MERCHANT_TYPE === 'ECommerce',
+    error: hashError || undefined,
   })
 }
