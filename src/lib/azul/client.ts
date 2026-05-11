@@ -102,7 +102,6 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
   const authHash = createHmac('sha512', PRIVATE_KEY)
     .update(hashInput)
     .digest('hex')
-    .toUpperCase()
 
   return {
     pageUrl: PAGE_URL,

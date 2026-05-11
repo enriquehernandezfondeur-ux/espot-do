@@ -88,7 +88,7 @@ export async function GET(
 
       const msg = [MERCHANT_ID, MERCHANT_NAME, MERCHANT_TYPE, CURRENCY,
         ORDER, AMT, ITBIS_V, AURL, DURL, CURL, '0','','','0','','', PRIV].join('')
-      const hash = createHmac('sha512', PRIV).update(msg).digest('hex').toUpperCase()
+      const hash = createHmac('sha512', PRIV).update(msg).digest('hex')
 
       const inputs = [
         ['MerchantId', MERCHANT_ID], ['TrxType', 'Sale'],
