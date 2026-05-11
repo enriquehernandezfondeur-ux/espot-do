@@ -53,8 +53,11 @@ export default function LocationPicker({ address, sector, lat, lng, onAddress, o
 
   const [hasPin,      setHasPin]      = useState(!!(lat && lng))
   const [suggestions, setSuggestions] = useState<PhotonFeature[]>([])
+  const [showDrop,    setShowDrop]    = useState(false)
   const [loading,     setLoading]     = useState(false)
+  const [noResults,   setNoResults]   = useState(false)
   const debounceRef   = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const blurTimerRef  = useRef<ReturnType<typeof setTimeout> | null>(null)
   const inputRef      = useRef<HTMLInputElement>(null)
 
   // ── Inicializar mapa ──────────────────────────────────────
@@ -121,28 +124,42 @@ export default function LocationPicker({ address, sector, lat, lng, onAddress, o
   // ── Autocompletar ─────────────────────────────────────────
   function handleAddressChange(val: string) {
     onAddress(val)
-    setSuggestions([])
+    setNoResults(false)
+    // NO limpiar suggestions aquí — se reemplazan cuando llega la respuesta.
+    // Limpiar en cada tecla causaba que el dropdown desapareciera.
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    if (val.trim().length < 3) return
-    debounceRef.current = setTimeout(() => doSearch(val), 250)
+    if (val.trim().length < 3) { setSuggestions([]); setShowDrop(false); return }
+    debounceRef.current = setTimeout(() => doSearch(val), 300)
   }
 
   async function doSearch(query: string) {
     setLoading(true)
     try {
-      // Photon: más rápido que Nominatim, retorna números de calle
-      // bbox restringido a República Dominicana: W=-72.0, S=17.5, E=-68.3, N=19.9
-      const q = [query, sector].filter(Boolean).join(' ')
-      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lang=es&limit=5&bbox=-72.0,17.5,-68.3,19.9`
+      // Añadimos "República Dominicana" a la query para mejorar resultados locales
+      const q = [query, sector, 'República Dominicana'].filter(Boolean).join(', ')
+      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lang=es&limit=6&bbox=-72.0,17.5,-68.3,19.9`
       const res  = await fetch(url)
       const data = await res.json()
-      const features: PhotonFeature[] = data.features ?? []
-      setSuggestions(features.slice(0, 5))
+      const features: PhotonFeature[] = (data.features ?? []).slice(0, 6)
+      setSuggestions(features)
+      setNoResults(features.length === 0)
+      setShowDrop(true)
     } catch {
       setSuggestions([])
+      setNoResults(false)
     } finally {
       setLoading(false)
     }
+  }
+
+  function handleFocus() {
+    if (blurTimerRef.current) clearTimeout(blurTimerRef.current)
+    if (suggestions.length > 0) setShowDrop(true)
+  }
+
+  function handleBlur() {
+    // Delay para que el click en una sugerencia se registre antes de cerrar
+    blurTimerRef.current = setTimeout(() => setShowDrop(false), 180)
   }
 
   function formatSuggestion(f: PhotonFeature): string {
@@ -159,6 +176,8 @@ export default function LocationPicker({ address, sector, lat, lng, onAddress, o
     onAddress(street || formatSuggestion(f).split(',')[0])
     if ((p.suburb || p.district) && !sector) onSector(p.suburb || p.district || '')
     setSuggestions([])
+    setShowDrop(false)
+    setNoResults(false)
 
     const [gLng, gLat] = f.geometry.coordinates  // Photon usa [lon, lat]
     onCoordsRef.current(gLat.toFixed(6), gLng.toFixed(6))
@@ -184,10 +203,13 @@ export default function LocationPicker({ address, sector, lat, lng, onAddress, o
               ref={inputRef}
               value={address}
               onChange={e => handleAddressChange(e.target.value)}
-              onKeyDown={e => e.key === 'Escape' && setSuggestions([])}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              onKeyDown={e => { if (e.key === 'Escape') { setSuggestions([]); setShowDrop(false) } }}
               placeholder="Av. Winston Churchill #123"
               className="w-full input-base rounded-xl px-4 py-3 pr-9"
               autoComplete="off"
+              style={{ fontSize: 16 }}
             />
             {loading && (
               <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin"
@@ -195,9 +217,9 @@ export default function LocationPicker({ address, sector, lat, lng, onAddress, o
             )}
 
             {/* Dropdown de sugerencias */}
-            {suggestions.length > 0 && (
-              <ul className="absolute left-0 right-0 top-full mt-1 z-[9999] rounded-xl overflow-hidden"
-                style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+            {showDrop && suggestions.length > 0 && (
+              <ul className="absolute left-0 right-0 top-full mt-1 rounded-xl overflow-hidden"
+                style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 24px rgba(0,0,0,0.14)', zIndex: 9999 }}>
                 {suggestions.map((s, i) => {
                   const label = formatSuggestion(s)
                   return (
@@ -216,6 +238,14 @@ export default function LocationPicker({ address, sector, lat, lng, onAddress, o
                   )
                 })}
               </ul>
+            )}
+
+            {/* Sin resultados */}
+            {showDrop && noResults && !loading && address.trim().length >= 3 && (
+              <div className="absolute left-0 right-0 top-full mt-1 rounded-xl px-4 py-3 text-sm"
+                style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 24px rgba(0,0,0,0.1)', color: 'var(--text-muted)', zIndex: 9999 }}>
+                No se encontraron resultados. Escribe más detalles o haz click en el mapa.
+              </div>
             )}
           </div>
         </div>
