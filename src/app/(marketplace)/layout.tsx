@@ -432,105 +432,89 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
       <footer style={{ borderTop: '1px solid var(--border-subtle)', background: '#fff' }} className="py-8 md:py-10 px-4 md:px-6">
         <div className="max-w-7xl mx-auto space-y-6">
 
-          <div className="flex flex-col md:flex-row items-center justify-between gap-5 md:gap-6">
-            <Link href="/">
-              <img src="/logo-dark.svg" alt="espot.do" style={{ height: 22, width: 'auto' }} />
+          {/* Fila 1: Logo + links de navegación + redes sociales */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-5">
+            <Link href="/" className="shrink-0">
+              <img src="/logo-dark.svg" alt="espothub.com" style={{ height: 22, width: 'auto' }} />
             </Link>
-            <div className="flex items-center gap-4 md:gap-5 text-sm flex-wrap justify-center" style={{ color: 'var(--text-muted)' }}>
-              <Link href="/buscar"             className="link-muted">Explorar</Link>
-              <Link href="/para-clientes"      className="link-muted">Para clientes</Link>
-              <Link href="/para-propietarios"  className="link-muted">Para propietarios</Link>
-              <Link href="/terminos"   className="link-muted">Términos</Link>
-              <Link href="/privacidad" className="link-muted">Privacidad</Link>
-              <Link href="/reembolso"  className="link-muted">Reembolso</Link>
-              <Link href="/seguridad"  className="link-muted">Seguridad</Link>
-              <Link href="/cookies"    className="link-muted">Cookies</Link>
-              <a href="mailto:contacto@espothub.com" className="link-muted">Contacto</a>
+            <div className="flex items-center gap-4 text-sm flex-wrap justify-center" style={{ color: 'var(--text-muted)' }}>
+              <Link href="/buscar"            className="link-muted">Explorar</Link>
+              <Link href="/para-clientes"     className="link-muted">Para clientes</Link>
+              <Link href="/para-propietarios" className="link-muted">Para propietarios</Link>
+              <Link href="/contacto"          className="link-muted">Servicio al cliente</Link>
             </div>
-
-            {/* Social icons */}
-            <div className="flex items-center gap-2.5">
-              <a href="https://www.instagram.com/espot.do/" target="_blank" rel="noopener noreferrer"
-                aria-label="Instagram"
+            <div className="flex items-center gap-2.5 shrink-0">
+              <a href="https://www.instagram.com/espot.do/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"
                 className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#E1306C'; (e.currentTarget as HTMLElement).style.background = 'rgba(225,48,108,0.08)' }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'; (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                </svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
               </a>
-              <a href="https://www.facebook.com/espot.do/" target="_blank" rel="noopener noreferrer"
-                aria-label="Facebook"
+              <a href="https://www.facebook.com/espot.do/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"
                 className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#1877F2'; (e.currentTarget as HTMLElement).style.background = 'rgba(24,119,242,0.08)' }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'; (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
               </a>
-              <a href="https://www.linkedin.com/company/espotdo/" target="_blank" rel="noopener noreferrer"
-                aria-label="LinkedIn"
+              <a href="https://www.linkedin.com/company/espotdo/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"
                 className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#0A66C2'; (e.currentTarget as HTMLElement).style.background = 'rgba(10,102,194,0.08)' }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'; (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 23.2 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                </svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 23.2 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
               </a>
             </div>
           </div>
 
-          {/* Logos de pago + seguridad */}
+          {/* Fila 2: Logos de pago + dirección + contacto */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-5"
             style={{ borderTop: '1px solid var(--border-subtle)' }}>
-
-            {/* Visa + MC + Verified logos */}
-            <div className="flex items-center gap-3 flex-wrap justify-center">
-              {/* Visa */}
-              <div className="px-3 py-1.5 rounded-lg flex items-center" style={{ background: '#1A1F71', height: 32 }}>
-                <svg width="42" height="14" viewBox="0 0 42 14"><text x="0" y="12" fontFamily="Arial" fontWeight="900" fontSize="14" fill="#fff">VISA</text></svg>
+            <div className="flex items-center gap-2.5 flex-wrap justify-center">
+              <div className="px-3 py-1.5 rounded-lg" style={{ background: '#1A1F71', height: 30 }}>
+                <svg width="38" height="13" viewBox="0 0 38 13"><text x="0" y="11" fontFamily="Arial" fontWeight="900" fontSize="13" fill="#fff">VISA</text></svg>
               </div>
-              {/* Mastercard */}
-              <div className="px-3 py-1 rounded-lg flex items-center gap-1" style={{ background: '#252525', height: 32 }}>
-                <svg width="30" height="18" viewBox="0 0 30 18"><circle cx="10" cy="9" r="9" fill="#EB001B"/><circle cx="20" cy="9" r="9" fill="#F79E1B"/><path d="M15 2.8a9 9 0 0 1 0 12.4A9 9 0 0 1 15 2.8z" fill="#FF5F00"/></svg>
+              <div className="px-2.5 py-1 rounded-lg flex items-center gap-1" style={{ background: '#252525', height: 30 }}>
+                <svg width="26" height="16" viewBox="0 0 26 16"><circle cx="9" cy="8" r="8" fill="#EB001B"/><circle cx="17" cy="8" r="8" fill="#F79E1B"/><path d="M13 2.4a8 8 0 0 1 0 11.2A8 8 0 0 1 13 2.4z" fill="#FF5F00"/></svg>
               </div>
-              {/* Verified by Visa */}
-              <div className="px-3 py-1 rounded-lg flex items-center gap-1.5 text-xs font-bold" style={{ background: '#EEF2FF', color: '#1A1F71', height: 32, border: '1px solid #C7D2FE' }}>
+              <div className="px-2.5 py-1 rounded-lg flex items-center gap-1 text-[10px] font-bold" style={{ background: '#EEF2FF', color: '#1A1F71', height: 30, border: '1px solid #C7D2FE' }}>
                 <span style={{ fontWeight: 900 }}>V</span> Verified by Visa
               </div>
-              {/* MC ID Check */}
-              <div className="px-3 py-1 rounded-lg flex items-center gap-1.5 text-xs font-bold" style={{ background: '#FFF7ED', color: '#92400E', height: 32, border: '1px solid #FED7AA' }}>
-                <svg width="16" height="10" viewBox="0 0 16 10"><circle cx="5" cy="5" r="5" fill="#EB001B"/><circle cx="11" cy="5" r="5" fill="#F79E1B"/></svg>
+              <div className="px-2.5 py-1 rounded-lg flex items-center gap-1 text-[10px] font-bold" style={{ background: '#FFF7ED', color: '#92400E', height: 30, border: '1px solid #FED7AA' }}>
+                <svg width="14" height="9" viewBox="0 0 14 9"><circle cx="4.5" cy="4.5" r="4.5" fill="#EB001B"/><circle cx="9.5" cy="4.5" r="4.5" fill="#F79E1B"/></svg>
                 ID Check
               </div>
-              {/* Azul */}
-              <div className="px-3 py-1 rounded-lg flex items-center gap-1.5 text-xs font-bold text-white" style={{ background: '#0057A8', height: 32 }}>
-                🔒 azul payments
+              <div className="px-2.5 py-1 rounded-lg flex items-center gap-1 text-[10px] font-bold text-white" style={{ background: '#0057A8', height: 30 }}>
+                🔒 azul
               </div>
             </div>
-
-            <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
-              © 2026 ESPOT, S.R.L. · Av. Winston Churchill, Santo Domingo, República Dominicana ·{' '}
-              <a href="mailto:contacto@espothub.com" style={{ color: 'var(--text-muted)' }}>contacto@espothub.com</a>{' '}·{' '}
-              <a href="tel:+18095550000" style={{ color: 'var(--text-muted)' }}>+1 (809) 555-0000</a>
-            </p>
+            <div className="text-xs text-center md:text-right space-y-0.5" style={{ color: 'var(--text-muted)' }}>
+              <div>© 2026 ESPOT, S.R.L. · Calle Caonabo No. 42, Gazcue, Distrito Nacional, Rep. Dominicana</div>
+              <div className="flex items-center justify-center md:justify-end gap-3">
+                <a href="mailto:contacto@espot.do" style={{ color: 'var(--text-muted)' }}>contacto@espot.do</a>
+                <span>·</span>
+                <a href="tel:+18295481998" style={{ color: 'var(--text-muted)' }}>+1 (829) 548-1998</a>
+              </div>
+            </div>
           </div>
 
-          {/* Links legales */}
-          <div className="flex items-center justify-center gap-4 text-xs flex-wrap" style={{ color: 'var(--text-muted)' }}>
-            <Link href="/terminos"   className="link-muted">Términos</Link>
+          {/* Fila 3: Links legales — una sola fila, sin duplicados */}
+          <div className="flex items-center justify-center gap-3 text-xs flex-wrap pt-1"
+            style={{ borderTop: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}>
+            <Link href="/terminos"   className="link-muted">Términos y condiciones</Link>
             <span>·</span>
-            <Link href="/privacidad" className="link-muted">Privacidad</Link>
+            <Link href="/privacidad" className="link-muted">Política de privacidad</Link>
             <span>·</span>
-            <Link href="/reembolso"  className="link-muted">Reembolso</Link>
+            <Link href="/reembolso"  className="link-muted">Reembolsos</Link>
             <span>·</span>
-            <Link href="/seguridad"  className="link-muted">Seguridad</Link>
+            <Link href="/seguridad"  className="link-muted">Seguridad de pagos</Link>
             <span>·</span>
             <Link href="/cookies"    className="link-muted">Cookies</Link>
+            <span>·</span>
+            <Link href="/contacto"   className="link-muted">Servicio al cliente</Link>
           </div>
+
         </div>
       </footer>
     </div>

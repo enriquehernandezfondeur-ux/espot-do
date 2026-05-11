@@ -13,8 +13,8 @@ const sections = [
     content: `ESPOT, S.R.L., con domicilio en la República Dominicana, es la empresa responsable del tratamiento de los datos personales recopilados a través de la plataforma EspotHub (espothub.com).
 
 Contacto del responsable:
-• Correo electrónico: contacto@espothub.com
-• Teléfono: +1 (809) 555-0000`,
+• Correo electrónico: contacto@espot.do
+• Teléfono: +1 (829) 548-1998`,
   },
   {
     num: '2', title: 'Datos que recopilamos',
@@ -92,7 +92,7 @@ Para más detalles, visita nuestra Política de Seguridad de Pagos en /seguridad
 • Oponerte al tratamiento de tus datos para fines de marketing.
 • Portar tus datos a otro servicio.
 
-Para ejercer estos derechos, escribe a contacto@espothub.com con el asunto "Solicitud de Privacidad" y tu nombre completo y correo registrado. Respondemos en un máximo de 30 días hábiles.`,
+Para ejercer estos derechos, escribe a contacto@espot.do con el asunto "Solicitud de Privacidad" y tu nombre completo y correo registrado. Respondemos en un máximo de 30 días hábiles.`,
   },
   {
     num: '8', title: 'Retención de datos',

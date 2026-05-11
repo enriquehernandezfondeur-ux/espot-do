@@ -144,11 +144,11 @@ export default function SeguridadPage() {
             <div className="mt-3 space-y-2">
               <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
                 <span style={{ color: 'var(--brand)' }}>✉</span>
-                <a href="mailto:contacto@espothub.com" style={{ color: 'var(--brand)' }}>contacto@espothub.com</a>
+                <a href="mailto:contacto@espot.do" style={{ color: 'var(--brand)' }}>contacto@espot.do</a>
               </div>
               <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
                 <span style={{ color: 'var(--brand)' }}>📞</span>
-                <a href="tel:+18095550000" style={{ color: 'var(--brand)' }}>+1 (809) 555-0000</a>
+                <a href="tel:+18095550000" style={{ color: 'var(--brand)' }}>+1 (829) 548-1998</a>
               </div>
             </div>
           </div>
