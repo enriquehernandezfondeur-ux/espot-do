@@ -50,11 +50,13 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
   const declinedUrl = `${BASE}/pago-declinado/?b=${params.bookingId}${cuotaQuery}`
   const cancelUrl   = `${BASE}/pago-cancelado/?b=${params.bookingId}${cuotaQuery}`
 
+  const CURRENCY    = process.env.AZUL_CURRENCY_CODE ?? 'RD$'
+
   const hashInput = [
     MERCHANT_ID,
     MERCHANT_NAME,
     MERCHANT_TYPE,
-    '$',
+    CURRENCY,
     params.orderNumber,
     amountStr,
     itbisStr,
@@ -74,7 +76,7 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
       MerchantId:   MERCHANT_ID,
       MerchantName: MERCHANT_NAME,
       MerchantType: MERCHANT_TYPE,
-      CurrencyCode: '$',
+      CurrencyCode: CURRENCY,
       OrderNumber:  params.orderNumber,
       Amount:       amountStr,
       ITBIS:        itbisStr,
