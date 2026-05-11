@@ -65,56 +65,73 @@ export async function GET(
       .map(([k, v]) => `<input type="hidden" name="${k}" value="${v.replace(/"/g, '&quot;')}">`)
       .join('\n    ')
 
-    // Modo debug: muestra los campos sin enviar el formulario
+    // Modo debug: prueba todas las combinaciones de MerchantName y MerchantType
     if (isDebug) {
-      // Generar también la variante alternativa del hash
-      const { buildPaymentPageFields: bppf2 } = await import('@/lib/azul/client')
-      const altEnv = { ...process.env, AZUL_HASH_INCLUDE_CUSTOM: process.env.AZUL_HASH_INCLUDE_CUSTOM === '1' ? '0' : '1' }
-      // Calcular hash alternativo manualmente
       const { createHmac } = await import('crypto')
       const PRIV = process.env.AZUL_PRIVATE_KEY ?? ''
-      const base10 = [
-        fields.MerchantId, fields.MerchantName, fields.MerchantType, fields.CurrencyCode,
-        fields.OrderNumber, fields.Amount, fields.ITBIS,
-        fields.ApprovedUrl, fields.DeclinedUrl, fields.CancelUrl,
-      ].join('')
-      const baseWithCustom = base10 + (fields.UseCustomField1??'0') + (fields.CustomField1Label??'') + (fields.CustomField1Value??'') + (fields.UseCustomField2??'0') + (fields.CustomField2Label??'') + (fields.CustomField2Value??'')
-      const hashBase   = createHmac('sha512', PRIV).update(base10).digest('hex').toUpperCase()
-      const hashCustom = createHmac('sha512', PRIV).update(baseWithCustom).digest('hex').toUpperCase()
-      const currentHash = fields.AuthHash
 
-      const rows = Object.entries(fields)
-        .map(([k, v]) => `<tr><td style="padding:6px 12px;font-weight:600;color:#374151">${k}</td><td style="padding:6px 12px;font-family:monospace;color:#0057A8;word-break:break-all">${k === 'AuthHash' ? v.slice(0,20)+'…' : v}</td></tr>`)
-        .join('')
+      // Combinaciones más comunes para cuentas de prueba de Azul
+      const NAMES  = ['PRUEBAS', 'ESPOT, S.R.L.', 'ESPOTHUB', 'ESPOT', 'TEST', '39038540035']
+      const TYPES  = ['E-Commerce', 'Ecommerce', 'ecommerce', 'Retail', 'Marketplace']
 
-      const mkInputs = (hash: string) => Object.entries({...fields, AuthHash: hash})
-        .map(([k, v]) => `<input type="hidden" name="${k}" value="${v.replace(/"/g, '&quot;')}">`)
-        .join('')
+      function makeHash(name: string, type: string) {
+        const str = [
+          fields.MerchantId, name, type, fields.CurrencyCode,
+          fields.OrderNumber, fields.Amount, fields.Itbis,
+          fields.ApprovedUrl, fields.DeclinedUrl, fields.CancelUrl,
+        ].join('')
+        return createHmac('sha512', PRIV).update(str).digest('hex').toUpperCase()
+      }
+
+      function mkForm(name: string, type: string, hash: string, label: string, color: string) {
+        const f = { ...fields, MerchantName: name, MerchantType: type, AuthHash: hash }
+        const inputs = Object.entries(f)
+          .map(([k, v]) => `<input type="hidden" name="${k}" value="${(v as string).replace(/"/g, '&quot;')}">`)
+          .join('')
+        return `
+          <div style="background:#fff;border-radius:10px;padding:14px 18px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06)">
+            <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:4px">${label}</div>
+            <div style="font-family:monospace;font-size:10px;color:#6B7280;margin-bottom:8px">${hash.slice(0,28)}…</div>
+            <form method="POST" action="${pageUrl}" style="display:inline">
+              ${inputs}
+              <button type="submit" style="background:${color};color:#fff;border:none;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">
+                Probar →
+              </button>
+            </form>
+          </div>`
+      }
+
+      const currentRows = Object.entries(fields)
+        .map(([k, v]) => `<tr>
+          <td style="padding:5px 12px;font-weight:600;color:#374151;font-size:12px">${k}</td>
+          <td style="padding:5px 12px;font-family:monospace;font-size:11px;color:#0057A8;word-break:break-all">${k === 'AuthHash' ? (v as string).slice(0,24)+'…' : v}</td>
+        </tr>`).join('')
+
+      let combos = ''
+      for (const name of NAMES) {
+        for (const type of TYPES) {
+          const hash = makeHash(name, type)
+          const colors = ['#0057A8','#16A34A','#7C3AED','#D97706','#DC2626']
+          const ci = (NAMES.indexOf(name) * TYPES.length + TYPES.indexOf(type)) % colors.length
+          combos += mkForm(name, type, hash, `Name: "${name}" | Type: "${type}"`, colors[ci])
+        }
+      }
 
       return new NextResponse(`<!DOCTYPE html><html><head><meta charset="UTF-8">
-<style>body{font-family:sans-serif;padding:32px;background:#F4F6F8}
-h2{color:#0F1623;margin:0 0 4px}p{color:#6B7280;font-size:13px;margin:0 0 16px}
-table{background:#fff;border-radius:12px;border-collapse:collapse;width:100%;max-width:640px;box-shadow:0 1px 6px rgba(0,0,0,0.08);margin-bottom:24px}
-td{border-bottom:1px solid #F0F2F5;padding:6px 12px}tr:last-child td{border:none}
-.url{background:#fff;border-radius:12px;padding:12px 16px;font-family:monospace;font-size:12px;color:#374151;margin-bottom:20px;box-shadow:0 1px 6px rgba(0,0,0,0.08);word-break:break-all}
-.btn1{margin-top:12px;background:#0057A8;color:#fff;border:none;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer}
-.btn2{margin-top:12px;background:#16A34A;color:#fff;border:none;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer}
-.hash{font-family:monospace;font-size:11px;background:#F0F2F5;padding:6px 10px;border-radius:6px;margin:4px 0;word-break:break-all}
+<style>
+  body{font-family:sans-serif;padding:28px;background:#F4F6F8;max-width:860px;margin:0 auto}
+  h2{color:#0F1623;font-size:20px;margin:0 0 4px}
+  .sub{color:#6B7280;font-size:13px;margin:0 0 20px}
+  table{background:#fff;border-radius:12px;border-collapse:collapse;width:100%;box-shadow:0 1px 6px rgba(0,0,0,0.06);margin-bottom:24px}
+  td{border-bottom:1px solid #F0F2F5;padding:5px 12px}tr:last-child td{border:none}
+  h3{font-size:14px;color:#374151;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid #E5E7EB}
 </style></head><body>
-<h2>Debug — Prueba ambos hashes</h2>
-<div class="url">${pageUrl}</div>
-<table>${rows}</table>
-<p><strong>Hash variante A</strong> (10 campos, sin custom fields):</p>
-<div class="hash">${hashBase.slice(0,32)}…</div>
-<form method="POST" action="${pageUrl}">${mkInputs(hashBase)}
-  <button class="btn1" type="submit">🔵 Probar Hash A (sin custom fields)</button>
-</form>
-<br>
-<p><strong>Hash variante B</strong> (16 campos, con custom fields):</p>
-<div class="hash">${hashCustom.slice(0,32)}…</div>
-<form method="POST" action="${pageUrl}">${mkInputs(hashCustom)}
-  <button class="btn2" type="submit">🟢 Probar Hash B (con custom fields)</button>
-</form>
+<h2>🔧 Debug de Hash — EspotHub × Azul</h2>
+<p class="sub">Prueba las ${NAMES.length * TYPES.length} combinaciones posibles de MerchantName + MerchantType. La que NO dé error de hash es la correcta.</p>
+<h3>Campos actuales enviados a Azul</h3>
+<table>${currentRows}</table>
+<h3>Combinaciones a probar (${NAMES.length * TYPES.length} total)</h3>
+${combos}
 </body></html>`, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } })
     }
 
