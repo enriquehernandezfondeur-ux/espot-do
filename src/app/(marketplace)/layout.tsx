@@ -429,37 +429,37 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
       {children}
 
       {/* ── FOOTER ── */}
-      <footer style={{ borderTop: '1px solid var(--border-subtle)', background: '#fff' }} className="py-10 md:py-12 px-4 md:px-6">
+      <footer style={{ borderTop: '1px solid var(--border-subtle)', background: '#fff' }} className="py-7 md:py-8 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
 
           {/* 3 columnas */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-7 md:gap-8 mb-6">
 
             {/* Col 1: Marca + descripción + redes */}
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-3">
               <Link href="/">
-                <img src="/logo-dark.svg" alt="espothub.com" style={{ height: 24, width: 'auto' }} />
+                <img src="/logo-dark.svg" alt="espothub.com" style={{ height: 20, width: 'auto' }} />
               </Link>
-              <p className="text-sm leading-relaxed" style={{ color: 'var(--text-muted)', maxWidth: 260 }}>
-                El marketplace de espacios para eventos en República Dominicana.
+              <p className="text-xs" style={{ color: 'var(--text-muted)', maxWidth: 240, lineHeight: 1.5 }}>
+                Marketplace de espacios para eventos en República Dominicana.
               </p>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <a href="https://www.instagram.com/espot.do/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"
-                  className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+                  className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:scale-110"
                   style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#E1306C'; (e.currentTarget as HTMLElement).style.background = 'rgba(225,48,108,0.08)' }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'; (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                 </a>
                 <a href="https://www.facebook.com/espot.do/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"
-                  className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+                  className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:scale-110"
                   style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#1877F2'; (e.currentTarget as HTMLElement).style.background = 'rgba(24,119,242,0.08)' }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'; (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                 </a>
                 <a href="https://www.linkedin.com/company/espotdo/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"
-                  className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+                  className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:scale-110"
                   style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#0A66C2'; (e.currentTarget as HTMLElement).style.background = 'rgba(10,102,194,0.08)' }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'; (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}>
@@ -470,8 +470,8 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
 
             {/* Col 2: Legal */}
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: 'var(--text-muted)' }}>Legal</p>
-              <div className="flex flex-col gap-2.5">
+              <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Legal</p>
+              <div className="flex flex-col gap-1.5">
                 {[
                   { href: '/terminos',   label: 'Términos y condiciones' },
                   { href: '/privacidad', label: 'Política de privacidad' },
@@ -479,7 +479,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                   { href: '/seguridad',  label: 'Seguridad de pagos' },
                   { href: '/cookies',    label: 'Política de cookies' },
                 ].map(({ href, label }) => (
-                  <Link key={href} href={href} className="text-sm link-muted" style={{ color: 'var(--text-muted)' }}>
+                  <Link key={href} href={href} className="text-xs link-muted" style={{ color: 'var(--text-muted)' }}>
                     {label}
                   </Link>
                 ))}
@@ -488,18 +488,18 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
 
             {/* Col 3: Contacto */}
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: 'var(--text-muted)' }}>Contacto</p>
-              <div className="flex flex-col gap-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                <a href="mailto:contacto@espot.do" className="link-muted flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Contacto</p>
+              <div className="flex flex-col gap-1.5">
+                <a href="mailto:contacto@espot.do" className="link-muted text-xs flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
                   <span>✉</span> contacto@espot.do
                 </a>
-                <a href="tel:+18295481998" className="link-muted flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
+                <a href="tel:+18295481998" className="link-muted text-xs flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
                   <span>📞</span> +1 (829) 548-1998
                 </a>
-                <Link href="/contacto" className="link-muted flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
+                <Link href="/contacto" className="link-muted text-xs flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
                   <span>💬</span> Servicio al cliente
                 </Link>
-                <p className="text-xs leading-relaxed mt-1" style={{ color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)', lineHeight: 1.5 }}>
                   Calle Caonabo No. 42, Gazcue<br />
                   Distrito Nacional, República Dominicana
                 </p>
@@ -509,29 +509,29 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
           </div>
 
           {/* Barra inferior: logos de pago + copyright */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6"
+          <div className="flex flex-col md:flex-row items-center justify-between gap-3 pt-4"
             style={{ borderTop: '1px solid var(--border-subtle)' }}>
 
-            <div className="flex items-center gap-2.5 flex-wrap justify-center">
-              <div className="px-3 py-1.5 rounded-lg" style={{ background: '#1A1F71', height: 28 }}>
-                <svg width="36" height="12" viewBox="0 0 36 12"><text x="0" y="10" fontFamily="Arial" fontWeight="900" fontSize="12" fill="#fff">VISA</text></svg>
+            <div className="flex items-center gap-2 flex-wrap justify-center">
+              <div className="px-2.5 py-1 rounded" style={{ background: '#1A1F71', height: 22 }}>
+                <svg width="30" height="10" viewBox="0 0 30 10"><text x="0" y="9" fontFamily="Arial" fontWeight="900" fontSize="10" fill="#fff">VISA</text></svg>
               </div>
-              <div className="px-2.5 py-1 rounded-lg flex items-center gap-1" style={{ background: '#252525', height: 28 }}>
-                <svg width="24" height="14" viewBox="0 0 24 14"><circle cx="8" cy="7" r="7" fill="#EB001B"/><circle cx="16" cy="7" r="7" fill="#F79E1B"/><path d="M12 2.2a7 7 0 0 1 0 9.6A7 7 0 0 1 12 2.2z" fill="#FF5F00"/></svg>
+              <div className="px-2 py-0.5 rounded flex items-center gap-0.5" style={{ background: '#252525', height: 22 }}>
+                <svg width="20" height="12" viewBox="0 0 20 12"><circle cx="7" cy="6" r="6" fill="#EB001B"/><circle cx="13" cy="6" r="6" fill="#F79E1B"/><path d="M10 1.8a6 6 0 0 1 0 8.4A6 6 0 0 1 10 1.8z" fill="#FF5F00"/></svg>
               </div>
-              <div className="px-2.5 py-1 rounded-lg flex items-center gap-1 text-[10px] font-bold" style={{ background: '#EEF2FF', color: '#1A1F71', height: 28, border: '1px solid #C7D2FE' }}>
+              <div className="px-2 py-0.5 rounded flex items-center gap-0.5 text-[9px] font-bold" style={{ background: '#EEF2FF', color: '#1A1F71', height: 22, border: '1px solid #C7D2FE' }}>
                 <span style={{ fontWeight: 900 }}>V</span> Verified by Visa
               </div>
-              <div className="px-2.5 py-1 rounded-lg flex items-center gap-1 text-[10px] font-bold" style={{ background: '#FFF7ED', color: '#92400E', height: 28, border: '1px solid #FED7AA' }}>
-                <svg width="14" height="9" viewBox="0 0 14 9"><circle cx="4.5" cy="4.5" r="4.5" fill="#EB001B"/><circle cx="9.5" cy="4.5" r="4.5" fill="#F79E1B"/></svg>
+              <div className="px-2 py-0.5 rounded flex items-center gap-0.5 text-[9px] font-bold" style={{ background: '#FFF7ED', color: '#92400E', height: 22, border: '1px solid #FED7AA' }}>
+                <svg width="12" height="8" viewBox="0 0 12 8"><circle cx="4" cy="4" r="4" fill="#EB001B"/><circle cx="8" cy="4" r="4" fill="#F79E1B"/></svg>
                 ID Check
               </div>
-              <div className="px-2.5 py-1 rounded-lg flex items-center gap-1 text-[10px] font-bold text-white" style={{ background: '#0057A8', height: 28 }}>
+              <div className="px-2 py-0.5 rounded flex items-center gap-0.5 text-[9px] font-bold text-white" style={{ background: '#0057A8', height: 22 }}>
                 🔒 azul
               </div>
             </div>
 
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
               © 2026 ESPOT, S.R.L. · República Dominicana
             </p>
           </div>
