@@ -52,8 +52,7 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
 
   const CURRENCY    = process.env.AZUL_CURRENCY_CODE ?? 'RD$'
 
-  // Campos de custom fields — se incluyen en el hash aunque estén vacíos
-  // para coincidir con la implementación del plugin WooCommerce de Azul
+  // Campos de custom fields — van en el formulario pero NO en el hash
   const useCustomField1    = '0'
   const customField1Label  = ''
   const customField1Value  = ''
@@ -61,7 +60,8 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
   const customField2Label  = ''
   const customField2Value  = ''
 
-  const hashInput = [
+  // Hash con solo los 10 campos base (sin custom fields)
+  const hashInputBase = [
     MERCHANT_ID,
     MERCHANT_NAME,
     MERCHANT_TYPE,
@@ -72,13 +72,14 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
     approvedUrl,
     declinedUrl,
     cancelUrl,
-    useCustomField1,
-    customField1Label,
-    customField1Value,
-    useCustomField2,
-    customField2Label,
-    customField2Value,
   ].join('')
+
+  // Hash alternativo con custom fields incluidos (algunas versiones del plugin lo requieren)
+  const hashInputWithCustom = hashInputBase + useCustomField1 + customField1Label + customField1Value + useCustomField2 + customField2Label + customField2Value
+
+  // Usar el que está configurado (por defecto: sin custom fields = más compatible)
+  const useCustomInHash = process.env.AZUL_HASH_INCLUDE_CUSTOM === '1'
+  const hashInput       = useCustomInHash ? hashInputWithCustom : hashInputBase
 
   const authHash = createHmac('sha512', PRIVATE_KEY)
     .update(hashInput)
