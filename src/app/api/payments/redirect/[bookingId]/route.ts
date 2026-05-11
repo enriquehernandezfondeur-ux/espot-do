@@ -14,6 +14,7 @@ export async function GET(
   const amount        = Number(req.nextUrl.searchParams.get('amount') ?? '0')
   const cuotaRaw      = req.nextUrl.searchParams.get('cuota')
   const cuotaId       = cuotaRaw && cuotaRaw !== 'undefined' ? cuotaRaw : null
+  const isDebug       = req.nextUrl.searchParams.get('debug') === '1'
 
   if (!amount || amount <= 0) {
     return new NextResponse(errorHtml('Monto de reserva inválido.'), {
@@ -63,6 +64,28 @@ export async function GET(
     const hiddenInputs = Object.entries(fields)
       .map(([k, v]) => `<input type="hidden" name="${k}" value="${v.replace(/"/g, '&quot;')}">`)
       .join('\n    ')
+
+    // Modo debug: muestra los campos sin enviar el formulario
+    if (isDebug) {
+      const rows = Object.entries(fields)
+        .map(([k, v]) => `<tr><td style="padding:6px 12px;font-weight:600;color:#374151">${k}</td><td style="padding:6px 12px;font-family:monospace;color:#0057A8;word-break:break-all">${k === 'AuthHash' ? v.slice(0,16)+'…' : v}</td></tr>`)
+        .join('')
+      return new NextResponse(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>body{font-family:sans-serif;padding:32px;background:#F4F6F8}
+h2{color:#0F1623;margin:0 0 4px}p{color:#6B7280;font-size:13px;margin:0 0 20px}
+table{background:#fff;border-radius:12px;border-collapse:collapse;width:100%;max-width:600px;box-shadow:0 1px 6px rgba(0,0,0,0.08)}
+td{border-bottom:1px solid #F0F2F5}tr:last-child td{border:none}
+.url{background:#fff;border-radius:12px;padding:12px 16px;font-family:monospace;font-size:12px;color:#374151;margin-bottom:20px;box-shadow:0 1px 6px rgba(0,0,0,0.08);word-break:break-all}
+form button{margin-top:20px;background:#0057A8;color:#fff;border:none;padding:12px 28px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer}</style>
+</head><body>
+<h2>Debug — Campos enviados a Azul</h2>
+<p>URL de Azul:</p><div class="url">${pageUrl}</div>
+<table>${rows}</table>
+<form method="POST" action="${pageUrl}">${hiddenInputs}
+  <button type="submit">Enviar a Azul ahora →</button>
+</form>
+</body></html>`, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } })
+    }
 
     const html = `<!DOCTYPE html>
 <html lang="es">
