@@ -78,13 +78,13 @@ export async function GET(
       const CURRENCY      = process.env.AZUL_CURRENCY_CODE ?? '$'
       const PAGE_URL      = process.env.AZUL_PAYMENT_PAGE_URL ?? 'https://pruebas.azul.com.do/PaymentPage/'
 
-      // Valores fijos del ejemplo — OrderNumber simple, URLs simples sin &
-      const ORDER   = 'TEST001'
+      // Valores EXACTOS del ejemplo oficial de Azul (incluyendo google.com)
+      const ORDER   = '001'
       const AMT     = '10000'
       const ITBIS_V = '000'
-      const AURL    = 'https://espothub.com/pago/exitoso'
-      const DURL    = 'https://espothub.com/pago/fallido'
-      const CURL    = 'https://espothub.com/pago/cancelado'
+      const AURL    = 'https://google.com'
+      const DURL    = 'https://google.com'
+      const CURL    = 'https://google.com'
 
       const msg = [MERCHANT_ID, MERCHANT_NAME, MERCHANT_TYPE, CURRENCY,
         ORDER, AMT, ITBIS_V, AURL, DURL, CURL, '0','','','0','','', PRIV].join('')
