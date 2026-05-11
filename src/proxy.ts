@@ -7,7 +7,7 @@ const COOKIE_NAME   = 'espot_preview_access'
 
 const AUTH_ROUTES = ['/dashboard', '/admin']
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Permitir siempre: auth, acceso privado, assets, API, favicon
