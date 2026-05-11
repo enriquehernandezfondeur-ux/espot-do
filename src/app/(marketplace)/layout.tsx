@@ -440,7 +440,8 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
               <Link href="/buscar"             className="link-muted">Explorar</Link>
               <Link href="/para-clientes"      className="link-muted">Para clientes</Link>
               <Link href="/para-propietarios"  className="link-muted">Para propietarios</Link>
-              <Link href="/terminos"    className="link-muted">Términos</Link>
+              <Link href="/terminos"   className="link-muted">Términos</Link>
+              <Link href="/privacidad" className="link-muted">Privacidad</Link>
               <Link href="/reembolso"  className="link-muted">Reembolso</Link>
               <Link href="/seguridad"  className="link-muted">Seguridad</Link>
               <Link href="/cookies"    className="link-muted">Cookies</Link>
@@ -520,13 +521,15 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
 
           {/* Links legales */}
           <div className="flex items-center justify-center gap-4 text-xs flex-wrap" style={{ color: 'var(--text-muted)' }}>
-            <Link href="/terminos" className="link-muted">Términos y condiciones</Link>
+            <Link href="/terminos"   className="link-muted">Términos</Link>
             <span>·</span>
-            <Link href="/reembolso" className="link-muted">Política de reembolso</Link>
+            <Link href="/privacidad" className="link-muted">Privacidad</Link>
             <span>·</span>
-            <Link href="/seguridad" className="link-muted">Seguridad de pagos</Link>
+            <Link href="/reembolso"  className="link-muted">Reembolso</Link>
             <span>·</span>
-            <Link href="/cookies" className="link-muted">Cookies</Link>
+            <Link href="/seguridad"  className="link-muted">Seguridad</Link>
+            <span>·</span>
+            <Link href="/cookies"    className="link-muted">Cookies</Link>
           </div>
         </div>
       </footer>
