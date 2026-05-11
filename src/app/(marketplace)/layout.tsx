@@ -522,7 +522,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 24, width: 'auto' }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/azul-logo.jpg" alt="Azul Payments" style={{ height: 24, width: 'auto', borderRadius: 4, objectFit: 'contain' }} />
+              <img src="/azul-logo.svg" alt="Azul Payments" style={{ height: 24, width: 'auto', borderRadius: 4, objectFit: 'contain' }} />
             </div>
 
             <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
