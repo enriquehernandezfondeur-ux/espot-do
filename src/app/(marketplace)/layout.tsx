@@ -440,10 +440,11 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
               <Link href="/buscar"             className="link-muted">Explorar</Link>
               <Link href="/para-clientes"      className="link-muted">Para clientes</Link>
               <Link href="/para-propietarios"  className="link-muted">Para propietarios</Link>
-              <Link href="/terminos"           className="link-muted">Términos</Link>
-              <Link href="/reembolso" className="link-muted">Reembolso</Link>
-              <Link href="/cookies"   className="link-muted">Cookies</Link>
-              <a href="mailto:contacto@espot.do" className="link-muted">Contacto</a>
+              <Link href="/terminos"    className="link-muted">Términos</Link>
+              <Link href="/reembolso"  className="link-muted">Reembolso</Link>
+              <Link href="/seguridad"  className="link-muted">Seguridad</Link>
+              <Link href="/cookies"    className="link-muted">Cookies</Link>
+              <a href="mailto:contacto@espothub.com" className="link-muted">Contacto</a>
             </div>
 
             {/* Social icons */}
@@ -481,8 +482,51 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
             </div>
           </div>
 
-          <div className="flex items-center justify-center pt-4" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>© 2026 ESPOT, S.R.L. · República Dominicana</p>
+          {/* Logos de pago + seguridad */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-5"
+            style={{ borderTop: '1px solid var(--border-subtle)' }}>
+
+            {/* Visa + MC + Verified logos */}
+            <div className="flex items-center gap-3 flex-wrap justify-center">
+              {/* Visa */}
+              <div className="px-3 py-1.5 rounded-lg flex items-center" style={{ background: '#1A1F71', height: 32 }}>
+                <svg width="42" height="14" viewBox="0 0 42 14"><text x="0" y="12" fontFamily="Arial" fontWeight="900" fontSize="14" fill="#fff">VISA</text></svg>
+              </div>
+              {/* Mastercard */}
+              <div className="px-3 py-1 rounded-lg flex items-center gap-1" style={{ background: '#252525', height: 32 }}>
+                <svg width="30" height="18" viewBox="0 0 30 18"><circle cx="10" cy="9" r="9" fill="#EB001B"/><circle cx="20" cy="9" r="9" fill="#F79E1B"/><path d="M15 2.8a9 9 0 0 1 0 12.4A9 9 0 0 1 15 2.8z" fill="#FF5F00"/></svg>
+              </div>
+              {/* Verified by Visa */}
+              <div className="px-3 py-1 rounded-lg flex items-center gap-1.5 text-xs font-bold" style={{ background: '#EEF2FF', color: '#1A1F71', height: 32, border: '1px solid #C7D2FE' }}>
+                <span style={{ fontWeight: 900 }}>V</span> Verified by Visa
+              </div>
+              {/* MC ID Check */}
+              <div className="px-3 py-1 rounded-lg flex items-center gap-1.5 text-xs font-bold" style={{ background: '#FFF7ED', color: '#92400E', height: 32, border: '1px solid #FED7AA' }}>
+                <svg width="16" height="10" viewBox="0 0 16 10"><circle cx="5" cy="5" r="5" fill="#EB001B"/><circle cx="11" cy="5" r="5" fill="#F79E1B"/></svg>
+                ID Check
+              </div>
+              {/* Azul */}
+              <div className="px-3 py-1 rounded-lg flex items-center gap-1.5 text-xs font-bold text-white" style={{ background: '#0057A8', height: 32 }}>
+                🔒 azul payments
+              </div>
+            </div>
+
+            <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
+              © 2026 ESPOT, S.R.L. · Av. Winston Churchill, Santo Domingo, República Dominicana ·{' '}
+              <a href="mailto:contacto@espothub.com" style={{ color: 'var(--text-muted)' }}>contacto@espothub.com</a>{' '}·{' '}
+              <a href="tel:+18095550000" style={{ color: 'var(--text-muted)' }}>+1 (809) 555-0000</a>
+            </p>
+          </div>
+
+          {/* Links legales */}
+          <div className="flex items-center justify-center gap-4 text-xs flex-wrap" style={{ color: 'var(--text-muted)' }}>
+            <Link href="/terminos" className="link-muted">Términos y condiciones</Link>
+            <span>·</span>
+            <Link href="/reembolso" className="link-muted">Política de reembolso</Link>
+            <span>·</span>
+            <Link href="/seguridad" className="link-muted">Seguridad de pagos</Link>
+            <span>·</span>
+            <Link href="/cookies" className="link-muted">Cookies</Link>
           </div>
         </div>
       </footer>

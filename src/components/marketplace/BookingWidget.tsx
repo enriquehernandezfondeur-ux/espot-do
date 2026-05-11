@@ -85,6 +85,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   const [successType,      setSuccessType]      = useState<'pending' | 'quote' | 'instant'>('pending')
   const [createdBookingId, setCreatedBookingId] = useState<string | null>(null)
   const [error,            setError]            = useState('')
+  const [termsAccepted,    setTermsAccepted]    = useState(false)
 
   const finalEventType = eventType === 'Otro' ? (customEventType.trim() || 'Otro') : eventType
 
@@ -270,6 +271,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     }
     if (step === 2) return guestCount >= 1
     if (step === 3) return !!eventType && (eventType !== 'Otro' || customEventType.trim().length > 0)
+    if (step === maxStep) return termsAccepted
     return true
   }
 
@@ -992,6 +994,56 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                 "{guestNote}"
               </div>
             )}
+
+            {/* Checkbox T&C — requerido por Azul Payments */}
+            <label className="flex items-start gap-3 cursor-pointer select-none">
+              <div className="relative mt-0.5 shrink-0">
+                <input
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={e => setTermsAccepted(e.target.checked)}
+                  className="sr-only"
+                />
+                <div className="w-5 h-5 rounded-md flex items-center justify-center transition-all"
+                  style={{
+                    background: termsAccepted ? 'var(--brand)' : '#fff',
+                    border: termsAccepted ? '2px solid var(--brand)' : '2px solid #CBD5E1',
+                  }}>
+                  {termsAccepted && (
+                    <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
+                      <path d="M1 4.5L4 7.5L10 1" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </div>
+              </div>
+              <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                He leído y acepto los{' '}
+                <a href="/terminos" target="_blank" style={{ color: 'var(--brand)', textDecoration: 'underline' }}>
+                  términos y condiciones
+                </a>{' '}y la{' '}
+                <a href="/reembolso" target="_blank" style={{ color: 'var(--brand)', textDecoration: 'underline' }}>
+                  política de reembolso
+                </a>{' '}de EspotHub. *
+              </p>
+            </label>
+
+            {/* Logos de seguridad de pago */}
+            <div className="flex items-center justify-center gap-3 pt-1">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
+                style={{ background: '#F8FAFB', border: '1px solid #E8ECF0' }}>
+                <svg width="36" height="12" viewBox="0 0 36 12"><text x="0" y="10" fontFamily="Arial" fontWeight="900" fontSize="12" fill="#1A1F71">VISA</text></svg>
+                <div style={{ width: 1, height: 16, background: '#E8ECF0' }} />
+                <svg width="28" height="18" viewBox="0 0 28 18">
+                  <circle cx="10" cy="9" r="9" fill="#EB001B"/>
+                  <circle cx="18" cy="9" r="9" fill="#F79E1B"/>
+                  <path d="M14 3.5a9 9 0 0 1 0 11A9 9 0 0 1 14 3.5z" fill="#FF5F00"/>
+                </svg>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold"
+                style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', color: '#1E40AF' }}>
+                🔒 Pago 3D Secure
+              </div>
+            </div>
 
             {error && (
               <div className="text-sm px-4 py-3 rounded-xl"
