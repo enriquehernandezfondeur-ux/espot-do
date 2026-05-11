@@ -18,6 +18,12 @@ export default function AdminConfigPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving]   = useState<string | null>(null)
   const [saved, setSaved]     = useState<string | null>(null)
+  const [toast, setToast]     = useState<{ msg: string; ok: boolean } | null>(null)
+
+  function showToast(msg: string, ok: boolean) {
+    setToast({ msg, ok })
+    setTimeout(() => setToast(null), 3000)
+  }
 
   useEffect(() => {
     getMarketplaceConfig().then(d => { setConfig(d); setLoading(false) })
@@ -26,7 +32,9 @@ export default function AdminConfigPage() {
   async function handleSave(key: string, value: string) {
     setSaving(key)
     const result = await updateConfig(key, value)
-    if (!result || !('error' in result)) {
+    if ('error' in result) {
+      showToast(`Error al guardar: ${result.error}`, false)
+    } else {
       setSaved(key)
       setTimeout(() => setSaved(null), 2000)
     }
@@ -46,6 +54,12 @@ export default function AdminConfigPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto">
+      {toast && (
+        <div className="fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
+          style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
+          {toast.ok ? '✓' : '✕'} {toast.msg}
+        </div>
+      )}
       <div className="mb-8">
         <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Configuración</h1>
         <p className="text-sm text-slate-500 mt-0.5">Ajustes globales del marketplace</p>

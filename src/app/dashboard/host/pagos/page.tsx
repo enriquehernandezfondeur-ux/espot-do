@@ -56,12 +56,12 @@ export default function HostPagosPage() {
     }).catch(() => setLoading(false))
   }, [])
 
-  const paid    = bookings.filter(b => b.payment_status === 'paid' && ['confirmed','completed'].includes(b.status))
+  const paid    = bookings.filter(b => ['advance','partial','paid'].includes(b.payment_status) && ['confirmed','completed'].includes(b.status))
   const totalGross    = paid.reduce((s, b) => s + Number(b.total_amount), 0)
-  const totalFee      = paid.reduce((s, b) => s + Number(b.platform_fee), 0)
+  const totalFee      = paid.reduce((s, b) => s + Number(b.total_amount) * 0.10, 0)
   const totalNet      = totalGross - totalFee
-  const pendingPayout = paid.filter(b => b.payout_status === 'pending').reduce((s, b) => s + (Number(b.total_amount) - Number(b.platform_fee)), 0)
-  const liquidated    = paid.filter(b => b.payout_status === 'paid').reduce((s, b) => s + (Number(b.total_amount) - Number(b.platform_fee)), 0)
+  const pendingPayout = paid.filter(b => b.payout_status !== 'paid').reduce((s, b) => s + Number(b.total_amount) * 0.90, 0)
+  const liquidated    = paid.filter(b => b.payout_status === 'paid').reduce((s, b) => s + Number(b.total_amount) * 0.90, 0)
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
@@ -158,7 +158,7 @@ export default function HostPagosPage() {
               </div>
               <div className="divide-y divide-[#F8FAFC]">
                 {paid.map((bk: any) => {
-                  const net = Number(bk.total_amount) - Number(bk.platform_fee)
+                  const net = Number(bk.total_amount) * 0.90
                   const ps  = PAYOUT_STATUS[bk.payout_status ?? 'pending']
                   const guest = bk.profiles as any
                   return (
@@ -170,7 +170,7 @@ export default function HostPagosPage() {
                       </div>
                       <div className="text-sm" style={{ color: '#374151' }}>{formatDate(bk.event_date)}</div>
                       <div className="text-sm font-bold" style={{ color: '#0F1623' }}>{formatCurrency(Number(bk.total_amount))}</div>
-                      <div className="text-sm" style={{ color: '#7C3AED' }}>−{formatCurrency(Number(bk.platform_fee))}</div>
+                      <div className="text-sm" style={{ color: '#7C3AED' }}>−{formatCurrency(Number(bk.total_amount) * 0.10)}</div>
                       <div className="text-sm font-bold" style={{ color: '#35C493' }}>{formatCurrency(net)}</div>
                       <span className="text-xs font-semibold px-2.5 py-1.5 rounded-full w-fit"
                         style={{ background: ps?.bg, color: ps?.color }}>

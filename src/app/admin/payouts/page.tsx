@@ -29,6 +29,12 @@ export default function AdminPayoutsPage() {
   const [loading, setLoading]     = useState(true)
   const [paying, setPaying]       = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [toast, setToast]         = useState<{ msg: string; ok: boolean } | null>(null)
+
+  function showToast(msg: string, ok: boolean) {
+    setToast({ msg, ok })
+    setTimeout(() => setToast(null), 3500)
+  }
 
   async function load() {
     setLoading(true)
@@ -43,21 +49,32 @@ export default function AdminPayoutsPage() {
     setPaying(bookingId)
     startTransition(async () => {
       const result = await markPayoutPaid(bookingId)
-      if (!result || !('error' in result)) await load()
+      if (result && 'error' in result) {
+        showToast(`Error: ${result.error}`, false)
+      } else {
+        await load()
+        showToast('Payout marcado como pagado', true)
+      }
       setPaying(null)
     })
   }
 
   const totalPending = payouts
     .filter(b => b.payout_status === 'pending')
-    .reduce((s, b) => s + (Number(b.total_amount) - Number(b.platform_fee)), 0)
+    .reduce((s, b) => s + Number(b.total_amount) * 0.90, 0)
 
   const totalPaid = payouts
     .filter(b => b.payout_status === 'paid')
-    .reduce((s, b) => s + (Number(b.total_amount) - Number(b.platform_fee)), 0)
+    .reduce((s, b) => s + Number(b.total_amount) * 0.90, 0)
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
+      {toast && (
+        <div className="fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
+          style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
+          {toast.ok ? '✓' : '✕'} {toast.msg}
+        </div>
+      )}
 
       {/* Header */}
       <div className="flex items-start justify-between mb-8">
@@ -187,7 +204,7 @@ export default function AdminPayoutsPage() {
             {payouts.map((bk: any) => {
               const space   = bk.spaces as any
               const host    = space?.profiles as any
-              const hostAmt = Number(bk.total_amount) - Number(bk.platform_fee)
+              const hostAmt = Number(bk.total_amount) * 0.90
               const isPaid  = bk.payout_status === 'paid'
 
               return (

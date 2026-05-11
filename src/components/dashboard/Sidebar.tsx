@@ -113,7 +113,7 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
 
       {/* Cambiar a modo Cliente */}
       <div className="px-4 pb-3" style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 16 }}>
-        <Link href="/dashboard"
+        <Link href="/dashboard/reservas"
           onClick={() => setMobileOpen(false)}
           className="flex items-center gap-3 w-full px-4 py-3.5 rounded-2xl transition-all"
           style={{

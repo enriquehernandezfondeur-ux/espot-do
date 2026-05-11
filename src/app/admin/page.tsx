@@ -30,6 +30,13 @@ function timeAgo(date: string) {
 }
 
 export default async function AdminDashboard() {
+  const supabase = await (await import('@/lib/supabase/server')).createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: profile } = user
+    ? await supabase.from('profiles').select('full_name').eq('id', user.id).single()
+    : { data: null }
+  const adminName = profile?.full_name?.split(' ')[0] ?? 'Admin'
+
   const [stats, activity, pendingPayouts] = await Promise.all([
     getAdminStats(),
     getAdminActivity(),
@@ -37,7 +44,7 @@ export default async function AdminDashboard() {
   ])
 
   const pendingPayoutTotal = pendingPayouts.reduce(
-    (s, b: any) => s + ((Number(b.total_amount) || 0) - (Number(b.platform_fee) || 0)), 0
+    (s, b: any) => s + (Number(b.total_amount) || 0) * 0.90, 0
   )
 
   const now = new Date()
@@ -64,7 +71,7 @@ export default async function AdminDashboard() {
             </span>
           </div>
           <h1 className="text-xl md:text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>
-            {greeting}, Enrique 👋
+            {greeting}, {adminName} 👋
           </h1>
           <p className="text-sm mt-0.5 capitalize" style={{ color: '#94A3B8' }}>{dateLabel}</p>
         </div>

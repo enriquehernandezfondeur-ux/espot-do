@@ -49,11 +49,11 @@ export default function FinanzasPage() {
   })
 
   const totalBruto     = active.reduce((s, b) => s + Number(b.total_amount), 0)
-  const totalComision  = active.reduce((s, b) => s + Number(b.platform_fee), 0)
+  const totalComision  = active.reduce((s, b) => s + Number(b.total_amount) * 0.10, 0)
   const totalNeto      = totalBruto - totalComision
   const pendingPayout  = active
     .filter(b => b.status === 'confirmed')
-    .reduce((s, b) => s + (Number(b.total_amount) - Number(b.platform_fee)), 0)
+    .reduce((s, b) => s + Number(b.total_amount) * 0.90, 0)
   const thisMonth = stats?.revenueThisMonth ?? 0
 
   function exportCSV() {
@@ -64,8 +64,8 @@ export default function FinanzasPage() {
         (b.profiles as any)?.full_name ?? 'Cliente',
         b.event_type ?? '',
         Number(b.total_amount).toFixed(2),
-        Number(b.platform_fee).toFixed(2),
-        (Number(b.total_amount) - Number(b.platform_fee)).toFixed(2),
+        (Number(b.total_amount) * 0.10).toFixed(2),
+        (Number(b.total_amount) * 0.90).toFixed(2),
         b.status,
       ])
     ]
@@ -125,7 +125,7 @@ export default function FinanzasPage() {
                 {formatCurrency(pendingPayout)}
               </p>
               <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                Se libera automáticamente luego de cada evento confirmado
+                EspotHub te transfiere el neto después de cada evento completado
               </p>
             </div>
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0"
@@ -276,7 +276,7 @@ export default function FinanzasPage() {
             <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
               {filtered.map(b => {
                 const guest  = (b as any).profiles as any
-                const neto   = Number(b.total_amount) - Number(b.platform_fee)
+                const neto   = Number(b.total_amount) * 0.90
                 const payout = getPayoutStatus(b)
                 return (
                   <div key={b.id} className="grid gap-4 items-center px-5 py-4"
@@ -324,7 +324,7 @@ export default function FinanzasPage() {
                 {formatCurrency(filtered.reduce((s, b) => s + Number(b.total_amount), 0))}
               </span>
               <span className="text-sm text-right" style={{ color: '#16A34A' }}>
-                {formatCurrency(filtered.reduce((s, b) => s + Number(b.total_amount) - Number(b.platform_fee), 0))}
+                {formatCurrency(filtered.reduce((s, b) => s + Number(b.total_amount) * 0.90, 0))}
               </span>
               <span></span>
             </div>

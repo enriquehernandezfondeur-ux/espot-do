@@ -154,6 +154,7 @@ export default function CalendarioPage() {
   async function handleBlockTime() {
     if (!selected || !spaceId) return
     if (!blockStart || !blockEnd) { setBlockError('Selecciona hora de inicio y fin'); return }
+    if (hourToNum(blockEnd) <= hourToNum(blockStart)) { setBlockError('La hora de fin debe ser después de la hora de inicio'); return }
     setBlockSaving(true)
     setBlockError('')
 
@@ -198,6 +199,10 @@ export default function CalendarioPage() {
     // Check bookings
     const dayBookings = bookingsByDate[date] ?? []
     for (const b of dayBookings) {
+      if (!b.start_time || !b.end_time) {
+        // Sin horario específico (consumo mínimo / paquete) → todo el día ocupado
+        return { type: 'booked' as const, booking: b }
+      }
       if (isHourInRange(hour, b.start_time, b.end_time)) {
         return { type: 'booked' as const, booking: b }
       }

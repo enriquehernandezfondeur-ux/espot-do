@@ -361,7 +361,7 @@ export async function respondToQuote(bookingId: string, quotedPrice: number, mes
       base_price:    quotedPrice,
       status:        'accepted',      // listo para que el cliente pague
       accepted_at:   new Date().toISOString(),
-      event_notes:   message ? `[Cotización]: ${message}` : null,
+      event_notes:   `[Cotización]${message ? ': ' + message : ''}`,
     })
     .eq('id', bookingId)
     .eq('status', 'quote_requested')

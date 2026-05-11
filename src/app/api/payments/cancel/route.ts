@@ -17,12 +17,12 @@ export async function POST(req: NextRequest) {
   const { bookingId } = body
   if (!bookingId) return NextResponse.json({ ok: true })
 
-  // Solo resetear si está en 'processing' — no tocar pagos completados
+  // Solo resetear si aún no hay pago completado — no tocar bookings con 'advance'
   const { error } = await supabase.from('bookings')
-    .update({ payment_status: 'payment_pending' })
+    .update({ payment_status: 'unpaid' })
     .eq('id', bookingId)
     .eq('guest_id', user.id)
-    .eq('payment_status', 'processing')
+    .not('payment_status', 'in', '("advance","partial","paid")')
 
   if (error) return NextResponse.json({ error: 'No se pudo cancelar el pago' }, { status: 500 })
   return NextResponse.json({ ok: true })

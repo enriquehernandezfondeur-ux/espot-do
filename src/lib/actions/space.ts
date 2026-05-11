@@ -414,22 +414,22 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
     is_active: true,
   }
   if (payload.pricingType === 'hourly') {
-    pricingData.hourly_price = parseFloat(payload.hourlyPrice)
-    pricingData.min_hours = parseInt(payload.minHours) || 1
-    if (payload.maxHours) pricingData.max_hours = parseInt(payload.maxHours)
+    pricingData.hourly_price = num(payload.hourlyPrice)
+    pricingData.min_hours    = int(payload.minHours) ?? 1
+    pricingData.max_hours    = int(payload.maxHours) ?? null
   }
   if (payload.pricingType === 'minimum_consumption') {
-    pricingData.minimum_consumption = parseFloat(payload.minConsumption)
-    pricingData.session_hours = payload.sessionHours ? parseInt(payload.sessionHours) : null
-    pricingData.min_hours     = payload.minHours     ? parseInt(payload.minHours)     : null
-    pricingData.max_hours     = payload.maxHours     ? parseInt(payload.maxHours)     : null
+    pricingData.minimum_consumption = num(payload.minConsumption)
+    pricingData.session_hours       = int(payload.sessionHours) ?? null
+    pricingData.min_hours           = int(payload.minHours)     ?? null
+    pricingData.max_hours           = int(payload.maxHours)     ?? null
   }
   if (payload.pricingType === 'fixed_package') {
-    pricingData.fixed_price      = parseFloat(payload.fixedPrice)
+    pricingData.fixed_price      = num(payload.fixedPrice)
     pricingData.package_name     = payload.packageName
     pricingData.package_includes = payload.packageIncludes
-    if (payload.packageHours)      pricingData.package_hours    = parseInt(payload.packageHours)
-    if (payload.pkgExtraHourPrice) pricingData.extra_hour_price = parseFloat(payload.pkgExtraHourPrice)
+    pricingData.package_hours    = int(payload.packageHours)      ?? null
+    pricingData.extra_hour_price = num(payload.pkgExtraHourPrice) ?? null
   }
 
   const existingPricing = await supabase.from('space_pricing').select('id').eq('space_id', spaceId).limit(1)
@@ -487,6 +487,48 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
     await supabase.from('space_conditions').insert(condData)
   }
 
+  // Actualizar horarios — borrar los anteriores e insertar los nuevos
+  await supabase.from('space_time_blocks').delete().eq('space_id', spaceId)
+  if (payload.timeBlocks.length > 0) {
+    await supabase.from('space_time_blocks').insert(
+      payload.timeBlocks.map(b => ({
+        space_id:     spaceId,
+        block_name:   b.block_name,
+        start_time:   b.start_time,
+        end_time:     b.end_time,
+        days_of_week: b.days,
+        is_active:    true,
+      }))
+    )
+  }
+
+  // Actualizar addons — borrar los anteriores e insertar los nuevos
+  await supabase.from('space_addons').delete().eq('space_id', spaceId)
+  if (payload.addons.length > 0) {
+    await supabase.from('space_addons').insert(
+      payload.addons.map(a => ({
+        space_id:     spaceId,
+        name:         a.name,
+        price:        a.price,
+        unit:         a.unit,
+        category:     a.category,
+        is_available: true,
+      }))
+    )
+  }
+
+  // Actualizar términos de pago
+  if (payload.paymentTerm) {
+    const ptData = { space_id: spaceId, term_type: payload.paymentTerm }
+    const existingPt = await supabase.from('space_payment_terms').select('id').eq('space_id', spaceId).limit(1)
+    if (existingPt.data?.length) {
+      await supabase.from('space_payment_terms').update(ptData).eq('space_id', spaceId)
+    } else {
+      await supabase.from('space_payment_terms').insert(ptData)
+    }
+  }
+
   revalidatePath('/buscar')
+  revalidatePath('/', 'layout')
   return { success: true, spaceId }
 }

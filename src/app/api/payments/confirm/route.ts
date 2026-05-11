@@ -48,8 +48,8 @@ export async function POST(req: NextRequest) {
 
   if (!booking) return NextResponse.json({ error: 'Reserva no encontrada' }, { status: 404 })
 
-  // Idempotencia — si ya fue confirmada, devolver éxito sin reprocesar
-  if (booking.payment_status === 'advance') {
+  // Idempotencia — si ya fue confirmada y no es pago de cuota adicional, no reprocesar
+  if (booking.payment_status === 'advance' && !cuotaId) {
     return NextResponse.json({ success: true, already: true })
   }
 

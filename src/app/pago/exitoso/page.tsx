@@ -44,15 +44,16 @@ function ExitoContent() {
 
       setBooking(data)
 
-      // Si ya estaba confirmada (recarga de página), no llamar confirm otra vez
-      if (data?.payment_status === 'advance') {
+      // Validar que los params requeridos de Azul estén presentes
+      const hasAzulParams = isoCode && authHash && orderNumber && amount && azulOrderId
+
+      // Si ya estaba confirmada y no hay params nuevos de Azul (recarga de página), no reprocesar
+      // Excepción: si llegan params de Azul + cuotaId, es pago de cuota 2/3 → debe procesarse
+      if (data?.payment_status === 'advance' && (!hasAzulParams || !cuotaId)) {
         setConfirmed(true)
         setTimeout(() => setVisible(true), 80)
         return
       }
-
-      // Validar que los params requeridos de Azul estén presentes
-      const hasAzulParams = isoCode && authHash && orderNumber && amount && azulOrderId
 
       // Si Azul envió params de respuesta, verificar y confirmar
       if (hasAzulParams && isoCode === '00') {

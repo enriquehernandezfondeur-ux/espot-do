@@ -39,7 +39,7 @@ const tabs: { id: Tab; label: string; icon: any }[] = [
 ]
 
 export default function AdminEditSpaceClient({ space }: { space: any }) {
-  const pricing    = space.space_pricing?.[0]
+  const pricing    = space.space_pricing?.find((p: any) => p.is_active) ?? space.space_pricing?.[0]
   const conditions = space.space_conditions?.[0]
   const payTerms   = space.space_payment_terms?.[0]
   const host       = space.profiles

@@ -7,20 +7,25 @@ import { Search, ChevronDown, Loader2, CalendarDays, Clock, Users, MapPin } from
 import { cn } from '@/lib/utils'
 
 const STATUS_OPTIONS = [
-  { value: 'all',            label: 'Todas' },
-  { value: 'pending',        label: 'Pendientes' },
-  { value: 'confirmed',      label: 'Confirmadas' },
-  { value: 'completed',      label: 'Completadas' },
-  { value: 'cancelled_host', label: 'Canceladas' },
+  { value: 'all',             label: 'Todas' },
+  { value: 'pending',         label: 'Pendientes' },
+  { value: 'accepted',        label: 'Por pagar' },
+  { value: 'confirmed',       label: 'Confirmadas' },
+  { value: 'completed',       label: 'Completadas' },
+  { value: 'quote_requested', label: 'Cotizaciones' },
+  { value: 'cancelled_guest', label: 'Canceladas' },
+  { value: 'rejected',        label: 'Rechazadas' },
 ]
 
 const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
-  pending:         { label: 'Pendiente',  color: '#D97706', bg: 'rgba(217,119,6,0.1)' },
-  confirmed:       { label: 'Confirmada', color: '#16A34A', bg: 'rgba(22,163,74,0.1)' },
-  completed:       { label: 'Completada', color: '#2563EB', bg: 'rgba(37,99,235,0.1)' },
-  cancelled_guest: { label: 'Cancelada',  color: '#DC2626', bg: 'rgba(220,38,38,0.1)' },
-  cancelled_host:  { label: 'Cancelada',  color: '#DC2626', bg: 'rgba(220,38,38,0.1)' },
-  quote_requested: { label: 'Cotización', color: '#7C3AED', bg: 'rgba(124,58,237,0.1)' },
+  pending:         { label: 'Pendiente',    color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
+  accepted:        { label: 'Por pagar',    color: '#2563EB', bg: 'rgba(37,99,235,0.1)'   },
+  confirmed:       { label: 'Confirmada',   color: '#16A34A', bg: 'rgba(22,163,74,0.1)'   },
+  completed:       { label: 'Completada',   color: '#35C493', bg: 'rgba(53,196,147,0.1)'  },
+  rejected:        { label: 'Rechazada',    color: '#DC2626', bg: 'rgba(220,38,38,0.1)'   },
+  cancelled_guest: { label: 'Cancelada',    color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },
+  cancelled_host:  { label: 'Cancelada',    color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },
+  quote_requested: { label: 'Cotización',   color: '#7C3AED', bg: 'rgba(124,58,237,0.1)'  },
 }
 
 export default function AdminReservasPage() {
@@ -30,6 +35,12 @@ export default function AdminReservasPage() {
   const [search, setSearch]     = useState('')
   const [selected, setSelected] = useState<any | null>(null)
   const [updating, setUpdating] = useState<string | null>(null)
+  const [toast, setToast]       = useState<{ msg: string; ok: boolean } | null>(null)
+
+  function showToast(msg: string, ok: boolean) {
+    setToast({ msg, ok })
+    setTimeout(() => setToast(null), 3000)
+  }
 
   useEffect(() => {
     getAdminBookings({ status: filter === 'all' ? undefined : filter })
@@ -46,15 +57,24 @@ export default function AdminReservasPage() {
   async function handleStatusChange(bookingId: string, status: string) {
     setUpdating(bookingId)
     const result = await updateBookingStatus(bookingId, status)
-    if (!result || !('error' in result)) {
+    if ('error' in result) {
+      showToast(`Error: ${result.error}`, false)
+    } else {
       setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status } : b))
       if (selected?.id === bookingId) setSelected((p: any) => ({ ...p, status }))
+      showToast(`Estado cambiado a "${statusConfig[status]?.label ?? status}"`, true)
     }
     setUpdating(null)
   }
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
+      {toast && (
+        <div className="fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
+          style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
+          {toast.ok ? '✓' : '✕'} {toast.msg}
+        </div>
+      )}
       <div className="mb-8">
         <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Reservas</h1>
         <p className="text-sm text-slate-500 mt-0.5">{bookings.length} reservas en total</p>
@@ -205,7 +225,7 @@ export default function AdminReservasPage() {
                   <span>Total evento</span><span>{formatCurrency(Number(selected.total_amount))}</span>
                 </div>
                 <div className="flex justify-between text-sm font-bold" style={{ color: 'var(--brand)' }}>
-                  <span>Comisión Espot</span><span>{formatCurrency(Number(selected.platform_fee))}</span>
+                  <span>Comisión Espot (10%)</span><span>{formatCurrency(Number(selected.total_amount) * 0.10)}</span>
                 </div>
                 <div className="flex justify-between text-xs pt-1" style={{ borderTop: '1px solid rgba(53,196,147,0.15)', color: '#6B7280' }}>
                   <span>Estado de pago</span>

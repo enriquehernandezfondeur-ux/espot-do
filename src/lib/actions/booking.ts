@@ -236,7 +236,6 @@ export async function acceptBooking(bookingId: string) {
   await createInstallments(bookingId, bk.event_date, Number(bk.total_amount))
 
   const guest = bk.profiles as any
-  const depositAmount = formatCurrency(Number(bk.platform_fee))
 
   await Promise.all([
     guest?.email && sendEmail({
@@ -428,7 +427,7 @@ export async function confirmPayment(bookingId: string) {
     eventDate: bk.event_date, startTime: bk.start_time, endTime: bk.end_time,
     eventType: bk.event_type, guestCount: bk.guest_count,
     totalAmount: Number(bk.total_amount), platformFee: Number(bk.platform_fee),
-    basePrice: Number(bk.total_amount), selectedAddons: [], bookingId,
+    basePrice: Number(bk.base_price), selectedAddons: [], bookingId,
   }
   await Promise.all([
     guest?.email && sendEmail({
@@ -447,7 +446,14 @@ export async function confirmPayment(bookingId: string) {
 }
 
 // ── CANCELAR RESERVA (cliente o host) ─────────────────────
-export async function cancelBooking(bookingId: string, reason?: string) {
+export interface RefundBankInfo {
+  holderName:    string
+  bank:          string
+  accountNumber: string
+  accountType:   string
+}
+
+export async function cancelBooking(bookingId: string, reason?: string, refundBankInfo?: RefundBankInfo) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
@@ -527,6 +533,7 @@ export async function cancelBooking(bookingId: string, reason?: string) {
           paidAmount,
           bookingId,
           cancelledBy,
+          refundBankInfo,
         }),
       }),
       // Notificar al otro participante (host si cancela guest, viceversa)

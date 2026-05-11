@@ -24,6 +24,7 @@ export async function getSpaceReviews(spaceId: string): Promise<ReviewsSummary> 
     .from('reviews')
     .select('id, rating, comment, created_at, profiles!guest_id(full_name)')
     .eq('space_id', spaceId)
+    .eq('is_public', true)
     .order('created_at', { ascending: false })
 
   const reviews = (data ?? []).map((r: any) => ({
@@ -104,6 +105,16 @@ export async function submitReview(data: {
   if (!user) return { error: 'No autenticado' }
 
   if (data.rating < 1 || data.rating > 5) return { error: 'Rating inválido' }
+
+  // Verificar que la reserva pertenece al usuario y el evento ya ocurrió
+  const today = new Date().toISOString().split('T')[0]
+  const { data: booking } = await supabase
+    .from('bookings')
+    .select('event_date, guest_id')
+    .eq('id', data.bookingId)
+    .single()
+  if (!booking || booking.guest_id !== user.id) return { error: 'Reserva no encontrada' }
+  if (booking.event_date >= today) return { error: 'Solo puedes dejar una reseña después de tu evento' }
 
   const { error } = await supabase.from('reviews').insert({
     booking_id: data.bookingId,

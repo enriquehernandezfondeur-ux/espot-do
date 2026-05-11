@@ -396,7 +396,7 @@ export function tplReembolsoPendiente(data: {
         { label: 'Tiempo estimado',   value: '3–5 días hábiles' },
         { label: 'Referencia',        value: data.bookingId.slice(0, 8).toUpperCase() },
       ])}
-      <p style="color:#374151;margin:0 0 12px;">El reembolso se procesará automáticamente hacia el método de pago original (Azul Payments). El tiempo de acreditación depende de tu banco.</p>
+      <p style="color:#374151;margin:0 0 12px;">Realizaremos la transferencia a tu cuenta bancaria en un plazo de 3–5 días hábiles. Si no recibiste una confirmación con tus datos bancarios, escríbenos para coordinar.</p>
       <p style="color:#6B7280;font-size:13px;margin:0;">¿Dudas? Escríbenos a <a href="mailto:contacto@espot.do" style="color:#35C493;">contacto@espot.do</a> con la referencia <strong>${data.bookingId.slice(0, 8).toUpperCase()}</strong>.</p>`,
     cta: { text: 'Ver mis reservas', url: `${SITE}/dashboard/reservas` },
   })
@@ -411,20 +411,32 @@ export function tplReembolsoPendienteAdmin(data: {
   paidAmount: number
   bookingId: string
   cancelledBy: string
+  refundBankInfo?: { holderName: string; bank: string; accountNumber: string; accountType: string }
 }) {
+  const bankRows = data.refundBankInfo ? [
+    { label: '── Datos para transferencia ──', value: '' },
+    { label: 'Titular de la cuenta',   value: data.refundBankInfo.holderName },
+    { label: 'Banco',                  value: data.refundBankInfo.bank },
+    { label: 'Tipo de cuenta',         value: data.refundBankInfo.accountType === 'ahorro' ? 'Cuenta de ahorro' : 'Cuenta corriente' },
+    { label: 'Número de cuenta',       value: data.refundBankInfo.accountNumber },
+  ] : [
+    { label: 'Datos bancarios',        value: '⚠️ El cliente no proporcionó datos. Contactarlo para obtenerlos.' },
+  ]
+
   return emailBase({
     title: '⚠️ Cancelación con reembolso pendiente',
-    subtitle: `Reserva ${data.bookingId.slice(0, 8).toUpperCase()} — Acción requerida`,
+    subtitle: `Reserva ${data.bookingId.slice(0, 8).toUpperCase()} — Transferencia requerida`,
     accentColor: '#DC2626',
     body: `
-      <p style="color:#374151;margin:0 0 16px;">Una reserva con pagos procesados fue cancelada. <strong>Es necesario procesar el reembolso manualmente en Azul Payments.</strong></p>
+      <p style="color:#374151;margin:0 0 16px;">Una reserva con pagos procesados fue cancelada. <strong>Realiza la transferencia bancaria al cliente por el monto indicado.</strong></p>
       ${infoBox([
         { label: 'Reserva ID',          value: data.bookingId },
         { label: 'Cliente',             value: `${data.guestName} · ${data.guestEmail}` },
         { label: 'Espacio',             value: data.spaceName },
         { label: 'Fecha del evento',    value: formatDate(data.eventDate) },
-        { label: 'Monto a reembolsar',  value: formatCurrency(data.paidAmount) },
+        { label: 'Monto a transferir',  value: formatCurrency(data.paidAmount) },
         { label: 'Cancelado por',       value: data.cancelledBy },
+        ...bankRows,
       ])}`,
     cta: { text: 'Ver en panel admin', url: `${SITE}/admin/liquidaciones` },
   })

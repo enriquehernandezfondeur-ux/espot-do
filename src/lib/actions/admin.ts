@@ -151,26 +151,23 @@ export async function getAdminStats() {
   const supabase = await requireAdmin()
   if (!supabase) return null
 
-  const [spaces, bookings, profiles, payments, pendingSpaces, pendingBookings] = await Promise.all([
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
+
+  const [spaces, bookings, profiles, payments, pendingSpaces, pendingBookings, monthRevenue] = await Promise.all([
     supabase.from('spaces').select('id', { count: 'exact', head: true }),
     supabase.from('bookings').select('id', { count: 'exact', head: true }),
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
-    supabase.from('bookings').select('platform_fee').not('payment_status', 'eq', 'unpaid'),
+    supabase.from('bookings').select('total_amount').in('payment_status', ['advance', 'partial', 'paid']),
     supabase.from('spaces').select('id', { count: 'exact', head: true }).eq('is_published', false).eq('is_active', true),
     supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+    supabase.from('bookings').select('total_amount').in('payment_status', ['advance', 'partial', 'paid']).gte('created_at', monthStart),
   ])
 
   const hosts = await supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'host')
   const admins = await supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'admin')
 
-  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
-  const monthRevenue = await supabase.from('bookings')
-    .select('platform_fee')
-    .not('payment_status', 'eq', 'unpaid')
-    .gte('created_at', monthStart)
-
-  const totalRevenue = (payments.data ?? []).reduce((s, b) => s + Number(b.platform_fee), 0)
-  const monthlyRevenue = (monthRevenue.data ?? []).reduce((s, b) => s + Number(b.platform_fee), 0)
+  const totalRevenue   = (payments.data ?? []).reduce((s, b) => s + Number(b.total_amount) * 0.10, 0)
+  const monthlyRevenue = (monthRevenue.data ?? []).reduce((s, b) => s + Number(b.total_amount) * 0.10, 0)
 
   return {
     totalSpaces:      spaces.count ?? 0,

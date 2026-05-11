@@ -8,12 +8,13 @@ import { cn } from '@/lib/utils'
 interface Photo { url: string; path: string; isCover: boolean }
 
 interface Props {
-  spaceId?: string
-  onChange: (photos: Photo[]) => void
+  spaceId?:       string
+  onChange:       (photos: Photo[]) => void
+  initialPhotos?: Photo[]  // Fotos existentes al editar
 }
 
-export default function PhotoUploader({ spaceId, onChange }: Props) {
-  const [photos, setPhotos]         = useState<Photo[]>([])
+export default function PhotoUploader({ spaceId, onChange, initialPhotos }: Props) {
+  const [photos, setPhotos]         = useState<Photo[]>(initialPhotos ?? [])
   const [uploading, setUploading]   = useState(false)
   const [dragOver, setDragOver]     = useState(false)
   const [uploadError, setUploadError] = useState('')

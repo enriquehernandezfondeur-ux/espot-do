@@ -72,9 +72,29 @@ export default function AdminLiquidacionesPage() {
   const [payouts, setPayouts]   = useState<any[]>([])
   const [loading, setLoading]   = useState(true)
   const [paying,  setPaying]    = useState<string | null>(null)
-  const [notes,   setNotes]     = useState<Record<string, string>>({})
+  const [notes,    setNotes]    = useState<Record<string, string>>({})
   const [showNote, setShowNote] = useState<string | null>(null)
+  const [toast,    setToast]    = useState<{ msg: string; ok: boolean } | null>(null)
   const [, startTransition] = useTransition()
+
+  function showToast(msg: string, ok: boolean) {
+    setToast({ msg, ok })
+    setTimeout(() => setToast(null), 3000)
+  }
+
+  // Notas persistidas en localStorage por booking ID
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('espothub_liq_notes') ?? '{}')
+      setNotes(saved)
+    } catch {}
+  }, [])
+
+  function saveNote(bookingId: string, text: string) {
+    const updated = { ...notes, [bookingId]: text }
+    setNotes(updated)
+    try { localStorage.setItem('espothub_liq_notes', JSON.stringify(updated)) } catch {}
+  }
 
   async function load() {
     setLoading(true)
@@ -89,16 +109,27 @@ export default function AdminLiquidacionesPage() {
     setPaying(bookingId)
     startTransition(async () => {
       const result = await markPayoutPaid(bookingId)
-      if (!result || !('error' in result)) await load()
+      if (result && 'error' in result) {
+        showToast(`Error: ${result.error}`, false)
+      } else {
+        await load()
+        showToast('Liquidación marcada como pagada ✓', true)
+      }
       setPaying(null)
     })
   }
 
-  const totalPending = payouts.filter(b => b.payout_status !== 'paid').reduce((s, b) => s + (Number(b.total_amount) - Number(b.platform_fee)), 0)
-  const totalPaid    = payouts.filter(b => b.payout_status === 'paid').reduce((s, b) => s + (Number(b.total_amount) - Number(b.platform_fee)), 0)
+  const totalPending = payouts.filter(b => b.payout_status !== 'paid').reduce((s, b) => s + Number(b.total_amount) * 0.90, 0)
+  const totalPaid    = payouts.filter(b => b.payout_status === 'paid').reduce((s, b) => s + Number(b.total_amount) * 0.90, 0)
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
+      {toast && (
+        <div className="fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
+          style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
+          {toast.ok ? '✓' : '✕'} {toast.msg}
+        </div>
+      )}
 
       {/* Header */}
       <div className="flex items-start justify-between mb-8">
@@ -192,7 +223,7 @@ export default function AdminLiquidacionesPage() {
             {payouts.map((bk: any) => {
               const space   = bk.spaces as any
               const host    = space?.profiles as any
-              const hostAmt = Number(bk.total_amount) - Number(bk.platform_fee)
+              const hostAmt = Number(bk.total_amount) * 0.90
               const isPaid  = bk.payout_status === 'paid'
 
               return (
@@ -274,8 +305,8 @@ export default function AdminLiquidacionesPage() {
                       <FileText size={13} style={{ color: '#94A3B8', flexShrink: 0 }} />
                       <input
                         value={notes[bk.id] ?? ''}
-                        onChange={e => setNotes(p => ({ ...p, [bk.id]: e.target.value }))}
-                        placeholder="Agregar nota interna (referencia de transferencia, observaciones...)"
+                        onChange={e => saveNote(bk.id, e.target.value)}
+                        placeholder="Referencia de transferencia, observaciones... (se guarda automáticamente)"
                         className="flex-1 text-sm bg-transparent focus:outline-none"
                         style={{ color: '#374151' }}
                       />

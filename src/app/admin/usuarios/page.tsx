@@ -16,6 +16,12 @@ export default function AdminUsersPage() {
   const [filter, setFilter]   = useState('all')
   const [search, setSearch]   = useState('')
   const [updating, setUpdating] = useState<string | null>(null)
+  const [toast, setToast]       = useState<{ msg: string; ok: boolean } | null>(null)
+
+  function showToast(msg: string, ok: boolean) {
+    setToast({ msg, ok })
+    setTimeout(() => setToast(null), 3500)
+  }
 
   useEffect(() => {
     getAdminUsers({ role: filter === 'all' ? undefined : filter })
@@ -32,14 +38,27 @@ export default function AdminUsersPage() {
     if (!window.confirm(`¿Cambiar el rol de este usuario a "${label}"?`)) return
     setUpdating(userId)
     const result = await updateUserRole(userId, role)
-    if (!result || !('error' in result)) {
+    if ('error' in result) {
+      showToast(`Error: ${result.error}`, false)
+    } else {
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, role } : u))
+      showToast(`Rol cambiado a ${label} correctamente`, true)
     }
     setUpdating(null)
   }
 
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
+      {toast && (
+        <div className="fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
+          style={{
+            background: toast.ok ? '#16A34A' : '#DC2626',
+            color: '#fff',
+            animation: 'slideIn 0.2s ease',
+          }}>
+          {toast.ok ? '✓' : '✕'} {toast.msg}
+        </div>
+      )}
       <div className="mb-8">
         <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Usuarios</h1>
         <p className="text-sm text-slate-500 mt-0.5">{users.length} usuarios registrados</p>

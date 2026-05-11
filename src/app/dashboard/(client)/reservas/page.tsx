@@ -9,7 +9,7 @@ import { getClientBookings } from '@/lib/actions/client'
 import { STATUS_LABELS, STATUS_COLORS, isPaid } from '@/lib/bookingConfig'
 import { cn } from '@/lib/utils'
 import { submitReview, getUserReviewedBookings } from '@/lib/actions/reviews'
-import { cancelBooking } from '@/lib/actions/booking'
+import { cancelBooking, type RefundBankInfo } from '@/lib/actions/booking'
 import { getInstallments, type BookingInstallment } from '@/lib/actions/installments'
 import { countdownLabel } from '@/lib/payments/schedule'
 
@@ -30,23 +30,42 @@ export default function MisReservasPage() {
   const [submitting, setSubmitting]   = useState(false)
   const [selected, setSelected]       = useState<Booking | null>(null)
   const [cancelModal, setCancelModal] = useState<Booking | null>(null)
+  const [cancelStep, setCancelStep]   = useState<1 | 2>(1)
   const [cancelReason, setCancelReason] = useState('')
   const [cancelling, setCancelling]   = useState(false)
+  const [refundBank, setRefundBank]   = useState<RefundBankInfo>({ holderName: '', bank: '', accountNumber: '', accountType: 'ahorro' })
   const [installments, setInstallments] = useState<BookingInstallment[]>([])
   const router = useRouter()
+
+  const cancelHasPaid = cancelModal ? isPaid((cancelModal as any).payment_status) : false
+
+  function openCancelModal(bk: Booking) {
+    setCancelModal(bk)
+    setCancelStep(1)
+    setCancelReason('')
+    setRefundBank({ holderName: '', bank: '', accountNumber: '', accountType: 'ahorro' })
+  }
+
+  function closeCancelModal() {
+    setCancelModal(null)
+    setCancelStep(1)
+    setCancelReason('')
+  }
 
   async function handleCancel() {
     if (!cancelModal) return
     setCancelling(true)
-    const result = await cancelBooking(cancelModal.id, cancelReason || undefined)
+    const bankInfo = cancelHasPaid && refundBank.accountNumber ? refundBank : undefined
+    const result = await cancelBooking(cancelModal.id, cancelReason || undefined, bankInfo)
     if (!('error' in result)) {
       setBookings(prev => prev.map(b =>
         b.id === cancelModal.id ? { ...b, status: 'cancelled_guest' as any } : b
       ))
+      if (selected?.id === cancelModal.id)
+        setSelected((prev: Booking | null) => prev ? { ...prev, status: 'cancelled_guest' as any } : null)
     }
     setCancelling(false)
-    setCancelModal(null)
-    setCancelReason('')
+    closeCancelModal()
   }
 
   useEffect(() => {
@@ -172,10 +191,9 @@ export default function MisReservasPage() {
                 <button className="w-full text-left" onClick={() => {
                   const next = isSelected ? null : bk
                   setSelected(next)
+                  setInstallments([])
                   if (next && (next.status === 'accepted' || next.status === 'confirmed')) {
-                    getInstallments(next.id).then(setInstallments).catch(() => setInstallments([]))
-                  } else {
-                    setInstallments([])
+                    getInstallments(next.id).then(setInstallments).catch(() => {})
                   }
                 }}>
                   <div className="flex items-center gap-3 p-4">
@@ -412,17 +430,35 @@ export default function MisReservasPage() {
                           style={{ background: 'rgba(217,119,6,0.05)', border: '1px solid rgba(217,119,6,0.15)', color: '#92400E' }}>
                           El propietario revisará tu solicitud y confirmará disponibilidad.
                         </div>
-                        <button onClick={() => setCancelModal(bk)}
+                        <button onClick={() => openCancelModal(bk)}
                           className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
                           style={{ color: '#DC2626', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
                           <X size={12} /> Cancelar solicitud
                         </button>
                       </div>
                     )}
+                    {bk.status === 'accepted' && (
+                      <div className="mt-4 space-y-2">
+                        <button onClick={() => openCancelModal(bk)}
+                          className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
+                          style={{ color: '#DC2626', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
+                          <X size={12} /> Cancelar reserva
+                        </button>
+                      </div>
+                    )}
                     {bk.status === 'confirmed' && (
-                      <div className="mt-4 px-4 py-3 rounded-xl text-sm"
-                        style={{ background: 'rgba(22,163,74,0.05)', border: '1px solid rgba(22,163,74,0.15)', color: '#166534' }}>
-                        Reserva confirmada. Las cuotas restantes se cobrarán automáticamente por espot.do según el plan de pagos.
+                      <div className="mt-4 space-y-3">
+                        <div className="px-4 py-3 rounded-xl text-sm"
+                          style={{ background: 'rgba(22,163,74,0.05)', border: '1px solid rgba(22,163,74,0.15)', color: '#166534' }}>
+                          Reserva confirmada. Las cuotas restantes se cobrarán según el plan de pagos.
+                        </div>
+                        {new Date(bk.event_date) > new Date() && (
+                          <button onClick={() => openCancelModal(bk)}
+                            className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
+                            style={{ color: '#DC2626', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
+                            <X size={12} /> Cancelar reserva
+                          </button>
+                        )}
                       </div>
                     )}
                     {bk.status === 'rejected' && (
@@ -551,49 +587,159 @@ export default function MisReservasPage() {
       {/* ── Modal cancelar reserva ── */}
       {cancelModal && (
         <>
-          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={() => setCancelModal(null)} />
+          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={closeCancelModal} />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="w-full max-w-md rounded-3xl p-6 space-y-5"
               style={{ background: '#fff', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
-                  style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.15)' }}>
-                  <AlertTriangle size={20} style={{ color: '#DC2626' }} />
-                </div>
-                <div>
-                  <h3 className="font-bold text-base mb-1" style={{ color: 'var(--text-primary)' }}>
-                    ¿Cancelar reserva?
-                  </h3>
-                  <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                    Esta acción no se puede deshacer. Si ya realizaste el pago, aplica la política de cancelación del espacio.
+
+              {/* ── PASO 1: Confirmar cancelación + motivo ── */}
+              {cancelStep === 1 && (
+                <>
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+                      style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.15)' }}>
+                      <AlertTriangle size={20} style={{ color: '#DC2626' }} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-base mb-1" style={{ color: 'var(--text-primary)' }}>
+                        ¿Cancelar reserva?
+                      </h3>
+                      <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                        {cancelHasPaid
+                          ? 'Ya realizaste un pago. Te devolveremos el dinero según la política de cancelación del espacio.'
+                          : 'Esta acción no se puede deshacer.'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                      Motivo (opcional)
+                    </label>
+                    <textarea
+                      value={cancelReason}
+                      onChange={e => setCancelReason(e.target.value)}
+                      placeholder="Ej: Cambio de fecha, evento cancelado..."
+                      rows={2}
+                      className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none"
+                    />
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button onClick={closeCancelModal}
+                      className="flex-1 py-3 rounded-xl text-sm font-semibold btn-outline">
+                      Volver
+                    </button>
+                    <button
+                      onClick={() => cancelHasPaid ? setCancelStep(2) : handleCancel()}
+                      disabled={cancelling}
+                      className="flex-1 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+                      style={{ background: '#DC2626', color: '#fff' }}>
+                      {cancelHasPaid ? 'Continuar →' : (cancelling ? <><Loader2 size={15} className="animate-spin" /> Cancelando...</> : 'Sí, cancelar')}
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {/* ── PASO 2: Datos bancarios para reembolso ── */}
+              {cancelStep === 2 && (
+                <>
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                      style={{ background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.15)' }}>
+                      <CreditCard size={18} style={{ color: '#2563EB' }} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-base mb-1" style={{ color: 'var(--text-primary)' }}>
+                        Datos para tu reembolso
+                      </h3>
+                      <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                        Te transferiremos el monto pagado a esta cuenta en 3–5 días hábiles.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                        Nombre del titular *
+                      </label>
+                      <input
+                        value={refundBank.holderName}
+                        onChange={e => setRefundBank(p => ({ ...p, holderName: e.target.value }))}
+                        placeholder="Como aparece en tu cuenta bancaria"
+                        className="input-base w-full rounded-xl px-4 py-3 text-sm"
+                        style={{ fontSize: 16 }}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                          Banco *
+                        </label>
+                        <select
+                          value={refundBank.bank}
+                          onChange={e => setRefundBank(p => ({ ...p, bank: e.target.value }))}
+                          className="input-base w-full rounded-xl px-4 py-3 text-sm"
+                          style={{ fontSize: 16 }}>
+                          <option value="">Seleccionar</option>
+                          <option>Banco Popular</option>
+                          <option>BHD León</option>
+                          <option>Banreservas</option>
+                          <option>Scotiabank</option>
+                          <option>Banco Santa Cruz</option>
+                          <option>Asociación Popular</option>
+                          <option>Asociación La Nacional</option>
+                          <option>Otro</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                          Tipo *
+                        </label>
+                        <select
+                          value={refundBank.accountType}
+                          onChange={e => setRefundBank(p => ({ ...p, accountType: e.target.value }))}
+                          className="input-base w-full rounded-xl px-4 py-3 text-sm"
+                          style={{ fontSize: 16 }}>
+                          <option value="ahorro">Ahorro</option>
+                          <option value="corriente">Corriente</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+                        Número de cuenta *
+                      </label>
+                      <input
+                        value={refundBank.accountNumber}
+                        onChange={e => setRefundBank(p => ({ ...p, accountNumber: e.target.value }))}
+                        placeholder="Ej: 2100012345678"
+                        className="input-base w-full rounded-xl px-4 py-3 text-sm"
+                        inputMode="numeric"
+                        style={{ fontSize: 16 }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button onClick={() => setCancelStep(1)}
+                      className="flex-1 py-3 rounded-xl text-sm font-semibold btn-outline">
+                      ← Atrás
+                    </button>
+                    <button
+                      onClick={handleCancel}
+                      disabled={cancelling || !refundBank.holderName || !refundBank.bank || !refundBank.accountNumber}
+                      className="flex-1 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50"
+                      style={{ background: '#DC2626', color: '#fff' }}>
+                      {cancelling ? <><Loader2 size={15} className="animate-spin" /> Procesando...</> : 'Confirmar cancelación'}
+                    </button>
+                  </div>
+                  <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
+                    Estos datos solo se usan para procesarte el reembolso.
                   </p>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>
-                  Motivo (opcional)
-                </label>
-                <textarea
-                  value={cancelReason}
-                  onChange={e => setCancelReason(e.target.value)}
-                  placeholder="Ej: Cambio de fecha, evento cancelado..."
-                  rows={3}
-                  className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none min-h-[80px]"
-                />
-              </div>
-
-              <div className="flex gap-3">
-                <button onClick={() => setCancelModal(null)}
-                  className="flex-1 py-3 rounded-xl text-sm font-semibold btn-outline">
-                  Volver
-                </button>
-                <button onClick={handleCancel} disabled={cancelling}
-                  className="flex-1 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50"
-                  style={{ background: '#DC2626', color: '#fff' }}>
-                  {cancelling ? <><Loader2 size={15} className="animate-spin" /> Cancelando...</> : 'Sí, cancelar'}
-                </button>
-              </div>
+                </>
+              )}
             </div>
           </div>
         </>

@@ -2,19 +2,22 @@ import { getAdminPayments } from '@/lib/actions/admin'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { CreditCard, TrendingUp, Clock, CheckCircle } from 'lucide-react'
 
+const PAID = ['advance', 'partial', 'paid']
+
 const paymentConfig: Record<string, { label: string; color: string; bg: string }> = {
-  unpaid:  { label: 'Sin pago',   color: '#D97706', bg: 'rgba(217,119,6,0.08)' },
-  partial: { label: '10% pagado', color: '#2563EB', bg: 'rgba(37,99,235,0.08)' },
-  advance: { label: 'Anticipo',   color: '#7C3AED', bg: 'rgba(124,58,237,0.08)' },
-  paid:    { label: 'Pagado',     color: '#16A34A', bg: 'rgba(22,163,74,0.08)' },
+  unpaid:  { label: 'Sin pago',         color: '#D97706', bg: 'rgba(217,119,6,0.08)'   },
+  partial: { label: 'Pago parcial',     color: '#2563EB', bg: 'rgba(37,99,235,0.08)'   },
+  advance: { label: 'Depósito pagado',  color: '#16A34A', bg: 'rgba(22,163,74,0.08)'   },
+  paid:    { label: 'Pago completo',    color: '#35C493', bg: 'rgba(53,196,147,0.08)'  },
 }
 
 export default async function AdminPagosPage() {
   const bookings = await getAdminPayments()
 
-  const totalRevenue    = bookings.reduce((s, b) => s + Number((b as any).platform_fee), 0)
-  const totalPaid       = bookings.filter(b => (b as any).payment_status === 'paid').reduce((s, b) => s + Number((b as any).platform_fee), 0)
-  const totalPending    = bookings.filter(b => (b as any).payment_status !== 'paid').reduce((s, b) => s + Number((b as any).platform_fee), 0)
+  const commission      = (b: any) => Number((b as any).total_amount) * 0.10
+  const totalRevenue    = bookings.reduce((s, b) => s + commission(b), 0)
+  const totalPaid       = bookings.filter(b => PAID.includes((b as any).payment_status)).reduce((s, b) => s + commission(b), 0)
+  const totalPending    = bookings.filter(b => !PAID.includes((b as any).payment_status)).reduce((s, b) => s + commission(b), 0)
   const totalEventValue = bookings.reduce((s, b) => s + Number((b as any).total_amount), 0)
 
   return (
@@ -62,7 +65,7 @@ export default async function AdminPagosPage() {
                 </div>
                 <div className="text-sm text-slate-600">{formatDate(bk.event_date)}</div>
                 <div className="text-sm font-bold" style={{ color: '#0F1623' }}>{formatCurrency(Number(bk.total_amount))}</div>
-                <div className="text-sm font-bold" style={{ color: '#35C493' }}>{formatCurrency(Number(bk.platform_fee))}</div>
+                <div className="text-sm font-bold" style={{ color: '#35C493' }}>{formatCurrency(Number(bk.total_amount) * 0.10)}</div>
                 <span className="text-xs font-semibold px-2.5 py-1 rounded-full w-fit"
                   style={{ background: pc.bg, color: pc.color }}>
                   {pc.label}

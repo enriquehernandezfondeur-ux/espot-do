@@ -131,8 +131,11 @@ export default function EspacioPage() {
   const [currentStep, setCurrentStep] = useState(1)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
+  const [stepError, setStepError] = useState('')
   const [publishedPending, setPublishedPending] = useState(false)
   const [pendingPhotos, setPendingPhotos] = useState<{ url: string; path: string; isCover: boolean }[]>([])
+  const [existingPhotos, setExistingPhotos] = useState<{ url: string; path: string; isCover: boolean }[]>([])
+  const [photosTouched, setPhotosTouched] = useState(false)
   const [videoUrl,      setVideoUrl]      = useState('')
   const [menuUrl,       setMenuUrl]       = useState('')
   const [menuFileName,  setMenuFileName]  = useState('')
@@ -315,14 +318,15 @@ export default function EspacioPage() {
       }
     }
 
-    // Guardar fotos si hay pendientes
-    if (pendingPhotos.length > 0) {
+    // Guardar fotos solo si el usuario las modificó
+    if (photosTouched && pendingPhotos.length > 0) {
       const imgResult = await saveSpaceImages(spaceId, pendingPhotos)
       if (imgResult && 'error' in imgResult) {
         setSaveError(imgResult.error ?? 'Error al guardar fotos')
         setSaving(false)
         return
       }
+      setPhotosTouched(false)
     }
 
     setSaving(false)
@@ -334,6 +338,20 @@ export default function EspacioPage() {
 
   function loadSpaceForEdit(space: any) {
     setEditingSpaceId(space.id)
+    setSaveError('')
+    setStepError('')
+    setCurrentStep(1)
+    // Limpiar estado residual de sesión anterior
+    setNewInclude('')
+    setNewBlock({ block_name: '', start_time: '', end_time: '', days: [0,1,2,3,4,5,6] })
+    // Cargar fotos existentes para mostrarlas en el PhotoUploader
+    const imgs: { url: string; path: string; isCover: boolean }[] =
+      (space.space_images ?? [])
+        .sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+        .map((img: any) => ({ url: img.url, path: img.path, isCover: img.is_cover ?? false }))
+    setExistingPhotos(imgs)
+    setPendingPhotos(imgs)
+    setPhotosTouched(false)
     // Cargar info básica
     setName(space.name ?? '')
     setCategory(space.category ?? '')
@@ -418,15 +436,41 @@ export default function EspacioPage() {
     // Payment terms
     const pt = space.space_payment_terms?.[0]
     if (pt) setPaymentTerm(pt.term_type ?? '')
+    else    setPaymentTerm('')
     // Time blocks
-    if (space.space_time_blocks?.length) {
-      setTimeBlocks(space.space_time_blocks.map((b: any) => ({
+    setTimeBlocks(
+      (space.space_time_blocks ?? []).map((b: any) => ({
         block_name: b.block_name, start_time: b.start_time, end_time: b.end_time,
         days: b.days_of_week ?? [0,1,2,3,4,5,6],
-      })))
-    }
-    setCurrentStep(1)
+      }))
+    )
     setView('create')
+  }
+
+  function validateStep(step: number): string {
+    if (step === 1) {
+      if (!name.trim())      return 'El nombre del espacio es obligatorio.'
+      if (!category)         return 'Selecciona una categoría.'
+      if (!description.trim()) return 'La descripción es obligatoria.'
+      if (!capacityMax)      return 'Indica la capacidad máxima.'
+    }
+    if (step === 2) {
+      if (!pricingType) return 'Selecciona un modelo de precio.'
+      if (pricingType === 'hourly' && !hourlyPrice) return 'Indica el precio por hora.'
+      if (pricingType === 'minimum_consumption' && !minConsumption) return 'Indica el consumo mínimo.'
+      if (pricingType === 'fixed_package' && !fixedPrice) return 'Indica el precio del paquete.'
+    }
+    if (step === 6) {
+      if (!paymentTerm) return 'Selecciona el modelo de pago.'
+    }
+    return ''
+  }
+
+  function goNext() {
+    const err = validateStep(currentStep)
+    if (err) { setStepError(err); return }
+    setStepError('')
+    setCurrentStep(s => Math.min(7, s + 1))
   }
 
   function toggleAddon(addon: AddonItem) {
@@ -794,7 +838,12 @@ export default function EspacioPage() {
               <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
                 Fotos del espacio
               </label>
-              <PhotoUploader onChange={photos => setPendingPhotos(photos)} />
+              <PhotoUploader
+                key={editingSpaceId ?? 'new'}
+                spaceId={editingSpaceId ?? undefined}
+                initialPhotos={existingPhotos}
+                onChange={photos => { setPendingPhotos(photos); setPhotosTouched(true) }}
+              />
               <p className="text-xs mt-1.5" style={{ color: pendingPhotos.length === 0 ? '#EF4444' : 'var(--text-muted)' }}>
                 * Obligatorio: al menos una foto para publicar
               </p>
@@ -1491,10 +1540,14 @@ export default function EspacioPage() {
             <ChevronLeft size={18} /> Anterior
           </button>
 
-          <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Paso {currentStep} de {steps.length}</span>
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Paso {currentStep} de {steps.length}</span>
+            {stepError && (
+              <span className="text-xs font-medium" style={{ color: '#DC2626' }}>{stepError}</span>
+            )}
+          </div>
 
           <div className="flex items-center gap-2">
-            {/* Guardar cambios visible desde cualquier paso cuando se está editando */}
             {editingSpaceId && currentStep < 7 && (
               <button
                 onClick={handlePublish}
@@ -1508,7 +1561,7 @@ export default function EspacioPage() {
 
             {currentStep < 7 && (
               <button
-                onClick={() => setCurrentStep(Math.min(7, currentStep + 1))}
+                onClick={goNext}
                 className="flex items-center gap-2 text-white text-sm font-medium px-5 py-3 rounded-xl transition-colors"
                 style={{ background: 'var(--brand)' }}
               >

@@ -51,11 +51,11 @@ export default async function AdminReportesPage() {
             <h2 className="font-bold text-sm" style={{ color: '#0F1623' }}>Espacios por categoría</h2>
           </div>
           <div className="space-y-3">
-            {Object.entries(reports?.byCategory ?? {})
+            {(() => {
+              const maxCat = Math.max(...Object.values(reports?.byCategory ?? {}), 1)
+              return Object.entries(reports?.byCategory ?? {})
               .sort((a, b) => b[1] - a[1])
-              .map(([cat, count]) => {
-                const maxCat = Math.max(...Object.values(reports?.byCategory ?? {}), 1)
-                return (
+              .map(([cat, count]) => (
                   <div key={cat} className="flex items-center gap-3">
                     <div className="w-24 text-xs text-slate-500 truncate shrink-0">
                       {CATEGORY_LABELS[cat] ?? cat}
@@ -66,8 +66,8 @@ export default async function AdminReportesPage() {
                     </div>
                     <div className="w-6 text-xs font-bold text-right shrink-0" style={{ color: '#0F1623' }}>{count}</div>
                   </div>
-                )
-              })}
+              ))
+            })()}
           </div>
         </div>
       </div>

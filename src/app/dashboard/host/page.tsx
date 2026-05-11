@@ -98,17 +98,25 @@ export default function DashboardPage() {
     }).catch(() => setLoading(false))
   }, [])
 
+  const [actionError, setActionError] = useState('')
+
   async function handleConfirm(id: string) {
     const r = await acceptBooking(id)
-    if (!('error' in r)) {
+    if ('error' in r) {
+      setActionError(r.error ?? 'Error al aceptar')
+      setTimeout(() => setActionError(''), 3000)
+    } else {
       setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'accepted' } : b))
       setStats(prev => prev ? { ...prev, pendingCount: Math.max(0, prev.pendingCount - 1), confirmedCount: prev.confirmedCount + 1 } : prev)
     }
   }
   async function handleReject(id: string) {
     const r = await rejectBooking(id)
-    if (!('error' in r)) {
-      setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'cancelled_host' } : b))
+    if ('error' in r) {
+      setActionError(r.error ?? 'Error al rechazar')
+      setTimeout(() => setActionError(''), 3000)
+    } else {
+      setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'rejected' } : b))
       setStats(prev => prev ? { ...prev, pendingCount: Math.max(0, prev.pendingCount - 1) } : prev)
     }
   }
@@ -132,6 +140,12 @@ export default function DashboardPage() {
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
       <Suspense fallback={null}><PublishedToast /></Suspense>
+      {actionError && (
+        <div className="fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
+          style={{ background: '#DC2626', color: '#fff' }}>
+          ✕ {actionError}
+        </div>
+      )}
 
       {/* ── Encabezado ── */}
       <div className="mb-6 md:mb-8">
