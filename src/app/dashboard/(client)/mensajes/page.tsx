@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Loader2, MessageCircle, Send, Search, ArrowLeft } from 'lucide-react'
+// ArrowLeft used in mobile back button below
 import { getMyConversations, getConversation, sendMessage, markMessagesRead } from '@/lib/actions/messages'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
@@ -16,6 +17,7 @@ export default function ClientMensajesPage() {
   const [hostId, setHostId]         = useState<string | null>(null)
   const [body, setBody]             = useState('')
   const [sending, setSending]       = useState(false)
+  const [sendError, setSendError]   = useState('')
   const [search, setSearch]         = useState('')
   const bottomRef    = useRef<HTMLDivElement>(null)
   const channelRef   = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
@@ -61,8 +63,14 @@ export default function ClientMensajesPage() {
   async function handleSend() {
     if (!body.trim() || sending || !active || !hostId) return
     setSending(true)
+    setSendError('')
     const result = await sendMessage(active.spaceId, hostId, body)
-    if (!result || !('error' in result)) setBody('')
+    if ('error' in result) {
+      setSendError(result.error ?? 'No se pudo enviar el mensaje')
+      setTimeout(() => setSendError(''), 3000)
+    } else {
+      setBody('')
+    }
     setSending(false)
   }
 
@@ -142,9 +150,9 @@ export default function ClientMensajesPage() {
             style={{ background: '#fff', borderBottom: '1px solid var(--border-subtle)' }}>
             {/* Botón volver — solo móvil */}
             <button onClick={() => setActive(null)}
-              className="md:hidden w-8 h-8 flex items-center justify-center rounded-xl shrink-0 text-lg"
+              className="md:hidden w-8 h-8 flex items-center justify-center rounded-xl shrink-0"
               style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
-              ←
+              <ArrowLeft size={17} />
             </button>
             <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0" style={{ background: 'var(--bg-elevated)' }}>
               {active.cover ? <img src={active.cover} alt="" className="w-full h-full object-cover" /> : <div className="text-center text-xl leading-9">🏛️</div>}
@@ -181,6 +189,12 @@ export default function ClientMensajesPage() {
 
           {/* Input */}
           <div className="px-5 py-4 shrink-0" style={{ background: '#fff', borderTop: '1px solid var(--border-subtle)' }}>
+            {sendError && (
+              <div className="mb-2 px-3 py-2 rounded-xl text-xs font-medium"
+                style={{ background: 'rgba(220,38,38,0.08)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.2)' }}>
+                {sendError}
+              </div>
+            )}
             <div className="flex items-end gap-3">
               <textarea value={body} onChange={e => setBody(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}

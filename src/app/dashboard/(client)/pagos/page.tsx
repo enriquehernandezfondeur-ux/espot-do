@@ -5,11 +5,13 @@ import { CreditCard, CheckCircle, Clock, XCircle, Loader2, Receipt } from 'lucid
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { getClientBookings } from '@/lib/actions/client'
 
+const PAID_PS = ['advance', 'partial', 'paid']
+
 const paymentStatusConfig: Record<string, { label: string; color: string; bg: string; icon: any }> = {
-  unpaid:  { label: 'Sin pago',    color: '#D97706', bg: 'rgba(217,119,6,0.08)',  icon: Clock },
-  partial: { label: 'Pago parcial', color: '#2563EB', bg: 'rgba(37,99,235,0.08)', icon: CreditCard },
-  advance: { label: 'Anticipo',    color: '#7C3AED', bg: 'rgba(124,58,237,0.08)',icon: CreditCard },
-  paid:    { label: 'Pagado',      color: '#16A34A', bg: 'rgba(22,163,74,0.08)', icon: CheckCircle },
+  unpaid:  { label: 'Sin pago',         color: '#D97706', bg: 'rgba(217,119,6,0.08)',    icon: Clock },
+  partial: { label: 'Pago parcial',     color: '#2563EB', bg: 'rgba(37,99,235,0.08)',    icon: CreditCard },
+  advance: { label: 'Depósito pagado',  color: '#16A34A', bg: 'rgba(22,163,74,0.08)',    icon: CheckCircle },
+  paid:    { label: 'Pagado completo',  color: '#35C493', bg: 'rgba(53,196,147,0.08)',   icon: CheckCircle },
 }
 
 export default function PagosPage() {
@@ -20,8 +22,8 @@ export default function PagosPage() {
     getClientBookings().then(d => { setBookings(d); setLoading(false) })
   }, [])
 
-  const totalPaid   = bookings.filter(b => b.payment_status === 'paid').reduce((s, b) => s + Number(b.platform_fee), 0)
-  const totalPending = bookings.filter(b => b.payment_status !== 'paid' && !b.status.startsWith('cancelled')).reduce((s, b) => s + Number(b.platform_fee), 0)
+  const totalPaid    = bookings.filter(b => PAID_PS.includes(b.payment_status) && ['confirmed','completed'].includes(b.status)).reduce((s, b) => s + Number(b.total_amount), 0)
+  const totalPending = bookings.filter(b => b.status === 'accepted' && !PAID_PS.includes(b.payment_status)).reduce((s, b) => s + Number(b.total_amount), 0)
 
   if (loading) return (
     <div className="flex items-center justify-center h-dvh">
@@ -89,10 +91,10 @@ export default function PagosPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
-                      {formatCurrency(Number(bk.platform_fee))}
+                      {formatCurrency(Number(bk.total_amount))}
                     </span>
                     <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                      de {formatCurrency(Number(bk.total_amount))} total
+                      total del evento
                     </span>
                   </div>
                 </div>

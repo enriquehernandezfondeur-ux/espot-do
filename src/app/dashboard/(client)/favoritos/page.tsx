@@ -10,6 +10,7 @@ export default function FavoritosPage() {
   const [favorites, setFavorites] = useState<any[]>([])
   const [loading, setLoading]     = useState(true)
   const [removing, setRemoving]   = useState<string | null>(null)
+  const [toast, setToast]         = useState('')
 
   useEffect(() => {
     getClientFavorites().then(d => { setFavorites(d); setLoading(false) })
@@ -18,7 +19,10 @@ export default function FavoritosPage() {
   async function handleRemove(favId: string) {
     setRemoving(favId)
     const result = await removeFavorite(favId)
-    if (!result || !('error' in result)) {
+    if ('error' in result) {
+      setToast('No se pudo eliminar el favorito')
+      setTimeout(() => setToast(''), 3000)
+    } else {
       setFavorites(prev => prev.filter(f => f.id !== favId))
     }
     setRemoving(null)
@@ -41,6 +45,12 @@ export default function FavoritosPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
+      {toast && (
+        <div className="fixed top-5 right-5 z-50 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
+          style={{ background: '#DC2626', color: '#fff' }}>
+          ✕ {toast}
+        </div>
+      )}
       <div className="mb-5 md:mb-8">
         <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Favoritos</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>

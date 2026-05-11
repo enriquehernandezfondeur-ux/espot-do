@@ -7,11 +7,14 @@ import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getClientStats } from '@/lib/actions/client'
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
-  pending:         { label: 'Pendiente',  color: '#D97706', bg: 'rgba(217,119,6,0.08)',   dot: 'bg-amber-400' },
-  confirmed:       { label: 'Confirmada', color: '#16A34A', bg: 'rgba(22,163,74,0.08)',   dot: 'bg-green-500' },
-  completed:       { label: 'Completada', color: '#2563EB', bg: 'rgba(37,99,235,0.08)',   dot: 'bg-blue-500' },
-  cancelled_guest: { label: 'Cancelada',  color: '#DC2626', bg: 'rgba(220,38,38,0.08)',   dot: 'bg-red-500' },
-  cancelled_host:  { label: 'Cancelada',  color: '#DC2626', bg: 'rgba(220,38,38,0.08)',   dot: 'bg-red-500' },
+  pending:         { label: 'Pendiente',    color: '#D97706', bg: 'rgba(217,119,6,0.08)',    dot: 'bg-amber-400' },
+  accepted:        { label: 'Por pagar',    color: '#2563EB', bg: 'rgba(37,99,235,0.08)',    dot: 'bg-blue-400' },
+  confirmed:       { label: 'Confirmada',   color: '#16A34A', bg: 'rgba(22,163,74,0.08)',    dot: 'bg-green-500' },
+  completed:       { label: 'Completada',   color: '#35C493', bg: 'rgba(53,196,147,0.08)',   dot: 'bg-emerald-400' },
+  quote_requested: { label: 'Cotización',   color: '#7C3AED', bg: 'rgba(124,58,237,0.08)',   dot: 'bg-purple-400' },
+  rejected:        { label: 'Rechazada',    color: '#DC2626', bg: 'rgba(220,38,38,0.08)',    dot: 'bg-red-500' },
+  cancelled_guest: { label: 'Cancelada',    color: '#6B7280', bg: 'rgba(107,114,128,0.08)', dot: 'bg-gray-400' },
+  cancelled_host:  { label: 'Cancelada',    color: '#6B7280', bg: 'rgba(107,114,128,0.08)', dot: 'bg-gray-400' },
 }
 
 export default function ClientDashboard() {
@@ -143,7 +146,7 @@ export default function ClientDashboard() {
         ) : (
           <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
             {stats.recent.map((bk: any) => {
-              const st = statusConfig[bk.status]
+              const st = statusConfig[bk.status] ?? statusConfig.pending
               const space = bk.spaces as any
               return (
                 <Link key={bk.id} href="/dashboard/reservas"
