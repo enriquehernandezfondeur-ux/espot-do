@@ -102,7 +102,7 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
       CurrencyCode:      CURRENCY,
       OrderNumber:       params.orderNumber,
       Amount:            amountStr,
-      ITBIS:             itbisStr,
+      Itbis:             itbisStr,
       ApprovedUrl:       approvedUrl,
       DeclinedUrl:       declinedUrl,
       CancelUrl:         cancelUrl,
