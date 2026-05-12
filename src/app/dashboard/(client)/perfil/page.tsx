@@ -155,7 +155,7 @@ export default function PerfilPage() {
           { label: 'WhatsApp',        value: whatsapp,  setter: setWhatsapp,  placeholder: '+1 (829) 000-0000',  type: 'tel' },
         ].map(field => (
           <div key={field.label}>
-            <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
+            <label className="block text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-muted)' }}>
               {field.label}
             </label>
             <input
@@ -169,7 +169,7 @@ export default function PerfilPage() {
         ))}
 
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
+          <label className="block text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-muted)' }}>
             Correo electrónico
           </label>
           <input value={profile?.email ?? ''} disabled

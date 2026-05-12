@@ -93,7 +93,7 @@ export default function HostPagosPage() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <Banknote size={15} style={{ color: '#35C493' }} />
-          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#35C493' }}>Finanzas</span>
+          <span className="text-xs font-bold uppercase tracking-wide" style={{ color: '#35C493' }}>Finanzas</span>
         </div>
         <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Pagos y liquidaciones</h1>
         <p className="text-sm mt-0.5" style={{ color: '#94A3B8' }}>
@@ -152,7 +152,7 @@ export default function HostPagosPage() {
           /* overflow-x-auto para que en móvil haga scroll horizontal en lugar de romper */
           <div className="overflow-x-auto">
             <div style={{ minWidth: 680 }}>
-              <div className="grid gap-3 px-6 py-3 text-[11px] font-bold uppercase tracking-widest"
+              <div className="grid gap-3 px-6 py-3 text-xs font-bold uppercase tracking-wide"
                 style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', background: '#FAFBFC', borderBottom: '1px solid #F0F2F5', color: '#94A3B8' }}>
                 <span>Cliente · Evento</span><span>Fecha</span><span>Total pagado</span><span>Comisión</span><span>Tu neto</span><span>Liquidación</span>
               </div>

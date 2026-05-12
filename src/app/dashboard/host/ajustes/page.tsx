@@ -211,7 +211,7 @@ function AjustesInner() {
         {/* Nombre del negocio — campo más importante, con contexto */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="text-xs font-semibold uppercase tracking-widest"
+            <label className="text-xs font-semibold uppercase tracking-wide"
               style={{ color: 'var(--text-muted)' }}>Nombre del negocio</label>
             <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
               style={{ background: 'rgba(53,196,147,0.1)', color: 'var(--brand)' }}>
@@ -231,7 +231,7 @@ function AjustesInner() {
           { label: 'WhatsApp',  value: whatsapp, setter: setWhatsapp, placeholder: '+1 (829) 000-0000' },
         ].map(field => (
           <div key={field.label}>
-            <label className="block text-xs font-semibold uppercase tracking-widest mb-2"
+            <label className="block text-xs font-semibold uppercase tracking-wide mb-2"
               style={{ color: 'var(--text-muted)' }}>{field.label}</label>
             <input value={field.value} onChange={e => field.setter(e.target.value)}
               placeholder={field.placeholder}
@@ -239,7 +239,7 @@ function AjustesInner() {
           </div>
         ))}
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-widest mb-2"
+          <label className="block text-xs font-semibold uppercase tracking-wide mb-2"
             style={{ color: 'var(--text-muted)' }}>Correo electrónico</label>
           <input value={email} disabled
             className="w-full rounded-xl px-4 py-3.5 text-sm cursor-not-allowed"
@@ -370,7 +370,7 @@ function AjustesInner() {
 
             {/* URL del feed */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest mb-2"
+              <label className="block text-xs font-semibold uppercase tracking-wide mb-2"
                 style={{ color: 'var(--text-muted)' }}>Tu enlace iCal privado</label>
               <div className="flex items-center gap-2">
                 <div className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-mono overflow-hidden"

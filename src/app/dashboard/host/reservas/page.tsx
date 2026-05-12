@@ -20,7 +20,7 @@ function HostInstallmentStatus({ bookingId, totalAmount }: { bookingId: string; 
     <div className="rounded-xl overflow-hidden mt-3" style={{ border: '1px solid var(--border-subtle)' }}>
       <div className="px-4 py-2.5 flex items-center justify-between"
         style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
-        <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Cobros</span>
+        <span className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Cobros</span>
         <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>
           {insts.filter((i: any) => i.status === 'paid').length}/{insts.length} pagados
         </span>
@@ -32,7 +32,7 @@ function HostInstallmentStatus({ bookingId, totalAmount }: { bookingId: string; 
             <div className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
               Cuota {inst.installment_number} — {inst.label ?? ''}
             </div>
-            <div className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+            <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
               Vence: {inst.due_date}
               {inst.status !== 'paid' && (
                 <span className="ml-2 font-semibold" style={{ color: inst.status === 'overdue' ? '#DC2626' : 'var(--text-muted)' }}>
@@ -258,12 +258,12 @@ export default function HostReservasPage() {
                           <div className="flex gap-2 mt-3" onClick={e => e.stopPropagation()}>
                             <button onClick={() => doAccept(bk.id)} disabled={!!actionId}
                               className="flex-1 text-xs font-semibold py-2.5 rounded-xl transition-colors"
-                              style={{ background: 'rgba(22,163,74,0.1)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)' }}>
+                              style={{ background: 'rgba(22,163,74,0.12)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)' }}>
                               {actionId === bk.id + 'a' ? '...' : '✓ Aceptar'}
                             </button>
                             <button onClick={() => { setSelected(bk); setRejectReason(''); setShowRejectForm(true) }} disabled={!!actionId}
                               className="flex-1 text-xs font-semibold py-2.5 rounded-xl transition-colors"
-                              style={{ background: 'rgba(220,38,38,0.08)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }}>
+                              style={{ background: 'rgba(220,38,38,0.1)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }}>
                               ✕ Rechazar
                             </button>
                           </div>
@@ -325,7 +325,7 @@ export default function HostReservasPage() {
             <div className="p-4 space-y-4">
               {/* Cliente */}
               <div>
-                <div className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: 'var(--text-muted)' }}>Cliente</div>
+                <div className="text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--text-muted)' }}>Cliente</div>
                 <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{(selected as any).profiles?.full_name}</div>
                 {(selected as any).profiles?.email && (
                   <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>{(selected as any).profiles?.email}</div>
@@ -370,7 +370,7 @@ export default function HostReservasPage() {
               {/* Contenido del paquete */}
               {(selected as any).space_pricing?.pricing_type === 'fixed_package' && (selected as any).space_pricing?.package_includes && (
                 <div>
-                  <div className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                  <div className="text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--text-muted)' }}>
                     {(selected as any).space_pricing.package_name ? `Paquete · ${(selected as any).space_pricing.package_name}` : 'Incluye el paquete'}
                   </div>
                   <div className="rounded-xl px-3 py-2.5 text-xs whitespace-pre-line"
@@ -407,7 +407,7 @@ export default function HostReservasPage() {
                   </button>
                   <button onClick={() => setShowRejectForm(true)}
                     className="flex-1 flex items-center justify-center gap-1 text-xs font-semibold py-2.5 rounded-xl"
-                    style={{ background: 'rgba(220,38,38,0.08)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.2)' }}>
+                    style={{ background: 'rgba(220,38,38,0.1)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.2)' }}>
                     <XCircle size={13} /> Rechazar
                   </button>
                 </div>

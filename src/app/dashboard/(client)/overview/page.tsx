@@ -319,13 +319,13 @@ export default function ClientDashboard() {
               <div className="flex items-center gap-4 flex-wrap">
                 {/* Fecha */}
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'var(--text-muted)' }}>Fecha</p>
+                  <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-muted)' }}>Fecha</p>
                   <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{formatDate(next.event_date)}</p>
                 </div>
                 {/* Horario — solo si existe */}
                 {hasTime && (
                   <div>
-                    <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'var(--text-muted)' }}>Horario</p>
+                    <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-muted)' }}>Horario</p>
                     <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                       {formatTime(next.start_time)} – {formatTime(next.end_time)}
                     </p>
@@ -333,20 +333,20 @@ export default function ClientDashboard() {
                 )}
                 {/* Personas */}
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'var(--text-muted)' }}>Personas</p>
+                  <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-muted)' }}>Personas</p>
                   <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{next.guest_count}</p>
                 </div>
                 {/* Evento */}
                 {next.event_type && (
                   <div>
-                    <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'var(--text-muted)' }}>Evento</p>
+                    <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-muted)' }}>Evento</p>
                     <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{next.event_type}</p>
                   </div>
                 )}
               </div>
               {/* Total + flecha */}
               <div className="text-right shrink-0">
-                <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'var(--text-muted)' }}>Total</p>
+                <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--text-muted)' }}>Total</p>
                 <p className="text-lg font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
                   {formatCurrency(Number(next.total_amount))}
                 </p>

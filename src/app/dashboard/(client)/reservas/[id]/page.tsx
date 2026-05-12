@@ -102,7 +102,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
       {/* Detalles del evento */}
       <div className="rounded-2xl p-5 mb-4"
         style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
-        <h2 className="text-sm font-bold uppercase tracking-widest mb-4" style={{ color: 'var(--text-muted)' }}>
+        <h2 className="text-sm font-bold uppercase tracking-wide mb-4" style={{ color: 'var(--text-muted)' }}>
           Tu evento
         </h2>
         <div className="space-y-3">
@@ -169,7 +169,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
       {/* Plan de pagos — nota si es cotización sin plan aún */}
       {installments.length === 0 && (booking as any).status === 'quote_requested' && (
         <div className="rounded-2xl px-5 py-4 mb-4 flex items-center gap-3"
-          style={{ background: 'rgba(8,145,178,0.05)', border: '1px solid rgba(8,145,178,0.2)' }}>
+          style={{ background: 'rgba(8,145,178,0.08)', border: '1px solid rgba(8,145,178,0.2)' }}>
           <CreditCard size={16} style={{ color: '#0891B2', flexShrink: 0 }} />
           <p className="text-sm" style={{ color: '#0369A1' }}>
             El plan de pagos se mostrará cuando el anfitrión confirme el precio de tu cotización.
@@ -245,7 +245,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
       {host && (
         <div className="rounded-2xl p-5 mb-4"
           style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
-          <h2 className="text-sm font-bold uppercase tracking-widest mb-4" style={{ color: 'var(--text-muted)' }}>
+          <h2 className="text-sm font-bold uppercase tracking-wide mb-4" style={{ color: 'var(--text-muted)' }}>
             Tu anfitrión
           </h2>
           <div className="flex items-center gap-3 mb-4">
@@ -286,7 +286,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
       {addons.length > 0 && (
         <div className="rounded-2xl p-5 mb-4"
           style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
-          <h2 className="text-sm font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
+          <h2 className="text-sm font-bold uppercase tracking-wide mb-3" style={{ color: 'var(--text-muted)' }}>
             Servicios adicionales
           </h2>
           <div className="space-y-2">
@@ -308,7 +308,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
       {/* Antes de tu evento */}
       <div className="rounded-2xl p-5 mb-4"
         style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
-        <h2 className="text-sm font-bold uppercase tracking-widest mb-4" style={{ color: 'var(--text-muted)' }}>
+        <h2 className="text-sm font-bold uppercase tracking-wide mb-4" style={{ color: 'var(--text-muted)' }}>
           Antes de tu evento
         </h2>
         <div className="space-y-3">

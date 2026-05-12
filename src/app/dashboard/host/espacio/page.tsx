@@ -1097,7 +1097,7 @@ export default function EspacioPage() {
             {/* ─ Sección 1: Selección ─ */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>
                   ¿Qué ofreces?
                 </p>
                 {addons.length > 0 && (
@@ -1146,7 +1146,7 @@ export default function EspacioPage() {
             {/* ─ Sección 2: Configurar precios (solo si hay seleccionados) ─ */}
             {addons.length > 0 && (
               <div>
-                <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
+                <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--text-muted)' }}>
                   Configura precios de los seleccionados
                 </p>
                 <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
@@ -1216,7 +1216,7 @@ export default function EspacioPage() {
 
             {/* ─── 0. FACILIDADES E INSTALACIONES ─── */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>Instalaciones y facilidades</p>
+              <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--text-muted)' }}>Instalaciones y facilidades</p>
               <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>Indica qué incluye tu espacio. Los clientes podrán filtrar por esto.</p>
 
               {/* Grid de facilidades booleanas */}
@@ -1257,7 +1257,7 @@ export default function EspacioPage() {
 
             {/* ─── 1. PERMISOS GENERALES ─── */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Permisos generales</p>
+              <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--text-muted)' }}>Permisos generales</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {([
                   { label: 'Decoración externa',    desc: 'Globos, flores, mantelería', value: allowsDecoration,  setter: setAllowsDecoration },
@@ -1291,7 +1291,7 @@ export default function EspacioPage() {
 
             {/* ─── 2. HORAS EXTRA ─── */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Horas extra</p>
+              <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--text-muted)' }}>Horas extra</p>
               <div className="space-y-3">
                 {/* Horas extra */}
                 <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
@@ -1321,7 +1321,7 @@ export default function EspacioPage() {
 
             {/* ─── 4. POLÍTICA DE CANCELACIÓN ─── */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Política de cancelación</p>
+              <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--text-muted)' }}>Política de cancelación</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {[
                   { value: 'flexible', label: 'Flexible',  desc: '100% reembolso hasta 24h antes' },
@@ -1350,7 +1350,7 @@ export default function EspacioPage() {
 
             {/* ─── 5. REGLAS ADICIONALES ─── */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Reglas adicionales</p>
+              <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--text-muted)' }}>Reglas adicionales</p>
               <textarea
                 value={customRules}
                 onChange={e => setCustomRules(e.target.value)}

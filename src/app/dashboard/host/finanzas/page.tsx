@@ -114,7 +114,7 @@ export default function FinanzasPage() {
               style={{ background: 'rgba(53,196,147,0.15)', border: '1px solid rgba(53,196,147,0.25)' }}>
               <Banknote size={18} color="#35C493" />
             </div>
-            <p className="text-xs font-semibold uppercase tracking-widest"
+            <p className="text-xs font-semibold uppercase tracking-wide"
               style={{ color: 'rgba(255,255,255,0.5)' }}>
               Payout pendiente
             </p>
@@ -249,7 +249,7 @@ export default function FinanzasPage() {
         <div className="overflow-x-auto">
         <div style={{ minWidth: 580 }}>
         {/* Header de tabla */}
-        <div className="grid gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-widest"
+        <div className="grid gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-wide"
           style={{
             gridTemplateColumns: '1fr auto auto auto auto',
             borderBottom: '1px solid var(--border-subtle)',

@@ -293,7 +293,7 @@ export default function CalendarioPage() {
 
           {/* Nombre + label */}
           <div className="flex-1 min-w-0">
-            <div className="text-xs font-semibold uppercase tracking-widest mb-0.5"
+            <div className="text-xs font-semibold uppercase tracking-wide mb-0.5"
               style={{ color: 'rgba(255,255,255,0.45)' }}>
               Espacio activo
             </div>

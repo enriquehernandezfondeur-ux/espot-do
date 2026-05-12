@@ -16,7 +16,7 @@ function QuoteSchedulePreview({ price, eventDate }: { price: number; eventDate: 
   const schedule = buildSchedule(eventDate, price)
   return (
     <div className="rounded-xl overflow-hidden mt-1" style={{ border: '1px solid var(--border-subtle)' }}>
-      <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest"
+      <div className="px-3 py-1.5 text-xs font-bold uppercase tracking-wide"
         style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', borderBottom: '1px solid var(--border-subtle)' }}>
         Plan de cuotas que recibirá el cliente
       </div>
@@ -168,7 +168,7 @@ export default function CotizacionesPage() {
               <div className="p-6 space-y-6">
                 {/* Mensaje del cliente */}
                 <div>
-                  <div className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
+                  <div className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--text-muted)' }}>
                     Solicitud del cliente
                   </div>
                   <div className="rounded-xl p-4 text-sm leading-relaxed"
@@ -179,7 +179,7 @@ export default function CotizacionesPage() {
 
                 {/* Formulario de cotización */}
                 <div className="space-y-4">
-                  <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                  <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>
                     Tu propuesta de precio
                   </div>
 
