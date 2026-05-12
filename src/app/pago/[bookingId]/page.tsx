@@ -125,7 +125,7 @@ function PagoContent({ bookingId }: { bookingId: string }) {
             disabled={testLoading}
             className="mt-4 px-5 py-2.5 rounded-xl text-sm font-bold disabled:opacity-50"
             style={{ background: '#F59E0B', color: '#fff', border: '2px dashed rgba(255,255,255,0.3)' }}>
-            {testLoading ? '⏳ Procesando...' : '🧪 Simular pago exitoso (TEST)'}
+            {testLoading ? 'Procesando...' : 'Simular pago exitoso (TEST)'}
           </button>
         )}
       </div>

@@ -1105,7 +1105,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
       {/* Navegación */}
       <div className="px-6 pb-6 space-y-3">
         {step === maxStep ? (
-          <button onClick={handleBook} disabled={booking}
+          <button onClick={handleBook} disabled={booking || (!isQuote && !termsAccepted)}
             className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl font-bold text-base transition-all disabled:opacity-50"
             style={{
               background: isQuote ? '#0891B2' : 'var(--brand)', color: '#fff',
