@@ -118,9 +118,9 @@ export async function getClientStats() {
   const [{ data: bookings }, { data: profile }] = await Promise.all([
     supabase
       .from('bookings')
-      .select('id, status, total_amount, event_date, event_type, spaces!space_id(name,slug)')
+      .select('id, status, total_amount, event_date, event_type, created_at, confirmed_at, spaces!space_id(name,slug)')
       .eq('guest_id', user.id)
-      .order('event_date', { ascending: true }),
+      .order('created_at', { ascending: false }),  // más recientes primero
     supabase
       .from('profiles')
       .select('full_name')
@@ -156,8 +156,20 @@ export async function getClientStats() {
     completed:  bk.filter(b => b.status === 'completed').length,
     totalSpent: bk.filter(b => b.status === 'confirmed' || b.status === 'completed')
                   .reduce((s, b) => s + Number(b.total_amount), 0),
-    nextBooking: bk.find(b => b.event_date >= today && ['confirmed', 'accepted'].includes(b.status)) ?? null,
+    // Próximo evento: el confirmado/aceptado con fecha más cercana al futuro
+    nextBooking: [...bk]
+      .filter(b => b.event_date >= today && ['confirmed', 'accepted'].includes(b.status))
+      .sort((a, b) => a.event_date.localeCompare(b.event_date))[0] ?? null,
+    // Actividad reciente: los 5 más recientemente creados (ya vienen ordenados por created_at DESC)
     recent: bk.slice(0, 5),
+    // Recién confirmadas en las últimas 48h (para destacar en el overview)
+    recentlyConfirmed: bk.filter(b => {
+      if (b.status !== 'confirmed') return false
+      if (!b.confirmed_at) return false
+      const confirmedAt = new Date(b.confirmed_at)
+      const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000)
+      return confirmedAt > cutoff
+    }).slice(0, 3),
     overdueInstallments: (installments ?? []).filter(i => i.status === 'overdue'),
     upcomingInstallments: (installments ?? []).filter(i => i.status === 'pending' && i.due_date <= soonStr),
     installmentsByBooking: Object.fromEntries(

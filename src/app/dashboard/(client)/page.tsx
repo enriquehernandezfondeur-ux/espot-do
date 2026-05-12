@@ -93,6 +93,46 @@ export default function ClientDashboard() {
         </div>
       )}
 
+      {/* ── Recién confirmadas — aparecen 48h después de pagar ── */}
+      {(stats?.recentlyConfirmed?.length ?? 0) > 0 && (
+        <div className="mb-4 rounded-2xl overflow-hidden"
+          style={{ border: '1.5px solid rgba(22,163,74,0.25)', background: 'rgba(22,163,74,0.04)' }}>
+          <div className="flex items-center gap-2.5 px-4 py-3"
+            style={{ borderBottom: '1px solid rgba(22,163,74,0.15)' }}>
+            <CheckCircle size={14} style={{ color: '#16A34A' }} />
+            <span className="text-sm font-semibold" style={{ color: '#16A34A' }}>
+              {stats!.recentlyConfirmed!.length === 1 ? 'Reserva confirmada' : `${stats!.recentlyConfirmed!.length} reservas confirmadas`} recientemente
+            </span>
+          </div>
+          {stats!.recentlyConfirmed!.map((bk: any) => (
+            <Link key={bk.id} href="/dashboard/reservas"
+              className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-[rgba(22,163,74,0.06)]"
+              style={{ borderBottom: '1px solid rgba(22,163,74,0.08)' }}>
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold text-white shrink-0"
+                  style={{ background: 'linear-gradient(135deg, #35C493, #16A34A)' }}>
+                  {(bk.spaces as any)?.name?.charAt(0)}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                    {(bk.spaces as any)?.name}
+                  </p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                    {formatDate(bk.event_date)} · {bk.event_type}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                  {formatCurrency(Number(bk.total_amount))}
+                </span>
+                <ArrowRight size={14} style={{ color: 'var(--text-muted)' }} />
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+
       {(stats?.upcomingInstallments?.length ?? 0) > 0 && (stats?.overdueInstallments?.length ?? 0) === 0 && (
         <div className="mb-4 rounded-2xl px-4 py-3 flex items-center gap-3"
           style={{ background: 'rgba(217,119,6,0.06)', border: '1.5px solid rgba(217,119,6,0.2)' }}>
@@ -194,7 +234,7 @@ export default function ClientDashboard() {
         style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
         <div className="flex items-center justify-between px-4 md:px-6 py-4 md:py-5"
           style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-          <h2 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>Reservas recientes</h2>
+          <h2 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>Actividad reciente</h2>
           <Link href="/dashboard/reservas" className="flex items-center gap-1 text-sm font-medium" style={{ color: 'var(--brand)' }}>
             Ver todas <ArrowRight size={14} />
           </Link>
