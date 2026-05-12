@@ -770,6 +770,18 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
 
           {/* ── Móvil: fila de filtros (igual estilo que desktop) ── */}
           <div className="md:hidden flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+
+            {/* Filtros — primero */}
+            <button onClick={() => setMoreOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 transition-all"
+              style={{ background: activeFiltersCount > 0 ? 'var(--brand)' : '#fff', border: `1.5px solid ${activeFiltersCount > 0 ? 'var(--brand)' : 'var(--border-medium)'}`, color: activeFiltersCount > 0 ? '#fff' : 'var(--text-primary)' }}>
+              <SlidersHorizontal size={13} />
+              Filtros
+              {activeFiltersCount > 0 && <span className="w-4 h-4 rounded-full flex items-center justify-center text-xs font-black" style={{ background: 'rgba(255,255,255,0.3)' }}>{activeFiltersCount}</span>}
+            </button>
+
+            <div className="w-px shrink-0 self-stretch my-1" style={{ background: 'var(--border-medium)' }} />
+
             {/* Tipo de espacio */}
             {(() => { const cat = CATEGORIES.find(c => c.value === categoria); const Icon = cat?.icon ?? LayoutList; return (
               <button onClick={() => setMoreOpen(true)}
@@ -824,15 +836,6 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               <Clock size={13} style={{ flexShrink: 0 }} />
               <span>{pricingFilter ? PRICING_TYPES.find(p=>p.value===pricingFilter)?.label : 'Precio'}</span>
               {pricingFilter ? <X size={10} onClick={e => { e.stopPropagation(); setPricingFilter('') }} /> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
-            </button>
-
-            {/* Más filtros */}
-            <button onClick={() => setMoreOpen(true)}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 transition-all"
-              style={{ background: activeFiltersCount > 0 ? 'var(--brand)' : '#fff', border: `1.5px solid ${activeFiltersCount > 0 ? 'var(--brand)' : 'var(--border-medium)'}`, color: activeFiltersCount > 0 ? '#fff' : 'var(--text-primary)' }}>
-              <SlidersHorizontal size={13} />
-              Filtros
-              {activeFiltersCount > 0 && <span className="w-4 h-4 rounded-full flex items-center justify-center text-xs font-black" style={{ background: 'rgba(255,255,255,0.3)' }}>{activeFiltersCount}</span>}
             </button>
           </div>
 
