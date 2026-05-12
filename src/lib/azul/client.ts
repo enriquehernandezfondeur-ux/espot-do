@@ -33,7 +33,7 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
   const PAGE_URL      = process.env.AZUL_PAYMENT_PAGE_URL
     ?? (IS_PROD
       ? 'https://pagos.azul.com.do/PaymentPage/Default.aspx'
-      : 'https://pruebas.azul.com.do/paymentpage/Default.aspx')
+      : 'https://pruebas.azul.com.do/PaymentPage/Default.aspx')
 
   if (!MERCHANT_ID) throw new Error('Falta AZUL_MERCHANT_ID en las variables de entorno de Vercel.')
   if (!PRIVATE_KEY) throw new Error('Falta AZUL_PRIVATE_KEY en las variables de entorno de Vercel.')

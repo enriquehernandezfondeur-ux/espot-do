@@ -202,13 +202,22 @@ function ExitoContent() {
 
             <div className="px-6 py-5 space-y-3">
               <div className="flex justify-between text-sm">
-                <span style={{ color: 'rgba(255,255,255,0.5)' }}>Pago de confirmación</span>
+                <span style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  {paidSoFar >= total ? 'Total pagado' : 'Pagado ahora'}
+                </span>
                 <span className="font-bold text-white">{formatCurrency(paidSoFar)}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span style={{ color: 'rgba(255,255,255,0.5)' }}>Saldo en el lugar</span>
-                <span style={{ color: 'rgba(255,255,255,0.5)' }}>{formatCurrency(remaining)}</span>
-              </div>
+              {remaining > 0 && (
+                <div className="flex justify-between text-sm">
+                  <div>
+                    <span style={{ color: 'rgba(255,255,255,0.5)' }}>Próximas cuotas</span>
+                    <p className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                      Se cobran vía EspotHub según tu plan
+                    </p>
+                  </div>
+                  <span style={{ color: 'rgba(255,255,255,0.5)' }}>{formatCurrency(remaining)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
                 <span style={{ color: 'rgba(255,255,255,0.5)' }}>Total del evento</span>
                 <span className="font-semibold text-white">{formatCurrency(total)}</span>
