@@ -618,12 +618,17 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             />
 
             {/* ── Días + cuotas — compacto ── */}
-            {eventDate && !dateBlocked && allowedTimeRange !== null && !isQuote && (() => {
+            {eventDate && !dateBlocked && allowedTimeRange !== null && allowedTimeRange !== undefined && !isQuote && (() => {
               const today = new Date(); today.setHours(0,0,0,0)
               const daysUntil = Math.max(0, Math.ceil((new Date(eventDate + 'T12:00').getTime() - today.getTime()) / 86400000))
-              const baseAmt = pricing?.hourly_price || pricing?.minimum_consumption || pricing?.fixed_price || 0
+              // Para precio por hora: usar mínimo facturable (min_hours × hourly_price)
+              // Para paquete/consumo: usar precio base directamente
+              const baseAmt = isHourly
+                ? (pricing?.hourly_price ?? 0) * Math.max(minHours || 1, 1)
+                : (pricing?.minimum_consumption || pricing?.fixed_price || 0)
               if (!baseAmt) return null
               const sched = buildSchedule(eventDate, baseAmt)
+              const isEstimate = isHourly // para precio por hora el total varía según horas
               return (
                 <div className="rounded-xl overflow-hidden"
                   style={{ border: '1px solid var(--border-medium)' }}>
@@ -646,14 +651,21 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                         <div className="w-1.5 h-1.5 rounded-full shrink-0"
                           style={{ background: i === 0 ? 'var(--brand)' : 'var(--border-medium)' }} />
                         <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
-                          {i === 0 ? 'Hoy al confirmar' : `${new Date(inst.due_date + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}`}
+                          {i === 0 ? 'Al confirmar' : new Date(inst.due_date + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
                         </span>
                       </div>
                       <span className="text-xs font-bold" style={{ color: i === 0 ? 'var(--brand)' : 'var(--text-primary)' }}>
-                        {formatCurrency(inst.amount)} <span className="font-normal" style={{ color: 'var(--text-muted)' }}>({inst.percentage}%)</span>
+                        {isEstimate ? '~' : ''}{formatCurrency(inst.amount)}
+                        <span className="font-normal ml-1" style={{ color: 'var(--text-muted)' }}>({inst.percentage}%)</span>
                       </span>
                     </div>
                   ))}
+                  {isEstimate && (
+                    <div className="px-3 py-1.5 text-[11px]"
+                      style={{ background: 'var(--bg-elevated)', borderTop: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}>
+                      * Estimado base. El total final depende del horario elegido.
+                    </div>
+                  )}
                 </div>
               )
             })()}
