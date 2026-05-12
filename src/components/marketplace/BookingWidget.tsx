@@ -618,37 +618,25 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         <PriceHeader />
       </div>
 
-      {/* Pasos */}
-      <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-base)' }}>
-        <div className="flex items-center w-full min-w-0">
-          {steps.map((s, i) => {
-            const isActive   = s.id === step
-            const isComplete = s.id < step
-            return (
-              <div key={s.id} className="flex items-center min-w-0"
-                style={{ flex: i < steps.length - 1 ? '1 1 0' : '0 0 auto' }}>
-                <button onClick={() => isComplete && setStep(s.id)}
-                  disabled={!isComplete && !isActive}
-                  className="flex flex-col items-center gap-0.5 shrink-0 min-w-0">
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all shrink-0"
-                    style={isComplete
-                      ? { background: 'var(--brand)', color: '#fff' }
-                      : isActive ? { background: '#0F1623', color: '#fff' }
-                      : { background: 'var(--border-medium)', color: 'var(--text-muted)' }}>
-                    {isComplete ? <CheckCircle size={12} /> : i + 1}
-                  </div>
-                  <span className="hidden sm:block text-xs font-medium leading-none"
-                    style={{ color: isActive ? '#0F1623' : isComplete ? 'var(--brand)' : 'var(--text-muted)', maxWidth: 44, textAlign: 'center' }}>
-                    {s.label}
-                  </span>
-                </button>
-                {i < steps.length - 1 && (
-                  <div className="flex-1 h-px mx-1.5 mt-[-10px]"
-                    style={{ background: s.id < step ? 'var(--brand)' : 'var(--border-subtle)', minWidth: 8 }} />
-                )}
-              </div>
-            )
-          })}
+      {/* Progreso — barra limpia */}
+      <div className="px-5 py-3" style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-base)' }}>
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
+            {steps.find(s => s.id === step)?.label ?? 'Reserva'}
+          </span>
+          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            Paso {steps.findIndex(s => s.id === step) + 1} de {steps.length}
+          </span>
+        </div>
+        <div className="flex gap-1">
+          {steps.map((s, i) => (
+            <button key={s.id}
+              onClick={() => s.id < step && setStep(s.id)}
+              disabled={s.id >= step}
+              className="flex-1 h-1 rounded-full transition-all"
+              style={{ background: s.id <= step ? 'var(--brand)' : 'var(--border-medium)', opacity: s.id === step ? 1 : s.id < step ? 0.6 : 0.25 }}
+            />
+          ))}
         </div>
       </div>
 
@@ -659,7 +647,12 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         {/* ── PASO 1: FECHA Y HORA ────────────────────────── */}
         {step === 1 && (
           <div className="space-y-4">
-            <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>¿Cuándo es tu evento?</h3>
+            <div>
+              <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>¿Cuándo es tu evento?</h3>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                Selecciona la fecha y verás exactamente cuánto pagarás y cuándo.
+              </p>
+            </div>
 
             <DatePicker
               value={eventDate}
@@ -667,6 +660,68 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               minDate={new Date().toISOString().split('T')[0]}
               placeholder="Elige una fecha"
             />
+
+            {/* ── Airbnb-style: días + cuotas inmediatas ── */}
+            {eventDate && !dateBlocked && allowedTimeRange !== null && !isQuote && (() => {
+              const daysUntil = Math.max(0, Math.ceil(
+                (new Date(eventDate + 'T12:00').getTime() - new Date().setHours(0,0,0,0)) / 86400000
+              ))
+              const baseAmt = pricing?.hourly_price || pricing?.minimum_consumption || pricing?.fixed_price || 0
+              if (!baseAmt) return null
+              const sched = buildSchedule(eventDate, baseAmt)
+              const isMultiple = sched.installments.length > 1
+              return (
+                <div className="rounded-2xl overflow-hidden"
+                  style={{ border: '1.5px solid var(--border-medium)' }}>
+                  {/* Countdown */}
+                  <div className="px-4 py-3 flex items-center justify-between"
+                    style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
+                    <div className="flex items-center gap-2">
+                      <CalendarDays size={15} style={{ color: 'var(--brand)' }} />
+                      <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                        {daysUntil === 0 ? 'Tu evento es hoy'
+                          : daysUntil === 1 ? 'Tu evento es mañana'
+                          : `Tu evento es en ${daysUntil} días`}
+                      </span>
+                    </div>
+                    <span className="text-xs px-2.5 py-1 rounded-full font-semibold"
+                      style={{ background: 'var(--brand-dim)', color: 'var(--brand)' }}>
+                      {scheduleModelLabel(sched.model)}
+                    </span>
+                  </div>
+                  {/* Cuotas */}
+                  {sched.installments.map((inst, i) => (
+                    <div key={i} className="flex items-center justify-between px-4 py-3.5"
+                      style={{ borderBottom: i < sched.installments.length - 1 ? '1px solid var(--border-subtle)' : 'none', background: i === 0 ? 'rgba(53,196,147,0.02)' : '#fff' }}>
+                      <div>
+                        <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                          {i === 0 ? 'Pagas al confirmar' : i === sched.installments.length - 1 ? 'Pagas antes del evento' : `Cuota ${i + 1}`}
+                        </p>
+                        <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                          {inst.label}
+                          {i > 0 && ` · vence ${new Date(inst.due_date + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}`}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-bold" style={{ color: i === 0 ? 'var(--brand)' : 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+                          {formatCurrency(inst.amount)}
+                        </p>
+                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{inst.percentage}% del total</p>
+                      </div>
+                    </div>
+                  ))}
+                  {isMultiple && (
+                    <div className="px-4 py-2.5 flex items-center gap-1.5"
+                      style={{ background: 'var(--bg-elevated)', borderTop: '1px solid var(--border-subtle)' }}>
+                      <ShieldCheck size={12} style={{ color: 'var(--brand)' }} />
+                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                        Solo pagas la primera cuota hoy. Sin intereses.
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
 
             {/* Mensaje informativo por modelo */}
             {isConsumption && (
