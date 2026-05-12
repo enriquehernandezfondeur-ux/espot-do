@@ -1021,8 +1021,12 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             )}
 
             {/* Plan de cuotas — sección destacada en el resumen final */}
-            {!isQuote && subtotal > 0 && (() => {
-              const sched = buildSchedule(eventDate, subtotal)
+            {!isQuote && (() => {
+              // Usar subtotal real si está calculado; si no, el precio base del pricing
+              const planAmount = subtotal > 0 ? subtotal
+                : (pricing?.hourly_price || pricing?.minimum_consumption || pricing?.fixed_price || 0)
+              if (!planAmount) return null
+              const sched = buildSchedule(eventDate, planAmount)
               return (
                 <div className="rounded-2xl overflow-hidden"
                   style={{ border: '1.5px solid var(--brand-border)' }}>
