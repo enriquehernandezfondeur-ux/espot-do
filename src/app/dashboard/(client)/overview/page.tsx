@@ -201,32 +201,39 @@ export default function ClientDashboard() {
               {stats!.recentlyConfirmed!.length === 1 ? 'Reserva confirmada' : `${stats!.recentlyConfirmed!.length} reservas confirmadas`} recientemente
             </span>
           </div>
-          {stats!.recentlyConfirmed!.map((bk: any) => (
-            <Link key={bk.id} href={`/dashboard/reservas/${bk.id}`}
-              className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-[rgba(22,163,74,0.06)]"
-              style={{ borderBottom: '1px solid rgba(22,163,74,0.08)' }}>
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold text-white shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #35C493, #16A34A)' }}>
-                  {(bk.spaces as any)?.name?.charAt(0)}
+          {stats!.recentlyConfirmed!.map((bk: any) => {
+            const sp    = (bk.spaces as any)
+            const cover = sp?.space_images?.find((i: any) => i.is_cover)?.url ?? sp?.space_images?.[0]?.url
+            return (
+              <Link key={bk.id} href={`/dashboard/reservas/${bk.id}`}
+                className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-[rgba(22,163,74,0.06)]"
+                style={{ borderBottom: '1px solid rgba(22,163,74,0.08)' }}>
+                <div className="flex items-center gap-3 min-w-0">
+                  {cover
+                    ? <img src={cover} alt={sp?.name} className="w-9 h-9 rounded-xl object-cover shrink-0" />
+                    : <div className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold text-white shrink-0"
+                        style={{ background: 'linear-gradient(135deg, #35C493, #16A34A)' }}>
+                        {sp?.name?.charAt(0)}
+                      </div>
+                  }
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                      {sp?.name}
+                    </p>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                      {formatDate(bk.event_date)} · {bk.event_type}
+                    </p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
-                    {(bk.spaces as any)?.name}
-                  </p>
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                    {formatDate(bk.event_date)} · {bk.event_type}
-                  </p>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                    {formatCurrency(Number(bk.total_amount))}
+                  </span>
+                  <ArrowRight size={14} style={{ color: 'var(--text-muted)' }} />
                 </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                  {formatCurrency(Number(bk.total_amount))}
-                </span>
-                <ArrowRight size={14} style={{ color: 'var(--text-muted)' }} />
-              </div>
-            </Link>
-          ))}
+              </Link>
+            )
+          })}
         </div>
       )}
 
