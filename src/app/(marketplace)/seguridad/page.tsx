@@ -141,7 +141,7 @@ export default function SeguridadPage() {
               </div>
               <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
                 <span style={{ color: 'var(--brand)' }}>📞</span>
-                <a href="tel:+18095550000" style={{ color: 'var(--brand)' }}>+1 (829) 548-1998</a>
+                <a href="tel:+18295481998" style={{ color: 'var(--brand)' }}>+1 (829) 548-1998</a>
               </div>
             </div>
           </div>

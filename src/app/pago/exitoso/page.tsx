@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { CheckCircle, Calendar, MapPin, ArrowRight, Home, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
+import { isPaid } from '@/lib/bookingConfig'
 
 function ExitoContent() {
   const sp        = useSearchParams()
@@ -51,7 +52,7 @@ function ExitoContent() {
 
       // Si ya estaba confirmada y no hay params nuevos de Azul (recarga de página), no reprocesar
       // Excepción: si llegan params de Azul + cuotaId, es pago de cuota 2/3 → debe procesarse
-      if (data?.payment_status === 'advance' && (!hasAzulParams || !cuotaId)) {
+      if (isPaid(data?.payment_status) && (!hasAzulParams || !cuotaId)) {
         setConfirmed(true)
         setTimeout(() => setVisible(true), 80)
         return
@@ -108,7 +109,7 @@ function ExitoContent() {
         return
       } else {
         // Recarga manual o llegó sin params de Azul — mostrar si ya está pagado en DB
-        setConfirmed(data?.payment_status === 'advance')
+        setConfirmed(isPaid(data?.payment_status))
       }
 
       setTimeout(() => setVisible(true), 80)

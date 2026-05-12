@@ -128,7 +128,7 @@ export default function PrivacidadPage() {
             Política de Privacidad
           </h1>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            Última actualización: mayo 2026
+            Última actualización: 10 de mayo de 2026
           </p>
         </div>
 

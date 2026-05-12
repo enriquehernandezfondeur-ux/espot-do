@@ -490,15 +490,15 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
             <div className="flex items-center gap-2 flex-wrap justify-center">
               <span className="text-xs font-semibold" style={{color:'#9CA3AF'}}>Pago seguro</span>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/azul-logo.svg"           alt="Azul"             style={{height:14,width:'auto',borderRadius:2,objectFit:'contain'}}/>
+              <img src="/azul-logo.svg"           alt="Azul"             style={{height:14,width:42,borderRadius:2,objectFit:'contain'}}/>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/visa-logo.jpg"           alt="Visa"             style={{height:14,width:'auto',borderRadius:2,objectFit:'contain'}}/>
+              <img src="/visa-logo.jpg"           alt="Visa"             style={{height:14,width:25,borderRadius:2,objectFit:'contain'}}/>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/mastercard-logo.svg"     alt="Mastercard"       style={{height:14,width:'auto'}}/>
+              <img src="/mastercard-logo.svg"     alt="Mastercard"       style={{height:14,width:22}}/>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/verified-by-visa.svg"    alt="Verified by Visa" style={{height:12,width:'auto'}}/>
+              <img src="/verified-by-visa.svg"    alt="Verified by Visa" style={{height:12,width:36}}/>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/mastercard-id-check.png" alt="MC ID Check"      style={{height:12,width:'auto'}}/>
+              <img src="/mastercard-id-check.png" alt="MC ID Check"      style={{height:12,width:12}}/>
             </div>
             <p className="text-xs" style={{color:'#9CA3AF'}}>© 2026 ESPOT, S.R.L. · República Dominicana</p>
           </div>

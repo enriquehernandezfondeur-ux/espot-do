@@ -888,10 +888,10 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             {eventType === 'Otro' && (
               <div className="space-y-3">
                 <input value={customEventType} onChange={e => setCustomEventType(e.target.value)}
-                  placeholder="Describe tu evento..." className="input-base w-full rounded-xl px-4 py-3 text-sm" autoFocus style={{ fontSize: 16 }} />
+                  placeholder="Describe tu evento..." className="input-base w-full rounded-xl px-4 py-3 text-sm" autoFocus maxLength={80} style={{ fontSize: 16 }} />
                 <textarea value={guestNote} onChange={e => setGuestNote(e.target.value)}
                   placeholder="Cuéntale más al propietario (opcional)..."
-                  rows={2} className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none" />
+                  rows={2} maxLength={400} className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none" />
               </div>
             )}
             {eventType && eventType !== 'Otro' && (
@@ -903,7 +903,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               ) : (
                 <textarea value={guestNote} onChange={e => setGuestNote(e.target.value)}
                   placeholder="Ej: Llegaremos 2 horas antes para decorar..."
-                  rows={2} className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none" />
+                  rows={2} maxLength={400} className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none" />
               )
             )}
 

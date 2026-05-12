@@ -85,6 +85,14 @@ export default function MisReservasPage() {
     }).catch(() => setLoading(false))
   }, [])
 
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape' && cancelModal) closeCancelModal()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [cancelModal])
+
   const filtered = bookings.filter(b => {
     const matchFilter =
       filter === 'Todas'      ||
