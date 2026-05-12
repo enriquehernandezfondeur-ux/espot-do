@@ -45,11 +45,14 @@ export default function ClientMensajesPage() {
 
   useEffect(() => {
     async function init() {
-      const { data: { user } } = await supabase.auth.getUser()
-      const uid = user?.id ?? null
-      setUserId(uid)
-      const data = await getMyConversations()
-      setConvs(data)
+      let uid: string | null = null
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        uid = user?.id ?? null
+        setUserId(uid)
+        const data = await getMyConversations()
+        setConvs(data)
+      } catch {}
       setLoading(false)
 
       if (uid) {

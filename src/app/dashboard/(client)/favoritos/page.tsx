@@ -11,7 +11,7 @@ export default function FavoritosPage() {
   const [loading, setLoading]     = useState(true)
 
   useEffect(() => {
-    getClientFavorites().then(d => { setFavorites(d); setLoading(false) })
+    getClientFavorites().then(d => { setFavorites(d); setLoading(false) }).catch(() => setLoading(false))
   }, [])
 
   if (loading) return (

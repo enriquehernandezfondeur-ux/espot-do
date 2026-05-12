@@ -86,6 +86,7 @@ export default function HostReservasPage() {
     setLoading(true)
     getHostBookings(filter === 'all' ? undefined : filter)
       .then(d => { setBookings(d); setLoading(false) })
+      .catch(() => setLoading(false))
   }, [filter])
 
   const filtered = bookings.filter(b => {

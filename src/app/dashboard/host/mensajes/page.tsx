@@ -44,11 +44,13 @@ export default function HostMensajesPage() {
 
   useEffect(() => {
     async function init() {
-      const { data: { user } } = await supabase.auth.getUser()
-      const uid = user?.id ?? null
-      setUserId(uid)
-      const data = await getMyConversations()
-      setConvs(data)
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        const uid = user?.id ?? null
+        setUserId(uid)
+        const data = await getMyConversations()
+        setConvs(data)
+      } catch {}
       setLoading(false)
 
       // Suscripción global: marca conversaciones inactivas como no leídas

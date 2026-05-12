@@ -43,7 +43,7 @@ export default function CotizacionesPage() {
   const [rejectError, setRejectError] = useState('')
 
   useEffect(() => {
-    getHostQuotes().then(d => { setQuotes(d); setLoading(false) })
+    getHostQuotes().then(d => { setQuotes(d); setLoading(false) }).catch(() => setLoading(false))
   }, [])
 
   async function handleRespond() {
