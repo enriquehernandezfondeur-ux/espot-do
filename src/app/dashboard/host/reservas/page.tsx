@@ -326,7 +326,15 @@ export default function HostReservasPage() {
               <div>
                 <div className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: 'var(--text-muted)' }}>Cliente</div>
                 <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{(selected as any).profiles?.full_name}</div>
-                <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>{(selected as any).profiles?.email}</div>
+                {(selected as any).profiles?.email && (
+                  <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>{(selected as any).profiles?.email}</div>
+                )}
+                {(selected as any).profiles?.phone && (
+                  <a href={`tel:${(selected as any).profiles.phone}`}
+                    className="text-xs" style={{ color: 'var(--brand)' }}>
+                    {(selected as any).profiles.phone}
+                  </a>
+                )}
               </div>
 
               {/* Estado */}

@@ -252,15 +252,23 @@ export default function MisReservasPage() {
                         </span>
                       </div>
                       {/* Ubicación */}
-                      <div className="flex items-center gap-1 text-xs mb-2" style={{ color: 'var(--text-muted)' }}>
-                        <MapPin size={10} /> {space?.sector ? `${space.sector}, ` : ''}{space?.city}
+                      <div className="flex items-start gap-1 text-xs mb-2" style={{ color: 'var(--text-muted)' }}>
+                        <MapPin size={10} className="shrink-0 mt-0.5" />
+                        <span>
+                          {space?.address ? `${space.address}, ` : ''}{space?.sector ? `${space.sector}, ` : ''}{space?.city}
+                        </span>
                       </div>
-                      {/* Meta: fecha + monto en fila */}
+                      {/* Meta: fecha + hora + monto en fila */}
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
                             <CalendarDays size={10} /> {formatDate(bk.event_date)}
                           </span>
+                          {bk.start_time && bk.end_time && (
+                            <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                              <Clock size={10} /> {formatTime(bk.start_time)} – {formatTime(bk.end_time)}
+                            </span>
+                          )}
                           <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
                             <Users size={10} /> {bk.guest_count}
                           </span>
@@ -315,8 +323,14 @@ export default function MisReservasPage() {
                 {isSelected && (
                   <div className="px-5 pb-5 pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
 
-                    {/* Fila rápida: tipo evento + total */}
-                    <div className="flex items-center gap-3 mb-4 flex-wrap">
+                    {/* Fila rápida: tipo evento + horario + personas + total */}
+                    <div className="flex items-center gap-2 mb-4 flex-wrap">
+                      {bk.start_time && bk.end_time && (
+                        <span className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full"
+                          style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
+                          <Clock size={11} /> {formatTime(bk.start_time)} – {formatTime(bk.end_time)}
+                        </span>
+                      )}
                       {bk.event_type && (
                         <span className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full"
                           style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
