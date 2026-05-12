@@ -630,12 +630,12 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                 <button onClick={() => isComplete && setStep(s.id)}
                   disabled={!isComplete && !isActive}
                   className="flex flex-col items-center gap-0.5 shrink-0 min-w-0">
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all shrink-0"
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all shrink-0"
                     style={isComplete
                       ? { background: 'var(--brand)', color: '#fff' }
                       : isActive ? { background: '#0F1623', color: '#fff' }
                       : { background: 'var(--border-medium)', color: 'var(--text-muted)' }}>
-                    {isComplete ? <CheckCircle size={11} /> : i + 1}
+                    {isComplete ? <CheckCircle size={12} /> : i + 1}
                   </div>
                   <span className="hidden sm:block text-xs font-medium leading-none"
                     style={{ color: isActive ? '#0F1623' : isComplete ? 'var(--brand)' : 'var(--text-muted)', maxWidth: 44, textAlign: 'center' }}>
@@ -1115,15 +1115,15 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             {/* Logos de seguridad de pago */}
             <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/visa-logo.jpg" alt="Visa" style={{ height: 20, width: 'auto', borderRadius: 3, objectFit: 'contain' }} />
+              <img src="/visa-logo.jpg" alt="Visa" style={{ height: 20, width: 35, borderRadius: 3, objectFit: 'contain' }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/mastercard-logo.svg" alt="Mastercard" style={{ height: 20, width: 'auto' }} />
+              <img src="/mastercard-logo.svg" alt="Mastercard" style={{ height: 20, width: 32 }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/verified-by-visa.svg" alt="Verified by Visa" style={{ height: 18, width: 'auto' }} />
+              <img src="/verified-by-visa.svg" alt="Verified by Visa" style={{ height: 18, width: 54 }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 18, width: 'auto' }} />
+              <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 18, width: 18 }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/azul-logo.svg" alt="Azul Payments" style={{ height: 18, width: 'auto', borderRadius: 3, objectFit: 'contain' }} />
+              <img src="/azul-logo.svg" alt="Azul Payments" style={{ height: 18, width: 54, borderRadius: 3, objectFit: 'contain' }} />
             </div>
 
             {error && (
@@ -1154,7 +1154,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
           </button>
         ) : (
           <button onClick={next} disabled={!canGoNext()}
-            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-semibold text-sm transition-all disabled:opacity-35"
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-semibold text-sm transition-all disabled:opacity-40"
             style={{
               background: canGoNext() ? '#0F1623' : 'var(--bg-elevated)',
               color: canGoNext() ? '#fff' : 'var(--text-muted)',

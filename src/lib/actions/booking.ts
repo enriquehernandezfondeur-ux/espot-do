@@ -47,6 +47,10 @@ export async function createBooking(payload: CreateBookingPayload) {
 
   if (!space) return { error: 'Espacio no encontrado' }
 
+  // Validar que la fecha no sea pasada
+  const today = new Date().toISOString().split('T')[0]
+  if (payload.eventDate < today) return { error: 'No puedes reservar para una fecha pasada' }
+
   // Obtener perfil del guest
   const guestProfile = user ? await supabase
     .from('profiles').select('full_name, email, phone').eq('id', user.id).single()
