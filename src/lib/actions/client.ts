@@ -118,7 +118,7 @@ export async function getClientStats() {
   const [{ data: bookings }, { data: profile }] = await Promise.all([
     supabase
       .from('bookings')
-      .select('id, status, total_amount, event_date, event_type, created_at, confirmed_at, paid_at, spaces!space_id(name,slug)')
+      .select('id, status, payment_status, total_amount, event_date, event_type, created_at, confirmed_at, paid_at, spaces!space_id(name,slug)')
       .eq('guest_id', user.id)
       .order('created_at', { ascending: false }),  // más recientes primero
     supabase
@@ -151,7 +151,10 @@ export async function getClientStats() {
   return {
     userName:   profile?.full_name?.split(' ')[0] ?? null,
     total:      bk.length,
-    pendingPayment: bk.filter(b => b.status === 'accepted').length,
+    // Solo bookings aceptados que AÚN no tienen pago registrado
+    pendingPayment: bk.filter(b => b.status === 'accepted' && !['advance','partial','paid'].includes((b as any).payment_status ?? '')).length,
+    // Lista de bookings pendientes de pago (para mostrar cuáles son)
+    pendingPaymentBookings: bk.filter(b => b.status === 'accepted' && !['advance','partial','paid'].includes((b as any).payment_status ?? '')).slice(0, 3),
     confirmed:  bk.filter(b => b.status === 'confirmed').length,
     completed:  bk.filter(b => b.status === 'completed').length,
     totalSpent: bk.filter(b => b.status === 'confirmed' || b.status === 'completed')
