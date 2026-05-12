@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { CalendarDays, Clock, Users, MapPin, ChevronRight, Loader2, Search, CreditCard, CheckCircle, X, AlertTriangle, Building2, Star, MessageCircle, ExternalLink, Bell, Check } from 'lucide-react'
+import { CalendarDays, Clock, Users, MapPin, ChevronRight, Loader2, Search, CreditCard, CheckCircle, X, AlertTriangle, Building2, Star, MessageCircle, ExternalLink, Bell, Check, Sparkles } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getClientBookings } from '@/lib/actions/client'
 import { STATUS_LABELS, STATUS_COLORS, isPaid } from '@/lib/bookingConfig'
@@ -313,80 +313,30 @@ export default function MisReservasPage() {
 
                 {/* ── Detalle expandido ── */}
                 {isSelected && (
-                  <div className="px-5 pb-5 pt-2" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-                      <div className="space-y-3">
-                        <div>
-                          <div className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>Tipo de evento</div>
-                          <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{bk.event_type}</div>
-                        </div>
-                        {(bk as any).space_pricing?.pricing_type === 'fixed_package' && (bk as any).space_pricing?.package_includes && (
-                          <div>
-                            <div className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>
-                              {(bk as any).space_pricing.package_name ? `Paquete: ${(bk as any).space_pricing.package_name}` : 'Incluye el paquete'}
-                            </div>
-                            <div className="text-xs rounded-xl px-3 py-2.5 whitespace-pre-line"
-                              style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid rgba(53,196,147,0.15)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-                              {(bk as any).space_pricing.package_includes}
-                            </div>
-                          </div>
-                        )}
-                        {bk.event_notes && (
-                          <div>
-                            <div className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>Nota enviada</div>
-                            <div className="text-sm italic" style={{ color: 'var(--text-secondary)' }}>"{bk.event_notes}"</div>
-                          </div>
-                        )}
-                        {bk.booking_addons?.length > 0 && (
-                          <div>
-                            <div className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>Adicionales</div>
-                            {bk.booking_addons.map((a: any, i: number) => (
-                              <div key={i} className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                                · {a.space_addons?.name} — {formatCurrency(a.subtotal)}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                  <div className="px-5 pb-5 pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
 
-                      <div className="rounded-2xl p-4 space-y-2" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                        <div className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>Resumen de pago</div>
-                        <div className="flex justify-between text-xs" style={{ color: 'var(--text-secondary)' }}>
-                          <span>Total del evento</span>
-                          <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{formatCurrency(Number(bk.total_amount))}</span>
-                        </div>
-                        {/* Cuotas pagadas vs. pendientes */}
-                        {installments.length > 0 ? (() => {
-                          const paid    = installments.filter(i => i.status === 'paid').reduce((s, i) => s + Number(i.amount), 0)
-                          const pending = installments.filter(i => i.status !== 'paid').reduce((s, i) => s + Number(i.amount), 0)
-                          return (
-                            <>
-                              {paid > 0 && (
-                                <div className="flex justify-between text-xs" style={{ color: '#16A34A' }}>
-                                  <span>Pagado hasta ahora</span>
-                                  <span className="font-semibold">{formatCurrency(paid)}</span>
-                                </div>
-                              )}
-                              {pending > 0 && (
-                                <div className="flex justify-between text-xs" style={{ color: '#D97706' }}>
-                                  <span>Pendiente en cuotas</span>
-                                  <span className="font-semibold">{formatCurrency(pending)}</span>
-                                </div>
-                              )}
-                            </>
-                          )
-                        })() : (
-                          <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
-                            <span>Todo se paga a través de espot.do en cuotas</span>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-1 text-xs font-semibold mt-1 pt-2"
-                          style={{ borderTop: '1px solid var(--border-medium)', color: isPaid(bk.payment_status) ? '#16A34A' : '#D97706' }}>
-                          {isPaid(bk.payment_status)
-                            ? <><CheckCircle size={11} /> Pago completado</>
-                            : <><Clock size={11} /> Pago pendiente</>}
-                        </div>
-                      </div>
+                    {/* Fila rápida: tipo evento + total */}
+                    <div className="flex items-center gap-3 mb-4 flex-wrap">
+                      {bk.event_type && (
+                        <span className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full"
+                          style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+                          <Sparkles size={11} style={{ color: 'var(--brand)' }} /> {bk.event_type}
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full"
+                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+                        <Users size={11} /> {bk.guest_count} personas
+                      </span>
+                      <span className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full ml-auto"
+                        style={{ background: isPaid(bk.payment_status) ? 'rgba(22,163,74,0.08)' : 'var(--bg-elevated)', color: isPaid(bk.payment_status) ? '#16A34A' : 'var(--text-primary)', border: `1px solid ${isPaid(bk.payment_status) ? 'rgba(22,163,74,0.2)' : 'var(--border-subtle)'}` }}>
+                        {formatCurrency(Number(bk.total_amount))} total
+                      </span>
+                    </div>
+
+                    {/* Layout principal: plan de pagos + info secundaria */}
+                    <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-start">
+                      {/* Plan de pagos — columna principal */}
+                      <div className="min-w-0">
 
                       {/* ── Plan de pagos ── */}
                       {isSelected && installments.length > 0 && (() => {
@@ -503,7 +453,41 @@ export default function MisReservasPage() {
                           </div>
                         )
                       })()}
-                    </div>
+                      </div>{/* fin columna principal */}
+
+                      {/* Columna secundaria — notas y adicionales */}
+                      {(bk.event_notes || bk.booking_addons?.length > 0 || ((bk as any).space_pricing?.pricing_type === 'fixed_package' && (bk as any).space_pricing?.package_includes)) && (
+                        <div className="space-y-3 md:w-56">
+                          {(bk as any).space_pricing?.pricing_type === 'fixed_package' && (bk as any).space_pricing?.package_includes && (
+                            <div className="rounded-xl p-3" style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
+                              <p className="text-xs font-bold mb-1.5" style={{ color: 'var(--brand)' }}>
+                                {(bk as any).space_pricing.package_name ?? 'Paquete incluye'}
+                              </p>
+                              <p className="text-xs whitespace-pre-line leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                                {(bk as any).space_pricing.package_includes}
+                              </p>
+                            </div>
+                          )}
+                          {bk.event_notes && (
+                            <div className="rounded-xl p-3" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                              <p className="text-xs font-bold mb-1" style={{ color: 'var(--text-muted)' }}>Nota enviada</p>
+                              <p className="text-xs italic leading-relaxed" style={{ color: 'var(--text-secondary)' }}>"{bk.event_notes}"</p>
+                            </div>
+                          )}
+                          {bk.booking_addons?.length > 0 && (
+                            <div className="rounded-xl p-3" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                              <p className="text-xs font-bold mb-1.5" style={{ color: 'var(--text-muted)' }}>Adicionales</p>
+                              {bk.booking_addons.map((a: any, i: number) => (
+                                <div key={i} className="flex justify-between text-xs py-0.5" style={{ color: 'var(--text-secondary)' }}>
+                                  <span>{a.space_addons?.name}</span>
+                                  <span className="font-semibold">{formatCurrency(a.subtotal)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>{/* fin grid */}
 
                     {/* Acciones por estado */}
                     {bk.status === 'pending' && (
