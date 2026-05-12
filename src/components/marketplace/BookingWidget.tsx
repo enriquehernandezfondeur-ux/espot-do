@@ -1034,7 +1034,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/mastercard-logo.svg" alt="Mastercard" style={{ height: 20, width: 'auto' }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/verified-by-visa.png" alt="Verified by Visa" style={{ height: 18, width: 'auto' }} />
+              <img src="/verified-by-visa.svg" alt="Verified by Visa" style={{ height: 18, width: 'auto' }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 18, width: 'auto' }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}

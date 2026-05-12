@@ -431,8 +431,8 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
       {/* ── FOOTER ── */}
       <footer style={{ background: '#F4F6F5', borderTop: '1px solid #E0E7E3' }}>
         <style>{`
-          .ft-link { transition: color .18s ease, padding-left .18s ease; }
-          .ft-link:hover { color: #35C493 !important; padding-left: 5px; }
+          .ft-link { transition: color .18s ease, transform .18s ease; display: inline-block; }
+          .ft-link:hover { color: #35C493 !important; transform: translateX(4px); }
           .ft-soc { transition: background .18s ease, transform .18s ease; }
           .ft-soc:hover { background: #35C493 !important; color: #fff !important; transform: translateY(-2px); }
         `}</style>
@@ -490,13 +490,13 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
             <div className="flex items-center gap-2 flex-wrap justify-center">
               <span className="text-xs font-semibold" style={{color:'#9CA3AF'}}>Pago seguro</span>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/azul-logo.jpg"           alt="Azul"             style={{height:14,width:'auto',borderRadius:2,objectFit:'contain'}}/>
+              <img src="/azul-logo.svg"           alt="Azul"             style={{height:14,width:'auto',borderRadius:2,objectFit:'contain'}}/>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/visa-logo.jpg"           alt="Visa"             style={{height:14,width:'auto',borderRadius:2,objectFit:'contain'}}/>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/mastercard-logo.svg"     alt="Mastercard"       style={{height:14,width:'auto'}}/>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/verified-by-visa.png"    alt="Verified by Visa" style={{height:12,width:'auto'}}/>
+              <img src="/verified-by-visa.svg"    alt="Verified by Visa" style={{height:12,width:'auto'}}/>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/mastercard-id-check.png" alt="MC ID Check"      style={{height:12,width:'auto'}}/>
             </div>

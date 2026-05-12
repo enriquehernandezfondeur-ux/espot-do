@@ -50,7 +50,7 @@ export default function SeguridadPage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/visa-logo.jpg" alt="Visa" style={{ height: 36, width: 'auto', borderRadius: 8, objectFit: 'contain' }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/verified-by-visa.png" alt="Verified by Visa" style={{ height: 28, width: 'auto' }} />
+              <img src="/verified-by-visa.svg" alt="Verified by Visa" style={{ height: 28, width: 'auto' }} />
               <span className="text-xs font-semibold" style={{ color: '#1A1F71' }}>Verified by Visa</span>
             </div>
 
