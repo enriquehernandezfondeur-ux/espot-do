@@ -43,6 +43,23 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
   const space   = (booking as any).spaces as any
   const host    = space?.profiles as any
   const addons  = (booking as any).booking_addons ?? []
+  const pricing = (booking as any).space_pricing as any
+
+  function getPricingInfo() {
+    if (!pricing) return null
+    switch (pricing.pricing_type) {
+      case 'hourly':
+        return { label: 'Por hora', detail: pricing.hourly_price ? formatCurrency(pricing.hourly_price) + ' / hora' : null, color: '#2563EB', bg: 'rgba(37,99,235,0.08)' }
+      case 'minimum_consumption':
+        return { label: 'Consumo mínimo garantizado', detail: pricing.minimum_consumption ? formatCurrency(pricing.minimum_consumption) : null, color: '#D97706', bg: 'rgba(217,119,6,0.08)' }
+      case 'fixed_package':
+        return { label: pricing.package_name ?? 'Paquete fijo', detail: pricing.fixed_price ? formatCurrency(pricing.fixed_price) : null, color: '#7C3AED', bg: 'rgba(124,58,237,0.08)' }
+      case 'custom_quote':
+        return { label: 'Precio personalizado (cotización)', detail: null, color: '#0891B2', bg: 'rgba(8,145,178,0.08)' }
+      default: return null
+    }
+  }
+  const pricingInfo = getPricingInfo()
   const cover   = space?.space_images?.find((i: any) => i.is_cover)?.url ?? space?.space_images?.[0]?.url
   const sc      = STATUS_COLORS[(booking as any).status as keyof typeof STATUS_COLORS] ?? { color: '#6B7280', bg: '#F4F6F8' }
   const sl      = STATUS_LABELS[(booking as any).status as keyof typeof STATUS_LABELS] ?? (booking as any).status
@@ -156,6 +173,41 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
                 </p>
                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Tipo de evento</p>
               </div>
+            </div>
+          )}
+          {/* Tipo de precio */}
+          {pricingInfo && (
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: pricingInfo.bg }}>
+                <CreditCard size={16} style={{ color: pricingInfo.color }} />
+              </div>
+              <div>
+                <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  {pricingInfo.label}
+                  {pricingInfo.detail && (
+                    <span className="ml-1.5 text-xs font-normal" style={{ color: 'var(--text-muted)' }}>
+                      · {pricingInfo.detail}
+                    </span>
+                  )}
+                </p>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Modalidad de cobro</p>
+              </div>
+            </div>
+          )}
+          {/* Descripción del paquete si aplica */}
+          {pricing?.pricing_type === 'fixed_package' && pricing?.package_includes && (
+            <div className="rounded-xl px-4 py-3 text-xs whitespace-pre-line"
+              style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.15)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+              <span className="font-semibold block mb-1" style={{ color: '#7C3AED' }}>Incluye:</span>
+              {pricing.package_includes}
+            </div>
+          )}
+          {/* Nota consumo mínimo */}
+          {pricing?.pricing_type === 'minimum_consumption' && (
+            <div className="rounded-xl px-4 py-2.5 text-xs"
+              style={{ background: 'rgba(217,119,6,0.05)', border: '1px solid rgba(217,119,6,0.2)', color: '#92400E' }}>
+              Tu grupo garantiza consumir este monto. Lo adicional se paga en el lugar.
             </div>
           )}
         </div>

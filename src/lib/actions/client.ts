@@ -15,7 +15,7 @@ export async function getClientBookings() {
         id, name, slug, category, address, city, sector,
         space_images(url, is_cover)
       ),
-      space_pricing!pricing_id(package_name, package_includes, pricing_type),
+      space_pricing!pricing_id(package_name, package_includes, pricing_type, hourly_price, minimum_consumption, fixed_price),
       booking_addons(
         quantity, unit_price, subtotal,
         space_addons(name)

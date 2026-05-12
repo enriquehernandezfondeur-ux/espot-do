@@ -17,6 +17,24 @@ type Booking = Awaited<ReturnType<typeof getClientBookings>>[0]
 
 const FILTERS = ['Todas', 'Pendientes', 'Cotizaciones', 'Por pagar', 'Confirmadas', 'Completadas', 'Canceladas']
 
+// Helper: etiqueta e info del tipo de precio
+function getPricingLabel(pricing: any): { label: string; detail: string; color: string; bg: string } | null {
+  if (!pricing) return null
+  const p = pricing
+  switch (p.pricing_type) {
+    case 'hourly':
+      return { label: 'Por hora', detail: p.hourly_price ? formatCurrency(p.hourly_price) + '/hr' : '', color: '#2563EB', bg: 'rgba(37,99,235,0.08)' }
+    case 'minimum_consumption':
+      return { label: 'Consumo mín.', detail: p.minimum_consumption ? 'Desde ' + formatCurrency(p.minimum_consumption) : '', color: '#D97706', bg: 'rgba(217,119,6,0.08)' }
+    case 'fixed_package':
+      return { label: p.package_name ?? 'Paquete fijo', detail: p.fixed_price ? formatCurrency(p.fixed_price) : '', color: '#7C3AED', bg: 'rgba(124,58,237,0.08)' }
+    case 'custom_quote':
+      return { label: 'Cotización', detail: 'Precio personalizado', color: '#0891B2', bg: 'rgba(8,145,178,0.08)' }
+    default:
+      return null
+  }
+}
+
 export default function MisReservasPage() {
   const [bookings, setBookings]   = useState<Booking[]>([])
   const [loading, setLoading]     = useState(true)
@@ -251,13 +269,29 @@ export default function MisReservasPage() {
                           {sl}
                         </span>
                       </div>
-                      {/* Ubicación */}
-                      <div className="flex items-start gap-1 text-xs mb-2" style={{ color: 'var(--text-muted)' }}>
+                      {/* Ubicación + tipo de precio */}
+                      <div className="flex items-start gap-1 text-xs mb-1.5" style={{ color: 'var(--text-muted)' }}>
                         <MapPin size={10} className="shrink-0 mt-0.5" />
                         <span>
                           {space?.address ? `${space.address}, ` : ''}{space?.sector ? `${space.sector}, ` : ''}{space?.city}
                         </span>
                       </div>
+                      {/* Badge pricing */}
+                      {(() => {
+                        const pl = getPricingLabel((bk as any).space_pricing)
+                        if (!pl) return null
+                        return (
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <span className="text-xs font-semibold px-2 py-0.5 rounded-md"
+                              style={{ background: pl.bg, color: pl.color }}>
+                              {pl.label}
+                            </span>
+                            {pl.detail && (
+                              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{pl.detail}</span>
+                            )}
+                          </div>
+                        )
+                      })()}
                       {/* Meta: fecha + hora + monto en fila */}
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 flex-wrap">
@@ -323,7 +357,7 @@ export default function MisReservasPage() {
                 {isSelected && (
                   <div className="px-5 pb-5 pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
 
-                    {/* Fila rápida: tipo evento + horario + personas + total */}
+                    {/* Fila rápida: tipo evento + horario + personas + precio + total */}
                     <div className="flex items-center gap-2 mb-4 flex-wrap">
                       {bk.start_time && bk.end_time && (
                         <span className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full"
@@ -341,6 +375,17 @@ export default function MisReservasPage() {
                         style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
                         <Users size={11} /> {bk.guest_count} personas
                       </span>
+                      {/* Tipo de precio */}
+                      {(() => {
+                        const pl = getPricingLabel((bk as any).space_pricing)
+                        if (!pl) return null
+                        return (
+                          <span className="text-xs font-semibold px-3 py-1.5 rounded-full"
+                            style={{ background: pl.bg, color: pl.color }}>
+                            {pl.label}{pl.detail ? ` · ${pl.detail}` : ''}
+                          </span>
+                        )
+                      })()}
                       <span className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full ml-auto"
                         style={{ background: isPaid(bk.payment_status) ? 'rgba(22,163,74,0.08)' : 'var(--bg-elevated)', color: isPaid(bk.payment_status) ? '#16A34A' : 'var(--text-primary)', border: `1px solid ${isPaid(bk.payment_status) ? 'rgba(22,163,74,0.2)' : 'var(--border-subtle)'}` }}>
                         {formatCurrency(Number(bk.total_amount))} total
