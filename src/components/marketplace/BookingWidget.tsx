@@ -493,7 +493,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   function PriceHeader() {
     if (!pricing) return null
     if (isQuote) return (
-      <div className="flex items-center gap-2 pb-4 mb-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+      <div className="flex items-center gap-2">
         <MessageCircle size={20} style={{ color: 'var(--brand)' }} />
         <span className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>Cotización personalizada</span>
       </div>
@@ -592,12 +592,19 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             <button key={s.id}
               onClick={() => s.id < step && setStep(s.id)}
               disabled={s.id >= step}
-              className="flex-1 h-1 rounded-full transition-all"
-              style={{ background: s.id <= step ? 'var(--brand)' : 'var(--border-medium)', opacity: s.id === step ? 1 : s.id < step ? 0.55 : 0.2 }}
-            />
+              className="flex-1 py-1.5 flex items-center"
+              style={{ cursor: s.id < step ? 'pointer' : 'default' }}>
+              <div className="w-full h-1 rounded-full transition-all"
+                style={{
+                  background: s.id < step ? 'var(--brand)'
+                    : s.id === step ? 'var(--brand)'
+                    : 'var(--border-medium)',
+                  opacity: s.id < step ? 0.45 : s.id === step ? 1 : 0.2,
+                }} />
+            </button>
           ))}
         </div>
-        <p className="text-[11px] mt-1.5 font-medium" style={{ color: 'var(--text-muted)' }}>
+        <p className="text-[11px] mt-0.5 font-medium" style={{ color: 'var(--text-muted)' }}>
           {steps.find(s => s.id === step)?.label}
         </p>
       </div>
@@ -609,11 +616,14 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         {/* ── PASO 1: FECHA Y HORA ────────────────────────── */}
         {step === 1 && (
           <div className="space-y-4">
-            <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>¿Cuándo es tu evento?</h3>
+            <div>
+              <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>¿Cuándo es tu evento?</h3>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>El plan de cuotas se asigna según los días que faltan.</p>
+            </div>
 
             <DatePicker
               value={eventDate}
-              onChange={setEventDate}
+              onChange={v => { setEventDate(v); setShowPaymentPlan(false) }}
               minDate={new Date().toISOString().split('T')[0]}
               placeholder="Elige una fecha"
             />
@@ -822,7 +832,12 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         {/* ── PASO 2: PERSONAS ──────────────────────────── */}
         {step === 2 && (
           <div>
-            <h3 className="font-bold text-base mb-4" style={{ color: 'var(--text-primary)' }}>¿Cuántas personas asistirán?</h3>
+            <div className="mb-4">
+              <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>¿Cuántas personas asistirán?</h3>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                Capacidad: {space.capacity_min ? `${space.capacity_min}–` : 'hasta '}{space.capacity_max} personas
+              </p>
+            </div>
             <div className="flex items-stretch gap-0 rounded-2xl overflow-hidden"
               style={{ border: '1.5px solid var(--border-medium)' }}>
               <button onClick={() => adjustCount(-1)} disabled={guestCount <= (space.capacity_min ?? 1)}
@@ -836,7 +851,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                   onChange={e => handleCountInput(e.target.value)}
                   onBlur={() => setCountInput(String(guestCount))}
                   className="text-3xl font-bold text-center bg-transparent focus:outline-none w-24 tabular-nums"
-                  style={{ color: 'var(--text-primary)', fontSize: 16, minHeight: 48 }}
+                  style={{ color: 'var(--text-primary)', fontSize: '2rem', minHeight: 48 }}
                   min={space.capacity_min ?? 1} max={space.capacity_max} />
                 <span className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>personas</span>
               </div>
