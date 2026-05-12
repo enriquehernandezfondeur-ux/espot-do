@@ -693,7 +693,7 @@ export default function MisReservasPage() {
                               placeholder="Cuéntanos cómo fue tu experiencia (opcional)"
                               rows={3}
                               className="w-full rounded-xl px-3 py-2.5 text-sm resize-none focus:outline-none"
-                              style={{ background: '#fff', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)' }}
+                              style={{ background: '#fff', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)', fontSize: 16 }}
                             />
                             <div className="flex gap-2">
                               <button

@@ -227,6 +227,16 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
               </Link>
             )
           })}
+          {/* Botón "Más" para acceder a Favoritos, Pagos y más */}
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1"
+            style={{ color: 'var(--text-muted)' }}>
+            <div className="w-8 h-8 flex items-center justify-center rounded-xl">
+              <Menu size={18} />
+            </div>
+            <span className="text-xs font-semibold leading-tight">Más</span>
+          </button>
         </div>
       </div>
     </>
