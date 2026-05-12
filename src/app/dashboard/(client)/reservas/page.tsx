@@ -28,6 +28,7 @@ export default function MisReservasPage() {
   const [comment, setComment]     = useState('')
   const [reviewed, setReviewed]   = useState<Set<string>>(new Set())
   const [submitting, setSubmitting]   = useState(false)
+  const [reviewError, setReviewError] = useState('')
   const [selected, setSelected]       = useState<Booking | null>(null)
   const [cancelModal, setCancelModal] = useState<Booking | null>(null)
   const [cancelStep, setCancelStep]   = useState<1 | 2>(1)
@@ -547,6 +548,7 @@ export default function MisReservasPage() {
                                 onClick={async () => {
                                   if (!rating) return
                                   setSubmitting(true)
+                                  setReviewError('')
                                   const { error } = await submitReview({
                                     bookingId: bk.id,
                                     spaceId:   (bk as any).space_id,
@@ -554,23 +556,28 @@ export default function MisReservasPage() {
                                     comment,
                                   })
                                   setSubmitting(false)
-                                  if (!error) {
+                                  if (error) { setReviewError(error) }
+                                  else {
                                     setReviewed(prev => new Set([...prev, bk.id]))
                                     setReviewFor(null)
                                     setRating(0)
                                     setComment('')
+                                    setReviewError('')
                                   }
                                 }}
                                 className="px-4 py-2 rounded-xl text-sm font-bold disabled:opacity-40"
                                 style={{ background: '#35C493', color: '#fff' }}>
                                 {submitting ? 'Publicando...' : 'Publicar reseña'}
                               </button>
-                              <button onClick={() => { setReviewFor(null); setRating(0); setComment('') }}
+                              <button onClick={() => { setReviewFor(null); setRating(0); setComment(''); setReviewError('') }}
                                 className="px-4 py-2 rounded-xl text-sm"
                                 style={{ color: 'var(--text-secondary)' }}>
                                 Cancelar
                               </button>
                             </div>
+                            {reviewError && (
+                              <p className="text-xs font-semibold mt-2" style={{ color: '#DC2626' }}>{reviewError}</p>
+                            )}
                           </div>
                         ) : (
                           <button onClick={() => { setReviewFor(bk.id); setRating(0); setComment('') }}

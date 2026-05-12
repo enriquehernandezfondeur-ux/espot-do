@@ -32,18 +32,44 @@ export default function HostMensajesPage() {
 
   const bottomRef  = useRef<HTMLDivElement>(null)
   const fileRef    = useRef<HTMLInputElement>(null)
-  const channelRef = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
-  const supabase   = createClient()
+  const channelRef       = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
+  const globalChannelRef = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
+  const activeRef        = useRef<any | null>(null)
+  const supabase         = createClient()
 
-  useEffect(() => () => { channelRef.current?.unsubscribe() }, [])
+  useEffect(() => () => {
+    channelRef.current?.unsubscribe()
+    globalChannelRef.current?.unsubscribe()
+  }, [])
 
   useEffect(() => {
     async function init() {
       const { data: { user } } = await supabase.auth.getUser()
-      setUserId(user?.id ?? null)
+      const uid = user?.id ?? null
+      setUserId(uid)
       const data = await getMyConversations()
       setConvs(data)
       setLoading(false)
+
+      // Suscripción global: marca conversaciones inactivas como no leídas
+      // cuando llega un mensaje nuevo de un cliente
+      if (uid) {
+        globalChannelRef.current?.unsubscribe()
+        globalChannelRef.current = supabase
+          .channel(`msg-host-global-${uid}`)
+          .on('postgres_changes', {
+            event: 'INSERT', schema: 'public', table: 'messages',
+            filter: `receiver_id=eq.${uid}`,
+          }, payload => {
+            const spaceId = (payload.new as any).space_id
+            setConvs(prev => prev.map(c =>
+              c.spaceId === spaceId && c.spaceId !== (activeRef.current?.spaceId)
+                ? { ...c, unread: true }
+                : c
+            ))
+          })
+          .subscribe()
+      }
     }
     init()
   }, [])
@@ -54,6 +80,7 @@ export default function HostMensajesPage() {
 
   async function openConv(conv: any) {
     setActive(conv)
+    activeRef.current = conv
     setAttachment(null)
     setSendError('')
     const data = await getConversation(conv.spaceId)

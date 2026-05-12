@@ -260,7 +260,7 @@ export default function HostReservasPage() {
                               style={{ background: 'rgba(22,163,74,0.1)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)' }}>
                               {actionId === bk.id + 'a' ? '...' : '✓ Aceptar'}
                             </button>
-                            <button onClick={() => { setSelected(bk); setShowRejectForm(true) }} disabled={!!actionId}
+                            <button onClick={() => { setSelected(bk); setRejectReason(''); setShowRejectForm(true) }} disabled={!!actionId}
                               className="flex-1 text-xs font-semibold py-2.5 rounded-xl transition-colors"
                               style={{ background: 'rgba(220,38,38,0.08)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }}>
                               ✕ Rechazar
@@ -297,7 +297,7 @@ export default function HostReservasPage() {
           <div className="w-full lg:w-72 shrink-0 rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
             <div className="px-5 py-4 flex justify-between" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
               <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Detalle</span>
-              <button onClick={() => { setSelected(null); setShowRejectForm(false) }} style={{ color: 'var(--text-muted)' }}>✕</button>
+              <button onClick={() => { setSelected(null); setShowRejectForm(false); setRejectReason('') }} style={{ color: 'var(--text-muted)' }}>✕</button>
             </div>
 
             {/* Rechazar form */}
@@ -314,7 +314,7 @@ export default function HostReservasPage() {
                     style={{ background: '#DC2626', color: '#fff' }}>
                     {actionId === selected.id + 'r' ? 'Enviando...' : 'Confirmar rechazo'}
                   </button>
-                  <button onClick={() => setShowRejectForm(false)}
+                  <button onClick={() => { setShowRejectForm(false); setRejectReason('') }}
                     className="px-3 py-2 text-xs rounded-xl"
                     style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>Cancelar</button>
                 </div>
