@@ -661,39 +661,20 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                     </div>
                   ))}
                   {isEstimate && (
-                    <div className="px-3 py-1.5 text-[11px]"
+                    <div className="px-3 py-1 text-[11px]"
                       style={{ background: 'var(--bg-elevated)', borderTop: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}>
-                      * Estimado base. El total final depende del horario elegido.
+                      ~ Estimado según precio base
                     </div>
                   )}
                 </div>
               )
             })()}
 
-            {/* Mensaje informativo por modelo */}
-            {isConsumption && (
-              <div className="rounded-xl px-4 py-3 text-xs" style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.15)', color: '#374151', lineHeight: 1.7 }}>
-                Tu grupo garantiza consumir este monto en comida y bebidas en el espacio.
-                Lo que exceda, se paga directamente en el lugar.
-              </div>
-            )}
-
-            {isPackage && pricing.package_includes && (
-              <div className="rounded-xl px-4 py-3 text-xs"
-                style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid rgba(53,196,147,0.15)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-                <span className="font-semibold block mb-1" style={{ color: 'var(--brand)' }}>El paquete incluye:</span>
-                <span className="whitespace-pre-line">{pricing.package_includes}</span>
-              </div>
-            )}
-
             {isQuote && (
-              <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl"
-                style={{ background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)' }}>
-                <Info size={14} style={{ color: '#D97706', flexShrink: 0, marginTop: 1 }} />
-                <div className="text-xs" style={{ color: '#92400E', lineHeight: 1.6 }}>
-                  El propietario te enviará un precio personalizado. Selecciona el horario que necesitas
-                  para que pueda prepararte la mejor propuesta. <strong>El horario es opcional</strong> — puedes continuar sin elegir horas.
-                </div>
+              <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs"
+                style={{ background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)', color: '#92400E' }}>
+                <Info size={12} style={{ color: '#D97706', flexShrink: 0 }} />
+                El propietario te enviará un precio. El horario es opcional.
               </div>
             )}
 
@@ -713,39 +694,9 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               </div>
             )}
 
-            {/* Selectores de hora — solo si la fecha no está bloqueada y tiene horario */}
+            {/* Selectores de hora */}
             {eventDate && !dateBlocked && allowedTimeRange !== null && (
               <div className="space-y-3">
-
-                {/* Bloque del día disponible — siempre visible para contexto */}
-                {allowedTimeRange && (
-                  <div className="flex items-center justify-between px-4 py-3 rounded-xl"
-                    style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                    <div className="flex items-center gap-2">
-                      <Clock size={13} style={{ color: 'var(--brand)', flexShrink: 0 }} />
-                      <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
-                        Disponible este día
-                      </span>
-                    </div>
-                    <span className="text-xs font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>
-                      {formatTime(allowedTimeRange.start)} – {formatTime(allowedTimeRange.end)}
-                    </span>
-                  </div>
-                )}
-
-                {/* Info de duración para precio por hora */}
-                {isHourly && (minHours > 0 || maxHours > 0) && (
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
-                    style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
-                    <Clock size={12} style={{ color: 'var(--brand)' }} />
-                    <span style={{ color: 'var(--text-secondary)' }}>
-                      {minHours > 0 && maxHours > 0
-                        ? `Reserva entre ${minHours} y ${maxHours} horas`
-                        : minHours > 0 ? `Mínimo ${minHours} hora${minHours > 1 ? 's' : ''}`
-                        : `Máximo ${maxHours} horas`}
-                    </span>
-                  </div>
-                )}
 
                 {/* Error: bloque demasiado corto */}
                 {blockTooShort && (
