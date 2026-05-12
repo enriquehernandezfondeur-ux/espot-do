@@ -563,6 +563,14 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             )}
           </div>
         )}
+
+        {/* Badge de cuotas — siempre visible debajo del precio */}
+        <div className="flex items-center gap-1.5 mt-3 pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+          <CreditCard size={13} style={{ color: 'var(--brand)' }} />
+          <span className="text-xs font-semibold" style={{ color: 'var(--brand)' }}>
+            Pago en cuotas según tu fecha de evento
+          </span>
+        </div>
       </div>
     )
   }
