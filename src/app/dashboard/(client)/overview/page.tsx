@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { CalendarDays, Clock, CheckCircle, ArrowRight, MapPin, Users, CreditCard, Heart, Loader2, MessageCircle, AlertTriangle, Bell } from 'lucide-react'
+import { CalendarDays, Clock, CheckCircle, ArrowRight, MapPin, Users, CreditCard, Heart, Loader2, MessageCircle, AlertTriangle, Bell, Sparkles } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getClientStats } from '@/lib/actions/client'
 
@@ -133,24 +133,36 @@ export default function ClientDashboard() {
         </div>
       )}
 
-      {(stats?.upcomingInstallments?.length ?? 0) > 0 && (stats?.overdueInstallments?.length ?? 0) === 0 && (
-        <div className="mb-4 rounded-2xl px-4 py-3 flex items-center gap-3"
-          style={{ background: 'rgba(217,119,6,0.06)', border: '1.5px solid rgba(217,119,6,0.2)' }}>
-          <Clock size={16} style={{ color: '#D97706', flexShrink: 0 }} />
-          <div className="flex-1 min-w-0">
-            <span className="text-sm font-semibold" style={{ color: '#92400E' }}>
-              Próxima cuota — {formatDate(stats!.upcomingInstallments![0].due_date)}
-            </span>
-            <span className="text-xs ml-2" style={{ color: '#D97706' }}>
-              {formatCurrency(Number(stats!.upcomingInstallments![0].amount))}
-            </span>
+      {stats?.nextInstallment && (stats?.overdueInstallments?.length ?? 0) === 0 && (stats?.pendingPayment ?? 0) === 0 && (() => {
+        const inst = stats.nextInstallment!
+        const daysLeft = Math.ceil((new Date(inst.due_date + 'T12:00').getTime() - new Date().setHours(0,0,0,0)) / 86400000)
+        const isUrgent = daysLeft <= 7
+        const color = isUrgent ? '#D97706' : '#2563EB'
+        const bg    = isUrgent ? 'rgba(217,119,6,0.06)' : 'rgba(37,99,235,0.05)'
+        const bdr   = isUrgent ? 'rgba(217,119,6,0.2)'  : 'rgba(37,99,235,0.2)'
+        return (
+          <div className="mb-4 rounded-2xl px-4 py-3.5 flex items-center gap-3"
+            style={{ background: bg, border: `1.5px solid ${bdr}` }}>
+            <CreditCard size={16} style={{ color, flexShrink: 0 }} />
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-semibold" style={{ color }}>
+                {formatCurrency(Number(inst.amount))}
+                <span className="font-normal ml-1.5 text-xs" style={{ color: isUrgent ? '#92400E' : '#1D4ED8' }}>
+                  · {daysLeft === 0 ? 'vence hoy' : daysLeft === 1 ? 'vence mañana' : `vence en ${daysLeft} días`}
+                </span>
+              </div>
+              <div className="text-xs mt-0.5" style={{ color: isUrgent ? '#B45309' : '#3B82F6' }}>
+                Próxima cuota · {formatDate(inst.due_date)}
+              </div>
+            </div>
+            <Link href="/dashboard/reservas"
+              className="text-xs font-semibold px-3 py-2 rounded-xl shrink-0"
+              style={{ background: color, color: '#fff' }}>
+              Ver plan
+            </Link>
           </div>
-          <Link href="/dashboard/reservas"
-            className="text-xs font-semibold shrink-0" style={{ color: '#D97706' }}>
-            Ver →
-          </Link>
-        </div>
-      )}
+        )
+      })()}
 
       {/* Próxima reserva destacada */}
       {next && (

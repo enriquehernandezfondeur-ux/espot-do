@@ -172,6 +172,10 @@ export async function getClientStats() {
       return refDate > cutoff
     }).slice(0, 3),
     overdueInstallments: (installments ?? []).filter(i => i.status === 'overdue'),
+    // Próxima cuota pendiente (la más cercana, sin límite de 7 días)
+    nextInstallment: (installments ?? [])
+      .filter(i => i.status === 'pending')
+      .sort((a, b) => a.due_date.localeCompare(b.due_date))[0] ?? null,
     upcomingInstallments: (installments ?? []).filter(i => i.status === 'pending' && i.due_date <= soonStr),
     installmentsByBooking: Object.fromEntries(
       bk.map(b => [b.id, { spaceName: (b.spaces as any)?.name ?? '' }])
