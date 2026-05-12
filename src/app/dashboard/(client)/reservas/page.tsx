@@ -388,45 +388,33 @@ export default function MisReservasPage() {
                         </div>
                       </div>
 
-                      {/* ── Plan de pagos — tarjeta unificada ── */}
+                      {/* ── Plan de pagos ── */}
                       {isSelected && installments.length > 0 && (() => {
-                        const nextInst    = installments.find(i => i.status !== 'paid')
-                        const paidCount   = installments.filter(i => i.status === 'paid').length
-                        const allPaid     = paidCount === installments.length
-                        const isOD        = nextInst?.status === 'overdue'
+                        const nextInst  = installments.find(i => i.status !== 'paid')
+                        const paidCount = installments.filter(i => i.status === 'paid').length
+                        const allPaid   = paidCount === installments.length
+                        const isOD      = nextInst?.status === 'overdue'
 
                         return (
                           <div className="mt-3 rounded-2xl overflow-hidden"
-                            style={{ border: '1.5px solid #E2E8EC' }}>
+                            style={{ border: '1.5px solid var(--brand-border)' }}>
 
-                            {/* Cabecera oscura */}
-                            <div className="px-4 py-3.5 flex items-center justify-between"
-                              style={{ background: '#0F1623' }}>
+                            {/* Header verde suave */}
+                            <div className="flex items-center justify-between px-4 py-3"
+                              style={{ background: 'var(--brand-dim)', borderBottom: '1px solid var(--brand-border)' }}>
                               <div className="flex items-center gap-2">
-                                <CreditCard size={14} style={{ color: '#35C493' }} />
-                                <span className="text-sm font-semibold" style={{ color: '#fff' }}>
+                                <CreditCard size={13} style={{ color: 'var(--brand)' }} />
+                                <span className="text-xs font-bold" style={{ color: 'var(--brand)' }}>
                                   Plan de pagos
                                 </span>
                               </div>
-                              <div className="flex items-center gap-1.5">
-                                {installments.map((inst, i) => (
-                                  <div key={i} className="w-2 h-2 rounded-full transition-all"
-                                    style={{
-                                      background: inst.status === 'paid' ? '#35C493'
-                                        : inst.status === 'overdue' ? '#F87171'
-                                        : (!inst.status || inst.status === 'pending') && installments.slice(0, i).every(x => x.status === 'paid')
-                                          ? '#35C493'
-                                          : 'rgba(255,255,255,0.2)',
-                                      opacity: inst.status === 'paid' ? 1 : 0.9,
-                                    }} />
-                                ))}
-                                <span className="text-xs ml-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                                  {paidCount}/{installments.length}
-                                </span>
-                              </div>
+                              <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
+                                style={{ background: allPaid ? 'rgba(22,163,74,0.1)' : 'rgba(53,196,147,0.15)', color: allPaid ? '#16A34A' : 'var(--brand)' }}>
+                                {allPaid ? 'Completado' : `${paidCount}/${installments.length} pagadas`}
+                              </span>
                             </div>
 
-                            {/* Lista de cuotas */}
+                            {/* Cuotas */}
                             <div style={{ background: '#fff' }}>
                               {installments.map((inst, i) => {
                                 const isPaidI = inst.status === 'paid'
@@ -435,50 +423,51 @@ export default function MisReservasPage() {
                                 const isLast  = i === installments.length - 1
 
                                 return (
-                                  <div key={inst.id}
-                                    className="flex items-center gap-3 px-4"
+                                  <div key={inst.id} className="flex items-center gap-3 px-4 py-3.5"
                                     style={{
-                                      paddingTop: 14, paddingBottom: 14,
-                                      borderBottom: isLast ? 'none' : '1px solid #F1F5F8',
-                                      background: isNext ? 'rgba(53,196,147,0.03)' : isOvD ? 'rgba(239,68,68,0.02)' : '#fff',
+                                      borderBottom: isLast ? 'none' : '1px solid var(--border-subtle)',
+                                      background: isNext ? 'rgba(53,196,147,0.03)' : '#fff',
                                     }}>
-                                    {/* Indicador */}
+                                    {/* Círculo */}
                                     <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
                                       style={{
-                                        background: isPaidI ? '#0F1623' : isOvD ? '#FEF2F2' : isNext ? '#35C493' : '#F4F6F8',
-                                        color:      isPaidI ? '#35C493'  : isOvD ? '#DC2626' : isNext ? '#fff'     : '#94A3B8',
+                                        background: isPaidI ? 'rgba(22,163,74,0.1)' : isOvD ? 'rgba(220,38,38,0.08)' : isNext ? 'var(--brand-dim)' : 'var(--bg-elevated)',
+                                        color:      isPaidI ? '#16A34A' : isOvD ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)',
+                                        border:     `1.5px solid ${isPaidI ? 'rgba(22,163,74,0.3)' : isOvD ? 'rgba(220,38,38,0.2)' : isNext ? 'var(--brand-border)' : 'var(--border-medium)'}`,
                                       }}>
                                       {isPaidI ? <Check size={13} /> : i + 1}
                                     </div>
 
-                                    {/* Info */}
+                                    {/* Texto */}
                                     <div className="flex-1 min-w-0">
-                                      <div className="flex items-baseline justify-between gap-2">
-                                        <span className="text-sm font-bold"
-                                          style={{ color: isPaidI ? '#0F1623' : isOvD ? '#DC2626' : isNext ? '#0F1623' : '#94A3B8', letterSpacing: '-0.02em' }}>
+                                      <div className="flex items-center justify-between gap-2">
+                                        <span className="text-sm font-bold" style={{
+                                          color: isPaidI ? 'var(--text-secondary)' : isOvD ? '#DC2626' : 'var(--text-primary)',
+                                          letterSpacing: '-0.02em',
+                                        }}>
                                           {formatCurrency(inst.amount)}
                                         </span>
-                                        <span className="text-xs font-medium shrink-0"
-                                          style={{ color: isPaidI ? '#35C493' : isOvD ? '#DC2626' : isNext ? '#35C493' : '#CBD5E1' }}>
+                                        <span className="text-xs shrink-0 font-medium" style={{
+                                          color: isPaidI ? '#16A34A' : isOvD ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)',
+                                        }}>
                                           {isPaidI
-                                            ? `Pagado${inst.paid_at ? ' · ' + formatDate(inst.paid_at.split('T')[0]) : ''}`
+                                            ? `✓ Pagado${inst.paid_at ? ' · ' + formatDate(inst.paid_at.split('T')[0]) : ''}`
                                             : countdownLabel(inst.due_date)}
                                         </span>
                                       </div>
-                                      <span className="text-xs" style={{ color: '#94A3B8' }}>{inst.label}</span>
+                                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{inst.label}</span>
                                     </div>
 
-                                    {/* Badge */}
-                                    {isNext && (
+                                    {isNext && !isOvD && (
                                       <span className="text-[10px] font-bold px-2 py-1 rounded-lg shrink-0"
-                                        style={{ background: '#0F1623', color: '#35C493', letterSpacing: '0.03em' }}>
-                                        AHORA
+                                        style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
+                                        Próxima
                                       </span>
                                     )}
                                     {isOvD && (
                                       <span className="text-[10px] font-bold px-2 py-1 rounded-lg shrink-0"
-                                        style={{ background: '#FEF2F2', color: '#DC2626' }}>
-                                        VENCIDA
+                                        style={{ background: 'rgba(220,38,38,0.08)', color: '#DC2626' }}>
+                                        Vencida
                                       </span>
                                     )}
                                   </div>
@@ -486,31 +475,27 @@ export default function MisReservasPage() {
                               })}
                             </div>
 
-                            {/* CTA pago */}
+                            {/* CTA */}
                             {nextInst && !allPaid && (
-                              <div className="px-4 py-3"
-                                style={{ borderTop: '1px solid #F1F5F8', background: '#FAFCFD' }}>
+                              <div className="p-3" style={{ borderTop: '1px solid var(--brand-border)', background: 'var(--brand-dim)' }}>
                                 <Link href={`/pago/${selected?.id}?cuota=${nextInst.id}`}
-                                  className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl text-sm font-bold"
+                                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold transition-all"
                                   style={{
-                                    background: isOD ? '#DC2626' : '#0F1623',
-                                    color: isOD ? '#fff' : '#35C493',
-                                    letterSpacing: '-0.01em',
+                                    background: isOD ? '#DC2626' : 'var(--brand)',
+                                    color: '#fff',
+                                    boxShadow: isOD ? '0 2px 12px rgba(220,38,38,0.25)' : '0 2px 12px rgba(53,196,147,0.3)',
                                   }}>
                                   <CreditCard size={15} />
-                                  {isOD
-                                    ? `Pagar cuota vencida — ${formatCurrency(nextInst.amount)}`
-                                    : `Pagar ahora — ${formatCurrency(nextInst.amount)}`}
+                                  {isOD ? `Pagar cuota vencida — ${formatCurrency(nextInst.amount)}` : `Pagar ahora — ${formatCurrency(nextInst.amount)}`}
                                 </Link>
                               </div>
                             )}
 
-                            {/* Todo pagado */}
                             {allPaid && (
                               <div className="px-4 py-3 flex items-center gap-2"
-                                style={{ borderTop: '1px solid #F1F5F8', background: '#FAFCFD' }}>
-                                <CheckCircle size={14} style={{ color: '#35C493' }} />
-                                <span className="text-sm font-semibold" style={{ color: '#0F1623' }}>
+                                style={{ borderTop: '1px solid var(--brand-border)', background: 'var(--brand-dim)' }}>
+                                <CheckCircle size={14} style={{ color: 'var(--brand)' }} />
+                                <span className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>
                                   Todas las cuotas pagadas
                                 </span>
                               </div>
