@@ -503,6 +503,17 @@ export default function EspacioPage() {
             </button>
           </div>
         )}
+
+        {saveError && (
+          <div className="mb-5 rounded-2xl px-5 py-4 flex items-center gap-3"
+            style={{ background: 'rgba(220,38,38,0.06)', border: '1.5px solid rgba(220,38,38,0.2)' }}>
+            <span className="text-sm font-semibold flex-1" style={{ color: '#DC2626' }}>{saveError}</span>
+            <button onClick={() => setSaveError('')} className="shrink-0" style={{ color: '#DC2626' }}>
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
         <div className="flex items-center justify-between mb-5 md:mb-8">
           <div>
             <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>

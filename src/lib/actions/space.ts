@@ -275,9 +275,31 @@ export async function deleteSpaceByHost(spaceId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
+
   const { data: space } = await supabase.from('spaces').select('host_id, is_published').eq('id', spaceId).single()
   if (!space || space.host_id !== user.id) return { error: 'No autorizado' }
   if (space.is_published) return { error: 'Debes despublicar el espacio antes de eliminarlo.' }
+
+  // Bloquear si hay reservas activas (pendientes, aceptadas o confirmadas)
+  const { data: activeBookings } = await supabase
+    .from('bookings').select('id').eq('space_id', spaceId)
+    .in('status', ['pending', 'quote_requested', 'accepted', 'confirmed'])
+    .limit(1)
+  if (activeBookings && activeBookings.length > 0)
+    return { error: 'No puedes eliminar un espacio con reservas activas. Cancélalas primero.' }
+
+  // Eliminar registros hijos en orden para evitar FK violations
+  await Promise.all([
+    supabase.from('space_images').delete().eq('space_id', spaceId),
+    supabase.from('space_addons').delete().eq('space_id', spaceId),
+    supabase.from('space_time_blocks').delete().eq('space_id', spaceId),
+    supabase.from('space_payment_terms').delete().eq('space_id', spaceId),
+    supabase.from('favorites').delete().eq('space_id', spaceId),
+    supabase.from('messages').delete().eq('space_id', spaceId),
+  ])
+  // Pricing después de addons (por si hay FK cruzada)
+  await supabase.from('space_pricing').delete().eq('space_id', spaceId)
+
   const { error } = await supabase.from('spaces').delete().eq('id', spaceId)
   if (!error) revalidatePath('/buscar')
   return error ? { error: error.message } : { success: true }
