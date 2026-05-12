@@ -5,7 +5,7 @@ import "./globals.css";
 // Tipografía oficial de marca Espot — Poppins (Manual de marca)
 const poppins = Poppins({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
   variable: '--font-poppins',
   display: 'swap',
 })
@@ -14,7 +14,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
-  robots: { index: false, follow: false },
+  robots: { index: true, follow: true },
   title: {
     default:  'espot.do — Espacios a tu alcance en República Dominicana',
     template: '%s | espot.do',
