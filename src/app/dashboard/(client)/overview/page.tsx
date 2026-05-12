@@ -116,7 +116,7 @@ export default function ClientDashboard() {
             </span>
           </div>
           {stats!.recentlyConfirmed!.map((bk: any) => (
-            <Link key={bk.id} href="/dashboard/reservas"
+            <Link key={bk.id} href={`/dashboard/reservas/${bk.id}`}
               className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-[rgba(22,163,74,0.06)]"
               style={{ borderBottom: '1px solid rgba(22,163,74,0.08)' }}>
               <div className="flex items-center gap-3 min-w-0">
@@ -215,7 +215,7 @@ export default function ClientDashboard() {
                 </div>
                 <div className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>total del evento</div>
               </div>
-              <Link href="/dashboard/reservas"
+              <Link href={`/dashboard/reservas/${next.id}`}
                 className="inline-flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl shrink-0"
                 style={{ background: 'rgba(53,196,147,0.2)', color: '#6EE7C7', border: '1px solid rgba(53,196,147,0.3)' }}>
                 Ver detalle <ArrowRight size={14} />
@@ -281,7 +281,7 @@ export default function ClientDashboard() {
               const st = statusConfig[bk.status] ?? statusConfig.pending
               const space = bk.spaces as any
               return (
-                <Link key={bk.id} href="/dashboard/reservas"
+                <Link key={bk.id} href={`/dashboard/reservas/${bk.id}`}
                   className="flex items-start gap-3 px-4 md:px-6 py-3.5 md:py-4 transition-colors hover:bg-[var(--bg-elevated)] block">
                   <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center font-bold text-white shrink-0 text-sm"
                     style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-dark))' }}>

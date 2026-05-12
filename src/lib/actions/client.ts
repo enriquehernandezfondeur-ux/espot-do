@@ -27,6 +27,39 @@ export async function getClientBookings() {
   return data ?? []
 }
 
+export async function getClientBookingDetail(bookingId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data } = await supabase
+    .from('bookings')
+    .select(`
+      *,
+      spaces!space_id(
+        id, name, slug, category, address, city, sector,
+        space_images(url, is_cover),
+        profiles!host_id(id, full_name, email, phone, avatar_url)
+      ),
+      space_pricing!pricing_id(package_name, package_includes, pricing_type, hourly_price, minimum_consumption, fixed_price),
+      booking_addons(quantity, unit_price, subtotal, space_addons(name))
+    `)
+    .eq('id', bookingId)
+    .eq('guest_id', user.id)
+    .single()
+
+  if (!data) return null
+
+  // Cuotas del plan de pagos
+  const { data: installments } = await supabase
+    .from('booking_installments')
+    .select('*')
+    .eq('booking_id', bookingId)
+    .order('installment_number')
+
+  return { booking: data, installments: installments ?? [] }
+}
+
 export async function getClientFavorites() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
