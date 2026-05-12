@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { CalendarDays, Clock, Users, MapPin, ChevronRight, Loader2, Search, CreditCard, CheckCircle, X, AlertTriangle } from 'lucide-react'
+import { CalendarDays, Clock, Users, MapPin, ChevronRight, Loader2, Search, CreditCard, CheckCircle, X, AlertTriangle, Building2, Star, MessageCircle, ExternalLink, Bell, Check } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getClientBookings } from '@/lib/actions/client'
 import { STATUS_LABELS, STATUS_COLORS, isPaid } from '@/lib/bookingConfig'
@@ -15,7 +15,7 @@ import { countdownLabel } from '@/lib/payments/schedule'
 
 type Booking = Awaited<ReturnType<typeof getClientBookings>>[0]
 
-const FILTERS = ['Todas', 'Pendientes', 'Por pagar', 'Confirmadas', 'Completadas', 'Canceladas']
+const FILTERS = ['Todas', 'Pendientes', 'Cotizaciones', 'Por pagar', 'Confirmadas', 'Completadas', 'Canceladas']
 
 export default function MisReservasPage() {
   const [bookings, setBookings]   = useState<Booking[]>([])
@@ -95,12 +95,13 @@ export default function MisReservasPage() {
 
   const filtered = bookings.filter(b => {
     const matchFilter =
-      filter === 'Todas'      ||
-      (filter === 'Pendientes'  && b.status === 'pending') ||
-      (filter === 'Por pagar'   && b.status === 'accepted') ||
-      (filter === 'Confirmadas' && b.status === 'confirmed') ||
-      (filter === 'Completadas' && b.status === 'completed') ||
-      (filter === 'Canceladas'  && b.status.startsWith('cancelled'))
+      filter === 'Todas'         ||
+      (filter === 'Pendientes'   && b.status === 'pending') ||
+      (filter === 'Cotizaciones' && b.status === 'quote_requested') ||
+      (filter === 'Por pagar'    && b.status === 'accepted') ||
+      (filter === 'Confirmadas'  && b.status === 'confirmed') ||
+      (filter === 'Completadas'  && b.status === 'completed') ||
+      (filter === 'Canceladas'   && b.status.startsWith('cancelled'))
     const matchSearch =
       ((b as any).spaces?.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
       (b.event_type ?? '').toLowerCase().includes(search.toLowerCase())
@@ -136,24 +137,33 @@ export default function MisReservasPage() {
       </div>
 
       {/* Alerta de pago pendiente */}
-      {pendingPayment > 0 && (
-        <div className="mb-6 rounded-2xl px-5 py-4 flex items-center justify-between"
-          style={{ background: 'rgba(37,99,235,0.06)', border: '1.5px solid rgba(37,99,235,0.2)' }}>
-          <div>
-            <div className="font-semibold text-sm" style={{ color: '#1D4ED8' }}>
-              🎉 ¡Tu reserva fue aceptada!
+      {pendingPayment > 0 && (() => {
+        const firstPending = bookings.find(b => b.status === 'accepted')
+        return (
+          <div className="mb-6 rounded-2xl px-5 py-4 flex items-center gap-4"
+            style={{ background: 'rgba(37,99,235,0.06)', border: '1.5px solid rgba(37,99,235,0.2)' }}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: 'rgba(37,99,235,0.12)' }}>
+              <Bell size={16} style={{ color: '#2563EB' }} />
             </div>
-            <div className="text-sm" style={{ color: '#3B82F6' }}>
-              Completa el pago para confirmar tu fecha.
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-sm" style={{ color: '#1D4ED8' }}>
+                ¡Tu reserva fue aceptada!
+              </div>
+              <div className="text-xs mt-0.5" style={{ color: '#3B82F6' }}>
+                Completa el pago para confirmar tu fecha.
+              </div>
             </div>
+            {firstPending && (
+              <Link href={`/pago/${firstPending.id}`}
+                className="text-xs font-bold px-4 py-2.5 rounded-xl shrink-0"
+                style={{ background: '#2563EB', color: '#fff', whiteSpace: 'nowrap' }}>
+                Pagar ahora
+              </Link>
+            )}
           </div>
-          <button onClick={() => setFilter('Por pagar')}
-            className="text-xs font-semibold px-4 py-2 rounded-xl shrink-0"
-            style={{ background: '#2563EB', color: '#fff' }}>
-            Ver ahora
-          </button>
-        </div>
-      )}
+        )
+      })()}
 
       {/* Filtros */}
       <div className="flex flex-col md:flex-row gap-3 mb-5 md:mb-6">
@@ -214,16 +224,27 @@ export default function MisReservasPage() {
                     {/* Imagen */}
                     <div className="w-16 h-14 md:w-20 md:h-16 rounded-xl overflow-hidden shrink-0" style={{ background: 'var(--bg-elevated)' }}>
                       {cover
-                        ? <img src={cover} alt="" className="w-full h-full object-cover" />
-                        : <div className="w-full h-full flex items-center justify-center text-xl">🏛️</div>}
+                        ? <img src={cover} alt={space?.name} className="w-full h-full object-cover" />
+                        : <div className="w-full h-full flex items-center justify-center" style={{ color: 'var(--text-muted)' }}><Building2 size={24} /></div>}
                     </div>
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       {/* Nombre + estado */}
                       <div className="flex items-start justify-between gap-2 mb-1">
-                        <div className="font-semibold text-sm leading-tight truncate" style={{ color: 'var(--text-primary)' }}>
-                          {space?.name}
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <div className="font-semibold text-sm leading-tight truncate" style={{ color: 'var(--text-primary)' }}>
+                            {space?.name}
+                          </div>
+                          {space?.slug && (
+                            <Link href={`/espacios/${space.slug}`}
+                              onClick={e => e.stopPropagation()}
+                              className="shrink-0 w-5 h-5 flex items-center justify-center rounded"
+                              style={{ color: 'var(--text-muted)' }}
+                              title="Ver espacio">
+                              <ExternalLink size={11} />
+                            </Link>
+                          )}
                         </div>
                         <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0"
                           style={{ background: sc.bg, color: sc.color }}>
@@ -363,7 +384,7 @@ export default function MisReservasPage() {
                           style={{ borderTop: '1px solid var(--border-medium)', color: isPaid(bk.payment_status) ? '#16A34A' : '#D97706' }}>
                           {isPaid(bk.payment_status)
                             ? <><CheckCircle size={11} /> Pago completado</>
-                            : '⏳ Pago pendiente'}
+                            : <><Clock size={11} /> Pago pendiente</>}
                         </div>
                       </div>
 
@@ -395,7 +416,7 @@ export default function MisReservasPage() {
                                       color: isPaidInst ? '#16A34A' : isOverdue ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)',
                                       border: `1.5px solid ${isPaidInst ? '#16A34A' : isOverdue ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--border-medium)'}`,
                                     }}>
-                                    {isPaidInst ? '✓' : inst.installment_number}
+                                    {isPaidInst ? <Check size={12} /> : inst.installment_number}
                                   </div>
                                   {/* Info */}
                                   <div className="flex-1 min-w-0">
@@ -437,27 +458,54 @@ export default function MisReservasPage() {
                       )}
                     </div>
 
-                    {/* Guías por estado */}
+                    {/* Acciones por estado */}
                     {bk.status === 'pending' && (
                       <div className="mt-4 space-y-3">
                         <div className="px-4 py-3 rounded-xl text-sm"
                           style={{ background: 'rgba(217,119,6,0.05)', border: '1px solid rgba(217,119,6,0.15)', color: '#92400E' }}>
                           El propietario revisará tu solicitud y confirmará disponibilidad.
                         </div>
-                        <button onClick={() => openCancelModal(bk)}
-                          className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
-                          style={{ color: '#DC2626', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
-                          <X size={12} /> Cancelar solicitud
-                        </button>
+                        <div className="flex gap-2 flex-wrap">
+                          <Link href="/dashboard/mensajes"
+                            className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
+                            style={{ color: 'var(--brand)', background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
+                            <MessageCircle size={12} /> Contactar propietario
+                          </Link>
+                          <button onClick={() => openCancelModal(bk)}
+                            className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
+                            style={{ color: '#DC2626', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
+                            <X size={12} /> Cancelar solicitud
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {bk.status === 'quote_requested' && (
+                      <div className="mt-4 space-y-3">
+                        <div className="px-4 py-3 rounded-xl text-sm"
+                          style={{ background: 'rgba(8,145,178,0.05)', border: '1px solid rgba(8,145,178,0.2)', color: '#0369A1' }}>
+                          Esperando que el propietario te envíe el precio. Te notificaremos por email.
+                        </div>
+                        <Link href="/dashboard/mensajes"
+                          className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all w-fit"
+                          style={{ color: 'var(--brand)', background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
+                          <MessageCircle size={12} /> Contactar propietario
+                        </Link>
                       </div>
                     )}
                     {bk.status === 'accepted' && (
                       <div className="mt-4 space-y-2">
-                        <button onClick={() => openCancelModal(bk)}
-                          className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
-                          style={{ color: '#DC2626', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
-                          <X size={12} /> Cancelar reserva
-                        </button>
+                        <div className="flex gap-2 flex-wrap">
+                          <Link href="/dashboard/mensajes"
+                            className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
+                            style={{ color: 'var(--brand)', background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
+                            <MessageCircle size={12} /> Contactar propietario
+                          </Link>
+                          <button onClick={() => openCancelModal(bk)}
+                            className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
+                            style={{ color: '#DC2626', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
+                            <X size={12} /> Cancelar reserva
+                          </button>
+                        </div>
                       </div>
                     )}
                     {bk.status === 'confirmed' && (
@@ -466,13 +514,20 @@ export default function MisReservasPage() {
                           style={{ background: 'rgba(22,163,74,0.05)', border: '1px solid rgba(22,163,74,0.15)', color: '#166534' }}>
                           Reserva confirmada. Las cuotas restantes se cobrarán según el plan de pagos.
                         </div>
-                        {new Date(bk.event_date) > new Date() && (
-                          <button onClick={() => openCancelModal(bk)}
+                        <div className="flex gap-2 flex-wrap">
+                          <Link href="/dashboard/mensajes"
                             className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
-                            style={{ color: '#DC2626', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
-                            <X size={12} /> Cancelar reserva
-                          </button>
-                        )}
+                            style={{ color: 'var(--brand)', background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
+                            <MessageCircle size={12} /> Contactar propietario
+                          </Link>
+                          {new Date(bk.event_date) > new Date() && (
+                            <button onClick={() => openCancelModal(bk)}
+                              className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
+                              style={{ color: '#DC2626', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
+                              <X size={12} /> Cancelar reserva
+                            </button>
+                          )}
+                        </div>
                       </div>
                     )}
                     {bk.status === 'rejected' && (
@@ -521,7 +576,7 @@ export default function MisReservasPage() {
                         {reviewed.has(bk.id) ? (
                           <div className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm"
                             style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.2)', color: '#166534' }}>
-                            <span>⭐</span> ¡Gracias por tu reseña!
+                            <Star size={14} style={{ color: '#F59E0B', fill: '#F59E0B' }} /> ¡Gracias por tu reseña!
                           </div>
                         ) : reviewFor === bk.id ? (
                           <div className="p-4 rounded-2xl space-y-3"
