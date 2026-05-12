@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -86,6 +86,35 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   const [createdBookingId, setCreatedBookingId] = useState<string | null>(null)
   const [error,            setError]            = useState('')
   const [termsAccepted,    setTermsAccepted]    = useState(false)
+
+  // ── Disponibilidad real de la fecha seleccionada ──────
+  const [dateBlocked,  setDateBlocked]  = useState(false)
+  const [bookedRanges, setBookedRanges] = useState<{start:string;end:string}[]>([])
+
+  useEffect(() => {
+    if (!eventDate) { setDateBlocked(false); setBookedRanges([]); return }
+    const supabase = createClient()
+    Promise.all([
+      supabase.from('space_availability').select('start_time,end_time,block_type')
+        .eq('space_id', space.id).eq('blocked_date', eventDate),
+      supabase.from('bookings').select('start_time,end_time')
+        .eq('space_id', space.id).eq('event_date', eventDate)
+        .not('status', 'in', '("cancelled_guest","cancelled_host","rejected")'),
+    ]).then(([{ data: avail }, { data: bks }]) => {
+      const fullDay = avail?.some(a => a.block_type === 'full_day' || !a.start_time || !a.end_time)
+      setDateBlocked(!!fullDay)
+      const ranges: {start:string;end:string}[] = []
+      avail?.forEach(a => {
+        if (a.start_time && a.end_time && a.block_type !== 'full_day')
+          ranges.push({ start: a.start_time.slice(0,5), end: a.end_time.slice(0,5) })
+      })
+      bks?.forEach(b => {
+        if (b.start_time && b.end_time)
+          ranges.push({ start: b.start_time.slice(0,5), end: b.end_time.slice(0,5) })
+      })
+      setBookedRanges(ranges)
+    }).catch(() => {})
+  }, [eventDate, space.id])
 
   const finalEventType = eventType === 'Otro' ? (customEventType.trim() || 'Otro') : eventType
 
@@ -264,6 +293,8 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   function canGoNext(): boolean {
     if (step === 1) {
       if (!eventDate) return false
+      if (dateBlocked) return false
+      if (allowedTimeRange === null) return false
       if (isQuote) return true
       if (!effectiveStartTime || !realEndTime) return false
       if (hoursError) return false
@@ -621,16 +652,24 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               </div>
             )}
 
-            {/* Sin horario disponible este día */}
-            {allowedTimeRange === null && eventDate && (
+            {/* Fecha bloqueada manualmente por el propietario */}
+            {dateBlocked && eventDate && (
               <div className="px-4 py-3 rounded-xl text-sm"
                 style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)', color: '#DC2626' }}>
-                No hay horarios disponibles para esta fecha. Elige otro día o consulta al propietario.
+                El propietario ha bloqueado esta fecha. Elige otro día o contáctalo directamente.
               </div>
             )}
 
-            {/* Selectores de hora — disponibles para todos los modelos incluyendo cotización */}
-            {eventDate && allowedTimeRange !== null && (
+            {/* Sin horario configurado para este día de la semana */}
+            {!dateBlocked && allowedTimeRange === null && eventDate && (
+              <div className="px-4 py-3 rounded-xl text-sm"
+                style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)', color: '#DC2626' }}>
+                El propietario no tiene este día habilitado. Elige otra fecha o consulta con él.
+              </div>
+            )}
+
+            {/* Selectores de hora — solo si la fecha no está bloqueada y tiene horario */}
+            {eventDate && !dateBlocked && allowedTimeRange !== null && (
               <div className="space-y-3">
 
                 {/* Bloque del día disponible — siempre visible para contexto */}
@@ -702,6 +741,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                       onChange={v => setStartTime(v)}
                       placeholder={isConsumption ? '¿A qué hora llega tu grupo?' : 'Hora de llegada'}
                       allowedRange={startPickerRange}
+                      excludedRanges={bookedRanges}
                     />
                     {startTime && (
                       <div className="flex items-center justify-between px-4 py-3.5 rounded-2xl"
@@ -725,6 +765,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                       onChange={v => { setStartTime(v); setEndTime('') }}
                       placeholder={isConsumption ? 'Llegada' : 'Hora de inicio'}
                       allowedRange={allowedTimeRange}
+                      excludedRanges={bookedRanges}
                     />
                     <TimePicker
                       value={endTime}

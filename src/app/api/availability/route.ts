@@ -33,7 +33,10 @@ export async function GET(req: NextRequest) {
 
   bookings?.forEach(b => {
     if (!time) {
-      ids.add(b.space_id)
+      // Sin hora específica: solo marcar como no disponible si la reserva
+      // cubre todo el día (sin horario definido). Una reserva parcial no
+      // bloquea otros slots del día.
+      if (!b.start_time || !b.end_time) ids.add(b.space_id)
     } else {
       const start = b.start_time ? b.start_time.slice(0, 5) : null
       const end   = b.end_time   ? b.end_time.slice(0, 5)   : null
@@ -43,20 +46,20 @@ export async function GET(req: NextRequest) {
     }
   })
 
-  // Bloqueos manuales: respetar el rango de horas del bloqueo
-  // full_day o sin horario → bloquea todo el día
+  // Bloqueos manuales: full_day o sin horario → bloquea todo el día
   // time_range → solo bloquea si la hora pedida cae dentro del rango
   blocks?.forEach(b => {
     const isFullDay = b.block_type === 'full_day' || !b.start_time || !b.end_time
-    if (!time || isFullDay) {
+    if (isFullDay) {
       ids.add(b.space_id)
-    } else {
+    } else if (time) {
       const bStart = b.start_time.slice(0, 5)
       const bEnd   = b.end_time.slice(0, 5)
       if (timeInRange(time, bStart, bEnd)) {
         ids.add(b.space_id)
       }
     }
+    // sin time y bloque parcial → no bloquea (puede haber otros slots libres)
   })
 
   return NextResponse.json({ blockedSpaceIds: [...ids] })

@@ -73,13 +73,14 @@ interface Props {
   minMinutesAfter?: number
   maxMinutesAfter?: number
   allowedRange?:    { start: string; end: string } | null
+  excludedRanges?:  { start: string; end: string }[]
   disabled?:        boolean
 }
 
 export default function TimePicker({
   value, onChange, placeholder = 'Seleccionar hora',
   afterValue, minMinutesAfter, maxMinutesAfter,
-  allowedRange, disabled,
+  allowedRange, excludedRanges, disabled,
 }: Props) {
   const [open,    setOpen]    = useState(false)
   const [dropPos, setDropPos] = useState({ top: 0, left: 0, width: 0 })
@@ -129,11 +130,19 @@ export default function TimePicker({
     setOpen(o => !o)
   }
 
+  function isExcluded(v: string): boolean {
+    if (!excludedRanges?.length) return false
+    const n = slotMins(v)
+    return excludedRanges.some(r => {
+      const rs = slotMins(r.start)
+      const re = slotMins(r.end) <= rs ? slotMins(r.end) + 24 * 60 : slotMins(r.end)
+      return n >= rs && n < re
+    })
+  }
+
   const available = ALL_SLOTS.filter(s => {
     if (allowedRange === null) return false
     if (allowedRange) {
-      // Filtro minuto-preciso: slotMins considera tanto horas como minutos
-      // y maneja overnight (0-5am = 24-29h). El rango es [start, end).
       const n  = slotMins(s.v)
       const sn = slotMins(allowedRange.start)
       const en = (allowedRange.end === '00:00' || allowedRange.end === '24:00')
@@ -256,23 +265,28 @@ export default function TimePicker({
                   </div>
                   {slots.map(slot => {
                     const isSel = slot.v === value
+                    const isBusy = isExcluded(slot.v)
                     return (
                       <button
                         key={slot.v}
                         data-v={slot.v}
                         type="button"
-                        onClick={() => { onChange(slot.v); setOpen(false) }}
+                        disabled={isBusy}
+                        onClick={() => { if (!isBusy) { onChange(slot.v); setOpen(false) } }}
                         style={{
                           width: '100%', display: 'flex', alignItems: 'center',
                           justifyContent: 'space-between', padding: '12px 16px',
-                          border: 'none', background: isSel ? 'rgba(53,196,147,0.08)' : 'transparent',
-                          cursor: 'pointer', transition: 'background 0.1s',
-                          borderLeft: isSel ? '3px solid #35C493' : '3px solid transparent',
+                          border: 'none',
+                          background: isSel ? 'rgba(53,196,147,0.08)' : isBusy ? '#FEF2F2' : 'transparent',
+                          cursor: isBusy ? 'not-allowed' : 'pointer',
+                          transition: 'background 0.1s',
+                          borderLeft: isSel ? '3px solid #35C493' : isBusy ? '3px solid #FCA5A5' : '3px solid transparent',
+                          opacity: isBusy ? 0.6 : 1,
                         }}
-                        onMouseEnter={e => { if (!isSel) (e.currentTarget as HTMLElement).style.background = '#F9FAFB' }}
-                        onMouseLeave={e => { if (!isSel) (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
-                        <span style={{ fontSize: 14, fontWeight: isSel ? 700 : 400, color: isSel ? '#35C493' : '#374151' }}>
-                          {slot.l}
+                        onMouseEnter={e => { if (!isSel && !isBusy) (e.currentTarget as HTMLElement).style.background = '#F9FAFB' }}
+                        onMouseLeave={e => { if (!isSel && !isBusy) (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
+                        <span style={{ fontSize: 14, fontWeight: isSel ? 700 : 400, color: isSel ? '#35C493' : isBusy ? '#EF4444' : '#374151' }}>
+                          {slot.l}{isBusy ? ' · Ocupado' : ''}
                         </span>
                         {isSel && <Check size={15} color="#35C493" />}
                       </button>
