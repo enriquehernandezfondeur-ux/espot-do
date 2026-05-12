@@ -831,8 +831,8 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
             )}
           </div>
 
-          {/* Pills mobile — categoría de espacio */}
-          <div className="md:hidden flex gap-2 overflow-x-auto pb-1 pr-4 scrollbar-hide mt-2.5">
+          {/* Pills mobile — tipo de espacio + tipo de evento combinados */}
+          <div className="md:hidden flex gap-2 overflow-x-auto pb-2 pr-4 scrollbar-hide mt-2.5">
             {CATEGORIES.map(cat => {
               const isActive = categoria === cat.value
               const Icon = cat.icon
@@ -849,10 +849,8 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                 </button>
               )
             })}
-          </div>
-
-          {/* Pills mobile — tipo de evento */}
-          <div className="md:hidden flex gap-2 overflow-x-auto pb-2 pr-4 scrollbar-hide mt-1.5">
+            {/* Separador visual */}
+            <div className="w-px shrink-0 self-stretch my-1" style={{ background: 'var(--border-medium)' }} />
             {QUICK_ACTIVITIES.map(a => {
               const isActive = activity === a.slug
               return (
@@ -1119,6 +1117,73 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* ── TIPO DE EVENTO ── */}
+              <div>
+                <h3 className="font-bold text-sm mb-1" style={{ color: 'var(--text-primary)' }}>Tipo de evento</h3>
+                <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>¿Qué tipo de evento vas a celebrar?</p>
+                {/* Input libre */}
+                <div className="relative mb-3">
+                  <Tag size={15} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
+                    style={{ color: activity ? 'var(--brand)' : 'var(--text-muted)' }} />
+                  <input
+                    value={actQ}
+                    onChange={e => setActQ(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' && actQ.trim()) {
+                        setQ(actQ.trim()); setActivity(''); setActQ(''); setMoreOpen(false)
+                      }
+                    }}
+                    placeholder="Ej: bautizo, afterwork, karaoke..."
+                    className="input-base w-full rounded-xl pl-10 pr-10 py-3.5 text-sm"
+                    style={{ color: 'var(--text-primary)', fontSize: 16 }}
+                  />
+                  {actQ && (
+                    <button onClick={() => setActQ('')}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2"
+                      style={{ color: 'var(--text-muted)' }}>
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+                {/* Opciones predefinidas filtradas */}
+                <div className="flex flex-wrap gap-2">
+                  {QUICK_ACTIVITIES
+                    .filter(a => !actQ || a.label.toLowerCase().includes(actQ.toLowerCase()))
+                    .map(a => {
+                      const isActive = activity === a.slug
+                      return (
+                        <button key={a.slug}
+                          onClick={() => { setActivity(isActive ? '' : a.slug); setActQ('') }}
+                          className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition-all"
+                          style={isActive
+                            ? { background: '#0F1623', color: '#fff' }
+                            : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }
+                          }>
+                          {a.label}
+                          {isActive && <X size={9} />}
+                        </button>
+                      )
+                    })}
+                  {/* Búsqueda personalizada si no hay coincidencia exacta */}
+                  {actQ.trim() && !QUICK_ACTIVITIES.some(a => a.label.toLowerCase() === actQ.toLowerCase()) && (
+                    <button
+                      onClick={() => { setQ(actQ.trim()); setActivity(''); setActQ(''); setMoreOpen(false) }}
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition-all"
+                      style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
+                      <Search size={11} />
+                      Buscar "{actQ.trim()}"
+                    </button>
+                  )}
+                </div>
+                {activity && (
+                  <button onClick={() => { setActivity(''); setActQ('') }}
+                    className="flex items-center gap-1.5 mt-2.5 text-xs font-medium"
+                    style={{ color: '#DC2626' }}>
+                    <X size={11} /> Quitar tipo de evento
+                  </button>
+                )}
               </div>
 
               {/* ── TIPO DE ESPACIO ── */}
