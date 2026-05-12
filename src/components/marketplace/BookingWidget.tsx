@@ -489,8 +489,6 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   )
 
   // ── Cabecera de precio ────────────────────────────────
-  const [showInstallmentGuide, setShowInstallmentGuide] = useState(false)
-
   function PriceHeader() {
     if (!pricing) return null
     if (isQuote) return (
@@ -511,7 +509,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         {isHourly && (
           <div>
             <div className="flex items-baseline gap-1 mb-1">
-              <span className="text-3xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+              <span className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
                 {formatCurrency(pricing.hourly_price)}
               </span>
               <span className="text-sm" style={{ color: 'var(--text-muted)' }}> / hora</span>
@@ -530,7 +528,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               Consumo mínimo garantizado
             </div>
             <div className="flex items-baseline gap-1 mb-1">
-              <span className="text-3xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+              <span className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
                 {formatCurrency(pricing.minimum_consumption)}
               </span>
             </div>
@@ -549,7 +547,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               {pricing.package_name ?? 'Paquete'}
             </div>
             <div className="flex items-baseline gap-1 mb-1">
-              <span className="text-3xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+              <span className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
                 {formatCurrency(pricing.fixed_price)}
               </span>
               {packageHours > 0 && (
@@ -566,44 +564,12 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
           </div>
         )}
 
-        {/* Cuotas — desplegable */}
-        <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-          <button
-            type="button"
-            onClick={() => setShowInstallmentGuide(o => !o)}
-            className="flex items-center justify-between w-full"
-          >
-            <div className="flex items-center gap-1.5">
-              <CreditCard size={13} style={{ color: 'var(--brand)' }} />
-              <span className="text-xs font-semibold" style={{ color: 'var(--brand)' }}>
-                Pago en cuotas según tu fecha
-              </span>
-            </div>
-            <ChevronRight size={13} style={{
-              color: 'var(--brand)',
-              transition: 'transform 0.2s',
-              transform: showInstallmentGuide ? 'rotate(90deg)' : 'rotate(0deg)',
-            }} />
-          </button>
-
-          {showInstallmentGuide && (
-            <div className="mt-2.5 rounded-xl overflow-hidden"
-              style={{ border: '1px solid var(--brand-border)', background: 'var(--brand-dim)' }}>
-              {[
-                { days: 'Menos de 7 días',   note: '100% al confirmar' },
-                { days: '7 a 30 días',        note: '50% ahora · 50% antes del evento' },
-                { days: '30 a 60 días',       note: '30% ahora · 70% antes del evento' },
-                { days: 'Más de 60 días',     note: '25% · 50% a 60 días · 25% antes' },
-              ].map((row, i, arr) => (
-                <div key={row.days}
-                  className="flex items-baseline justify-between gap-3 px-3 py-2 text-xs"
-                  style={i < arr.length - 1 ? { borderBottom: '1px solid var(--brand-border)' } : {}}>
-                  <span className="shrink-0 font-medium" style={{ color: 'var(--brand)' }}>{row.days}</span>
-                  <span className="text-right" style={{ color: 'var(--text-secondary)' }}>{row.note}</span>
-                </div>
-              ))}
-            </div>
-          )}
+        {/* Cuotas — solo una línea, el detalle sale en step 1 */}
+        <div className="mt-2.5 pt-2.5 flex items-center gap-1.5" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+          <CreditCard size={12} style={{ color: 'var(--brand)' }} />
+          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            Pago disponible en cuotas · elige una fecha para ver el plan
+          </span>
         </div>
       </div>
     )
@@ -618,26 +584,21 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         <PriceHeader />
       </div>
 
-      {/* Progreso — barra limpia */}
-      <div className="px-5 py-3" style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-base)' }}>
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
-            {steps.find(s => s.id === step)?.label ?? 'Reserva'}
-          </span>
-          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-            Paso {steps.findIndex(s => s.id === step) + 1} de {steps.length}
-          </span>
-        </div>
-        <div className="flex gap-1">
-          {steps.map((s, i) => (
+      {/* Progreso */}
+      <div className="px-5 pt-3 pb-2.5" style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-base)' }}>
+        <div className="flex gap-1.5">
+          {steps.map(s => (
             <button key={s.id}
               onClick={() => s.id < step && setStep(s.id)}
               disabled={s.id >= step}
               className="flex-1 h-1 rounded-full transition-all"
-              style={{ background: s.id <= step ? 'var(--brand)' : 'var(--border-medium)', opacity: s.id === step ? 1 : s.id < step ? 0.6 : 0.25 }}
+              style={{ background: s.id <= step ? 'var(--brand)' : 'var(--border-medium)', opacity: s.id === step ? 1 : s.id < step ? 0.55 : 0.2 }}
             />
           ))}
         </div>
+        <p className="text-[11px] mt-1.5 font-medium" style={{ color: 'var(--text-muted)' }}>
+          {steps.find(s => s.id === step)?.label}
+        </p>
       </div>
 
       {/* Contenido */}
