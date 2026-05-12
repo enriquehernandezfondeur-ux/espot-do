@@ -99,8 +99,11 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
     PRIVATE_KEY,
   ].join('')
 
+  // Azul requiere que el mensaje se codifique en UTF-16LE antes del HMAC
+  // (C#: Encoding.Unicode.GetBytes / PHP: mb_convert_encoding(..., 'UTF-16LE'))
+  const msgBuffer = Buffer.from(hashInput, 'utf16le')
   const authHash = createHmac('sha512', PRIVATE_KEY)
-    .update(hashInput)
+    .update(msgBuffer)
     .digest('hex')
 
   return {
@@ -135,12 +138,13 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
 export interface AzulResponseParams {
   OrderNumber:       string
   Amount:            string
-  ITBIS:             string
-  ResponseMessage:   string
-  IsoCode:           string
   AuthorizationCode: string
   DateTime:          string
-  AzulOrderId:       string
+  ResponseCode:      string
+  IsoCode:           string
+  ResponseMessage:   string
+  ErrorDescription:  string
+  RRN:               string
   AuthHash:          string
 }
 
@@ -148,19 +152,25 @@ export function verifyResponseHash(p: AzulResponseParams): boolean {
   const PRIVATE_KEY = process.env.AZUL_PRIVATE_KEY ?? ''
   if (!PRIVATE_KEY) return false
 
+  // Orden exacto según doc Azul pág. 8:
+  // OrderNumber + Amount + AuthorizationCode + DateTime + ResponseCode +
+  // ISOCode + ResponseMessage + ErrorDescription + RRN + AuthKey
   const input = [
     p.OrderNumber,
     p.Amount,
-    p.ITBIS,
-    p.ResponseMessage,
-    p.IsoCode,
     p.AuthorizationCode,
     p.DateTime,
-    p.AzulOrderId,
+    p.ResponseCode,
+    p.IsoCode,
+    p.ResponseMessage,
+    p.ErrorDescription,
+    p.RRN,
+    PRIVATE_KEY,
   ].join('')
 
+  const msgBuffer = Buffer.from(input, 'utf16le')
   const expected = createHmac('sha512', PRIVATE_KEY)
-    .update(input)
+    .update(msgBuffer)
     .digest('hex')
     .toUpperCase()
 

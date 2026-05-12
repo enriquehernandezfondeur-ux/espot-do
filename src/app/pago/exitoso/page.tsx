@@ -16,12 +16,13 @@ function ExitoContent() {
   // Parámetros que Azul envía al redirigir al ApprovedUrl
   const orderNumber       = sp.get('OrderNumber') ?? sp.get('ordernumber') ?? ''
   const amount            = sp.get('Amount') ?? ''
-  const itbis             = sp.get('ITBIS') ?? '0'
-  const responseMessage   = sp.get('ResponseMessage') ?? ''
-  const isoCode           = sp.get('IsoCode') ?? ''
   const authorizationCode = sp.get('AuthorizationCode') ?? ''
   const dateTime          = sp.get('DateTime') ?? ''
-  const azulOrderId       = sp.get('AzulOrderId') ?? ''
+  const responseCode      = sp.get('ResponseCode') ?? ''
+  const isoCode           = sp.get('IsoCode') ?? ''
+  const responseMessage   = sp.get('ResponseMessage') ?? ''
+  const errorDescription  = sp.get('ErrorDescription') ?? ''
+  const rrn               = sp.get('RRN') ?? ''
   const authHash          = sp.get('AuthHash') ?? ''
 
   const [booking,   setBooking]  = useState<any>(null)
@@ -64,15 +65,16 @@ function ExitoContent() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               bookingId,
-              cuotaId: cuotaId || undefined,  // si aplica, marcar cuota específica
+              cuotaId: cuotaId || undefined,
               OrderNumber:       orderNumber,
               Amount:            amount,
-              ITBIS:             itbis,
-              ResponseMessage:   responseMessage,
-              IsoCode:           isoCode,
               AuthorizationCode: authorizationCode,
               DateTime:          dateTime,
-              AzulOrderId:       azulOrderId,
+              ResponseCode:      responseCode,
+              IsoCode:           isoCode,
+              ResponseMessage:   responseMessage,
+              ErrorDescription:  errorDescription,
+              RRN:               rrn,
               AuthHash:          authHash,
             }),
           })
