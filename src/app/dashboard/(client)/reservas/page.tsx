@@ -388,74 +388,119 @@ export default function MisReservasPage() {
                         </div>
                       </div>
 
-                      {/* Timeline de cuotas — solo si hay installments */}
-                      {isSelected && installments.length > 0 && (
-                        <div className="rounded-2xl overflow-hidden mt-3"
-                          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                          <div className="px-4 py-3 flex items-center justify-between"
-                            style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
-                              Plan de pagos
-                            </span>
-                            <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
-                              style={{ background: 'var(--brand-dim)', color: 'var(--brand)' }}>
-                              {installments.length} cuota{installments.length !== 1 ? 's' : ''}
-                            </span>
-                          </div>
-                          <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
-                            {installments.map((inst, i) => {
-                              const isPaidInst = inst.status === 'paid'
-                              const isOverdue  = inst.status === 'overdue'
-                              const isNext     = !isPaidInst && installments.slice(0, i).every(x => x.status === 'paid')
-                              return (
-                                <div key={inst.id} className="flex items-center gap-3 px-4 py-3">
-                                  {/* Icono estado */}
-                                  <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
-                                    style={{
-                                      background: isPaidInst ? 'rgba(22,163,74,0.1)' : isOverdue ? 'rgba(220,38,38,0.1)' : isNext ? 'rgba(53,196,147,0.1)' : 'var(--bg-base)',
-                                      color: isPaidInst ? '#16A34A' : isOverdue ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)',
-                                      border: `1.5px solid ${isPaidInst ? '#16A34A' : isOverdue ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--border-medium)'}`,
-                                    }}>
-                                    {isPaidInst ? <Check size={12} /> : inst.installment_number}
+                      {/* Plan de pagos rediseñado */}
+                      {isSelected && installments.length > 0 && (() => {
+                        const nextInst = installments.find(i => i.status !== 'paid')
+                        const paidCount = installments.filter(i => i.status === 'paid').length
+                        const isOverdueNext = nextInst?.status === 'overdue'
+                        return (
+                          <div className="mt-3 space-y-2">
+
+                            {/* Banner próximo pago */}
+                            {nextInst && (
+                              <div className="rounded-2xl p-4"
+                                style={{
+                                  background: isOverdueNext ? 'rgba(220,38,38,0.05)' : 'var(--brand-dim)',
+                                  border: `1.5px solid ${isOverdueNext ? 'rgba(220,38,38,0.25)' : 'var(--brand-border)'}`,
+                                }}>
+                                <div className="flex items-start justify-between gap-3 mb-3">
+                                  <div>
+                                    <p className="text-xs font-bold uppercase tracking-widest mb-0.5"
+                                      style={{ color: isOverdueNext ? '#DC2626' : 'var(--brand)' }}>
+                                      {isOverdueNext ? '⚠️ Pago vencido' : 'Tu próximo pago'}
+                                    </p>
+                                    <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+                                      {formatCurrency(nextInst.amount)}
+                                    </p>
+                                    <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                                      {nextInst.label} · {countdownLabel(nextInst.due_date)}
+                                    </p>
                                   </div>
-                                  {/* Info */}
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center justify-between gap-2">
-                                      <span className="text-xs font-semibold truncate min-w-0" style={{ color: isPaidInst ? '#16A34A' : 'var(--text-primary)' }}>
-                                        {inst.label ?? `Cuota ${inst.installment_number}`}
-                                      </span>
-                                      <span className="text-xs font-bold shrink-0" style={{ color: 'var(--text-primary)' }}>
-                                        {formatCurrency(inst.amount)}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center justify-between gap-2 mt-0.5">
-                                      <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
-                                        {isPaidInst ? `Pagado${inst.paid_at ? ' · ' + formatDate(inst.paid_at.split('T')[0]) : ''}` : formatDate(inst.due_date)}
-                                      </span>
-                                      {!isPaidInst && (
-                                        <span className="text-[11px] font-semibold"
-                                          style={{ color: isOverdue ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)' }}>
-                                          {countdownLabel(inst.due_date)}
-                                        </span>
-                                      )}
-                                    </div>
+                                  <div className="text-right shrink-0">
+                                    <p className="text-[11px] font-semibold" style={{ color: 'var(--text-muted)' }}>
+                                      Cuota {nextInst.installment_number} de {installments.length}
+                                    </p>
+                                    {paidCount > 0 && (
+                                      <p className="text-[11px] mt-1" style={{ color: '#16A34A' }}>
+                                        ✓ {paidCount} pagada{paidCount > 1 ? 's' : ''}
+                                      </p>
+                                    )}
                                   </div>
                                 </div>
-                              )
-                            })}
+                                {/* Barra de progreso */}
+                                <div className="w-full h-1.5 rounded-full mb-3" style={{ background: 'rgba(0,0,0,0.06)' }}>
+                                  <div className="h-1.5 rounded-full transition-all"
+                                    style={{
+                                      width: `${(paidCount / installments.length) * 100}%`,
+                                      background: isOverdueNext ? '#DC2626' : 'var(--brand)',
+                                    }} />
+                                </div>
+                                <Link href={`/pago/${selected?.id}?cuota=${nextInst.id}`}
+                                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold"
+                                  style={{
+                                    background: isOverdueNext ? '#DC2626' : 'var(--brand)',
+                                    color: '#fff',
+                                    boxShadow: isOverdueNext ? '0 2px 8px rgba(220,38,38,0.3)' : '0 2px 8px rgba(53,196,147,0.3)',
+                                  }}>
+                                  <CreditCard size={15} />
+                                  {isOverdueNext ? 'Pagar ahora (vencida)' : 'Pagar esta cuota'}
+                                </Link>
+                              </div>
+                            )}
+
+                            {/* Todas las cuotas */}
+                            {installments.length > 1 && (
+                              <div className="rounded-2xl overflow-hidden"
+                                style={{ border: '1px solid var(--border-subtle)', background: '#fff' }}>
+                                <div className="px-4 py-2.5 flex items-center justify-between"
+                                  style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)' }}>
+                                  <span className="text-xs font-bold" style={{ color: 'var(--text-secondary)' }}>
+                                    Todas las cuotas
+                                  </span>
+                                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                                    {paidCount}/{installments.length} pagadas
+                                  </span>
+                                </div>
+                                <div className="px-4 py-3 space-y-0">
+                                  {installments.map((inst, i) => {
+                                    const isPaidInst = inst.status === 'paid'
+                                    const isOD = inst.status === 'overdue'
+                                    const isNxt = !isPaidInst && installments.slice(0, i).every(x => x.status === 'paid')
+                                    return (
+                                      <div key={inst.id} className="flex items-center gap-3 py-2.5 relative"
+                                        style={i < installments.length - 1 ? { borderBottom: '1px solid var(--border-subtle)' } : {}}>
+                                        {/* Dot */}
+                                        <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold z-10"
+                                          style={{
+                                            background: isPaidInst ? '#16A34A' : isOD ? '#DC2626' : isNxt ? 'var(--brand)' : 'var(--bg-elevated)',
+                                            color: isPaidInst || isOD || isNxt ? '#fff' : 'var(--text-muted)',
+                                            border: `2px solid ${isPaidInst ? '#16A34A' : isOD ? '#DC2626' : isNxt ? 'var(--brand)' : 'var(--border-medium)'}`,
+                                          }}>
+                                          {isPaidInst ? <Check size={10} /> : inst.installment_number}
+                                        </div>
+                                        {/* Info */}
+                                        <div className="flex-1 min-w-0">
+                                          <div className="flex items-center justify-between gap-1">
+                                            <span className="text-xs font-semibold" style={{ color: isPaidInst ? '#16A34A' : isOD ? '#DC2626' : 'var(--text-primary)' }}>
+                                              {formatCurrency(inst.amount)}
+                                              {isNxt && <span className="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md" style={{ background: 'var(--brand-dim)', color: 'var(--brand)' }}>Próxima</span>}
+                                              {isOD && <span className="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md" style={{ background: 'rgba(220,38,38,0.08)', color: '#DC2626' }}>Vencida</span>}
+                                            </span>
+                                            <span className="text-[11px] shrink-0" style={{ color: isPaidInst ? '#16A34A' : isOD ? '#DC2626' : 'var(--text-muted)' }}>
+                                              {isPaidInst ? `Pagado ${inst.paid_at ? '· ' + formatDate(inst.paid_at.split('T')[0]) : ''}` : countdownLabel(inst.due_date)}
+                                            </span>
+                                          </div>
+                                          <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{inst.label}</span>
+                                        </div>
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          {/* Botón pagar si hay cuota pendiente */}
-                          {installments.some(i => i.status !== 'paid') && (
-                            <div className="px-4 py-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-                              <Link href={`/pago/${selected?.id}?cuota=${installments.find(i => i.status !== 'paid')?.id}`}
-                                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-bold transition-all"
-                                style={{ background: 'var(--brand)', color: '#fff' }}>
-                                Pagar siguiente cuota →
-                              </Link>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                        )
+                      })()}
                     </div>
 
                     {/* Acciones por estado */}
