@@ -498,7 +498,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
       </div>
     )
     return (
-      <div className="pb-4 mb-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+      <div>
         {space.instant_booking && (
           <div className="flex items-center gap-1.5 mb-3 px-3 py-1.5 rounded-xl w-fit"
             style={{ background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.2)' }}>
@@ -580,7 +580,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
       style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 40px rgba(0,0,0,0.08)', overflow: 'visible' }}>
 
       {/* Precio */}
-      <div className="px-6 pt-6 pb-5" style={{ borderBottom: '1px solid var(--border-subtle)', borderRadius: '24px 24px 0 0' }}>
+      <div className="px-6 pt-5 pb-4" style={{ borderBottom: '1px solid var(--border-subtle)', borderRadius: '24px 24px 0 0' }}>
         <PriceHeader />
       </div>
 
