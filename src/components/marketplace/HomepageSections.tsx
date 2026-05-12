@@ -424,19 +424,21 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
             </p>
           </Reveal>
 
-          <div ref={howSection.ref} className="grid md:grid-cols-3 gap-6 md:gap-8">
+          <div ref={howSection.ref} className="grid md:grid-cols-3 gap-6 md:gap-8" style={{ perspective: 1000 }}>
             {[
               { num: '01', icon: Search,     title: 'Busca tu espacio',     desc: 'Filtra por sector, tipo y capacidad. Todos los espacios son verificados por nuestro equipo antes de publicarse.' },
               { num: '02', icon: Clock,      title: 'Elige fecha y horario', desc: 'Selecciona el día, horario y adicionales. El propietario revisará tu solicitud y confirmará disponibilidad.' },
               { num: '03', icon: CreditCard, title: 'Paga y asegura tu fecha', desc: 'Una vez confirmada tu reserva, paga de forma segura con Azul Payments. El precio que ves es el que pagas.' },
             ].map((step, i) => {
               const Icon = step.icon
+              const delay = i * 180
               return (
                 <div key={step.num} className="relative"
                   style={{
-                    opacity: howSection.on ? 1 : 0,
-                    transform: howSection.on ? 'translateY(0)' : 'translateY(36px)',
-                    transition: `opacity 0.7s ease ${i * 150}ms, transform 0.7s ease ${i * 150}ms`,
+                    opacity:    howSection.on ? 1 : 0,
+                    transform:  howSection.on ? 'translateY(0) rotateX(0deg)' : 'translateY(28px) rotateX(14deg)',
+                    transition: `opacity 0.65s cubic-bezier(0.22,1,0.36,1) ${delay}ms, transform 0.65s cubic-bezier(0.22,1,0.36,1) ${delay}ms`,
+                    transformOrigin: 'bottom center',
                   }}>
                   {/* Número de fondo */}
                   <div className="absolute -top-4 -left-2 font-bold select-none pointer-events-none"
@@ -444,16 +446,30 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                     {step.num}
                   </div>
 
-                  {/* Línea conectora */}
+                  {/* Línea conectora — se dibuja después que la card aparece */}
                   {i < 2 && (
-                    <div className="hidden md:block absolute top-6 left-full w-8 h-px"
-                      style={{ background: 'rgba(53,196,147,0.2)', zIndex: 1 }} />
+                    <div className="hidden md:block absolute top-6 left-full h-px overflow-hidden" style={{ width: 32, zIndex: 1 }}>
+                      <div style={{
+                        height: '100%',
+                        background: 'rgba(53,196,147,0.25)',
+                        transform: howSection.on ? 'scaleX(1)' : 'scaleX(0)',
+                        transformOrigin: 'left center',
+                        transition: `transform 0.35s ease ${delay + 500}ms`,
+                      }} />
+                    </div>
                   )}
 
                   <div className="relative p-6 md:p-8 rounded-2xl"
                     style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    {/* Icono con micro-bounce */}
                     <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5"
-                      style={{ background: 'rgba(53,196,147,0.12)', border: '1px solid rgba(53,196,147,0.2)' }}>
+                      style={{
+                        background: 'rgba(53,196,147,0.12)',
+                        border: '1px solid rgba(53,196,147,0.2)',
+                        transform:  howSection.on ? 'scale(1)' : 'scale(0.6)',
+                        opacity:    howSection.on ? 1 : 0,
+                        transition: `transform 0.5s cubic-bezier(0.34,1.56,0.64,1) ${delay + 280}ms, opacity 0.4s ease ${delay + 280}ms`,
+                      }}>
                       <Icon size={18} style={{ color: '#35C493' }} />
                     </div>
                     <div className="text-xs font-bold tracking-widest mb-2" style={{ color: 'rgba(53,196,147,0.6)' }}>
