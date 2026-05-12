@@ -647,12 +647,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         {/* ── PASO 1: FECHA Y HORA ────────────────────────── */}
         {step === 1 && (
           <div className="space-y-4">
-            <div>
-              <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>¿Cuándo es tu evento?</h3>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                Selecciona la fecha y verás exactamente cuánto pagarás y cuándo.
-              </p>
-            </div>
+            <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>¿Cuándo es tu evento?</h3>
 
             <DatePicker
               value={eventDate}
@@ -661,64 +656,43 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               placeholder="Elige una fecha"
             />
 
-            {/* ── Airbnb-style: días + cuotas inmediatas ── */}
+            {/* ── Días + cuotas — compacto ── */}
             {eventDate && !dateBlocked && allowedTimeRange !== null && !isQuote && (() => {
-              const daysUntil = Math.max(0, Math.ceil(
-                (new Date(eventDate + 'T12:00').getTime() - new Date().setHours(0,0,0,0)) / 86400000
-              ))
+              const today = new Date(); today.setHours(0,0,0,0)
+              const daysUntil = Math.max(0, Math.ceil((new Date(eventDate + 'T12:00').getTime() - today.getTime()) / 86400000))
               const baseAmt = pricing?.hourly_price || pricing?.minimum_consumption || pricing?.fixed_price || 0
               if (!baseAmt) return null
               const sched = buildSchedule(eventDate, baseAmt)
-              const isMultiple = sched.installments.length > 1
               return (
-                <div className="rounded-2xl overflow-hidden"
-                  style={{ border: '1.5px solid var(--border-medium)' }}>
-                  {/* Countdown */}
-                  <div className="px-4 py-3 flex items-center justify-between"
+                <div className="rounded-xl overflow-hidden"
+                  style={{ border: '1px solid var(--border-medium)' }}>
+                  {/* Línea resumen */}
+                  <div className="px-3 py-2 flex items-center justify-between"
                     style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
-                    <div className="flex items-center gap-2">
-                      <CalendarDays size={15} style={{ color: 'var(--brand)' }} />
-                      <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                        {daysUntil === 0 ? 'Tu evento es hoy'
-                          : daysUntil === 1 ? 'Tu evento es mañana'
-                          : `Tu evento es en ${daysUntil} días`}
-                      </span>
-                    </div>
-                    <span className="text-xs px-2.5 py-1 rounded-full font-semibold"
-                      style={{ background: 'var(--brand-dim)', color: 'var(--brand)' }}>
+                    <span className="text-xs font-semibold flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
+                      <CalendarDays size={12} style={{ color: 'var(--brand)' }} />
+                      {daysUntil === 0 ? 'Hoy' : daysUntil === 1 ? 'Mañana' : `${daysUntil} días`}
+                    </span>
+                    <span className="text-xs font-semibold" style={{ color: 'var(--brand)' }}>
                       {scheduleModelLabel(sched.model)}
                     </span>
                   </div>
-                  {/* Cuotas */}
+                  {/* Cuotas — una línea cada una */}
                   {sched.installments.map((inst, i) => (
-                    <div key={i} className="flex items-center justify-between px-4 py-3.5"
-                      style={{ borderBottom: i < sched.installments.length - 1 ? '1px solid var(--border-subtle)' : 'none', background: i === 0 ? 'rgba(53,196,147,0.02)' : '#fff' }}>
-                      <div>
-                        <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                          {i === 0 ? 'Pagas al confirmar' : i === sched.installments.length - 1 ? 'Pagas antes del evento' : `Cuota ${i + 1}`}
-                        </p>
-                        <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                          {inst.label}
-                          {i > 0 && ` · vence ${new Date(inst.due_date + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}`}
-                        </p>
+                    <div key={i} className="flex items-center justify-between px-3 py-2.5"
+                      style={{ borderBottom: i < sched.installments.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full shrink-0"
+                          style={{ background: i === 0 ? 'var(--brand)' : 'var(--border-medium)' }} />
+                        <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+                          {i === 0 ? 'Hoy al confirmar' : `${new Date(inst.due_date + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}`}
+                        </span>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm font-bold" style={{ color: i === 0 ? 'var(--brand)' : 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-                          {formatCurrency(inst.amount)}
-                        </p>
-                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{inst.percentage}% del total</p>
-                      </div>
-                    </div>
-                  ))}
-                  {isMultiple && (
-                    <div className="px-4 py-2.5 flex items-center gap-1.5"
-                      style={{ background: 'var(--bg-elevated)', borderTop: '1px solid var(--border-subtle)' }}>
-                      <ShieldCheck size={12} style={{ color: 'var(--brand)' }} />
-                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                        Solo pagas la primera cuota hoy. Sin intereses.
+                      <span className="text-xs font-bold" style={{ color: i === 0 ? 'var(--brand)' : 'var(--text-primary)' }}>
+                        {formatCurrency(inst.amount)} <span className="font-normal" style={{ color: 'var(--text-muted)' }}>({inst.percentage}%)</span>
                       </span>
                     </div>
-                  )}
+                  ))}
                 </div>
               )
             })()}
