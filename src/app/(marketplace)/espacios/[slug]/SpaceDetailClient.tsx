@@ -201,7 +201,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                 <X size={18} />
               </button>
             </div>
-            <div className="px-4 pb-8">
+            <div className="px-4 pb-safe">
               <BookingWidget space={space} onChat={() => { setShowMobileWidget(false); setShowChat(true) }} initialDate={initialDate} />
             </div>
           </div>

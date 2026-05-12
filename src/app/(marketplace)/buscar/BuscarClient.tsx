@@ -970,7 +970,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
       {moreOpen && (
         <>
           <div className="fixed inset-0 z-[49] bg-black/40 backdrop-blur-sm" onClick={() => setMoreOpen(false)} />
-          <div className="fixed right-0 top-0 h-full w-full max-w-md z-50 flex flex-col overflow-hidden"
+          <div className="fixed right-0 top-0 h-full w-full max-w-md z-50 flex flex-col overflow-hidden pt-safe"
             style={{ background: '#fff', boxShadow: '-8px 0 40px rgba(0,0,0,0.12)' }}>
 
             {/* Header */}
@@ -1295,7 +1295,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
             </div>
 
             {/* Footer con acciones */}
-            <div className="px-5 py-4 flex gap-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+            <div className="px-5 pt-4 pb-safe flex gap-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
               <button onClick={clearAll}
                 className="flex-1 py-3.5 rounded-2xl text-sm font-semibold btn-outline">
                 Limpiar todo

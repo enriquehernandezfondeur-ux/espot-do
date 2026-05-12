@@ -330,7 +330,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
             </h2>
           </Reveal>
 
-          <div ref={catSection.ref} className="grid grid-cols-4 lg:grid-cols-8 gap-3">
+          <div ref={catSection.ref} className="grid grid-cols-4 md:grid-cols-8 gap-3">
             {categories.map((cat, i) => {
               const Icon = cat.icon
               return (
