@@ -4,13 +4,12 @@ import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeft, CalendarDays, Clock, Users, MapPin, MessageCircle,
-  CreditCard, CheckCircle, AlertTriangle, Sparkles, ExternalLink,
-  Phone, Mail, Loader2, Check, X,
+  CreditCard, CheckCircle, Sparkles, ExternalLink,
+  Phone, Mail, Loader2, Check, Building2,
 } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getClientBookingDetail } from '@/lib/actions/client'
-import { getInstallments } from '@/lib/actions/installments'
-import { isPaid, STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
+import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
 import { countdownLabel } from '@/lib/payments/schedule'
 
 export default function BookingDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -63,9 +62,14 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
       {/* Hero imagen + nombre */}
       <div className="rounded-3xl overflow-hidden mb-5"
         style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-        {cover && (
+        {cover ? (
           <div className="h-52 md:h-64 overflow-hidden">
             <img src={cover} alt={space?.name} className="w-full h-full object-cover" />
+          </div>
+        ) : (
+          <div className="h-28 flex items-center justify-center"
+            style={{ background: 'var(--bg-elevated)' }}>
+            <Building2 size={40} style={{ color: 'var(--border-medium)' }} />
           </div>
         )}
         <div className="p-5">
@@ -161,6 +165,17 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
           </div>
         )}
       </div>
+
+      {/* Plan de pagos — nota si es cotización sin plan aún */}
+      {installments.length === 0 && (booking as any).status === 'quote_requested' && (
+        <div className="rounded-2xl px-5 py-4 mb-4 flex items-center gap-3"
+          style={{ background: 'rgba(8,145,178,0.05)', border: '1px solid rgba(8,145,178,0.2)' }}>
+          <CreditCard size={16} style={{ color: '#0891B2', flexShrink: 0 }} />
+          <p className="text-sm" style={{ color: '#0369A1' }}>
+            El plan de pagos se mostrará cuando el anfitrión confirme el precio de tu cotización.
+          </p>
+        </div>
+      )}
 
       {/* Plan de pagos */}
       {installments.length > 0 && (
