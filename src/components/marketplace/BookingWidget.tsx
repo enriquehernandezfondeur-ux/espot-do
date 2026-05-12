@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { formatCurrency, formatTime } from '@/lib/utils'
 import { createBooking } from '@/lib/actions/booking'
+import { buildSchedule, scheduleModelLabel } from '@/lib/payments/schedule'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import DatePicker from '@/components/ui/DatePicker'
@@ -624,6 +625,45 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               minDate={new Date().toISOString().split('T')[0]}
               placeholder="Elige una fecha"
             />
+
+            {/* Preview del plan de cuotas — aparece al elegir fecha */}
+            {eventDate && !isQuote && (() => {
+              const totalEst = pricing?.hourly_price ?? pricing?.minimum_consumption ?? pricing?.fixed_price ?? 0
+              if (!totalEst) return null
+              const sched = buildSchedule(eventDate, totalEst)
+              return (
+                <div className="rounded-2xl overflow-hidden"
+                  style={{ border: '1px solid var(--brand-border)', background: 'var(--brand-dim)' }}>
+                  <div className="flex items-center justify-between px-4 py-2.5"
+                    style={{ borderBottom: '1px solid var(--brand-border)' }}>
+                    <div className="flex items-center gap-2">
+                      <CreditCard size={13} style={{ color: 'var(--brand)' }} />
+                      <span className="text-xs font-bold" style={{ color: 'var(--brand)' }}>
+                        {scheduleModelLabel(sched.model)}
+                      </span>
+                    </div>
+                    <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                      {sched.daysUntilEvent} días al evento
+                    </span>
+                  </div>
+                  <div className="px-4 py-2.5 space-y-1.5">
+                    {sched.installments.map((inst, i) => (
+                      <div key={i} className="flex items-center justify-between text-xs">
+                        <span style={{ color: 'var(--text-secondary)' }}>
+                          {inst.label}
+                        </span>
+                        <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                          {inst.percentage}% — {formatCurrency(inst.amount)}
+                        </span>
+                      </div>
+                    ))}
+                    <p className="text-[11px] pt-1" style={{ color: 'var(--text-muted)', borderTop: '1px solid var(--border-subtle)' }}>
+                      Los montos son estimados según el precio base. El total exacto se confirma al completar la reserva.
+                    </p>
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* Mensaje informativo por modelo */}
             {isConsumption && (

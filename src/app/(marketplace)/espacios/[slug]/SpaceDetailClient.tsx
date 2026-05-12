@@ -11,6 +11,7 @@ import {
   Sun, Zap, ShowerHead, Building2, Star, Video, Package, Sparkles, Camera,
 } from 'lucide-react'
 import { cn, formatCurrency, formatTime } from '@/lib/utils'
+import { scheduleModelLabel } from '@/lib/payments/schedule'
 import ChatDrawer from '@/components/marketplace/ChatDrawer'
 import BookingWidget from '@/components/marketplace/BookingWidget'
 import dynamic from 'next/dynamic'
@@ -1149,6 +1150,34 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
               )
             })()}
 
+            {/* ¿Cómo funciona el pago? — solo para pricing con precio definido */}
+            {pricing && pricing.pricing_type !== 'custom_quote' && (
+              <div className="rounded-2xl overflow-hidden"
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                    Pago en cuotas según tu fecha
+                  </p>
+                </div>
+                <div className="px-4 py-3 space-y-2">
+                  {[
+                    { days: '< 7 días al evento',   label: scheduleModelLabel('100'),       note: '100% al confirmar' },
+                    { days: '7–30 días',             label: scheduleModelLabel('50_50'),     note: '50% ahora · 50% antes del evento' },
+                    { days: '30–60 días',            label: scheduleModelLabel('30_70'),     note: '30% ahora · 70% antes del evento' },
+                    { days: '60+ días',              label: scheduleModelLabel('25_50_25'), note: '25% ahora · 50% a 60 días · 25% antes' },
+                  ].map(row => (
+                    <div key={row.days} className="flex items-start justify-between gap-2 text-xs">
+                      <span className="font-medium shrink-0" style={{ color: 'var(--text-secondary)' }}>{row.days}</span>
+                      <span className="text-right" style={{ color: 'var(--text-muted)' }}>{row.note}</span>
+                    </div>
+                  ))}
+                  <p className="text-[11px] pt-2" style={{ color: 'var(--text-muted)', borderTop: '1px solid var(--border-subtle)' }}>
+                    El plan exacto se muestra al elegir la fecha de tu evento.
+                  </p>
+                </div>
+              </div>
+            )}
+
             <BookingWidget space={space} onChat={() => setShowChat(true)} initialDate={initialDate} />
           </div>
 
@@ -1256,6 +1285,12 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
             )}
             <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
               {space.capacity_min ? `${space.capacity_min}–` : 'hasta '}{space.capacity_max} personas
+              {pricing?.pricing_type !== 'custom_quote' && (
+                <span className="ml-1.5 px-1.5 py-0.5 rounded-md text-[10px] font-semibold"
+                  style={{ background: 'var(--brand-dim)', color: 'var(--brand)' }}>
+                  Pago en cuotas
+                </span>
+              )}
             </div>
           </div>
           <button
