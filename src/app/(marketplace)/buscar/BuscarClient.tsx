@@ -359,34 +359,12 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
           borderBottom:   '1px solid var(--border-subtle)',
           boxShadow:      '0 1px 8px rgba(0,0,0,0.05)',
         }}>
-        <div className="max-w-screen-2xl mx-auto px-4 md:px-6 pt-3 pb-2 w-full">
+        <div className="max-w-screen-2xl mx-auto px-4 md:px-6 py-3 w-full">
 
-          {/* ── Desktop: fila 1 — buscador full-width ── */}
-          <div className="hidden md:flex items-center gap-3 mb-2.5">
-            <div className="flex items-center gap-3 flex-1 rounded-2xl px-4 py-3"
-              style={{ background: '#fff', border: `1.5px solid ${q ? 'var(--brand-border)' : 'var(--border-medium)'}`, boxShadow: q ? '0 0 0 3px rgba(53,196,147,0.08)' : 'none' }}>
-              <Search size={16} style={{ color: q ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
-              <input
-                value={q} onChange={e => setQ(e.target.value)}
-                placeholder="Busca por nombre, tipo de espacio, sector o tipo de evento..."
-                className="flex-1 bg-transparent text-sm focus:outline-none min-w-0 font-medium"
-                style={{ color: 'var(--text-primary)', fontSize: 15 }}
-              />
-              {q && (
-                <button onClick={() => setQ('')}
-                  className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
-                  style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                  <X size={12} />
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* ── Desktop: fila 2 — filtros ── */}
+          {/* ── Desktop: filtros ── */}
           <div className="hidden md:flex items-center gap-2">
 
               {/* Tipo de espacio */}
-
               <div className="relative">
                 {catOpen && <div className="fixed inset-0 z-40" onClick={() => setCatOpen(false)} />}
                 <button onClick={() => { setCatOpen(o => !o); setCapOpen(false); setSecOpen(false) }}

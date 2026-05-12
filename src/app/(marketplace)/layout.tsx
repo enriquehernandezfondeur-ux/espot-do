@@ -117,8 +117,8 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
             <img src="/logo-dark.svg" alt="espot.do" style={{ height: 28, width: "auto" }} />
           </Link>
 
-          {/* Search — desktop, oculto en /buscar donde ya hay uno propio */}
-          <div className={`items-center gap-2 w-64 rounded-full px-4 py-2.5 ${pathname.startsWith('/buscar') ? 'hidden' : 'hidden md:flex'}`}
+          {/* Search — desktop */}
+          <div className="hidden md:flex items-center gap-2 w-64 rounded-full px-4 py-2.5"
             style={{ background: 'var(--bg-elevated)', border: '1.5px solid var(--border-medium)' }}>
             <Search size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
             <input
