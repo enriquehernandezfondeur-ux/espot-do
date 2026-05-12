@@ -224,13 +224,15 @@ export async function acceptBooking(bookingId: string) {
   const space = bk.spaces as any
   if (space?.host_id !== user.id) return { error: 'No autorizado' }
 
-  const { error } = await supabase
+  const { error, data: updated } = await supabase
     .from('bookings')
     .update({ status: 'accepted', accepted_at: new Date().toISOString() })
     .eq('id', bookingId)
     .in('status', ['pending', 'quote_requested'])
+    .select('id')
 
   if (error) return { error: error.message }
+  if (!updated || updated.length === 0) return { error: 'La reserva ya fue procesada o no existe' }
 
   // Crear schedule de cuotas al aceptar
   await createInstallments(bookingId, bk.event_date, Number(bk.total_amount))
@@ -248,7 +250,7 @@ export async function acceptBooking(bookingId: string) {
         eventDate: bk.event_date, startTime: bk.start_time, endTime: bk.end_time,
         eventType: bk.event_type, guestCount: bk.guest_count,
         totalAmount: Number(bk.total_amount), platformFee: Number(bk.platform_fee),
-        basePrice: Number(bk.total_amount), selectedAddons: [], bookingId,
+        basePrice: Number(bk.base_price ?? bk.total_amount), selectedAddons: [], bookingId,
       }),
     }),
   ])
@@ -281,7 +283,7 @@ export async function rejectBooking(bookingId: string, reason?: string) {
     .eq('status', 'paid')
   const paidAmount = paidInstalls?.reduce((sum, i) => sum + Number(i.amount), 0) ?? 0
 
-  const { error } = await supabase
+  const { error, data: rejUpdated } = await supabase
     .from('bookings')
     .update({
       status: 'rejected',
@@ -289,8 +291,11 @@ export async function rejectBooking(bookingId: string, reason?: string) {
       rejection_reason: reason ?? null,
     })
     .eq('id', bookingId)
+    .in('status', ['pending', 'quote_requested', 'accepted'])
+    .select('id')
 
   if (error) return { error: error.message }
+  if (!rejUpdated || rejUpdated.length === 0) return { error: 'La reserva no se puede rechazar en su estado actual' }
 
   // Google Calendar: eliminar evento si existe
   const host = space?.profiles as any
@@ -482,7 +487,7 @@ export async function cancelBooking(bookingId: string, reason?: string, refundBa
 
   const newStatus = isGuest ? 'cancelled_guest' : 'cancelled_host'
 
-  const { error } = await supabase
+  const { error, data: cancelUpdated } = await supabase
     .from('bookings')
     .update({
       status: newStatus,
@@ -491,8 +496,10 @@ export async function cancelBooking(bookingId: string, reason?: string, refundBa
     })
     .eq('id', bookingId)
     .in('status', ['pending', 'quote_requested', 'accepted', 'confirmed'])
+    .select('id')
 
   if (error) return { error: error.message }
+  if (!cancelUpdated || cancelUpdated.length === 0) return { error: 'La reserva no se puede cancelar en su estado actual' }
 
   // Google Calendar: eliminar evento si existe
   const hostProfile = space?.profiles as any

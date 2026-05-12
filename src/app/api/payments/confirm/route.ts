@@ -57,11 +57,13 @@ export async function POST(req: NextRequest) {
   const host   = space?.profiles as any
   const guest  = booking.profiles as any
 
-  // Convertir Amount de centavos a pesos
-  const commissionAmt = Number(azulParams.Amount) / 100
+  // paidAmount = lo que Azul cobró en esta transacción (centavos → pesos)
+  const paidAmount    = Math.round(Number(azulParams.Amount)) / 100
   const totalAmount   = Number(booking.total_amount)
-  const commissionPct = totalAmount > 0 ? Math.round((commissionAmt / totalAmount) * 100) : 10
-  const netToHost     = Math.round((totalAmount - commissionAmt) * 100) / 100
+  // Comisión fija 10% sobre el total de la reserva (no sobre el depósito parcial)
+  const commissionAmt = Math.round(totalAmount * 0.10)
+  const commissionPct = 10
+  const netToHost     = Math.round(totalAmount * 0.90)
 
   // Si es pago de cuota específica, marcarla como pagada
   if (cuotaId) {
@@ -74,10 +76,10 @@ export async function POST(req: NextRequest) {
   const { error: updateError } = await supabase.from('bookings').update({
     status:             'confirmed',
     payment_status:     'advance',
-    paid_amount:        commissionAmt,
+    paid_amount:        paidAmount,        // monto real pagado en esta transacción
     paid_at:            new Date().toISOString(),
     ...(isFirstConfirmation ? { confirmed_at: new Date().toISOString() } : {}),
-    platform_fee:       commissionAmt,
+    platform_fee:       commissionAmt,     // 10% del total (comisión real)
     azul_order_id:      azulParams.AzulOrderId,
     azul_auth_code:     azulParams.AuthorizationCode,
     azul_response_code: azulParams.IsoCode,
@@ -102,7 +104,7 @@ export async function POST(req: NextRequest) {
   // Registrar en payments
   const { error: payErr } = await supabase.from('payments').insert({
     booking_id:     bookingId,
-    amount:         commissionAmt,
+    amount:         paidAmount,    // monto real cobrado por Azul
     currency:       'DOP',
     payment_type:   'deposit',
     payment_method: 'azul',

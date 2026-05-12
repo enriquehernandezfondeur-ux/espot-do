@@ -134,9 +134,9 @@ function ExitoContent() {
   )
 
   const space     = booking?.spaces as any
-  const fee       = Number(booking?.platform_fee ?? 0)
   const total     = Number(booking?.total_amount ?? 0)
-  const remaining = total - fee
+  const paidSoFar = Number(booking?.paid_amount ?? 0)
+  const remaining = total - paidSoFar  // lo que queda por pagar al propietario
   const txId      = booking?.azul_order_id ?? azulOrderId ?? booking?.id?.slice(0, 8).toUpperCase()
 
   return (
@@ -202,7 +202,7 @@ function ExitoContent() {
             <div className="px-6 py-5 space-y-3">
               <div className="flex justify-between text-sm">
                 <span style={{ color: 'rgba(255,255,255,0.5)' }}>Pago de confirmación</span>
-                <span className="font-bold text-white">{formatCurrency(fee)}</span>
+                <span className="font-bold text-white">{formatCurrency(paidSoFar)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span style={{ color: 'rgba(255,255,255,0.5)' }}>Saldo en el lugar</span>
