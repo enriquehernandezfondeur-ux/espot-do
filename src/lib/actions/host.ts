@@ -370,7 +370,8 @@ export async function respondToQuote(bookingId: string, quotedPrice: number, mes
 
   // Crear plan de cuotas con el precio real de la cotización
   const { createInstallments } = await import('@/lib/actions/installments')
-  await createInstallments(bookingId, bk.event_date, quotedPrice)
+  const instResult = await createInstallments(bookingId, bk.event_date, quotedPrice)
+  if (!instResult.success) console.error('[respondToQuote] installments failed:', instResult.error)
 
   // Email al cliente con precio, cuotas y CTA directo al pago
   const SITE  = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'

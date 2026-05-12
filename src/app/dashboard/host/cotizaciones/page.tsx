@@ -39,7 +39,8 @@ export default function CotizacionesPage() {
   const [price, setPrice]         = useState('')
   const [sending, setSending]     = useState(false)
   const [actionId, setActionId]   = useState<string | null>(null)
-  const [sendError, setSendError] = useState('')
+  const [sendError, setSendError]     = useState('')
+  const [rejectError, setRejectError] = useState('')
 
   useEffect(() => {
     getHostQuotes().then(d => { setQuotes(d); setLoading(false) })
@@ -65,8 +66,11 @@ export default function CotizacionesPage() {
 
   async function handleReject(id: string) {
     setActionId(id + 'r')
+    setRejectError('')
     const result = await rejectBooking(id)
-    if (!('error' in result)) {
+    if ('error' in result) {
+      setRejectError(result.error ?? 'Error al rechazar la cotización')
+    } else {
       setQuotes(prev => prev.filter(q => q.id !== id))
       if (selected?.id === id) setSelected(null)
     }
@@ -230,6 +234,11 @@ export default function CotizacionesPage() {
                     </button>
                   </div>
 
+                  {(sendError || rejectError) && (
+                    <p className="text-xs text-center font-semibold" style={{ color: '#DC2626' }}>
+                      {sendError || rejectError}
+                    </p>
+                  )}
                   <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
                     Al enviar, el cliente recibirá el precio y el plan de cuotas por email. La reserva queda lista para pago.
                   </p>
