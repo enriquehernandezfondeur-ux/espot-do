@@ -749,107 +749,110 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               </div>
             </div>
 
-          {/* ── Móvil: barra de búsqueda ── */}
-          <div className="md:hidden mb-2 w-full overflow-hidden">
-            <div className="flex gap-2.5 w-full">
-              {/* Search input grande y cómodo */}
-              <div className="flex-1 min-w-0 flex items-center gap-3 rounded-2xl px-4 py-3.5 input-base">
-                <Search size={17} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-                <input
-                  value={q} onChange={e => setQ(e.target.value)}
-                  placeholder="Salones, rooftops, eventos..."
-                  className="flex-1 min-w-0 bg-transparent focus:outline-none font-medium"
-                  style={{ color: 'var(--text-primary)', fontSize: 16 }}
-                />
-                {q && (
-                  <button onClick={() => setQ('')}
-                    className="w-6 h-6 flex items-center justify-center rounded-full shrink-0"
-                    style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                    <X size={12} />
-                  </button>
-                )}
-              </div>
-              {/* Botón Filtros — más grande y visible */}
-              <button onClick={() => setMoreOpen(true)}
-                className="flex items-center justify-center gap-2 px-4 rounded-2xl font-bold shrink-0 transition-all"
-                style={{
-                  background:  activeFiltersCount > 0 ? 'var(--brand)' : 'var(--bg-surface)',
-                  color:       activeFiltersCount > 0 ? '#fff' : 'var(--text-secondary)',
-                  border:      `2px solid ${activeFiltersCount > 0 ? 'var(--brand)' : 'var(--border-medium)'}`,
-                  minWidth: 52,
-                  minHeight: 52,
-                }}>
-                <SlidersHorizontal size={18} />
-                {activeFiltersCount > 0 && (
-                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-black"
-                    style={{ background: 'rgba(255,255,255,0.28)' }}>
-                    {activeFiltersCount}
-                  </span>
-                )}
+          {/* ── Móvil: buscador compacto ── */}
+          <div className="md:hidden flex items-center gap-2 rounded-xl px-3.5 py-2.5 mb-2.5"
+            style={{ background: '#fff', border: `1.5px solid ${q ? 'var(--brand-border)' : 'var(--border-medium)'}` }}>
+            <Search size={14} style={{ color: q ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
+            <input
+              value={q} onChange={e => setQ(e.target.value)}
+              placeholder="Buscar espacios, eventos, sectores..."
+              className="flex-1 min-w-0 bg-transparent focus:outline-none text-sm"
+              style={{ color: 'var(--text-primary)', fontSize: 16 }}
+            />
+            {q && (
+              <button onClick={() => setQ('')}
+                className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
+                <X size={10} />
               </button>
-            </div>
-
-            {/* Chips de filtros activos — solo si hay filtros */}
-            {activeChips.length > 0 && (
-              <div className="flex gap-2 mt-2.5 flex-wrap">
-                {activeChips.map(chip => (
-                  <button key={chip.key}
-                    onClick={chip.onRemove}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all"
-                    style={{
-                      background: 'var(--brand-dim)',
-                      color: 'var(--brand)',
-                      border: '1px solid var(--brand-border)',
-                    }}>
-                    {chip.label}
-                    <X size={10} />
-                  </button>
-                ))}
-                <button onClick={clearAll}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold shrink-0"
-                  style={{ background: 'rgba(220,38,38,0.08)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }}>
-                  Limpiar todo
-                </button>
-              </div>
             )}
           </div>
 
-          {/* Pills mobile — tipo de espacio + tipo de evento combinados */}
-          <div className="md:hidden flex gap-2 overflow-x-auto pb-2 pr-4 scrollbar-hide mt-2.5">
-            {CATEGORIES.map(cat => {
-              const isActive = categoria === cat.value
-              const Icon = cat.icon
-              return (
-                <button key={cat.value}
-                  onClick={() => setCategoria(isActive ? '' : cat.value)}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0"
-                  style={isActive
-                    ? { background: 'var(--brand)', color: '#fff', boxShadow: '0 2px 8px rgba(53,196,147,0.3)' }
-                    : { background: '#fff', color: 'var(--text-secondary)', border: '1px solid var(--border-medium)' }
-                  }>
-                  <Icon size={13} />
-                  {cat.label}
-                </button>
-              )
-            })}
-            {/* Separador visual */}
-            <div className="w-px shrink-0 self-stretch my-1" style={{ background: 'var(--border-medium)' }} />
-            {QUICK_ACTIVITIES.map(a => {
-              const isActive = activity === a.slug
-              return (
-                <button key={a.slug}
-                  onClick={() => setActivity(isActive ? '' : a.slug)}
-                  className="flex items-center gap-1 px-3.5 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0"
-                  style={isActive
-                    ? { background: '#0F1623', color: '#fff' }
-                    : { background: '#fff', color: 'var(--text-secondary)', border: '1px solid var(--border-medium)' }
-                  }>
-                  <Tag size={11} />
-                  {a.label}
-                </button>
-              )
-            })}
+          {/* ── Móvil: fila de filtros (igual estilo que desktop) ── */}
+          <div className="md:hidden flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            {/* Tipo de espacio */}
+            {(() => { const cat = CATEGORIES.find(c => c.value === categoria); const Icon = cat?.icon ?? LayoutList; return (
+              <button onClick={() => setMoreOpen(true)}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all"
+                style={{ background: categoria ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${categoria ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: categoria ? 'var(--brand)' : 'var(--text-primary)' }}>
+                <Icon size={13} style={{ flexShrink: 0 }} />
+                <span>{categoria ? cat?.label : 'Espacio'}</span>
+                {categoria ? <X size={10} onClick={e => { e.stopPropagation(); setCategoria('') }} /> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
+              </button>
+            )})()}
+
+            {/* Tipo de evento */}
+            <button onClick={() => setMoreOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all"
+              style={{ background: activity ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${activity ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: activity ? 'var(--brand)' : 'var(--text-primary)' }}>
+              <Tag size={13} style={{ flexShrink: 0 }} />
+              <span>{activityLabel || 'Evento'}</span>
+              {activity ? <X size={10} onClick={e => { e.stopPropagation(); setActivity('') }} /> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
+            </button>
+
+            {/* Personas */}
+            <button onClick={() => setMoreOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all"
+              style={{ background: capacidad ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${capacidad ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: capacidad ? 'var(--brand)' : 'var(--text-primary)' }}>
+              <Users size={13} style={{ flexShrink: 0 }} />
+              <span>{capacidad ? `${capacidad}+` : 'Personas'}</span>
+              {capacidad ? <X size={10} onClick={e => { e.stopPropagation(); applyCapacity('') }} /> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
+            </button>
+
+            {/* Sector */}
+            <button onClick={() => setMoreOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all"
+              style={{ background: sector ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${sector ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: sector ? 'var(--brand)' : 'var(--text-primary)' }}>
+              <MapPin size={13} style={{ flexShrink: 0 }} />
+              <span className="max-w-[90px] truncate">{sector || 'Dónde'}</span>
+              {sector ? <X size={10} onClick={e => { e.stopPropagation(); clearSector() }} /> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
+            </button>
+
+            {/* Fecha */}
+            <button onClick={() => setMoreOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all"
+              style={{ background: dateFrom ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${dateFrom ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: dateFrom ? 'var(--brand)' : 'var(--text-primary)' }}>
+              <CalendarDays size={13} style={{ flexShrink: 0 }} />
+              <span>{dateFrom ? fmtDateShort(dateFrom) : 'Fecha'}</span>
+              {dateFrom ? <X size={10} onClick={e => { e.stopPropagation(); setDateFrom(''); setTimeFrom('') }} /> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
+            </button>
+
+            {/* Precio */}
+            <button onClick={() => setMoreOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all"
+              style={{ background: pricingFilter ? (PRICING_TYPES.find(p=>p.value===pricingFilter)?.bg ?? 'var(--brand-dim)') : '#fff', border: `1.5px solid ${pricingFilter ? (PRICING_TYPES.find(p=>p.value===pricingFilter)?.border ?? 'var(--brand-border)') : 'var(--border-medium)'}`, color: pricingFilter ? (PRICING_TYPES.find(p=>p.value===pricingFilter)?.text ?? 'var(--brand)') : 'var(--text-primary)' }}>
+              <Clock size={13} style={{ flexShrink: 0 }} />
+              <span>{pricingFilter ? PRICING_TYPES.find(p=>p.value===pricingFilter)?.label : 'Precio'}</span>
+              {pricingFilter ? <X size={10} onClick={e => { e.stopPropagation(); setPricingFilter('') }} /> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
+            </button>
+
+            {/* Más filtros */}
+            <button onClick={() => setMoreOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 transition-all"
+              style={{ background: activeFiltersCount > 0 ? 'var(--brand)' : '#fff', border: `1.5px solid ${activeFiltersCount > 0 ? 'var(--brand)' : 'var(--border-medium)'}`, color: activeFiltersCount > 0 ? '#fff' : 'var(--text-primary)' }}>
+              <SlidersHorizontal size={13} />
+              Filtros
+              {activeFiltersCount > 0 && <span className="w-4 h-4 rounded-full flex items-center justify-center text-xs font-black" style={{ background: 'rgba(255,255,255,0.3)' }}>{activeFiltersCount}</span>}
+            </button>
           </div>
+
+          {/* Chips activos mobile */}
+          {activeChips.length > 0 && (
+            <div className="md:hidden flex gap-2 mt-2 flex-wrap">
+              {activeChips.map(chip => (
+                <button key={chip.key} onClick={chip.onRemove}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold shrink-0"
+                  style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
+                  {chip.label} <X size={10} />
+                </button>
+              ))}
+              <button onClick={clearAll}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold shrink-0"
+                style={{ background: 'rgba(220,38,38,0.08)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }}>
+                Limpiar todo
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
