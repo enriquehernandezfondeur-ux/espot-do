@@ -388,114 +388,131 @@ export default function MisReservasPage() {
                         </div>
                       </div>
 
-                      {/* Plan de pagos rediseñado */}
+                      {/* ── Plan de pagos — tarjeta unificada ── */}
                       {isSelected && installments.length > 0 && (() => {
-                        const nextInst = installments.find(i => i.status !== 'paid')
-                        const paidCount = installments.filter(i => i.status === 'paid').length
-                        const isOverdueNext = nextInst?.status === 'overdue'
-                        return (
-                          <div className="mt-3 space-y-2">
+                        const nextInst    = installments.find(i => i.status !== 'paid')
+                        const paidCount   = installments.filter(i => i.status === 'paid').length
+                        const allPaid     = paidCount === installments.length
+                        const isOD        = nextInst?.status === 'overdue'
 
-                            {/* Banner próximo pago */}
-                            {nextInst && (
-                              <div className="rounded-2xl p-4"
-                                style={{
-                                  background: isOverdueNext ? 'rgba(220,38,38,0.05)' : 'var(--brand-dim)',
-                                  border: `1.5px solid ${isOverdueNext ? 'rgba(220,38,38,0.25)' : 'var(--brand-border)'}`,
-                                }}>
-                                <div className="flex items-start justify-between gap-3 mb-3">
-                                  <div>
-                                    <p className="text-xs font-bold uppercase tracking-widest mb-0.5"
-                                      style={{ color: isOverdueNext ? '#DC2626' : 'var(--brand)' }}>
-                                      {isOverdueNext ? '⚠️ Pago vencido' : 'Tu próximo pago'}
-                                    </p>
-                                    <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-                                      {formatCurrency(nextInst.amount)}
-                                    </p>
-                                    <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-                                      {nextInst.label} · {countdownLabel(nextInst.due_date)}
-                                    </p>
-                                  </div>
-                                  <div className="text-right shrink-0">
-                                    <p className="text-[11px] font-semibold" style={{ color: 'var(--text-muted)' }}>
-                                      Cuota {nextInst.installment_number} de {installments.length}
-                                    </p>
-                                    {paidCount > 0 && (
-                                      <p className="text-[11px] mt-1" style={{ color: '#16A34A' }}>
-                                        ✓ {paidCount} pagada{paidCount > 1 ? 's' : ''}
-                                      </p>
+                        return (
+                          <div className="mt-3 rounded-2xl overflow-hidden"
+                            style={{ border: '1.5px solid #E2E8EC' }}>
+
+                            {/* Cabecera oscura */}
+                            <div className="px-4 py-3.5 flex items-center justify-between"
+                              style={{ background: '#0F1623' }}>
+                              <div className="flex items-center gap-2">
+                                <CreditCard size={14} style={{ color: '#35C493' }} />
+                                <span className="text-sm font-semibold" style={{ color: '#fff' }}>
+                                  Plan de pagos
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                {installments.map((inst, i) => (
+                                  <div key={i} className="w-2 h-2 rounded-full transition-all"
+                                    style={{
+                                      background: inst.status === 'paid' ? '#35C493'
+                                        : inst.status === 'overdue' ? '#F87171'
+                                        : (!inst.status || inst.status === 'pending') && installments.slice(0, i).every(x => x.status === 'paid')
+                                          ? '#35C493'
+                                          : 'rgba(255,255,255,0.2)',
+                                      opacity: inst.status === 'paid' ? 1 : 0.9,
+                                    }} />
+                                ))}
+                                <span className="text-xs ml-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                                  {paidCount}/{installments.length}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Lista de cuotas */}
+                            <div style={{ background: '#fff' }}>
+                              {installments.map((inst, i) => {
+                                const isPaidI = inst.status === 'paid'
+                                const isOvD   = inst.status === 'overdue'
+                                const isNext  = !isPaidI && installments.slice(0, i).every(x => x.status === 'paid')
+                                const isLast  = i === installments.length - 1
+
+                                return (
+                                  <div key={inst.id}
+                                    className="flex items-center gap-3 px-4"
+                                    style={{
+                                      paddingTop: 14, paddingBottom: 14,
+                                      borderBottom: isLast ? 'none' : '1px solid #F1F5F8',
+                                      background: isNext ? 'rgba(53,196,147,0.03)' : isOvD ? 'rgba(239,68,68,0.02)' : '#fff',
+                                    }}>
+                                    {/* Indicador */}
+                                    <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
+                                      style={{
+                                        background: isPaidI ? '#0F1623' : isOvD ? '#FEF2F2' : isNext ? '#35C493' : '#F4F6F8',
+                                        color:      isPaidI ? '#35C493'  : isOvD ? '#DC2626' : isNext ? '#fff'     : '#94A3B8',
+                                      }}>
+                                      {isPaidI ? <Check size={13} /> : i + 1}
+                                    </div>
+
+                                    {/* Info */}
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-baseline justify-between gap-2">
+                                        <span className="text-sm font-bold"
+                                          style={{ color: isPaidI ? '#0F1623' : isOvD ? '#DC2626' : isNext ? '#0F1623' : '#94A3B8', letterSpacing: '-0.02em' }}>
+                                          {formatCurrency(inst.amount)}
+                                        </span>
+                                        <span className="text-xs font-medium shrink-0"
+                                          style={{ color: isPaidI ? '#35C493' : isOvD ? '#DC2626' : isNext ? '#35C493' : '#CBD5E1' }}>
+                                          {isPaidI
+                                            ? `Pagado${inst.paid_at ? ' · ' + formatDate(inst.paid_at.split('T')[0]) : ''}`
+                                            : countdownLabel(inst.due_date)}
+                                        </span>
+                                      </div>
+                                      <span className="text-xs" style={{ color: '#94A3B8' }}>{inst.label}</span>
+                                    </div>
+
+                                    {/* Badge */}
+                                    {isNext && (
+                                      <span className="text-[10px] font-bold px-2 py-1 rounded-lg shrink-0"
+                                        style={{ background: '#0F1623', color: '#35C493', letterSpacing: '0.03em' }}>
+                                        AHORA
+                                      </span>
+                                    )}
+                                    {isOvD && (
+                                      <span className="text-[10px] font-bold px-2 py-1 rounded-lg shrink-0"
+                                        style={{ background: '#FEF2F2', color: '#DC2626' }}>
+                                        VENCIDA
+                                      </span>
                                     )}
                                   </div>
-                                </div>
-                                {/* Barra de progreso */}
-                                <div className="w-full h-1.5 rounded-full mb-3" style={{ background: 'rgba(0,0,0,0.06)' }}>
-                                  <div className="h-1.5 rounded-full transition-all"
-                                    style={{
-                                      width: `${(paidCount / installments.length) * 100}%`,
-                                      background: isOverdueNext ? '#DC2626' : 'var(--brand)',
-                                    }} />
-                                </div>
+                                )
+                              })}
+                            </div>
+
+                            {/* CTA pago */}
+                            {nextInst && !allPaid && (
+                              <div className="px-4 py-3"
+                                style={{ borderTop: '1px solid #F1F5F8', background: '#FAFCFD' }}>
                                 <Link href={`/pago/${selected?.id}?cuota=${nextInst.id}`}
-                                  className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold"
+                                  className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl text-sm font-bold"
                                   style={{
-                                    background: isOverdueNext ? '#DC2626' : 'var(--brand)',
-                                    color: '#fff',
-                                    boxShadow: isOverdueNext ? '0 2px 8px rgba(220,38,38,0.3)' : '0 2px 8px rgba(53,196,147,0.3)',
+                                    background: isOD ? '#DC2626' : '#0F1623',
+                                    color: isOD ? '#fff' : '#35C493',
+                                    letterSpacing: '-0.01em',
                                   }}>
                                   <CreditCard size={15} />
-                                  {isOverdueNext ? 'Pagar ahora (vencida)' : 'Pagar esta cuota'}
+                                  {isOD
+                                    ? `Pagar cuota vencida — ${formatCurrency(nextInst.amount)}`
+                                    : `Pagar ahora — ${formatCurrency(nextInst.amount)}`}
                                 </Link>
                               </div>
                             )}
 
-                            {/* Todas las cuotas */}
-                            {installments.length > 1 && (
-                              <div className="rounded-2xl overflow-hidden"
-                                style={{ border: '1px solid var(--border-subtle)', background: '#fff' }}>
-                                <div className="px-4 py-2.5 flex items-center justify-between"
-                                  style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)' }}>
-                                  <span className="text-xs font-bold" style={{ color: 'var(--text-secondary)' }}>
-                                    Todas las cuotas
-                                  </span>
-                                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                                    {paidCount}/{installments.length} pagadas
-                                  </span>
-                                </div>
-                                <div className="px-4 py-3 space-y-0">
-                                  {installments.map((inst, i) => {
-                                    const isPaidInst = inst.status === 'paid'
-                                    const isOD = inst.status === 'overdue'
-                                    const isNxt = !isPaidInst && installments.slice(0, i).every(x => x.status === 'paid')
-                                    return (
-                                      <div key={inst.id} className="flex items-center gap-3 py-2.5 relative"
-                                        style={i < installments.length - 1 ? { borderBottom: '1px solid var(--border-subtle)' } : {}}>
-                                        {/* Dot */}
-                                        <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold z-10"
-                                          style={{
-                                            background: isPaidInst ? '#16A34A' : isOD ? '#DC2626' : isNxt ? 'var(--brand)' : 'var(--bg-elevated)',
-                                            color: isPaidInst || isOD || isNxt ? '#fff' : 'var(--text-muted)',
-                                            border: `2px solid ${isPaidInst ? '#16A34A' : isOD ? '#DC2626' : isNxt ? 'var(--brand)' : 'var(--border-medium)'}`,
-                                          }}>
-                                          {isPaidInst ? <Check size={10} /> : inst.installment_number}
-                                        </div>
-                                        {/* Info */}
-                                        <div className="flex-1 min-w-0">
-                                          <div className="flex items-center justify-between gap-1">
-                                            <span className="text-xs font-semibold" style={{ color: isPaidInst ? '#16A34A' : isOD ? '#DC2626' : 'var(--text-primary)' }}>
-                                              {formatCurrency(inst.amount)}
-                                              {isNxt && <span className="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md" style={{ background: 'var(--brand-dim)', color: 'var(--brand)' }}>Próxima</span>}
-                                              {isOD && <span className="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md" style={{ background: 'rgba(220,38,38,0.08)', color: '#DC2626' }}>Vencida</span>}
-                                            </span>
-                                            <span className="text-[11px] shrink-0" style={{ color: isPaidInst ? '#16A34A' : isOD ? '#DC2626' : 'var(--text-muted)' }}>
-                                              {isPaidInst ? `Pagado ${inst.paid_at ? '· ' + formatDate(inst.paid_at.split('T')[0]) : ''}` : countdownLabel(inst.due_date)}
-                                            </span>
-                                          </div>
-                                          <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{inst.label}</span>
-                                        </div>
-                                      </div>
-                                    )
-                                  })}
-                                </div>
+                            {/* Todo pagado */}
+                            {allPaid && (
+                              <div className="px-4 py-3 flex items-center gap-2"
+                                style={{ borderTop: '1px solid #F1F5F8', background: '#FAFCFD' }}>
+                                <CheckCircle size={14} style={{ color: '#35C493' }} />
+                                <span className="text-sm font-semibold" style={{ color: '#0F1623' }}>
+                                  Todas las cuotas pagadas
+                                </span>
                               </div>
                             )}
                           </div>
