@@ -7,6 +7,7 @@ import {
   CalendarDays, Users, Sparkles, CreditCard,
   ChevronRight, ChevronLeft, Loader2, CheckCircle,
   Minus, Plus, MessageCircle, Clock, ShieldCheck, Info,
+  Timer, Mail,
 } from 'lucide-react'
 import { formatCurrency, formatTime } from '@/lib/utils'
 import { createBooking } from '@/lib/actions/booking'
@@ -424,7 +425,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
           </p>
           <div className="flex items-start gap-2.5 text-left px-4 py-3 rounded-xl mb-5"
             style={{ background: 'rgba(37,99,235,0.06)', border: '1px solid rgba(37,99,235,0.2)' }}>
-            <span style={{ fontSize: 16 }}>⏱️</span>
+            <Timer size={15} style={{ color: '#2563EB', flexShrink: 0, marginTop: 1 }} />
             <p className="text-xs" style={{ color: '#1E40AF', lineHeight: 1.6 }}>
               <strong>Tienes 24 horas para completar el pago.</strong>{' '}
               Si no pagas en ese tiempo, la fecha se liberará automáticamente.
@@ -451,7 +452,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
           </p>
           <div className="flex items-start gap-2.5 text-left px-4 py-3 rounded-xl mb-5"
             style={{ background: 'rgba(8,145,178,0.06)', border: '1px solid rgba(8,145,178,0.2)' }}>
-            <span style={{ fontSize: 16 }}>📩</span>
+            <Mail size={15} style={{ color: '#0891B2', flexShrink: 0, marginTop: 1 }} />
             <p className="text-xs" style={{ color: '#0C4A6E', lineHeight: 1.6 }}>
               <strong>Plazo de respuesta: 48 horas hábiles.</strong>{' '}
               Recibirás un email cuando el propietario envíe su propuesta. Puedes escribirle directamente desde el chat mientras tanto.
@@ -473,7 +474,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
           </p>
           <div className="flex items-start gap-2.5 text-left px-4 py-3 rounded-xl mb-5"
             style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.18)' }}>
-            <span style={{ fontSize: 16 }}>💳</span>
+            <ShieldCheck size={15} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: 1 }} />
             <p className="text-xs" style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
               <strong style={{ color: 'var(--text-primary)' }}>Solo pagas cuando el propietario acepte.</strong>{' '}
               Recibirás un email con el enlace de pago una vez que confirme tu reserva.
@@ -884,7 +885,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                   <button key={et} onClick={() => { setEventType(et); if (et !== 'Otro') setCustomEventType('') }}
                     className="flex items-center gap-2.5 px-3.5 py-3 rounded-2xl text-left transition-all"
                     style={isSelected
-                      ? { background: '#03313C', color: '#fff', boxShadow: '0 2px 12px rgba(3,49,60,0.2)' }
+                      ? { background: '#0F1623', color: '#fff', boxShadow: '0 2px 12px rgba(15,22,35,0.2)' }
                       : { background: '#fff', color: 'var(--text-primary)', border: '1.5px solid var(--border-medium)' }}>
                     <span className="w-2 h-2 rounded-full shrink-0"
                       style={{ background: isSelected ? '#35C493' : 'var(--border-medium)' }} />
@@ -1054,7 +1055,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                   onChange={e => setTermsAccepted(e.target.checked)}
                   className="sr-only"
                 />
-                <div className="w-5 h-5 rounded-md flex items-center justify-center transition-all"
+                <div className="w-6 h-6 rounded-md flex items-center justify-center transition-all"
                   style={{
                     background: termsAccepted ? 'var(--brand)' : '#fff',
                     border: termsAccepted ? '2px solid var(--brand)' : '2px solid #CBD5E1',
