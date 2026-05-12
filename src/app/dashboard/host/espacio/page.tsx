@@ -618,16 +618,17 @@ export default function EspacioPage() {
                         <Pencil size={13} /> Editar
                       </button>
 
-                      {!space.is_published && space.is_active && (
+                      {!space.is_published && (
                         <button
                           onClick={async () => {
                             const result = await publishSpace(space.id)
-                            if ('pending' in result && result.pending) {
-                              setPublishedPending(true)
+                            if (!('error' in result)) {
+                              setSpaces(prev => prev.map(s => s.id === space.id ? { ...s, is_active: true } : s))
+                              if ('pending' in result && result.pending) setPublishedPending(true)
                             }
                           }}
                           className="btn-brand flex-1 flex items-center justify-center gap-1.5 text-sm font-medium py-2 rounded-xl">
-                          <Eye size={13} /> Enviar a revisión
+                          <Eye size={13} /> {space.is_active ? 'Enviar a revisión' : 'Volver a publicar'}
                         </button>
                       )}
 
@@ -643,7 +644,7 @@ export default function EspacioPage() {
                         </button>
                       )}
 
-                      {!space.is_published && (
+                      {!space.is_published && !space.is_active && (
                         <button
                           onClick={async () => {
                             if (!window.confirm(`¿Eliminar "${space.name}"? Esta acción no se puede deshacer.`)) return
