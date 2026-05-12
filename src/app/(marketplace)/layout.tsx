@@ -6,6 +6,53 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
+function FooterContact() {
+  const [open, setOpen] = useState(false)
+  return (
+    <div>
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest mb-3"
+        style={{ color: 'var(--text-muted)' }}>
+        Contacto
+        <svg width="10" height="10" viewBox="0 0 10 10"
+          style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.25s ease' }}
+          fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M2 3.5l3 3 3-3"/>
+        </svg>
+      </button>
+      <div style={{
+        overflow: 'hidden',
+        maxHeight: open ? 180 : 0,
+        opacity: open ? 1 : 0,
+        transition: 'max-height 0.3s ease, opacity 0.2s ease',
+      }}>
+        <div className="flex flex-col gap-1.5">
+          <a href="mailto:contacto@espot.do" className="text-xs link-muted flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
+            <span>✉</span> contacto@espot.do
+          </a>
+          <a href="tel:+18295481998" className="text-xs link-muted flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
+            <span>📞</span> +1 (829) 548-1998
+          </a>
+          <Link href="/contacto" className="text-xs link-muted flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
+            <span>💬</span> Servicio al cliente
+          </Link>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)', lineHeight: 1.5 }}>
+            Calle Caonabo No. 42, Gazcue<br/>Distrito Nacional, República Dominicana
+          </p>
+        </div>
+      </div>
+      {!open && (
+        <p className="text-xs" style={{ color: 'var(--text-muted)', lineHeight: 1.6 }}>
+          <a href="mailto:contacto@espot.do" className="link-muted" style={{ color: 'var(--text-muted)' }}>contacto@espot.do</a>
+          {' · '}
+          <a href="tel:+18295481998" className="link-muted" style={{ color: 'var(--text-muted)' }}>+1 (829) 548-1998</a>
+        </p>
+      )}
+    </div>
+  )
+}
+
 export default function MarketplaceLayout({ children }: { children: React.ReactNode }) {
   const router   = useRouter()
   const pathname = usePathname()
@@ -429,11 +476,11 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
       {children}
 
       {/* ── FOOTER ── */}
-      <footer style={{ borderTop: '1px solid var(--border-subtle)', background: '#fff' }} className="py-7 md:py-8 px-4 md:px-6">
+      <footer style={{ borderTop: '1px solid var(--border-subtle)', background: '#fff' }} className="px-4 md:px-6 pt-7 pb-5">
         <div className="max-w-7xl mx-auto">
 
           {/* 3 columnas */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-7 md:gap-8 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-7 md:gap-8 mb-5">
 
             {/* Col 1: Marca + descripción + redes */}
             <div className="flex flex-col gap-3">
@@ -486,46 +533,47 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
               </div>
             </div>
 
-            {/* Col 3: Contacto */}
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Contacto</p>
-              <div className="flex flex-col gap-1.5">
-                <a href="mailto:contacto@espot.do" className="link-muted text-xs flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
-                  <span>✉</span> contacto@espot.do
-                </a>
-                <a href="tel:+18295481998" className="link-muted text-xs flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
-                  <span>📞</span> +1 (829) 548-1998
-                </a>
-                <Link href="/contacto" className="link-muted text-xs flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
-                  <span>💬</span> Servicio al cliente
-                </Link>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                  Calle Caonabo No. 42, Gazcue<br />
-                  Distrito Nacional, República Dominicana
-                </p>
-              </div>
-            </div>
+            {/* Col 3: Contacto — expandible */}
+            <FooterContact />
 
           </div>
 
-          {/* Barra inferior: logos de pago + copyright */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-3 pt-4"
+          {/* Logos de pago */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4"
             style={{ borderTop: '1px solid var(--border-subtle)' }}>
 
-            <div className="flex items-center gap-2.5 flex-wrap justify-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/visa-logo.jpg" alt="Visa" style={{ height: 24, width: 'auto', borderRadius: 4, objectFit: 'contain' }} />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/mastercard-logo.svg" alt="Mastercard" style={{ height: 24, width: 'auto' }} />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/verified-by-visa.png" alt="Verified by Visa" style={{ height: 24, width: 'auto' }} />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 24, width: 'auto' }} />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/azul-logo.svg" alt="Azul Payments" style={{ height: 24, width: 'auto', borderRadius: 4, objectFit: 'contain' }} />
+            <div className="flex items-center gap-3 flex-wrap justify-center">
+              {/* Visa */}
+              <div className="flex flex-col items-center gap-1">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/visa-logo.jpg" alt="Visa" style={{ height: 22, width: 'auto', borderRadius: 3, objectFit: 'contain' }} />
+              </div>
+              {/* Mastercard */}
+              <div className="flex flex-col items-center gap-1">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/mastercard-logo.svg" alt="Mastercard" style={{ height: 22, width: 'auto' }} />
+              </div>
+              {/* Verified by Visa */}
+              <div className="flex flex-col items-center gap-1">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/verified-by-visa.png" alt="Verified by Visa" style={{ height: 20, width: 'auto' }} />
+                <span style={{ fontSize: 8, color: '#1A1F71', fontWeight: 700, textAlign: 'center', lineHeight: 1.2 }}>Verified<br/>by Visa</span>
+              </div>
+              {/* MC ID Check */}
+              <div className="flex flex-col items-center gap-1">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 20, width: 'auto' }} />
+                <span style={{ fontSize: 8, color: '#252525', fontWeight: 700, textAlign: 'center', lineHeight: 1.2 }}>Mastercard<br/>ID Check</span>
+              </div>
+              {/* Azul */}
+              <div className="flex flex-col items-center gap-1">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/azul-logo.jpg" alt="Azul Payments" style={{ height: 22, width: 'auto', borderRadius: 3, objectFit: 'contain' }} />
+                <span style={{ fontSize: 8, color: '#0057A8', fontWeight: 700 }}>azul</span>
+              </div>
             </div>
 
-            <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
               © 2026 ESPOT, S.R.L. · República Dominicana
             </p>
           </div>
