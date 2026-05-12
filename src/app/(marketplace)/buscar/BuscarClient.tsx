@@ -158,10 +158,6 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  function openDatePicker() {
-    setDatePickerOpen(o => !o)
-  }
-
   // Bloquear scroll cuando el drawer de filtros está abierto
   useEffect(() => {
     if (moreOpen) document.body.style.overflow = 'hidden'
@@ -308,12 +304,18 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
     setSector(''); setSectorQ('')
   }
 
+  function closeAllDropdowns() {
+    setCatOpen(false); setActOpen(false); setCapOpen(false)
+    setSecOpen(false); setPriceOpen(false); setSortOpen(false); setDatePickerOpen(false)
+  }
+
   const activeFiltersCount = [
-    activity, categoria, sector, capacidad, dateFrom, timeFrom, pricingFilter, ...selectedAmenities, ...selectedFacilities, priceMin, priceMax,
+    activity, categoria, sector, capacidad, dateFrom, pricingFilter, ...selectedAmenities, ...selectedFacilities, priceMin, priceMax,
   ].filter(Boolean).length
 
   function clearAll() {
-    setQ(''); setActivity(''); setSector(''); setSectorQ(''); setCategoria(''); setCapacidad(''); setCapacidadInput('')
+    closeAllDropdowns()
+    setActQ(''); setQ(''); setActivity(''); setSector(''); setSectorQ(''); setCategoria(''); setCapacidad(''); setCapacidadInput('')
     setSelectedAmenities([]); setSelectedFacilities([]); setPricingFilter(''); setPriceMin(''); setPriceMax(''); setDateFrom(''); setTimeFrom('')
   }
 
@@ -367,7 +369,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               {/* Tipo de espacio */}
               <div className="relative">
                 {catOpen && <div className="fixed inset-0 z-40" onClick={() => setCatOpen(false)} />}
-                <button onClick={() => { setCatOpen(o => !o); setCapOpen(false); setSecOpen(false) }}
+                <button onClick={() => { const o = catOpen; closeAllDropdowns(); setCatOpen(!o) }}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap"
                   style={{
                     background: categoria ? 'var(--brand-dim)' : '#fff',
@@ -407,8 +409,8 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
 
               {/* Tipo de evento */}
               <div className="relative" ref={actRef}>
-                {actOpen && <div className="fixed inset-0 z-40" onClick={() => setActOpen(false)} />}
-                <button onClick={() => { setActOpen(o => !o); setCatOpen(false); setCapOpen(false); setSecOpen(false) }}
+                {actOpen && <div className="fixed inset-0 z-40" onClick={() => { setActOpen(false); setActQ('') }} />}
+                <button onClick={() => { const o = actOpen; closeAllDropdowns(); setActOpen(!o); if (actOpen) setActQ('') }}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap"
                   style={{
                     background: activity ? 'var(--brand-dim)' : '#fff',
@@ -484,7 +486,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               {/* Personas */}
               <div className="relative" ref={capRef}>
                 {capOpen && <div className="fixed inset-0 z-40" onClick={() => setCapOpen(false)} />}
-                <button onClick={() => { setCapOpen(o => !o); setSecOpen(false) }}
+                <button onClick={() => { const o = capOpen; closeAllDropdowns(); setCapOpen(!o) }}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all"
                   style={{
                     background: capacidad ? 'var(--brand-dim)' : '#fff',
@@ -555,8 +557,8 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
 
               {/* Sector / Ciudad */}
               <div className="relative" ref={secRef}>
-                {secOpen && <div className="fixed inset-0 z-40" onClick={() => setSecOpen(false)} />}
-                <button onClick={() => { setSecOpen(o => !o); setCapOpen(false) }}
+                {secOpen && <div className="fixed inset-0 z-40" onClick={() => { setSecOpen(false); setSectorQ(sector) }} />}
+                <button onClick={() => { const o = secOpen; closeAllDropdowns(); setSecOpen(!o); if (!secOpen) setSectorQ(sector) }}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all"
                   style={{
                     background: sector ? 'var(--brand-dim)' : '#fff',
@@ -604,7 +606,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
 
               {/* Fecha */}
               <div className="relative" ref={datePickerRef}>
-                <button onClick={openDatePicker}
+                <button onClick={() => { const o = datePickerOpen; closeAllDropdowns(); setDatePickerOpen(!o) }}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all"
                   style={{
                     background: dateFrom ? 'var(--brand-dim)' : '#fff',
@@ -643,7 +645,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               {/* Tipo de precio */}
               <div className="relative" ref={priceRef}>
                 {priceOpen && <div className="fixed inset-0 z-40" onClick={() => setPriceOpen(false)} />}
-                <button onClick={() => { setPriceOpen(o => !o); setCapOpen(false); setSecOpen(false) }}
+                <button onClick={() => { const o = priceOpen; closeAllDropdowns(); setPriceOpen(!o) }}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap"
                   style={{
                     background: pricingFilter ? (PRICING_TYPES.find(p => p.value === pricingFilter)?.bg ?? 'var(--brand-dim)') : '#fff',
@@ -691,7 +693,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                 {/* Ordenar */}
                 <div className="relative">
                   {sortOpen && <div className="fixed inset-0 z-40" onClick={() => setSortOpen(false)} />}
-                  <button onClick={() => setSortOpen(o => !o)}
+                  <button onClick={() => { const o = sortOpen; closeAllDropdowns(); setSortOpen(!o) }}
                     className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all"
                     style={{
                       background: sortBy !== 'relevancia' ? 'var(--brand-dim)' : '#fff',
