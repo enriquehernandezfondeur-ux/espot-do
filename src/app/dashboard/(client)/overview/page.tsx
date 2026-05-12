@@ -268,55 +268,100 @@ export default function ClientDashboard() {
         )
       })()}
 
-      {/* Próxima reserva destacada */}
-      {next && (
-        <div className="mb-6 md:mb-8 rounded-3xl overflow-hidden"
-          style={{ background: 'linear-gradient(135deg, #0F2A22 0%, #1A4D38 100%)', boxShadow: '0 8px 32px rgba(53,196,147,0.15)' }}>
-          <div className="px-5 md:px-8 py-6 md:py-7">
-            {/* Badge de tiempo */}
-            <div className="flex items-center gap-2 mb-3">
-              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                Próximo · {daysUntilNext === 0 ? '¡Hoy!' : daysUntilNext === 1 ? 'Mañana' : `En ${daysUntilNext} días`}
-              </span>
-            </div>
+      {/* Próxima reserva — estilo Airbnb */}
+      {next && (() => {
+        const sp    = (next.spaces as any)
+        const cover = sp?.space_images?.find((i: any) => i.is_cover)?.url ?? sp?.space_images?.[0]?.url
+        const hasTime = next.start_time && next.end_time
+        return (
+          <Link href={`/dashboard/reservas/${next.id}`}
+            className="block mb-6 md:mb-8 rounded-3xl overflow-hidden transition-transform hover:scale-[1.01]"
+            style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}>
 
-            {/* Nombre del espacio + evento */}
-            <h2 className="font-bold mb-1" style={{ color: '#fff', fontSize: 'clamp(1.2rem,4vw,1.5rem)' }}>
-              {(next.spaces as any)?.name}
-            </h2>
-            <p className="text-sm mb-4" style={{ color: 'rgba(255,255,255,0.65)' }}>{next.event_type}</p>
+            {/* Foto + overlay */}
+            <div className="relative h-48 md:h-56" style={{ background: '#0F2A22' }}>
+              {cover && (
+                <img src={cover} alt={sp?.name}
+                  className="w-full h-full object-cover" />
+              )}
+              {/* Gradiente sobre la foto */}
+              <div className="absolute inset-0"
+                style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.1) 50%, transparent 100%)' }} />
 
-            {/* Meta info — flex-wrap para móvil */}
-            <div className="flex items-center gap-3 md:gap-5 flex-wrap mb-5">
-              <span className="flex items-center gap-1.5 text-xs md:text-sm" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                <CalendarDays size={13} /> {formatDate(next.event_date)}
-              </span>
-              <span className="flex items-center gap-1.5 text-xs md:text-sm" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                <Clock size={13} /> {formatTime(next.start_time)} – {formatTime(next.end_time)}
-              </span>
-              <span className="flex items-center gap-1.5 text-xs md:text-sm" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                <Users size={13} /> {next.guest_count} personas
-              </span>
-            </div>
-
-            {/* Footer: monto + CTA */}
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <div className="text-2xl md:text-3xl font-bold" style={{ color: '#fff' }}>
-                  {formatCurrency(Number(next.total_amount))}
-                </div>
-                <div className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>total del evento</div>
+              {/* Badge días */}
+              <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+                style={{ background: 'rgba(53,196,147,0.9)', backdropFilter: 'blur(8px)' }}>
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                <span className="text-xs font-bold text-white">
+                  {daysUntilNext === 0 ? '¡Hoy!' : daysUntilNext === 1 ? 'Mañana' : `En ${daysUntilNext} días`}
+                </span>
               </div>
-              <Link href={`/dashboard/reservas/${next.id}`}
-                className="inline-flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl shrink-0"
-                style={{ background: 'rgba(53,196,147,0.2)', color: '#6EE7C7', border: '1px solid rgba(53,196,147,0.3)' }}>
-                Ver detalle <ArrowRight size={14} />
-              </Link>
+
+              {/* Nombre sobre la foto */}
+              <div className="absolute bottom-0 left-0 right-0 px-5 pb-4">
+                <p className="text-xs font-semibold mb-0.5" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                  TU PRÓXIMO EVENTO
+                </p>
+                <h2 className="font-bold text-white leading-tight" style={{ fontSize: 'clamp(1.15rem,4vw,1.4rem)' }}>
+                  {sp?.name}
+                </h2>
+                {sp?.sector && (
+                  <p className="text-xs mt-0.5 flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                    <MapPin size={11} /> {sp.sector}, {sp.city}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+
+            {/* Info — blanco */}
+            <div className="px-5 py-4 flex items-center justify-between gap-4"
+              style={{ background: '#fff' }}>
+              <div className="flex items-center gap-4 flex-wrap">
+                {/* Fecha */}
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'var(--text-muted)' }}>Fecha</p>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{formatDate(next.event_date)}</p>
+                </div>
+                {/* Horario — solo si existe */}
+                {hasTime && (
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'var(--text-muted)' }}>Horario</p>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                      {formatTime(next.start_time)} – {formatTime(next.end_time)}
+                    </p>
+                  </div>
+                )}
+                {/* Personas */}
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'var(--text-muted)' }}>Personas</p>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{next.guest_count}</p>
+                </div>
+                {/* Evento */}
+                {next.event_type && (
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'var(--text-muted)' }}>Evento</p>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{next.event_type}</p>
+                  </div>
+                )}
+              </div>
+              {/* Total + flecha */}
+              <div className="text-right shrink-0">
+                <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'var(--text-muted)' }}>Total</p>
+                <p className="text-lg font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+                  {formatCurrency(Number(next.total_amount))}
+                </p>
+              </div>
+            </div>
+
+            {/* CTA footer */}
+            <div className="px-5 py-3 flex items-center justify-between"
+              style={{ background: 'var(--brand-dim)', borderTop: '1px solid var(--brand-border)' }}>
+              <span className="text-xs font-medium" style={{ color: 'var(--brand)' }}>Ver detalle completo</span>
+              <ArrowRight size={15} style={{ color: 'var(--brand)' }} />
+            </div>
+          </Link>
+        )
+      })()}
 
       {/* Stats — 2 cols en móvil, 4 en desktop */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
