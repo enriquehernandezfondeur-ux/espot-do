@@ -626,40 +626,6 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               placeholder="Elige una fecha"
             />
 
-            {/* Plan de cuotas — aparece al elegir fecha, en la misma card */}
-            {eventDate && !isQuote && (() => {
-              const totalEst = pricing?.hourly_price ?? pricing?.minimum_consumption ?? pricing?.fixed_price ?? 0
-              if (!totalEst) return null
-              const sched = buildSchedule(eventDate, totalEst)
-              return (
-                <div className="rounded-2xl overflow-hidden"
-                  style={{ border: '1.5px solid var(--brand-border)', background: 'var(--brand-dim)' }}>
-                  <div className="flex items-center justify-between px-4 py-2.5"
-                    style={{ borderBottom: '1px solid var(--brand-border)' }}>
-                    <div className="flex items-center gap-2">
-                      <CreditCard size={13} style={{ color: 'var(--brand)' }} />
-                      <span className="text-xs font-bold" style={{ color: 'var(--brand)' }}>
-                        {scheduleModelLabel(sched.model)}
-                      </span>
-                    </div>
-                    <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
-                      {sched.daysUntilEvent} días al evento
-                    </span>
-                  </div>
-                  <div className="px-4 py-3 space-y-1.5">
-                    {sched.installments.map((inst, i) => (
-                      <div key={i} className="flex items-center justify-between text-xs">
-                        <span style={{ color: 'var(--text-secondary)' }}>{inst.label}</span>
-                        <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-                          {inst.percentage}% — {formatCurrency(inst.amount)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )
-            })()}
-
             {/* Mensaje informativo por modelo */}
             {isConsumption && (
               <div className="rounded-xl px-4 py-3 text-xs" style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.15)', color: '#374151', lineHeight: 1.7 }}>
@@ -1053,6 +1019,65 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                 </p>
               </div>
             )}
+
+            {/* Plan de cuotas — sección destacada en el resumen final */}
+            {!isQuote && subtotal > 0 && (() => {
+              const sched = buildSchedule(eventDate, subtotal)
+              return (
+                <div className="rounded-2xl overflow-hidden"
+                  style={{ border: '1.5px solid var(--brand-border)' }}>
+                  {/* Header */}
+                  <div className="flex items-center justify-between px-4 py-3"
+                    style={{ background: 'var(--brand-dim)', borderBottom: '1px solid var(--brand-border)' }}>
+                    <div className="flex items-center gap-2">
+                      <CreditCard size={14} style={{ color: 'var(--brand)' }} />
+                      <span className="text-sm font-bold" style={{ color: 'var(--brand)' }}>
+                        Tu plan de pagos
+                      </span>
+                    </div>
+                    <span className="text-xs px-2.5 py-1 rounded-full font-semibold"
+                      style={{ background: 'rgba(53,196,147,0.15)', color: 'var(--brand)' }}>
+                      {scheduleModelLabel(sched.model)}
+                    </span>
+                  </div>
+                  {/* Cuotas */}
+                  <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
+                    {sched.installments.map((inst, i) => (
+                      <div key={i} className="flex items-center gap-3 px-4 py-3.5">
+                        {/* Número */}
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                          style={{ background: i === 0 ? 'var(--brand)' : 'var(--bg-elevated)', color: i === 0 ? '#fff' : 'var(--text-muted)', border: i === 0 ? 'none' : '1.5px solid var(--border-medium)' }}>
+                          {i + 1}
+                        </div>
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                            {formatCurrency(inst.amount)}
+                            <span className="ml-1.5 text-xs font-normal" style={{ color: 'var(--text-muted)' }}>
+                              ({inst.percentage}%)
+                            </span>
+                          </div>
+                          <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{inst.label}</div>
+                        </div>
+                        {/* Badge primera cuota */}
+                        {i === 0 && (
+                          <span className="text-[11px] font-bold px-2 py-1 rounded-lg shrink-0"
+                            style={{ background: 'rgba(53,196,147,0.12)', color: 'var(--brand)' }}>
+                            Ahora
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {sched.installments.length > 1 && (
+                    <div className="px-4 py-2.5 text-[11px]"
+                      style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', borderTop: '1px solid var(--border-subtle)' }}>
+                      Solo pagas la cuota 1 hoy. Las siguientes se cobran en las fechas indicadas.
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
 
             {!isQuote && (
               <div className="flex items-center gap-3 px-4 py-3 rounded-2xl"
