@@ -80,7 +80,8 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   const [selectedAddons, setSelectedAddons] = useState<string[]>([])
   const [guestNote,      setGuestNote]      = useState('')
 
-  const [showNote,       setShowNote]       = useState(false)
+  const [showNote,         setShowNote]         = useState(false)
+  const [showPaymentPlan,  setShowPaymentPlan]  = useState(false)
   const [booking,          setBooking]          = useState(false)
   const [success,          setSuccess]          = useState(false)
   const [successType,      setSuccessType]      = useState<'pending' | 'quote' | 'instant'>('pending')
@@ -617,53 +618,49 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               placeholder="Elige una fecha"
             />
 
-            {/* ── Días + cuotas — compacto ── */}
+            {/* ── Plan de cuotas desplegable ── */}
             {eventDate && !dateBlocked && allowedTimeRange !== null && allowedTimeRange !== undefined && !isQuote && (() => {
               const today = new Date(); today.setHours(0,0,0,0)
               const daysUntil = Math.max(0, Math.ceil((new Date(eventDate + 'T12:00').getTime() - today.getTime()) / 86400000))
-              // Para precio por hora: usar mínimo facturable (min_hours × hourly_price)
-              // Para paquete/consumo: usar precio base directamente
-              const baseAmt = isHourly
-                ? (pricing?.hourly_price ?? 0) * Math.max(minHours || 1, 1)
-                : (pricing?.minimum_consumption || pricing?.fixed_price || 0)
-              if (!baseAmt) return null
-              const sched = buildSchedule(eventDate, baseAmt)
-              const isEstimate = isHourly // para precio por hora el total varía según horas
+              const sched = buildSchedule(eventDate, 100)
+              const daysLabel = daysUntil === 0 ? 'Hoy' : daysUntil === 1 ? 'Mañana' : `${daysUntil} días`
               return (
                 <div className="rounded-xl overflow-hidden"
                   style={{ border: '1px solid var(--border-medium)' }}>
-                  {/* Línea resumen */}
-                  <div className="px-3 py-2 flex items-center justify-between"
-                    style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
+                  {/* Fila colapsable */}
+                  <button type="button"
+                    onClick={() => setShowPaymentPlan(o => !o)}
+                    className="w-full flex items-center justify-between px-3 py-2.5 transition-colors"
+                    style={{ background: 'var(--bg-elevated)' }}>
                     <span className="text-xs font-semibold flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
                       <CalendarDays size={12} style={{ color: 'var(--brand)' }} />
-                      {daysUntil === 0 ? 'Hoy' : daysUntil === 1 ? 'Mañana' : `${daysUntil} días`}
+                      {daysLabel} · {scheduleModelLabel(sched.model)}
                     </span>
-                    <span className="text-xs font-semibold" style={{ color: 'var(--brand)' }}>
-                      {scheduleModelLabel(sched.model)}
-                    </span>
-                  </div>
-                  {/* Cuotas — una línea cada una */}
-                  {sched.installments.map((inst, i) => (
-                    <div key={i} className="flex items-center justify-between px-3 py-2.5"
-                      style={{ borderBottom: i < sched.installments.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
-                      <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full shrink-0"
-                          style={{ background: i === 0 ? 'var(--brand)' : 'var(--border-medium)' }} />
-                        <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
-                          {i === 0 ? 'Al confirmar' : new Date(inst.due_date + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
-                        </span>
-                      </div>
-                      <span className="text-xs font-bold" style={{ color: i === 0 ? 'var(--brand)' : 'var(--text-primary)' }}>
-                        {isEstimate ? '~' : ''}{formatCurrency(inst.amount)}
-                        <span className="font-normal ml-1" style={{ color: 'var(--text-muted)' }}>({inst.percentage}%)</span>
-                      </span>
-                    </div>
-                  ))}
-                  {isEstimate && (
-                    <div className="px-3 py-1 text-[11px]"
-                      style={{ background: 'var(--bg-elevated)', borderTop: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}>
-                      ~ Estimado según precio base
+                    <ChevronRight size={13} style={{
+                      color: 'var(--text-muted)',
+                      transition: 'transform 0.2s',
+                      transform: showPaymentPlan ? 'rotate(90deg)' : 'rotate(0deg)',
+                      flexShrink: 0,
+                    }} />
+                  </button>
+                  {/* Detalle expandido */}
+                  {showPaymentPlan && (
+                    <div style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                      {sched.installments.map((inst, i) => (
+                        <div key={i} className="flex items-center justify-between px-3 py-2.5"
+                          style={{ borderBottom: i < sched.installments.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
+                          <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full shrink-0"
+                              style={{ background: i === 0 ? 'var(--brand)' : 'var(--border-medium)' }} />
+                            <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                              {i === 0 ? 'Al confirmar reserva' : new Date(inst.due_date + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'long' })}
+                            </span>
+                          </div>
+                          <span className="text-xs font-semibold" style={{ color: i === 0 ? 'var(--brand)' : 'var(--text-muted)' }}>
+                            {inst.percentage}% del total
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
