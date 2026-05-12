@@ -626,6 +626,40 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               placeholder="Elige una fecha"
             />
 
+            {/* Plan de cuotas — aparece al elegir fecha, en la misma card */}
+            {eventDate && !isQuote && (() => {
+              const totalEst = pricing?.hourly_price ?? pricing?.minimum_consumption ?? pricing?.fixed_price ?? 0
+              if (!totalEst) return null
+              const sched = buildSchedule(eventDate, totalEst)
+              return (
+                <div className="rounded-2xl overflow-hidden"
+                  style={{ border: '1.5px solid var(--brand-border)', background: 'var(--brand-dim)' }}>
+                  <div className="flex items-center justify-between px-4 py-2.5"
+                    style={{ borderBottom: '1px solid var(--brand-border)' }}>
+                    <div className="flex items-center gap-2">
+                      <CreditCard size={13} style={{ color: 'var(--brand)' }} />
+                      <span className="text-xs font-bold" style={{ color: 'var(--brand)' }}>
+                        {scheduleModelLabel(sched.model)}
+                      </span>
+                    </div>
+                    <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                      {sched.daysUntilEvent} días al evento
+                    </span>
+                  </div>
+                  <div className="px-4 py-3 space-y-1.5">
+                    {sched.installments.map((inst, i) => (
+                      <div key={i} className="flex items-center justify-between text-xs">
+                        <span style={{ color: 'var(--text-secondary)' }}>{inst.label}</span>
+                        <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                          {inst.percentage}% — {formatCurrency(inst.amount)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
+
             {/* Mensaje informativo por modelo */}
             {isConsumption && (
               <div className="rounded-xl px-4 py-3 text-xs" style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.15)', color: '#374151', lineHeight: 1.7 }}>
@@ -1019,43 +1053,6 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                 </p>
               </div>
             )}
-
-            {/* Plan de cuotas en el paso 5 — justo antes de confirmar */}
-            {!isQuote && subtotal > 0 && (() => {
-              const sched = buildSchedule(eventDate, subtotal)
-              if (sched.installments.length <= 1) return null
-              return (
-                <div className="rounded-2xl overflow-hidden" style={{ border: '1.5px solid var(--brand-border)' }}>
-                  <div className="px-4 py-2.5 flex items-center justify-between"
-                    style={{ background: 'var(--brand-dim)', borderBottom: '1px solid var(--brand-border)' }}>
-                    <div className="flex items-center gap-2">
-                      <CreditCard size={13} style={{ color: 'var(--brand)' }} />
-                      <span className="text-xs font-bold" style={{ color: 'var(--brand)' }}>
-                        {scheduleModelLabel(sched.model)}
-                      </span>
-                    </div>
-                    <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
-                      {sched.daysUntilEvent} días al evento
-                    </span>
-                  </div>
-                  <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
-                    {sched.installments.map((inst, i) => (
-                      <div key={i} className="flex items-center justify-between px-4 py-2.5 text-xs">
-                        <div>
-                          <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{inst.label}</span>
-                          <span className="ml-2 text-[11px]" style={{ color: 'var(--text-muted)' }}>
-                            · vence {inst.due_date === new Date().toISOString().split('T')[0] ? 'hoy' : new Date(inst.due_date + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
-                          </span>
-                        </div>
-                        <span className="font-bold shrink-0" style={{ color: 'var(--text-primary)' }}>
-                          {formatCurrency(inst.amount)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )
-            })()}
 
             {!isQuote && (
               <div className="flex items-center gap-3 px-4 py-3 rounded-2xl"

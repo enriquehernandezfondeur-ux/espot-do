@@ -1151,27 +1151,6 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
             })()}
 
             <BookingWidget space={space} onChat={() => setShowChat(true)} initialDate={initialDate} />
-
-            {/* ¿Cómo funciona el pago? — debajo del widget, no interrumpe el flujo */}
-            {pricing && pricing.pricing_type !== 'custom_quote' && (
-              <div className="rounded-2xl px-4 py-3 space-y-2"
-                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                <p className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
-                  Pago en cuotas según cuánto falta para tu evento
-                </p>
-                {[
-                  { days: 'Menos de 7 días', note: '100% al confirmar' },
-                  { days: '7 a 30 días',     note: '50% ahora · 50% 48h antes' },
-                  { days: '30 a 60 días',    note: '30% ahora · 70% 48h antes' },
-                  { days: 'Más de 60 días',  note: '25% ahora · 50% a los 60 días · 25% 48h antes' },
-                ].map(row => (
-                  <div key={row.days} className="flex items-baseline justify-between gap-2 text-xs">
-                    <span className="shrink-0" style={{ color: 'var(--text-muted)' }}>{row.days}</span>
-                    <span className="text-right font-medium" style={{ color: 'var(--text-secondary)' }}>{row.note}</span>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
 
         </div>{/* end grid */}
