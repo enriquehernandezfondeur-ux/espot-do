@@ -115,23 +115,53 @@ export async function getClientStats() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
-  const { data: bookings } = await supabase
-    .from('bookings')
-    .select('id, status, total_amount, event_date, event_type, spaces!space_id(name), profiles!guest_id(full_name)')
-    .eq('guest_id', user.id)
-    .order('event_date', { ascending: true })
+  const [{ data: bookings }, { data: profile }] = await Promise.all([
+    supabase
+      .from('bookings')
+      .select('id, status, total_amount, event_date, event_type, spaces!space_id(name,slug)')
+      .eq('guest_id', user.id)
+      .order('event_date', { ascending: true }),
+    supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', user.id)
+      .single(),
+  ])
 
   const bk = bookings ?? []
   const today = new Date().toISOString().split('T')[0]
 
+  const activeBookingIds = bk
+    .filter(b => ['accepted', 'confirmed'].includes(b.status))
+    .map(b => b.id)
+
+  const { data: installments } = activeBookingIds.length > 0
+    ? await supabase
+        .from('booking_installments')
+        .select('id, amount, due_date, status, installment_number, booking_id')
+        .in('booking_id', activeBookingIds)
+        .in('status', ['pending', 'overdue'])
+        .order('due_date', { ascending: true })
+    : { data: [] }
+
+  const soon = new Date()
+  soon.setDate(soon.getDate() + 7)
+  const soonStr = soon.toISOString().split('T')[0]
+
   return {
-    total:     bk.length,
-    pending:   bk.filter(b => b.status === 'pending').length,
-    confirmed: bk.filter(b => b.status === 'confirmed').length,
-    completed: bk.filter(b => b.status === 'completed').length,
+    userName:   profile?.full_name?.split(' ')[0] ?? null,
+    total:      bk.length,
+    pendingPayment: bk.filter(b => b.status === 'accepted').length,
+    confirmed:  bk.filter(b => b.status === 'confirmed').length,
+    completed:  bk.filter(b => b.status === 'completed').length,
     totalSpent: bk.filter(b => b.status === 'confirmed' || b.status === 'completed')
                   .reduce((s, b) => s + Number(b.total_amount), 0),
-    nextBooking: bk.find(b => b.event_date >= today && ['confirmed', 'pending'].includes(b.status)) ?? null,
+    nextBooking: bk.find(b => b.event_date >= today && ['confirmed', 'accepted'].includes(b.status)) ?? null,
     recent: bk.slice(0, 5),
+    overdueInstallments: (installments ?? []).filter(i => i.status === 'overdue'),
+    upcomingInstallments: (installments ?? []).filter(i => i.status === 'pending' && i.due_date <= soonStr),
+    installmentsByBooking: Object.fromEntries(
+      bk.map(b => [b.id, { spaceName: (b.spaces as any)?.name ?? '' }])
+    ),
   }
 }

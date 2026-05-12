@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { CalendarDays, Clock, CheckCircle, ArrowRight, MapPin, Users, CreditCard, Heart, Loader2 } from 'lucide-react'
+import { CalendarDays, Clock, CheckCircle, ArrowRight, MapPin, Users, CreditCard, Heart, Loader2, MessageCircle, AlertTriangle, Bell } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getClientStats } from '@/lib/actions/client'
 
@@ -39,14 +39,78 @@ export default function ClientDashboard() {
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
 
       {/* Header */}
-      <div className="mb-6 md:mb-8">
+      <div className="mb-5 md:mb-7">
         <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-          Bienvenido 👋
+          {stats?.userName ? `Hola, ${stats.userName}` : 'Mi panel'}
         </h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
           Aquí tienes el resumen de tus reservas y actividad
         </p>
       </div>
+
+      {/* ── Alertas críticas ── */}
+      {(stats?.overdueInstallments?.length ?? 0) > 0 && (
+        <div className="mb-4 rounded-2xl px-4 py-4 flex items-start gap-3"
+          style={{ background: 'rgba(220,38,38,0.06)', border: '1.5px solid rgba(220,38,38,0.25)' }}>
+          <AlertTriangle size={18} style={{ color: '#DC2626', flexShrink: 0, marginTop: 1 }} />
+          <div className="flex-1 min-w-0">
+            <div className="font-semibold text-sm" style={{ color: '#DC2626' }}>
+              {stats!.overdueInstallments!.length === 1
+                ? 'Tienes una cuota vencida'
+                : `Tienes ${stats!.overdueInstallments!.length} cuotas vencidas`}
+            </div>
+            <div className="text-xs mt-0.5" style={{ color: '#B91C1C' }}>
+              Revisa tu plan de pagos para evitar la cancelación de tu reserva.
+            </div>
+          </div>
+          <Link href="/dashboard/reservas"
+            className="text-xs font-bold px-3 py-2 rounded-xl shrink-0"
+            style={{ background: '#DC2626', color: '#fff' }}>
+            Ver ahora
+          </Link>
+        </div>
+      )}
+
+      {(stats?.pendingPayment ?? 0) > 0 && (stats?.overdueInstallments?.length ?? 0) === 0 && (
+        <div className="mb-4 rounded-2xl px-4 py-4 flex items-start gap-3"
+          style={{ background: 'rgba(37,99,235,0.06)', border: '1.5px solid rgba(37,99,235,0.2)' }}>
+          <Bell size={18} style={{ color: '#2563EB', flexShrink: 0, marginTop: 1 }} />
+          <div className="flex-1 min-w-0">
+            <div className="font-semibold text-sm" style={{ color: '#1D4ED8' }}>
+              {stats!.pendingPayment === 1
+                ? '¡Tu reserva fue aceptada!'
+                : `${stats!.pendingPayment} reservas esperan tu pago`}
+            </div>
+            <div className="text-xs mt-0.5" style={{ color: '#3B82F6' }}>
+              Completa el pago para confirmar tu fecha.
+            </div>
+          </div>
+          <Link href="/dashboard/reservas?filter=Por+pagar"
+            className="text-xs font-bold px-3 py-2 rounded-xl shrink-0"
+            style={{ background: '#2563EB', color: '#fff' }}>
+            Pagar ahora
+          </Link>
+        </div>
+      )}
+
+      {(stats?.upcomingInstallments?.length ?? 0) > 0 && (stats?.overdueInstallments?.length ?? 0) === 0 && (
+        <div className="mb-4 rounded-2xl px-4 py-3 flex items-center gap-3"
+          style={{ background: 'rgba(217,119,6,0.06)', border: '1.5px solid rgba(217,119,6,0.2)' }}>
+          <Clock size={16} style={{ color: '#D97706', flexShrink: 0 }} />
+          <div className="flex-1 min-w-0">
+            <span className="text-sm font-semibold" style={{ color: '#92400E' }}>
+              Próxima cuota — {formatDate(stats!.upcomingInstallments![0].due_date)}
+            </span>
+            <span className="text-xs ml-2" style={{ color: '#D97706' }}>
+              {formatCurrency(Number(stats!.upcomingInstallments![0].amount))}
+            </span>
+          </div>
+          <Link href="/dashboard/reservas"
+            className="text-xs font-semibold shrink-0" style={{ color: '#D97706' }}>
+            Ver →
+          </Link>
+        </div>
+      )}
 
       {/* Próxima reserva destacada */}
       {next && (
@@ -99,23 +163,28 @@ export default function ClientDashboard() {
       )}
 
       {/* Stats — 2 cols en móvil, 4 en desktop */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
         {[
-          { label: 'Total reservas', value: stats?.total ?? 0,     icon: CalendarDays, color: 'var(--brand)' },
-          { label: 'Pendientes',     value: stats?.pending ?? 0,   icon: Clock,        color: '#D97706' },
-          { label: 'Confirmadas',    value: stats?.confirmed ?? 0, icon: CheckCircle,  color: '#16A34A' },
+          { label: 'Total reservas', value: stats?.total ?? 0,            icon: CalendarDays, color: 'var(--brand)' },
+          { label: 'Por pagar',      value: stats?.pendingPayment ?? 0,   icon: Clock,        color: '#2563EB',
+            urgent: (stats?.pendingPayment ?? 0) > 0 },
+          { label: 'Confirmadas',    value: stats?.confirmed ?? 0,        icon: CheckCircle,  color: '#16A34A' },
           { label: 'Total gastado',  value: formatCurrency(stats?.totalSpent ?? 0), icon: CreditCard, color: '#7C3AED' },
-        ].map(({ label, value, icon: Icon, color }) => (
+        ].map(({ label, value, icon: Icon, color, urgent }) => (
           <div key={label} className="rounded-2xl p-4 md:p-5"
-            style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+            style={{
+              background: urgent ? 'rgba(37,99,235,0.04)' : '#fff',
+              border: urgent ? '1.5px solid rgba(37,99,235,0.25)' : '1px solid var(--border-subtle)',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.04)'
+            }}>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs md:text-sm" style={{ color: 'var(--text-secondary)' }}>{label}</span>
               <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center"
-                style={{ background: `${color}15` }}>
+                style={{ background: `${color}18` }}>
                 <Icon size={14} style={{ color }} />
               </div>
             </div>
-            <div className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{value}</div>
+            <div className="text-xl md:text-2xl font-bold" style={{ color: urgent ? color : 'var(--text-primary)' }}>{value}</div>
           </div>
         ))}
       </div>
@@ -183,12 +252,13 @@ export default function ClientDashboard() {
         )}
       </div>
 
-      {/* Quick links — 1 col en móvil, 3 en desktop */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+      {/* Quick links — 2 cols en móvil, 4 en desktop */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {[
-          { href: '/buscar',             label: 'Explorar espacios', sub: 'Descubre nuevos lugares',  icon: MapPin,   color: 'var(--brand)' },
-          { href: '/dashboard/favoritos',label: 'Mis favoritos',     sub: 'Espacios que guardaste',   icon: Heart,    color: '#EF4444' },
-          { href: '/dashboard/pagos',    label: 'Historial de pagos',sub: 'Revisa tus transacciones', icon: CreditCard, color: '#7C3AED' },
+          { href: '/buscar',              label: 'Explorar',     sub: 'Buscar espacios',        icon: MapPin,         color: 'var(--brand)' },
+          { href: '/dashboard/mensajes',  label: 'Mensajes',     sub: 'Hablar con el host',     icon: MessageCircle,  color: '#0891B2' },
+          { href: '/dashboard/favoritos', label: 'Favoritos',    sub: 'Espacios guardados',     icon: Heart,          color: '#EF4444' },
+          { href: '/dashboard/pagos',     label: 'Mis pagos',    sub: 'Historial y cuotas',     icon: CreditCard,     color: '#7C3AED' },
         ].map(({ href, label, sub, icon: Icon, color }) => (
           <Link key={href} href={href}
             className="flex items-center gap-4 p-4 md:p-5 rounded-2xl transition-all card-hover"
