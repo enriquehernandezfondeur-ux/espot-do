@@ -441,32 +441,32 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
 
             {/* Plataforma */}
             <div>
-              <p className="text-[9px] font-bold uppercase tracking-widest mb-3" style={{color:'#35C493'}}>Plataforma</p>
-              {[{href:'/buscar',label:'Explorar'},{href:'/para-clientes',label:'Para clientes'},{href:'/para-propietarios',label:'Para propietarios'}].map(({href,label})=>(
-                <Link key={href} href={href} className="ft-link block text-xs mb-1.5" style={{color:'#6B7280'}}>{label}</Link>
+              <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{color:'#35C493'}}>Plataforma</p>
+              {[{href:'/buscar',label:'Explorar espacios'},{href:'/para-clientes',label:'Para clientes'},{href:'/para-propietarios',label:'Para propietarios'}].map(({href,label})=>(
+                <Link key={href} href={href} className="ft-link block text-sm mb-2" style={{color:'#6B7280'}}>{label}</Link>
               ))}
             </div>
 
             {/* Anfitriones */}
             <div>
-              <p className="text-[9px] font-bold uppercase tracking-widest mb-3" style={{color:'#35C493'}}>Anfitriones</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{color:'#35C493'}}>Anfitriones</p>
               {[{href:'/para-propietarios',label:'Publicar espacio'},{href:'/dashboard/host',label:'Panel de control'},{href:'/contacto',label:'Contacto'}].map(({href,label})=>(
-                <Link key={label} href={href} className="ft-link block text-xs mb-1.5" style={{color:'#6B7280'}}>{label}</Link>
+                <Link key={href} href={href} className="ft-link block text-sm mb-2" style={{color:'#6B7280'}}>{label}</Link>
               ))}
             </div>
 
             {/* Legal */}
             <div>
-              <p className="text-[9px] font-bold uppercase tracking-widest mb-3" style={{color:'#35C493'}}>Legal</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{color:'#35C493'}}>Legal</p>
               {[{href:'/terminos',label:'Términos'},{href:'/privacidad',label:'Privacidad'},{href:'/reembolso',label:'Reembolsos'},{href:'/seguridad',label:'Seguridad'},{href:'/cookies',label:'Cookies'}].map(({href,label})=>(
-                <Link key={href} href={href} className="ft-link block text-xs mb-1.5" style={{color:'#6B7280'}}>{label}</Link>
+                <Link key={href} href={href} className="ft-link block text-sm mb-2" style={{color:'#6B7280'}}>{label}</Link>
               ))}
             </div>
 
             {/* Logo + redes */}
             <div className="flex flex-col items-start gap-3">
-              <Link href="/"><img src="/logo-dark.svg" alt="EspotHub" style={{height:18,width:'auto'}}/></Link>
-              <p className="text-xs" style={{color:'#9CA3AF',lineHeight:1.5}}>Marketplace de espacios para eventos en RD.</p>
+              <Link href="/"><img src="/logo-dark.svg" alt="EspotHub" style={{height:22,width:'auto'}}/></Link>
+              <p className="text-sm" style={{color:'#9CA3AF',lineHeight:1.6}}>Marketplace de espacios para eventos en RD.</p>
               <div className="flex gap-1.5">
                 {[
                   {href:'https://www.instagram.com/espot.do/',path:'M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z',label:'IG'},
@@ -485,10 +485,10 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
           </div>
 
           {/* Barra inferior */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-4"
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-5 pb-2"
             style={{borderTop:'1px solid #E0E7E3'}}>
             <div className="flex items-center gap-2 flex-wrap justify-center">
-              <span className="text-[10px] font-semibold" style={{color:'#9CA3AF'}}>Pago seguro</span>
+              <span className="text-xs font-semibold" style={{color:'#9CA3AF'}}>Pago seguro</span>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/azul-logo.jpg"           alt="Azul"             style={{height:14,width:'auto',borderRadius:2,objectFit:'contain'}}/>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -500,7 +500,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/mastercard-id-check.png" alt="MC ID Check"      style={{height:12,width:'auto'}}/>
             </div>
-            <p className="text-[10px]" style={{color:'#9CA3AF'}}>© 2026 ESPOT, S.R.L. · República Dominicana</p>
+            <p className="text-xs" style={{color:'#9CA3AF'}}>© 2026 ESPOT, S.R.L. · República Dominicana</p>
           </div>
         </div>
       </footer>
