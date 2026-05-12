@@ -3,17 +3,16 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import {
   Search, MapPin, Users, SlidersHorizontal, X, CalendarDays, Clock,
   LayoutList, Map,
-  Check, Building2, UtensilsCrossed, ChevronDown,
+  Check, Building2, UtensilsCrossed, ChevronDown, Tag,
   Wine, Trees, Camera,
   Car, Volume2, Music2, Waves, Minus, Plus, Wifi,
   Wind, Projector, Zap, ShowerHead, MonitorPlay,
 } from 'lucide-react'
 import { CATEGORIES, PRICING_TYPES } from './constants'
-import { SUB_ACTIVITIES } from '@/lib/activities'
+import { SUB_ACTIVITIES, SUB_TO_BASE } from '@/lib/activities'
 import { SpaceCard } from './SpaceCard'
 import { DateTimePicker } from './DateTimePicker'
 
@@ -101,8 +100,9 @@ interface Props {
 }
 
 export default function BuscarClient({ spaces, initialParams }: Props) {
-  const router = useRouter()
-  const activity = initialParams.activity ?? ''
+  const [activity,       setActivity]       = useState(initialParams.activity ?? '')
+  const [actOpen,        setActOpen]        = useState(false)
+  const actRef = useRef<HTMLDivElement>(null)
   const [q,              setQ]              = useState(initialParams.q ?? '')
   const [sector,         setSector]         = useState(initialParams.sector ?? '')
   const [sectorQ,        setSectorQ]        = useState(initialParams.sector ?? '')
@@ -151,6 +151,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
       setPriceOpen(false)
       setSortOpen(false)
       setDatePickerOpen(false)
+      setActOpen(false)
     }
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
@@ -196,11 +197,27 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
     let result = [...spaces]
     if (q) {
       const ql = q.toLowerCase()
+      // Actividades que coinciden con el texto escrito
+      const actMatch = QUICK_ACTIVITIES.find(a =>
+        a.label.toLowerCase().includes(ql) || a.slug.replace('-', ' ').includes(ql)
+      )
+      const actBase = actMatch ? (SUB_TO_BASE[actMatch.slug] ?? null) : null
       result = result.filter(s =>
         s.name?.toLowerCase().includes(ql) ||
         s.description?.toLowerCase().includes(ql) ||
         s.category?.toLowerCase().includes(ql) ||
-        s.sector?.toLowerCase().includes(ql),
+        s.sector?.toLowerCase().includes(ql) ||
+        (actBase && (
+          s.primary_activity === actBase ||
+          (Array.isArray(s.secondary_activities) && s.secondary_activities.includes(actBase))
+        )),
+      )
+    }
+    if (activity) {
+      const base = SUB_TO_BASE[activity] ?? activity
+      result = result.filter(s =>
+        s.primary_activity === base ||
+        (Array.isArray(s.secondary_activities) && s.secondary_activities.includes(base))
       )
     }
     if (categoria) result = result.filter(s => s.category === categoria)
@@ -263,7 +280,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
     }
 
     return result
-  }, [spaces, q, categoria, sector, capacidad, priceMin, priceMax, selectedAmenities, selectedFacilities, pricingFilter, sortBy])
+  }, [spaces, q, activity, categoria, sector, capacidad, priceMin, priceMax, selectedAmenities, selectedFacilities, pricingFilter, sortBy])
 
   function applyCapacity(val: string) {
     setCapacidad(val); setCapacidadInput(val)
@@ -294,21 +311,8 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
     activity, categoria, sector, capacidad, dateFrom, timeFrom, pricingFilter, ...selectedAmenities, ...selectedFacilities, priceMin, priceMax,
   ].filter(Boolean).length
 
-  function buildActivityUrl(slug: string) {
-    const p = new URLSearchParams()
-    if (q)       p.set('q', q)
-    if (sector)  p.set('sector', sector)
-    if (categoria) p.set('categoria', categoria)
-    if (capacidad) p.set('capacidad', capacidad)
-    if (dateFrom) p.set('dateFrom', dateFrom)
-    if (timeFrom) p.set('timeFrom', timeFrom)
-    if (slug)    p.set('activity', slug)
-    return `/buscar?${p.toString()}`
-  }
-
   function clearAll() {
-    router.push('/buscar')
-    setQ(''); setSector(''); setSectorQ(''); setCategoria(''); setCapacidad(''); setCapacidadInput('')
+    setQ(''); setActivity(''); setSector(''); setSectorQ(''); setCategoria(''); setCapacidad(''); setCapacidadInput('')
     setSelectedAmenities([]); setSelectedFacilities([]); setPricingFilter(''); setPriceMin(''); setPriceMax(''); setDateFrom(''); setTimeFrom('')
   }
 
@@ -320,7 +324,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
     : ''
 
   const activeChips = [
-    activity  && { key: 'activity', label: activityLabel, onRemove: () => router.push(buildActivityUrl('')) },
+    activity  && { key: 'activity', label: activityLabel, onRemove: () => setActivity('') },
     sector    && { key: 'sector', label: sector, onRemove: () => clearSector() },
     dateFrom  && { key: 'date',   label: timeFrom ? `${fmtDateShort(dateFrom)} · ${fmtTime(timeFrom)}` : fmtDateShort(dateFrom), onRemove: () => { setDateFrom(''); setTimeFrom('') } },
     capacidad && { key: 'cap',    label: `${capacidad}+ personas`, onRemove: () => applyCapacity('') },
@@ -409,6 +413,45 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
                           <Icon size={14} style={{ color: isActive ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
                           {cat.label}
+                          {isActive && <Check size={13} style={{ color: 'var(--brand)', marginLeft: 'auto' }} />}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div className="w-px h-5 shrink-0" style={{ background: 'var(--border-medium)' }} />
+
+              {/* Tipo de evento */}
+              <div className="relative" ref={actRef}>
+                {actOpen && <div className="fixed inset-0 z-40" onClick={() => setActOpen(false)} />}
+                <button onClick={() => { setActOpen(o => !o); setCatOpen(false); setCapOpen(false); setSecOpen(false) }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap"
+                  style={{
+                    background: activity ? 'var(--brand-dim)' : '#fff',
+                    border: `1.5px solid ${activity ? 'var(--brand-border)' : 'var(--border-medium)'}`,
+                    color: activity ? 'var(--brand)' : 'var(--text-primary)',
+                  }}>
+                  <Tag size={14} style={{ flexShrink: 0 }} />
+                  <span>{activityLabel || 'Tipo de evento'}</span>
+                  {activity
+                    ? <button onClick={e => { e.stopPropagation(); setActivity('') }}><X size={12} /></button>
+                    : <ChevronDown size={13} style={{ opacity: 0.5 }} />
+                  }
+                </button>
+                {actOpen && (
+                  <div className="absolute left-0 top-full mt-2 z-50 rounded-2xl overflow-hidden py-1.5"
+                    style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', minWidth: 200 }}>
+                    {QUICK_ACTIVITIES.map(a => {
+                      const isActive = activity === a.slug
+                      return (
+                        <button key={a.slug} onClick={() => { setActivity(isActive ? '' : a.slug); setActOpen(false) }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-all"
+                          style={{ color: isActive ? 'var(--brand)' : 'var(--text-primary)', fontWeight: isActive ? 600 : 400 }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
+                          {a.label}
                           {isActive && <Check size={13} style={{ color: 'var(--brand)', marginLeft: 'auto' }} />}
                         </button>
                       )
@@ -750,15 +793,15 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
             )}
           </div>
 
-          {/* Category pills — solo mobile (desktop las tiene inline arriba) */}
-          <div className="md:hidden flex gap-2 overflow-x-auto pb-2 pr-4 scrollbar-hide mt-2.5">
+          {/* Pills mobile — categoría de espacio */}
+          <div className="md:hidden flex gap-2 overflow-x-auto pb-1 pr-4 scrollbar-hide mt-2.5">
             {CATEGORIES.map(cat => {
               const isActive = categoria === cat.value
               const Icon = cat.icon
               return (
                 <button key={cat.value}
                   onClick={() => setCategoria(isActive ? '' : cat.value)}
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0"
                   style={isActive
                     ? { background: 'var(--brand)', color: '#fff', boxShadow: '0 2px 8px rgba(53,196,147,0.3)' }
                     : { background: '#fff', color: 'var(--text-secondary)', border: '1px solid var(--border-medium)' }
@@ -770,25 +813,21 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
             })}
           </div>
 
-          {/* ── Tipo de evento pills — ambos breakpoints ── */}
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide mt-2.5"
-            style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 10 }}>
-            <span className="text-xs font-semibold shrink-0 self-center pr-1" style={{ color: 'var(--text-muted)' }}>
-              Tipo de evento:
-            </span>
+          {/* Pills mobile — tipo de evento */}
+          <div className="md:hidden flex gap-2 overflow-x-auto pb-2 pr-4 scrollbar-hide mt-1.5">
             {QUICK_ACTIVITIES.map(a => {
               const isActive = activity === a.slug
               return (
-                <Link key={a.slug}
-                  href={isActive ? buildActivityUrl('') : buildActivityUrl(a.slug)}
-                  className="flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0"
+                <button key={a.slug}
+                  onClick={() => setActivity(isActive ? '' : a.slug)}
+                  className="flex items-center gap-1 px-3.5 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0"
                   style={isActive
                     ? { background: '#0F1623', color: '#fff' }
                     : { background: '#fff', color: 'var(--text-secondary)', border: '1px solid var(--border-medium)' }
                   }>
+                  <Tag size={11} />
                   {a.label}
-                  {isActive && <X size={10} className="ml-1.5" />}
-                </Link>
+                </button>
               )
             })}
           </div>
