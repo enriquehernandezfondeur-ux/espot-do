@@ -33,6 +33,7 @@ export default function MisReservasPage() {
   const [cancelStep, setCancelStep]   = useState<1 | 2>(1)
   const [cancelReason, setCancelReason] = useState('')
   const [cancelling, setCancelling]   = useState(false)
+  const [cancelError, setCancelError] = useState('')
   const [refundBank, setRefundBank]   = useState<RefundBankInfo>({ holderName: '', bank: '', accountNumber: '', accountType: 'ahorro' })
   const [installments, setInstallments] = useState<BookingInstallment[]>([])
   const router = useRouter()
@@ -55,15 +56,19 @@ export default function MisReservasPage() {
   async function handleCancel() {
     if (!cancelModal) return
     setCancelling(true)
+    setCancelError('')
     const bankInfo = cancelHasPaid && refundBank.accountNumber ? refundBank : undefined
     const result = await cancelBooking(cancelModal.id, cancelReason || undefined, bankInfo)
-    if (!('error' in result)) {
-      setBookings(prev => prev.map(b =>
-        b.id === cancelModal.id ? { ...b, status: 'cancelled_guest' as any } : b
-      ))
-      if (selected?.id === cancelModal.id)
-        setSelected((prev: Booking | null) => prev ? { ...prev, status: 'cancelled_guest' as any } : null)
+    if ('error' in result) {
+      setCancelError(result.error ?? 'No se pudo cancelar la reserva')
+      setCancelling(false)
+      return
     }
+    setBookings(prev => prev.map(b =>
+      b.id === cancelModal.id ? { ...b, status: 'cancelled_guest' as any } : b
+    ))
+    if (selected?.id === cancelModal.id)
+      setSelected((prev: Booking | null) => prev ? { ...prev, status: 'cancelled_guest' as any } : null)
     setCancelling(false)
     closeCancelModal()
   }
@@ -638,6 +643,11 @@ export default function MisReservasPage() {
                       {cancelHasPaid ? 'Continuar →' : (cancelling ? <><Loader2 size={15} className="animate-spin" /> Cancelando...</> : 'Sí, cancelar')}
                     </button>
                   </div>
+                  {cancelError && !cancelHasPaid && (
+                    <p className="text-xs text-center font-semibold mt-2" style={{ color: '#DC2626' }}>
+                      {cancelError}
+                    </p>
+                  )}
                 </>
               )}
 
@@ -738,6 +748,11 @@ export default function MisReservasPage() {
                   <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
                     Estos datos solo se usan para procesarte el reembolso.
                   </p>
+                  {cancelError && (
+                    <p className="text-xs text-center font-semibold mt-2" style={{ color: '#DC2626' }}>
+                      {cancelError}
+                    </p>
+                  )}
                 </>
               )}
             </div>

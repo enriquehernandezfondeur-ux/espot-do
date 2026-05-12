@@ -201,7 +201,8 @@ export async function createBooking(payload: CreateBookingPayload) {
 
   // Para reservas instantáneas: crear cuotas inmediatamente (saltean acceptBooking)
   if (isInstant) {
-    await createInstallments(booking.id, payload.eventDate, payload.totalAmount)
+    const instResult = await createInstallments(booking.id, payload.eventDate, payload.totalAmount)
+    if (!instResult.success) console.error('[createBooking] installments failed:', instResult.error)
   }
 
   return { success: true, bookingId: booking.id, status: isQuote ? 'quote_requested' : isInstant ? 'accepted' : 'pending' }

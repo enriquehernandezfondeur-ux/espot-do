@@ -80,6 +80,7 @@ export default function HostReservasPage() {
   const [actionId, setActionId]         = useState<string | null>(null)
   const [rejectReason, setRejectReason] = useState('')
   const [showRejectForm, setShowRejectForm] = useState(false)
+  const [actionError, setActionError]   = useState('')
 
   useEffect(() => {
     setLoading(true)
@@ -96,10 +97,16 @@ export default function HostReservasPage() {
   const pending  = bookings.filter(b => b.status === 'pending').length
   const accepted = bookings.filter(b => b.status === 'accepted').length
 
+  function showError(msg: string) {
+    setActionError(msg)
+    setTimeout(() => setActionError(''), 4000)
+  }
+
   async function doAccept(id: string) {
     setActionId(id + 'a')
     const r = await acceptBooking(id)
-    if (!('error' in r)) {
+    if ('error' in r) { showError(r.error ?? 'Error al aceptar'); }
+    else {
       setBookings(p => p.map(b => b.id === id ? { ...b, status: 'accepted' as const } : b))
       if (selected?.id === id) setSelected((p: Booking | null) => p ? { ...p, status: 'accepted' as const } : null)
     }
@@ -109,7 +116,8 @@ export default function HostReservasPage() {
   async function doReject(id: string) {
     setActionId(id + 'r')
     const r = await rejectBooking(id, rejectReason || undefined)
-    if (!('error' in r)) {
+    if ('error' in r) { showError(r.error ?? 'Error al rechazar'); }
+    else {
       setBookings(p => p.map(b => b.id === id ? { ...b, status: 'rejected' as const } : b))
       if (selected?.id === id) setSelected((p: Booking | null) => p ? { ...p, status: 'rejected' as const } : null)
       setShowRejectForm(false)
@@ -121,7 +129,8 @@ export default function HostReservasPage() {
   async function doComplete(id: string) {
     setActionId(id + 'c')
     const r = await completeBooking(id)
-    if (!('error' in r)) {
+    if ('error' in r) { showError(r.error ?? 'Error al completar'); }
+    else {
       setBookings(p => p.map(b => b.id === id ? { ...b, status: 'completed' as const } : b))
       if (selected?.id === id) setSelected((p: Booking | null) => p ? { ...p, status: 'completed' as const } : null)
     }
@@ -136,6 +145,12 @@ export default function HostReservasPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
+      {actionError && (
+        <div className="fixed top-5 right-5 z-50 flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
+          style={{ background: '#DC2626', color: '#fff' }}>
+          ✕ {actionError}
+        </div>
+      )}
       <div className="mb-5 md:mb-6">
         <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Reservas</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
