@@ -21,5 +21,5 @@ export default async function DashboardRootPage() {
 
   if (role === 'host')  redirect('/dashboard/host')
   if (role === 'admin') redirect('/admin')
-  redirect('/dashboard/reservas')
+  redirect('/dashboard/overview')
 }

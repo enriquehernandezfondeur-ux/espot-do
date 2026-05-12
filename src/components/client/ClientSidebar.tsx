@@ -11,7 +11,7 @@ import {
 import { cn } from '@/lib/utils'
 
 const navItems = [
-  { href: '/dashboard',           label: 'Inicio',      icon: LayoutDashboard },
+  { href: '/dashboard/overview',   label: 'Inicio',      icon: LayoutDashboard },
   { href: '/dashboard/reservas',  label: 'Mis reservas', icon: CalendarDays },
   { href: '/dashboard/favoritos', label: 'Favoritos',    icon: Heart },
   { href: '/dashboard/pagos',     label: 'Pagos',        icon: CreditCard },
@@ -21,7 +21,7 @@ const navItems = [
 
 // Ítems para la barra inferior móvil
 const mobileBottomNav = [
-  { href: '/dashboard',           label: 'Inicio',    icon: LayoutDashboard },
+  { href: '/dashboard/overview',   label: 'Inicio',    icon: LayoutDashboard },
   { href: '/dashboard/reservas',  label: 'Reservas',  icon: CalendarDays },
   { href: '/dashboard/mensajes',  label: 'Mensajes',  icon: MessageCircle },
   { href: '/dashboard/perfil',    label: 'Perfil',    icon: User },
@@ -39,7 +39,7 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
   }
 
   function isActive(href: string) {
-    return pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
+    return pathname === href || pathname.startsWith(href + '/')
   }
 
   const SidebarInner = () => (
