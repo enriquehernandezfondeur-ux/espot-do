@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { CheckCircle, Calendar, MapPin, ArrowRight, Home, Loader2 } from 'lucide-react'
+import { CheckCircle, Calendar, MapPin, ArrowRight, Home, Loader2, Users, Sparkles } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { isPaid } from '@/lib/bookingConfig'
@@ -178,7 +178,9 @@ function ExitoContent() {
             <div className="px-6 py-5 flex items-center justify-between"
               style={{ background: 'rgba(53,196,147,0.1)', borderBottom: '1px solid rgba(53,196,147,0.15)' }}>
               <div>
-                <p className="text-xs font-semibold mb-0.5" style={{ color: '#35C493' }}>RESERVA CONFIRMADA</p>
+                <p className="text-xs font-semibold mb-0.5" style={{ color: '#35C493' }}>
+                  {booking.event_type ? `${booking.event_type} · ` : ''}RESERVA CONFIRMADA
+                </p>
                 <p className="text-white font-bold">{space?.name}</p>
               </div>
               <div className="text-right">
@@ -187,15 +189,23 @@ function ExitoContent() {
               </div>
             </div>
 
-            <div className="px-6 py-5 space-y-3">
+            <div className="px-6 py-5 space-y-2.5">
               <div className="flex items-center gap-2.5 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
                 <MapPin size={14} style={{ color: '#35C493', flexShrink: 0 }} />
-                {[space?.sector, space?.city].filter(Boolean).join(', ')}
+                {space?.address
+                  ? `${space.address}, ${[space?.sector, space?.city].filter(Boolean).join(', ')}`
+                  : [space?.sector, space?.city].filter(Boolean).join(', ')}
               </div>
               <div className="flex items-center gap-2.5 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
                 <Calendar size={14} style={{ color: '#35C493', flexShrink: 0 }} />
                 {formatDate(booking.event_date)} · {formatTime(booking.start_time)} – {formatTime(booking.end_time)}
               </div>
+              {booking.guest_count && (
+                <div className="flex items-center gap-2.5 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                  <Users size={14} style={{ color: '#35C493', flexShrink: 0 }} />
+                  {booking.guest_count} personas
+                </div>
+              )}
             </div>
 
             <div style={{ margin: '0 24px', borderTop: '1px dashed rgba(255,255,255,0.1)' }} />
@@ -240,10 +250,10 @@ function ExitoContent() {
 
         <div className="space-y-3"
           style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.2s' }}>
-          <Link href="/dashboard/reservas"
+          <Link href={`/dashboard/reservas/${bookingId}`}
             className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-bold text-base"
             style={{ background: '#35C493', color: '#071814', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
-            <Calendar size={17} /> Ver mis reservas <ArrowRight size={15} />
+            <Calendar size={17} /> Ver detalle de mi reserva <ArrowRight size={15} />
           </Link>
           <Link href="/"
             className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-semibold text-sm"

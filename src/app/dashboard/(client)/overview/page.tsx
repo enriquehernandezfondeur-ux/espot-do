@@ -86,14 +86,14 @@ export default function ClientDashboard() {
           {(stats!.pendingPaymentBookings ?? []).map((bk: any) => (
             <div key={bk.id} className="flex items-center justify-between px-4 py-3"
               style={{ borderBottom: '1px solid rgba(37,99,235,0.08)', background: '#fff' }}>
-              <div className="min-w-0">
+              <Link href={`/dashboard/reservas/${bk.id}`} className="min-w-0 flex-1">
                 <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
                   {(bk.spaces as any)?.name}
                 </p>
                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                   {formatDate(bk.event_date)} · {formatCurrency(Number(bk.total_amount))}
                 </p>
-              </div>
+              </Link>
               <Link href={`/pago/${bk.id}`}
                 className="text-xs font-bold px-3 py-2 rounded-xl shrink-0 ml-3"
                 style={{ background: '#2563EB', color: '#fff', whiteSpace: 'nowrap' }}>

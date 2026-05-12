@@ -3,7 +3,7 @@
 import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import {
-  ArrowLeft, CalendarDays, Clock, Users, MapPin, MessageCircle,
+  ArrowLeft, CalendarDays, Calendar, Clock, Users, MapPin, MessageCircle,
   CreditCard, CheckCircle, Sparkles, ExternalLink,
   Phone, Mail, Loader2, Check, Building2,
 } from 'lucide-react'
@@ -115,7 +115,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
               <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                 {formatDate(booking.event_date)}
               </p>
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Fecha del evento</p>
+              <p className="text-xs" style={{ color: 'var(--brand)' }}>{countdownLabel(booking.event_date)}</p>
             </div>
           </div>
           {booking.start_time && booking.end_time && (
@@ -328,6 +328,23 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
           ))}
         </div>
       </div>
+
+      {/* Añadir al calendario */}
+      {booking.event_date && booking.start_time && (() => {
+        const dt = booking.event_date.replace(/-/g, '')
+        const st = (booking.start_time ?? '').slice(0,5).replace(':', '')
+        const et = (booking.end_time ?? '').slice(0,5).replace(':', '')
+        const title = encodeURIComponent(`${booking.event_type ?? 'Evento'} — ${space?.name ?? ''}`)
+        const loc   = encodeURIComponent(space?.address ? `${space.address}, ${space?.city}` : space?.city ?? '')
+        const gcal  = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dt}T${st}00/${dt}T${et}00&location=${loc}`
+        return (
+          <a href={gcal} target="_blank" rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl text-sm font-semibold mb-3 transition-all"
+            style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+            <Calendar size={15} /> Añadir a Google Calendar
+          </a>
+        )
+      })()}
 
       {/* Acciones */}
       <div className="flex gap-3">
