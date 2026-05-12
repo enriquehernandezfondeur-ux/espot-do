@@ -431,7 +431,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
       {/* ── FOOTER ── */}
       <footer style={{ background: '#F4F6F5', borderTop: '1px solid #E0E7E3' }}>
         <style>{`
-          .ft-link { transition: color .18s ease, transform .18s ease; display: inline-block; }
+          .ft-link { transition: color .18s ease, transform .18s ease; }
           .ft-link:hover { color: #35C493 !important; transform: translateX(4px); }
           .ft-soc { transition: background .18s ease, transform .18s ease; }
           .ft-soc:hover { background: #35C493 !important; color: #fff !important; transform: translateY(-2px); }
@@ -443,7 +443,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
             <div>
               <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{color:'#35C493'}}>Plataforma</p>
               {[{href:'/buscar',label:'Explorar espacios'},{href:'/para-clientes',label:'Para clientes'},{href:'/para-propietarios',label:'Para propietarios'}].map(({href,label})=>(
-                <Link key={href} href={href} className="ft-link block text-sm mb-2" style={{color:'#6B7280'}}>{label}</Link>
+                <Link key={href} href={href} className="ft-link block text-sm mb-2.5" style={{color:'#6B7280'}}>{label}</Link>
               ))}
             </div>
 
@@ -451,7 +451,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
             <div>
               <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{color:'#35C493'}}>Anfitriones</p>
               {[{href:'/para-propietarios',label:'Publicar espacio'},{href:'/dashboard/host',label:'Panel de control'},{href:'/contacto',label:'Contacto'}].map(({href,label})=>(
-                <Link key={href} href={href} className="ft-link block text-sm mb-2" style={{color:'#6B7280'}}>{label}</Link>
+                <Link key={href} href={href} className="ft-link block text-sm mb-2.5" style={{color:'#6B7280'}}>{label}</Link>
               ))}
             </div>
 
@@ -459,7 +459,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
             <div>
               <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{color:'#35C493'}}>Legal</p>
               {[{href:'/terminos',label:'Términos'},{href:'/privacidad',label:'Privacidad'},{href:'/reembolso',label:'Reembolsos'},{href:'/seguridad',label:'Seguridad'},{href:'/cookies',label:'Cookies'}].map(({href,label})=>(
-                <Link key={href} href={href} className="ft-link block text-sm mb-2" style={{color:'#6B7280'}}>{label}</Link>
+                <Link key={href} href={href} className="ft-link block text-sm mb-2.5" style={{color:'#6B7280'}}>{label}</Link>
               ))}
             </div>
 
