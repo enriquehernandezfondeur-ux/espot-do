@@ -23,6 +23,7 @@ function ExitoContent() {
   const responseMessage   = sp.get('ResponseMessage') ?? ''
   const errorDescription  = sp.get('ErrorDescription') ?? ''
   const rrn               = sp.get('RRN') ?? ''
+  const azulOrderId       = sp.get('AzulOrderId') ?? ''
   const authHash          = sp.get('AuthHash') ?? ''
 
   const [booking,   setBooking]  = useState<any>(null)
@@ -65,7 +66,7 @@ function ExitoContent() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               bookingId,
-              cuotaId: cuotaId || undefined,
+              cuotaId:           cuotaId || undefined,
               OrderNumber:       orderNumber,
               Amount:            amount,
               AuthorizationCode: authorizationCode,
@@ -75,6 +76,7 @@ function ExitoContent() {
               ResponseMessage:   responseMessage,
               ErrorDescription:  errorDescription,
               RRN:               rrn,
+              AzulOrderId:       azulOrderId,
               AuthHash:          authHash,
             }),
           })

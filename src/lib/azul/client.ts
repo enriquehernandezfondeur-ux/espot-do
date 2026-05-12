@@ -146,6 +146,7 @@ export interface AzulResponseParams {
   ErrorDescription:  string
   RRN:               string
   AuthHash:          string
+  AzulOrderId?:      string  // no va en el hash pero Azul lo devuelve
 }
 
 export function verifyResponseHash(p: AzulResponseParams): boolean {

@@ -91,9 +91,13 @@ export const SUB_ACTIVITIES: SubActivity[] = [
 ]
 
 // ── Mapping: sub-actividad → categoría base ───────────────
-export const SUB_TO_BASE: Record<string, BaseActivity> = Object.fromEntries(
-  SUB_ACTIVITIES.map(s => [s.key, s.base])
-)
+export const SUB_TO_BASE: Record<string, BaseActivity> = {
+  ...Object.fromEntries(SUB_ACTIVITIES.map(s => [s.key, s.base])),
+  // Aliases para slugs del homepage (plural / variantes)
+  bodas:        'fiesta',
+  quinceaneras: 'fiesta',
+  corporativo:  'corporativo',
+}
 
 // Dado un slug de sub-actividad, devuelve la categoría base
 export function getBaseFromSub(subKey: string): BaseActivity | null {

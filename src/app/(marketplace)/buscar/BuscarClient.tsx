@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   Search, MapPin, Users, SlidersHorizontal, X, CalendarDays, Clock,
   LayoutList, Map,
@@ -12,6 +13,7 @@ import {
   Wind, Projector, Zap, ShowerHead, MonitorPlay,
 } from 'lucide-react'
 import { CATEGORIES, PRICING_TYPES } from './constants'
+import { SUB_ACTIVITIES } from '@/lib/activities'
 import { SpaceCard } from './SpaceCard'
 import { DateTimePicker } from './DateTimePicker'
 
@@ -24,6 +26,16 @@ const SpacesMap = dynamic(() => import('@/components/map/SpacesMap'), {
 })
 
 const QUICK_CAPACITIES = [20, 50, 100, 150]
+
+// Actividades que se muestran en el homepage — deben coincidir con SUB_ACTIVITIES
+const QUICK_ACTIVITIES = [
+  { slug: 'cumpleanos',  label: 'Cumpleaños'  },
+  { slug: 'bodas',       label: 'Bodas'        },
+  { slug: 'corporativo', label: 'Corporativo'  },
+  { slug: 'graduacion',  label: 'Graduación'   },
+  { slug: 'quinceaneras',label: 'Quinceañera' },
+  { slug: 'baby-shower', label: 'Baby Shower'  },
+]
 
 const AMENITIES = [
   { key: 'allows_external_decoration', label: 'Permite decoración externa' },
@@ -89,6 +101,8 @@ interface Props {
 }
 
 export default function BuscarClient({ spaces, initialParams }: Props) {
+  const router = useRouter()
+  const activity = initialParams.activity ?? ''
   const [q,              setQ]              = useState(initialParams.q ?? '')
   const [sector,         setSector]         = useState(initialParams.sector ?? '')
   const [sectorQ,        setSectorQ]        = useState(initialParams.sector ?? '')
@@ -277,10 +291,23 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   }
 
   const activeFiltersCount = [
-    categoria, sector, capacidad, dateFrom, timeFrom, pricingFilter, ...selectedAmenities, ...selectedFacilities, priceMin, priceMax,
+    activity, categoria, sector, capacidad, dateFrom, timeFrom, pricingFilter, ...selectedAmenities, ...selectedFacilities, priceMin, priceMax,
   ].filter(Boolean).length
 
+  function buildActivityUrl(slug: string) {
+    const p = new URLSearchParams()
+    if (q)       p.set('q', q)
+    if (sector)  p.set('sector', sector)
+    if (categoria) p.set('categoria', categoria)
+    if (capacidad) p.set('capacidad', capacidad)
+    if (dateFrom) p.set('dateFrom', dateFrom)
+    if (timeFrom) p.set('timeFrom', timeFrom)
+    if (slug)    p.set('activity', slug)
+    return `/buscar?${p.toString()}`
+  }
+
   function clearAll() {
+    router.push('/buscar')
     setQ(''); setSector(''); setSectorQ(''); setCategoria(''); setCapacidad(''); setCapacidadInput('')
     setSelectedAmenities([]); setSelectedFacilities([]); setPricingFilter(''); setPriceMin(''); setPriceMax(''); setDateFrom(''); setTimeFrom('')
   }
@@ -288,7 +315,12 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   const handleCardHover = useCallback((id: string | null) => setHoveredId(id), [])
 
   // Chips de filtros activos (para móvil)
+  const activityLabel = activity
+    ? (QUICK_ACTIVITIES.find(a => a.slug === activity)?.label ?? SUB_ACTIVITIES.find(a => a.key === activity)?.label ?? activity)
+    : ''
+
   const activeChips = [
+    activity  && { key: 'activity', label: activityLabel, onRemove: () => router.push(buildActivityUrl('')) },
     sector    && { key: 'sector', label: sector, onRemove: () => clearSector() },
     dateFrom  && { key: 'date',   label: timeFrom ? `${fmtDateShort(dateFrom)} · ${fmtTime(timeFrom)}` : fmtDateShort(dateFrom), onRemove: () => { setDateFrom(''); setTimeFrom('') } },
     capacidad && { key: 'cap',    label: `${capacidad}+ personas`, onRemove: () => applyCapacity('') },
@@ -734,6 +766,29 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                   <Icon size={13} />
                   {cat.label}
                 </button>
+              )
+            })}
+          </div>
+
+          {/* ── Tipo de evento pills — ambos breakpoints ── */}
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide mt-2.5"
+            style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 10 }}>
+            <span className="text-xs font-semibold shrink-0 self-center pr-1" style={{ color: 'var(--text-muted)' }}>
+              Tipo de evento:
+            </span>
+            {QUICK_ACTIVITIES.map(a => {
+              const isActive = activity === a.slug
+              return (
+                <Link key={a.slug}
+                  href={isActive ? buildActivityUrl('') : buildActivityUrl(a.slug)}
+                  className="flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0"
+                  style={isActive
+                    ? { background: '#0F1623', color: '#fff' }
+                    : { background: '#fff', color: 'var(--text-secondary)', border: '1px solid var(--border-medium)' }
+                  }>
+                  {a.label}
+                  {isActive && <X size={10} className="ml-1.5" />}
+                </Link>
               )
             })}
           </div>
