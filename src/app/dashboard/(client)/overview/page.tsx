@@ -31,9 +31,82 @@ export default function ClientDashboard() {
     </div>
   )
 
-  const next = stats?.nextBooking as any
-  const today = new Date()
+  const next        = stats?.nextBooking as any
+  const today       = new Date()
   const daysUntilNext = next ? Math.ceil((new Date(next.event_date).getTime() - today.getTime()) / (1000*60*60*24)) : null
+  const hasBookings = (stats?.total ?? 0) > 0
+
+  // ── Empty state: usuario sin reservas ─────────────────
+  if (!loading && !hasBookings) return (
+    <div className="p-4 md:p-6 max-w-3xl mx-auto">
+      {/* Bienvenida */}
+      <div className="text-center py-10 md:py-14">
+        <div className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-5"
+          style={{ background: 'linear-gradient(135deg, rgba(53,196,147,0.15), rgba(53,196,147,0.05))', border: '1.5px solid var(--brand-border)' }}>
+          <Sparkles size={32} style={{ color: 'var(--brand)' }} />
+        </div>
+        <h1 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+          {stats?.userName ? `¡Hola, ${stats.userName}!` : '¡Bienvenido a EspotHub!'}
+        </h1>
+        <p className="text-base mb-8 max-w-md mx-auto" style={{ color: 'var(--text-secondary)' }}>
+          Reserva salones, rooftops, restaurantes y más para tu próximo evento en República Dominicana.
+        </p>
+        <Link href="/buscar"
+          className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl text-base font-bold"
+          style={{ background: 'var(--brand)', color: '#fff', boxShadow: '0 4px 24px rgba(53,196,147,0.35)' }}>
+          <MapPin size={18} /> Explorar espacios
+        </Link>
+      </div>
+
+      {/* Cómo funciona */}
+      <div className="rounded-3xl overflow-hidden mb-6"
+        style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+        <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+          <h2 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>¿Cómo funciona?</h2>
+        </div>
+        <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
+          {[
+            { num: '1', title: 'Elige tu espacio', desc: 'Busca por sector, tipo de evento o capacidad. Todos los espacios son verificados.', color: 'var(--brand)' },
+            { num: '2', title: 'Selecciona fecha y horario', desc: 'Elige el día y las horas que necesitas. El propietario confirma disponibilidad.', color: '#2563EB' },
+            { num: '3', title: 'Paga en cuotas', desc: 'Solo pagas al confirmar. El resto según el plan de cuotas según cuánto falta para tu evento.', color: '#7C3AED' },
+          ].map(step => (
+            <div key={step.num} className="flex items-start gap-4 px-5 py-4">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold text-white shrink-0"
+                style={{ background: step.color }}>
+                {step.num}
+              </div>
+              <div className="min-w-0">
+                <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{step.title}</p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{step.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Quick links */}
+      <div className="grid grid-cols-2 gap-3">
+        {[
+          { href: '/buscar', label: 'Buscar espacios', sub: 'Explora ahora', icon: MapPin, color: 'var(--brand)' },
+          { href: '/para-clientes', label: 'Cómo reservar', sub: 'Aprende más', icon: CalendarDays, color: '#2563EB' },
+        ].map(({ href, label, sub, icon: Icon, color }) => (
+          <Link key={href} href={href}
+            className="flex items-center gap-3 p-4 rounded-2xl transition-all card-hover"
+            style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: `${color}15` }}>
+              <Icon size={16} style={{ color }} />
+            </div>
+            <div className="min-w-0">
+              <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{label}</div>
+              <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{sub}</div>
+            </div>
+            <ArrowRight size={14} className="shrink-0 ml-auto" style={{ color: 'var(--text-muted)' }} />
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
 
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
@@ -83,24 +156,37 @@ export default function ClientDashboard() {
                 : `${stats!.pendingPayment} reservas pendientes de pago`}
             </span>
           </div>
-          {(stats!.pendingPaymentBookings ?? []).map((bk: any) => (
-            <div key={bk.id} className="flex items-center justify-between px-4 py-3"
+          {(stats!.pendingPaymentBookings ?? []).map((bk: any) => {
+            const sp = (bk.spaces as any)
+            const cover = sp?.space_images?.find((i: any) => i.is_cover)?.url ?? sp?.space_images?.[0]?.url
+            return (
+            <div key={bk.id} className="flex items-center gap-3 justify-between px-4 py-3"
               style={{ borderBottom: '1px solid rgba(37,99,235,0.08)', background: '#fff' }}>
-              <Link href={`/dashboard/reservas/${bk.id}`} className="min-w-0 flex-1">
+              <Link href={`/dashboard/reservas/${bk.id}`} className="min-w-0 flex-1 flex items-center gap-3">
+                {cover
+                  ? <img src={cover} alt={sp?.name} className="w-10 h-10 rounded-xl object-cover shrink-0" />
+                  : <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shrink-0 text-sm"
+                      style={{ background: 'linear-gradient(135deg, #2563EB, #1D4ED8)' }}>
+                      {sp?.name?.charAt(0)}
+                    </div>
+                }
+                <div className="min-w-0">
                 <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
-                  {(bk.spaces as any)?.name}
+                  {sp?.name}
                 </p>
                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                   {formatDate(bk.event_date)} · {formatCurrency(Number(bk.total_amount))}
                 </p>
+                </div>
               </Link>
               <Link href={`/pago/${bk.id}`}
-                className="text-xs font-bold px-3 py-2 rounded-xl shrink-0 ml-3"
+                className="text-xs font-bold px-3 py-2 rounded-xl shrink-0"
                 style={{ background: '#2563EB', color: '#fff', whiteSpace: 'nowrap' }}>
                 Pagar →
               </Link>
             </div>
-          ))}
+          )})}
+
         </div>
       )}
 
@@ -283,10 +369,16 @@ export default function ClientDashboard() {
               return (
                 <Link key={bk.id} href={`/dashboard/reservas/${bk.id}`}
                   className="flex items-start gap-3 px-4 md:px-6 py-3.5 md:py-4 transition-colors hover:bg-[var(--bg-elevated)] block">
-                  <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center font-bold text-white shrink-0 text-sm"
-                    style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-dark))' }}>
-                    {space?.name?.charAt(0)}
-                  </div>
+                  {/* Foto del espacio */}
+                  {(() => {
+                    const cover = space?.space_images?.find((i: any) => i.is_cover)?.url ?? space?.space_images?.[0]?.url
+                    return cover
+                      ? <img src={cover} alt={space?.name} className="w-10 h-10 rounded-xl object-cover shrink-0" />
+                      : <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shrink-0 text-sm"
+                          style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-dark))' }}>
+                          {space?.name?.charAt(0)}
+                        </div>
+                  })()}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                       <div className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>
