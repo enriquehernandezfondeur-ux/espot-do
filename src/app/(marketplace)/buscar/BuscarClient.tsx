@@ -101,6 +101,7 @@ interface Props {
 
 export default function BuscarClient({ spaces, initialParams }: Props) {
   const [activity,       setActivity]       = useState(initialParams.activity ?? '')
+  const [actQ,           setActQ]           = useState('')
   const [actOpen,        setActOpen]        = useState(false)
   const actRef = useRef<HTMLDivElement>(null)
   const [q,              setQ]              = useState(initialParams.q ?? '')
@@ -436,26 +437,63 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                   <Tag size={14} style={{ flexShrink: 0 }} />
                   <span>{activityLabel || 'Tipo de evento'}</span>
                   {activity
-                    ? <button onClick={e => { e.stopPropagation(); setActivity('') }}><X size={12} /></button>
+                    ? <button onClick={e => { e.stopPropagation(); setActivity(''); setActQ('') }}><X size={12} /></button>
                     : <ChevronDown size={13} style={{ opacity: 0.5 }} />
                   }
                 </button>
                 {actOpen && (
-                  <div className="absolute left-0 top-full mt-2 z-50 rounded-2xl overflow-hidden py-1.5"
-                    style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', minWidth: 200 }}>
-                    {QUICK_ACTIVITIES.map(a => {
-                      const isActive = activity === a.slug
-                      return (
-                        <button key={a.slug} onClick={() => { setActivity(isActive ? '' : a.slug); setActOpen(false) }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-all"
-                          style={{ color: isActive ? 'var(--brand)' : 'var(--text-primary)', fontWeight: isActive ? 600 : 400 }}
+                  <div className="absolute left-0 top-full mt-2 z-50 rounded-2xl overflow-hidden"
+                    style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', width: 260 }}>
+                    {/* Input búsqueda */}
+                    <div className="p-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
+                      <div className="flex items-center gap-2 rounded-xl px-3 py-2 input-base">
+                        <Search size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                        <input
+                          value={actQ} autoFocus
+                          onChange={e => setActQ(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' && actQ.trim()) {
+                              setQ(actQ.trim()); setActivity(''); setActQ(''); setActOpen(false)
+                            }
+                          }}
+                          placeholder="Ej: bautizo, afterwork..."
+                          className="flex-1 bg-transparent text-sm focus:outline-none"
+                          style={{ color: 'var(--text-primary)', fontSize: 16 }}
+                        />
+                        {actQ && <button onClick={() => setActQ('')} style={{ color: 'var(--text-muted)' }}><X size={11} /></button>}
+                      </div>
+                    </div>
+                    {/* Lista de opciones filtradas */}
+                    <div style={{ maxHeight: 220, overflowY: 'auto' }}>
+                      {QUICK_ACTIVITIES
+                        .filter(a => !actQ || a.label.toLowerCase().includes(actQ.toLowerCase()))
+                        .map(a => {
+                          const isActive = activity === a.slug
+                          return (
+                            <button key={a.slug} onClick={() => { setActivity(isActive ? '' : a.slug); setActQ(''); setActOpen(false) }}
+                              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-all text-left"
+                              style={{ color: isActive ? 'var(--brand)' : 'var(--text-primary)', fontWeight: isActive ? 600 : 400 }}
+                              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}
+                              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
+                              <Tag size={12} style={{ color: isActive ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
+                              {a.label}
+                              {isActive && <Check size={13} style={{ color: 'var(--brand)', marginLeft: 'auto' }} />}
+                            </button>
+                          )
+                        })}
+                      {/* Opción búsqueda personalizada */}
+                      {actQ.trim() && !QUICK_ACTIVITIES.some(a => a.label.toLowerCase() === actQ.toLowerCase()) && (
+                        <button
+                          onClick={() => { setQ(actQ.trim()); setActivity(''); setActQ(''); setActOpen(false) }}
+                          className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-all text-left border-t"
+                          style={{ color: 'var(--brand)', borderColor: 'var(--border-subtle)' }}
                           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}
                           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
-                          {a.label}
-                          {isActive && <Check size={13} style={{ color: 'var(--brand)', marginLeft: 'auto' }} />}
+                          <Search size={12} style={{ flexShrink: 0 }} />
+                          Buscar "{actQ.trim()}"
                         </button>
-                      )
-                    })}
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
