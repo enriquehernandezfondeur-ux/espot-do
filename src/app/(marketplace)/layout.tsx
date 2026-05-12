@@ -557,19 +557,19 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
               <div className="flex flex-col items-center gap-1">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/verified-by-visa.png" alt="Verified by Visa" style={{ height: 20, width: 'auto' }} />
-                <span style={{ fontSize: 7, color: '#1A1F71', fontWeight: 800, textAlign: 'center', lineHeight: 1.2, background: 'rgba(26,31,113,0.07)', padding: '2px 5px', borderRadius: 3, border: '1px solid rgba(26,31,113,0.12)' }}>Verified by Visa</span>
+                <span style={{ fontSize: 8, color: '#1A1F71', fontWeight: 700, textAlign: 'center', lineHeight: 1.2 }}>Verified<br/>by Visa</span>
               </div>
               {/* MC ID Check */}
               <div className="flex flex-col items-center gap-1">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 20, width: 'auto' }} />
-                <span style={{ fontSize: 7, color: '#7C2D12', fontWeight: 800, textAlign: 'center', lineHeight: 1.2, background: 'rgba(235,0,27,0.07)', padding: '2px 5px', borderRadius: 3, border: '1px solid rgba(235,0,27,0.15)' }}>Mastercard ID Check</span>
+                <span style={{ fontSize: 8, color: '#252525', fontWeight: 700, textAlign: 'center', lineHeight: 1.2 }}>Mastercard<br/>ID Check</span>
               </div>
               {/* Azul */}
               <div className="flex flex-col items-center gap-1">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/azul-logo.jpg" alt="Azul Payments" style={{ height: 22, width: 'auto', borderRadius: 3, objectFit: 'contain' }} />
-                <span style={{ fontSize: 7, color: '#0057A8', fontWeight: 800, background: 'rgba(0,87,168,0.07)', padding: '2px 5px', borderRadius: 3, border: '1px solid rgba(0,87,168,0.15)' }}>azul payments</span>
+                <span style={{ fontSize: 8, color: '#0057A8', fontWeight: 700 }}>azul</span>
               </div>
             </div>
 
