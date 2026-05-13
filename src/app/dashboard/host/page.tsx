@@ -54,7 +54,7 @@ function StatCard({
           <Icon size={15} style={{ color: iconColor }} />
         </div>
       </div>
-      <div className="font-bold text-2xl" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+      <div className="font-bold text-lg md:text-2xl" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em', wordBreak: 'break-word' }}>
         {value}
       </div>
       <div className="flex items-center justify-between">
@@ -196,14 +196,14 @@ export default function DashboardPage() {
         {/* Gráfica */}
         <div className="lg:col-span-2 rounded-2xl p-6"
           style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <div className="flex items-start justify-between gap-3 mb-6">
-            <div className="min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between sm:gap-3 mb-6 gap-0.5">
+            <div>
               <h2 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>Ingresos por mes</h2>
               <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Últimos 6 meses</p>
             </div>
-            <span className="font-bold text-base md:text-lg shrink-0 text-right" style={{ color: 'var(--brand)', letterSpacing: '-0.02em' }}>
+            <div className="font-bold text-xl sm:text-2xl" style={{ color: 'var(--brand)', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
               {formatCurrency(stats?.revenueThisMonth ?? 0)}
-            </span>
+            </div>
           </div>
           {stats?.monthlyRevenue?.some(m => m.ingresos > 0) ? (
             <ResponsiveContainer width="100%" height={160}>

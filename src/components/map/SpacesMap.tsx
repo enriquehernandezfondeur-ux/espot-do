@@ -70,13 +70,23 @@ function stableJitter(id: string, range: number, seed: number): number {
 }
 
 export function getSpaceCoords(space: any): [number, number] | null {
-  if (space.lat && space.lng) return [parseFloat(space.lat), parseFloat(space.lng)]
+  // Solo usar lat/lng si son coordenadas válidas dentro de República Dominicana
+  const lat = parseFloat(space.lat)
+  const lng = parseFloat(space.lng)
+  if (
+    space.lat && space.lng &&
+    !isNaN(lat) && !isNaN(lng) &&
+    lat >= 17.5 && lat <= 20.0 &&   // bounds approx. RD
+    lng >= -72.0 && lng <= -68.0
+  ) {
+    return [lat, lng]
+  }
+
   const id     = space.id ?? ''
   const sector = (space.sector ?? '').toLowerCase().trim()
   if (sector) {
     for (const [key, coords] of Object.entries(SECTOR_COORDS)) {
       if (sector.includes(key) || (key.includes(sector) && sector.length > 3)) {
-        // Jitter pequeño para que pines del mismo sector no se apilen
         return [coords[0] + stableJitter(id, 0.006, 1), coords[1] + stableJitter(id, 0.006, 2)]
       }
     }
@@ -128,37 +138,40 @@ interface Props {
 }
 
 export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const mapRef       = useRef<any>(null)
-  const markersRef   = useRef<Map<string, any>>(new Map())
-  const coordsRef    = useRef<Map<string, [number, number]>>(new Map())
+  const containerRef  = useRef<HTMLDivElement>(null)
+  const mapRef        = useRef<any>(null)
+  const lRef          = useRef<any>(null)          // Leaflet module — loaded once
+  const markersRef    = useRef<Map<string, any>>(new Map())
+  const coordsRef     = useRef<Map<string, [number, number]>>(new Map())
+  const spacesRef     = useRef(spaces)             // always latest spaces
+  const onHoverRef    = useRef(onSpaceHover)
+  const hoveredIdRef  = useRef(hoveredId)
 
-  // ── Inicializar el mapa ────────────────────────────────
+  // Keep refs in sync
+  useEffect(() => { spacesRef.current   = spaces },       [spaces])
+  useEffect(() => { onHoverRef.current  = onSpaceHover }, [onSpaceHover])
+  useEffect(() => { hoveredIdRef.current = hoveredId },   [hoveredId])
+
+  // ── Inicializar el mapa UNA sola vez ─────────────────────
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return
+    let cancelled = false
 
     injectLeafletCSS()
 
-    // Carga secuencial: primero Leaflet, luego el mapa
     import('leaflet').then((LModule) => {
+      if (cancelled || !containerRef.current || mapRef.current) return
       const L = LModule.default
+      lRef.current = L
 
-      // Asegurarse de que el contenedor todavía existe
-      if (!containerRef.current) return
-
-      const cityKey = Object.keys(CITY_VIEW).find(k =>
-        k !== 'default' && (cityFilter ?? '').toLowerCase().includes(k)
-      )
-      const view = CITY_VIEW[cityKey ?? 'default']
-
-      const map = L.map(containerRef.current, {
+      const view = CITY_VIEW['default']
+      const map  = L.map(containerRef.current, {
         center:             view.center,
         zoom:               view.zoom,
         zoomControl:        false,
         attributionControl: true,
       })
 
-      // Tiles CartoDB Light
       L.tileLayer(
         'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
         {
@@ -169,78 +182,98 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
       ).addTo(map)
 
       L.control.zoom({ position: 'bottomright' }).addTo(map)
-
       mapRef.current = map
 
-      // Forzar recálculo de tamaño después de que el DOM esté listo
-      requestAnimationFrame(() => {
-        map.invalidateSize()
-      })
+      requestAnimationFrame(() => { map.invalidateSize() })
 
-      // Poblar marcadores
-      spaces.forEach(space => {
-        const coords = getSpaceCoords(space)
-        if (!coords) return
-        coordsRef.current.set(space.id, coords)
-
-        const label  = getPricePin(space)
-        const marker = L.marker(coords, { icon: buildIcon(L, label, false) })
-
-        marker.on('mouseover', () => {
-          onSpaceHover?.(space.id)
-          marker.setIcon(buildIcon(L, label, true))
-          marker.setZIndexOffset(1000)
-        })
-        marker.on('mouseout', () => {
-          if (hoveredId !== space.id) {
-            onSpaceHover?.(null)
-            marker.setIcon(buildIcon(L, label, false))
-            marker.setZIndexOffset(0)
-          }
-        })
-        marker.on('click', () => openSpacePopup(L, map, space, coords))
-
-        marker.addTo(map)
-        markersRef.current.set(space.id, marker)
-      })
-
-      // Ajustar bounds a los pins disponibles
-      const validCoords = Array.from(coordsRef.current.values())
-      if (validCoords.length > 1) {
-        const bounds = L.latLngBounds(validCoords)
-        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 })
-      }
+      // Poblar marcadores con los espacios actuales
+      addMarkers(L, map, spacesRef.current)
     })
 
     return () => {
+      cancelled = true
       mapRef.current?.remove()
       mapRef.current = null
+      lRef.current   = null
       markersRef.current.clear()
       coordsRef.current.clear()
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // ── Función para añadir/actualizar todos los marcadores ──
+  function addMarkers(L: any, map: any, spaceList: any[]) {
+    // Limpiar marcadores anteriores
+    markersRef.current.forEach(m => m.remove())
+    markersRef.current.clear()
+    coordsRef.current.clear()
+
+    spaceList.forEach(space => {
+      const coords = getSpaceCoords(space)
+      if (!coords) return
+      coordsRef.current.set(space.id, coords)
+
+      const label  = getPricePin(space)
+      const marker = L.marker(coords, { icon: buildIcon(L, label, false) })
+
+      marker.on('mouseover', () => {
+        onHoverRef.current?.(space.id)
+        marker.setIcon(buildIcon(L, label, true))
+        marker.setZIndexOffset(1000)
+      })
+      marker.on('mouseout', () => {
+        if (hoveredIdRef.current !== space.id) {
+          onHoverRef.current?.(null)
+          marker.setIcon(buildIcon(L, label, false))
+          marker.setZIndexOffset(0)
+        }
+      })
+      marker.on('click', () => openSpacePopup(L, map, space, coords))
+
+      marker.addTo(map)
+      markersRef.current.set(space.id, marker)
+    })
+
+    // Ajustar vista a los pins
+    const validCoords = Array.from(coordsRef.current.values())
+    if (validCoords.length > 1) {
+      const bounds = L.latLngBounds(validCoords)
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 })
+    } else if (validCoords.length === 1) {
+      map.flyTo(validCoords[0], 15, { duration: 0.6 })
+    }
+  }
+
+  // ── Actualizar marcadores cuando cambian los espacios ─────
+  useEffect(() => {
+    const L   = lRef.current
+    const map = mapRef.current
+    if (!L || !map) return
+    addMarkers(L, map, spaces)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spaces])
 
-  // ── Actualizar highlight cuando cambia hoveredId ───────
+  // ── Actualizar highlight cuando cambia hoveredId ──────────
   useEffect(() => {
-    if (!mapRef.current) return
-    import('leaflet').then(({ default: L }) => {
-      markersRef.current.forEach((marker, id) => {
-        const space  = spaces.find(s => s.id === id)
-        const label  = getPricePin(space ?? {})
-        const active = id === hoveredId
-        marker.setIcon(buildIcon(L, label, active))
-        marker.setZIndexOffset(active ? 1000 : 0)
-      })
+    const L   = lRef.current
+    const map = mapRef.current
+    if (!L || !map) return
+    markersRef.current.forEach((marker, id) => {
+      const space  = spaces.find(s => s.id === id)
+      const label  = getPricePin(space ?? {})
+      const active = id === hoveredId
+      marker.setIcon(buildIcon(L, label, active))
+      marker.setZIndexOffset(active ? 1000 : 0)
     })
   }, [hoveredId, spaces])
 
-  // ── Re-centrar cuando cambia la ciudad ────────────────
+  // ── Re-centrar cuando cambia la ciudad ────────────────────
   useEffect(() => {
-    if (!mapRef.current) return
+    const map = mapRef.current
+    if (!map) return
     const key  = Object.keys(CITY_VIEW).find(k => k !== 'default' && (cityFilter ?? '').toLowerCase().includes(k))
     const view = CITY_VIEW[key ?? 'default']
-    mapRef.current.flyTo(view.center, view.zoom, { duration: 0.8 })
+    map.flyTo(view.center, view.zoom, { duration: 0.8 })
   }, [cityFilter])
 
   return (
@@ -315,7 +348,6 @@ function openSpacePopup(L: any, map: any, space: any, coords: [number, number]) 
   const price    = getFullPrice(space)
   const location = [space.sector, space.city].filter(Boolean).join(', ')
 
-  // Ancho responsivo: más grande en móvil
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
   const popupW   = isMobile ? Math.min(window.innerWidth - 32, 320) : 260
 
@@ -338,7 +370,7 @@ function openSpacePopup(L: any, map: any, space: any, coords: [number, number]) 
       <div style="padding:${isMobile ? '16px' : '14px'};">
         <div style="font-weight:700;font-size:${isMobile ? '15px' : '14px'};color:#111827;margin-bottom:4px;line-height:1.3;">${space.name}</div>
         <div style="font-size:${isMobile ? '13px' : '12px'};color:#6B7280;margin-bottom:8px;">
-          ${location} · ${space.capacity_max} personas máx.
+          ${location} &middot; ${space.capacity_max} personas m&aacute;x.
         </div>
         ${price ? `<div style="font-weight:700;font-size:${isMobile ? '14px' : '13px'};color:#35C493;margin-bottom:${isMobile ? '14px' : '12px'};">${price}</div>` : ''}
         <a href="/espacios/${space.slug}"
@@ -346,7 +378,7 @@ function openSpacePopup(L: any, map: any, space: any, coords: [number, number]) 
                  padding:${isMobile ? '12px 16px' : '9px 16px'};
                  border-radius:12px;font-size:${isMobile ? '14px' : '12px'};
                  font-weight:700;text-decoration:none;letter-spacing:-0.01em;">
-          Ver Espot →
+          Ver Espot &rarr;
         </a>
       </div>
     </div>
