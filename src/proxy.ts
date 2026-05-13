@@ -4,11 +4,71 @@ import { createServerClient } from '@supabase/ssr'
 
 const SITE_PASSWORD = process.env.SITE_PASSWORD
 const COOKIE_NAME   = 'espot_preview_access'
+const AUTH_ROUTES   = ['/dashboard', '/admin']
 
-const AUTH_ROUTES = ['/dashboard', '/admin']
+// ── Rate limiter en memoria (por instancia Vercel) ──────────────
+// Para producción a escala: usar Upstash Redis con @upstash/ratelimit
+const rlMap = new Map<string, { count: number; resetAt: number }>()
+let rlCleanupCounter = 0
+
+function checkRateLimit(key: string, limit: number, windowMs: number): boolean {
+  const now = Date.now()
+  const entry = rlMap.get(key)
+  if (!entry || entry.resetAt <= now) {
+    rlMap.set(key, { count: 1, resetAt: now + windowMs })
+    return true
+  }
+  if (entry.count >= limit) return false
+  entry.count++
+  if (++rlCleanupCounter > 200) {
+    rlCleanupCounter = 0
+    for (const [k, v] of rlMap.entries()) {
+      if (v.resetAt <= now) rlMap.delete(k)
+    }
+  }
+  return true
+}
+
+function secureHeaders(res: NextResponse): NextResponse {
+  res.headers.set('X-Content-Type-Options', 'nosniff')
+  res.headers.set('X-Frame-Options', 'SAMEORIGIN')
+  res.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  res.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+  return res
+}
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const ip =
+    request.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
+    request.headers.get('x-real-ip') ?? 'unknown'
+
+  // ── Rate limiting ────────────────────────────────────────────
+  if (pathname.startsWith('/api/payments/')) {
+    // Pagos: 20 req / 10 min por IP
+    if (!checkRateLimit(`pay:${ip}`, 20, 10 * 60 * 1000)) {
+      return NextResponse.json(
+        { error: 'Demasiadas solicitudes. Intenta en unos minutos.' },
+        { status: 429, headers: { 'Retry-After': '600' } }
+      )
+    }
+  } else if (pathname.startsWith('/api/')) {
+    // API general: 120 req / min por IP
+    if (!checkRateLimit(`api:${ip}`, 120, 60 * 1000)) {
+      return NextResponse.json(
+        { error: 'Límite de solicitudes alcanzado.' },
+        { status: 429, headers: { 'Retry-After': '60' } }
+      )
+    }
+  } else if (pathname === '/auth' || pathname.startsWith('/auth/')) {
+    // Auth: 15 intentos / 15 min por IP (anti fuerza bruta)
+    if (!checkRateLimit(`auth:${ip}`, 15, 15 * 60 * 1000)) {
+      return secureHeaders(new NextResponse(
+        'Demasiados intentos. Espera unos minutos.',
+        { status: 429, headers: { 'Retry-After': '900', 'Content-Type': 'text/plain; charset=utf-8' } }
+      ))
+    }
+  }
 
   // Permitir siempre: auth, acceso privado, assets, API, favicon
   if (
@@ -21,22 +81,20 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/og-') ||
     pathname.includes('.')
   ) {
-    return NextResponse.next()
+    return secureHeaders(NextResponse.next())
   }
 
-  // Si no hay contraseña configurada, acceso libre (entorno local) — igual proteger auth routes
+  // Si no hay contraseña configurada, acceso libre — igual proteger auth routes
   if (!SITE_PASSWORD) {
-    // Aún así verificar autenticación para rutas protegidas
     if (AUTH_ROUTES.some(r => pathname.startsWith(r))) {
       return checkAuth(request, pathname)
     }
-    return NextResponse.next()
+    return secureHeaders(NextResponse.next())
   }
 
   // Verificar cookie de acceso (preview)
   const cookie = request.cookies.get(COOKIE_NAME)
   if (cookie?.value !== SITE_PASSWORD) {
-    // Redirigir a la página de acceso
     const url = request.nextUrl.clone()
     const returnTo = pathname + (request.nextUrl.search ?? '')
     url.pathname = '/acceso'
@@ -49,7 +107,7 @@ export async function proxy(request: NextRequest) {
     return checkAuth(request, pathname)
   }
 
-  return NextResponse.next()
+  return secureHeaders(NextResponse.next())
 }
 
 async function checkAuth(request: NextRequest, pathname: string): Promise<NextResponse> {
@@ -60,9 +118,7 @@ async function checkAuth(request: NextRequest, pathname: string): Promise<NextRe
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
+        getAll() { return request.cookies.getAll() },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
             request.cookies.set(name, value)
@@ -82,7 +138,7 @@ async function checkAuth(request: NextRequest, pathname: string): Promise<NextRe
     return NextResponse.redirect(url)
   }
 
-  return response
+  return secureHeaders(response)
 }
 
 export const config = {
