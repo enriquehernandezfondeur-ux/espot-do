@@ -210,7 +210,7 @@ export default function HostMensajesPage() {
                   </div>
                   <div className="flex items-center gap-1 mt-0.5">
                     <p className="text-xs truncate flex-1" style={{ color: 'var(--text-secondary)' }}>
-                      {conv.lastMessage ?? (conv.hasAttachment ? '📎 Archivo' : '')}
+                      {conv.lastMessage ?? (conv.hasAttachment ? 'Archivo adjunto' : '')}
                     </p>
                     {conv.unread && <span className="w-2 h-2 rounded-full shrink-0" style={{ background: 'var(--brand)' }} />}
                   </div>
@@ -328,7 +328,7 @@ export default function HostMensajesPage() {
               </button>
             </div>
             <p className="text-xs text-center mt-2" style={{ color: sendError ? '#DC2626' : 'var(--text-muted)' }}>
-              {sendError || 'Fotos, PDF, Word · Máx 20MB · 📎 para adjuntar'}
+              {sendError || 'Fotos, PDF, Word · Máx 20MB · Clip para adjuntar'}
             </p>
           </div>
         </div>

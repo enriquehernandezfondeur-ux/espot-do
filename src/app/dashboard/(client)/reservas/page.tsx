@@ -736,7 +736,7 @@ export default function MisReservasPage() {
                           <button onClick={() => { setReviewFor(bk.id); setRating(0); setComment('') }}
                             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold w-full"
                             style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)', color: '#92400E' }}>
-                            <span>⭐</span> Dejar reseña de este espacio
+                            <Star size={14} style={{ color: '#F59E0B', fill: '#F59E0B' }} /> Dejar reseña de este espacio
                           </button>
                         )}
                       </div>

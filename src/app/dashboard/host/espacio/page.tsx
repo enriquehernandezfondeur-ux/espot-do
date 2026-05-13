@@ -976,7 +976,7 @@ export default function EspacioPage() {
                 </div>
                 {hourlyPrice && minHours && (
                   <div className="rounded-lg p-3 text-sm" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
-                    💡 El cliente pagaría mínimo <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(Number(hourlyPrice) * Number(minHours))}</strong> por {minHours} horas
+                    El cliente pagaría mínimo <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(Number(hourlyPrice) * Number(minHours))}</strong> por {minHours} horas
                   </div>
                 )}
               </div>
@@ -1003,7 +1003,7 @@ export default function EspacioPage() {
                   </div>
                 </div>
                 <div className="rounded-lg p-3 text-xs" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
-                  💡 El cliente reserva el horario y se compromete a consumir mínimo <strong style={{ color: 'var(--text-primary)' }}>{minConsumption ? formatCurrency(Number(minConsumption)) : 'ese monto'}</strong> en comida y bebidas.
+                  El cliente reserva el horario y se compromete a consumir mínimo <strong style={{ color: 'var(--text-primary)' }}>{minConsumption ? formatCurrency(Number(minConsumption)) : 'ese monto'}</strong> en comida y bebidas.
                   Si consumen más, lo pagan directo en tu local. espot.do cobra el mínimo como garantía.
                 </div>
               </div>
@@ -1039,7 +1039,7 @@ export default function EspacioPage() {
                 </div>
                 {fixedPrice && packageHours && (
                   <div className="rounded-lg p-3 text-xs" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
-                    💡 El cliente paga <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(Number(fixedPrice))}</strong> por {packageHours} horas.
+                    El cliente paga <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(Number(fixedPrice))}</strong> por {packageHours} horas.
                     {pkgExtraHourPrice && ` Hora adicional: ${formatCurrency(Number(pkgExtraHourPrice))}.`}
                   </div>
                 )}
@@ -1072,7 +1072,7 @@ export default function EspacioPage() {
             {pricingType === 'custom_quote' && (
               <div className="rounded-xl p-5" style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)' }}>
                 <p className="text-sm" style={{ color: '#92400E' }}>
-                  💬 Con esta modalidad, los clientes te enviarán una solicitud describiendo su evento. Tú recibirás una notificación y podrás responder con un precio personalizado.
+                  Con esta modalidad, los clientes te enviarán una solicitud describiendo su evento. Recibirás una notificación y podrás responder con un precio personalizado.
                 </p>
               </div>
             )}

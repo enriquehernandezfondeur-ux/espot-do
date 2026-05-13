@@ -213,7 +213,7 @@ export default function ClientMensajesPage() {
                   </div>
                   <div className="flex items-center gap-1 mt-0.5">
                     <p className="text-xs truncate flex-1" style={{ color: 'var(--text-secondary)' }}>
-                      {conv.lastMessage ?? '📎 Archivo adjunto'}
+                      {conv.lastMessage ?? 'Archivo adjunto'}
                     </p>
                     {conv.unread && <span className="w-2 h-2 rounded-full shrink-0" style={{ background: 'var(--brand)' }} />}
                   </div>
@@ -335,7 +335,7 @@ export default function ClientMensajesPage() {
               </button>
             </div>
             <p className="text-xs text-center mt-2" style={{ color: sendError ? '#DC2626' : 'var(--text-muted)' }}>
-              {sendError || '📎 Fotos, PDF, Word · Máx 20MB · Enter para enviar'}
+              {sendError || 'Fotos, PDF, Word · Máx 20MB · Enter para enviar'}
             </p>
           </div>
         </div>

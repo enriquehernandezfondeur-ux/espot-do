@@ -14,12 +14,18 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
       background: 'var(--bg-base, #F4F6F5)', padding: 24,
     }}>
       <div style={{ textAlign: 'center', maxWidth: 420 }}>
+        {/* Icono SVG inline — compatible con todos los entornos sin imports */}
         <div style={{
           width: 64, height: 64, borderRadius: 20, margin: '0 auto 20px',
           background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          ⚠️
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+            stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
         </div>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: '#0F1623', marginBottom: 8, letterSpacing: '-0.02em' }}>
           Algo salió mal
@@ -37,7 +43,11 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
               border: 'none', cursor: 'pointer',
               boxShadow: '0 4px 20px rgba(53,196,147,0.3)',
             }}>
-            🔄 Intentar de nuevo
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            </svg>
+            Intentar de nuevo
           </button>
           <Link href="/"
             style={{
