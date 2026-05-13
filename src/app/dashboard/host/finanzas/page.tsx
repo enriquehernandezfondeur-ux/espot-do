@@ -161,13 +161,13 @@ export default function FinanzasPage() {
       {/* ── Gráfica de ingresos mensuales ── */}
       <div className="rounded-2xl p-6 mb-6"
         style={{ background: '#fff', border: '1px solid #E5E7EB', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-        <div className="flex items-center justify-between mb-6">
-          <div>
+        <div className="flex items-start justify-between gap-3 mb-6">
+          <div className="min-w-0">
             <h2 className="font-bold text-sm" style={{ color: '#03313C' }}>Ingresos por mes</h2>
             <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>Últimos 6 meses · Ingresos brutos confirmados</p>
           </div>
-          <div className="text-right">
-            <div className="font-bold text-lg" style={{ color: '#35C493', letterSpacing: '-0.02em' }}>
+          <div className="text-right shrink-0">
+            <div className="font-bold text-base md:text-lg" style={{ color: '#35C493', letterSpacing: '-0.02em' }}>
               {formatCurrency(thisMonth)}
             </div>
             <div className="text-xs" style={{ color: '#9CA3AF' }}>este mes</div>

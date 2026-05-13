@@ -196,12 +196,12 @@ export default function DashboardPage() {
         {/* Gráfica */}
         <div className="lg:col-span-2 rounded-2xl p-6"
           style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <div className="flex items-center justify-between mb-6">
-            <div>
+          <div className="flex items-start justify-between gap-3 mb-6">
+            <div className="min-w-0">
               <h2 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>Ingresos por mes</h2>
               <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Últimos 6 meses</p>
             </div>
-            <span className="font-bold text-lg" style={{ color: 'var(--brand)', letterSpacing: '-0.02em' }}>
+            <span className="font-bold text-base md:text-lg shrink-0 text-right" style={{ color: 'var(--brand)', letterSpacing: '-0.02em' }}>
               {formatCurrency(stats?.revenueThisMonth ?? 0)}
             </span>
           </div>
