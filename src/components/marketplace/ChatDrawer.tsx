@@ -12,6 +12,7 @@ interface Props {
   spaceName: string
   hostId: string
   hostName: string
+  hostAvatarUrl?: string | null
   onClose: () => void
 }
 
@@ -49,7 +50,7 @@ function FilePreview({ name, url, type }: { name: string; url: string; type: 'im
   )
 }
 
-export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, onClose }: Props) {
+export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, hostAvatarUrl, onClose }: Props) {
   const [messages,    setMessages]   = useState<any[]>([])
   const [body,        setBody]       = useState('')
   const [loading,     setLoading]    = useState(true)
@@ -180,9 +181,13 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, onClo
             style={{ color: 'var(--text-secondary)' }}>
             <X size={18} />
           </button>
-          <div className="w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-white text-sm shrink-0"
+          <div className="w-10 h-10 rounded-2xl overflow-hidden shrink-0 flex items-center justify-center font-bold text-white text-sm"
             style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-dark))' }}>
-            {hostName.charAt(0).toUpperCase()}
+            {hostAvatarUrl
+              // eslint-disable-next-line @next/next/no-img-element
+              ? <img src={hostAvatarUrl} alt={hostName} className="w-full h-full object-cover" />
+              : hostName.charAt(0).toUpperCase()
+            }
           </div>
           <div className="flex-1 min-w-0">
             <div className="font-bold text-sm truncate" style={{ color: 'var(--text-primary)' }}>{hostName}</div>

@@ -180,6 +180,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
           spaceName={space.name}
           hostId={hostProfile.id ?? space.host_id}
           hostName={hostProfile.full_name ?? 'Propietario'}
+          hostAvatarUrl={hostProfile.avatar_url ?? null}
           onClose={() => setShowChat(false)}
         />
       )}

@@ -133,7 +133,17 @@ export async function updateClientProfile(updates: { full_name?: string; phone?:
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', user.id)
 
-  return error ? { error: error.message } : { success: true }
+  if (error) return { error: error.message }
+
+  // Si cambia nombre o foto, revalidar las páginas de espacio del propietario
+  if (updates.full_name !== undefined || updates.avatar_url !== undefined) {
+    const { revalidatePath } = await import('next/cache')
+    // Revalidar todas las páginas de espacios (propietario o cliente)
+    revalidatePath('/espacios', 'layout')
+    revalidatePath('/buscar')
+  }
+
+  return { success: true }
 }
 
 export async function removeFavorite(favoriteId: string) {
