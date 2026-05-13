@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { MapPin, Users, ArrowRight, Check, X, Building2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { MapPin, Users, ArrowRight, Check, X, Building2, ChevronLeft, ChevronRight, Zap } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 import { CATEGORIES, PRICING_TYPES } from './constants'
 
@@ -136,7 +136,7 @@ export function SpaceCard({
           ) : images.map((url, i) => (
             // eslint-disable-next-line @next/next/no-img-element
             <img key={i} src={url} alt={space.name} loading="lazy"
-              className="absolute inset-0 w-full h-full object-cover transition-opacity duration-400"
+              className="absolute inset-0 w-full h-full object-cover transition-opacity duration-[400ms]"
               style={{ opacity: i === photoIdx ? 1 : 0, zIndex: i === photoIdx ? 1 : 0,
                 transform: i === photoIdx && isHovered ? 'scale(1.06)' : 'scale(1)',
                 transition: 'opacity 0.35s ease, transform 0.7s ease' }} />
@@ -197,7 +197,7 @@ export function SpaceCard({
           ) : space.instant_booking ? (
             <span className="absolute top-3 left-3 z-20 flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full"
               style={{ background: 'rgba(37,99,235,0.9)', color: '#fff', backdropFilter: 'blur(8px)' }}>
-              ⚡ Instantánea
+              <Zap size={9} style={{ fill: '#fff' }} /> Instantánea
             </span>
           ) : space.is_verified ? (
             <span className="absolute top-3 left-3 z-20 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"

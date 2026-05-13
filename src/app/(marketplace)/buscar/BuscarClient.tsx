@@ -326,9 +326,12 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
     ? (QUICK_ACTIVITIES.find(a => a.slug === activity)?.label ?? SUB_ACTIVITIES.find(a => a.key === activity)?.label ?? activity)
     : ''
 
+  const categoriaLabel = CATEGORIES.find(c => c.value === categoria)?.label ?? ''
+
   const activeChips = [
-    activity  && { key: 'activity', label: activityLabel, onRemove: () => setActivity('') },
-    sector    && { key: 'sector', label: sector, onRemove: () => clearSector() },
+    activity  && { key: 'activity',  label: activityLabel,  onRemove: () => setActivity('') },
+    categoria && { key: 'categoria', label: categoriaLabel, onRemove: () => setCategoria('') },
+    sector    && { key: 'sector',    label: sector,         onRemove: () => clearSector() },
     dateFrom  && { key: 'date',   label: timeFrom ? `${fmtDateShort(dateFrom)} · ${fmtTime(timeFrom)}` : fmtDateShort(dateFrom), onRemove: () => { setDateFrom(''); setTimeFrom('') } },
     capacidad && { key: 'cap',    label: `${capacidad}+ personas`, onRemove: () => applyCapacity('') },
     priceMin  && { key: 'priceMin',  label: `Desde RD$${priceMin}`,   onRemove: () => setPriceMin('') },
