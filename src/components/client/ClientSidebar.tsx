@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard, CalendarDays, Heart,
-  CreditCard, User, MessageCircle, LogOut, Building2, ArrowRight, Menu, X,
+  CreditCard, User, MessageCircle, LogOut, Building2, ArrowRight, Menu, X, Search,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -108,8 +108,26 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
         })}
       </nav>
 
+      {/* Explorar EspotHub — vuelta al marketplace */}
+      <div className="px-4 pb-2" style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 12 }}>
+        <Link href="/buscar"
+          onClick={() => setMobileOpen(false)}
+          className="flex items-center gap-3 w-full px-4 py-3 rounded-2xl transition-all"
+          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: 'var(--brand-dim)' }}>
+            <Search size={14} style={{ color: 'var(--brand)' }} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Explorar espacios</div>
+            <div className="text-xs" style={{ color: 'var(--text-muted)' }}>Ir al marketplace</div>
+          </div>
+          <ArrowRight size={13} style={{ color: 'var(--text-muted)' }} />
+        </Link>
+      </div>
+
       {/* Cambiar a modo Negocio */}
-      <div className="px-4 pb-3" style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 16 }}>
+      <div className="px-4 pb-3" style={{ paddingTop: 6 }}>
         <Link href="/dashboard/host"
           onClick={() => setMobileOpen(false)}
           className="flex items-center gap-3 w-full px-4 py-3.5 rounded-2xl transition-all group"

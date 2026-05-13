@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard, Building2, CalendarDays, ClipboardList,
   MessageSquareQuote, MessageCircle, BarChart3, Settings,
-  LogOut, User, ArrowRight, Banknote, Shield, Menu, X, Star,
+  LogOut, User, ArrowRight, Banknote, Shield, Menu, X, Star, Search,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -112,8 +112,26 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
         })}
       </nav>
 
+      {/* Explorar EspotHub — vuelta al marketplace */}
+      <div className="px-4 pb-2" style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 12 }}>
+        <Link href="/buscar"
+          onClick={() => setMobileOpen(false)}
+          className="flex items-center gap-3 w-full px-4 py-3 rounded-2xl transition-all"
+          style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.15)' }}>
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: 'rgba(53,196,147,0.12)' }}>
+            <Search size={14} style={{ color: 'var(--brand)' }} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Explorar espacios</div>
+            <div className="text-xs" style={{ color: 'var(--text-muted)' }}>Ver marketplace</div>
+          </div>
+          <ArrowRight size={13} style={{ color: 'var(--brand)' }} />
+        </Link>
+      </div>
+
       {/* Cambiar a modo Cliente */}
-      <div className="px-4 pb-3" style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 16 }}>
+      <div className="px-4 pb-3" style={{ paddingTop: 6 }}>
         <Link href="/dashboard/reservas"
           onClick={() => setMobileOpen(false)}
           className="flex items-center gap-3 w-full px-4 py-3.5 rounded-2xl transition-all"

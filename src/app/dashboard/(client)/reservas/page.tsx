@@ -215,24 +215,31 @@ export default function MisReservasPage() {
       })()}
 
       {/* Filtros */}
-      <div className="flex flex-col md:flex-row gap-3 mb-5 md:mb-6">
+      <div className="space-y-2 mb-5 md:mb-6">
+        {/* Pills de filtro — scroll horizontal en mobile, sin stacking */}
         <div className="flex gap-1 p-1 rounded-2xl overflow-x-auto scrollbar-hide" style={{ background: 'var(--bg-elevated)' }}>
           {FILTERS.map(f => (
             <button key={f} onClick={() => setFilter(f)}
-              className="px-3 py-2.5 rounded-xl text-xs md:text-sm font-medium transition-all whitespace-nowrap shrink-0"
+              className="px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0"
               style={filter === f
-                ? { background: '#fff', color: 'var(--text-primary)', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }
-                : { color: 'var(--text-secondary)' }}>
+                ? { background: '#fff', color: 'var(--text-primary)', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }
+                : { color: 'var(--text-secondary)', background: 'transparent' }}>
               {f}
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-2 rounded-xl px-4 py-3 input-base md:w-48">
-          <Search size={15} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+        {/* Búsqueda — siempre en su propia fila para no causar layout shift */}
+        <div className="flex items-center gap-2 rounded-xl px-4 py-2.5 input-base">
+          <Search size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
           <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Buscar..."
+            placeholder="Buscar reserva..."
             className="bg-transparent text-sm focus:outline-none flex-1"
             style={{ color: 'var(--text-primary)', fontSize: 16 }} />
+          {search && (
+            <button onClick={() => setSearch('')} style={{ color: 'var(--text-muted)', flexShrink: 0 }}>
+              <X size={14} />
+            </button>
+          )}
         </div>
       </div>
 
