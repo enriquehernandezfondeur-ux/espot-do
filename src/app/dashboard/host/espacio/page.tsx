@@ -175,7 +175,8 @@ export default function EspacioPage() {
   const [newInclude, setNewInclude]               = useState('')
 
   // Precio dinámico y anticipo mínimo
-  const [weekendMultiplier, setWeekendMultiplier] = useState('1.00')
+  const [weekendEnabled,    setWeekendEnabled]    = useState(false)
+  const [weekendPrice,      setWeekendPrice]      = useState('')
   const [minAdvanceAmount,  setMinAdvanceAmount]  = useState('0')
 
   // Step 3 - Time blocks
@@ -280,8 +281,13 @@ export default function EspacioPage() {
       pricingType: pricingType as PricingType,
       hourlyPrice, minHours, maxHours, minConsumption, sessionHours,
       fixedPrice, packageName, packageHours, pkgExtraHourPrice, packageIncludes,
-      weekendMultiplier: Number(weekendMultiplier) || 1,
-      minAdvanceAmount:  Number(minAdvanceAmount)  || 0,
+      weekendMultiplier: (() => {
+        if (!weekendEnabled || !weekendPrice) return 1
+        const base = Number(hourlyPrice || minConsumption || fixedPrice || 0)
+        const wknd = Number(weekendPrice)
+        return base > 0 && wknd > base ? Math.round((wknd / base) * 100) / 100 : 1
+      })(),
+      minAdvanceAmount: Number(minAdvanceAmount) || 0,
       timeBlocks, addons,
       instantBooking,
       hasParkingFac, hasValetParking, hasWifi, hasAc, hasSoundSystem, hasProjector,
@@ -390,7 +396,16 @@ export default function EspacioPage() {
       setPackageHours(String(p.package_hours ?? ''))
       setPkgExtraHourPrice(String(p.extra_hour_price ?? ''))
       setPackageIncludes(p.package_includes ?? [])
-      setWeekendMultiplier(String(p.weekend_multiplier ?? '1.00'))
+      // Derivar weekendPrice del multiplier almacenado
+      const mult = Number(p.weekend_multiplier ?? 1)
+      if (mult > 1) {
+        setWeekendEnabled(true)
+        const base = Number(p.hourly_price ?? p.minimum_consumption ?? p.fixed_price ?? 0)
+        setWeekendPrice(base > 0 ? String(Math.round(base * mult)) : '')
+      } else {
+        setWeekendEnabled(false)
+        setWeekendPrice('')
+      }
       setMinAdvanceAmount(String(p.min_advance_amount ?? '0'))
     }
     // Addons
@@ -1180,45 +1195,63 @@ export default function EspacioPage() {
               </div>
             )}
 
-            {/* Precio dinámico y anticipo mínimo */}
+            {/* Precio fin de semana */}
             {pricingType && pricingType !== 'custom_quote' && (
-              <div className="space-y-4 pt-2 mt-2" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-                <h3 className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Opciones avanzadas de precio</h3>
+              <div className="space-y-3 pt-3 mt-1" style={{ borderTop: '1px solid var(--border-subtle)' }}>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Precio dinámico fines de semana */}
-                  <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                    <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--text-muted)' }}>
-                      Multiplicador fines de semana
+                {/* Toggle precio diferente fin de semana */}
+                <button type="button"
+                  onClick={() => { setWeekendEnabled(e => !e); if (weekendEnabled) setWeekendPrice('') }}
+                  className="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all"
+                  style={{
+                    background: weekendEnabled ? 'rgba(53,196,147,0.06)' : 'var(--bg-elevated)',
+                    border: `1.5px solid ${weekendEnabled ? 'var(--brand-border)' : 'var(--border-subtle)'}`,
+                  }}>
+                  <div className="text-left">
+                    <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                      ¿Precio diferente los fines de semana?
+                    </div>
+                    <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                      Viernes, sábados y domingos con precio distinto al de entre semana
+                    </div>
+                  </div>
+                  {/* Toggle visual */}
+                  <div className="w-11 h-6 rounded-full flex items-center transition-all shrink-0 ml-3"
+                    style={{ background: weekendEnabled ? 'var(--brand)' : 'var(--border-medium)', padding: '2px' }}>
+                    <div className="w-5 h-5 rounded-full bg-white shadow-sm transition-transform"
+                      style={{ transform: weekendEnabled ? 'translateX(20px)' : 'translateX(0)' }} />
+                  </div>
+                </button>
+
+                {weekendEnabled && (
+                  <div className="rounded-xl px-4 py-4 space-y-2"
+                    style={{ background: 'rgba(53,196,147,0.04)', border: '1px solid var(--brand-border)' }}>
+                    <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      Precio vie / sáb / dom
                     </label>
                     <div className="flex items-center gap-2">
-                      <input type="number" value={weekendMultiplier} onChange={e => setWeekendMultiplier(e.target.value)}
-                        step="0.05" min="1" max="3"
-                        className="input-base w-full rounded-xl px-4 py-3 text-sm" style={{ fontSize: 16 }} />
-                      <span className="text-sm font-semibold shrink-0" style={{ color: 'var(--text-muted)' }}>×</span>
+                      <span className="text-sm font-semibold shrink-0" style={{ color: 'var(--text-muted)' }}>RD$</span>
+                      <input
+                        type="number"
+                        value={weekendPrice}
+                        onChange={e => setWeekendPrice(e.target.value)}
+                        placeholder={hourlyPrice || minConsumption || fixedPrice || '0'}
+                        min="0"
+                        className="input-base flex-1 rounded-xl px-4 py-3 text-sm"
+                        style={{ fontSize: 16 }}
+                      />
                     </div>
-                    <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
-                      {Number(weekendMultiplier) > 1
-                        ? `Vie/Sáb/Dom = ${Math.round((Number(weekendMultiplier) - 1) * 100)}% más caro`
-                        : 'Sin sobrecargo por fin de semana (1.00)'}
-                    </p>
+                    {weekendPrice && (Number(hourlyPrice || minConsumption || fixedPrice || 0)) > 0 && (
+                      <p className="text-xs" style={{ color: 'var(--brand)' }}>
+                        {Number(weekendPrice) > Number(hourlyPrice || minConsumption || fixedPrice || 0)
+                          ? `+${Math.round((Number(weekendPrice) / Number(hourlyPrice || minConsumption || fixedPrice || 1) - 1) * 100)}% más que entre semana`
+                          : Number(weekendPrice) < Number(hourlyPrice || minConsumption || fixedPrice || 0)
+                          ? `${Math.round((1 - Number(weekendPrice) / Number(hourlyPrice || minConsumption || fixedPrice || 1)) * 100)}% menos que entre semana`
+                          : 'Mismo precio que entre semana'}
+                      </p>
+                    )}
                   </div>
-
-                  {/* Anticipo mínimo */}
-                  <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                    <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--text-muted)' }}>
-                      Anticipo mínimo (RD$)
-                    </label>
-                    <input type="number" value={minAdvanceAmount} onChange={e => setMinAdvanceAmount(e.target.value)}
-                      placeholder="0" min="0"
-                      className="input-base w-full rounded-xl px-4 py-3 text-sm" style={{ fontSize: 16 }} />
-                    <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
-                      {Number(minAdvanceAmount) > 0
-                        ? `La primera cuota será al menos RD$${Number(minAdvanceAmount).toLocaleString('es-DO')}`
-                        : 'El anticipo se calcula automáticamente por el plan de cuotas (recomendado)'}
-                    </p>
-                  </div>
-                </div>
+                )}
               </div>
             )}
           </div>
