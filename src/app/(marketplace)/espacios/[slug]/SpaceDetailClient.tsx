@@ -1269,7 +1269,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
             onClick={() => setShowMobileWidget(true)}
             className="btn-brand flex items-center gap-2 px-6 py-4 rounded-2xl text-sm font-bold shrink-0"
             style={{ boxShadow: '0 4px 16px rgba(53,196,147,0.35)' }}>
-            Reservar
+            {pricing?.pricing_type === 'custom_quote' ? 'Solicitar precio' : 'Reservar'}
             <ChevronDown size={16} style={{ transform: 'rotate(-90deg)' }} />
           </button>
         </div>

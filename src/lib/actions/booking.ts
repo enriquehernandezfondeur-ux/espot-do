@@ -155,19 +155,33 @@ export async function createBooking(payload: CreateBookingPayload) {
 
   if (bookingError) return { error: bookingError.message }
 
-  // Guardar addons seleccionados
+  // Guardar addons seleccionados con subtotales correctos por unidad
   if (payload.selectedAddonIds.length > 0) {
     const { data: addonData } = await supabase
-      .from('space_addons').select('id, name, price')
+      .from('space_addons').select('id, name, price, unit')
       .eq('space_id', payload.spaceId)
       .in('id', payload.selectedAddonIds)
 
     if (addonData?.length) {
+      // Calcular horas seleccionadas (para addons por hora)
+      let selectedH = 0
+      if (payload.startTime && payload.endTime) {
+        const sn = parseInt(payload.startTime.split(':')[0]) * 60 + parseInt(payload.startTime.split(':')[1] || '0')
+        let en   = parseInt(payload.endTime.split(':')[0])   * 60 + parseInt(payload.endTime.split(':')[1]   || '0')
+        if (en <= sn) en += 24 * 60
+        selectedH = Math.max(0, (en - sn) / 60)
+      }
+
       const { error: addonInsertError } = await supabase.from('booking_addons').insert(
-        addonData.map(a => ({
-          booking_id: booking.id, addon_id: a.id,
-          quantity: 1, unit_price: a.price, subtotal: a.price,
-        }))
+        addonData.map((a: any) => {
+          const qty = a.unit === 'persona' ? payload.guestCount
+                    : a.unit === 'hora'    ? Math.max(1, Math.round(selectedH))
+                    : 1
+          const subtotal = a.unit === 'persona' ? a.price * payload.guestCount
+                         : a.unit === 'hora'    ? Math.round(a.price * selectedH)
+                         : a.price
+          return { booking_id: booking.id, addon_id: a.id, quantity: qty, unit_price: a.price, subtotal }
+        })
       )
       if (addonInsertError) console.error('[createBooking] addon insert failed:', addonInsertError.message)
     }
