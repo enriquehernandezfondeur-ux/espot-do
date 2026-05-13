@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Loader2, MessageCircle, Send, Search, Paperclip, FileText, Download, X, ArrowLeft, Building2 } from 'lucide-react'
+import { Loader2, MessageCircle, Send, Search, Paperclip, FileText, Download, X, ArrowLeft, Building2, Zap, ChevronDown } from 'lucide-react'
 import { getMyConversations, getConversation, sendMessage, markMessagesRead } from '@/lib/actions/messages'
 import type { MessageAttachment } from '@/lib/actions/messages'
 import { createClient } from '@/lib/supabase/client'
@@ -29,6 +29,27 @@ export default function HostMensajesPage() {
   const [sendError, setSendError] = useState('')
   const [search,    setSearch]    = useState('')
   const [attachment, setAttachment] = useState<{ file: File; preview: string; type: 'image' | 'file' } | null>(null)
+  const [showQuickReplies, setShowQuickReplies] = useState(false)
+
+  const DEFAULT_QUICK_REPLIES = [
+    '¡Hola! Gracias por tu interés. Con gusto les atendemos para su evento.',
+    '¿Para cuántas personas sería el evento aproximadamente?',
+    '¡Excelente! Tenemos disponibilidad para esa fecha. ¿Deseas proceder con la reserva?',
+    'Puedes ver más detalles del espacio en nuestra página. ¿Tienes alguna pregunta específica?',
+    'El espacio incluye: sillas, mesas, estacionamiento y acceso desde las 8am. ¿Necesitas algo adicional?',
+    'Lamentablemente no tenemos disponibilidad para esa fecha. ¿Tienes alguna fecha alternativa?',
+    'Puedes programar una visita al espacio. ¿Qué día te quedaría bien?',
+    'El anticipo del 30% confirma tu fecha. El resto se paga según el plan de cuotas.',
+  ]
+
+  const [quickReplies, setQuickReplies] = useState<string[]>(DEFAULT_QUICK_REPLIES)
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('espot_quick_replies')
+      if (saved) setQuickReplies(JSON.parse(saved))
+    } catch {}
+  }, [])
 
   const bottomRef  = useRef<HTMLDivElement>(null)
   const fileRef    = useRef<HTMLInputElement>(null)
@@ -305,6 +326,30 @@ export default function HostMensajesPage() {
                 </button>
               </div>
             )}
+
+            {/* Respuestas rápidas */}
+            <div className="relative mb-2">
+              <button
+                onClick={() => setShowQuickReplies(o => !o)}
+                className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-xl transition-all"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
+                <Zap size={11} style={{ color: 'var(--brand)' }} /> Respuestas rápidas
+                <ChevronDown size={11} style={{ transform: showQuickReplies ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+              </button>
+              {showQuickReplies && (
+                <div className="absolute bottom-full mb-1 left-0 right-0 rounded-2xl overflow-hidden shadow-xl z-10"
+                  style={{ background: '#fff', border: '1px solid var(--border-subtle)', maxHeight: 280, overflowY: 'auto' }}>
+                  {quickReplies.map((reply, i) => (
+                    <button key={i} type="button"
+                      onClick={() => { setBody(reply); setShowQuickReplies(false) }}
+                      className="w-full text-left px-4 py-3 text-sm hover:bg-[var(--bg-elevated)] transition-colors"
+                      style={{ color: 'var(--text-primary)', borderBottom: i < quickReplies.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
+                      {reply.length > 80 ? reply.slice(0, 80) + '...' : reply}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <div className="flex items-end gap-2">
               <input ref={fileRef} type="file" accept={ACCEPTED} className="hidden" onChange={handleFileChange} />

@@ -4,17 +4,20 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 export interface Review {
-  id:         string
-  rating:     number
-  comment:    string | null
-  created_at: string
-  guest:      { full_name: string | null }
+  id:               string
+  rating:           number
+  comment:          string | null
+  host_response:    string | null
+  host_response_at: string | null
+  created_at:       string
+  guest:            { full_name: string | null }
+  space?:           { id: string; name: string; slug: string }
 }
 
 export interface ReviewsSummary {
-  average:  number
-  total:    number
-  reviews:  Review[]
+  average: number
+  total:   number
+  reviews: Review[]
 }
 
 export async function getSpaceReviews(spaceId: string): Promise<ReviewsSummary> {
@@ -22,17 +25,19 @@ export async function getSpaceReviews(spaceId: string): Promise<ReviewsSummary> 
 
   const { data } = await supabase
     .from('reviews')
-    .select('id, rating, comment, created_at, profiles!guest_id(full_name)')
+    .select('id, rating, comment, host_response, host_response_at, created_at, profiles!guest_id(full_name)')
     .eq('space_id', spaceId)
     .eq('is_public', true)
     .order('created_at', { ascending: false })
 
   const reviews = (data ?? []).map((r: any) => ({
-    id:         r.id,
-    rating:     r.rating,
-    comment:    r.comment,
-    created_at: r.created_at,
-    guest:      { full_name: r.profiles?.full_name ?? null },
+    id:               r.id,
+    rating:           r.rating,
+    comment:          r.comment,
+    host_response:    r.host_response ?? null,
+    host_response_at: r.host_response_at ?? null,
+    created_at:       r.created_at,
+    guest:            { full_name: r.profiles?.full_name ?? null },
   }))
 
   const total   = reviews.length
@@ -43,6 +48,75 @@ export async function getSpaceReviews(spaceId: string): Promise<ReviewsSummary> 
   return { average, total, reviews }
 }
 
+/** Todas las reseñas de los espacios del propietario autenticado */
+export async function getHostReviews(): Promise<Review[]> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  // Obtener los IDs de sus espacios
+  const { data: spaces } = await supabase
+    .from('spaces')
+    .select('id, name, slug')
+    .eq('host_id', user.id)
+
+  if (!spaces?.length) return []
+  const spaceIds = spaces.map(s => s.id)
+
+  const { data } = await supabase
+    .from('reviews')
+    .select('id, rating, comment, host_response, host_response_at, created_at, space_id, profiles!guest_id(full_name)')
+    .in('space_id', spaceIds)
+    .eq('is_public', true)
+    .order('created_at', { ascending: false })
+
+  const spaceMap = Object.fromEntries(spaces.map(s => [s.id, s]))
+
+  return (data ?? []).map((r: any) => ({
+    id:               r.id,
+    rating:           r.rating,
+    comment:          r.comment,
+    host_response:    r.host_response ?? null,
+    host_response_at: r.host_response_at ?? null,
+    created_at:       r.created_at,
+    guest:            { full_name: r.profiles?.full_name ?? null },
+    space:            spaceMap[r.space_id] ?? null,
+  }))
+}
+
+/** Propietario responde a una reseña */
+export async function respondToReview(
+  reviewId: string,
+  response: string
+): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+
+  // Verificar que la reseña pertenece a un espacio del host
+  const { data: review } = await supabase
+    .from('reviews')
+    .select('space_id, spaces!space_id(host_id)')
+    .eq('id', reviewId)
+    .single()
+
+  if (!review) return { error: 'Reseña no encontrada' }
+  if ((review.spaces as any)?.host_id !== user.id) return { error: 'No autorizado' }
+
+  const { error } = await supabase
+    .from('reviews')
+    .update({
+      host_response:    response.trim() || null,
+      host_response_at: response.trim() ? new Date().toISOString() : null,
+    })
+    .eq('id', reviewId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/espacios')
+  return {}
+}
+
 export async function getUserPendingReview(userId: string): Promise<{
   bookingId: string
   spaceId:   string
@@ -50,7 +124,6 @@ export async function getUserPendingReview(userId: string): Promise<{
 } | null> {
   const supabase = await createClient()
 
-  // Buscar reservas completadas sin reseña
   const { data: bookings } = await supabase
     .from('bookings')
     .select('id, space_id, spaces!space_id(name), event_date')
@@ -63,12 +136,9 @@ export async function getUserPendingReview(userId: string): Promise<{
 
   if (!bookings?.length) return null
 
-  // Verificar cuáles ya tienen reseña
   const bookingIds = bookings.map(b => b.id)
   const { data: existing } = await supabase
-    .from('reviews')
-    .select('booking_id')
-    .in('booking_id', bookingIds)
+    .from('reviews').select('booking_id').in('booking_id', bookingIds)
 
   const reviewed = new Set((existing ?? []).map((r: any) => r.booking_id))
   const pending  = bookings.find(b => !reviewed.has(b.id))
@@ -87,9 +157,7 @@ export async function getUserReviewedBookings(): Promise<Set<string>> {
   if (!user) return new Set()
 
   const { data } = await supabase
-    .from('reviews')
-    .select('booking_id')
-    .eq('guest_id', user.id)
+    .from('reviews').select('booking_id').eq('guest_id', user.id)
 
   return new Set((data ?? []).map((r: any) => r.booking_id))
 }
@@ -106,13 +174,9 @@ export async function submitReview(data: {
 
   if (data.rating < 1 || data.rating > 5) return { error: 'Rating inválido' }
 
-  // Verificar que la reserva pertenece al usuario y el evento ya ocurrió
   const today = new Date().toISOString().split('T')[0]
   const { data: booking } = await supabase
-    .from('bookings')
-    .select('event_date, guest_id')
-    .eq('id', data.bookingId)
-    .single()
+    .from('bookings').select('event_date, guest_id').eq('id', data.bookingId).single()
   if (!booking || booking.guest_id !== user.id) return { error: 'Reserva no encontrada' }
   if (booking.event_date >= today) return { error: 'Solo puedes dejar una reseña después de tu evento' }
 
@@ -129,6 +193,6 @@ export async function submitReview(data: {
     return { error: error.message }
   }
 
-  revalidatePath(`/espacios`)
+  revalidatePath('/espacios')
   return {}
 }

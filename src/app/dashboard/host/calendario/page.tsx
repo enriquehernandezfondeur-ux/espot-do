@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { ChevronLeft, ChevronRight, Building2, Lock, Loader2, Plus, X, Clock, Users, CheckCircle, Calendar, Link2, Link2Off } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Building2, Lock, Loader2, Plus, X, Clock, Users, CheckCircle, Calendar, Link2, Link2Off, Printer } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
 import { getHostCalendarBookings, getHostSpaces, getSpaceAvailability, createAvailabilityBlock, deleteAvailabilityBlock, getOrCreateIcalToken, getGoogleCalendarStatus, disconnectGoogleCalendar } from '@/lib/actions/host'
 
@@ -234,12 +234,18 @@ export default function CalendarioPage() {
         <div>
           <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Calendario</h1>
           <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-            Gestiona la disponibilidad de tu espacio
+            Gestiona la disponibilidad de tu espacio &mdash; {MONTHS[current.month]} {current.year}
           </p>
         </div>
 
-        {/* Sync de calendarios */}
+        {/* Sync de calendarios + Exportar */}
         <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => window.print()}
+            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl transition-all print:hidden"
+            style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+            <Printer size={13} /> Imprimir / PDF
+          </button>
           {/* Google Calendar */}
           {gcalConnected ? (
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium"
@@ -635,7 +641,10 @@ export default function CalendarioPage() {
                         <div className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>
                           {b.profiles?.full_name ?? 'Cliente'}
                         </div>
-                        <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                        <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
+                          {(b as any).spaces?.name && spaceList.length > 1 && (
+                            <span className="font-medium" style={{ color: 'var(--brand)' }}>{(b as any).spaces.name} · </span>
+                          )}
                           {new Date(b.event_date + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })} · {b.start_time?.slice(0,5)}
                         </div>
                       </div>

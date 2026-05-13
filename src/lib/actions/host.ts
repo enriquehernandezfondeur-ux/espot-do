@@ -303,7 +303,7 @@ export async function getHostCalendarBookings() {
 
   const { data } = await supabase
     .from('bookings')
-    .select('id, event_date, start_time, end_time, status, total_amount, event_type, profiles!guest_id(full_name)')
+    .select('id, space_id, event_date, start_time, end_time, status, total_amount, event_type, profiles!guest_id(full_name), spaces!space_id(name)')
     .in('space_id', spaces.map(s => s.id))
     .not('status', 'in', '("cancelled_guest","cancelled_host","rejected")')
     .order('event_date')

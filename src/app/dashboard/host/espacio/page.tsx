@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { Building2, Clock, DollarSign, Plus, Gift, Shield, CreditCard, CheckCircle, ChevronRight, ChevronLeft, X, Loader2, Eye, EyeOff, MapPin, Users, Pencil, PlusCircle, Wine, UtensilsCrossed, Sunset, Trees, Camera, Briefcase, Home, Package, MessageSquare, Music2, Volume2, Sun, Car, Wifi, Wind, Waves, Monitor, Zap, ShowerHead, Sparkles, Trash2, Save } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
-import { saveSpace, publishSpace, getMySpaces, saveSpaceImages, updateSpace, deactivateSpace, deleteSpaceByHost } from '@/lib/actions/space'
+import { saveSpace, publishSpace, getMySpaces, saveSpaceImages, updateSpace, deactivateSpace, deleteSpaceByHost, updateCancellationPolicy } from '@/lib/actions/space'
 import PhotoUploader from '@/components/dashboard/PhotoUploader'
 import WeeklySchedule from '@/components/dashboard/WeeklySchedule'
 import ActivityPicker from '@/components/dashboard/ActivityPicker'
@@ -133,6 +133,11 @@ export default function EspacioPage() {
   const [saveError, setSaveError] = useState('')
   const [stepError, setStepError] = useState('')
   const [publishedPending, setPublishedPending] = useState(false)
+  const [cancelModal, setCancelModal]   = useState<{ id: string; name: string } | null>(null)
+  const [cancelPolicy,     setCancelPolicy]     = useState('moderada')
+  const [cancelRefundPct,  setCancelRefundPct]  = useState('50')
+  const [cancelHoursBefore,setCancelHoursBefore]= useState('72')
+  const [cancelSaving, setCancelSaving] = useState(false)
   const [pendingPhotos, setPendingPhotos] = useState<{ url: string; path: string; isCover: boolean }[]>([])
   const [existingPhotos, setExistingPhotos] = useState<{ url: string; path: string; isCover: boolean }[]>([])
   const [photosTouched, setPhotosTouched] = useState(false)
@@ -168,6 +173,10 @@ export default function EspacioPage() {
   const [pkgExtraHourPrice, setPkgExtraHourPrice] = useState('')
   const [packageIncludes, setPackageIncludes]     = useState<string[]>([])
   const [newInclude, setNewInclude]               = useState('')
+
+  // Precio dinámico y anticipo mínimo
+  const [weekendMultiplier, setWeekendMultiplier] = useState('1.00')
+  const [minAdvanceAmount,  setMinAdvanceAmount]  = useState('0')
 
   // Step 3 - Time blocks
   const [timeBlocks, setTimeBlocks] = useState<TimeBlock[]>([])
@@ -271,6 +280,8 @@ export default function EspacioPage() {
       pricingType: pricingType as PricingType,
       hourlyPrice, minHours, maxHours, minConsumption, sessionHours,
       fixedPrice, packageName, packageHours, pkgExtraHourPrice, packageIncludes,
+      weekendMultiplier: Number(weekendMultiplier) || 1,
+      minAdvanceAmount:  Number(minAdvanceAmount)  || 0,
       timeBlocks, addons,
       instantBooking,
       hasParkingFac, hasValetParking, hasWifi, hasAc, hasSoundSystem, hasProjector,
@@ -379,6 +390,8 @@ export default function EspacioPage() {
       setPackageHours(String(p.package_hours ?? ''))
       setPkgExtraHourPrice(String(p.extra_hour_price ?? ''))
       setPackageIncludes(p.package_includes ?? [])
+      setWeekendMultiplier(String(p.weekend_multiplier ?? '1.00'))
+      setMinAdvanceAmount(String(p.min_advance_amount ?? '0'))
     }
     // Addons
     if (space.space_addons?.length) {
@@ -485,6 +498,7 @@ export default function EspacioPage() {
   // ── VISTA: Lista de espacios ──────────────────────────────
   if (view === 'list') {
     return (
+      <>
       <div className="p-4 md:p-6 max-w-6xl mx-auto">
         {publishedPending && (
           <div className="mb-6 rounded-2xl px-5 py-4 flex items-start gap-3"
@@ -628,6 +642,18 @@ export default function EspacioPage() {
                         style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
                         <Pencil size={13} /> Editar
                       </button>
+                      <button onClick={() => {
+                        const c = space.space_conditions?.[0]
+                        setCancelModal({ id: space.id, name: space.name })
+                        setCancelPolicy(c?.cancellation_policy ?? 'moderada')
+                        setCancelRefundPct(String(c?.cancellation_refund_pct ?? 50))
+                        setCancelHoursBefore(String(c?.cancellation_hours_before ?? 72))
+                      }}
+                        className="flex items-center justify-center gap-1.5 text-xs font-medium py-2 px-3 rounded-xl transition-colors"
+                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}
+                        title="Política de cancelación">
+                        <Shield size={12} /> Cancelación
+                      </button>
 
                       {!space.is_published && (
                         <button
@@ -676,6 +702,83 @@ export default function EspacioPage() {
           </div>
         )}
       </div>
+
+      {/* ── Modal: Editar política de cancelación ── */}
+      {cancelModal ? (
+        <>
+          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={() => setCancelModal(null)} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="w-full max-w-sm rounded-3xl p-6 space-y-5"
+              style={{ background: '#fff', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>
+                  Política de cancelación
+                </h3>
+                <button onClick={() => setCancelModal(null)} style={{ color: 'var(--text-muted)' }}>
+                  <X size={18} />
+                </button>
+              </div>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{cancelModal.name}</p>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>Tipo de política</label>
+                  <div className="flex gap-2">
+                    {['flexible', 'moderada', 'estricta'].map(p => (
+                      <button key={p} onClick={() => setCancelPolicy(p)}
+                        className="flex-1 py-2 rounded-xl text-xs font-semibold capitalize transition-all"
+                        style={cancelPolicy === p
+                          ? { background: 'var(--brand)', color: '#fff' }
+                          : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>% de reembolso</label>
+                    <input type="number" value={cancelRefundPct} onChange={e => setCancelRefundPct(e.target.value)}
+                      min="0" max="100" className="input-base w-full rounded-xl px-3 py-2.5 text-sm" style={{ fontSize: 16 }} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>Horas de anticipación</label>
+                    <input type="number" value={cancelHoursBefore} onChange={e => setCancelHoursBefore(e.target.value)}
+                      min="0" className="input-base w-full rounded-xl px-3 py-2.5 text-sm" style={{ fontSize: 16 }} />
+                  </div>
+                </div>
+                <p className="text-xs rounded-xl px-3 py-2.5"
+                  style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+                  {Number(cancelRefundPct) > 0
+                    ? `${cancelRefundPct}% de reembolso si cancela con más de ${cancelHoursBefore}h de anticipación`
+                    : `Sin reembolso independientemente de la anticipación`}
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <button onClick={() => setCancelModal(null)} className="flex-1 py-3 rounded-xl text-sm font-semibold btn-outline">
+                  Cancelar
+                </button>
+                <button
+                  onClick={async () => {
+                    setCancelSaving(true)
+                    const r = await updateCancellationPolicy(cancelModal.id, cancelPolicy, Number(cancelRefundPct), Number(cancelHoursBefore))
+                    setCancelSaving(false)
+                    if (r.error) { setSaveError(r.error); return }
+                    setCancelModal(null)
+                    setSaveError('')
+                  }}
+                  disabled={cancelSaving}
+                  className="flex-1 py-3 rounded-xl text-sm font-bold disabled:opacity-50"
+                  style={{ background: 'var(--brand)', color: '#fff' }}>
+                  {cancelSaving ? 'Guardando...' : 'Guardar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : null}
+      </>
     )
   }
 
@@ -1074,6 +1177,48 @@ export default function EspacioPage() {
                 <p className="text-sm" style={{ color: '#92400E' }}>
                   Con esta modalidad, los clientes te enviarán una solicitud describiendo su evento. Recibirás una notificación y podrás responder con un precio personalizado.
                 </p>
+              </div>
+            )}
+
+            {/* Precio dinámico y anticipo mínimo */}
+            {pricingType && pricingType !== 'custom_quote' && (
+              <div className="space-y-4 pt-2 mt-2" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                <h3 className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Opciones avanzadas de precio</h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Precio dinámico fines de semana */}
+                  <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                    <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                      Multiplicador fines de semana
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input type="number" value={weekendMultiplier} onChange={e => setWeekendMultiplier(e.target.value)}
+                        step="0.05" min="1" max="3"
+                        className="input-base w-full rounded-xl px-4 py-3 text-sm" style={{ fontSize: 16 }} />
+                      <span className="text-sm font-semibold shrink-0" style={{ color: 'var(--text-muted)' }}>×</span>
+                    </div>
+                    <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
+                      {Number(weekendMultiplier) > 1
+                        ? `Vie/Sáb/Dom = ${Math.round((Number(weekendMultiplier) - 1) * 100)}% más caro`
+                        : 'Sin sobrecargo por fin de semana (1.00)'}
+                    </p>
+                  </div>
+
+                  {/* Anticipo mínimo */}
+                  <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                    <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                      Anticipo mínimo (RD$)
+                    </label>
+                    <input type="number" value={minAdvanceAmount} onChange={e => setMinAdvanceAmount(e.target.value)}
+                      placeholder="0" min="0"
+                      className="input-base w-full rounded-xl px-4 py-3 text-sm" style={{ fontSize: 16 }} />
+                    <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
+                      {Number(minAdvanceAmount) > 0
+                        ? `La primera cuota será al menos RD$${Number(minAdvanceAmount).toLocaleString('es-DO')}`
+                        : 'El anticipo se calcula automáticamente por el plan de cuotas (recomendado)'}
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
           </div>

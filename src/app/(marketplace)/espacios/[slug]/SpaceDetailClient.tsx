@@ -998,6 +998,21 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                               {r.comment && (
                                 <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{r.comment}</p>
                               )}
+                              {/* Respuesta del propietario */}
+                              {r.host_response && (
+                                <div className="mt-3 rounded-xl px-4 py-3"
+                                  style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
+                                  <div className="flex items-center gap-1.5 mb-1">
+                                    <CheckCircle size={11} style={{ color: 'var(--brand)' }} />
+                                    <span className="text-xs font-semibold" style={{ color: 'var(--brand)' }}>
+                                      Respuesta del propietario
+                                    </span>
+                                  </div>
+                                  <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                                    {r.host_response}
+                                  </p>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>

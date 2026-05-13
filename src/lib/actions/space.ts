@@ -53,6 +53,8 @@ export interface SaveSpacePayload {
   packageHours: string
   pkgExtraHourPrice: string
   packageIncludes: string[]
+  weekendMultiplier?: number
+  minAdvanceAmount?: number
   // Step 3
   timeBlocks: { block_name: string; start_time: string; end_time: string; days: number[] }[]
   // Step 4
@@ -120,8 +122,10 @@ function buildPricingData(spaceId: string, p: SaveSpacePayload) {
     fixed_price:       num(p.fixedPrice),
     package_name:      p.packageName,
     package_hours:     int(p.packageHours),
-    extra_hour_price:  num(p.pkgExtraHourPrice),
-    package_includes:  p.packageIncludes,
+    extra_hour_price:    num(p.pkgExtraHourPrice),
+    package_includes:    p.packageIncludes,
+    weekend_multiplier:  p.weekendMultiplier ?? 1,
+    min_advance_amount:  p.minAdvanceAmount  ?? 0,
   }
   return base
 }
@@ -453,6 +457,9 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
     pricingData.package_hours    = int(payload.packageHours)      ?? null
     pricingData.extra_hour_price = num(payload.pkgExtraHourPrice) ?? null
   }
+  // Precio dinámico y anticipo mínimo — aplica a todos los tipos
+  if (payload.weekendMultiplier !== undefined) pricingData.weekend_multiplier = payload.weekendMultiplier
+  if (payload.minAdvanceAmount  !== undefined) pricingData.min_advance_amount  = payload.minAdvanceAmount
 
   const existingPricing = await supabase.from('space_pricing').select('id').eq('space_id', spaceId).limit(1)
   if (existingPricing.data?.length) {
@@ -553,4 +560,32 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
   revalidatePath('/buscar')
   revalidatePath('/', 'layout')
   return { success: true, spaceId }
+}
+
+/** Actualizar solo la política de cancelación de un espacio (sin wizard completo) */
+export async function updateCancellationPolicy(
+  spaceId: string,
+  policy: string,
+  refundPct: number,
+  hoursBefore: number
+): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+
+  const { data: space } = await supabase
+    .from('spaces').select('host_id').eq('id', spaceId).single()
+  if (!space || space.host_id !== user.id) return { error: 'No autorizado' }
+
+  const { error } = await supabase.from('space_conditions')
+    .update({
+      cancellation_policy:       policy,
+      cancellation_refund_pct:   refundPct,
+      cancellation_hours_before: hoursBefore,
+    })
+    .eq('space_id', spaceId)
+
+  if (error) return { error: error.message }
+  revalidatePath('/buscar')
+  return {}
 }

@@ -170,5 +170,59 @@ export async function GET(req: Request) {
     errors++
   }
 
+  // ── 4. SLA 48h: recordatorio a host que no ha respondido reservas pendientes ────
+
+  try {
+    const supabase   = await createClient()
+    const cutoff48h  = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()
+    const cutoff72h  = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString()
+
+    const { data: pendingBookings } = await supabase
+      .from('bookings')
+      .select(`
+        id, event_type, event_date, guest_count, created_at,
+        spaces!space_id(name, profiles!host_id(full_name, email)),
+        profiles!guest_id(full_name)
+      `)
+      .eq('status', 'pending')
+      .lt('created_at', cutoff48h)   // más de 48h sin respuesta
+      .gt('created_at', cutoff72h)   // pero menos de 72h (solo enviar una vez)
+
+    for (const bk of pendingBookings ?? []) {
+      const space     = (bk as any).spaces
+      const host      = space?.profiles
+      const guest     = (bk as any).profiles
+      if (!host?.email) continue
+      try {
+        await sendEmail({
+          to:      host.email,
+          subject: `Tienes una solicitud pendiente de respuesta — ${space?.name}`,
+          html:    `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="font-family:Arial,sans-serif;background:#F2F4F3;margin:0;padding:40px 20px;">
+            <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.07);">
+              <div style="height:5px;background:#F59E0B;"></div>
+              <div style="padding:32px 36px;">
+                <h2 style="color:#0F1623;font-size:19px;margin:0 0 8px;letter-spacing:-0.02em;">Solicitud pendiente de respuesta</h2>
+                <p style="color:#6B7280;font-size:14px;margin:0 0 20px;">Hola <strong>${host.full_name ?? 'Propietario'}</strong>, tienes una solicitud de reserva que lleva más de 48 horas sin respuesta.</p>
+                <table style="width:100%;border-collapse:collapse;margin-bottom:24px;border:1px solid #E8ECF0;border-radius:12px;overflow:hidden;">
+                  <tr><td style="padding:10px 16px;background:#FAFBFC;color:#6B7280;font-size:13px;border-bottom:1px solid #F0F2F5;">Espacio</td><td style="padding:10px 16px;font-size:13px;font-weight:600;color:#0F1623;border-bottom:1px solid #F0F2F5;">${space?.name ?? '—'}</td></tr>
+                  <tr><td style="padding:10px 16px;background:#FAFBFC;color:#6B7280;font-size:13px;border-bottom:1px solid #F0F2F5;">Cliente</td><td style="padding:10px 16px;font-size:13px;font-weight:600;color:#0F1623;border-bottom:1px solid #F0F2F5;">${guest?.full_name ?? 'Cliente'}</td></tr>
+                  <tr><td style="padding:10px 16px;background:#FAFBFC;color:#6B7280;font-size:13px;">Fecha del evento</td><td style="padding:10px 16px;font-size:13px;font-weight:600;color:#0F1623;">${bk.event_date}</td></tr>
+                </table>
+                <p style="color:#92400E;font-size:13px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:12px 16px;margin:0 0 24px;">Si no respondes en las próximas 24 horas, la solicitud podría cancelarse automáticamente y el cliente buscará otra opción.</p>
+                <div style="text-align:center;">
+                  <a href="${SITE}/dashboard/host/reservas" style="display:inline-block;background:#35C493;color:#060D09;font-weight:700;font-size:14px;padding:14px 32px;border-radius:14px;text-decoration:none;">Responder solicitud &rarr;</a>
+                </div>
+              </div>
+            </div>
+          </body></html>`,
+        })
+        sent++
+      } catch { errors++ }
+    }
+  } catch (err: any) {
+    console.error('[cron] SLA reminders failed:', err.message)
+    errors++
+  }
+
   return NextResponse.json({ ok: true, sent, errors, ts: new Date().toISOString() })
 }

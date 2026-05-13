@@ -5,7 +5,7 @@ import Link from 'next/link'
 import {
   ArrowLeft, CalendarDays, Calendar, Clock, Users, MapPin, MessageCircle,
   CreditCard, CheckCircle, Sparkles, ExternalLink,
-  Phone, Mail, Loader2, Check, Building2,
+  Phone, Mail, Loader2, Check, Building2, FileText,
 } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getClientBookingDetail } from '@/lib/actions/client'
@@ -397,6 +397,13 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
           </a>
         )
       })()}
+
+      {/* Contrato */}
+      <a href={`/contrato/${booking.id}`} target="_blank" rel="noopener noreferrer"
+        className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl text-sm font-semibold mb-3 transition-all"
+        style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+        <FileText size={15} /> Ver contrato de reserva
+      </a>
 
       {/* Acciones */}
       <div className="flex gap-3">
