@@ -268,11 +268,14 @@ export default function MisReservasPage() {
                     style={{ background: 'linear-gradient(90deg, rgba(53,196,147,0.12), rgba(53,196,147,0.04))', borderBottom: '1px solid rgba(53,196,147,0.2)' }}>
                     <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: 'var(--brand)', flexShrink: 0 }} />
                     <span className="text-xs font-bold" style={{ color: 'var(--brand)' }}>
-                      Tu próxima reserva &mdash; {Math.ceil((new Date(bk.event_date + 'T12:00').getTime() - new Date().setHours(0,0,0,0)) / 86400000) === 0
-                        ? '¡Hoy!'
-                        : Math.ceil((new Date(bk.event_date + 'T12:00').getTime() - new Date().setHours(0,0,0,0)) / 86400000) === 1
-                        ? 'Mañana'
-                        : `en ${Math.ceil((new Date(bk.event_date + 'T12:00').getTime() - new Date().setHours(0,0,0,0)) / 86400000)} días`}
+                      {(() => {
+                        const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1)
+                        const tomorrowStr = tomorrow.toISOString().split('T')[0]
+                        if (bk.event_date === today) return 'Tu próxima reserva — ¡Hoy!'
+                        if (bk.event_date === tomorrowStr) return 'Tu próxima reserva — Mañana'
+                        const days = Math.round((new Date(bk.event_date + 'T12:00').getTime() - new Date(today + 'T12:00').getTime()) / 86400000)
+                        return `Tu próxima reserva — en ${days} día${days !== 1 ? 's' : ''}`
+                      })()}
                     </span>
                   </div>
                 )}

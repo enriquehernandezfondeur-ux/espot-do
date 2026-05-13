@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Search, Menu, X, User, ChevronDown, LogOut, Settings, LayoutDashboard, MapPin, Building2, CalendarDays, Heart, ChevronRight } from 'lucide-react'
+import { Search, Menu, X, User, ChevronDown, LogOut, Settings, LayoutDashboard, MapPin, Building2, CalendarDays, Heart, ChevronRight, CreditCard } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -546,7 +546,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                 { href: '/dashboard/overview',   label: 'Inicio',             icon: LayoutDashboard, desc: 'Ver resumen y alertas' },
                 { href: '/dashboard/reservas',   label: 'Mis reservas',       icon: CalendarDays,    desc: 'Ver y gestionar reservas' },
                 { href: '/dashboard/favoritos',  label: 'Espacios guardados', icon: Heart,           desc: 'Mis espacios favoritos' },
-                { href: '/dashboard/pagos',      label: 'Mis pagos',          icon: MapPin,          desc: 'Historial de pagos y cuotas' },
+                { href: '/dashboard/pagos',      label: 'Mis pagos',          icon: CreditCard,      desc: 'Historial de pagos y cuotas' },
                 ...(user?.role === 'host' ? [{ href: '/dashboard/host', label: 'Panel propietario', icon: Building2, desc: 'Gestionar mis espacios' }] : []),
               ].map(({ href, label, icon: Icon, desc }) => (
                 <Link key={href} href={href} onClick={() => setAccountSheet(false)}
