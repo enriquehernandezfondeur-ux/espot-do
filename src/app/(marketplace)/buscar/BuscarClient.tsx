@@ -919,14 +919,14 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
           </div>
         </div>
 
-        {/* ── MÓVIL: Lista o Mapa ── */}
-        <div className="md:hidden w-full" style={{ overflowX: 'hidden' }}>
-          {mobileView === 'list' ? (
-            filtered.length === 0
+        {/* ── MÓVIL: Vista lista ── */}
+        {mobileView === 'list' && (
+          <div className="md:hidden w-full" style={{ overflowX: 'hidden' }}>
+            {filtered.length === 0
               ? <EmptyState onClear={clearAll} />
               : (
                 <div className="grid grid-cols-1 gap-4 w-full"
-                  style={{ paddingBottom: 'calc(7rem + env(safe-area-inset-bottom, 0px))' }}>
+                  style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))' }}>
                   {filtered.map(space => (
                     <SpaceCard key={space.id} space={space} isHovered={false} onHover={() => {}}
                       dateFilter={dateFrom || undefined} timeFilter={timeFrom || undefined}
@@ -934,38 +934,123 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                   ))}
                 </div>
               )
-          ) : (
-            /* Mapa full-width: cancela el padding del contenedor padre con -mx-4 */
-            <div className="-mx-4"
-              style={{
-                height: 'calc(100dvh - 230px)',
-                minHeight: 400,
-                overflow: 'hidden',
-                marginBottom: 0,
+            }
+          </div>
+        )}
+
+        {/* ── MÓVIL: Vista mapa con strip de cards ── */}
+        {mobileView === 'map' && (() => {
+          const cardStripRef = React.createRef<HTMLDivElement>()
+          return (
+            <div className="md:hidden -mx-4" style={{ position: 'relative' }}>
+              {/* Mapa */}
+              <div style={{ height: 'calc(100dvh - 340px)', minHeight: 280, overflow: 'hidden' }}>
+                <SpacesMap
+                  key="mobile-map"
+                  spaces={filtered}
+                  cityFilter={sector}
+                  onSpaceHover={id => {
+                    setHoveredId(id)
+                    if (!id) return
+                    // Scroll al card correspondiente en el strip
+                    const el = document.getElementById(`mcard-${id}`)
+                    el?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+                  }}
+                />
+              </div>
+
+              {/* Strip de cards deslizable */}
+              <div style={{
+                background: 'rgba(255,255,255,0.98)',
+                borderTop: '1px solid var(--border-subtle)',
+                paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))',
               }}>
-              {/* key fuerza remount al activar el mapa → Leaflet recalcula tamaño */}
-              <SpacesMap key="mobile-map" spaces={filtered} cityFilter={sector} />
+                {/* Cabecera del strip */}
+                <div className="flex items-center justify-between px-4 pt-3 pb-2">
+                  <span className="text-xs font-bold" style={{ color: 'var(--text-secondary)' }}>
+                    {filtered.length} espacio{filtered.length !== 1 ? 's' : ''}
+                    {hoveredId ? ' · tap en un pin' : ' · desliza para ver más'}
+                  </span>
+                </div>
+
+                {/* Cards horizontales */}
+                {filtered.length === 0 ? (
+                  <div className="px-4 pb-4 text-sm" style={{ color: 'var(--text-muted)' }}>
+                    Sin resultados con estos filtros
+                  </div>
+                ) : (
+                  <div
+                    ref={cardStripRef}
+                    className="flex gap-3 px-4 pb-3 overflow-x-auto scrollbar-hide"
+                    style={{ scrollSnapType: 'x mandatory' }}>
+                    {filtered.map(space => {
+                      const cover = space.space_images?.find((i: any) => i.is_cover)?.url ?? space.space_images?.[0]?.url
+                      const p     = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
+                      const price = p?.pricing_type === 'hourly' ? `RD$${Number(p.hourly_price).toLocaleString('es-DO')}/hr`
+                        : p?.pricing_type === 'minimum_consumption' ? `Desde RD$${Number(p.minimum_consumption).toLocaleString('es-DO')}`
+                        : p?.pricing_type === 'fixed_package' ? `RD$${Number(p.fixed_price).toLocaleString('es-DO')}`
+                        : 'Cotizar'
+                      const isActive = hoveredId === space.id
+                      return (
+                        <Link
+                          id={`mcard-${space.id}`}
+                          key={space.id}
+                          href={`/espacios/${space.slug}`}
+                          className="shrink-0 rounded-2xl overflow-hidden transition-all"
+                          style={{
+                            width: 220,
+                            scrollSnapAlign: 'start',
+                            border: `2px solid ${isActive ? 'var(--brand)' : 'var(--border-subtle)'}`,
+                            background: '#fff',
+                            boxShadow: isActive ? '0 4px 16px rgba(53,196,147,0.25)' : '0 1px 4px rgba(0,0,0,0.06)',
+                            transform: isActive ? 'scale(1.02)' : 'scale(1)',
+                          }}>
+                          {/* Foto */}
+                          <div style={{ height: 100, overflow: 'hidden', background: 'var(--bg-elevated)' }}>
+                            {cover
+                              // eslint-disable-next-line @next/next/no-img-element
+                              ? <img src={cover} alt={space.name} className="w-full h-full object-cover" />
+                              : <div className="w-full h-full flex items-center justify-center">
+                                  <Building2 size={28} style={{ color: 'var(--text-muted)', opacity: 0.3 }} />
+                                </div>
+                            }
+                          </div>
+                          {/* Info */}
+                          <div className="px-3 py-2.5">
+                            <div className="text-xs font-bold truncate mb-0.5" style={{ color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+                              {space.name}
+                            </div>
+                            <div className="text-[10px] truncate mb-1" style={{ color: 'var(--text-muted)' }}>
+                              {[space.sector, space.city].filter(Boolean).join(', ')}
+                            </div>
+                            <div className="text-xs font-bold" style={{ color: 'var(--brand)' }}>{price}</div>
+                          </div>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
-          )}
-        </div>
+          )
+        })()}
       </div>
 
-      {/* ── Botón flotante móvil Lista/Mapa ── */}
-      {/* bottom: 5.5rem sube el botón por encima de la barra inferior del marketplace (~72px) */}
-      <div className="md:hidden fixed left-1/2 -translate-x-1/2 z-50"
+      {/* ── Botón flotante Lista/Mapa — compacto ── */}
+      <div className="md:hidden fixed right-4 z-50"
         style={{ bottom: 'calc(5.5rem + env(safe-area-inset-bottom, 0px))' }}>
         <button
           onClick={() => setMobileView(v => v === 'list' ? 'map' : 'list')}
-          className="flex items-center gap-2.5 px-6 py-3.5 rounded-full text-sm font-bold text-white"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold text-white shadow-lg"
           style={{
             background: mobileView === 'map' ? '#03313C' : 'var(--brand)',
             boxShadow: mobileView === 'map'
-              ? '0 4px 20px rgba(3,49,60,0.45), 0 0 0 3px rgba(255,255,255,0.15)'
-              : '0 4px 24px rgba(53,196,147,0.5), 0 0 0 3px rgba(255,255,255,0.15)',
+              ? '0 4px 16px rgba(3,49,60,0.4)'
+              : '0 4px 16px rgba(53,196,147,0.45)',
           }}>
           {mobileView === 'list'
-            ? <><Map size={16} /> Ver mapa</>
-            : <><LayoutList size={16} /> Ver lista ({filtered.length})</>
+            ? <><Map size={14} /> Mapa</>
+            : <><LayoutList size={14} /> Lista</>
           }
         </button>
       </div>
