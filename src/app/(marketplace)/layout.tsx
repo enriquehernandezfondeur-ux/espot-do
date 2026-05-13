@@ -537,13 +537,9 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                 {/* Fondo */}
                 <rect width="80" height="80" rx="8" fill="url(#azulGrad)"/>
                 {/* Patrón cuadros estilo Azul */}
-                {[0,10,20,30,40,50,60,70].map(x =>
-                  [0,10,20,30,40,50,60,70].map(y =>
-                    (x+y)%20===0
-                      ? <rect key={`${x}-${y}`} x={x} y={y} width="10" height="10" fill="#fff" fillOpacity="0.10"/>
-                      : null
-                  )
-                )}
+                {[[0,0],[20,0],[40,0],[60,0],[10,10],[30,10],[50,10],[70,10],[0,20],[20,20],[40,20],[60,20],[10,30],[30,30],[50,30],[70,30],[0,40],[20,40],[40,40],[60,40],[10,50],[30,50],[50,50],[70,50],[0,60],[20,60],[40,60],[60,60],[10,70],[30,70],[50,70],[70,70]].map(([x,y])=>(
+                  <rect key={`${x}-${y}`} x={x} y={y} width="10" height="10" fill="#fff" fillOpacity="0.09"/>
+                ))}
                 {/* Overlay diagonal */}
                 <rect width="80" height="80" rx="8" fill="url(#azulGrad2)"/>
                 {/* Texto AZUL */}

@@ -19,10 +19,14 @@ export default async function ContratoPage({ params }: { params: Promise<{ booki
       booking_addons(quantity, unit_price, subtotal, space_addons(name))
     `)
     .eq('id', bookingId)
-    .or(`guest_id.eq.${user.id},spaces.host_id.eq.${user.id}`)
     .single()
 
+  // Verificar que el usuario es el cliente O el propietario del espacio
   if (!booking) return notFound()
+  const spaceHostId = (booking as any).spaces?.profiles?.id ?? null
+  const isGuest     = (booking as any).guest_id === user.id
+  const isHost      = spaceHostId === user.id
+  if (!isGuest && !isHost) return notFound()
 
   const space  = (booking as any).spaces as any
   const host   = space?.profiles as any
