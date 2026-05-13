@@ -262,13 +262,11 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                 Espacios disponibles
               </p>
               <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
-                {spaces.length > 0 ? (
-                  <>{spaces.length}{' '}
-                    <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                      espacio{spaces.length !== 1 ? 's' : ''}
-                    </span>
-                    {' '}en República Dominicana</>
-                ) : 'Próximamente más espacios'}
+                {spaces.length}{' '}
+                <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  espacio{spaces.length !== 1 ? 's' : ''}
+                </span>
+                {' '}en República Dominicana
               </h2>
             </div>
             <Link href="/buscar" className="hidden md:flex items-center gap-1.5 text-sm font-semibold"
@@ -277,34 +275,21 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
             </Link>
           </Reveal>
 
-          {spaces.length === 0 ? (
-            <Reveal className="py-20 text-center rounded-2xl" style={{ background: '#fff', border: '1px solid #E2E8F0' }}>
-              <Building2 size={32} style={{ color: '#35C493', margin: '0 auto 12px' }} />
-              <h3 className="font-bold text-lg mb-2" style={{ color: '#0F1623' }}>Próximamente más espacios</h3>
-              <p className="text-sm mb-6" style={{ color: '#6B7280' }}>Sé el primero en publicar tu espacio</p>
-              <Link href="/auth?mode=register&redirect=/dashboard/host/espacio"
-                className="inline-flex items-center gap-2 text-sm font-bold px-6 py-3 rounded-xl"
-                style={{ background: '#35C493', color: '#fff' }}>
-                Publicar espacio gratis
-              </Link>
-            </Reveal>
-          ) : (
-            <div ref={spSection.ref} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-              {spaces.slice(0, 6).map((space: any, i: number) => (
-                <div key={space.id} style={{
-                  opacity: spSection.on ? 1 : 0,
-                  transform: spSection.on ? 'translateY(0)' : 'translateY(32px)',
-                  transition: `opacity 0.65s ease ${i * 90}ms, transform 0.65s ease ${i * 90}ms`,
-                }}>
-                  <SpaceCard
-                    space={space}
-                    isHovered={hoveredId === space.id}
-                    onHover={setHoveredId}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
+          <div ref={spSection.ref} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+            {spaces.slice(0, 6).map((space: any, i: number) => (
+              <div key={space.id} style={{
+                opacity: spSection.on ? 1 : 0,
+                transform: spSection.on ? 'translateY(0)' : 'translateY(32px)',
+                transition: `opacity 0.65s ease ${i * 90}ms, transform 0.65s ease ${i * 90}ms`,
+              }}>
+                <SpaceCard
+                  space={space}
+                  isHovered={hoveredId === space.id}
+                  onHover={setHoveredId}
+                />
+              </div>
+            ))}
+          </div>
 
           <div className="text-center mt-8 md:hidden">
             <Link href="/buscar" className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-xl"
