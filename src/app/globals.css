@@ -81,6 +81,9 @@ body {
   width: 100%;
 }
 
+/* ── TAP HIGHLIGHT — eliminar flash azul en iOS ──── */
+* { -webkit-tap-highlight-color: transparent; }
+
 /* ── HOVER UTILITIES ─────────────────────────────── */
 .card-hover {
   transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
@@ -111,6 +114,11 @@ body {
 .btn-outline:hover { border-color: var(--brand); color: var(--brand); }
 .link-muted { color: var(--text-secondary); transition: color 0.15s; }
 .link-muted:hover { color: var(--brand); }
+
+/* ── ACTIVE STATES para feedback táctil en mobile ── */
+.btn-brand:active  { transform: scale(0.97); background: var(--brand-dark); }
+.btn-outline:active { opacity: 0.75; }
+.card-hover:active { transform: scale(0.99); }
 
 /* ── INPUTS ──────────────────────────────────────── */
 .input-base {
@@ -216,13 +224,17 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   }
 }
 
-/* Card hover — desactivar lift en touch (no hay hover en móvil) */
+/* Desactivar todos los efectos hover en dispositivos touch */
 @media (hover: none) {
   .card-hover:hover {
     transform: none;
     box-shadow: var(--shadow-card);
     border-color: var(--border-subtle) !important;
   }
+  .btn-brand:hover  { background: var(--brand);          transform: none; }
+  .btn-outline:hover { border-color: var(--border-medium); color: var(--text-secondary); }
+  .cat-hover:hover  { background: transparent !important; border-color: var(--border-subtle) !important; }
+  .link-muted:hover { color: var(--text-secondary); }
 }
 
 /* Animación suave para drawers y modales */

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CalendarDays, Users, MessageSquare, X, Send, Loader2, CheckCircle } from 'lucide-react'
+import { CalendarDays, Users, MessageSquare, X, Send, Loader2, CheckCircle, ArrowLeft } from 'lucide-react'
 import { formatDate, formatCurrency } from '@/lib/utils'
 import { getHostQuotes, respondToQuote } from '@/lib/actions/host'
 import { rejectBooking } from '@/lib/actions/booking'
@@ -143,6 +143,13 @@ export default function CotizacionesPage() {
           {selected ? (
             <div className="flex-1 rounded-2xl overflow-y-auto" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
               <div className="p-6" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                {/* Botón volver en mobile */}
+                <button
+                  onClick={() => setSelected(null)}
+                  className="lg:hidden flex items-center gap-1.5 text-sm font-medium mb-4"
+                  style={{ color: 'var(--text-muted)' }}>
+                  <ArrowLeft size={14} /> Volver a cotizaciones
+                </button>
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
