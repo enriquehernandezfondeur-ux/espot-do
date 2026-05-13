@@ -263,24 +263,35 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     [addons, selectedAddons]
   )
 
+  // Detectar si la fecha seleccionada es fin de semana (vie=5, sáb=6, dom=0)
+  const isWeekend = useMemo(() => {
+    if (!eventDate) return false
+    const dow = new Date(eventDate + 'T12:00').getDay()
+    return dow === 0 || dow === 5 || dow === 6
+  }, [eventDate])
+
+  const weekendMultiplier = useMemo(() => {
+    const m = Number(pricing?.weekend_multiplier ?? 1)
+    return isWeekend && m > 1 ? m : 1
+  }, [isWeekend, pricing])
+
   const basePrice = useMemo(() => {
     if (!effectiveStartTime || !realEndTime || selectedHours === 0) return 0
 
+    let price = 0
     if (isHourly) {
-      return (pricing?.hourly_price ?? 0) * selectedHours
-    }
-    if (isConsumption) {
-      // El consumo mínimo es fijo — las horas definen el slot, no el precio
-      return pricing?.minimum_consumption ?? 0
-    }
-    if (isPackage) {
+      price = (pricing?.hourly_price ?? 0) * selectedHours
+    } else if (isConsumption) {
+      price = pricing?.minimum_consumption ?? 0
+    } else if (isPackage) {
       const base  = pricing?.fixed_price ?? 0
       const extra = Math.max(0, selectedHours - packageHours)
       const extraRate = pricing?.extra_hour_price ?? 0
-      return base + extra * extraRate
+      price = base + extra * extraRate
     }
-    return 0 // quote
-  }, [pricing, effectiveStartTime, realEndTime, selectedHours, isHourly, isConsumption, isPackage, packageHours])
+    // Aplicar precio de fin de semana si aplica
+    return price > 0 ? Math.round(price * weekendMultiplier) : price
+  }, [pricing, effectiveStartTime, realEndTime, selectedHours, isHourly, isConsumption, isPackage, packageHours, weekendMultiplier])
 
   const addonsTotal = useMemo(() =>
     selectedAddonItems.reduce((s: number, a: any) => {
@@ -680,6 +691,18 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               )
             })()}
 
+            {/* Badge precio fin de semana */}
+            {isWeekend && weekendMultiplier > 1 && eventDate && !dateBlocked && (
+              <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs"
+                style={{ background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.25)', color: '#92400E' }}>
+                <CalendarDays size={12} style={{ color: '#D97706', flexShrink: 0 }} />
+                <span>
+                  <strong>Precio de fin de semana:</strong> este espacio aplica un precio especial viernes, sábados y domingos
+                  {' '}(+{Math.round((weekendMultiplier - 1) * 100)}% sobre el precio base).
+                </span>
+              </div>
+            )}
+
             {isQuote && (
               <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs"
                 style={{ background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)', color: '#92400E' }}>
@@ -1005,6 +1028,12 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                             ? `Paquete (${packageHours}h) + ${extra.toFixed(1)}h adicionales`
                             : `Paquete ${packageHours}h incluidas`
                         })()}
+                        {isWeekend && weekendMultiplier > 1 && (
+                          <span className="ml-1.5 text-xs font-semibold px-1.5 py-0.5 rounded-md"
+                            style={{ background: 'rgba(245,158,11,0.1)', color: '#D97706' }}>
+                            Tarifa fin de semana
+                          </span>
+                        )}
                       </span>
                       <span>{formatCurrency(basePrice)}</span>
                     </div>

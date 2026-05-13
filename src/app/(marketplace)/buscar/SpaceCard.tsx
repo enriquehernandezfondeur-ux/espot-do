@@ -253,6 +253,15 @@ export function SpaceCard({
                   {pricingDef.value === 'minimum_consumption' ? 'Cons. mínimo' : pricingDef.label}
                 </span>
               )}
+              {(() => {
+                const p = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
+                return p?.weekend_multiplier > 1 ? (
+                  <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap shrink-0"
+                    style={{ background: 'rgba(245,158,11,0.1)', color: '#D97706', border: '1px solid rgba(245,158,11,0.25)' }}>
+                    +{Math.round((p.weekend_multiplier - 1) * 100)}% fines
+                  </span>
+                ) : null
+              })()}
             </div>
 
             {/* Capacidad — siempre visible */}
