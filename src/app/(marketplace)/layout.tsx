@@ -59,17 +59,23 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
       setAuthReady(true)
     }
 
-    supabase.auth.getUser().then(({ data: { user: u } }) => {
-      if (u) loadProfile(u.id, u.email ?? '')
-      else    setAuthReady(true)
-    })
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      if (session?.user) loadProfile(session.user.id, session.user.email ?? '')
-      else { setUser(null); setAuthReady(true) }
+    // onAuthStateChange dispara inmediatamente con la sesión guardada en localStorage
+    // → mostramos la barra de inmediato sin esperar getUser() (evita layout shift)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        // Mostrar barra inmediatamente con datos básicos, luego actualizar con perfil completo
+        if (!user) {
+          setUser({ email: session.user.email ?? '', role: undefined, fullName: undefined, avatarUrl: undefined })
+        }
+        loadProfile(session.user.id, session.user.email ?? '')
+      } else {
+        setUser(null)
+        setAuthReady(true)
+      }
     })
 
     return () => subscription.unsubscribe()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function handleSignOut() {
@@ -417,8 +423,8 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
         </>
       )}
 
-      {/* Padding inferior para la barra de mobile cuando está logueado */}
-      <div className={authReady && user ? 'pb-20 md:pb-0' : ''}>
+      {/* Espacio inferior siempre reservado en mobile — evita layout shift al cargar auth */}
+      <div className="pb-20 md:pb-0">
         {children}
       </div>
 

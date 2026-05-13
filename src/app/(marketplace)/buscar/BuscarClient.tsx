@@ -938,10 +938,10 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
             /* Mapa full-width: cancela el padding del contenedor padre con -mx-4 */
             <div className="-mx-4"
               style={{
-                height: 'calc(100dvh - 160px)',
+                height: 'calc(100dvh - 230px)',
                 minHeight: 400,
                 overflow: 'hidden',
-                marginBottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))',
+                marginBottom: 0,
               }}>
               {/* key fuerza remount al activar el mapa → Leaflet recalcula tamaño */}
               <SpacesMap key="mobile-map" spaces={filtered} cityFilter={sector} />
@@ -951,8 +951,9 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
       </div>
 
       {/* ── Botón flotante móvil Lista/Mapa ── */}
+      {/* bottom: 5.5rem sube el botón por encima de la barra inferior del marketplace (~72px) */}
       <div className="md:hidden fixed left-1/2 -translate-x-1/2 z-50"
-        style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}>
+        style={{ bottom: 'calc(5.5rem + env(safe-area-inset-bottom, 0px))' }}>
         <button
           onClick={() => setMobileView(v => v === 'list' ? 'map' : 'list')}
           className="flex items-center gap-2.5 px-6 py-3.5 rounded-full text-sm font-bold text-white"
