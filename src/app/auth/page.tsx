@@ -104,6 +104,12 @@ function AuthContent() {
     if (error) {
       setError(error.message)
     } else {
+      // Enviar email de bienvenida — fire and forget, no bloquea el flujo
+      fetch('/api/auth/welcome', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email, name: fullName }),
+      }).catch(() => {})
       setScreen('forgot_sent') // reuse "sent" state for register confirm
     }
     setLoading(false)

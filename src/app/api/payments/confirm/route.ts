@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { verifyResponseHash, type AzulResponseParams } from '@/lib/azul/client'
 import { sendEmail } from '@/lib/email/send'
-import { tplPagoCompletado } from '@/lib/email/templates'
+import { tplPagoCompletado, tplCuotaPagada } from '@/lib/email/templates'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
-import { markInstallmentPaid } from '@/lib/actions/installments'
+import { markInstallmentPaid, getInstallments } from '@/lib/actions/installments'
 
 // POST /api/payments/confirm
 // Body: los query params que Azul envió al ApprovedUrl
@@ -149,26 +149,53 @@ export async function POST(req: NextRequest) {
     siteUrl: SITE,
   }
 
+  // Emails diferenciados: primer pago vs cuota subsiguiente
   // allSettled — un email fallando no debe revertir un pago ya procesado
-  await Promise.allSettled([
-    guestEmail && sendEmail({
+  if (isFirstConfirmation) {
+    // Primer pago: confirmación completa para cliente, host y admin
+    await Promise.allSettled([
+      guestEmail && sendEmail({
+        to:      guestEmail,
+        subject: `Reserva confirmada — ${spaceName}`,
+        html:    tplPagoCompletado({ ...paymentData, recipientName: guestName }),
+      }),
+      hostEmail && sendEmail({
+        to:      hostEmail,
+        subject: `Pago recibido — Reserva confirmada en ${spaceName}`,
+        html:    tplPagoCompletado({ ...paymentData, recipientName: host?.full_name ?? 'Propietario', isHost: true }),
+      }),
+      sendEmail({
+        to:      process.env.ADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com',
+        subject: `Nueva reserva pagada — ${spaceName} | ${formatCurrency(totalAmount)}`,
+        html:    tplPagoCompletado({ ...paymentData, recipientName: 'Admin', isAdmin: true }),
+      }),
+    ])
+  } else if (cuotaId && guestEmail) {
+    // Cuota subsiguiente: solo confirmar al cliente con el resumen de la cuota
+    const allInsts     = await getInstallments(bookingId)
+    const paidInsts    = allInsts.filter(i => i.status === 'paid')
+    const nextInst     = allInsts.find(i => i.status === 'pending')
+    const paidInstNum  = paidInsts.length
+    const remainingAmt = Math.max(0, totalAmount - newPaidTotal)
+
+    await sendEmail({
       to:      guestEmail,
-      subject: `Reserva confirmada — ${spaceName}`,
-      html:    tplPagoCompletado({ ...paymentData, recipientName: guestName }),
-    }),
-
-    hostEmail && sendEmail({
-      to:      hostEmail,
-      subject: `Pago recibido — Reserva confirmada en ${spaceName}`,
-      html:    tplPagoCompletado({ ...paymentData, recipientName: host?.full_name ?? 'Propietario', isHost: true }),
-    }),
-
-    sendEmail({
-      to:      process.env.ADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com',
-      subject: `Nueva reserva pagada — ${spaceName} | ${formatCurrency(totalAmount)}`,
-      html:    tplPagoCompletado({ ...paymentData, recipientName: 'Admin', isAdmin: true }),
-    }),
-  ])
+      subject: paidInstNum >= allInsts.length
+        ? `Todo pagado — ${spaceName}`
+        : `Cuota ${paidInstNum} confirmada — ${spaceName}`,
+      html:    tplCuotaPagada({
+        guestName,
+        spaceName,
+        eventDate:          booking.event_date,
+        installmentNumber:  paidInstNum,
+        totalInstallments:  allInsts.length,
+        amountPaid:         paidAmount,
+        remainingAmount:    remainingAmt,
+        nextDueDate:        nextInst?.due_date,
+        nextDueAmount:      nextInst?.amount,
+      }),
+    })
+  }
 
   return NextResponse.json({ success: true, azulOrderId: azulParams.AzulOrderId })
 }
