@@ -769,11 +769,42 @@ export default function MisReservasPage() {
                       <h3 className="font-bold text-base mb-1" style={{ color: 'var(--text-primary)' }}>
                         ¿Cancelar reserva?
                       </h3>
-                      <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                        {cancelHasPaid
-                          ? 'Ya realizaste un pago. Te devolveremos el dinero según la política de cancelación del espacio.'
-                          : 'Esta acción no se puede deshacer.'}
-                      </p>
+                      {cancelHasPaid ? (() => {
+                        const cond = (cancelModal as any)?.spaces?.space_conditions?.[0]
+                        const paidAmt = Number((cancelModal as any)?.paid_amount ?? 0)
+                        const hoursLeft = cancelModal?.event_date
+                          ? Math.floor((new Date(cancelModal.event_date + 'T12:00').getTime() - Date.now()) / 3600000)
+                          : null
+                        const refundPct = cond?.cancellation_hours_before != null && hoursLeft != null
+                          ? (hoursLeft >= cond.cancellation_hours_before ? (cond.cancellation_refund_pct ?? 0) : 0)
+                          : null
+                        const refundAmt = refundPct != null && paidAmt > 0 ? Math.round(paidAmt * refundPct / 100) : null
+                        return (
+                          <div className="space-y-2">
+                            {refundAmt != null ? (
+                              <div className="rounded-xl px-4 py-3 text-sm"
+                                style={{ background: refundAmt > 0 ? 'rgba(22,163,74,0.06)' : 'rgba(220,38,38,0.05)', border: `1px solid ${refundAmt > 0 ? 'rgba(22,163,74,0.2)' : 'rgba(220,38,38,0.15)'}` }}>
+                                {refundAmt > 0 ? (
+                                  <span style={{ color: '#166534' }}>
+                                    <strong>Reembolso estimado: {formatCurrency(refundAmt)}</strong>
+                                    {' '}({refundPct}% de lo pagado). Política: {cond?.cancellation_policy ?? 'estándar'}.
+                                  </span>
+                                ) : (
+                                  <span style={{ color: '#991B1B' }}>
+                                    <strong>Sin reembolso</strong> — cancelación con menos de {cond.cancellation_hours_before}h de anticipación. Política: {cond?.cancellation_policy ?? 'estándar'}.
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                                Ya realizaste un pago. El reembolso depende de la política de cancelación del espacio.
+                              </p>
+                            )}
+                          </div>
+                        )
+                      })() : (
+                        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Esta acción no se puede deshacer.</p>
+                      )}
                     </div>
                   </div>
 
