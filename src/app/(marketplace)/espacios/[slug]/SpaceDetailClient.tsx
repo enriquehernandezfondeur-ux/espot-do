@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { getSpaceReviews, type ReviewsSummary } from '@/lib/actions/reviews'
 import Link from 'next/link'
 import {
@@ -123,6 +123,7 @@ const termLabel: Record<string, string> = {
 export default function SpaceDetailClient({ space, similarSpaces = [], initialDate }: { space: any; similarSpaces?: any[]; initialDate?: string }) {
   const [photoIdx,        setPhotoIdx]        = useState(0)
   const [showLightbox,    setShowLightbox]    = useState(false)
+  const mobileTouchX = useRef<number | null>(null)
   const [showChat,        setShowChat]        = useState(false)
   const [activeTab,       setActiveTab]       = useState<'info' | 'addons' | 'rules' | 'reviews'>('info')
   const [reviewsData,     setReviewsData]     = useState<ReviewsSummary | null>(null)
@@ -414,9 +415,21 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
             )}
           </div>
 
-          {/* ────────────────────── MÓVIL: Carousel ── */}
+          {/* ────────────────────── MÓVIL: Carousel con swipe ── */}
           <div className="md:hidden relative rounded-2xl overflow-hidden"
-            style={{ aspectRatio: '4/3', background: 'var(--bg-elevated)' }}>
+            style={{ aspectRatio: '4/3', background: 'var(--bg-elevated)' }}
+            onTouchStart={e => { mobileTouchX.current = e.touches[0].clientX }}
+            onTouchEnd={e => {
+              if (mobileTouchX.current === null || images.length <= 1) return
+              const dx = e.changedTouches[0].clientX - mobileTouchX.current
+              if (Math.abs(dx) > 40) {
+                setPhotoIdx(i => dx < 0
+                  ? (i + 1) % images.length
+                  : (i - 1 + images.length) % images.length
+                )
+              }
+              mobileTouchX.current = null
+            }}>
             {images.length > 0 ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={images[photoIdx]?.url} alt={space.name}
@@ -1257,7 +1270,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
       </div>
 
       {/* ── MÓVIL: Sticky CTA de reserva ── */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 px-4 py-3 pb-safe"
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[45] px-4 py-3 pb-safe"
         style={{
           background: 'rgba(255,255,255,0.97)',
           backdropFilter: 'blur(20px)',

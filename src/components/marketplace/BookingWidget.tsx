@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -70,6 +70,8 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
 
   const steps   = addons.length > 0 ? STEPS : STEPS.filter(s => s.id !== 4)
   const maxStep = steps[steps.length - 1].id
+
+  const contentRef = useRef<HTMLDivElement>(null)
 
   // ── State ──────────────────────────────────────────────
   const [step,           setStep]           = useState(initialDate ? 2 : 1)
@@ -323,8 +325,19 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     return true
   }
 
-  function next() { if (canGoNext() && step < maxStep) setStep(s => s + 1) }
-  function back() { if (step > 1) setStep(s => s - 1) }
+  function next() {
+    if (canGoNext() && step < maxStep) {
+      setStep(s => s + 1)
+      // En mobile, scroll al inicio del contenido para ver el nuevo paso
+      setTimeout(() => contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
+    }
+  }
+  function back() {
+    if (step > 1) {
+      setStep(s => s - 1)
+      setTimeout(() => contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
+    }
+  }
 
   function adjustCount(delta: number) {
     const min = space.capacity_min ?? 1
@@ -592,7 +605,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   }
 
   return (
-    <div className="rounded-3xl"
+    <div ref={contentRef} className="rounded-3xl"
       style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 40px rgba(0,0,0,0.08)', overflow: 'visible' }}>
 
       {/* Precio */}
