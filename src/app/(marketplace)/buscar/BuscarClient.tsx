@@ -181,9 +181,10 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   const [secOpen,   setSecOpen]   = useState(false)
   const [catOpen,   setCatOpen]   = useState(false)
   const [priceOpen, setPriceOpen] = useState(false)
-  const capRef   = useRef<HTMLDivElement>(null)
-  const secRef   = useRef<HTMLDivElement>(null)
-  const priceRef = useRef<HTMLDivElement>(null)
+  const capRef      = useRef<HTMLDivElement>(null)
+  const secRef      = useRef<HTMLDivElement>(null)
+  const priceRef    = useRef<HTMLDivElement>(null)
+  const cardStripRef = useRef<HTMLDivElement>(null)
 
   // Sectores filtrados por búsqueda en el drawer
   const filteredSectors = SECTORS.filter(s =>
@@ -938,102 +939,97 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
           </div>
         )}
 
-        {/* ── MÓVIL: Vista mapa con strip de cards ── */}
-        {mobileView === 'map' && (() => {
-          const cardStripRef = React.createRef<HTMLDivElement>()
-          return (
-            <div className="md:hidden -mx-4" style={{ position: 'relative' }}>
-              {/* Mapa */}
-              <div style={{ height: 'calc(100dvh - 340px)', minHeight: 280, overflow: 'hidden' }}>
-                <SpacesMap
-                  key="mobile-map"
-                  spaces={filtered}
-                  cityFilter={sector}
-                  onSpaceHover={id => {
-                    setHoveredId(id)
-                    if (!id) return
-                    // Scroll al card correspondiente en el strip
-                    const el = document.getElementById(`mcard-${id}`)
-                    el?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
-                  }}
-                />
+        {/* ── MÓVIL: Vista mapa — overlay fijo sobre la página ── */}
+        {mobileView === 'map' && (
+          <div className="md:hidden" style={{
+            position: 'fixed',
+            top: 128,   /* navbar 64 + filtros ~64 */
+            left: 0, right: 0,
+            bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))',
+            display: 'flex',
+            flexDirection: 'column',
+            zIndex: 30,
+            background: '#fff',
+          }}>
+            {/* Mapa — ocupa todo el espacio disponible menos el strip */}
+            <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+              <SpacesMap
+                key="mobile-map"
+                spaces={filtered}
+                cityFilter={sector}
+                onSpaceHover={id => {
+                  setHoveredId(id)
+                  if (!id || !cardStripRef.current) return
+                  // Scroll horizontal dentro del strip — sin mover la página
+                  const strip = cardStripRef.current
+                  const cardEl = strip.querySelector(`[data-id="${id}"]`) as HTMLElement | null
+                  if (cardEl) {
+                    strip.scrollTo({
+                      left: cardEl.offsetLeft - 16,
+                      behavior: 'smooth',
+                    })
+                  }
+                }}
+              />
+            </div>
+
+            {/* Strip de cards — altura fija, no mueve la página */}
+            <div style={{ background: '#fff', borderTop: '1px solid var(--border-subtle)', flexShrink: 0 }}>
+              <div className="flex items-center px-4 pt-2.5 pb-1.5">
+                <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
+                  {filtered.length} espacio{filtered.length !== 1 ? 's' : ''}
+                  {hoveredId ? '' : ' · desliza las cards'}
+                </span>
               </div>
-
-              {/* Strip de cards deslizable */}
-              <div style={{
-                background: 'rgba(255,255,255,0.98)',
-                borderTop: '1px solid var(--border-subtle)',
-                paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))',
-              }}>
-                {/* Cabecera del strip */}
-                <div className="flex items-center justify-between px-4 pt-3 pb-2">
-                  <span className="text-xs font-bold" style={{ color: 'var(--text-secondary)' }}>
-                    {filtered.length} espacio{filtered.length !== 1 ? 's' : ''}
-                    {hoveredId ? ' · tap en un pin' : ' · desliza para ver más'}
-                  </span>
-                </div>
-
-                {/* Cards horizontales */}
-                {filtered.length === 0 ? (
-                  <div className="px-4 pb-4 text-sm" style={{ color: 'var(--text-muted)' }}>
-                    Sin resultados con estos filtros
-                  </div>
-                ) : (
-                  <div
-                    ref={cardStripRef}
-                    className="flex gap-3 px-4 pb-3 overflow-x-auto scrollbar-hide"
-                    style={{ scrollSnapType: 'x mandatory' }}>
-                    {filtered.map(space => {
-                      const cover = space.space_images?.find((i: any) => i.is_cover)?.url ?? space.space_images?.[0]?.url
-                      const p     = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
-                      const price = p?.pricing_type === 'hourly' ? `RD$${Number(p.hourly_price).toLocaleString('es-DO')}/hr`
-                        : p?.pricing_type === 'minimum_consumption' ? `Desde RD$${Number(p.minimum_consumption).toLocaleString('es-DO')}`
-                        : p?.pricing_type === 'fixed_package' ? `RD$${Number(p.fixed_price).toLocaleString('es-DO')}`
-                        : 'Cotizar'
-                      const isActive = hoveredId === space.id
-                      return (
-                        <Link
-                          id={`mcard-${space.id}`}
-                          key={space.id}
-                          href={`/espacios/${space.slug}`}
-                          className="shrink-0 rounded-2xl overflow-hidden transition-all"
-                          style={{
-                            width: 220,
-                            scrollSnapAlign: 'start',
-                            border: `2px solid ${isActive ? 'var(--brand)' : 'var(--border-subtle)'}`,
-                            background: '#fff',
-                            boxShadow: isActive ? '0 4px 16px rgba(53,196,147,0.25)' : '0 1px 4px rgba(0,0,0,0.06)',
-                            transform: isActive ? 'scale(1.02)' : 'scale(1)',
-                          }}>
-                          {/* Foto */}
-                          <div style={{ height: 100, overflow: 'hidden', background: 'var(--bg-elevated)' }}>
-                            {cover
-                              // eslint-disable-next-line @next/next/no-img-element
-                              ? <img src={cover} alt={space.name} className="w-full h-full object-cover" />
-                              : <div className="w-full h-full flex items-center justify-center">
-                                  <Building2 size={28} style={{ color: 'var(--text-muted)', opacity: 0.3 }} />
-                                </div>
-                            }
-                          </div>
-                          {/* Info */}
-                          <div className="px-3 py-2.5">
-                            <div className="text-xs font-bold truncate mb-0.5" style={{ color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
-                              {space.name}
+              <div
+                ref={cardStripRef}
+                className="flex gap-3 px-4 pb-3 overflow-x-auto scrollbar-hide"
+                style={{ scrollSnapType: 'x mandatory' }}>
+                {filtered.map(space => {
+                  const cover   = space.space_images?.find((i: any) => i.is_cover)?.url ?? space.space_images?.[0]?.url
+                  const p       = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
+                  const price   = p?.pricing_type === 'hourly'              ? `RD$${Number(p.hourly_price).toLocaleString('es-DO')}/hr`
+                                : p?.pricing_type === 'minimum_consumption' ? `Desde RD$${Number(p.minimum_consumption).toLocaleString('es-DO')}`
+                                : p?.pricing_type === 'fixed_package'       ? `RD$${Number(p.fixed_price).toLocaleString('es-DO')}`
+                                : 'Cotizar'
+                  const isActive = hoveredId === space.id
+                  return (
+                    <Link
+                      key={space.id}
+                      data-id={space.id}
+                      href={`/espacios/${space.slug}`}
+                      className="shrink-0 rounded-2xl overflow-hidden"
+                      style={{
+                        width: 200,
+                        scrollSnapAlign: 'start',
+                        border: `2px solid ${isActive ? 'var(--brand)' : 'var(--border-subtle)'}`,
+                        background: '#fff',
+                        boxShadow: isActive ? '0 4px 16px rgba(53,196,147,0.2)' : '0 1px 4px rgba(0,0,0,0.05)',
+                        transition: 'border-color 0.2s, box-shadow 0.2s',
+                      }}>
+                      <div style={{ height: 90, overflow: 'hidden', background: 'var(--bg-elevated)' }}>
+                        {cover
+                          // eslint-disable-next-line @next/next/no-img-element
+                          ? <img src={cover} alt={space.name} className="w-full h-full object-cover" />
+                          : <div className="w-full h-full flex items-center justify-center">
+                              <Building2 size={24} style={{ color: 'var(--text-muted)', opacity: 0.2 }} />
                             </div>
-                            <div className="text-[10px] truncate mb-1" style={{ color: 'var(--text-muted)' }}>
-                              {[space.sector, space.city].filter(Boolean).join(', ')}
-                            </div>
-                            <div className="text-xs font-bold" style={{ color: 'var(--brand)' }}>{price}</div>
-                          </div>
-                        </Link>
-                      )
-                    })}
-                  </div>
-                )}
+                        }
+                      </div>
+                      <div className="px-3 py-2">
+                        <div className="text-xs font-bold truncate" style={{ color: 'var(--text-primary)' }}>{space.name}</div>
+                        <div className="text-[10px] truncate" style={{ color: 'var(--text-muted)' }}>
+                          {[space.sector, space.city].filter(Boolean).join(', ')}
+                        </div>
+                        <div className="text-xs font-bold mt-0.5" style={{ color: 'var(--brand)' }}>{price}</div>
+                      </div>
+                    </Link>
+                  )
+                })}
               </div>
             </div>
-          )
-        })()}
+          </div>
+        )}
       </div>
 
       {/* ── Botón flotante Lista/Mapa — compacto ── */}
