@@ -522,9 +522,33 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
               </div>
 
               {/* 2. AZUL */}
-              <div style={{background:'linear-gradient(135deg,#1565C0 0%,#0D47A1 100%)',borderRadius:6,padding:'5px 11px',display:'flex',alignItems:'center',justifyContent:'center',height:32}}>
-                <span style={{color:'#fff',fontSize:14,fontWeight:900,letterSpacing:'0.5px',fontFamily:'Arial,Helvetica,sans-serif',textTransform:'lowercase'}}>azul</span>
-              </div>
+              <svg viewBox="0 0 80 80" width="32" height="32" xmlns="http://www.w3.org/2000/svg" style={{borderRadius:6,display:'block'}}>
+                <defs>
+                  <linearGradient id="azulGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#29B6F6"/>
+                    <stop offset="50%" stopColor="#1565C0"/>
+                    <stop offset="100%" stopColor="#0D47A1"/>
+                  </linearGradient>
+                  <linearGradient id="azulGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#40C4FF" stopOpacity="0.35"/>
+                    <stop offset="100%" stopColor="#0D47A1" stopOpacity="0"/>
+                  </linearGradient>
+                </defs>
+                {/* Fondo */}
+                <rect width="80" height="80" rx="8" fill="url(#azulGrad)"/>
+                {/* Patrón cuadros estilo Azul */}
+                {[0,10,20,30,40,50,60,70].map(x =>
+                  [0,10,20,30,40,50,60,70].map(y =>
+                    (x+y)%20===0
+                      ? <rect key={`${x}-${y}`} x={x} y={y} width="10" height="10" fill="#fff" fillOpacity="0.10"/>
+                      : null
+                  )
+                )}
+                {/* Overlay diagonal */}
+                <rect width="80" height="80" rx="8" fill="url(#azulGrad2)"/>
+                {/* Texto AZUL */}
+                <text x="40" y="48" textAnchor="middle" fontFamily="Arial Black,Arial,sans-serif" fontWeight="900" fontSize="22" fill="white" letterSpacing="1">{`AZUL`}</text>
+              </svg>
 
               {/* 3. Mastercard */}
               <div style={{background:'#fff',border:'1px solid #E2E8F0',borderRadius:6,padding:'4px 8px',display:'flex',alignItems:'center',gap:6,height:32}}>
