@@ -428,80 +428,68 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
         {children}
       </div>
 
-      {/* ── BARRA INFERIOR MÓVIL — mismo estilo que el dashboard, solo logueados ── */}
-      {authReady && user && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 pb-safe"
-          style={{
-            background: 'rgba(255,255,255,0.97)',
-            backdropFilter: 'blur(20px)',
-            borderTop: '1px solid var(--border-subtle)',
-            boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
-          }}>
-          <div className="flex items-stretch">
+      {/* ── BARRA INFERIOR MÓVIL — inteligente según el rol ── */}
+      {authReady && user && (() => {
+        const isHost  = user?.role === 'host' || user?.role === 'admin'
+        // Tabs dinámicas según rol
+        const tab3 = isHost
+          ? { href: '/dashboard/host',          label: 'Mi panel',  icon: LayoutDashboard }
+          : { href: '/dashboard/reservas',       label: 'Reservas',  icon: CalendarDays }
+        const tab4 = isHost
+          ? { href: '/dashboard/host/mensajes',  label: 'Mensajes',  icon: MessageCircle }
+          : { href: '/dashboard/mensajes',       label: 'Mensajes',  icon: MessageCircle }
 
-            {/* Inicio */}
-            <Link href="/"
-              className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-all"
-              style={{ color: pathname === '/' ? 'var(--brand)' : 'var(--text-muted)' }}>
-              <div className="w-8 h-8 flex items-center justify-center rounded-xl transition-all"
-                style={{ background: pathname === '/' ? 'var(--brand-dim)' : 'transparent' }}>
-                <Home size={18} />
-              </div>
-              <span className="text-xs font-semibold leading-tight">Inicio</span>
-            </Link>
+        const navTabs = [
+          { href: '/',        label: 'Inicio',  icon: Home,          active: pathname === '/' },
+          { href: '/buscar',  label: 'Buscar',  icon: Search,        active: pathname === '/buscar' || pathname.startsWith('/espacios') },
+          { ...tab3,                                                   active: false },
+          { ...tab4,                                                   active: false },
+        ]
 
-            {/* Buscar */}
-            <Link href="/buscar"
-              className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-all"
-              style={{ color: (pathname === '/buscar' || pathname.startsWith('/espacios')) ? 'var(--brand)' : 'var(--text-muted)' }}>
-              <div className="w-8 h-8 flex items-center justify-center rounded-xl transition-all"
-                style={{ background: (pathname === '/buscar' || pathname.startsWith('/espacios')) ? 'var(--brand-dim)' : 'transparent' }}>
-                <Search size={18} />
-              </div>
-              <span className="text-xs font-semibold leading-tight">Buscar</span>
-            </Link>
+        return (
+          <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 pb-safe"
+            style={{
+              background: 'rgba(255,255,255,0.97)',
+              backdropFilter: 'blur(20px)',
+              borderTop: '1px solid var(--border-subtle)',
+              boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
+            }}>
+            <div className="flex items-stretch">
 
-            {/* Reservas */}
-            <Link href="/dashboard/reservas"
-              className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-all"
-              style={{ color: 'var(--text-muted)' }}>
-              <div className="w-8 h-8 flex items-center justify-center rounded-xl">
-                <CalendarDays size={18} />
-              </div>
-              <span className="text-xs font-semibold leading-tight">Reservas</span>
-            </Link>
+              {navTabs.map(({ href, label, icon: Icon, active }) => (
+                <Link key={href} href={href}
+                  className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-all"
+                  style={{ color: active ? 'var(--brand)' : 'var(--text-muted)' }}>
+                  <div className="w-8 h-8 flex items-center justify-center rounded-xl transition-all"
+                    style={{ background: active ? 'var(--brand-dim)' : 'transparent' }}>
+                    <Icon size={18} />
+                  </div>
+                  <span className="text-xs font-semibold leading-tight">{label}</span>
+                </Link>
+              ))}
 
-            {/* Mensajes */}
-            <Link href="/dashboard/mensajes"
-              className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-all"
-              style={{ color: 'var(--text-muted)' }}>
-              <div className="w-8 h-8 flex items-center justify-center rounded-xl">
-                <MessageCircle size={18} />
-              </div>
-              <span className="text-xs font-semibold leading-tight">Mensajes</span>
-            </Link>
+              {/* Cuenta */}
+              <button
+                onClick={() => setAccountSheet(true)}
+                className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-all"
+                style={{ color: accountSheet ? 'var(--brand)' : 'var(--text-muted)', background: 'transparent', border: 'none' }}>
+                <div className="w-8 h-8 flex items-center justify-center rounded-xl transition-all"
+                  style={{ background: accountSheet ? 'var(--brand-dim)' : 'transparent' }}>
+                  {showAvatar
+                    // eslint-disable-next-line @next/next/no-img-element
+                    ? <img src={user.avatarUrl} alt={displayName}
+                        className="w-7 h-7 rounded-lg object-cover"
+                        onError={() => setImgError(true)} />
+                    : <User size={18} />
+                  }
+                </div>
+                <span className="text-xs font-semibold leading-tight">Cuenta</span>
+              </button>
 
-            {/* Cuenta */}
-            <button
-              onClick={() => setAccountSheet(true)}
-              className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-all"
-              style={{ color: accountSheet ? 'var(--brand)' : 'var(--text-muted)', background: 'transparent', border: 'none' }}>
-              <div className="w-8 h-8 flex items-center justify-center rounded-xl transition-all"
-                style={{ background: accountSheet ? 'var(--brand-dim)' : 'transparent' }}>
-                {showAvatar
-                  // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={user.avatarUrl} alt={displayName}
-                      className="w-7 h-7 rounded-lg object-cover"
-                      onError={() => setImgError(true)} />
-                  : <User size={18} />
-                }
-              </div>
-              <span className="text-xs font-semibold leading-tight">Cuenta</span>
-            </button>
-
+            </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* ── HOJA DE CUENTA (bottom sheet) ── */}
       {accountSheet && (
@@ -542,13 +530,19 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
 
             {/* Accesos rápidos */}
             <div className="px-4 space-y-0.5">
-              {[
-                { href: '/dashboard/overview',   label: 'Inicio',             icon: LayoutDashboard, desc: 'Ver resumen y alertas' },
-                { href: '/dashboard/reservas',   label: 'Mis reservas',       icon: CalendarDays,    desc: 'Ver y gestionar reservas' },
-                { href: '/dashboard/favoritos',  label: 'Espacios guardados', icon: Heart,           desc: 'Mis espacios favoritos' },
-                { href: '/dashboard/pagos',      label: 'Mis pagos',          icon: CreditCard,      desc: 'Historial de pagos y cuotas' },
-                ...(user?.role === 'host' ? [{ href: '/dashboard/host', label: 'Panel propietario', icon: Building2, desc: 'Gestionar mis espacios' }] : []),
-              ].map(({ href, label, icon: Icon, desc }) => (
+              {(user?.role === 'host' || user?.role === 'admin' ? [
+                // Propietario: primero su panel, luego opciones como cliente
+                { href: '/dashboard/host',          label: 'Mi panel propietario', icon: LayoutDashboard, desc: 'Reservas, ingresos, espacios' },
+                { href: '/dashboard/host/mensajes', label: 'Mensajes',             icon: MessageCircle,   desc: 'Chats con clientes' },
+                { href: '/dashboard/host/reservas', label: 'Reservas recibidas',   icon: CalendarDays,    desc: 'Solicitudes de mis espacios' },
+                { href: '/dashboard/reservas',      label: 'Mis reservas',         icon: Heart,           desc: 'Como cliente' },
+              ] : [
+                // Cliente: panel cliente
+                { href: '/dashboard/overview',  label: 'Inicio',             icon: LayoutDashboard, desc: 'Ver resumen y alertas' },
+                { href: '/dashboard/reservas',  label: 'Mis reservas',       icon: CalendarDays,    desc: 'Ver y gestionar reservas' },
+                { href: '/dashboard/favoritos', label: 'Espacios guardados', icon: Heart,           desc: 'Mis espacios favoritos' },
+                { href: '/dashboard/pagos',     label: 'Mis pagos',          icon: CreditCard,      desc: 'Historial de pagos y cuotas' },
+              ]).map(({ href, label, icon: Icon, desc }) => (
                 <Link key={href} href={href} onClick={() => setAccountSheet(false)}
                   className="flex items-center gap-3 px-3 py-3 rounded-2xl transition-colors active:bg-[var(--bg-elevated)]"
                   style={{ WebkitTapHighlightColor: 'transparent' }}>
