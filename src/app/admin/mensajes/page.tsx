@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Loader2, MessageCircle, Search, ArrowLeft, FileText, Download, Image as ImageIcon, Building2 } from 'lucide-react'
+import { Loader2, MessageCircle, Search, ArrowLeft, FileText, Download, Building2 } from 'lucide-react'
 import { getAdminConversations, getAdminConversationMessages } from '@/lib/actions/admin'
 
 function timeLabel(d: string) {
@@ -52,13 +52,13 @@ export default function AdminMensajesPage() {
     space?.space_images?.find((i: any) => i.is_cover)?.url ?? space?.space_images?.[0]?.url
 
   if (loading) return (
-    <div className="flex items-center justify-center h-dvh" style={{ background: '#F4F6F8' }}>
+    <div className="flex items-center justify-center h-[calc(100dvh-56px)] md:h-dvh" style={{ background: '#F4F6F8' }}>
       <Loader2 size={28} className="animate-spin" style={{ color: '#35C493' }} />
     </div>
   )
 
   return (
-    <div className="flex h-dvh overflow-hidden" style={{ background: '#F4F6F8' }}>
+    <div className="flex h-[calc(100dvh-56px)] md:h-dvh overflow-hidden" style={{ background: '#F4F6F8' }}>
 
       {/* ── Lista de conversaciones ── */}
       <div className={`${active ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-80 shrink-0`}

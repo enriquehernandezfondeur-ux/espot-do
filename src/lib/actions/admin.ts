@@ -488,7 +488,8 @@ export async function getAdminConversationMessages(spaceId: string, user1Id: str
     .from('messages')
     .select('*, sender:profiles!sender_id(id, full_name, avatar_url)')
     .eq('space_id', spaceId)
-    .or(`and(sender_id.eq.${user1Id},receiver_id.eq.${user2Id}),and(sender_id.eq.${user2Id},receiver_id.eq.${user1Id})`)
+    .in('sender_id',   [user1Id, user2Id])
+    .in('receiver_id', [user1Id, user2Id])
     .order('created_at', { ascending: true })
 
   return data ?? []
