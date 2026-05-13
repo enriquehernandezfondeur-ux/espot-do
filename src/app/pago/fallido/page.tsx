@@ -3,7 +3,7 @@
 import { useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { XCircle, RefreshCw, MessageCircle, Phone, CreditCard } from 'lucide-react'
+import { XCircle, RefreshCw, MessageCircle, Phone, CreditCard, Lightbulb } from 'lucide-react'
 
 // Consejos específicos por código ISO de Azul
 const ISO_TIPS: Record<string, { short: string; tip: string }> = {
@@ -94,7 +94,7 @@ function FallidoContent() {
             <div className="flex items-start gap-3">
               <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
                 style={{ background: 'rgba(251,191,36,0.12)', border: '1px solid rgba(251,191,36,0.2)' }}>
-                <span style={{ fontSize: 13 }}>💡</span>
+                <Lightbulb size={13} style={{ color: '#F59E0B' }} />
               </div>
               <div>
                 <p className="text-xs font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>Qué puedes hacer</p>

@@ -56,7 +56,7 @@ export async function getUserPendingReview(userId: string): Promise<{
     .select('id, space_id, spaces!space_id(name), event_date')
     .eq('guest_id', userId)
     .eq('status', 'confirmed')
-    .eq('payment_status', 'advance')
+    .in('payment_status', ['advance', 'partial', 'paid'])
     .lt('event_date', new Date().toISOString().split('T')[0])
     .order('event_date', { ascending: false })
     .limit(10)

@@ -33,8 +33,9 @@ export async function POST(req: NextRequest) {
 
   if (!booking) return NextResponse.json({ error: 'Reserva no encontrada' }, { status: 404 })
 
-  // Idempotencia para primera cuota
-  if (booking.payment_status === 'advance' && !cuotaId) {
+  // Idempotencia — primera cuota o pago completo ya procesado
+  const { isPaid: checkPaid } = await import('@/lib/bookingConfig')
+  if ((checkPaid(booking.payment_status) || booking.payment_status === 'advance') && !cuotaId) {
     return NextResponse.json({ success: true, already: true })
   }
 
@@ -48,12 +49,36 @@ export async function POST(req: NextRequest) {
     await markInstallmentPaid(cuotaId, fakeOrderId)
   }
 
-  // Confirmar reserva
+  // Determinar paid_amount acumulado y payment_status correcto
+  let testPaidAmount = 0
+  if (cuotaId) {
+    const { data: inst } = await supabase
+      .from('booking_installments').select('amount').eq('id', cuotaId).single()
+    testPaidAmount = Number(inst?.amount ?? 0)
+  } else {
+    testPaidAmount = Number(booking.total_amount)
+  }
+  const newPaidTotal = Math.round(Number(booking.paid_amount ?? 0) + testPaidAmount)
+
+  let newPaymentStatus: 'advance' | 'partial' | 'paid' = 'advance'
+  if (cuotaId) {
+    const { data: allInsts } = await supabase
+      .from('booking_installments').select('status').eq('booking_id', bookingId)
+    if (allInsts && allInsts.length > 0) {
+      const paidCount = allInsts.filter(i => i.status === 'paid').length
+      if (paidCount >= allInsts.length)    newPaymentStatus = 'paid'
+      else if (paidCount > 1)              newPaymentStatus = 'partial'
+    }
+  } else {
+    newPaymentStatus = 'paid'
+  }
+
+  // Confirmar reserva con valores correctos
   const isFirst = booking.status !== 'confirmed'
   await supabase.from('bookings').update({
     status:             'confirmed',
-    payment_status:     'advance',
-    paid_amount:        Number(booking.total_amount) * 0.10,
+    payment_status:     newPaymentStatus,
+    paid_amount:        newPaidTotal,
     paid_at:            new Date().toISOString(),
     ...(isFirst ? { confirmed_at: new Date().toISOString() } : {}),
     azul_order_id:      fakeOrderId,

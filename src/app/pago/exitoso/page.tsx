@@ -213,7 +213,7 @@ function ExitoContent() {
             <div className="px-6 py-5 space-y-3">
               <div className="flex justify-between text-sm">
                 <span style={{ color: 'rgba(255,255,255,0.5)' }}>
-                  {paidSoFar >= total ? 'Total pagado' : 'Pagado ahora'}
+                  {paidSoFar >= total ? 'Total pagado' : 'Total pagado hasta ahora'}
                 </span>
                 <span className="font-bold text-white">{formatCurrency(paidSoFar)}</span>
               </div>
