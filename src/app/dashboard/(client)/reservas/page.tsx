@@ -100,6 +100,18 @@ export default function MisReservasPage() {
       setBookings(bookingsData)
       setReviewed(reviewedIds)
       setLoading(false)
+      // Auto-expandir la próxima reserva activa al cargar
+      const todayStr = new Date().toISOString().split('T')[0]
+      const ACTIVE = ['pending', 'quote_requested', 'accepted', 'confirmed']
+      const next = bookingsData
+        .filter(b => b.event_date >= todayStr && ACTIVE.includes(b.status))
+        .sort((a, b) => a.event_date.localeCompare(b.event_date))[0]
+      if (next) {
+        setSelected(next as any)
+        if (['accepted', 'confirmed'].includes(next.status)) {
+          getInstallments(next.id).then(setInstallments).catch(() => {})
+        }
+      }
     }).catch(() => setLoading(false))
   }, [])
 
@@ -111,20 +123,39 @@ export default function MisReservasPage() {
     return () => document.removeEventListener('keydown', onKey)
   }, [cancelModal])
 
-  const filtered = bookings.filter(b => {
-    const matchFilter =
-      filter === 'Todas'         ||
-      (filter === 'Pendientes'   && b.status === 'pending') ||
-      (filter === 'Cotizaciones' && b.status === 'quote_requested') ||
-      (filter === 'Por pagar'    && b.status === 'accepted') ||
-      (filter === 'Confirmadas'  && b.status === 'confirmed') ||
-      (filter === 'Completadas'  && b.status === 'completed') ||
-      (filter === 'Canceladas'   && b.status.startsWith('cancelled'))
-    const matchSearch =
-      ((b as any).spaces?.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
-      (b.event_type ?? '').toLowerCase().includes(search.toLowerCase())
-    return matchFilter && matchSearch
-  })
+  const today = new Date().toISOString().split('T')[0]
+
+  const filtered = bookings
+    .filter(b => {
+      const matchFilter =
+        filter === 'Todas'         ||
+        (filter === 'Pendientes'   && b.status === 'pending') ||
+        (filter === 'Cotizaciones' && b.status === 'quote_requested') ||
+        (filter === 'Por pagar'    && b.status === 'accepted') ||
+        (filter === 'Confirmadas'  && b.status === 'confirmed') ||
+        (filter === 'Completadas'  && b.status === 'completed') ||
+        (filter === 'Canceladas'   && b.status.startsWith('cancelled'))
+      const matchSearch =
+        ((b as any).spaces?.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
+        (b.event_type ?? '').toLowerCase().includes(search.toLowerCase())
+      return matchFilter && matchSearch
+    })
+    .sort((a, b) => {
+      // Prioridad 1: activas y futuras (más próximas primero)
+      const ACTIVE = ['pending', 'quote_requested', 'accepted', 'confirmed']
+      const aUpcoming = a.event_date >= today && ACTIVE.includes(a.status)
+      const bUpcoming = b.event_date >= today && ACTIVE.includes(b.status)
+      if (aUpcoming && !bUpcoming) return -1
+      if (!aUpcoming && bUpcoming) return 1
+      if (aUpcoming && bUpcoming) return a.event_date.localeCompare(b.event_date) // más próxima primero
+      // Prioridad 2: el resto — más reciente primero
+      return b.event_date.localeCompare(a.event_date)
+    })
+
+  // Primera reserva activa y futura (la "próxima")
+  const nextActiveId = filtered.find(b =>
+    b.event_date >= today && ['pending', 'quote_requested', 'accepted', 'confirmed'].includes(b.status)
+  )?.id ?? null
 
   // Redirige al flujo de pago Azul — no se procesa aquí directamente
   function handlePay(bookingId: string) {
@@ -224,11 +255,27 @@ export default function MisReservasPage() {
             const sl    = STATUS_LABELS[bk.status as keyof typeof STATUS_LABELS] ?? bk.status
             const space = bk.spaces
             const cover = space?.space_images?.find((i: any) => i.is_cover)?.url ?? space?.space_images?.[0]?.url
-            const isSelected = selected?.id === bk.id
+            const isSelected  = selected?.id === bk.id
+            const isNextActive = bk.id === nextActiveId  // es la próxima reserva activa
 
             return (
               <div key={bk.id} className="rounded-2xl overflow-hidden transition-all"
-                style={{ background: '#fff', border: `1.5px solid ${isSelected ? 'var(--brand)' : bk.status === 'accepted' ? 'rgba(37,99,235,0.3)' : 'var(--border-subtle)'}` }}>
+                style={{ background: '#fff', border: `1.5px solid ${isSelected ? 'var(--brand)' : isNextActive ? 'rgba(53,196,147,0.4)' : bk.status === 'accepted' ? 'rgba(37,99,235,0.3)' : 'var(--border-subtle)'}` }}>
+
+                {/* Banner "Tu próxima reserva" */}
+                {isNextActive && (
+                  <div className="flex items-center gap-1.5 px-4 py-2"
+                    style={{ background: 'linear-gradient(90deg, rgba(53,196,147,0.12), rgba(53,196,147,0.04))', borderBottom: '1px solid rgba(53,196,147,0.2)' }}>
+                    <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: 'var(--brand)', flexShrink: 0 }} />
+                    <span className="text-xs font-bold" style={{ color: 'var(--brand)' }}>
+                      Tu próxima reserva &mdash; {Math.ceil((new Date(bk.event_date + 'T12:00').getTime() - new Date().setHours(0,0,0,0)) / 86400000) === 0
+                        ? '¡Hoy!'
+                        : Math.ceil((new Date(bk.event_date + 'T12:00').getTime() - new Date().setHours(0,0,0,0)) / 86400000) === 1
+                        ? 'Mañana'
+                        : `en ${Math.ceil((new Date(bk.event_date + 'T12:00').getTime() - new Date().setHours(0,0,0,0)) / 86400000)} días`}
+                    </span>
+                  </div>
+                )}
 
                 <button className="w-full text-left" onClick={() => {
                   const next = isSelected ? null : bk
