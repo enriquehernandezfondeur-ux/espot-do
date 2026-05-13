@@ -507,21 +507,52 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
           </div>
 
           {/* Barra inferior */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-5 pb-2"
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-5 pb-2"
             style={{borderTop:'1px solid #E0E7E3'}}>
-            <div className="flex items-center gap-2 flex-wrap justify-center">
-              <span className="text-xs font-semibold" style={{color:'#9CA3AF'}}>Pago seguro</span>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/azul-logo.svg"           alt="Azul"             style={{height:14,width:42,borderRadius:2,objectFit:'contain'}}/>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/visa-logo.jpg"           alt="Visa"             style={{height:14,width:25,borderRadius:2,objectFit:'contain'}}/>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/mastercard-logo.svg"     alt="Mastercard"       style={{height:14,width:22}}/>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/verified-by-visa.svg"    alt="Verified by Visa" style={{height:12,width:36}}/>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/mastercard-id-check.png" alt="MC ID Check"      style={{height:12,width:12}}/>
+
+            {/* Logos de pago inline SVG */}
+            <div className="flex items-center gap-3 flex-wrap justify-center">
+              <span className="text-[10px] font-bold uppercase tracking-widest" style={{color:'#9CA3AF'}}>Pago seguro</span>
+
+              {/* Azul */}
+              <div title="Azul Payments" style={{background:'linear-gradient(135deg,#0057B8,#003F8A)',borderRadius:5,padding:'3px 7px',display:'flex',alignItems:'center',height:22}}>
+                <span style={{color:'#fff',fontSize:11,fontWeight:800,letterSpacing:'-0.02em',fontFamily:'Arial,sans-serif'}}>azul</span>
+              </div>
+
+              {/* Visa */}
+              <svg aria-label="Visa" viewBox="0 0 780 250" height="18" width="56" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#1A1F71" d="M293.2 348.7l-43-267h-68.8l43 267zM518.7 88.4c-13.6-5.4-35-11.2-61.6-11.2-67.9 0-115.8 36.2-116.1 88-0.3 38.3 34.1 59.6 60.1 72.3 26.7 12.9 35.7 21.2 35.6 32.7-0.2 17.7-21.3 25.7-41.1 25.7-27.4 0-42-4-64.5-13.9l-8.8-4.2-9.6 59.3c16 7.4 45.5 13.9 76.2 14.2 71.9 0 118.6-35.6 119.1-90.8 0.3-30.2-18-53.2-57.5-72.2-23.9-12.3-38.6-20.5-38.4-33 0-11 12.4-22.8 39.2-22.8 22.4-0.4 38.6 4.8 51.2 10.2l6.1 3.1 9.2-56.4zM661.8 81.7h-53.1c-16.4 0-28.7 4.7-35.9 22l-101.8 243.3h71.9l14.3-39.6 87.7 0 8.1 39.6h63.4l-55.3-265.3zM574.5 263.5c5.7-15.3 27.3-74.2 27.3-74.2-0.4 0.6 5.6-15.4 9.1-25.4l4.6 22.9 16 76.7h-57zM230.2 81.7L162.9 266.1l-7.2-37c-12.6-42.8-51.8-89.2-95.6-112.5l61.6 230.8 72.3-0.1 107.5-265.5h-71.3z"/>
+                <path fill="#F7B600" d="M95.6 81.7H-2.7l-0.8 4.7c76.5 19.6 127.2 66.9 148.2 123.7L122 103.5c-4-16.9-15.9-21.4-30.4-21.8z"/>
+              </svg>
+
+              {/* Mastercard */}
+              <svg aria-label="Mastercard" viewBox="0 0 152 108" height="22" width="32" xmlns="http://www.w3.org/2000/svg">
+                <rect x="0" y="0" width="152" height="108" rx="8" fill="white" fillOpacity="0"/>
+                <circle cx="52" cy="54" r="38" fill="#EB001B"/>
+                <circle cx="100" cy="54" r="38" fill="#F79E1B"/>
+                <path d="M76 22.4a38 38 0 0 1 0 63.2A38 38 0 0 1 76 22.4z" fill="#FF5F00"/>
+              </svg>
+
+              {/* Visa Secure */}
+              <div title="Visa Secure" style={{background:'#1A1F71',borderRadius:4,padding:'2px 6px',display:'flex',flexDirection:'column',alignItems:'center',height:22,justifyContent:'center'}}>
+                <span style={{color:'#fff',fontSize:8,fontWeight:900,letterSpacing:'0.04em',lineHeight:1,fontFamily:'Arial,sans-serif'}}>VISA</span>
+                <span style={{color:'#fff',fontSize:6,fontWeight:700,letterSpacing:'0.06em',lineHeight:1.2,fontFamily:'Arial,sans-serif'}}>SECURE</span>
+              </div>
+
+              {/* Mastercard ID Check */}
+              <div title="Mastercard ID Check" style={{display:'flex',alignItems:'center',gap:4,background:'#fff',border:'1px solid #E5E7EB',borderRadius:4,padding:'2px 6px',height:22}}>
+                <svg viewBox="0 0 152 108" height="14" width="20" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="52" cy="54" r="38" fill="#EB001B"/>
+                  <circle cx="100" cy="54" r="38" fill="#F79E1B"/>
+                  <path d="M76 22.4a38 38 0 0 1 0 63.2A38 38 0 0 1 76 22.4z" fill="#FF5F00"/>
+                </svg>
+                <div style={{display:'flex',flexDirection:'column',lineHeight:1}}>
+                  <span style={{color:'#1A1A1A',fontSize:6,fontWeight:600,fontFamily:'Arial,sans-serif'}}>mastercard</span>
+                  <span style={{color:'#1A1A1A',fontSize:6,fontWeight:700,fontFamily:'Arial,sans-serif'}}>ID Check</span>
+                </div>
+              </div>
             </div>
+
             <p className="text-xs" style={{color:'#9CA3AF'}}>© 2026 ESPOT, S.R.L. · República Dominicana</p>
           </div>
         </div>
