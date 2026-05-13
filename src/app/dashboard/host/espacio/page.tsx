@@ -285,7 +285,12 @@ export default function EspacioPage() {
         if (!weekendEnabled || !weekendPrice) return 1
         const base = Number(hourlyPrice || minConsumption || fixedPrice || 0)
         const wknd = Number(weekendPrice)
-        return base > 0 && wknd > base ? Math.round((wknd / base) * 100) / 100 : 1
+        // Permitir tanto precio mayor (premium) como menor (descuento) el fin de semana
+        // Usar 4 decimales para evitar pérdida de precisión en el round-trip
+        if (base > 0 && wknd > 0 && wknd !== base) {
+          return Math.round((wknd / base) * 10000) / 10000
+        }
+        return 1
       })(),
       minAdvanceAmount: Number(minAdvanceAmount) || 0,
       timeBlocks, addons,

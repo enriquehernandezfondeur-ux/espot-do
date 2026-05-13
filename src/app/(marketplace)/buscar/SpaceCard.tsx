@@ -254,13 +254,22 @@ export function SpaceCard({
                 </span>
               )}
               {(() => {
-                const p = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
-                return p?.weekend_multiplier > 1 ? (
+                const p   = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
+                const wm  = Number(p?.weekend_multiplier ?? 1)
+                if (!wm || wm === 1) return null
+                const pct = Math.round(Math.abs(wm - 1) * 100)
+                if (pct === 0) return null
+                const isDiscount = wm < 1
+                return (
                   <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap shrink-0"
-                    style={{ background: 'rgba(245,158,11,0.1)', color: '#D97706', border: '1px solid rgba(245,158,11,0.25)' }}>
-                    +{Math.round((p.weekend_multiplier - 1) * 100)}% fines
+                    style={{
+                      background: isDiscount ? 'rgba(34,197,94,0.1)' : 'rgba(245,158,11,0.1)',
+                      color:      isDiscount ? '#16A34A' : '#D97706',
+                      border:     `1px solid ${isDiscount ? 'rgba(34,197,94,0.25)' : 'rgba(245,158,11,0.25)'}`,
+                    }}>
+                    {isDiscount ? `-${pct}%` : `+${pct}%`} fines
                   </span>
-                ) : null
+                )
               })()}
             </div>
 

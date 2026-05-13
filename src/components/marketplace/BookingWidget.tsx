@@ -272,7 +272,8 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
 
   const weekendMultiplier = useMemo(() => {
     const m = Number(pricing?.weekend_multiplier ?? 1)
-    return isWeekend && m > 1 ? m : 1
+    // Aplicar si es fin de semana Y el multiplicador es diferente de 1 (ya sea premium o descuento)
+    return isWeekend && m > 0 && m !== 1 ? m : 1
   }, [isWeekend, pricing])
 
   const basePrice = useMemo(() => {
@@ -692,16 +693,24 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             })()}
 
             {/* Badge precio fin de semana */}
-            {isWeekend && weekendMultiplier > 1 && eventDate && !dateBlocked && (
-              <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs"
-                style={{ background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.25)', color: '#92400E' }}>
-                <CalendarDays size={12} style={{ color: '#D97706', flexShrink: 0 }} />
-                <span>
-                  <strong>Precio de fin de semana:</strong> este espacio aplica un precio especial viernes, sábados y domingos
-                  {' '}(+{Math.round((weekendMultiplier - 1) * 100)}% sobre el precio base).
-                </span>
-              </div>
-            )}
+            {isWeekend && weekendMultiplier !== 1 && eventDate && !dateBlocked && (() => {
+              const pct = Math.round(Math.abs(weekendMultiplier - 1) * 100)
+              const isDiscount = weekendMultiplier < 1
+              return (
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs"
+                  style={{
+                    background: isDiscount ? 'rgba(34,197,94,0.06)' : 'rgba(245,158,11,0.07)',
+                    border:     `1px solid ${isDiscount ? 'rgba(34,197,94,0.25)' : 'rgba(245,158,11,0.25)'}`,
+                    color:      isDiscount ? '#166534' : '#92400E',
+                  }}>
+                  <CalendarDays size={12} style={{ color: isDiscount ? '#16A34A' : '#D97706', flexShrink: 0 }} />
+                  <span>
+                    <strong>Precio de fin de semana:</strong> este espacio aplica una tarifa
+                    {isDiscount ? ` especial de -${pct}%` : ` especial de +${pct}%`} viernes, sábados y domingos.
+                  </span>
+                </div>
+              )
+            })()}
 
             {isQuote && (
               <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs"
@@ -1028,12 +1037,19 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                             ? `Paquete (${packageHours}h) + ${extra.toFixed(1)}h adicionales`
                             : `Paquete ${packageHours}h incluidas`
                         })()}
-                        {isWeekend && weekendMultiplier > 1 && (
-                          <span className="ml-1.5 text-xs font-semibold px-1.5 py-0.5 rounded-md"
-                            style={{ background: 'rgba(245,158,11,0.1)', color: '#D97706' }}>
-                            Tarifa fin de semana
-                          </span>
-                        )}
+                        {isWeekend && weekendMultiplier !== 1 && (() => {
+                          const isDiscount = weekendMultiplier < 1
+                          const pct = Math.round(Math.abs(weekendMultiplier - 1) * 100)
+                          return (
+                            <span className="ml-1.5 text-xs font-semibold px-1.5 py-0.5 rounded-md"
+                              style={{
+                                background: isDiscount ? 'rgba(34,197,94,0.1)' : 'rgba(245,158,11,0.1)',
+                                color:      isDiscount ? '#16A34A' : '#D97706',
+                              }}>
+                              Tarifa fin de semana ({isDiscount ? '-' : '+'}{pct}%)
+                            </span>
+                          )
+                        })()}
                       </span>
                       <span>{formatCurrency(basePrice)}</span>
                     </div>

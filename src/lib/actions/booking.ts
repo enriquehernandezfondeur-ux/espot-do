@@ -60,7 +60,7 @@ export async function createBooking(payload: CreateBookingPayload) {
   if (payload.pricingId && payload.startTime && payload.endTime) {
     const { data: pricingCheck } = await supabase
       .from('space_pricing')
-      .select('min_hours, max_hours, session_hours, package_hours, extra_hour_price, pricing_type')
+      .select('min_hours, max_hours, session_hours, package_hours, extra_hour_price, pricing_type, hourly_price, minimum_consumption, fixed_price, weekend_multiplier')
       .eq('id', payload.pricingId)
       .single()
 
@@ -85,6 +85,31 @@ export async function createBooking(payload: CreateBookingPayload) {
         return { error: `Este espacio requiere exactamente ${sessH} hora${sessH > 1 ? 's' : ''} de sesión.` }
       if (pkgH > 0 && !hasExtra && Math.abs(selectedH - pkgH) > 0.1)
         return { error: `Este paquete tiene una duración fija de ${pkgH} hora${pkgH > 1 ? 's' : ''}.` }
+
+      // Validar basePrice para evitar manipulación: recalcular precio esperado en servidor
+      if (pricingCheck.pricing_type !== 'custom_quote') {
+        let expectedBase = 0
+        if (pricingCheck.pricing_type === 'hourly') {
+          expectedBase = (Number(pricingCheck.hourly_price) || 0) * selectedH
+        } else if (pricingCheck.pricing_type === 'minimum_consumption') {
+          expectedBase = Number(pricingCheck.minimum_consumption) || 0
+        } else if (pricingCheck.pricing_type === 'fixed_package') {
+          const extra = Math.max(0, selectedH - (pricingCheck.package_hours ?? 0))
+          expectedBase = (Number(pricingCheck.fixed_price) || 0) + extra * (Number(pricingCheck.extra_hour_price) || 0)
+        }
+        // Aplicar multiplicador de fin de semana si corresponde
+        const wm = Number(pricingCheck.weekend_multiplier ?? 1)
+        if (wm !== 1 && payload.eventDate) {
+          const dow = new Date(payload.eventDate + 'T12:00').getDay()
+          if (dow === 0 || dow === 5 || dow === 6) {
+            expectedBase = Math.round(expectedBase * wm)
+          }
+        }
+        // Tolerancia de RD$1 por redondeo
+        if (expectedBase > 0 && Math.abs(Number(payload.basePrice) - expectedBase) > 1) {
+          return { error: 'El precio del evento no coincide con la tarifa actual del espacio. Por favor recarga la página y vuelve a intentarlo.' }
+        }
+      }
     }
   }
 
