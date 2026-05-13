@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Search, Menu, X, User, ChevronDown, LogOut, Settings, LayoutDashboard, MapPin, Building2 } from 'lucide-react'
+import { Search, Menu, X, User, ChevronDown, LogOut, Settings, LayoutDashboard, MapPin, Building2, CalendarDays, Heart, ChevronRight } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -13,9 +13,10 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
   const [searchQ,       setSearchQ]       = useState('')
   const [user,          setUser]          = useState<{ email: string; role?: string; avatarUrl?: string; fullName?: string } | null>(null)
   const [authReady,     setAuthReady]     = useState(false)
-  const [dropdownOpen,  setDropdownOpen]  = useState(false)
-  const [dropdownPos,   setDropdownPos]   = useState({ top: 0, right: 0 })
-  const [imgError,      setImgError]      = useState(false)
+  const [dropdownOpen,   setDropdownOpen]   = useState(false)
+  const [dropdownPos,    setDropdownPos]    = useState({ top: 0, right: 0 })
+  const [imgError,       setImgError]       = useState(false)
+  const [accountSheet,   setAccountSheet]   = useState(false)
   const searchRef    = useRef<HTMLInputElement>(null)
   const dropdownRef  = useRef<HTMLDivElement>(null)
 
@@ -426,7 +427,142 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
         </>
       )}
 
-      {children}
+      {/* Padding inferior para que el contenido no quede bajo la barra */}
+      <div className={authReady && user ? 'pb-16 md:pb-0' : ''}>
+        {children}
+      </div>
+
+      {/* ── BARRA INFERIOR MÓVIL — solo usuarios logueados ── */}
+      {authReady && user && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe"
+          style={{
+            background: 'rgba(255,255,255,0.97)',
+            backdropFilter: 'blur(20px)',
+            borderTop: '1px solid var(--border-subtle)',
+            boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
+          }}>
+          <div className="flex items-stretch">
+
+            {/* Explorar */}
+            <Link href="/buscar"
+              className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-all"
+              style={{ color: pathname === '/buscar' ? 'var(--brand)' : 'var(--text-muted)' }}>
+              <div className="w-8 h-8 flex items-center justify-center rounded-xl"
+                style={{ background: pathname === '/buscar' ? 'var(--brand-dim)' : 'transparent' }}>
+                <Search size={18} />
+              </div>
+              <span className="text-xs font-semibold leading-tight">Explorar</span>
+            </Link>
+
+            {/* Mis Reservas */}
+            <Link href="/dashboard/reservas"
+              className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-all"
+              style={{ color: 'var(--text-muted)' }}>
+              <div className="w-8 h-8 flex items-center justify-center rounded-xl">
+                <CalendarDays size={18} />
+              </div>
+              <span className="text-xs font-semibold leading-tight">Reservas</span>
+            </Link>
+
+            {/* Favoritos */}
+            <Link href="/dashboard/favoritos"
+              className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-all"
+              style={{ color: 'var(--text-muted)' }}>
+              <div className="w-8 h-8 flex items-center justify-center rounded-xl">
+                <Heart size={18} />
+              </div>
+              <span className="text-xs font-semibold leading-tight">Guardados</span>
+            </Link>
+
+            {/* Mi Cuenta */}
+            <button
+              onClick={() => setAccountSheet(true)}
+              className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-all"
+              style={{ color: 'var(--text-muted)', background: 'transparent', border: 'none' }}>
+              <div className="w-8 h-8 flex items-center justify-center rounded-xl relative">
+                {showAvatar
+                  // eslint-disable-next-line @next/next/no-img-element
+                  ? <img src={user.avatarUrl} alt={displayName} className="w-8 h-8 rounded-xl object-cover" onError={() => setImgError(true)} />
+                  : <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold text-white"
+                      style={{ background: 'var(--brand)' }}>
+                      {avatarLetter}
+                    </div>
+                }
+              </div>
+              <span className="text-xs font-semibold leading-tight">Cuenta</span>
+            </button>
+
+          </div>
+        </div>
+      )}
+
+      {/* ── HOJA DE CUENTA (bottom sheet) ── */}
+      {accountSheet && (
+        <>
+          <div className="md:hidden fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm"
+            onClick={() => setAccountSheet(false)} />
+          <div className="md:hidden fixed bottom-0 left-0 right-0 z-[61] rounded-t-3xl pb-safe slide-in-bottom"
+            style={{ background: '#fff', boxShadow: '0 -8px 40px rgba(0,0,0,0.15)' }}>
+
+            {/* Tirador */}
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 rounded-full" style={{ background: '#E2E8F0' }} />
+            </div>
+
+            {/* Perfil */}
+            <div className="px-5 py-4 flex items-center gap-3"
+              style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+              {showAvatar
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img src={user.avatarUrl} alt={displayName} className="w-12 h-12 rounded-2xl object-cover shrink-0" />
+                : <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-base font-bold text-white shrink-0"
+                    style={{ background: 'var(--brand)' }}>
+                    {avatarLetter}
+                  </div>
+              }
+              <div className="min-w-0">
+                <div className="font-bold text-sm truncate" style={{ color: 'var(--text-primary)' }}>{user?.fullName ?? displayName}</div>
+                <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{user?.email}</div>
+              </div>
+            </div>
+
+            {/* Accesos rápidos */}
+            <div className="px-4 py-2">
+              {[
+                { href: '/dashboard/overview',   label: 'Mi panel',          icon: LayoutDashboard, desc: 'Ver resumen de actividad' },
+                { href: '/dashboard/reservas',   label: 'Mis reservas',      icon: CalendarDays,    desc: 'Ver y gestionar reservas' },
+                { href: '/dashboard/favoritos',  label: 'Espacios guardados', icon: Heart,           desc: 'Mis favoritos' },
+                ...(user?.role === 'host' ? [{ href: '/dashboard/host', label: 'Panel de propietario', icon: Building2, desc: 'Gestionar mis espacios' }] : []),
+              ].map(({ href, label, icon: Icon, desc }) => (
+                <Link key={href} href={href} onClick={() => setAccountSheet(false)}
+                  className="flex items-center gap-3 px-3 py-3.5 rounded-2xl transition-colors hover:bg-[var(--bg-elevated)]">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ background: 'var(--bg-elevated)' }}>
+                    <Icon size={18} style={{ color: 'var(--brand)' }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{label}</div>
+                    <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{desc}</div>
+                  </div>
+                  <ChevronRight size={15} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                </Link>
+              ))}
+            </div>
+
+            {/* Cerrar sesión — botón prominente */}
+            <div className="px-4 pb-5 pt-1">
+              <button
+                onClick={async () => { setAccountSheet(false); await handleSignOut() }}
+                className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl font-bold text-sm transition-all active:scale-[0.98]"
+                style={{ background: 'rgba(239,68,68,0.08)', color: '#DC2626', border: '1.5px solid rgba(239,68,68,0.2)' }}>
+                <LogOut size={17} />
+                Cerrar sesión
+              </button>
+            </div>
+
+          </div>
+        </>
+      )}
 
       {/* ── FOOTER ── */}
       <footer style={{ background: '#F4F6F5', borderTop: '1px solid #E0E7E3' }}>
