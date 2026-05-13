@@ -7,7 +7,7 @@ const PAID = ['advance', 'partial', 'paid']
 const paymentConfig: Record<string, { label: string; color: string; bg: string }> = {
   unpaid:  { label: 'Sin pago',         color: '#D97706', bg: 'rgba(217,119,6,0.08)'   },
   partial: { label: 'Pago parcial',     color: '#2563EB', bg: 'rgba(37,99,235,0.08)'   },
-  advance: { label: 'Depósito pagado',  color: '#16A34A', bg: 'rgba(22,163,74,0.08)'   },
+  advance: { label: 'Anticipo pagado',  color: '#16A34A', bg: 'rgba(22,163,74,0.08)'   },
   paid:    { label: 'Pago completo',    color: '#35C493', bg: 'rgba(53,196,147,0.08)'  },
 }
 

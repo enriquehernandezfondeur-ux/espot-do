@@ -81,11 +81,12 @@ export default function AdminReservasPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="flex gap-1 p-1 rounded-xl" style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
+      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 mb-6">
+        <div className="flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide shrink-0"
+          style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
           {STATUS_OPTIONS.map(o => (
             <button key={o.value} onClick={() => { setFilter(o.value); setLoading(true) }}
-              className="px-3 py-2 rounded-lg text-sm font-medium transition-all"
+              className="px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shrink-0"
               style={filter === o.value ? { background: '#0F1623', color: '#fff' } : { color: '#6B7280' }}>
               {o.label}
             </button>
@@ -96,7 +97,8 @@ export default function AdminReservasPage() {
           <Search size={15} className="text-slate-400 shrink-0" />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Buscar espacio, cliente o evento..."
-            className="bg-transparent text-sm flex-1 focus:outline-none text-slate-700 placeholder-slate-400" />
+            className="bg-transparent text-sm flex-1 focus:outline-none text-slate-700 placeholder-slate-400"
+            style={{ fontSize: 16 }} />
         </div>
       </div>
 
@@ -225,7 +227,7 @@ export default function AdminReservasPage() {
                   <span>Total evento</span><span>{formatCurrency(Number(selected.total_amount))}</span>
                 </div>
                 <div className="flex justify-between text-sm font-bold" style={{ color: 'var(--brand)' }}>
-                  <span>Comisión Espot (10%)</span><span>{formatCurrency(Number(selected.total_amount) * 0.10)}</span>
+                  <span>Comisión Espot</span><span>{formatCurrency(Number(selected.platform_fee ?? Number(selected.total_amount) * 0.10))}</span>
                 </div>
                 <div className="flex justify-between text-xs pt-1" style={{ borderTop: '1px solid rgba(53,196,147,0.15)', color: '#6B7280' }}>
                   <span>Estado de pago</span>

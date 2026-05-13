@@ -144,8 +144,8 @@ export default async function AdminDashboard() {
         ))}
       </div>
 
-      {/* Main content — 2 columns */}
-      <div className="grid grid-cols-[1fr_340px] gap-6">
+      {/* Main content — 1 col mobile, 2 cols xl */}
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-6">
 
         {/* Activity feed */}
         <div className="rounded-2xl overflow-hidden"
@@ -170,7 +170,6 @@ export default async function AdminDashboard() {
               const sc = STATUS_CONFIG[bk.status] ?? STATUS_CONFIG.pending
               const space   = bk.spaces as any
               const guest   = bk.profiles as any
-              const hostAmt = Number(bk.total_amount) - Number(bk.platform_fee)
               return (
                 <Link key={bk.id} href={`/admin/reservas`}
                   className="flex items-center gap-4 px-6 py-3.5 hover:bg-slate-50 transition-colors">

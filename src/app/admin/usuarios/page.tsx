@@ -65,11 +65,12 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="flex gap-1 p-1 rounded-xl" style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
+      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 mb-6">
+        <div className="flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide shrink-0"
+          style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
           {[{ value: 'all', label: 'Todos' }, { value: 'guest', label: 'Clientes' }, { value: 'host', label: 'Propietarios' }, { value: 'admin', label: 'Admins' }].map(f => (
             <button key={f.value} onClick={() => { setFilter(f.value); setLoading(true) }}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shrink-0"
               style={filter === f.value ? { background: '#0F1623', color: '#fff' } : { color: '#6B7280' }}>
               {f.label}
             </button>
@@ -80,7 +81,8 @@ export default function AdminUsersPage() {
           <Search size={15} className="text-slate-400 shrink-0" />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Buscar por nombre o email..."
-            className="bg-transparent text-sm flex-1 focus:outline-none text-slate-700 placeholder-slate-400" />
+            className="bg-transparent text-sm flex-1 focus:outline-none text-slate-700 placeholder-slate-400"
+            style={{ fontSize: 16 }} />
         </div>
       </div>
 
