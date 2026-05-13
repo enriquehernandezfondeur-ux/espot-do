@@ -71,7 +71,7 @@ export default async function AdminDashboard() {
             </span>
           </div>
           <h1 className="text-xl md:text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>
-            {greeting}, {adminName} 👋
+            {greeting}, {adminName}
           </h1>
           <p className="text-sm mt-0.5 capitalize" style={{ color: '#94A3B8' }}>{dateLabel}</p>
         </div>

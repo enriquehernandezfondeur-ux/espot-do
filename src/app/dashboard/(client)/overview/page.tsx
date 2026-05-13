@@ -176,6 +176,15 @@ export default function ClientDashboard() {
                 </p>
                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                   {formatDate(bk.event_date)} · {formatCurrency(Number(bk.total_amount))}
+                  {(() => {
+                    const p = (bk as any).space_pricing as any
+                    if (!p) return null
+                    const labels: Record<string, string> = {
+                      hourly: ' · Por hora', minimum_consumption: ' · Consumo mín.',
+                      fixed_package: ` · ${p.package_name ?? 'Paquete'}`, custom_quote: ' · Cotización',
+                    }
+                    return labels[p.pricing_type] ?? null
+                  })()}
                 </p>
                 </div>
               </Link>
@@ -441,10 +450,27 @@ export default function ClientDashboard() {
                       </span>
                     </div>
                     <div className="flex items-center justify-between mt-1">
-                      <div className="text-xs flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
+                      <div className="text-xs flex items-center gap-1.5 flex-wrap" style={{ color: 'var(--text-muted)' }}>
                         <CalendarDays size={10} /> {formatDate(bk.event_date)}
                         <span style={{ color: 'var(--border-medium)' }}>·</span>
                         {bk.event_type}
+                        {(() => {
+                          const p = (bk as any).space_pricing as any
+                          if (!p) return null
+                          const map: Record<string, { label: string; color: string }> = {
+                            hourly:              { label: 'Por hora',      color: '#2563EB' },
+                            minimum_consumption: { label: 'Consumo mín.',  color: '#D97706' },
+                            fixed_package:       { label: p.package_name ?? 'Paquete', color: '#7C3AED' },
+                            custom_quote:        { label: 'Cotización',    color: '#0891B2' },
+                          }
+                          const cfg = map[p.pricing_type]
+                          if (!cfg) return null
+                          return (
+                            <span className="font-semibold" style={{ color: cfg.color }}>
+                              · {cfg.label}
+                            </span>
+                          )
+                        })()}
                       </div>
                       <span className="flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full shrink-0"
                         style={{ background: st.bg, color: st.color }}>

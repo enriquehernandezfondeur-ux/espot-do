@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard, Building2, CalendarDays, Users,
   CreditCard, Settings, BarChart3, LogOut,
-  ChevronRight, Shield, Banknote, Globe, Upload, Menu, X,
+  ChevronRight, Shield, Banknote, Globe, Upload, Menu, X, MessageCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -34,6 +34,7 @@ const sections: { label: string; items: NavItem[] }[] = [
       { href: '/admin/pagos',         label: 'Comisiones',    icon: CreditCard },
       { href: '/admin/payouts',       label: 'Payouts',       icon: Banknote },
       { href: '/admin/liquidaciones', label: 'Liquidaciones', icon: Banknote },
+      { href: '/admin/mensajes',      label: 'Mensajes',      icon: MessageCircle },
     ],
   },
   {

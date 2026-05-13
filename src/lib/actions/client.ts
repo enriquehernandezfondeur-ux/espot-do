@@ -151,7 +151,7 @@ export async function getClientStats() {
   const [{ data: bookings }, { data: profile }] = await Promise.all([
     supabase
       .from('bookings')
-      .select('id, status, payment_status, total_amount, event_date, event_type, guest_count, created_at, confirmed_at, paid_at, spaces!space_id(name,slug,space_images(url,is_cover))')
+      .select('id, status, payment_status, total_amount, event_date, event_type, guest_count, created_at, confirmed_at, paid_at, spaces!space_id(name,slug,space_images(url,is_cover)), space_pricing!pricing_id(pricing_type,hourly_price,minimum_consumption,fixed_price,package_name)')
       .eq('guest_id', user.id)
       .order('created_at', { ascending: false }),  // más recientes primero
     supabase

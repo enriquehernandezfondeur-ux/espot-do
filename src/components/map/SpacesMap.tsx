@@ -62,23 +62,32 @@ export const CITY_VIEW: Record<string, { center: [number, number]; zoom: number 
   'las terrenas':   { center: [19.3095, -69.5362], zoom: 13 },
 }
 
+// Jitter determinístico: mismo ID → misma posición siempre
+function stableJitter(id: string, range: number, seed: number): number {
+  let h = seed
+  for (let i = 0; i < id.length; i++) h = Math.imul(31, h) + id.charCodeAt(i) | 0
+  return ((((h >>> 0) % 10000) / 10000) - 0.5) * range * 2
+}
+
 export function getSpaceCoords(space: any): [number, number] | null {
   if (space.lat && space.lng) return [parseFloat(space.lat), parseFloat(space.lng)]
+  const id     = space.id ?? ''
   const sector = (space.sector ?? '').toLowerCase().trim()
   if (sector) {
     for (const [key, coords] of Object.entries(SECTOR_COORDS)) {
-      if (sector.includes(key) || (key.includes(sector) && sector.length > 3)) return coords
+      if (sector.includes(key) || (key.includes(sector) && sector.length > 3)) {
+        // Jitter pequeño para que pines del mismo sector no se apilen
+        return [coords[0] + stableJitter(id, 0.006, 1), coords[1] + stableJitter(id, 0.006, 2)]
+      }
     }
   }
   const city = (space.city ?? '').toLowerCase()
   if (city.includes('santo domingo') || city.includes('distrito nacional')) {
-    const jitter = () => (Math.random() - 0.5) * 0.018
-    return [18.4719 + jitter(), -69.9312 + jitter()]
+    return [18.4719 + stableJitter(id, 0.018, 1), -69.9312 + stableJitter(id, 0.018, 2)]
   }
   for (const [key, { center }] of Object.entries(CITY_VIEW)) {
     if (key !== 'default' && city.includes(key)) {
-      const jitter = () => (Math.random() - 0.5) * 0.01
-      return [center[0] + jitter(), center[1] + jitter()]
+      return [center[0] + stableJitter(id, 0.01, 1), center[1] + stableJitter(id, 0.01, 2)]
     }
   }
   return null
@@ -322,14 +331,14 @@ function openSpacePopup(L: any, map: any, space: any, coords: [number, number]) 
         ? `<div style="height:${isMobile ? 160 : 140}px;overflow:hidden;">
              <img src="${cover}" style="width:100%;height:100%;object-fit:cover;" />
            </div>`
-        : `<div style="height:${isMobile ? 110 : 90}px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;">
-             <span style="color:#fff;font-size:36px;opacity:0.7">🏛</span>
+        : `<div style="height:${isMobile ? 110 : 90}px;background:linear-gradient(135deg,#0F2A22,#0A4A3A);display:flex;align-items:center;justify-content:center;">
+             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
            </div>`
       }
       <div style="padding:${isMobile ? '16px' : '14px'};">
         <div style="font-weight:700;font-size:${isMobile ? '15px' : '14px'};color:#111827;margin-bottom:4px;line-height:1.3;">${space.name}</div>
         <div style="font-size:${isMobile ? '13px' : '12px'};color:#6B7280;margin-bottom:8px;">
-          📍 ${location} · 👥 ${space.capacity_max} máx.
+          ${location} · ${space.capacity_max} personas máx.
         </div>
         ${price ? `<div style="font-weight:700;font-size:${isMobile ? '14px' : '13px'};color:#35C493;margin-bottom:${isMobile ? '14px' : '12px'};">${price}</div>` : ''}
         <a href="/espacios/${space.slug}"

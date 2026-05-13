@@ -7,11 +7,11 @@ import { getClientBookings } from '@/lib/actions/client'
 
 const PAID_PS = ['advance', 'partial', 'paid']
 
-const paymentStatusConfig: Record<string, { label: string; color: string; bg: string; icon: any }> = {
-  unpaid:  { label: 'Sin pago',         color: '#D97706', bg: 'rgba(217,119,6,0.08)',    icon: Clock },
-  partial: { label: 'Pago parcial',     color: '#2563EB', bg: 'rgba(37,99,235,0.08)',    icon: CreditCard },
-  advance: { label: 'Depósito pagado',  color: '#16A34A', bg: 'rgba(22,163,74,0.08)',    icon: CheckCircle },
-  paid:    { label: 'Pagado completo',  color: '#35C493', bg: 'rgba(53,196,147,0.08)',   icon: CheckCircle },
+const paymentStatusConfig: Record<string, { label: string; sub: string; color: string; bg: string; icon: any }> = {
+  unpaid:  { label: 'Sin pago',              sub: 'Pendiente de primer pago',       color: '#D97706', bg: 'rgba(217,119,6,0.08)',    icon: Clock },
+  partial: { label: 'Cuotas en progreso',    sub: 'Quedan pagos pendientes',        color: '#2563EB', bg: 'rgba(37,99,235,0.08)',    icon: CreditCard },
+  advance: { label: 'Anticipo pagado',       sub: '1ª cuota confirmada — pendiente saldo', color: '#16A34A', bg: 'rgba(22,163,74,0.08)', icon: CheckCircle },
+  paid:    { label: 'Pagado completo',       sub: 'Todas las cuotas saldadas',      color: '#35C493', bg: 'rgba(53,196,147,0.08)',   icon: CheckCircle },
 }
 
 export default function PagosPage() {
@@ -86,9 +86,14 @@ export default function PagosPage() {
                       {ps.label}
                     </span>
                   </div>
-                  <div className="text-xs mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                  <div className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>
                     {bk.event_type} · {bk.guest_count} personas · {formatDate(bk.event_date)}
                   </div>
+                  {ps.sub && (
+                    <div className="text-xs mb-1.5 font-medium" style={{ color: ps.color, opacity: 0.85 }}>
+                      {ps.sub}
+                    </div>
+                  )}
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
                       {formatCurrency(Number(bk.total_amount))}

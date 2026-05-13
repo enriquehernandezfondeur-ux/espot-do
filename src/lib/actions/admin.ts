@@ -431,3 +431,65 @@ export async function updateConfig(key: string, value: string) {
   const { error } = await supabase.from('marketplace_config').upsert({ key, value })
   return error ? { error: error.message } : { success: true }
 }
+
+// ── MENSAJES ──────────────────────────────────────────────
+export async function getAdminConversations() {
+  const supabase = await requireAdmin()
+  if (!supabase) return []
+
+  const { data: msgs } = await supabase
+    .from('messages')
+    .select('id, body, created_at, space_id, sender_id, receiver_id, attachment_type')
+    .order('created_at', { ascending: false })
+    .limit(2000)
+
+  if (!msgs || !msgs.length) return []
+
+  const userIds  = [...new Set(msgs.flatMap(m => [m.sender_id, m.receiver_id]))]
+  const spaceIds = [...new Set(msgs.map(m => m.space_id))]
+
+  const [{ data: profiles }, { data: spaces }] = await Promise.all([
+    supabase.from('profiles').select('id, full_name, email, avatar_url').in('id', userIds),
+    supabase.from('spaces').select('id, name, slug, space_images(url, is_cover)').in('id', spaceIds),
+  ])
+
+  const profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p]))
+  const spaceMap   = Object.fromEntries((spaces ?? []).map(s => [s.id, s]))
+
+  const seen = new Set<string>()
+  const conversations: any[] = []
+
+  for (const msg of msgs) {
+    const sorted = [msg.sender_id, msg.receiver_id].sort()
+    const key    = `${msg.space_id}:${sorted.join(':')}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    conversations.push({
+      key,
+      spaceId:      msg.space_id,
+      space:        spaceMap[msg.space_id] ?? null,
+      participants: sorted.map(id => profileMap[id] ?? { id, full_name: 'Usuario', email: '' }),
+      user1:        sorted[0],
+      user2:        sorted[1],
+      lastMessage:  msg.body,
+      lastType:     msg.attachment_type,
+      lastAt:       msg.created_at,
+    })
+  }
+
+  return conversations
+}
+
+export async function getAdminConversationMessages(spaceId: string, user1Id: string, user2Id: string) {
+  const supabase = await requireAdmin()
+  if (!supabase) return []
+
+  const { data } = await supabase
+    .from('messages')
+    .select('*, sender:profiles!sender_id(id, full_name, avatar_url)')
+    .eq('space_id', spaceId)
+    .or(`and(sender_id.eq.${user1Id},receiver_id.eq.${user2Id}),and(sender_id.eq.${user2Id},receiver_id.eq.${user1Id})`)
+    .order('created_at', { ascending: true })
+
+  return data ?? []
+}

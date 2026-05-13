@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { getAdminSpaces, updateSpaceStatus } from '@/lib/actions/admin'
 import { formatCurrency } from '@/lib/utils'
-import { Search, Eye, EyeOff, Shield, Star, Trash2, CheckCircle, Loader2, MapPin, Users, Pencil } from 'lucide-react'
+import { Search, Eye, EyeOff, Shield, Star, Trash2, CheckCircle, Loader2, MapPin, Users, Pencil, Building2 } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
@@ -153,7 +153,7 @@ export default function AdminSpacesPage() {
                       <div className="w-12 h-10 rounded-xl overflow-hidden shrink-0" style={{ background: '#F0F2F5' }}>
                         {cover
                           ? <img src={cover} alt="" className="w-full h-full object-cover" />
-                          : <div className="w-full h-full flex items-center justify-center text-lg">🏛️</div>}
+                          : <div className="w-full h-full flex items-center justify-center"><Building2 size={18} style={{ color: '#CBD5E1' }} /></div>}
                       </div>
                       <div className="min-w-0">
                         <div className="font-semibold text-sm truncate" style={{ color: '#0F1623' }}>{space.name}</div>
