@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Search, Menu, X, User, ChevronDown, LogOut, Settings, LayoutDashboard, MapPin, Building2, CalendarDays, Heart, ChevronRight, CreditCard } from 'lucide-react'
+import { Search, Menu, X, User, ChevronDown, LogOut, Settings, LayoutDashboard, MapPin, Building2, CalendarDays, Heart, ChevronRight, CreditCard, MessageCircle, Home } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -417,91 +417,85 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
         </>
       )}
 
-      {/* Padding inferior — cuando hay bottom nav en mobile */}
-      <div className={authReady && user ? 'pb-[72px] md:pb-0' : ''}>
+      {/* Padding inferior para la barra de mobile cuando está logueado */}
+      <div className={authReady && user ? 'pb-20 md:pb-0' : ''}>
         {children}
       </div>
 
-      {/* ── BARRA INFERIOR MÓVIL — solo usuarios logueados ── */}
-      {authReady && user && (() => {
-        // Detectar tab activa
-        const isExplore   = pathname === '/' || pathname === '/buscar' || pathname.startsWith('/espacios')
-        const isReservas  = pathname.includes('/reservas') || pathname.includes('/dashboard/reservas')
-        const isGuardados = pathname.includes('/favoritos')
-        const isCuenta    = accountSheet
+      {/* ── BARRA INFERIOR MÓVIL — mismo estilo que el dashboard, solo logueados ── */}
+      {authReady && user && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 pb-safe"
+          style={{
+            background: 'rgba(255,255,255,0.97)',
+            backdropFilter: 'blur(20px)',
+            borderTop: '1px solid var(--border-subtle)',
+            boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
+          }}>
+          <div className="flex items-stretch">
 
-        const tab = (active: boolean, color = 'var(--brand)') => ({
-          color:      active ? color : 'var(--text-muted)',
-          background: active ? 'rgba(53,196,147,0.08)' : 'transparent',
-          borderRadius: 12,
-        } as React.CSSProperties)
+            {/* Inicio */}
+            <Link href="/"
+              className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-all"
+              style={{ color: pathname === '/' ? 'var(--brand)' : 'var(--text-muted)' }}>
+              <div className="w-8 h-8 flex items-center justify-center rounded-xl transition-all"
+                style={{ background: pathname === '/' ? 'var(--brand-dim)' : 'transparent' }}>
+                <Home size={18} />
+              </div>
+              <span className="text-xs font-semibold leading-tight">Inicio</span>
+            </Link>
 
-        return (
-          <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe"
-            style={{
-              background: 'rgba(255,255,255,0.98)',
-              backdropFilter: 'blur(20px)',
-              borderTop: '1px solid var(--border-subtle)',
-              boxShadow: '0 -2px 16px rgba(0,0,0,0.06)',
-            }}>
-            <div className="flex items-stretch">
+            {/* Buscar */}
+            <Link href="/buscar"
+              className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-all"
+              style={{ color: (pathname === '/buscar' || pathname.startsWith('/espacios')) ? 'var(--brand)' : 'var(--text-muted)' }}>
+              <div className="w-8 h-8 flex items-center justify-center rounded-xl transition-all"
+                style={{ background: (pathname === '/buscar' || pathname.startsWith('/espacios')) ? 'var(--brand-dim)' : 'transparent' }}>
+                <Search size={18} />
+              </div>
+              <span className="text-xs font-semibold leading-tight">Buscar</span>
+            </Link>
 
-              {/* Explorar */}
-              <Link href="/buscar"
-                className="flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-all"
-                style={{ color: isExplore ? 'var(--brand)' : 'var(--text-muted)' }}>
-                <div className="w-8 h-7 flex items-center justify-center rounded-xl transition-all"
-                  style={tab(isExplore)}>
-                  <Search size={17} />
-                </div>
-                <span className="text-[10px] font-semibold leading-tight">Explorar</span>
-              </Link>
+            {/* Reservas */}
+            <Link href="/dashboard/reservas"
+              className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-all"
+              style={{ color: 'var(--text-muted)' }}>
+              <div className="w-8 h-8 flex items-center justify-center rounded-xl">
+                <CalendarDays size={18} />
+              </div>
+              <span className="text-xs font-semibold leading-tight">Reservas</span>
+            </Link>
 
-              {/* Reservas */}
-              <Link href="/dashboard/reservas"
-                className="flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-all"
-                style={{ color: isReservas ? 'var(--brand)' : 'var(--text-muted)' }}>
-                <div className="w-8 h-7 flex items-center justify-center rounded-xl transition-all"
-                  style={tab(isReservas)}>
-                  <CalendarDays size={17} />
-                </div>
-                <span className="text-[10px] font-semibold leading-tight">Reservas</span>
-              </Link>
+            {/* Mensajes */}
+            <Link href="/dashboard/mensajes"
+              className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-all"
+              style={{ color: 'var(--text-muted)' }}>
+              <div className="w-8 h-8 flex items-center justify-center rounded-xl">
+                <MessageCircle size={18} />
+              </div>
+              <span className="text-xs font-semibold leading-tight">Mensajes</span>
+            </Link>
 
-              {/* Guardados */}
-              <Link href="/dashboard/favoritos"
-                className="flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-all"
-                style={{ color: isGuardados ? 'var(--brand)' : 'var(--text-muted)' }}>
-                <div className="w-8 h-7 flex items-center justify-center rounded-xl transition-all"
-                  style={tab(isGuardados)}>
-                  <Heart size={17} />
-                </div>
-                <span className="text-[10px] font-semibold leading-tight">Guardados</span>
-              </Link>
+            {/* Cuenta */}
+            <button
+              onClick={() => setAccountSheet(true)}
+              className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-all"
+              style={{ color: accountSheet ? 'var(--brand)' : 'var(--text-muted)', background: 'transparent', border: 'none' }}>
+              <div className="w-8 h-8 flex items-center justify-center rounded-xl transition-all"
+                style={{ background: accountSheet ? 'var(--brand-dim)' : 'transparent' }}>
+                {showAvatar
+                  // eslint-disable-next-line @next/next/no-img-element
+                  ? <img src={user.avatarUrl} alt={displayName}
+                      className="w-7 h-7 rounded-lg object-cover"
+                      onError={() => setImgError(true)} />
+                  : <User size={18} />
+                }
+              </div>
+              <span className="text-xs font-semibold leading-tight">Cuenta</span>
+            </button>
 
-              {/* Cuenta */}
-              <button
-                onClick={() => setAccountSheet(true)}
-                className="flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-all"
-                style={{ color: isCuenta ? 'var(--brand)' : 'var(--text-muted)', background: 'transparent', border: 'none' }}>
-                <div className="w-8 h-7 flex items-center justify-center rounded-xl transition-all overflow-hidden"
-                  style={tab(isCuenta)}>
-                  {showAvatar
-                    // eslint-disable-next-line @next/next/no-img-element
-                    ? <img src={user.avatarUrl} alt={displayName}
-                        className="w-6 h-6 rounded-lg object-cover"
-                        style={{ border: isCuenta ? '1.5px solid var(--brand)' : '1px solid #E2E8F0' }}
-                        onError={() => setImgError(true)} />
-                    : <User size={17} />
-                  }
-                </div>
-                <span className="text-[10px] font-semibold leading-tight">Cuenta</span>
-              </button>
-
-            </div>
           </div>
-        )
-      })()}
+        </div>
+      )}
 
       {/* ── HOJA DE CUENTA (bottom sheet) ── */}
       {accountSheet && (
