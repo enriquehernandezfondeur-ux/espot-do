@@ -166,6 +166,20 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
   const [activeTab,       setActiveTab]       = useState<'info' | 'addons' | 'rules' | 'reviews'>('info')
   const [reviewsData,     setReviewsData]     = useState<ReviewsSummary | null>(null)
 
+  // Auto-abrir chat si viene de ?chat=1 (desde botón "Preguntar" en SpaceCard)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search)
+      if (p.get('chat') === '1') {
+        setTimeout(() => setShowChat(true), 300)
+        // Limpiar el parámetro sin recargar
+        const url = new URL(window.location.href)
+        url.searchParams.delete('chat')
+        window.history.replaceState({}, '', url.toString())
+      }
+    }
+  }, [])
+
   useEffect(() => {
     getSpaceReviews(space.id).then(setReviewsData).catch(() => {})
   }, [space.id])

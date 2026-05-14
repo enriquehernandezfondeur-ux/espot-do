@@ -148,7 +148,8 @@ export async function getPublishedSpaces(filters?: {
         has_dressing_room, chairs_count, tables_count, bathrooms_count
       ),
       reviews(rating, is_public),
-      space_payment_terms(term_type, platform_fee_pct)
+      space_payment_terms(term_type, platform_fee_pct),
+      space_time_blocks(days_of_week, start_time, end_time, is_active)
     `)
     .eq('is_published', true)
     .eq('is_active', true)

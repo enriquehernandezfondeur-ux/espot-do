@@ -3,9 +3,28 @@
 import React, { useState, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { MapPin, Users, ArrowRight, Check, X, Building2, ChevronLeft, ChevronRight, Zap } from 'lucide-react'
+import { MapPin, Users, ArrowRight, Check, X, Building2, ChevronLeft, ChevronRight, Zap, Calendar } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 import { CATEGORIES, PRICING_TYPES } from './constants'
+
+const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+
+function getAvailableDays(space: any): string | null {
+  const blocks = (space.space_time_blocks ?? []).filter((b: any) => b.is_active !== false)
+  if (!blocks.length) return null
+  const allDays = new Set<number>()
+  blocks.forEach((b: any) => (b.days_of_week ?? []).forEach((d: number) => allDays.add(d)))
+  if (allDays.size === 0) return null
+  if (allDays.size === 7) return 'Todos los días'
+  const sorted = [...allDays].sort((a, b) => a - b)
+  // Detectar rangos consecutivos
+  if (sorted.join(',') === '1,2,3,4,5') return 'Lun – Vie'
+  if (sorted.join(',') === '0,6')       return 'Sáb y Dom'
+  if (sorted.join(',') === '5,6')       return 'Vie y Sáb'
+  if (sorted.join(',') === '1,2,3,4,5,6') return 'Lun – Sáb'
+  if (sorted.length <= 4) return sorted.map(d => DAY_NAMES[d]).join(' · ')
+  return `${DAY_NAMES[sorted[0]]} – ${DAY_NAMES[sorted[sorted.length - 1]]}`
+}
 
 const FavoriteButton = dynamic(() => import('@/components/marketplace/FavoriteButton'), { ssr: false })
 
@@ -76,8 +95,22 @@ export function SpaceCard({
     ? `/espacios/${space.slug}?fecha=${dateFilter}${timeFilter ? `&hora=${timeFilter}` : ''}`
     : `/espacios/${space.slug}`
 
-  const [photoIdx, setPhotoIdx] = useState(0)
+  const [photoIdx, setPhotoIdx]     = useState(0)
+  const [showPriceInfo, setShowPriceInfo] = useState(false)
   const touchX = useRef<number | null>(null)
+
+  const availableDays = getAvailableDays(space)
+
+  // Tooltip explicativo del tipo de precio
+  const PRICING_TIPS: Record<string, string> = {
+    hourly:              'Pagas según las horas que uses el espacio.',
+    minimum_consumption: 'Pagas este monto a través de Espot y lo usas en comida y bebidas en el lugar.',
+    fixed_package:       'Precio fijo por el paquete completo, sin importar cuántas horas uses.',
+    custom_quote:        'El propietario te envía un precio personalizado según tu evento.',
+  }
+  const currentPricingType = space.space_pricing?.find((p: any) => p.is_active)?.pricing_type
+    ?? space.space_pricing?.[0]?.pricing_type
+  const pricingTip = currentPricingType ? PRICING_TIPS[currentPricingType] : null
 
   function prevPhoto(e: React.MouseEvent) {
     e.preventDefault(); e.stopPropagation()
@@ -234,11 +267,19 @@ export function SpaceCard({
             )}
           </div>
 
+          {/* Días disponibles (#3) */}
+          {availableDays && (
+            <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+              <Calendar size={10} className="shrink-0" />
+              <span>{availableDays}</span>
+            </div>
+          )}
+
           {/* Precio · badge tipo · capacidad */}
           <div className="flex items-center gap-2 pt-2.5 mt-auto"
             style={{ borderTop: '1px solid #F0F2F5' }}>
 
-            {/* Grupo izquierdo: precio + badge */}
+            {/* Grupo izquierdo: precio + badge + tooltip (#4) */}
             <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-hidden">
               {priceInfo?.amount ? (
                 <span className="font-bold text-sm shrink-0" style={{ color: '#0F1623' }}>
@@ -248,10 +289,24 @@ export function SpaceCard({
                 <span className="text-sm font-semibold shrink-0" style={{ color: 'var(--text-muted)' }}>Cotizar</span>
               )}
               {pricingDef?.value && (
-                <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
-                  style={{ background: pricingDef.bg, color: pricingDef.text, border: `1px solid ${pricingDef.border}` }}>
-                  {pricingDef.value === 'minimum_consumption' ? 'Consumo mínimo' : pricingDef.label}
-                </span>
+                <div className="relative shrink-0">
+                  <button
+                    type="button"
+                    onClick={e => { e.preventDefault(); e.stopPropagation(); setShowPriceInfo(o => !o) }}
+                    className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap"
+                    style={{ background: pricingDef.bg, color: pricingDef.text, border: `1px solid ${pricingDef.border}` }}>
+                    {pricingDef.value === 'minimum_consumption' ? 'Consumo mínimo' : pricingDef.label}
+                  </button>
+                  {showPriceInfo && pricingTip && (
+                    <div className="absolute bottom-full mb-1.5 left-0 z-50 w-52 rounded-xl px-3 py-2.5 shadow-xl text-xs leading-relaxed"
+                      style={{ background: '#0F1623', color: '#E2E8F0' }}
+                      onClick={e => e.stopPropagation()}>
+                      {pricingTip}
+                      <div style={{ position: 'absolute', bottom: -5, left: 12, width: 10, height: 10,
+                        background: '#0F1623', transform: 'rotate(45deg)' }} />
+                    </div>
+                  )}
+                </div>
               )}
               {(() => {
                 const p   = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
@@ -273,11 +328,20 @@ export function SpaceCard({
               })()}
             </div>
 
-            {/* Capacidad — siempre visible */}
-            <span className="flex items-center gap-1 text-xs font-medium shrink-0" style={{ color: 'var(--text-muted)' }}>
-              <Users size={11} style={{ color: '#35C493', flexShrink: 0 }} />
-              {space.capacity_max ?? '—'}
-            </span>
+            {/* Capacidad + botón Preguntar (#5) */}
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="flex items-center gap-1 text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
+                <Users size={11} style={{ color: '#35C493', flexShrink: 0 }} />
+                {space.capacity_max ?? '—'}
+              </span>
+              <Link
+                href={`/espacios/${space.slug}?chat=1`}
+                onClick={e => e.stopPropagation()}
+                className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg shrink-0 transition-all"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+                💬 Preguntar
+              </Link>
+            </div>
           </div>
 
         </div>

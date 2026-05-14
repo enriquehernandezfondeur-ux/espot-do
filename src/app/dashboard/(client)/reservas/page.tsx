@@ -606,31 +606,78 @@ export default function MisReservasPage() {
                     </div>{/* fin grid */}
 
                     {/* Acciones por estado */}
-                    {bk.status === 'pending' && (
-                      <div className="mt-4 space-y-3">
-                        <div className="px-4 py-3 rounded-xl text-sm"
-                          style={{ background: 'rgba(217,119,6,0.05)', border: '1px solid rgba(217,119,6,0.15)', color: '#92400E' }}>
-                          El propietario revisará tu solicitud. Respuesta esperada en 24–48 horas. Te notificamos por email.
+                    {bk.status === 'pending' && (() => {
+                      const hoursElapsed = Math.floor((Date.now() - new Date(bk.created_at).getTime()) / 3600000)
+                      const hoursLeft    = Math.max(0, 48 - hoursElapsed)
+                      const expired      = hoursElapsed >= 48
+                      const urgent       = hoursLeft <= 6 && !expired
+                      return (
+                        <div className="mt-4 space-y-3">
+                          {/* Barra de progreso del tiempo */}
+                          <div className="px-4 py-3 rounded-xl"
+                            style={{
+                              background: expired ? 'rgba(220,38,38,0.05)' : urgent ? 'rgba(217,119,6,0.08)' : 'rgba(217,119,6,0.04)',
+                              border: `1px solid ${expired ? 'rgba(220,38,38,0.2)' : 'rgba(217,119,6,0.15)'}`,
+                            }}>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-semibold" style={{ color: expired ? '#DC2626' : '#92400E' }}>
+                                {expired
+                                  ? '⚠️ Sin respuesta después de 48h'
+                                  : urgent
+                                    ? `⏰ El propietario tiene ${hoursLeft}h para responder`
+                                    : `🕐 Esperando respuesta · ${hoursLeft}h restantes`}
+                              </span>
+                              <span className="text-xs tabular-nums" style={{ color: expired ? '#DC2626' : 'var(--text-muted)' }}>
+                                {hoursElapsed}h transcurridas
+                              </span>
+                            </div>
+                            <div className="w-full h-1.5 rounded-full" style={{ background: 'var(--border-subtle)' }}>
+                              <div className="h-1.5 rounded-full transition-all"
+                                style={{
+                                  width: `${Math.min(100, (hoursElapsed / 48) * 100)}%`,
+                                  background: expired ? '#DC2626' : urgent ? '#D97706' : 'var(--brand)',
+                                }} />
+                            </div>
+                            <p className="text-xs mt-2" style={{ color: expired ? '#DC2626' : '#92400E' }}>
+                              {expired
+                                ? 'Puedes cancelar esta solicitud sin costo. Si prefieres esperar, el propietario aún puede confirmar.'
+                                : 'Te notificamos por email cuando el propietario responda.'}
+                            </p>
+                          </div>
+                          <div className="flex gap-2 flex-wrap">
+                            <Link href="/dashboard/mensajes"
+                              className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
+                              style={{ color: 'var(--brand)', background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
+                              <MessageCircle size={12} /> Contactar propietario
+                            </Link>
+                            <button onClick={() => openCancelModal(bk)}
+                              className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
+                              style={{ color: '#DC2626', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
+                              <X size={12} /> Cancelar solicitud
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex gap-2 flex-wrap">
-                          <Link href="/dashboard/mensajes"
-                            className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
-                            style={{ color: 'var(--brand)', background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
-                            <MessageCircle size={12} /> Contactar propietario
-                          </Link>
-                          <button onClick={() => openCancelModal(bk)}
-                            className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
-                            style={{ color: '#DC2626', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
-                            <X size={12} /> Cancelar solicitud
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                    {bk.status === 'quote_requested' && (
+                      )
+                    })()}
+                    {bk.status === 'quote_requested' && (() => {
+                      const hoursElapsed = Math.floor((Date.now() - new Date(bk.created_at).getTime()) / 3600000)
+                      const hoursLeft    = Math.max(0, 48 - hoursElapsed)
+                      const expired      = hoursElapsed >= 48
+                      return (
                       <div className="mt-4 space-y-3">
-                        <div className="px-4 py-3 rounded-xl text-sm"
-                          style={{ background: 'rgba(8,145,178,0.05)', border: '1px solid rgba(8,145,178,0.2)', color: '#0369A1' }}>
-                          El propietario confirmará el precio en 48 horas. Te notificamos por email cuando responda. Puedes escribirle mientras tanto.
+                        <div className="px-4 py-3 rounded-xl"
+                          style={{ background: expired ? 'rgba(220,38,38,0.05)' : 'rgba(8,145,178,0.05)', border: `1px solid ${expired ? 'rgba(220,38,38,0.2)' : 'rgba(8,145,178,0.2)'}`, color: expired ? '#DC2626' : '#0369A1' }}>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-xs font-semibold">
+                              {expired ? '⚠️ Sin respuesta después de 48h' : `🕐 Cotización pendiente · ${hoursLeft}h restantes`}
+                            </span>
+                          </div>
+                          <div className="w-full h-1.5 rounded-full mb-2" style={{ background: 'var(--border-subtle)' }}>
+                            <div className="h-1.5 rounded-full" style={{ width: `${Math.min(100, (hoursElapsed / 48) * 100)}%`, background: expired ? '#DC2626' : '#0891B2' }} />
+                          </div>
+                          <p className="text-xs">
+                            {expired ? 'El propietario no respondió en el plazo. Escríbele directamente o cancela.' : 'Te notificamos por email cuando el propietario envíe el precio. Puedes escribirle mientras tanto.'}
+                          </p>
                         </div>
                         <Link href="/dashboard/mensajes"
                           className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all w-fit"
@@ -638,7 +685,8 @@ export default function MisReservasPage() {
                           <MessageCircle size={12} /> Contactar propietario
                         </Link>
                       </div>
-                    )}
+                      )
+                    })()}
                     {bk.status === 'accepted' && (
                       <div className="mt-4 space-y-2">
                         <div className="flex gap-2 flex-wrap">
