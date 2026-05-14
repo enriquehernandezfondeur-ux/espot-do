@@ -42,6 +42,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
 
   useEffect(() => {
     const supabase = createClient()
+    let isMounted  = true
 
     async function loadProfile(uid: string, email: string) {
       const { data: profile } = await supabase
@@ -49,6 +50,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
         .select('role, avatar_url, full_name')
         .eq('id', uid)
         .single()
+      if (!isMounted) return
       setImgError(false)
       setUser({
         email,
@@ -59,23 +61,17 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
       setAuthReady(true)
     }
 
-    // onAuthStateChange dispara inmediatamente con la sesión guardada en localStorage
-    // → mostramos la barra de inmediato sin esperar getUser() (evita layout shift)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      // TOKEN_REFRESHED no cambia el perfil — ignorar para evitar flash
+      if (event === 'TOKEN_REFRESHED') return
       if (session?.user) {
-        // Mostrar barra inmediatamente con datos básicos, luego actualizar con perfil completo
-        if (!user) {
-          setUser({ email: session.user.email ?? '', role: undefined, fullName: undefined, avatarUrl: undefined })
-        }
         loadProfile(session.user.id, session.user.email ?? '')
       } else {
-        setUser(null)
-        setAuthReady(true)
+        if (isMounted) { setUser(null); setAuthReady(true) }
       }
     })
 
-    return () => subscription.unsubscribe()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => { isMounted = false; subscription.unsubscribe() }
   }, [])
 
   async function handleSignOut() {
