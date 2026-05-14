@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server'
-import { getUpcomingInstallments, markReminderSent, getInstallments } from '@/lib/actions/installments'
 import { sendEmail } from '@/lib/email/send'
 import { tplRecordatorioCuota, tplRecordatorioEvento, tplSolicitudResena } from '@/lib/email/templates'
 import { daysUntilDate } from '@/lib/payments/schedule'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 
 const SITE        = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 const CRON_SECRET = process.env.CRON_SECRET ?? ''
@@ -17,10 +16,38 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  // Service client bypasea RLS — el cron no tiene sesión de usuario
+  const sb = createServiceClient()
+
   let sent = 0
   let errors = 0
 
   // ── 1. Recordatorios de cuotas (7d y 1d antes de vencimiento) ──────────
+
+  async function getUpcoming(daysAhead: number) {
+    const target = new Date()
+    target.setDate(target.getDate() + daysAhead)
+    const targetStr = target.toISOString().split('T')[0]
+    const { data } = await sb
+      .from('booking_installments')
+      .select(`
+        id, installment_number, amount, due_date,
+        reminder_7d_sent, reminder_1d_sent,
+        bookings!booking_id(
+          id, event_date,
+          spaces!space_id(name),
+          profiles!guest_id(full_name, email)
+        )
+      `)
+      .eq('due_date', targetStr)
+      .in('status', ['pending', 'overdue'])
+    return data ?? []
+  }
+
+  async function markSent(id: string, type: '7d' | '1d') {
+    const field = type === '7d' ? 'reminder_7d_sent' : 'reminder_1d_sent'
+    await sb.from('booking_installments').update({ [field]: true }).eq('id', id)
+  }
 
   async function sendPaymentReminder(
     inst: any,
@@ -35,8 +62,11 @@ export async function GET(req: Request) {
     const daysLeft = daysUntilDate(inst.due_date)
     if (reminderType === '7d' && daysLeft > 7) return
 
-    const allInsts        = await getInstallments(booking.id)
-    const totalInstallments = allInsts.length
+    const { data: allInsts } = await sb
+      .from('booking_installments')
+      .select('id')
+      .eq('booking_id', booking.id)
+    const totalInstallments = allInsts?.length ?? 1
 
     const subject = reminderType === '1d'
       ? `Pago vence mañana — ${booking?.spaces?.name}`
@@ -57,15 +87,15 @@ export async function GET(req: Request) {
         paymentUrl:        `${SITE}/pago/${booking?.id}?cuota=${inst.id}`,
       }),
     })
-    await markReminderSent(inst.id, reminderType)
+    await markSent(inst.id, reminderType)
     sent++
   }
 
-  for (const inst of await getUpcomingInstallments(7)) {
+  for (const inst of await getUpcoming(7)) {
     try { await sendPaymentReminder(inst, '7d', 'reminder_7d_sent') }
     catch { errors++ }
   }
-  for (const inst of await getUpcomingInstallments(1)) {
+  for (const inst of await getUpcoming(1)) {
     try { await sendPaymentReminder(inst, '1d', 'reminder_1d_sent') }
     catch { errors++ }
   }
@@ -73,7 +103,7 @@ export async function GET(req: Request) {
   // ── 2. Recordatorio pre-evento (48h antes) ──────────────────────────────
 
   try {
-    const supabase = await createClient()
+    const supabase = sb
     const tomorrow = new Date()
     tomorrow.setDate(tomorrow.getDate() + 1)
     const tomorrowStr = tomorrow.toISOString().split('T')[0]
@@ -120,7 +150,7 @@ export async function GET(req: Request) {
   // ── 3. Solicitud de reseña (24-48h después del evento) ─────────────────
 
   try {
-    const supabase = await createClient()
+    const supabase = sb
     const yesterday = new Date()
     yesterday.setDate(yesterday.getDate() - 1)
     const yesterdayStr = yesterday.toISOString().split('T')[0]
@@ -173,7 +203,7 @@ export async function GET(req: Request) {
   // ── 4. SLA 48h: recordatorio a host que no ha respondido reservas pendientes ────
 
   try {
-    const supabase   = await createClient()
+    const supabase   = sb
     const cutoff48h  = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()
     const cutoff72h  = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString()
 
