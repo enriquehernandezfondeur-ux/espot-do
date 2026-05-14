@@ -278,8 +278,8 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
   return (
     <>
       <style>{`
+        .espot-pin svg { overflow: visible; }
         .espot-pin { cursor: pointer !important; }
-        .espot-pin * { pointer-events: none; }
         .leaflet-marker-icon.espot-pin { pointer-events: auto !important; }
         .leaflet-popup-content-wrapper {
           border-radius:16px !important;
@@ -317,57 +317,29 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
 
 // ── Helpers de Leaflet ────────────────────────────────────
 
-// W=96 cubre hasta "RD$100k min"; H=36 = 28px pill + 8px triángulo
-const ICON_W = 96
-const ICON_H = 36
-
-function buildIcon(L: any, label: string, active: boolean) {
-  const bg     = active ? '#D4FF58' : '#03313C'
-  const text   = active ? '#03313C' : '#fff'
-  const scale  = active ? 1.15 : 1
+function buildIcon(L: any, _label: string, active: boolean) {
+  const color  = active ? '#0F1623' : '#35C493'
   const shadow = active
-    ? '0 4px 12px rgba(212,255,88,0.55)'
-    : '0 2px 8px rgba(0,0,0,0.35)'
-
+    ? 'drop-shadow(0 3px 8px rgba(15,22,35,0.5))'
+    : 'drop-shadow(0 2px 6px rgba(53,196,147,0.45))'
   return L.divIcon({
-    html: `<div style="
-        width:${ICON_W}px;
-        height:${ICON_H}px;
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        justify-content:flex-start;
-        cursor:pointer;
-        transform:scale(${scale});
-        transform-origin:50% 100%;
-        transition:transform 0.12s ease;">
-      <div style="
-        background:${bg};
-        color:${text};
-        font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-        font-size:11px;
-        font-weight:800;
-        padding:6px 10px;
-        border-radius:20px;
-        white-space:nowrap;
-        letter-spacing:-0.01em;
-        line-height:1;
-        box-shadow:${shadow};
-        pointer-events:none;">
-        ${label}
-      </div>
-      <div style="
-        width:0;height:0;
-        border-left:6px solid transparent;
-        border-right:6px solid transparent;
-        border-top:8px solid ${bg};
-        margin-top:-1px;
-        pointer-events:none;">
-      </div>
-    </div>`,
-    className:   'espot-pin',
-    iconSize:    [ICON_W, ICON_H],
-    iconAnchor:  [ICON_W / 2, ICON_H],
+    html: `
+      <div style="position:relative;width:28px;height:36px;cursor:pointer;
+                  will-change:transform;
+                  transition:transform 0.15s ease, filter 0.15s ease;
+                  transform:${active ? 'scale(1.25) translateZ(0)' : 'scale(1) translateZ(0)'};
+                  filter:${shadow}">
+        <svg width="28" height="36" viewBox="0 0 28 36" fill="none"
+             xmlns="http://www.w3.org/2000/svg"
+             shape-rendering="geometricPrecision">
+          <path d="M14 0C6.3 0 0 6.3 0 14c0 5.2 2.8 9.7 7 12.2L14 36l7-9.8C25.2 23.7 28 19.2 28 14 28 6.3 21.7 0 14 0z"
+                fill="${color}"/>
+          <circle cx="14" cy="13" r="6" fill="white"/>
+        </svg>
+      </div>`,
+    className:  'espot-pin',
+    iconSize:   [28, 36],
+    iconAnchor: [14, 36],
   })
 }
 

@@ -359,7 +359,7 @@ export default function ParaClientesPage() {
               <div className="flex flex-col gap-3 shrink-0">
                 <Link href="/buscar"
                   className="inline-flex items-center justify-center gap-2 font-bold px-8 py-4 rounded-2xl text-sm whitespace-nowrap"
-                  style={{ background: '#D4FF58', color: '#03313C', boxShadow: '0 4px 24px rgba(212,255,88,0.35)' }}>
+                  style={{ background: '#35C493', color: '#060D09', boxShadow: '0 4px 24px rgba(53,196,147,0.3)' }}>
                   Ver todos los espacios <ArrowRight size={15} />
                 </Link>
                 <p className="text-xs text-center" style={{ color: 'rgba(255,255,255,0.3)' }}>

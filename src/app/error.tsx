@@ -39,9 +39,9 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '12px 24px', borderRadius: 14, fontWeight: 700,
-              fontSize: 14, background: '#D4FF58', color: '#03313C',
+              fontSize: 14, background: '#35C493', color: '#060D09',
               border: 'none', cursor: 'pointer',
-              boxShadow: '0 4px 20px rgba(212,255,88,0.35)',
+              boxShadow: '0 4px 20px rgba(53,196,147,0.3)',
             }}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

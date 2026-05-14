@@ -88,7 +88,7 @@ export default function ParaPropietariosPage() {
               <div className="flex flex-wrap gap-3">
                 <Link href={REGISTER_URL}
                   className="inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl font-bold text-sm"
-                  style={{ background: '#D4FF58', color: '#03313C', boxShadow: '0 4px 20px rgba(212,255,88,0.35)' }}>
+                  style={{ background: '#35C493', color: '#03313C', boxShadow: '0 4px 20px rgba(53,196,147,0.3)' }}>
                   Publicar mi espacio <ArrowRight size={15} />
                 </Link>
                 <Link href="/buscar"
@@ -307,7 +307,7 @@ export default function ParaPropietariosPage() {
             <div className="flex flex-col gap-2 shrink-0">
               <Link href={REGISTER_URL}
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-sm whitespace-nowrap"
-                style={{ background: '#D4FF58', color: '#03313C', boxShadow: '0 4px 20px rgba(212,255,88,0.3)' }}>
+                style={{ background: '#35C493', color: '#03313C', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
                 Crear cuenta gratis <ArrowRight size={15} />
               </Link>
               <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>

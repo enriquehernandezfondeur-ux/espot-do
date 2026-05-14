@@ -81,8 +81,8 @@ export default function HeroParallax({ spaceCount }: Props) {
 
         {/* Badge */}
         <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-7 text-xs font-semibold tracking-wide"
-          style={{ background: 'rgba(212,255,88,0.08)', border: '1px solid rgba(212,255,88,0.18)', color: '#D4FF58' }}>
-          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#D4FF58' }} />
+          style={{ background: 'rgba(53,196,147,0.08)', border: '1px solid rgba(53,196,147,0.18)', color: '#6EE7C7' }}>
+          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#35C493' }} />
           Espacios para eventos · República Dominicana
         </div>
 
@@ -98,7 +98,7 @@ export default function HeroParallax({ spaceCount }: Props) {
           El espacio perfecto
           <br />
           <span style={{
-            background: 'linear-gradient(95deg, #35C493 0%, #D4FF58 100%)',
+            background: 'linear-gradient(95deg, #35C493 0%, #6EE7C7 50%, #35C493 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundSize: '200% auto',

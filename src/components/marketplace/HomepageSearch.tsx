@@ -241,7 +241,7 @@ export default function HomepageSearch() {
               onClick={() => pickDay(day)}
               className="aspect-square rounded-xl text-sm flex items-center justify-center font-medium transition-all"
               style={
-                isSel   ? { background: '#D4FF58', color: '#03313C', fontWeight: 700 } :
+                isSel   ? { background: '#35C493', color: '#fff', fontWeight: 700 } :
                 isToday ? { background: 'rgba(53,196,147,0.12)', color: '#35C493', fontWeight: 600 } :
                 isPast  ? { color: '#D1D5DB', cursor: 'not-allowed' } :
                           { color: '#374151' }
@@ -352,8 +352,8 @@ export default function HomepageSearch() {
 
           {/* Buscar */}
           <button type="button" onClick={search}
-            className="flex items-center gap-2 px-7 text-sm font-bold shrink-0 transition-opacity hover:opacity-90"
-            style={{ background: '#D4FF58', color: '#03313C', borderRadius: '0 16px 16px 0' }}>
+            className="flex items-center gap-2 px-7 text-sm font-bold text-white shrink-0 transition-opacity hover:opacity-90"
+            style={{ background: 'linear-gradient(135deg, #35C493, #28A87C)', borderRadius: '0 16px 16px 0' }}>
             <Search size={15} />
             Buscar
           </button>
@@ -416,8 +416,8 @@ export default function HomepageSearch() {
 
           {/* Buscar */}
           <button type="button" onClick={search}
-            className="w-full flex items-center justify-center gap-2 py-4 text-sm font-bold"
-            style={{ background: '#D4FF58', color: '#03313C' }}>
+            className="w-full flex items-center justify-center gap-2 py-4 text-sm font-bold text-white"
+            style={{ background: 'linear-gradient(135deg, #35C493, #28A87C)' }}>
             <Search size={16} /> Buscar espacios
           </button>
         </div>
@@ -522,10 +522,10 @@ export default function HomepageSearch() {
                       <button key={act.key} type="button" onClick={() => pickActivity(act.key, act.label)}
                         className="flex items-center gap-2 px-4 py-3.5 rounded-xl text-left text-sm font-medium transition-all"
                         style={activity === act.key
-                          ? { background: 'rgba(212,255,88,0.12)', color: '#03313C', border: '1.5px solid rgba(212,255,88,0.5)', fontWeight: 600 }
+                          ? { background: 'rgba(53,196,147,0.1)', color: '#35C493', border: '1.5px solid rgba(53,196,147,0.3)' }
                           : { background: '#F9FAFB', color: '#374151', border: '1.5px solid #E5E7EB' }}>
                         <span className="w-2 h-2 rounded-full shrink-0"
-                          style={{ background: activity === act.key ? '#D4FF58' : '#D1D5DB' }} />
+                          style={{ background: activity === act.key ? '#35C493' : '#D1D5DB' }} />
                         {act.label}
                       </button>
                     ))}
@@ -582,7 +582,7 @@ export default function HomepageSearch() {
             <div className="px-4 py-4 shrink-0 pb-safe" style={{ borderTop: '1px solid #F3F4F6' }}>
               <button type="button" onClick={() => setMobileModal(null)}
                 className="w-full py-3.5 rounded-2xl text-sm font-bold text-white"
-                style={{ background: '#D4FF58' }}>
+                style={{ background: '#35C493' }}>
                 Confirmar
               </button>
             </div>

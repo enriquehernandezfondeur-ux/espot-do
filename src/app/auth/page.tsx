@@ -179,7 +179,7 @@ function AuthContent() {
           </p>
           <button onClick={() => { setScreen('login'); reset() }}
             className="w-full py-3 rounded-xl text-sm font-semibold"
-            style={{ background: '#D4FF58', color: '#03313C' }}>
+            style={{ background: '#35C493', color: '#0B0F0E' }}>
             Volver al inicio de sesión
           </button>
         </div>
@@ -217,7 +217,7 @@ function AuthContent() {
           </div>
           <button type="submit" disabled={loading}
             className="w-full font-bold py-3.5 rounded-xl text-sm transition-all disabled:opacity-50"
-            style={{ background: '#D4FF58', color: '#03313C', boxShadow: '0 4px 20px rgba(212,255,88,0.3)' }}>
+            style={{ background: '#35C493', color: '#0B0F0E', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
             {loading ? 'Enviando...' : 'Enviar enlace de recuperación'}
           </button>
         </form>
@@ -237,7 +237,7 @@ function AuthContent() {
             onClick={() => { setScreen(s); reset() }}
             className="flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all"
             style={screen === s
-              ? { background: '#D4FF58', color: '#03313C' }
+              ? { background: '#35C493', color: '#0B0F0E' }
               : { color: 'rgba(255,255,255,0.45)' }}>
             {s === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
           </button>
@@ -405,7 +405,7 @@ function AuthContent() {
 
         <button type="submit" disabled={loading || !!oauthLoading}
           className="w-full font-bold py-3.5 rounded-xl text-sm transition-all mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ background: '#D4FF58', color: '#03313C', boxShadow: '0 4px 20px rgba(212,255,88,0.3)' }}>
+          style={{ background: '#35C493', color: '#0B0F0E', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
           {loading ? 'Cargando...' : screen === 'login'
             ? 'Iniciar sesión'
             : userType === 'host' ? 'Crear cuenta de negocio' : 'Crear mi cuenta'}

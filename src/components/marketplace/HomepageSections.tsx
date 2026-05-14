@@ -58,7 +58,7 @@ function SocialSection() {
             <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: '#35C493' }}>Comunidad</p>
             <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
               Espacios reales,{' '}
-              <span style={{ background: 'linear-gradient(95deg, #35C493 0%, #D4FF58 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 eventos reales
               </span>
             </h2>
@@ -166,7 +166,7 @@ function Ticker() {
         {items.map((item, i) => (
           <span key={i} className="inline-flex items-center gap-3 mx-4 text-xs font-semibold tracking-widest uppercase"
             style={{ color: 'rgba(255,255,255,0.25)' }}>
-            <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#D4FF58', display: 'inline-block', flexShrink: 0 }} />
+            <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#35C493', display: 'inline-block', flexShrink: 0 }} />
             {item}
           </span>
         ))}
@@ -202,7 +202,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
               </p>
               <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
                 ¿Qué estás{' '}
-                <span style={{ background: 'linear-gradient(95deg, #35C493 0%, #D4FF58 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                   celebrando?
                 </span>
               </h2>
@@ -264,7 +264,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
               <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
                 {spaces.length > 0 ? (
                   <>{spaces.length}{' '}
-                    <span style={{ background: 'linear-gradient(95deg, #35C493 0%, #D4FF58 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                    <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                       espacio{spaces.length !== 1 ? 's' : ''}
                     </span>
                     {' '}en República Dominicana</>
@@ -300,7 +300,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
               <p className="text-sm mb-6" style={{ color: '#6B7280' }}>Sé el primero en publicar tu espacio</p>
               <Link href="/auth?mode=register&redirect=/dashboard/host/espacio"
                 className="inline-flex items-center gap-2 text-sm font-bold px-6 py-3 rounded-xl"
-                style={{ background: '#D4FF58', color: '#03313C' }}>
+                style={{ background: '#35C493', color: '#fff' }}>
                 Publicar espacio gratis
               </Link>
             </Reveal>
@@ -324,7 +324,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
             </p>
             <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
               Explora{' '}
-              <span style={{ background: 'linear-gradient(95deg, #35C493 0%, #D4FF58 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 tu opción
               </span>
             </h2>
@@ -507,7 +507,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                 <div>
                   <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-5 text-xs font-semibold"
                     style={{ background: 'rgba(53,196,147,0.12)', color: '#6EE7C7', border: '1px solid rgba(53,196,147,0.18)' }}>
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#D4FF58' }} />
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#35C493' }} />
                     Para propietarios
                   </div>
                   <h2 className="font-bold text-white mb-3"
@@ -521,7 +521,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                 <div className="flex flex-col gap-3 shrink-0">
                   <Link href="/auth?mode=register&redirect=/dashboard/host/espacio"
                     className="inline-flex items-center justify-center gap-2 font-bold px-8 py-4 rounded-2xl text-sm whitespace-nowrap"
-                    style={{ background: '#D4FF58', color: '#03313C', boxShadow: '0 4px 24px rgba(212,255,88,0.35)' }}>
+                    style={{ background: '#35C493', color: '#060D09', boxShadow: '0 4px 24px rgba(53,196,147,0.3)' }}>
                     Publicar espacio gratis <ArrowRight size={15} />
                   </Link>
                   <Link href="/auth?mode=login"
