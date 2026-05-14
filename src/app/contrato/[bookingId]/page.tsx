@@ -34,6 +34,7 @@ export default async function ContratoPage({ params }: { params: Promise<{ booki
   const pricing = (booking as any).space_pricing as any
   const addons  = (booking as any).booking_addons ?? []
   const today   = new Date().toLocaleDateString('es-DO', { day: 'numeric', month: 'long', year: 'numeric' })
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com').replace('https://', '').replace('http://', '')
 
   return (
     <>
@@ -78,12 +79,12 @@ export default async function ContratoPage({ params }: { params: Promise<{ booki
         </div>
 
         <h1>CONTRATO DE RESERVA DE ESPACIO</h1>
-        <p className="subtitle">espot.do · República Dominicana</p>
+        <p className="subtitle">Espot · República Dominicana</p>
         <div className="ref">Referencia: <span>{bookingId.slice(0, 8).toUpperCase()}</span></div>
 
         <p className="intro">
           En Santo Domingo, República Dominicana, a {today}, las partes identificadas a continuación
-          celebran el presente contrato de reserva de espacio para evento a través de la plataforma Espot (espot.do),
+          celebran el presente contrato de reserva de espacio para evento a través de la plataforma Espot ({siteUrl}),
           de conformidad con sus términos y condiciones.
         </p>
 
@@ -152,7 +153,7 @@ export default async function ContratoPage({ params }: { params: Promise<{ booki
 
         <div className="clause">
           <div className="clause-title">5.1 Cancelaciones y reembolsos</div>
-          <p>El cliente puede cancelar desde su panel en espot.do. Los reembolsos se aplican
+          <p>El cliente puede cancelar desde su panel en {siteUrl}. Los reembolsos se aplican
           según la política de cancelación del espacio, visible antes de confirmar la reserva.
           Espot descuenta su comisión del 10% sobre los pagos procesados.</p>
         </div>
@@ -167,7 +168,7 @@ export default async function ContratoPage({ params }: { params: Promise<{ booki
 
         <div className="clause">
           <div className="clause-title">5.3 Modificaciones</div>
-          <p>Cualquier cambio (fecha, horario, personas) debe realizarse a través de espot.do
+          <p>Cualquier cambio (fecha, horario, personas) debe realizarse a través de {siteUrl}
           con aprobación expresa del propietario. Cambios no aprobados pueden anular este contrato.</p>
         </div>
 
@@ -193,7 +194,7 @@ export default async function ContratoPage({ params }: { params: Promise<{ booki
         </div>
 
         <div className="footer">
-          Documento generado por Espot (espot.do) · Referencia: {bookingId.slice(0, 8).toUpperCase()} · {today}
+          Documento generado por Espot ({siteUrl}) · Referencia: {bookingId.slice(0, 8).toUpperCase()} · {today}
         </div>
 
       </div>
