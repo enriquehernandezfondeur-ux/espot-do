@@ -7,22 +7,18 @@
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
+const DOMAIN = SITE.replace('https://', '').replace('http://', '')
 
-// ── Logo robusto para email (PNG + fallback texto) ────────
+// ── Logo de texto — funciona en TODOS los clientes de email ──
+// No depende de imágenes externas que pueden bloquearse
 
 function logo() {
   return `
-    <div style="text-align:center;margin-bottom:32px;">
-      <!--[if !mso]><!-->
-      <img src="${SITE}/logo-email.png" alt="Espot" width="130" height="28"
-        style="height:28px;width:auto;display:inline-block;border:0;outline:none;text-decoration:none;"
-        onerror="this.style.display='none'" />
-      <!--<![endif]-->
-      <!--[if mso]>
-      <div style="font-family:Arial,sans-serif;font-size:20px;font-weight:800;color:#03313C;letter-spacing:-0.04em;">
-        espot<span style="color:#35C493;">.do</span>
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="display:inline-block;">
+        <span style="font-family:Arial,sans-serif;font-size:26px;font-weight:900;color:#03313C;letter-spacing:-0.05em;line-height:1;">espot</span><span style="font-family:Arial,sans-serif;font-size:26px;font-weight:900;color:#35C493;letter-spacing:-0.05em;line-height:1;">.do</span>
       </div>
-      <![endif]-->
+      <div style="width:32px;height:3px;background:linear-gradient(90deg,#35C493,#03313C);border-radius:2px;margin:6px auto 0;"></div>
     </div>`
 }
 
@@ -63,40 +59,47 @@ export function emailBase({
   unsubscribeUrl?: string
 }) {
   const ctaHtml = cta ? `
-      <!-- Botón CTA -->
-      <div style="padding:${note ? '0' : '8px'} 36px 36px;text-align:center;">
+      <div style="padding:${note ? '8px' : '16px'} 36px 36px;text-align:center;">
         <!--[if mso]>
-        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${cta.url}" style="height:48px;v-text-anchor:middle;width:200px;" arcsize="30%" stroke="f" fillcolor="${accentColor}">
+        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${cta.url}" style="height:50px;v-text-anchor:middle;width:220px;" arcsize="28%" stroke="f" fillcolor="${accentColor}">
           <w:anchorlock/>
-          <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:14px;font-weight:bold;">${cta.text}</center>
+          <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:800;">${cta.text} →</center>
         </v:roundrect>
         <![endif]-->
         <!--[if !mso]><!-->
         <a href="${cta.url}"
-          style="display:inline-block;background:${accentColor};color:#ffffff;font-family:Arial,sans-serif;font-size:14px;font-weight:700;padding:14px 36px;border-radius:14px;text-decoration:none;letter-spacing:-0.01em;mso-hide:all;">
+          style="display:inline-block;background:${accentColor};color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:800;padding:15px 38px;border-radius:50px;text-decoration:none;letter-spacing:-0.01em;mso-hide:all;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
           ${cta.text} &rarr;
         </a>
         <!--<![endif]-->
       </div>` : ''
 
   const noteHtml = note ? `
-      <div style="margin:0 36px 24px;padding:14px 18px;background:#F0FDF9;border:1px solid rgba(53,196,147,0.25);border-radius:12px;">
-        <p style="color:#065F46;font-size:13px;margin:0;line-height:1.6;font-family:Arial,sans-serif;">${note}</p>
+      <div style="margin:0 32px 24px;padding:14px 18px;background:#F0FDF9;border-left:3px solid #35C493;border-radius:0 10px 10px 0;">
+        <p style="color:#065F46;font-size:13px;margin:0;line-height:1.6;font-family:Arial,sans-serif;">&#128274; ${note}</p>
       </div>` : ''
 
   const footer = `
-    <div style="text-align:center;margin-top:28px;padding:0 20px;">
-      <p style="color:#9CA3AF;font-size:12px;margin:0 0 4px;font-family:Arial,sans-serif;">
-        Espot &middot; Espacios para eventos en Rep&uacute;blica Dominicana
+    <div style="text-align:center;margin-top:32px;padding:24px 20px;border-top:1px solid #E8ECF0;">
+      <!-- Logo pequeño en footer -->
+      <div style="margin-bottom:12px;">
+        <span style="font-family:Arial,sans-serif;font-size:15px;font-weight:900;color:#03313C;letter-spacing:-0.04em;">espot</span><span style="font-family:Arial,sans-serif;font-size:15px;font-weight:900;color:#35C493;letter-spacing:-0.04em;">.do</span>
+      </div>
+      <p style="color:#9CA3AF;font-size:12px;margin:0 0 6px;font-family:Arial,sans-serif;">
+        Espacios para eventos en Rep&uacute;blica Dominicana
       </p>
-      <p style="color:#CBD5E1;font-size:11px;margin:0 0 4px;font-family:Arial,sans-serif;">
+      <p style="color:#CBD5E1;font-size:11px;margin:0 0 6px;font-family:Arial,sans-serif;">
         &copy; 2026 ESPOT, S.R.L. &middot;
-        <a href="mailto:contacto@espothub.com" style="color:#6EE7C7;text-decoration:none;">contacto@espothub.com</a>
+        <a href="mailto:contacto@${DOMAIN}" style="color:#35C493;text-decoration:none;">contacto@${DOMAIN}</a>
+        &middot; <a href="${SITE}" style="color:#9CA3AF;text-decoration:none;">${DOMAIN}</a>
       </p>
       ${unsubscribeUrl ? `
-      <p style="color:#CBD5E1;font-size:10px;margin:0;font-family:Arial,sans-serif;">
+      <p style="color:#CBD5E1;font-size:10px;margin:4px 0 0;font-family:Arial,sans-serif;">
         <a href="${unsubscribeUrl}" style="color:#CBD5E1;text-decoration:underline;">Cancelar suscripci&oacute;n</a>
-      </p>` : ''}
+      </p>` : `
+      <p style="color:#CBD5E1;font-size:10px;margin:4px 0 0;font-family:Arial,sans-serif;">
+        <a href="${SITE}/dashboard/perfil" style="color:#CBD5E1;text-decoration:underline;">Gestionar notificaciones</a>
+      </p>`}
     </div>`
 
   return `<!DOCTYPE html>
@@ -112,36 +115,40 @@ export function emailBase({
   <![endif]-->
   <style>
     @media only screen and (max-width:600px) {
-      .email-wrapper { padding: 20px 12px !important; }
-      .email-card    { border-radius: 16px !important; }
+      .email-wrapper { padding: 16px 12px !important; }
+      .email-card    { border-radius: 20px !important; }
       .card-body     { padding: 20px 20px !important; }
       .card-header   { padding: 24px 20px 16px !important; }
-      .cta-wrap      { padding: 0 20px 28px !important; }
     }
   </style>
 </head>
-<body style="margin:0;padding:0;background:#F2F4F3;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+<body style="margin:0;padding:0;background:#EEF2F0;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
   <!--[if mso | IE]><table align="center" border="0" cellpadding="0" cellspacing="0" style="width:600px;" width="600"><tr><td><![endif]-->
-  <div class="email-wrapper" style="max-width:580px;margin:0 auto;padding:40px 20px;">
+  <div class="email-wrapper" style="max-width:580px;margin:0 auto;padding:36px 20px;">
 
-    ${logo()}
+    <!-- Header con logo -->
+    <div style="background:#03313C;border-radius:20px 20px 0 0;padding:28px 36px 24px;text-align:center;">
+      <div style="display:inline-block;background:rgba(255,255,255,0.08);border-radius:12px;padding:10px 24px;">
+        <span style="font-family:Arial,sans-serif;font-size:22px;font-weight:900;color:#ffffff;letter-spacing:-0.04em;line-height:1;">espot</span><span style="font-family:Arial,sans-serif;font-size:22px;font-weight:900;color:#35C493;letter-spacing:-0.04em;line-height:1;">.do</span>
+      </div>
+    </div>
+
+    <!-- Banda de acento -->
+    <div style="height:4px;background:${accentColor};font-size:0;line-height:0;">&nbsp;</div>
 
     <!-- Tarjeta principal -->
-    <div class="email-card" style="background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.07);">
+    <div class="email-card" style="background:#ffffff;border-radius:0 0 20px 20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
 
-      <!-- Banda de color -->
-      <div style="height:5px;background:${accentColor};line-height:5px;font-size:0;">&nbsp;</div>
-
-      <!-- Encabezado -->
-      <div class="card-header" style="padding:32px 36px 20px;">
-        <h1 style="color:#03313C;font-size:21px;font-weight:700;margin:0 0 8px;letter-spacing:-0.03em;line-height:1.2;font-family:Arial,sans-serif;">${title}</h1>
-        ${subtitle ? `<p style="color:#6B7280;font-size:14px;margin:0;line-height:1.5;font-family:Arial,sans-serif;">${subtitle}</p>` : ''}
+      <!-- Encabezado del contenido -->
+      <div class="card-header" style="padding:32px 36px 20px;background:#fff;">
+        <h1 style="color:#03313C;font-size:22px;font-weight:800;margin:0 0 8px;letter-spacing:-0.03em;line-height:1.2;font-family:Arial,sans-serif;">${title}</h1>
+        ${subtitle ? `<p style="color:#6B7280;font-size:14px;margin:0;line-height:1.6;font-family:Arial,sans-serif;">${subtitle}</p>` : ''}
       </div>
 
       <div style="height:1px;background:#F0F2F5;font-size:0;line-height:0;">&nbsp;</div>
 
       <!-- Cuerpo -->
-      <div class="card-body" style="padding:24px 36px;color:#374151;font-size:14px;line-height:1.75;font-family:Arial,sans-serif;">
+      <div class="card-body" style="padding:24px 36px;color:#374151;font-size:14px;line-height:1.8;font-family:Arial,sans-serif;">
         ${body}
       </div>
 

@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Save, Camera, User, Shield, Loader2 } from 'lucide-react'
+import { Save, Camera, User, Shield, Loader2, Bell } from 'lucide-react'
 import { getClientProfile, updateClientProfile } from '@/lib/actions/client'
+import NotificationSettings from '@/components/dashboard/NotificationSettings'
 import { createClient } from '@/lib/supabase/client'
 
 export default function PerfilPage() {
@@ -208,6 +209,22 @@ export default function PerfilPage() {
          saved  ? <><Shield size={18} /> ¡Guardado!</> :
                   <><Save size={18} /> Guardar cambios</>}
       </button>
+
+      {/* ── Notificaciones ── */}
+      <div className="mt-6 rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+        <div className="flex items-center gap-3 px-5 py-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'var(--brand-dim)' }}>
+            <Bell size={16} style={{ color: 'var(--brand)' }} />
+          </div>
+          <div>
+            <h2 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Notificaciones por email</h2>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Elige qué emails quieres recibir</p>
+          </div>
+        </div>
+        <div className="p-5">
+          <NotificationSettings role="client" />
+        </div>
+      </div>
     </div>
   )
 }
