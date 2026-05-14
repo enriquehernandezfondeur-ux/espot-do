@@ -754,6 +754,20 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                       </div>
                     ))}
                   </div>
+
+                  {/* Nota explicativa solo para consumo mínimo */}
+                  {pricing?.pricing_type === 'minimum_consumption' && (
+                    <div className="mt-3 flex items-start gap-2.5 px-4 py-3 rounded-xl"
+                      style={{ background: 'rgba(217,119,6,0.06)', border: '1px solid rgba(217,119,6,0.15)' }}>
+                      <Lock size={13} style={{ color: '#D97706', flexShrink: 0, marginTop: 1 }} />
+                      <p className="text-xs leading-relaxed" style={{ color: '#92400E' }}>
+                        <strong>¿Qué es consumo mínimo?</strong> Tu grupo se compromete a consumir
+                        al menos <strong>{pricing.minimum_consumption ? formatCurrency(pricing.minimum_consumption) : 'ese monto'}</strong> en
+                        el lugar (comida, bebidas, etc.). Si consumen más, lo pagan directo allí.
+                        Espot cobra este monto al confirmar tu reserva.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Facilidades */}

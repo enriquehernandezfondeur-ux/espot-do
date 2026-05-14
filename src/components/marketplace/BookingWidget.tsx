@@ -556,12 +556,20 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                 {formatCurrency(pricing.minimum_consumption)}
               </span>
             </div>
-            <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            <div className="text-xs mb-2" style={{ color: 'var(--text-muted)' }}>
               {minHours > 0 && maxHours > 0
                 ? `Entre ${minHours} y ${maxHours} horas`
                 : minHours > 0 ? `Mínimo ${minHours} horas`
                 : maxHours > 0 ? `Máximo ${maxHours} horas`
                 : 'Elige tu horario'}
+            </div>
+            {/* Explicación clara del modelo de consumo mínimo */}
+            <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl"
+              style={{ background: 'rgba(217,119,6,0.06)', border: '1px solid rgba(217,119,6,0.15)' }}>
+              <Info size={12} style={{ color: '#D97706', flexShrink: 0, marginTop: 1 }} />
+              <p className="text-xs leading-relaxed" style={{ color: '#92400E' }}>
+                Tu grupo se compromete a consumir al menos este monto en el lugar (comida, bebidas, etc.). Si consumen más, se paga directo allí.
+              </p>
             </div>
           </div>
         )}
@@ -1081,7 +1089,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                 style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.15)' }}>
                 <Info size={13} style={{ color: '#2563EB', flexShrink: 0, marginTop: 1 }} />
                 <p className="text-xs" style={{ color: '#1D4ED8', lineHeight: 1.6 }}>
-                  Espot cobra el consumo mínimo como garantía. Si tu grupo consume más en el evento, lo pagas directo al lugar.
+                  Tu grupo garantiza consumir al menos {formatCurrency(Number(pricing?.minimum_consumption ?? 0))} en el lugar (comida, bebidas, etc.). Espot cobra este monto como garantía al confirmar. Si consumen más, se paga directo al local.
                 </p>
               </div>
             )}

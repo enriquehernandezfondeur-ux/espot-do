@@ -91,9 +91,9 @@ function buildPricingDisplay(p: any | null, capacityMax: number, currentPricingT
       ? Math.round(p.minimum_consumption / capacityMax)
       : null
     return {
-      main:  `Consumo mín. ${fmtDOP(p.minimum_consumption)}`,
+      main:  `Desde ${fmtDOP(p.minimum_consumption)}`,
       sub:   perPerson ? `Aprox. ${fmtDOP(perPerson)} por persona` : null,
-      badge: isAltModel ? 'Alt. consumo mínimo' : 'Consumo mínimo',
+      badge: 'Consumo mínimo',
       isAltModel,
     }
   }

@@ -111,7 +111,8 @@ function getPricePin(space: any): string {
   }
   if (p.pricing_type === 'minimum_consumption') {
     const n = Number(p.minimum_consumption)
-    return n >= 1000 ? `RD$${Math.round(n / 1000)}k min` : `RD$${n} min`
+    // "Desde" deja claro que es un consumo mínimo, no un precio fijo
+    return n >= 1000 ? `Desde RD$${Math.round(n / 1000)}k` : `Desde RD$${n}`
   }
   if (p.pricing_type === 'fixed_package') {
     const n = Number(p.fixed_price)

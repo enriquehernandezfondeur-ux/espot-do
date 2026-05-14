@@ -42,8 +42,9 @@ export function getPriceInfo(space: any) {
   }
   if (p.pricing_type === 'minimum_consumption') {
     const v = p.minimum_consumption
-    if (!v) return { type: 'Cons. mín.', unit: 'cons. mín.', amount: null, full: 'Cotizar precio' }
-    return { type: 'Cons. mín.', unit: 'cons. mín.', amount: formatCurrency(v), full: `Desde ${formatCurrency(v)}` }
+    if (!v) return { type: 'Consumo mínimo', unit: '', amount: null, full: 'Cotizar precio' }
+    // Mostrar "Desde" para dejar claro que es el mínimo a consumir, no el precio total
+    return { type: 'Consumo mínimo', unit: '', amount: `Desde ${formatCurrency(v)}`, full: `Desde ${formatCurrency(v)}` }
   }
   if (p.pricing_type === 'fixed_package') {
     const v = p.fixed_price
@@ -250,7 +251,7 @@ export function SpaceCard({
               {pricingDef?.value && (
                 <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
                   style={{ background: pricingDef.bg, color: pricingDef.text, border: `1px solid ${pricingDef.border}` }}>
-                  {pricingDef.value === 'minimum_consumption' ? 'Cons. mínimo' : pricingDef.label}
+                  {pricingDef.value === 'minimum_consumption' ? 'Consumo mínimo' : pricingDef.label}
                 </span>
               )}
               {(() => {
