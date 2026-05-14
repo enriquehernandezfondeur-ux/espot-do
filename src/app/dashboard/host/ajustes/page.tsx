@@ -495,13 +495,13 @@ function AjustesInner() {
             )}
           </div>
         )}
-
-        {/* ── Notificaciones ── */}
-        <div className="rounded-2xl p-6" style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-          <NotificationSettings role="host" />
-        </div>
-
       </div>
+
+      {/* ── Notificaciones ── */}
+      <div className="rounded-2xl p-6" style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+        <NotificationSettings role="host" />
+      </div>
+
     </div>
   )
 }
