@@ -222,7 +222,7 @@ function ExitoContent() {
                   <div>
                     <span style={{ color: 'rgba(255,255,255,0.5)' }}>Próximas cuotas</span>
                     <p className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                      Se cobran vía EspotHub según tu plan
+                      Se cobran vía Espot según tu plan
                     </p>
                   </div>
                   <span style={{ color: 'rgba(255,255,255,0.5)' }}>{formatCurrency(remaining)}</span>

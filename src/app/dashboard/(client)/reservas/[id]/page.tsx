@@ -315,7 +315,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
                 </svg>
                 <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                   <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>Pago seguro.</span>{' '}
-                  Procesado por Azul Payments con 3D Secure. EspotHub nunca almacena tu tarjeta.
+                  Procesado por Azul Payments con 3D Secure. Espot nunca almacena tu tarjeta.
                 </p>
               </div>
               <Link href={`/pago/${booking.id}?cuota=${nextInst.id}`}

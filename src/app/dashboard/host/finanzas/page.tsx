@@ -125,7 +125,7 @@ export default function FinanzasPage() {
                 {formatCurrency(pendingPayout)}
               </p>
               <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                EspotHub te transfiere el neto después de cada evento completado
+                Espot te transfiere el neto después de cada evento completado
               </p>
             </div>
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0"

@@ -54,7 +54,7 @@ export async function createInstallments(
     percentage:         i.percentage,
     amount:             i.amount,
     due_date:           i.due_date,
-    status:             i.number === 1 ? 'pending' : 'pending',
+    status:             'pending',
     label:              i.label,
   }))
 

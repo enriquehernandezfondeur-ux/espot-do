@@ -46,7 +46,7 @@ export default function ClientDashboard() {
           <Sparkles size={32} style={{ color: 'var(--brand)' }} />
         </div>
         <h1 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-          {stats?.userName ? `¡Hola, ${stats.userName}!` : '¡Bienvenido a EspotHub!'}
+          {stats?.userName ? `¡Hola, ${stats.userName}!` : '¡Bienvenido a Espot!'}
         </h1>
         <p className="text-base mb-8 max-w-md mx-auto" style={{ color: 'var(--text-secondary)' }}>
           Reserva salones, rooftops, restaurantes y más para tu próximo evento en República Dominicana.

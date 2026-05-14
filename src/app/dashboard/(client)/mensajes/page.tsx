@@ -253,7 +253,7 @@ export default function ClientMensajesPage() {
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
             <p className="text-xs leading-relaxed" style={{ color: '#92400E' }}>
-              <span className="font-bold">Nunca pagues fuera de EspotHub.</span>{' '}
+              <span className="font-bold">Nunca pagues fuera de Espot.</span>{' '}
               Todos los pagos se hacen a través de la plataforma para proteger tu reserva.
             </p>
           </div>

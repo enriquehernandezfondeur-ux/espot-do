@@ -124,7 +124,7 @@ function PagoContent({ bookingId }: { bookingId: string }) {
               Pago 100% seguro
             </p>
             <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.4)' }}>
-              Tus datos de tarjeta son procesados por Azul Payments con 3D Secure. EspotHub nunca almacena tu número de tarjeta.
+              Tus datos de tarjeta son procesados por Azul Payments con 3D Secure. Espot nunca almacena tu número de tarjeta.
             </p>
           </div>
         </div>

@@ -277,8 +277,8 @@ export default function HostMensajesPage() {
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
             <p className="text-xs leading-relaxed" style={{ color: '#92400E' }}>
-              <span className="font-bold">No acuerdes pagos fuera de EspotHub.</span>{' '}
-              Si aceptas pagos directos pierdes la protección de la plataforma. Los clientes pagan a través de EspotHub y tú recibes el neto.
+              <span className="font-bold">No acuerdes pagos fuera de Espot.</span>{' '}
+              Si aceptas pagos directos pierdes la protección de la plataforma. Los clientes pagan a través de Espot y tú recibes el neto.
             </p>
           </div>
 

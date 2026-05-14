@@ -194,10 +194,10 @@ export default function HostPagosPage() {
         </svg>
         <div>
           <p className="text-sm font-bold mb-1" style={{ color: '#065F46' }}>
-            EspotHub gestiona todos los cobros
+            Espot gestiona todos los cobros
           </p>
           <p className="text-xs leading-relaxed" style={{ color: '#047857' }}>
-            Los clientes pagan directamente a EspotHub. Nunca cobres ni solicites pagos fuera de la plataforma.
+            Los clientes pagan directamente a Espot. Nunca cobres ni solicites pagos fuera de la plataforma.
             Después de cada evento completado te transferimos el neto (90%) a la cuenta registrada aquí.
           </p>
         </div>

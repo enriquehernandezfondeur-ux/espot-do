@@ -81,9 +81,9 @@ export async function createBooking(payload: CreateBookingPayload) {
         return { error: `Este Espot requiere mínimo ${minH} hora${minH > 1 ? 's' : ''} de reserva.` }
       if (maxH > 0 && selectedH > maxH)
         return { error: `Este Espot permite máximo ${maxH} hora${maxH > 1 ? 's' : ''} de reserva.` }
-      if (sessH > 0 && Math.abs(selectedH - sessH) > 0.1)
+      if (sessH > 0 && Math.abs(selectedH - sessH) > 0.25)
         return { error: `Este espacio requiere exactamente ${sessH} hora${sessH > 1 ? 's' : ''} de sesión.` }
-      if (pkgH > 0 && !hasExtra && Math.abs(selectedH - pkgH) > 0.1)
+      if (pkgH > 0 && !hasExtra && Math.abs(selectedH - pkgH) > 0.25)
         return { error: `Este paquete tiene una duración fija de ${pkgH} hora${pkgH > 1 ? 's' : ''}.` }
 
       // Validar basePrice para evitar manipulación: recalcular precio esperado en servidor

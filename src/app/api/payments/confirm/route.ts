@@ -68,7 +68,11 @@ export async function POST(req: NextRequest) {
 
   // Si es pago de cuota específica, marcarla como pagada
   if (cuotaId) {
-    await markInstallmentPaid(cuotaId, azulParams.AzulOrderId)
+    const markResult = await markInstallmentPaid(cuotaId, azulParams.AzulOrderId)
+    if (!markResult.success) {
+      console.error('[confirm] markInstallmentPaid failed:', markResult.error, 'cuotaId:', cuotaId)
+      // No abortar — el pago ya fue cobrado por Azul; continuar actualizando el booking
+    }
   }
 
   // Calcular paid_amount acumulado (suma de pagos anteriores + este pago)
