@@ -267,14 +267,6 @@ export function SpaceCard({
             )}
           </div>
 
-          {/* Días disponibles (#3) */}
-          {availableDays && (
-            <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
-              <Calendar size={10} className="shrink-0" />
-              <span>{availableDays}</span>
-            </div>
-          )}
-
           {/* Precio · badge tipo · capacidad */}
           <div className="flex items-center gap-2 pt-2.5 mt-auto"
             style={{ borderTop: '1px solid #F0F2F5' }}>
