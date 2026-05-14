@@ -15,7 +15,11 @@ import { scheduleModelLabel } from '@/lib/payments/schedule'
 import ChatDrawer from '@/components/marketplace/ChatDrawer'
 import BookingWidget from '@/components/marketplace/BookingWidget'
 import dynamic from 'next/dynamic'
-const FavoriteButton = dynamic(() => import('@/components/marketplace/FavoriteButton'), { ssr: false })
+const FavoriteButton     = dynamic(() => import('@/components/marketplace/FavoriteButton'), { ssr: false })
+const SpaceLocationMap   = dynamic(() => import('@/components/marketplace/SpaceLocationMap'), {
+  ssr: false,
+  loading: () => <div className="rounded-2xl animate-pulse" style={{ height: 240, background: 'var(--bg-elevated)' }} />,
+})
 
 // Avatar del host con fallback a inicial + onError para URLs rotas
 function HostAvatar({ avatarUrl, fullName, size = 56 }: { avatarUrl: string | null; fullName: string | null; size?: number }) {
@@ -843,6 +847,9 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                     </div>
                   </div>
                 )}
+
+                {/* ── Mapa de ubicación ── */}
+                <SpaceLocationMap space={space} />
 
                 {/* ── Habla con el propietario ── */}
                 {host && (
