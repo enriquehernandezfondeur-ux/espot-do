@@ -108,7 +108,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
   const showAvatar   = !!user?.avatarUrl && !imgError
 
   return (
-    <div className="light-theme min-h-dvh w-full" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', overflowX: 'hidden' }}>
+    <div className="light-theme min-h-dvh w-full" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
 
       {/* ── NAVBAR ── */}
       <nav className="sticky top-0 z-50" style={{
