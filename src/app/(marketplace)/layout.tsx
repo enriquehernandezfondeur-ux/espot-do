@@ -511,7 +511,8 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                 // eslint-disable-next-line @next/next/no-img-element
                 ? <img src={user.avatarUrl} alt={displayName}
                     className="w-14 h-14 rounded-2xl object-cover shrink-0"
-                    style={{ border: '2px solid var(--brand)', boxShadow: '0 2px 8px rgba(53,196,147,0.2)' }} />
+                    style={{ border: '2px solid var(--brand)', boxShadow: '0 2px 8px rgba(53,196,147,0.2)' }}
+                    onError={() => setImgError(true)} />
                 : <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-lg font-bold text-white shrink-0"
                     style={{ background: 'var(--brand)', boxShadow: '0 2px 8px rgba(53,196,147,0.3)' }}>
                     {avatarLetter}

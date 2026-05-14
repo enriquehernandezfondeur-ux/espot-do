@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
     const isFullDay = b.block_type === 'full_day' || !b.start_time || !b.end_time
     if (isFullDay) {
       ids.add(b.space_id)
-    } else if (time) {
+    } else if (time && b.start_time && b.end_time) {
       const bStart = b.start_time.slice(0, 5)
       const bEnd   = b.end_time.slice(0, 5)
       if (timeInRange(time, bStart, bEnd)) {

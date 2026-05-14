@@ -578,7 +578,7 @@ export default function CalendarioPage() {
                               {(status.booking as any).profiles?.full_name ?? 'Cliente'}
                             </div>
                             <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                              {status.booking.event_type} · {status.booking.start_time.slice(0,5)}–{status.booking.end_time.slice(0,5)}
+                              {status.booking.event_type}{status.booking.start_time && status.booking.end_time ? ` · ${status.booking.start_time.slice(0,5)}–${status.booking.end_time.slice(0,5)}` : ''}
                             </div>
                           </div>
                         </div>

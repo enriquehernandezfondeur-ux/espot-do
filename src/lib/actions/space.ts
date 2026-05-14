@@ -558,6 +558,7 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
   }
 
   revalidatePath('/buscar')
+  revalidatePath('/espacios', 'layout')
   revalidatePath('/', 'layout')
   return { success: true, spaceId }
 }
@@ -587,5 +588,6 @@ export async function updateCancellationPolicy(
 
   if (error) return { error: error.message }
   revalidatePath('/buscar')
+  revalidatePath('/espacios', 'layout')
   return {}
 }
