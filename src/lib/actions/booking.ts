@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/email/send'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
@@ -287,6 +288,9 @@ export async function acceptBooking(bookingId: string) {
 
   const guest = bk.profiles as any
 
+  revalidatePath('/dashboard/host/reservas')
+  revalidatePath('/dashboard/reservas')
+
   await Promise.allSettled([
     guest?.email && sendEmail({
       to: guest.email,
@@ -397,6 +401,8 @@ export async function rejectBooking(bookingId: string, reason?: string) {
     })
   }
 
+  revalidatePath('/dashboard/host/reservas')
+  revalidatePath('/dashboard/reservas')
   return { success: true }
 }
 
@@ -623,5 +629,7 @@ export async function cancelBooking(bookingId: string, reason?: string, refundBa
     }
   }
 
+  revalidatePath('/dashboard/host/reservas')
+  revalidatePath('/dashboard/reservas')
   return { success: true }
 }

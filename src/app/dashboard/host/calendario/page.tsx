@@ -393,7 +393,7 @@ export default function CalendarioPage() {
               const dayBl = blockedSlots[dk] ?? []
               const isToday  = dk === today.toISOString().split('T')[0]
               const isSel    = selected === dk
-              const isPast   = new Date(dk) < new Date(today.toISOString().split('T')[0])
+              const isPast   = new Date(dk + 'T12:00') < new Date(today.toISOString().split('T')[0] + 'T12:00')
               const hasConfirmed = dayBk.some(b => b.status === 'confirmed')
               const hasPending   = dayBk.some(b => b.status === 'pending')
               const hasBlocked   = dayBl.length > 0

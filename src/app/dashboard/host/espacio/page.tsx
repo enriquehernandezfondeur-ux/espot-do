@@ -971,6 +971,7 @@ export default function EspacioPage() {
                 <input
                   type="number"
                   inputMode="numeric"
+                  min="0"
                   value={capacityMin}
                   onChange={e => setCapacityMin(e.target.value)}
                   placeholder="20"
@@ -982,6 +983,7 @@ export default function EspacioPage() {
                 <input
                   type="number"
                   inputMode="numeric"
+                  min="0"
                   value={capacityMax}
                   onChange={e => setCapacityMax(e.target.value)}
                   placeholder="200"
@@ -1106,7 +1108,7 @@ export default function EspacioPage() {
                   <div>
                     <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Precio por hora (RD$)</label>
                     <input
-                      type="number" inputMode="numeric"
+                      type="number" inputMode="numeric" min="0"
                       value={hourlyPrice}
                       onChange={e => setHourlyPrice(e.target.value)}
                       placeholder="5000"
@@ -1116,7 +1118,7 @@ export default function EspacioPage() {
                   <div>
                     <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Mínimo de horas</label>
                     <input
-                      type="number" inputMode="numeric"
+                      type="number" inputMode="numeric" min="0"
                       value={minHours}
                       onChange={e => setMinHours(e.target.value)}
                       placeholder="3"
@@ -1126,7 +1128,7 @@ export default function EspacioPage() {
                   <div>
                     <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Máximo de horas</label>
                     <input
-                      type="number" inputMode="numeric"
+                      type="number" inputMode="numeric" min="0"
                       value={maxHours}
                       onChange={e => setMaxHours(e.target.value)}
                       placeholder="8"
@@ -1148,17 +1150,17 @@ export default function EspacioPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
                   <div>
                     <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Consumo mínimo (RD$) *</label>
-                    <input type="number" inputMode="numeric" value={minConsumption} onChange={e => setMinConsumption(e.target.value)}
+                    <input type="number" inputMode="numeric" min="0" value={minConsumption} onChange={e => setMinConsumption(e.target.value)}
                       placeholder="60000" className="w-full input-base rounded-xl px-4 py-2.5 text-sm" />
                   </div>
                   <div>
                     <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Mínimo de horas</label>
-                    <input type="number" inputMode="numeric" value={minHours} onChange={e => setMinHours(e.target.value)}
+                    <input type="number" inputMode="numeric" min="0" value={minHours} onChange={e => setMinHours(e.target.value)}
                       placeholder="3" className="w-full input-base rounded-xl px-4 py-2.5 text-sm" />
                   </div>
                   <div>
                     <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Máximo de horas</label>
-                    <input type="number" inputMode="numeric" value={maxHours} onChange={e => setMaxHours(e.target.value)}
+                    <input type="number" inputMode="numeric" min="0" value={maxHours} onChange={e => setMaxHours(e.target.value)}
                       placeholder="8" className="w-full input-base rounded-xl px-4 py-2.5 text-sm" />
                   </div>
                 </div>
@@ -1181,18 +1183,18 @@ export default function EspacioPage() {
                   </div>
                   <div>
                     <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Precio del paquete (RD$) *</label>
-                    <input type="number" inputMode="numeric" value={fixedPrice} onChange={e => setFixedPrice(e.target.value)}
+                    <input type="number" inputMode="numeric" min="0" value={fixedPrice} onChange={e => setFixedPrice(e.target.value)}
                       placeholder="35000" className="w-full input-base rounded-xl px-4 py-2.5 text-sm" />
                   </div>
                   <div>
                     <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Horas incluidas *</label>
-                    <input type="number" inputMode="numeric" value={packageHours} onChange={e => setPackageHours(e.target.value)}
+                    <input type="number" inputMode="numeric" min="0" value={packageHours} onChange={e => setPackageHours(e.target.value)}
                       placeholder="6" className="w-full input-base rounded-xl px-4 py-2.5 text-sm" />
                     <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>El cliente reserva esas horas exactas</p>
                   </div>
                   <div>
                     <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Precio hora adicional (RD$)</label>
-                    <input type="number" inputMode="numeric" value={pkgExtraHourPrice} onChange={e => setPkgExtraHourPrice(e.target.value)}
+                    <input type="number" inputMode="numeric" min="0" value={pkgExtraHourPrice} onChange={e => setPkgExtraHourPrice(e.target.value)}
                       placeholder="5000" className="w-full input-base rounded-xl px-4 py-2.5 text-sm" />
                     <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Si quiere más horas que las incluidas</p>
                   </div>
