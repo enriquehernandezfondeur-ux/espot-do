@@ -44,20 +44,36 @@ function AjustesInner() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    Promise.all([
-      getClientProfile(),
-      getGoogleCalendarStatus(),
-    ]).then(([p, gcal]) => {
-      if (p) {
-        setFullName(p.full_name ?? '')
-        setPhone(p.phone ?? '')
-        setWhatsapp(p.whatsapp ?? '')
-        setEmail(p.email ?? '')
-        setAvatarUrl(p.avatar_url ?? '')
-      }
-      setGcalConnected(gcal.connected)
+    async function load() {
+      try {
+        const [[p, gcal], supabase] = await Promise.all([
+          Promise.all([getClientProfile(), getGoogleCalendarStatus()]),
+          Promise.resolve(createClient()),
+        ])
+        if (p) {
+          setFullName(p.full_name ?? '')
+          setPhone(p.phone ?? '')
+          setWhatsapp(p.whatsapp ?? '')
+          setEmail(p.email ?? '')
+
+          if (p.avatar_url) {
+            setAvatarUrl(p.avatar_url)
+          } else {
+            // Auto-sincronizar avatar de Google/Apple OAuth si no tiene uno guardado
+            const { data: { user } } = await supabase.auth.getUser()
+            const oauthAvatar = user?.user_metadata?.avatar_url || user?.user_metadata?.picture || null
+            if (oauthAvatar) {
+              setAvatarUrl(oauthAvatar)
+              // Guardar en profiles para que aparezca en el marketplace
+              await updateClientProfile({ avatar_url: oauthAvatar })
+            }
+          }
+        }
+        setGcalConnected(gcal.connected)
+      } catch {}
       setLoading(false)
-    }).catch(() => setLoading(false))
+    }
+    load()
   }, [])
 
   // Leer mensajes del callback de OAuth

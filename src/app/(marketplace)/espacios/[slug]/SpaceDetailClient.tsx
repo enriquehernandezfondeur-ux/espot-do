@@ -29,7 +29,7 @@ function HostAvatar({ avatarUrl, fullName, size = 56 }: { avatarUrl: string | nu
 
   return (
     <div
-      className="shrink-0 overflow-hidden flex items-center justify-content-center"
+      className="shrink-0 overflow-hidden flex items-center justify-center"
       style={{
         width: size, height: size,
         borderRadius: radius,

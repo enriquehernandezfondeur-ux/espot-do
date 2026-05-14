@@ -21,14 +21,28 @@ export default function PerfilPage() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    getClientProfile().then(p => {
+    async function load() {
+      const p = await getClientProfile()
       setProfile(p)
       setFullName(p?.full_name ?? '')
       setPhone(p?.phone ?? '')
       setWhatsapp(p?.whatsapp ?? '')
-      setAvatarUrl(p?.avatar_url ?? '')
+
+      if (p?.avatar_url) {
+        setAvatarUrl(p.avatar_url)
+      } else {
+        // Sincronizar avatar OAuth automáticamente si no hay uno guardado
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        const oauthAvatar = user?.user_metadata?.avatar_url || user?.user_metadata?.picture || null
+        if (oauthAvatar) {
+          setAvatarUrl(oauthAvatar)
+          await updateClientProfile({ avatar_url: oauthAvatar })
+        }
+      }
       setLoading(false)
-    })
+    }
+    load()
   }, [])
 
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
