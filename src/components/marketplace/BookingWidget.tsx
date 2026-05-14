@@ -179,10 +179,20 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   const packageHours = pricing?.package_hours ?? 0
   const sessionHours = pricing?.session_hours ?? 0
   const minHours     = pricing?.min_hours ?? 0
-  // Para paquete sin precio de hora extra: el máximo es packageHours
-  const maxHours = isPackage && packageHours > 0 && !(Number(pricing?.extra_hour_price) > 0)
-    ? packageHours
-    : (pricing?.max_hours ?? 0)
+
+  // Límite máximo de horas visible en el picker:
+  // - Paquete sin hora extra → packageHours es el máximo incluido
+  // - Consumo mínimo con session_hours → session_hours es la duración máxima de sesión
+  // - Cualquier tipo con max_hours explícito → respeta ese valor
+  const maxHours = (() => {
+    const explicit = pricing?.max_hours ?? 0
+    if (explicit > 0) return explicit
+    if (isPackage && packageHours > 0 && !(Number(pricing?.extra_hour_price) > 0))
+      return packageHours
+    if (isConsumption && sessionHours > 0)
+      return sessionHours
+    return 0 // sin límite
+  })()
 
   // El cliente siempre elige sus horas libremente.
   // session_hours y package_hours son sugerencias, no duración forzada.
@@ -821,12 +831,12 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                 {/* ── CASO C: El cliente elige horas libremente ── */}
                 {!blockTooShort && fixedDuration === 0 && (
                   <div className="space-y-3">
-                    {/* Sugerencia de duración para consumo mínimo y paquete */}
+                    {/* Límite de sesión para consumo mínimo */}
                     {(isConsumption && sessionHours > 0) && (
                       <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
                         style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.15)', color: '#1D4ED8' }}>
                         <Clock size={12} style={{ flexShrink: 0 }} />
-                        Duración sugerida: {sessionHours}h · Puedes elegir el horario que prefieras
+                        Sesión de hasta {sessionHours}h · Elige tu horario dentro de ese bloque
                       </div>
                     )}
                     {isPackage && packageHours > 0 && (

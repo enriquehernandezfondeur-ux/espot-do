@@ -77,15 +77,18 @@ export async function createBooking(payload: CreateBookingPayload) {
       const pkgH  = pricingCheck.package_hours ?? 0
       const hasExtra = Number(pricingCheck.extra_hour_price) > 0
 
+      // Calcular límite máximo efectivo (igual que en BookingWidget)
+      const effectiveMax = (() => {
+        if (maxH > 0) return maxH
+        if (pkgH > 0 && !hasExtra) return pkgH
+        if (pricingCheck.pricing_type === 'minimum_consumption' && sessH > 0) return sessH
+        return 0
+      })()
+
       if (minH > 0 && selectedH < minH)
         return { error: `Este Espot requiere mínimo ${minH} hora${minH > 1 ? 's' : ''} de reserva.` }
-      // Para paquete sin hora extra: no puede exceder el paquete
-      if (pkgH > 0 && !hasExtra && selectedH > pkgH + 0.25)
-        return { error: `Este paquete incluye hasta ${pkgH} hora${pkgH > 1 ? 's' : ''}. Selecciona un horario dentro de ese rango.` }
-      // maxH solo aplica para por hora (no para consumo mínimo ni paquete)
-      if (maxH > 0 && pricingCheck.pricing_type === 'hourly' && selectedH > maxH)
-        return { error: `Este Espot permite máximo ${maxH} hora${maxH > 1 ? 's' : ''} de reserva.` }
-      // session_hours es referencia, no restricción — cliente elige libremente
+      if (effectiveMax > 0 && selectedH > effectiveMax + 0.25)
+        return { error: `El máximo para este espacio es ${effectiveMax} hora${effectiveMax !== 1 ? 's' : ''}. Selecciona un horario dentro de ese rango.` }
 
       // Validar basePrice para evitar manipulación: recalcular precio esperado en servidor
       if (pricingCheck.pricing_type !== 'custom_quote') {
