@@ -13,6 +13,21 @@
 - **Resend** — emails transaccionales
 - **Leaflet** — mapas con marcadores de espacios
 
+## Tipografía oficial
+- **Fuente principal: Poppins** (Google Fonts) — es la fuente de marca según el manual de identidad de Espot
+- Cargada vía `next/font/google` en `src/app/layout.tsx`, disponible como variable CSS `--font-poppins`
+- Pesos disponibles: 300, 400, 500, 600, 700, 800, 900
+- Aplicada en `body`: `font-family: var(--font-poppins), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`
+- `font-smoothing: antialiased` activado globalmente
+- **Regla**: nunca cambiar la fuente a Inter, Geist u otra — Poppins es la fuente de marca
+- Pesos de uso típico:
+  - `font-bold` (700) — títulos, CTAs, labels de precio
+  - `font-semibold` (600) — subtítulos, nombres
+  - `font-medium` (500) — texto de interfaz
+  - `font-normal` (400) — cuerpo de texto
+- `letter-spacing: -0.02em` a `-0.04em` en títulos grandes (estilo de la marca)
+- `font-size: 16px` mínimo en todos los inputs (previene zoom en iOS Safari)
+
 ## Paleta de colores oficial
 - `#35C493` — Verde marca (brand principal, iconos, bordes, UI)
 - `#D4FF58` — Lima acento (NO usar en producción hasta decisión del dueño)
