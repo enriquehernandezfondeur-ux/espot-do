@@ -13,20 +13,38 @@
 - **Resend** — emails transaccionales
 - **Leaflet** — mapas con marcadores de espacios
 
-## Tipografía oficial
-- **Fuente principal: Poppins** (Google Fonts) — es la fuente de marca según el manual de identidad de Espot
-- Cargada vía `next/font/google` en `src/app/layout.tsx`, disponible como variable CSS `--font-poppins`
-- Pesos disponibles: 300, 400, 500, 600, 700, 800, 900
-- Aplicada en `body`: `font-family: var(--font-poppins), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`
-- `font-smoothing: antialiased` activado globalmente
-- **Regla**: nunca cambiar la fuente a Inter, Geist u otra — Poppins es la fuente de marca
-- Pesos de uso típico:
-  - `font-bold` (700) — títulos, CTAs, labels de precio
-  - `font-semibold` (600) — subtítulos, nombres
-  - `font-medium` (500) — texto de interfaz
-  - `font-normal` (400) — cuerpo de texto
-- `letter-spacing: -0.02em` a `-0.04em` en títulos grandes (estilo de la marca)
+## Tipografía oficial (Manual de Marca)
+
+### Sistema de dos fuentes:
+
+**1. TypoGraphica Regular** — fuente de display/headlines
+- Fuente comercial, NO es Google Font
+- Uso: títulos grandes, hero headlines, logotipo, números destacados
+- Peso: Regular (bold visual por diseño de la fuente)
+- Estado en el proyecto: ⚠️ PENDIENTE DE INSTALAR — los archivos (.woff2/.ttf) deben agregarse a `public/fonts/`
+- Variable CSS objetivo: `--font-typographica`
+- Fallback temporal hasta instalar: `var(--font-poppins)` en peso 800/900
+
+**2. Poppins** (Google Fonts) — fuente de UI y cuerpo
+- Cargada vía `next/font/google` en `src/app/layout.tsx`
+- Variable CSS: `--font-poppins`
+- Aplicada en `body` como fuente base
+- Dos pesos principales según el manual:
+  - **Medium (500)** — subtítulos, labels, botones, elementos de interfaz
+  - **Light (300)** — cuerpo de texto, descripciones, texto secundario
+- Pesos también disponibles: 400, 600, 700, 800, 900
+
+### Reglas de uso:
 - `font-size: 16px` mínimo en todos los inputs (previene zoom en iOS Safari)
+- `letter-spacing: -0.02em` a `-0.04em` en títulos grandes
+- `font-smoothing: antialiased` activado globalmente
+- **Nunca** usar Inter, Geist u otra fuente — solo TypoGraphica + Poppins
+
+### Cómo instalar TypoGraphica (pendiente):
+1. Poner archivos en `public/fonts/TypoGraphica-Regular.woff2` (y `.woff` de fallback)
+2. Declarar `@font-face` en `globals.css`
+3. Agregar `variable: '--font-typographica'` en `layout.tsx` con `next/font/local`
+4. Usar en headlines: `font-family: var(--font-typographica)`
 
 ## Paleta de colores oficial
 - `#35C493` — Verde marca (brand principal, iconos, bordes, UI)
