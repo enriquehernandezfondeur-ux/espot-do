@@ -132,6 +132,7 @@ export default function EspacioPage() {
   const [currentStep, setCurrentStep] = useState(1)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
+  const [publishingId, setPublishingId] = useState<string | null>(null)
   const [stepError, setStepError] = useState('')
   const [publishedPending, setPublishedPending] = useState(false)
   const [cancelModal, setCancelModal]   = useState<{ id: string; name: string } | null>(null)
@@ -252,8 +253,8 @@ export default function EspacioPage() {
     setSaving(true)
     setSaveError('')
 
-    // Validar fotos
-    if (pendingPhotos.length === 0) {
+    // Validar fotos — solo para espacios nuevos; al editar ya existen fotos
+    if (!editingSpaceId && pendingPhotos.length === 0) {
       setSaveError('Debes subir al menos una foto del espacio antes de publicar.')
       setSaving(false)
       return
@@ -676,18 +677,33 @@ export default function EspacioPage() {
                         <Shield size={12} /> Cancelación
                       </button>
 
-                      {!space.is_published && (
+                      {!space.is_published && !space.is_active && (
                         <button
+                          disabled={publishingId === space.id}
                           onClick={async () => {
+                            setPublishingId(space.id)
+                            setSaveError('')
                             const result = await publishSpace(space.id)
-                            if (!('error' in result)) {
+                            setPublishingId(null)
+                            if ('error' in result) {
+                              setSaveError(result.error ?? 'Error al enviar para revisión')
+                            } else {
                               setSpaces(prev => prev.map(s => s.id === space.id ? { ...s, is_active: true } : s))
                               if ('pending' in result && result.pending) setPublishedPending(true)
                             }
                           }}
-                          className="btn-brand flex-1 flex items-center justify-center gap-1.5 text-sm font-medium py-2 rounded-xl">
-                          <Eye size={13} /> {space.is_active ? 'Enviar a revisión' : 'Volver a publicar'}
+                          className="btn-brand flex-1 flex items-center justify-center gap-1.5 text-sm font-medium py-2 rounded-xl disabled:opacity-60">
+                          {publishingId === space.id
+                            ? <><Loader2 size={13} className="animate-spin" /> Enviando...</>
+                            : <><Eye size={13} /> Enviar a revisión</>
+                          }
                         </button>
+                      )}
+                      {!space.is_published && space.is_active && (
+                        <div className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl"
+                          style={{ background: 'rgba(37,99,235,0.08)', color: '#2563EB', border: '1px solid rgba(37,99,235,0.2)' }}>
+                          <Clock size={12} /> En revisión
+                        </div>
                       )}
 
                       {space.is_published && (
