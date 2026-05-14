@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard, Building2, CalendarDays, Users,
@@ -48,12 +48,12 @@ const sections: { label: string; items: NavItem[] }[] = [
 ]
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {
-  const pathname = usePathname()
-  const router   = useRouter()
-  const supabase = createClient()
+  const pathname    = usePathname()
+  const router      = useRouter()
+  const supabaseRef = useRef(createClient())
 
   async function handleLogout() {
-    await supabase.auth.signOut()
+    await supabaseRef.current.auth.signOut()
     router.push('/')
   }
 

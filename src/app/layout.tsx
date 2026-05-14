@@ -34,13 +34,11 @@ export const metadata: Metadata = {
     siteName:    'espot.do',
     title:       'espot.do — Espacios a tu alcance en RD',
     description: 'Salones, rooftops, restaurantes y más para eventos en República Dominicana.',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'espot.do' }],
   },
   twitter: {
     card:        'summary_large_image',
     title:       'espot.do — Espacios a tu alcance en RD',
     description: 'Salones, rooftops, restaurantes y más en República Dominicana.',
-    images:      ['/og-default.png'],
   },
 };
 

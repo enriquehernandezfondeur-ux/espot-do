@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -30,11 +30,11 @@ const mobileBottomNav = [
 export default function ClientSidebar({ userName, avatarUrl }: { userName?: string; avatarUrl?: string }) {
   const pathname = usePathname()
   const router   = useRouter()
-  const supabase = createClient()
+  const supabaseRef = useRef(createClient())
   const [mobileOpen, setMobileOpen] = useState(false)
 
   async function handleLogout() {
-    await supabase.auth.signOut()
+    await supabaseRef.current.auth.signOut()
     router.push('/')
   }
 

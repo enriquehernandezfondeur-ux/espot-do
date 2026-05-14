@@ -163,8 +163,8 @@ export function SpaceCard({
 
           {images.length === 0 ? (
             <div className="absolute inset-0 flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg,#667eea,#764ba2)' }}>
-              <CatIcon size={36} className="text-white opacity-60" />
+              style={{ background: 'linear-gradient(135deg,#03313C,#0D4A3A)' }}>
+              <CatIcon size={36} style={{ color: '#35C493', opacity: 0.6 }} />
             </div>
           ) : images.map((url, i) => (
             // eslint-disable-next-line @next/next/no-img-element
