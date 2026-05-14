@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, Suspense } from 'react'
-import { Save, Camera, Loader2, CheckCircle, Calendar, Copy, RefreshCw, ExternalLink, Link2, Link2Off, Bell } from 'lucide-react'
+import { Save, Camera, Loader2, CheckCircle, Calendar, Copy, RefreshCw, ExternalLink, Link2, Link2Off } from 'lucide-react'
 import { getClientProfile, updateClientProfile } from '@/lib/actions/client'
 import NotificationSettings from '@/components/dashboard/NotificationSettings'
 import { getOrCreateIcalToken, regenerateIcalToken, getGoogleCalendarStatus, disconnectGoogleCalendar } from '@/lib/actions/host'
@@ -497,19 +497,8 @@ function AjustesInner() {
         )}
 
         {/* ── Notificaciones ── */}
-        <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-          <div className="flex items-center gap-3 px-6 py-5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'var(--brand-dim)' }}>
-              <Bell size={16} style={{ color: 'var(--brand)' }} />
-            </div>
-            <div>
-              <h2 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Notificaciones por email</h2>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Elige qué emails quieres recibir</p>
-            </div>
-          </div>
-          <div className="p-6">
-            <NotificationSettings role="host" />
-          </div>
+        <div className="rounded-2xl p-6" style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+          <NotificationSettings role="host" />
         </div>
 
       </div>
