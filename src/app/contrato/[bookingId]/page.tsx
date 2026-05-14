@@ -34,7 +34,7 @@ export default async function ContratoPage({ params }: { params: Promise<{ booki
   const pricing = (booking as any).space_pricing as any
   const addons  = (booking as any).booking_addons ?? []
   const today   = new Date().toLocaleDateString('es-DO', { day: 'numeric', month: 'long', year: 'numeric' })
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com').replace('https://', '').replace('http://', '')
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do').replace('https://', '').replace('http://', '')
 
   return (
     <>

@@ -6,7 +6,7 @@
 
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 const DOMAIN = SITE.replace('https://', '').replace('http://', '')
 
 // ── Logo de texto — funciona en TODOS los clientes de email ──
@@ -355,7 +355,7 @@ export function tplCancelada(data: {
     body: `
       <p style="color:#374151;margin:0 0 16px;">Hola <strong>${data.recipientName}</strong>, la reserva en <strong>${data.spaceName}</strong> para el ${formatDate(data.eventDate)} fue cancelada por ${data.cancelledBy}.</p>
       ${data.reason ? `<p style="color:#6B7280;font-size:13px;background:#F9FAFB;border:1px solid #E8ECF0;border-radius:10px;padding:12px 16px;margin:0 0 16px;">Motivo: ${data.reason}</p>` : ''}
-      <p style="color:#374151;margin:0;">${data.isGuest ? 'Si tienes preguntas sobre reembolsos, cont&aacute;ctanos en contacto@espothub.com.' : 'El cliente ser&aacute; notificado.'}</p>`,
+      <p style="color:#374151;margin:0;">${data.isGuest ? 'Si tienes preguntas sobre reembolsos, cont&aacute;ctanos en contacto@espot.do.' : 'El cliente ser&aacute; notificado.'}</p>`,
     cta: data.isGuest
       ? { text: 'Explorar otros espacios', url: `${SITE}/buscar` }
       : { text: 'Ver mis reservas', url: `${SITE}/dashboard/host/reservas` },
@@ -440,7 +440,7 @@ export function tplSolicitudCotizacionCliente(d: BookingData) {
       <p style="color:#374151;margin:0 0 16px;">El propietario revisar&aacute; los detalles de tu evento y te enviar&aacute; una <strong>propuesta de precio personalizada</strong> en las pr&oacute;ximas 48 horas h&aacute;biles.</p>
       ${infoBox(rows)}
       <p style="color:#374151;margin:8px 0 16px;">Recibir&aacute;s un email con la propuesta en cuanto el propietario la env&iacute;e.</p>
-      <p style="color:#6B7280;font-size:13px;margin:0;">Si el propietario no responde en ese plazo, pu&eacute;des escribirle desde el chat o contactarnos en <a href="mailto:contacto@espothub.com" style="color:#35C493;">contacto@espothub.com</a>.</p>`,
+      <p style="color:#6B7280;font-size:13px;margin:0;">Si el propietario no responde en ese plazo, pu&eacute;des escribirle desde el chat o contactarnos en <a href="mailto:contacto@espot.do" style="color:#35C493;">contacto@espot.do</a>.</p>`,
     cta: { text: 'Ver mi cotizaci&oacute;n', url: `${SITE}/dashboard/reservas` },
     note: 'No se realizar&aacute; ning&uacute;n cobro hasta que aceptes la propuesta del propietario.',
   })
@@ -465,7 +465,7 @@ export function tplReembolsoPendiente(data: {
         { label: 'Referencia',        value: data.bookingId.slice(0, 8).toUpperCase() },
       ])}
       <p style="color:#374151;margin:0 0 12px;">Realizaremos la transferencia a tu cuenta bancaria en ese plazo. Para consultas incluye la referencia en tu mensaje.</p>`,
-    cta: { text: 'Contactar soporte', url: `mailto:contacto@espothub.com?subject=Reembolso ${data.bookingId.slice(0,8).toUpperCase()}` },
+    cta: { text: 'Contactar soporte', url: `mailto:contacto@espot.do?subject=Reembolso ${data.bookingId.slice(0,8).toUpperCase()}` },
   })
 }
 

@@ -410,7 +410,7 @@ export async function markPayoutPaid(bookingId: string) {
     const host      = space?.profiles as any
     const hostEmail = host?.email as string | undefined
     const netAmount = Math.round(Number(booking.total_amount) * 0.90)
-    const SITE      = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
+    const SITE      = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 
     if (hostEmail) {
       const html = emailBase({
@@ -429,7 +429,7 @@ export async function markPayoutPaid(bookingId: string) {
             { label: 'Neto transferido', value: formatCurrency(netAmount) },
           ])}
           <p style="font-size:13px;color:#6B7280;margin:16px 0 0;line-height:1.6;">
-            Si tienes alguna pregunta sobre esta transferencia, responde a este email o escríbenos a contacto@espothub.com.
+            Si tienes alguna pregunta sobre esta transferencia, responde a este email o escríbenos a contacto@espot.do.
           </p>
         `,
         cta: { text: 'Ver mis finanzas', url: `${SITE}/dashboard/host/pagos` },

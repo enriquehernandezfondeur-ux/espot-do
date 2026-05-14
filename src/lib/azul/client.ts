@@ -60,7 +60,7 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
 
   // AZUL_RETURN_BASE_URL permite usar un dominio diferente a NEXT_PUBLIC_SITE_URL
   // para las URLs de retorno — necesario cuando Azul tiene registrado un dominio
-  // distinto al dominio principal de la app (ej: espot.do vs espothub.com).
+  // distinto al dominio principal de la app (ej: espothub.com vs espot.do).
   const BASE        = process.env.AZUL_RETURN_BASE_URL ?? SITE
   const cuotaQuery  = params.cuotaId ? `&cuota=${params.cuotaId}` : ''
   const approvedUrl = `${BASE}/pago/exitoso?b=${params.bookingId}${cuotaQuery}`

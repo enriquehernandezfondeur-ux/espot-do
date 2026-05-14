@@ -3,8 +3,8 @@ import { Resend } from 'resend'
 // FROM debe ser un email de un dominio verificado en Resend.
 // Verificar en: https://resend.com/domains
 // Añadir DNS: SPF, DKIM, DMARC en el proveedor DNS del dominio.
-const FROM      = process.env.EMAIL_FROM      ?? 'Espot <hola@espothub.com>'
-const REPLY_TO  = process.env.EMAIL_REPLY_TO  ?? 'contacto@espothub.com'
+const FROM      = process.env.EMAIL_FROM      ?? 'Espot <hola@espot.do>'
+const REPLY_TO  = process.env.EMAIL_REPLY_TO  ?? 'contacto@espot.do'
 
 export async function sendEmail({
   to,
@@ -42,7 +42,7 @@ export async function sendEmail({
     replyTo:  replyTo ?? REPLY_TO,
     headers: {
       // Identifica el proyecto para seguimiento en Resend dashboard
-      'X-Entity-Ref-ID': 'espothub-transactional',
+      'X-Entity-Ref-ID': 'espot-transactional',
     },
   })
 

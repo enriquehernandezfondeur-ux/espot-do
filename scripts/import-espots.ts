@@ -1,5 +1,5 @@
 /**
- * SCRIPT DE MIGRACIÓN — EspotHub
+ * SCRIPT DE MIGRACIÓN — Espot
  *
  * Importa espacios desde un archivo JSON hacia Supabase.
  * Soporta imágenes remotas (descarga y sube a Storage).
@@ -269,7 +269,7 @@ async function importEspot(raw: any, index: number): Promise<{ ok: boolean; slug
 
 // ── Main ─────────────────────────────────────────────────
 async function main() {
-  console.log(`\n🚀  EspotHub Migration Tool`)
+  console.log(`\n🚀  Espot Migration Tool`)
   console.log(`   Archivo: ${fileArg}`)
   console.log(`   Modo: ${dryRun ? 'DRY RUN (no escribe nada)' : 'PRODUCCIÓN'}`)
   if (onlySlug) console.log(`   Solo importar: ${onlySlug}\n`)

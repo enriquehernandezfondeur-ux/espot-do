@@ -132,7 +132,7 @@ Todos los derechos sobre la plataforma, su diseño, código y marca pertenecen a
 • Los datos personales (nombre, email, teléfono) se utilizan exclusivamente para gestionar reservas, enviar notificaciones y mejorar el servicio.
 • No se venden ni comparten datos a terceros sin consentimiento, salvo requerimiento legal.
 • Los datos de tarjetas de crédito/débito NO son almacenados por Espot. El procesamiento es realizado íntegramente por Azul Payments bajo sus estándares PCI-DSS.
-• El usuario puede solicitar la eliminación de sus datos escribiendo a contacto@espothub.com.`,
+• El usuario puede solicitar la eliminación de sus datos escribiendo a contacto@espot.do.`,
   },
   {
     num: '14', title: 'Modificaciones y Ley Aplicable',

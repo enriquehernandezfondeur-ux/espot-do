@@ -65,7 +65,8 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, hostA
   const bottomRef    = useRef<HTMLDivElement>(null)
   const fileRef      = useRef<HTMLInputElement>(null)
   const textareaRef  = useRef<HTMLTextAreaElement>(null)
-  const supabase  = createClient()
+  const supabaseRef  = useRef(createClient())
+  const supabase     = supabaseRef.current
 
   useEffect(() => {
     async function init() {

@@ -72,7 +72,7 @@ export default function AdminUsersPage() {
     const url  = URL.createObjectURL(blob)
     const a    = document.createElement('a')
     a.href = url
-    a.download = `espothub-usuarios-${new Date().toISOString().split('T')[0]}.csv`
+    a.download = `espot-usuarios-${new Date().toISOString().split('T')[0]}.csv`
     a.click()
     URL.revokeObjectURL(url)
     showToast(`CSV exportado con ${filtered.length} usuarios`, true)

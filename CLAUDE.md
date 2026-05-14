@@ -155,4 +155,4 @@ src/app/
 ## Deploy
 - Repositorio: `https://github.com/enriquehernandezfondeur-ux/espot-do.git`
 - Branch principal: `main` → Vercel despliega automáticamente
-- Dominio: `espothub.com` (en transición a `espot.do`)
+- Dominio: `espothub.com` (dominio actual) + `espot.do` (dominio final)

@@ -5,7 +5,7 @@ import { tplRecordatorioCuota, tplRecordatorioEvento, tplSolicitudResena } from 
 import { daysUntilDate } from '@/lib/payments/schedule'
 import { createClient } from '@/lib/supabase/server'
 
-const SITE        = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
+const SITE        = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 const CRON_SECRET = process.env.CRON_SECRET ?? ''
 
 // GET /api/cron/payment-reminders

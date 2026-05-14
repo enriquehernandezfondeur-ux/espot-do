@@ -488,7 +488,7 @@ function AuthShell({ children, isHost, redirectTo }: {
               {' · '}
               <Link href="/privacidad" style={{ color: 'rgba(255,255,255,0.3)' }}>Privacidad</Link>
               {' · '}
-              <a href="mailto:contacto@espothub.com" style={{ color: 'rgba(255,255,255,0.3)' }}>Soporte</a>
+              <a href="mailto:contacto@espot.do" style={{ color: 'rgba(255,255,255,0.3)' }}>Soporte</a>
             </p>
 
           </div>
