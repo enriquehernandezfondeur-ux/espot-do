@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -79,11 +79,11 @@ export default function NotificationSettings({ role }: { role: 'client' | 'host'
   const [settings, setSettings] = useState<NotificationSettings>(DEFAULTS)
   const [pending,  setPending]  = useState<Set<string>>(new Set())
   const [loading,  setLoading]  = useState(true)
-  const supabase = createClient()
+  const supabaseRef = useRef(createClient())
 
   // Carga directa desde el cliente — más rápido y sin roundtrip al servidor
   useEffect(() => {
-    supabase.auth.getUser()
+    supabaseRef.current.auth.getUser()
       .then(({ data: { user } }) => {
         if (user?.user_metadata?.notification_settings) {
           setSettings({ ...DEFAULTS, ...user.user_metadata.notification_settings })
@@ -103,7 +103,7 @@ export default function NotificationSettings({ role }: { role: 'client' | 'host'
     try {
       const current = settings
       const updated = { ...current, [key]: newVal }
-      await supabase.auth.updateUser({ data: { notification_settings: updated } })
+      await supabaseRef.current.auth.updateUser({ data: { notification_settings: updated } })
     } catch {
       // revertir si falla
       setSettings(prev => ({ ...prev, [key]: !newVal }))

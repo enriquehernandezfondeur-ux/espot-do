@@ -16,8 +16,9 @@ export default function VideoUploader({ initialUrl, onChange, onRemove }: Props)
   const [progress,   setProgress]   = useState(0)
   const [dragOver,   setDragOver]   = useState(false)
   const [uploadError, setUploadError] = useState('')
-  const inputRef = useRef<HTMLInputElement>(null)
-  const supabase = createClient()
+  const inputRef    = useRef<HTMLInputElement>(null)
+  const supabaseRef = useRef(createClient())
+  const supabase    = supabaseRef.current
 
   const ACCEPTED = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v']
   const MAX_MB   = 200

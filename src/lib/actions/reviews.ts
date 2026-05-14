@@ -176,8 +176,10 @@ export async function submitReview(data: {
 
   const today = new Date().toISOString().split('T')[0]
   const { data: booking } = await supabase
-    .from('bookings').select('event_date, guest_id').eq('id', data.bookingId).single()
+    .from('bookings').select('event_date, guest_id, status').eq('id', data.bookingId).single()
   if (!booking || booking.guest_id !== user.id) return { error: 'Reserva no encontrada' }
+  if (booking.status === 'cancelled_guest' || booking.status === 'cancelled_host' || booking.status === 'rejected')
+    return { error: 'No puedes dejar una reseña de una reserva cancelada' }
   if (booking.event_date >= today) return { error: 'Solo puedes dejar una reseña después de tu evento' }
 
   const { error } = await supabase.from('reviews').insert({

@@ -21,8 +21,9 @@ export default function PhotoUploader({ spaceId, onChange, initialPhotos }: Prop
   const [dragIdx, setDragIdx]         = useState<number | null>(null)
   const [overIdx, setOverIdx]         = useState<number | null>(null)
   const [activeIdx, setActiveIdx]     = useState<number | null>(null)  // para touch
-  const inputRef = useRef<HTMLInputElement>(null)
-  const supabase = createClient()
+  const inputRef    = useRef<HTMLInputElement>(null)
+  const supabaseRef = useRef(createClient())
+  const supabase    = supabaseRef.current
 
   // ── Reordenar por drag ────────────────────────────────────
   function onDragStart(i: number) { setDragIdx(i) }

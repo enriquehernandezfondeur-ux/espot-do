@@ -389,8 +389,8 @@ export default function EspacioPage() {
     setMenuFileName(space.menu_file_name ?? '')
     setCapacityMin(String(space.capacity_min ?? ''))
     setCapacityMax(String(space.capacity_max ?? ''))
-    // Pricing
-    const p = space.space_pricing?.[0]
+    // Pricing — usar el pricing activo, con fallback al primero
+    const p = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
     if (p) {
       setPricingType(p.pricing_type ?? '')
       setHourlyPrice(String(p.hourly_price ?? ''))
@@ -403,9 +403,9 @@ export default function EspacioPage() {
       setPackageHours(String(p.package_hours ?? ''))
       setPkgExtraHourPrice(String(p.extra_hour_price ?? ''))
       setPackageIncludes(p.package_includes ?? [])
-      // Derivar weekendPrice del multiplier almacenado
+      // Derivar weekendPrice del multiplier almacenado (soporta descuento < 1 y premium > 1)
       const mult = Number(p.weekend_multiplier ?? 1)
-      if (mult > 1) {
+      if (mult !== 1 && mult > 0) {
         setWeekendEnabled(true)
         const base = Number(p.hourly_price ?? p.minimum_consumption ?? p.fixed_price ?? 0)
         setWeekendPrice(base > 0 ? String(Math.round(base * mult)) : '')

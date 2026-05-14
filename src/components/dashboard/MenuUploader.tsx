@@ -16,8 +16,9 @@ export default function MenuUploader({ initialUrl, initialName, onChange, onRemo
   const [fileName,  setFileName]  = useState(initialName ?? '')
   const [uploading, setUploading] = useState(false)
   const [error,     setError]     = useState('')
-  const inputRef = useRef<HTMLInputElement>(null)
-  const supabase = createClient()
+  const inputRef    = useRef<HTMLInputElement>(null)
+  const supabaseRef = useRef(createClient())
+  const supabase    = supabaseRef.current
 
   const ACCEPTED = [
     'application/pdf',
