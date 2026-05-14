@@ -759,12 +759,12 @@ export default function EspacioPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>% de reembolso</label>
-                    <input type="number" value={cancelRefundPct} onChange={e => setCancelRefundPct(e.target.value)}
+                    <input type="number" inputMode="numeric" value={cancelRefundPct} onChange={e => setCancelRefundPct(e.target.value)}
                       min="0" max="100" className="input-base w-full rounded-xl px-3 py-2.5 text-sm" style={{ fontSize: 16 }} />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>Horas de anticipación</label>
-                    <input type="number" value={cancelHoursBefore} onChange={e => setCancelHoursBefore(e.target.value)}
+                    <input type="number" inputMode="numeric" value={cancelHoursBefore} onChange={e => setCancelHoursBefore(e.target.value)}
                       min="0" className="input-base w-full rounded-xl px-3 py-2.5 text-sm" style={{ fontSize: 16 }} />
                   </div>
                 </div>
@@ -805,9 +805,9 @@ export default function EspacioPage() {
 
   // ── VISTA: Wizard de creación ─────────────────────────────
   return (
-    <div className="px-6 py-8 max-w-4xl mx-auto">
+    <div className="px-4 py-5 md:px-6 md:py-8 max-w-4xl mx-auto">
       {/* Header */}
-      <div className="mb-5 md:mb-8 flex items-center gap-4">
+      <div className="mb-5 md:mb-8 flex items-center gap-3">
         <button
           onClick={() => setView('list')}
           className="transition-colors text-sm flex items-center gap-1.5"
@@ -829,53 +829,71 @@ export default function EspacioPage() {
       </div>
 
       {/* Progress Steps */}
-      <div className="flex items-center gap-0.5 mb-8 overflow-x-auto pb-1 scrollbar-hide">
-        {steps.map((step, i) => {
-          const Icon = step.icon
-          const isActive = currentStep === step.id
-          const isDone   = currentStep > step.id
-          return (
-            <div key={step.id} className="flex items-center gap-1 shrink-0">
-              <button
-                onClick={() => isDone && setCurrentStep(step.id)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-all"
-                style={
-                  isActive ? {
-                    background: 'var(--brand)',
-                    color: '#fff',
-                    boxShadow: '0 2px 8px rgba(53,196,147,0.3)',
-                  } : isDone ? {
-                    background: 'var(--brand-dim)',
-                    color: 'var(--brand)',
-                    border: '1px solid var(--brand-border)',
-                    cursor: 'pointer',
-                  } : {
-                    background: 'var(--bg-elevated)',
-                    color: 'var(--text-muted)',
-                    border: '1px solid var(--border-subtle)',
-                    cursor: 'not-allowed',
+      <div className="mb-6 md:mb-8">
+        {/* Mobile: barra de progreso + paso actual */}
+        <div className="md:hidden mb-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold" style={{ color: 'var(--brand)' }}>
+              Paso {currentStep} de {steps.length} — {steps.find(s => s.id === currentStep)?.label}
+            </span>
+            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              {Math.round((currentStep / steps.length) * 100)}%
+            </span>
+          </div>
+          <div className="w-full h-1.5 rounded-full" style={{ background: 'var(--bg-elevated)' }}>
+            <div className="h-1.5 rounded-full transition-all duration-300"
+              style={{ width: `${(currentStep / steps.length) * 100}%`, background: 'var(--brand)' }} />
+          </div>
+        </div>
+        {/* Desktop: pills */}
+        <div className="hidden md:flex items-center gap-0.5 overflow-x-auto pb-1 scrollbar-hide">
+          {steps.map((step, i) => {
+            const Icon = step.icon
+            const isActive = currentStep === step.id
+            const isDone   = currentStep > step.id
+            return (
+              <div key={step.id} className="flex items-center gap-1 shrink-0">
+                <button
+                  onClick={() => isDone && setCurrentStep(step.id)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-all"
+                  style={
+                    isActive ? {
+                      background: 'var(--brand)',
+                      color: '#fff',
+                      boxShadow: '0 2px 8px rgba(53,196,147,0.3)',
+                    } : isDone ? {
+                      background: 'var(--brand-dim)',
+                      color: 'var(--brand)',
+                      border: '1px solid var(--brand-border)',
+                      cursor: 'pointer',
+                    } : {
+                      background: 'var(--bg-elevated)',
+                      color: 'var(--text-muted)',
+                      border: '1px solid var(--border-subtle)',
+                      cursor: 'not-allowed',
+                    }
                   }
-                }
-              >
-                {isDone ? <CheckCircle size={14} /> : <Icon size={14} />}
-                <span className="hidden sm:inline">{step.label}</span>
-              </button>
-              {i < steps.length - 1 && (
-                <div className="w-5 h-px" style={{ background: isDone ? 'var(--brand-border)' : 'var(--border-subtle)' }} />
-              )}
-            </div>
-          )
-        })}
+                >
+                  {isDone ? <CheckCircle size={14} /> : <Icon size={14} />}
+                  <span>{step.label}</span>
+                </button>
+                {i < steps.length - 1 && (
+                  <div className="w-5 h-px" style={{ background: isDone ? 'var(--brand-border)' : 'var(--border-subtle)' }} />
+                )}
+              </div>
+            )
+          })}
+        </div>
       </div>
 
       {/* Step Content */}
-      <div className="rounded-2xl p-4 md:p-8" style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+      <div className="rounded-2xl p-4 md:p-7" style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
 
         {/* STEP 1: Información básica */}
         {currentStep === 1 && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Información básica</h2>
+              <h2 className="text-lg md:text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Información básica</h2>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Cuéntanos sobre tu espacio</p>
             </div>
 
@@ -1036,7 +1054,7 @@ export default function EspacioPage() {
         {currentStep === 2 && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Modalidad de precio</h2>
+              <h2 className="text-lg md:text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Modalidad de precio</h2>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>¿Cómo quieres vender tu espacio?</p>
             </div>
 
@@ -1119,12 +1137,12 @@ export default function EspacioPage() {
                   </div>
                   <div>
                     <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Mínimo de horas</label>
-                    <input type="number" value={minHours} onChange={e => setMinHours(e.target.value)}
+                    <input type="number" inputMode="numeric" value={minHours} onChange={e => setMinHours(e.target.value)}
                       placeholder="3" className="w-full input-base rounded-xl px-4 py-2.5 text-sm" />
                   </div>
                   <div>
                     <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Máximo de horas</label>
-                    <input type="number" value={maxHours} onChange={e => setMaxHours(e.target.value)}
+                    <input type="number" inputMode="numeric" value={maxHours} onChange={e => setMaxHours(e.target.value)}
                       placeholder="8" className="w-full input-base rounded-xl px-4 py-2.5 text-sm" />
                   </div>
                 </div>
@@ -1241,6 +1259,7 @@ export default function EspacioPage() {
                       <span className="text-sm font-semibold shrink-0" style={{ color: 'var(--text-muted)' }}>RD$</span>
                       <input
                         type="number"
+                        inputMode="numeric"
                         value={weekendPrice}
                         onChange={e => setWeekendPrice(e.target.value)}
                         placeholder={hourlyPrice || minConsumption || fixedPrice || '0'}
@@ -1269,7 +1288,7 @@ export default function EspacioPage() {
         {currentStep === 3 && (
           <div>
             <div className="mb-5">
-              <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Horarios de disponibilidad</h2>
+              <h2 className="text-lg md:text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Horarios de disponibilidad</h2>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                 Define en qué horarios aceptas reservas cada semana.
               </p>
@@ -1285,7 +1304,7 @@ export default function EspacioPage() {
         {currentStep === 4 && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Adicionales y extras</h2>
+              <h2 className="text-lg md:text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Adicionales y extras</h2>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                 Activa los servicios que ofreces. El cliente podrá agregarlos al reservar.
               </p>
@@ -1349,21 +1368,31 @@ export default function EspacioPage() {
                 <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
                   {addons.map((addon, i) => (
                     <div key={i}
-                      className="flex items-center gap-4 px-4 py-3"
+                      className="px-4 py-3"
                       style={{ borderBottom: i < addons.length - 1 ? '1px solid var(--border-subtle)' : 'none', background: 'var(--bg-elevated)' }}>
-                      {(() => { const I = addon.icon as any; return <I size={16} style={{ color: 'var(--text-secondary)' }} /> })()}
-                      <span className="text-sm font-medium flex-1" style={{ color: 'var(--text-primary)' }}>{addon.name}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>RD$</span>
+                      {/* Fila 1: icono + nombre + eliminar */}
+                      <div className="flex items-center gap-3 mb-2">
+                        {(() => { const I = addon.icon as any; return <I size={16} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} /> })()}
+                        <span className="text-sm font-medium flex-1 min-w-0 truncate" style={{ color: 'var(--text-primary)' }}>{addon.name}</span>
+                        <button onClick={() => toggleAddon(addon)}
+                          className="w-7 h-7 flex items-center justify-center rounded-lg transition-all shrink-0"
+                          style={{ color: 'rgba(248,113,113,0.6)', background: 'rgba(248,113,113,0.08)' }}>
+                          <X size={13} />
+                        </button>
+                      </div>
+                      {/* Fila 2: precio + unidad */}
+                      <div className="flex items-center gap-2 pl-7">
+                        <span className="text-xs shrink-0" style={{ color: 'var(--text-muted)' }}>RD$</span>
                         <input
                           type="number"
+                          inputMode="numeric"
                           value={addon.price}
                           onChange={e => {
                             const updated = [...addons]
                             updated[i] = { ...addon, price: Number(e.target.value) }
                             setAddons(updated)
                           }}
-                          className="w-24 rounded-lg px-3 py-1.5 text-sm focus:outline-none transition-colors"
+                          className="flex-1 min-w-0 rounded-lg px-3 py-1.5 text-sm focus:outline-none transition-colors"
                           style={{ background: '#fff', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)', fontSize: 16 }}
                         />
                         <select
@@ -1373,19 +1402,14 @@ export default function EspacioPage() {
                             updated[i] = { ...addon, unit: e.target.value }
                             setAddons(updated)
                           }}
-                          className="rounded-lg px-2 py-1.5 text-xs focus:outline-none"
-                          style={{ background: '#fff', border: '1.5px solid var(--border-medium)', color: 'var(--text-secondary)', fontSize: 16 }}
+                          className="rounded-lg px-2 py-1.5 text-xs focus:outline-none shrink-0"
+                          style={{ background: '#fff', border: '1.5px solid var(--border-medium)', color: 'var(--text-secondary)', fontSize: 14 }}
                         >
                           <option value="evento">/ evento</option>
                           <option value="hora">/ hora</option>
                           <option value="persona">/ persona</option>
                         </select>
                       </div>
-                      <button onClick={() => toggleAddon(addon)}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg transition-all"
-                        style={{ color: 'rgba(248,113,113,0.6)', background: 'rgba(248,113,113,0.08)' }}>
-                        <X size={13} />
-                      </button>
                     </div>
                   ))}
                 </div>
@@ -1407,7 +1431,7 @@ export default function EspacioPage() {
         {currentStep === 5 && (
           <div className="space-y-7">
             <div>
-              <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Reglas y condiciones</h2>
+              <h2 className="text-lg md:text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Reglas y condiciones</h2>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Define las reglas de tu espacio. El cliente las verá antes de reservar.</p>
             </div>
 
@@ -1507,7 +1531,7 @@ export default function EspacioPage() {
                   {allowsExtraHours && (
                     <div className="pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
                       <label className="block text-xs mb-1.5" style={{ color: 'var(--text-muted)' }}>Precio por hora extra (RD$)</label>
-                      <input type="number" value={extraHourPrice} onChange={e => setExtraHourPrice(e.target.value)}
+                      <input type="number" inputMode="numeric" value={extraHourPrice} onChange={e => setExtraHourPrice(e.target.value)}
                         placeholder="Ej: 5000"
                         className="input-base w-full rounded-xl px-3 py-2.5 text-sm" />
                     </div>
@@ -1563,7 +1587,7 @@ export default function EspacioPage() {
         {currentStep === 6 && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Modelo de pagos</h2>
+              <h2 className="text-lg md:text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Modelo de pagos</h2>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Elige cómo el cliente realizará los pagos a través de Espot.</p>
             </div>
 
@@ -1729,43 +1753,44 @@ export default function EspacioPage() {
         )}
 
         {/* Navigation buttons */}
-        <div className="flex items-center justify-between mt-8 pt-6 border-t" style={{ borderColor: 'var(--border-subtle)' }}>
-          <button
-            onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
-            disabled={currentStep === 1}
-            className="flex items-center gap-2 px-4 py-3 rounded-xl disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm font-medium" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-medium)' }}
-          >
-            <ChevronLeft size={18} /> Anterior
-          </button>
+        <div className="mt-8 pt-6 border-t space-y-3" style={{ borderColor: 'var(--border-subtle)' }}>
+          {stepError && (
+            <p className="text-xs font-medium text-center" style={{ color: '#DC2626' }}>{stepError}</p>
+          )}
+          <div className="flex items-center justify-between gap-3">
+            <button
+              onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
+              disabled={currentStep === 1}
+              className="flex items-center gap-2 px-4 py-3 rounded-xl disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm font-medium shrink-0"
+              style={{ color: 'var(--text-secondary)', border: '1px solid var(--border-medium)' }}
+            >
+              <ChevronLeft size={16} /> <span className="hidden sm:inline">Anterior</span>
+            </button>
 
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Paso {currentStep} de {steps.length}</span>
-            {stepError && (
-              <span className="text-xs font-medium" style={{ color: '#DC2626' }}>{stepError}</span>
-            )}
-          </div>
+            <span className="text-xs hidden md:block" style={{ color: 'var(--text-muted)' }}>Paso {currentStep} de {steps.length}</span>
 
-          <div className="flex items-center gap-2">
-            {editingSpaceId && currentStep < 7 && (
-              <button
-                onClick={handlePublish}
-                disabled={saving}
-                className="flex items-center gap-1.5 text-sm font-semibold px-4 py-3 rounded-xl transition-all disabled:opacity-50"
-                style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
-                {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-                Guardar cambios
-              </button>
-            )}
+            <div className="flex items-center gap-2 ml-auto">
+              {editingSpaceId && currentStep < 7 && (
+                <button
+                  onClick={handlePublish}
+                  disabled={saving}
+                  className="flex items-center gap-1.5 text-sm font-semibold px-3 md:px-4 py-3 rounded-xl transition-all disabled:opacity-50 shrink-0"
+                  style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
+                  {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                  <span className="hidden sm:inline">Guardar</span>
+                </button>
+              )}
 
-            {currentStep < 7 && (
-              <button
-                onClick={goNext}
-                className="flex items-center gap-2 text-white text-sm font-medium px-5 py-3 rounded-xl transition-colors"
-                style={{ background: 'var(--brand)' }}
-              >
-                Siguiente <ChevronRight size={18} />
-              </button>
-            )}
+              {currentStep < 7 && (
+                <button
+                  onClick={goNext}
+                  className="flex items-center gap-2 text-white text-sm font-semibold px-5 py-3 rounded-xl transition-colors shrink-0"
+                  style={{ background: 'var(--brand)' }}
+                >
+                  Siguiente <ChevronRight size={16} />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
