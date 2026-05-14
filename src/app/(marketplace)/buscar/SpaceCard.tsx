@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { MapPin, Users, ArrowRight, Check, X, Building2, ChevronLeft, ChevronRight, Zap, Calendar } from 'lucide-react'
+import { MapPin, Users, ArrowRight, Check, X, Building2, ChevronLeft, ChevronRight, Zap, Calendar, MessageCircle } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 import { CATEGORIES, PRICING_TYPES } from './constants'
 
@@ -339,7 +339,7 @@ export function SpaceCard({
                 onClick={e => e.stopPropagation()}
                 className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg shrink-0 transition-all"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
-                💬 Preguntar
+                <MessageCircle size={11} /> Preguntar
               </Link>
             </div>
           </div>

@@ -620,12 +620,13 @@ export default function MisReservasPage() {
                               border: `1px solid ${expired ? 'rgba(220,38,38,0.2)' : 'rgba(217,119,6,0.15)'}`,
                             }}>
                             <div className="flex items-center justify-between mb-2">
-                              <span className="text-xs font-semibold" style={{ color: expired ? '#DC2626' : '#92400E' }}>
+                              <span className="text-xs font-semibold flex items-center gap-1.5"
+                                style={{ color: expired ? '#DC2626' : '#92400E' }}>
                                 {expired
-                                  ? '⚠️ Sin respuesta después de 48h'
+                                  ? <><AlertTriangle size={12} /> Sin respuesta después de 48h</>
                                   : urgent
-                                    ? `⏰ El propietario tiene ${hoursLeft}h para responder`
-                                    : `🕐 Esperando respuesta · ${hoursLeft}h restantes`}
+                                    ? <><Clock size={12} /> El propietario tiene {hoursLeft}h para responder</>
+                                    : <><Clock size={12} /> Esperando respuesta · {hoursLeft}h restantes</>}
                               </span>
                               <span className="text-xs tabular-nums" style={{ color: expired ? '#DC2626' : 'var(--text-muted)' }}>
                                 {hoursElapsed}h transcurridas
@@ -640,7 +641,7 @@ export default function MisReservasPage() {
                             </div>
                             <p className="text-xs mt-2" style={{ color: expired ? '#DC2626' : '#92400E' }}>
                               {expired
-                                ? 'Puedes cancelar esta solicitud sin costo. Si prefieres esperar, el propietario aún puede confirmar.'
+                                ? 'La solicitud no tiene pagos — puedes cancelarla cuando quieras. Si prefieres esperar, el propietario aún puede confirmar.'
                                 : 'Te notificamos por email cuando el propietario responda.'}
                             </p>
                           </div>
@@ -668,8 +669,10 @@ export default function MisReservasPage() {
                         <div className="px-4 py-3 rounded-xl"
                           style={{ background: expired ? 'rgba(220,38,38,0.05)' : 'rgba(8,145,178,0.05)', border: `1px solid ${expired ? 'rgba(220,38,38,0.2)' : 'rgba(8,145,178,0.2)'}`, color: expired ? '#DC2626' : '#0369A1' }}>
                           <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-xs font-semibold">
-                              {expired ? '⚠️ Sin respuesta después de 48h' : `🕐 Cotización pendiente · ${hoursLeft}h restantes`}
+                            <span className="text-xs font-semibold flex items-center gap-1.5">
+                              {expired
+                                ? <><AlertTriangle size={12} /> Sin respuesta después de 48h</>
+                                : <><Clock size={12} /> Cotización pendiente · {hoursLeft}h restantes</>}
                             </span>
                           </div>
                           <div className="w-full h-1.5 rounded-full mb-2" style={{ background: 'var(--border-subtle)' }}>
