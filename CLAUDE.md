@@ -13,6 +13,32 @@
 - **Resend** — emails transaccionales
 - **Leaflet** — mapas con marcadores de espacios
 
+## Logo
+
+### Descripción visual
+- Wordmark **"espot"** en minúsculas con la "o" reemplazada por un pin de ubicación (mapa) con punto blanco interior
+- La tipografía del logo es **TypoGraphica Regular** — letras redondeadas, bold, geométricas
+- La "t" tiene un corte diagonal característico en la parte superior derecha
+- El pin dentro de la "o" es el símbolo de la marca — siempre respetarlo en cualquier uso
+
+### Archivos en `public/`
+| Archivo | Uso |
+|---|---|
+| `logo-dark.svg` | Logo en navy `#03313C` — fondos claros, headers blancos |
+| `logo-green.svg` | Logo en verde `#35C493` — fondos oscuros, hero del marketplace |
+
+### Reglas de uso
+- **Fondo oscuro** → usar `logo-green.svg`
+- **Fondo claro/blanco** → usar `logo-dark.svg`
+- Nunca distorsionar las proporciones — el SVG tiene `viewBox="0 0 1682.16 585.47"`
+- Altura mínima: 22px en navbar, 28px en headers
+- No recrear el logo en HTML/CSS — siempre usar los archivos SVG
+
+### Dónde se usa en el código
+- Navbar del marketplace: `<img src="/logo-green.svg">` (fondo oscuro del footer y nav dark)
+- Navbar claro: `<img src="/logo-dark.svg">`
+- Páginas de pago y auth: `<img src="/logo-dark.svg">`
+
 ## Tipografía oficial (Manual de Marca)
 
 ### Sistema de dos fuentes:
