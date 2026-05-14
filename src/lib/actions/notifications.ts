@@ -60,17 +60,26 @@ export async function updateNotificationSettings(
   return error ? { error: error.message } : {}
 }
 
-/** Verificar si un tipo de notificación está habilitado para un usuario */
+/** Verificar si un tipo de notificación está habilitado para un usuario.
+ *  Usa service role para leer user_metadata de cualquier usuario.
+ *  Retorna true (habilitado) si no se puede verificar — fail safe. */
 export async function isNotificationEnabled(
   userId: string,
   type: keyof NotificationSettings
 ): Promise<boolean> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.admin?.getUserById
-    ? await (supabase.auth as any).admin.getUserById(userId).catch(() => ({ data: { user: null } }))
-    : { data: { user: null } }
+  try {
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    if (!serviceKey || !supabaseUrl) return true
 
-  if (!user) return true // Por defecto habilitado si no se puede verificar
-  const saved = user.user_metadata?.notification_settings ?? {}
-  return saved[type] !== false // Habilitado a menos que explícitamente false
+    const { createClient: sc } = await import('@supabase/supabase-js')
+    const admin = sc(supabaseUrl, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } })
+    const { data } = await admin.auth.admin.getUserById(userId)
+    if (!data?.user) return true
+
+    const saved = data.user.user_metadata?.notification_settings ?? {}
+    return saved[type] !== false
+  } catch {
+    return true // fail safe: si no se puede verificar, enviar el email
+  }
 }
