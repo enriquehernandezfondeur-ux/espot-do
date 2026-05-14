@@ -88,11 +88,11 @@ export default function HeroParallax({ spaceCount }: Props) {
 
         {/* Headline */}
         <h1
-          className="font-bold text-white mb-5"
+          className="font-display text-white mb-5"
           style={{
             fontSize: 'clamp(1.8rem, 5vw, 3.5rem)',
             lineHeight: 1.04,
-            letterSpacing: '-0.045em',
+            letterSpacing: '-0.03em',
             maxWidth: 900,
           }}>
           El espacio perfecto

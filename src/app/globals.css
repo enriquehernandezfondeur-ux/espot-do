@@ -1,11 +1,21 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'TypoGraphica';
+  src: url('/fonts/typographica.woff2') format('woff2'),
+       url('/fonts/typographica.woff')  format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ── BRAND — Paleta oficial Espot (Manual de Marca) ─
    #03313C  Navy principal (color oscuro del logo)
    #35C493  Verde marca
    #D4FF58  Lima acento
    ─────────────────────────────────────────────────── */
 :root {
+  --font-display: 'TypoGraphica', var(--font-poppins), sans-serif;
   --brand:        #35C493;
   --brand-dark:   #28A87C;
   --brand-light:  #4DD9A7;
@@ -252,6 +262,11 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 @keyframes slideInBottom {
   from { transform: translateY(100%); }
   to   { transform: translateY(0); }
+}
+
+/* Fuente de display — TypoGraphica para headlines */
+.font-display {
+  font-family: var(--font-display);
 }
 
 /* Gradiente texto para el hero */

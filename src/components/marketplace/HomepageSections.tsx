@@ -56,7 +56,7 @@ function SocialSection() {
               <span className="text-sm font-semibold" style={{ color: '#6B7280' }}>@espot.do</span>
             </div>
             <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: '#35C493' }}>Comunidad</p>
-            <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
+            <h2 className="font-display" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.02em' }}>
               Espacios reales,{' '}
               <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 eventos reales
@@ -200,7 +200,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
               <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: '#35C493' }}>
                 Por tipo de evento
               </p>
-              <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
+              <h2 className="font-display" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.02em' }}>
                 ¿Qué estás{' '}
                 <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                   celebrando?
@@ -261,7 +261,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
               <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: '#35C493' }}>
                 Espacios disponibles
               </p>
-              <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
+              <h2 className="font-display" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.02em' }}>
                 {spaces.length > 0 ? (
                   <>{spaces.length}{' '}
                     <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
@@ -322,7 +322,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
             <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: '#35C493' }}>
               Por tipo de espacio
             </p>
-            <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
+            <h2 className="font-display" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.02em' }}>
               Explora{' '}
               <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 tu opción
@@ -416,7 +416,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
             <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{ color: '#35C493' }}>
               Proceso simple
             </p>
-            <h2 className="font-bold text-white" style={{ fontSize: 'clamp(1.8rem, 5vw, 3rem)', letterSpacing: '-0.04em', lineHeight: 1.1 }}>
+            <h2 className="font-display text-white" style={{ fontSize: 'clamp(1.8rem, 5vw, 3rem)', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
               Reserva en tres pasos
             </h2>
             <p className="mt-3 text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>
@@ -510,8 +510,8 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                     <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#35C493' }} />
                     Para propietarios
                   </div>
-                  <h2 className="font-bold text-white mb-3"
-                    style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', letterSpacing: '-0.04em', lineHeight: 1.12 }}>
+                  <h2 className="font-display text-white mb-3"
+                    style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', letterSpacing: '-0.02em', lineHeight: 1.12 }}>
                     ¿Tienes un espacio<br className="hidden md:block" /> para eventos?
                   </h2>
                   <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.95rem', lineHeight: 1.75, maxWidth: 460 }}>
