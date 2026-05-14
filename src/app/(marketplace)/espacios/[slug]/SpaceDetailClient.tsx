@@ -614,7 +614,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   <video
                     src={space.video_url}
                     controls
-                    autoPlay
+                    playsInline
                     className="w-full"
                     style={{ maxHeight: '78vh', display: 'block' }}>
                     Tu navegador no soporta video.

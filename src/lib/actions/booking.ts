@@ -229,7 +229,7 @@ export async function createBooking(payload: CreateBookingPayload) {
     basePrice: payload.basePrice, selectedAddons: [],
     bookingId: booking.id,
   }
-  await Promise.all([
+  await Promise.allSettled([
     guestEmail && sendEmail({
       to: guestEmail,
       subject: isQuote ? `Cotización solicitada — ${spaceName}` : `Solicitud recibida — ${spaceName}`,
@@ -283,7 +283,7 @@ export async function acceptBooking(bookingId: string) {
 
   const guest = bk.profiles as any
 
-  await Promise.all([
+  await Promise.allSettled([
     guest?.email && sendEmail({
       to: guest.email,
       subject: `El propietario aceptó tu solicitud — ${space?.name}`,
@@ -354,7 +354,7 @@ export async function rejectBooking(bookingId: string, reason?: string) {
 
   if (paidAmount > 0) {
     // Reserva ya pagada rechazada → reembolso pendiente
-    await Promise.all([
+    await Promise.allSettled([
       guestEmail && sendEmail({
         to: guestEmail,
         subject: `Reembolso en proceso — ${space?.name}`,
@@ -478,7 +478,7 @@ export async function confirmPayment(bookingId: string) {
     totalAmount: Number(bk.total_amount), platformFee: Number(bk.platform_fee),
     basePrice: Number(bk.base_price), selectedAddons: [], bookingId,
   }
-  await Promise.all([
+  await Promise.allSettled([
     guest?.email && sendEmail({
       to: guest.email,
       subject: `Reserva confirmada — ${space?.name}`,
@@ -561,7 +561,7 @@ export async function cancelBooking(bookingId: string, reason?: string, refundBa
 
   // Si hay cuotas pagadas → email de reembolso al cliente + alerta al admin
   if (paidAmount > 0) {
-    await Promise.all([
+    await Promise.allSettled([
       guestEmail && sendEmail({
         to: guestEmail,
         subject: `Reembolso en proceso — ${space?.name}`,
