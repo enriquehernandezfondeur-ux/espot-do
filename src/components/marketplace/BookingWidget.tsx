@@ -176,17 +176,17 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   }, [eventDate, space.space_time_blocks])
 
   // ── Configuración de límites ───────────────────────────
-  const minHours     = pricing?.min_hours     ?? 0
-  const maxHours     = pricing?.max_hours     ?? 0
   const packageHours = pricing?.package_hours ?? 0
   const sessionHours = pricing?.session_hours ?? 0
+  const minHours     = pricing?.min_hours ?? 0
+  // Para paquete sin precio de hora extra: el máximo es packageHours
+  const maxHours = isPackage && packageHours > 0 && !(Number(pricing?.extra_hour_price) > 0)
+    ? packageHours
+    : (pricing?.max_hours ?? 0)
 
-  // Duración fija: consumo mínimo con sesión definida o paquete sin horas extra
-  const fixedDuration: number = (() => {
-    if (isConsumption && sessionHours > 0) return sessionHours
-    if (isPackage && packageHours > 0 && !(Number(pricing?.extra_hour_price) > 0)) return packageHours
-    return 0
-  })()
+  // El cliente siempre elige sus horas libremente.
+  // session_hours y package_hours son sugerencias, no duración forzada.
+  const fixedDuration: number = 0
 
   const SLOT_MINS = 30 // tamaño mínimo de slot (30 minutos)
 
@@ -818,30 +818,48 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                   </div>
                 )}
 
-                {/* ── CASO C: Duración variable (precio por hora o consumo flexible) ── */}
+                {/* ── CASO C: El cliente elige horas libremente ── */}
                 {!blockTooShort && fixedDuration === 0 && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <TimePicker
-                      value={startTime}
-                      onChange={v => { setStartTime(v); setEndTime('') }}
-                      placeholder={isConsumption ? 'Llegada' : 'Hora de inicio'}
-                      allowedRange={allowedTimeRange}
-                      excludedRanges={bookedRanges}
-                    />
-                    <TimePicker
-                      value={endTime}
-                      onChange={setEndTime}
-                      placeholder={startTime ? (isConsumption ? 'Salida' : 'Hora de salida') : 'Elige llegada primero'}
-                      disabled={!startTime}
-                      afterValue={startTime || undefined}
-                      minMinutesAfter={minHours ? minHours * 60 : undefined}
-                      maxMinutesAfter={
-                        minsUntilBlockEnd !== undefined
-                          ? (maxHours ? Math.min(maxHours * 60, minsUntilBlockEnd) : minsUntilBlockEnd)
-                          : (maxHours ? maxHours * 60 : undefined)
-                      }
-                      allowedRange={endPickerAllowedRange}
-                    />
+                  <div className="space-y-3">
+                    {/* Sugerencia de duración para consumo mínimo y paquete */}
+                    {(isConsumption && sessionHours > 0) && (
+                      <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
+                        style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.15)', color: '#1D4ED8' }}>
+                        <Clock size={12} style={{ flexShrink: 0 }} />
+                        Duración sugerida: {sessionHours}h · Puedes elegir el horario que prefieras
+                      </div>
+                    )}
+                    {isPackage && packageHours > 0 && (
+                      <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
+                        style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)', color: 'var(--brand)' }}>
+                        <Package size={12} style={{ flexShrink: 0 }} />
+                        Paquete de {packageHours}h · Elige el horario que mejor te convenga
+                        {Number(pricing?.extra_hour_price) > 0 && ` · +${formatCurrency(Number(pricing.extra_hour_price))}/hr adicional`}
+                      </div>
+                    )}
+                    <div className="grid grid-cols-2 gap-3">
+                      <TimePicker
+                        value={startTime}
+                        onChange={v => { setStartTime(v); setEndTime('') }}
+                        placeholder={isConsumption ? 'Llegada' : 'Hora de inicio'}
+                        allowedRange={allowedTimeRange}
+                        excludedRanges={bookedRanges}
+                      />
+                      <TimePicker
+                        value={endTime}
+                        onChange={setEndTime}
+                        placeholder={startTime ? (isConsumption ? 'Salida' : 'Hora de salida') : 'Elige llegada primero'}
+                        disabled={!startTime}
+                        afterValue={startTime || undefined}
+                        minMinutesAfter={minHours ? minHours * 60 : (isPackage && packageHours > 0 ? 30 : undefined)}
+                        maxMinutesAfter={
+                          minsUntilBlockEnd !== undefined
+                            ? (maxHours ? Math.min(maxHours * 60, minsUntilBlockEnd) : minsUntilBlockEnd)
+                            : (maxHours ? maxHours * 60 : undefined)
+                        }
+                        allowedRange={endPickerAllowedRange}
+                      />
+                    </div>
                   </div>
                 )}
               </div>

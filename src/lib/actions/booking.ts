@@ -79,12 +79,13 @@ export async function createBooking(payload: CreateBookingPayload) {
 
       if (minH > 0 && selectedH < minH)
         return { error: `Este Espot requiere mínimo ${minH} hora${minH > 1 ? 's' : ''} de reserva.` }
-      if (maxH > 0 && selectedH > maxH)
+      // Para paquete sin hora extra: no puede exceder el paquete
+      if (pkgH > 0 && !hasExtra && selectedH > pkgH + 0.25)
+        return { error: `Este paquete incluye hasta ${pkgH} hora${pkgH > 1 ? 's' : ''}. Selecciona un horario dentro de ese rango.` }
+      // maxH solo aplica para por hora (no para consumo mínimo ni paquete)
+      if (maxH > 0 && pricingCheck.pricing_type === 'hourly' && selectedH > maxH)
         return { error: `Este Espot permite máximo ${maxH} hora${maxH > 1 ? 's' : ''} de reserva.` }
-      if (sessH > 0 && Math.abs(selectedH - sessH) > 0.25)
-        return { error: `Este espacio requiere exactamente ${sessH} hora${sessH > 1 ? 's' : ''} de sesión.` }
-      if (pkgH > 0 && !hasExtra && Math.abs(selectedH - pkgH) > 0.25)
-        return { error: `Este paquete tiene una duración fija de ${pkgH} hora${pkgH > 1 ? 's' : ''}.` }
+      // session_hours es referencia, no restricción — cliente elige libremente
 
       // Validar basePrice para evitar manipulación: recalcular precio esperado en servidor
       if (pricingCheck.pricing_type !== 'custom_quote') {
