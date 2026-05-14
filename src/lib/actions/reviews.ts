@@ -113,7 +113,7 @@ export async function respondToReview(
 
   if (error) return { error: error.message }
 
-  revalidatePath('/espacios')
+  revalidatePath('/espacios', 'layout')
   return {}
 }
 
@@ -193,6 +193,6 @@ export async function submitReview(data: {
     return { error: error.message }
   }
 
-  revalidatePath('/espacios')
+  revalidatePath('/espacios', 'layout')
   return {}
 }

@@ -667,7 +667,7 @@ export default function MisReservasPage() {
                             style={{ color: 'var(--brand)', background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
                             <MessageCircle size={12} /> Contactar propietario
                           </Link>
-                          {new Date(bk.event_date) > new Date() && (
+                          {new Date(bk.event_date + 'T12:00') > new Date() && (
                             <button onClick={() => openCancelModal(bk)}
                               className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
                               style={{ color: '#DC2626', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
@@ -718,7 +718,7 @@ export default function MisReservasPage() {
                     {/* ── Reseña — aparece para reservas completadas con fecha pasada ── */}
                     {(bk.status === 'confirmed' || bk.status === 'completed') &&
                      isPaid(bk.payment_status) &&
-                     new Date(bk.event_date) < new Date() && (
+                     new Date(bk.event_date + 'T12:00') < new Date() && (
                       <div className="mt-4">
                         {reviewed.has(bk.id) ? (
                           <div className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm"

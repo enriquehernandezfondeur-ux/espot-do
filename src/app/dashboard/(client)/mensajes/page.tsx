@@ -36,7 +36,8 @@ export default function ClientMensajesPage() {
   const channelRef       = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
   const globalChannelRef = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
   const activeRef        = useRef<any | null>(null)
-  const supabase         = createClient()
+  const supabaseRef      = useRef(createClient())
+  const supabase         = supabaseRef.current
 
   useEffect(() => () => {
     channelRef.current?.unsubscribe()

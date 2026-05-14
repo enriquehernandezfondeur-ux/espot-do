@@ -67,25 +67,29 @@ export default function FavoriteButton({ spaceId, size = 'md', className = '' }:
     }
 
     setLoading(true)
-    if (saved && favoriteId) {
-      await supabase.from('favorites').delete().eq('id', favoriteId).eq('guest_id', user.id)
-      setSaved(false)
-      setFavoriteId(null)
-    } else {
-      const { data } = await supabase
-        .from('favorites')
-        .insert({ guest_id: user.id, space_id: spaceId })
-        .select('id')
-        .single()
-      if (data) {
-        setSaved(true)
-        setFavoriteId(data.id)
-        // Animación de pulso al guardar
-        setPulse(true)
-        setTimeout(() => setPulse(false), 600)
+    try {
+      if (saved && favoriteId) {
+        await supabase.from('favorites').delete().eq('id', favoriteId).eq('guest_id', user.id)
+        setSaved(false)
+        setFavoriteId(null)
+      } else {
+        const { data } = await supabase
+          .from('favorites')
+          .insert({ guest_id: user.id, space_id: spaceId })
+          .select('id')
+          .single()
+        if (data) {
+          setSaved(true)
+          setFavoriteId(data.id)
+          setPulse(true)
+          setTimeout(() => setPulse(false), 600)
+        }
       }
+    } catch {
+      // silencio — el estado visual no cambia si hay error de red
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   if (!mounted) return null

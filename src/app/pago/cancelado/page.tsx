@@ -20,7 +20,7 @@ function CanceladoContent() {
         body:    JSON.stringify({ bookingId }),
       }).catch(() => {})
     }
-  }, [])
+  }, [bookingId])
 
   return (
     <div className="min-h-dvh" style={{ background: 'linear-gradient(160deg, #080f12 0%, #0B0F0E 55%)' }}>
