@@ -129,7 +129,7 @@ function ResetContent() {
                 </div>
                 <button type="submit" disabled={loading}
                   className="w-full font-bold py-3.5 rounded-xl text-sm transition-all disabled:opacity-50"
-                  style={{ background: '#35C493', color: '#0B0F0E', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
+                  style={{ background: '#D4FF58', color: '#03313C', boxShadow: '0 4px 20px rgba(212,255,88,0.3)' }}>
                   {loading ? 'Actualizando...' : 'Actualizar contraseña'}
                 </button>
               </form>

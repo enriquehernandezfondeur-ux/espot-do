@@ -17,6 +17,7 @@ const BANKS = [
 const PAYOUT_STATUS: Record<string, { label: string; color: string; bg: string }> = {
   pending:     { label: 'Pendiente',   color: '#D97706', bg: 'rgba(217,119,6,0.08)'  },
   en_revision: { label: 'En revisión', color: '#2563EB', bg: 'rgba(37,99,235,0.08)'  },
+  paid:        { label: 'Liquidado',   color: '#16A34A', bg: 'rgba(22,163,74,0.08)'  },
   liquidado:   { label: 'Liquidado',   color: '#16A34A', bg: 'rgba(22,163,74,0.08)'  },
   retenido:    { label: 'Retenido',    color: '#DC2626', bg: 'rgba(220,38,38,0.08)'  },
   reembolsado: { label: 'Reembolsado', color: '#6B7280', bg: 'rgba(107,114,128,0.08)'},
@@ -183,6 +184,23 @@ export default function HostPagosPage() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Banner cómo funciona el cobro */}
+      <div className="flex items-start gap-3 px-5 py-4 rounded-2xl"
+        style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid rgba(53,196,147,0.18)' }}>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#35C493" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <div>
+          <p className="text-sm font-bold mb-1" style={{ color: '#065F46' }}>
+            EspotHub gestiona todos los cobros
+          </p>
+          <p className="text-xs leading-relaxed" style={{ color: '#047857' }}>
+            Los clientes pagan directamente a EspotHub. Nunca cobres ni solicites pagos fuera de la plataforma.
+            Después de cada evento completado te transferimos el neto (90%) a la cuenta registrada aquí.
+          </p>
+        </div>
       </div>
 
       {/* Cuenta bancaria */}

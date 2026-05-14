@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { formatCurrency } from '@/lib/utils'
 
 // Inyectar CSS de Leaflet via link tags
 const LEAFLET_CSS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
@@ -121,14 +120,6 @@ function getPricePin(space: any): string {
   return 'Cotizar'
 }
 
-function getFullPrice(space: any): string | null {
-  const p = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
-  if (!p) return null
-  if (p.pricing_type === 'hourly') return `${formatCurrency(p.hourly_price)} / hora`
-  if (p.pricing_type === 'minimum_consumption') return `Consumo mín. ${formatCurrency(p.minimum_consumption)}`
-  if (p.pricing_type === 'fixed_package') return `Paquete ${formatCurrency(p.fixed_price)}`
-  return 'Cotización'
-}
 
 interface Props {
   spaces:        any[]
@@ -228,7 +219,15 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
           marker.setZIndexOffset(0)
         }
       })
-      marker.on('click', () => openSpacePopup(L, map, space, coords))
+      // click Y dblclick para máxima compatibilidad entre browsers/Leaflet
+      const nav = () => { if (space.slug) window.location.href = '/espacios/' + space.slug }
+      marker.on('click', nav)
+
+      // Fallback: listener DOM directo en el elemento del marcador
+      marker.once('add', () => {
+        const el = marker.getElement()
+        if (el) el.addEventListener('click', nav, { passive: true })
+      })
 
       marker.addTo(map)
       markersRef.current.set(space.id, marker)
@@ -279,8 +278,9 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
   return (
     <>
       <style>{`
-        .espot-pin svg { overflow: visible; }
-        .espot-pin { transition: transform 0.15s ease; }
+        .espot-pin { cursor: pointer !important; }
+        .espot-pin * { pointer-events: none; }
+        .leaflet-marker-icon.espot-pin { pointer-events: auto !important; }
         .leaflet-popup-content-wrapper {
           border-radius:16px !important;
           padding:0 !important;
@@ -317,72 +317,57 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
 
 // ── Helpers de Leaflet ────────────────────────────────────
 
-function buildIcon(L: any, _label: string, active: boolean) {
-  const color  = active ? '#0F1623' : '#35C493'
+// W=96 cubre hasta "RD$100k min"; H=36 = 28px pill + 8px triángulo
+const ICON_W = 96
+const ICON_H = 36
+
+function buildIcon(L: any, label: string, active: boolean) {
+  const bg     = active ? '#D4FF58' : '#03313C'
+  const text   = active ? '#03313C' : '#fff'
+  const scale  = active ? 1.15 : 1
   const shadow = active
-    ? 'drop-shadow(0 3px 8px rgba(15,22,35,0.5))'
-    : 'drop-shadow(0 2px 6px rgba(53,196,147,0.45))'
+    ? '0 4px 12px rgba(212,255,88,0.55)'
+    : '0 2px 8px rgba(0,0,0,0.35)'
+
   return L.divIcon({
-    html: `
-      <div style="position:relative;width:28px;height:36px;cursor:pointer;
-                  will-change:transform;
-                  transition:transform 0.15s ease, filter 0.15s ease;
-                  transform:${active ? 'scale(1.25) translateZ(0)' : 'scale(1) translateZ(0)'};
-                  filter:${shadow}">
-        <svg width="28" height="36" viewBox="0 0 28 36" fill="none"
-             xmlns="http://www.w3.org/2000/svg"
-             shape-rendering="geometricPrecision">
-          <path d="M14 0C6.3 0 0 6.3 0 14c0 5.2 2.8 9.7 7 12.2L14 36l7-9.8C25.2 23.7 28 19.2 28 14 28 6.3 21.7 0 14 0z"
-                fill="${color}"/>
-          <circle cx="14" cy="13" r="6" fill="white"/>
-        </svg>
-      </div>`,
-    className:  '',
-    iconSize:   [28, 36],
-    iconAnchor: [14, 36],
+    html: `<div style="
+        width:${ICON_W}px;
+        height:${ICON_H}px;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:flex-start;
+        cursor:pointer;
+        transform:scale(${scale});
+        transform-origin:50% 100%;
+        transition:transform 0.12s ease;">
+      <div style="
+        background:${bg};
+        color:${text};
+        font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+        font-size:11px;
+        font-weight:800;
+        padding:6px 10px;
+        border-radius:20px;
+        white-space:nowrap;
+        letter-spacing:-0.01em;
+        line-height:1;
+        box-shadow:${shadow};
+        pointer-events:none;">
+        ${label}
+      </div>
+      <div style="
+        width:0;height:0;
+        border-left:6px solid transparent;
+        border-right:6px solid transparent;
+        border-top:8px solid ${bg};
+        margin-top:-1px;
+        pointer-events:none;">
+      </div>
+    </div>`,
+    className:   'espot-pin',
+    iconSize:    [ICON_W, ICON_H],
+    iconAnchor:  [ICON_W / 2, ICON_H],
   })
 }
 
-function openSpacePopup(L: any, map: any, space: any, coords: [number, number]) {
-  const cover    = space.space_images?.find((i: any) => i.is_cover)?.url ?? space.space_images?.[0]?.url
-  const price    = getFullPrice(space)
-  const location = [space.sector, space.city].filter(Boolean).join(', ')
-
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
-  const popupW   = isMobile ? Math.min(window.innerWidth - 32, 320) : 260
-
-  const popup = L.popup({
-    offset:    [0, -10],
-    className: 'espot-popup',
-    maxWidth:  popupW,
-    autoPan:   true,
-    autoPanPadding: [20, 80],
-  }).setLatLng(coords).setContent(`
-    <div style="width:${popupW}px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-      ${cover
-        ? `<div style="height:${isMobile ? 160 : 140}px;overflow:hidden;">
-             <img src="${cover}" style="width:100%;height:100%;object-fit:cover;" />
-           </div>`
-        : `<div style="height:${isMobile ? 110 : 90}px;background:linear-gradient(135deg,#0F2A22,#0A4A3A);display:flex;align-items:center;justify-content:center;">
-             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
-           </div>`
-      }
-      <div style="padding:${isMobile ? '16px' : '14px'};">
-        <div style="font-weight:700;font-size:${isMobile ? '15px' : '14px'};color:#111827;margin-bottom:4px;line-height:1.3;">${space.name}</div>
-        <div style="font-size:${isMobile ? '13px' : '12px'};color:#6B7280;margin-bottom:8px;">
-          ${location} &middot; ${space.capacity_max} personas m&aacute;x.
-        </div>
-        ${price ? `<div style="font-weight:700;font-size:${isMobile ? '14px' : '13px'};color:#35C493;margin-bottom:${isMobile ? '14px' : '12px'};">${price}</div>` : ''}
-        <a href="/espacios/${space.slug}"
-          style="display:block;background:#35C493;color:#fff;text-align:center;
-                 padding:${isMobile ? '12px 16px' : '9px 16px'};
-                 border-radius:12px;font-size:${isMobile ? '14px' : '12px'};
-                 font-weight:700;text-decoration:none;letter-spacing:-0.01em;">
-          Ver Espot &rarr;
-        </a>
-      </div>
-    </div>
-  `)
-
-  popup.openOn(map)
-}

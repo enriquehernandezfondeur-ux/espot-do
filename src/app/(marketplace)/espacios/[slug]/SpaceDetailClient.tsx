@@ -17,6 +17,40 @@ import BookingWidget from '@/components/marketplace/BookingWidget'
 import dynamic from 'next/dynamic'
 const FavoriteButton = dynamic(() => import('@/components/marketplace/FavoriteButton'), { ssr: false })
 
+// Avatar del host con fallback a inicial + onError para URLs rotas
+function HostAvatar({ avatarUrl, fullName, size = 56 }: { avatarUrl: string | null; fullName: string | null; size?: number }) {
+  const [imgError, setImgError] = useState(false)
+  const initial = (fullName ?? 'H').charAt(0).toUpperCase()
+  const radius  = Math.round(size * 0.28)
+
+  return (
+    <div
+      className="shrink-0 overflow-hidden flex items-center justify-content-center"
+      style={{
+        width: size, height: size,
+        borderRadius: radius,
+        background: 'linear-gradient(135deg, var(--brand), var(--brand-dark))',
+        flexShrink: 0,
+      }}>
+      {avatarUrl && !imgError ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={avatarUrl}
+          alt={fullName ?? ''}
+          className="w-full h-full object-cover"
+          onError={() => setImgError(true)}
+        />
+      ) : (
+        <div
+          className="w-full h-full flex items-center justify-center text-white font-bold"
+          style={{ fontSize: Math.round(size * 0.38) }}>
+          {initial}
+        </div>
+      )}
+    </div>
+  )
+}
+
 const DAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 
 function daysToLabel(days: number[]): string {
@@ -206,6 +240,19 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
             </div>
             <div className="px-4 pb-safe">
               <BookingWidget space={space} onChat={() => { setShowMobileWidget(false); setShowChat(true) }} initialDate={initialDate} />
+              {/* Garantía compacta en móvil */}
+              <div className="flex items-center justify-center gap-4 flex-wrap py-4 mt-1">
+                {[
+                  { icon: '📄', text: 'Contrato incluido' },
+                  { icon: '💳', text: 'Pago en cuotas' },
+                  { icon: '🛡️', text: 'Reembolso garantizado' },
+                ].map(({ icon, text }) => (
+                  <div key={text} className="flex items-center gap-1.5">
+                    <span style={{ fontSize: 12 }}>{icon}</span>
+                    <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>{text}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </>
@@ -584,23 +631,16 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
             {/* Host */}
             {host && (
               <div className="flex items-center gap-4 pb-6 mb-6" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl overflow-hidden shrink-0"
-                  style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-dark))' }}>
-                  {host.avatar_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={host.avatar_url} alt={host.full_name ?? ''} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white text-xl font-bold">
-                      {host.full_name?.charAt(0) ?? 'H'}
-                    </div>
-                  )}
-                </div>
+                <HostAvatar
+                  avatarUrl={(host as any).avatar_url ?? null}
+                  fullName={(host as any).full_name ?? null}
+                />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-semibold text-sm md:text-base" style={{ color: 'var(--text-primary)' }}>
-                      {host.full_name}
+                      {(host as any).full_name}
                     </span>
-                    {host.id_verified && (
+                    {(host as any).id_verified && (
                       <span className="flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full shrink-0"
                         style={{ background: 'rgba(34,197,94,0.1)', color: '#16A34A', border: '1px solid rgba(34,197,94,0.2)' }}>
                         <CheckCircle size={10} /> Verificado
@@ -811,18 +851,11 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                       style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
                       {/* Avatar con foto real */}
                       <div className="relative shrink-0">
-                        <div className="w-12 h-12 rounded-2xl overflow-hidden"
-                          style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-dark))' }}>
-                          {host.avatar_url ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={host.avatar_url} alt={host.full_name ?? ''}
-                              className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-white text-base font-bold">
-                              {host.full_name?.charAt(0).toUpperCase() ?? '?'}
-                            </div>
-                          )}
-                        </div>
+                        <HostAvatar
+                          avatarUrl={(host as any).avatar_url ?? null}
+                          fullName={(host as any).full_name ?? null}
+                          size={48}
+                        />
                         {/* Punto online */}
                         <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white bg-green-400" />
                       </div>
@@ -899,6 +932,20 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                       <p className="text-xs text-center mt-2.5" style={{ color: 'var(--text-muted)' }}>
                         Sin compromiso · El propietario confirma disponibilidad
                       </p>
+
+                      {/* Banner de seguridad */}
+                      <div className="flex items-start gap-3 mt-4 px-4 py-3.5 rounded-2xl"
+                        style={{ background: '#F8FAFC', border: '1px solid #E5E7EB' }}>
+                        <Shield size={15} style={{ color: '#35C493', flexShrink: 0, marginTop: 1 }} />
+                        <div>
+                          <p className="text-xs font-bold mb-0.5" style={{ color: '#0F1623' }}>
+                            Comunícate siempre a través de EspotHub
+                          </p>
+                          <p className="text-xs leading-relaxed" style={{ color: '#6B7280' }}>
+                            Para proteger tu reserva, nunca pagues ni acuerdes condiciones por fuera de la plataforma.
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1180,6 +1227,32 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
             })()}
 
             <BookingWidget space={space} onChat={() => setShowChat(true)} initialDate={initialDate} />
+
+            {/* ── Garantía EspotHub ── */}
+            <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)', background: 'var(--bg-surface)' }}>
+              <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                <Shield size={14} style={{ color: 'var(--brand)', flexShrink: 0 }} />
+                <span className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>
+                  Garantía EspotHub
+                </span>
+              </div>
+              <div className="px-4 py-3 space-y-2.5">
+                {[
+                  { icon: '📄', label: 'Contrato oficial incluido', sub: 'Firmado entre tú y el propietario' },
+                  { icon: '💳', label: 'Paga en cuotas', sub: 'Sin coordinar transferencias manualmente' },
+                  { icon: '🛡️', label: 'Reembolso si cancela el propietario', sub: 'Tu dinero está protegido' },
+                  { icon: '✅', label: 'Espacios verificados', sub: 'Revisados por el equipo de EspotHub' },
+                ].map(({ icon, label, sub }) => (
+                  <div key={label} className="flex items-start gap-2.5">
+                    <span style={{ fontSize: 13, lineHeight: 1, marginTop: 2, flexShrink: 0 }}>{icon}</span>
+                    <div>
+                      <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{label}</p>
+                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{sub}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
         </div>{/* end grid */}

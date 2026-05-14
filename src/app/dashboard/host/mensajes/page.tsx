@@ -199,12 +199,23 @@ export default function HostMensajesPage() {
         style={{ background: 'var(--bg-surface)', borderRight: '1px solid var(--border-subtle)', maxHeight: '100dvh' }}>
         <div className="px-5 pt-6 pb-4">
           <h1 className="text-lg font-bold mb-3" style={{ color: 'var(--text-primary)' }}>Mensajes</h1>
-          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl"
+          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl mb-3"
             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
             <Search size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
             <input value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Buscar..." className="bg-transparent text-sm flex-1 focus:outline-none"
               style={{ color: 'var(--text-primary)', fontSize: 16 }} />
+          </div>
+          {/* Banner seguridad */}
+          <div className="flex items-start gap-2.5 px-3 py-2.5 rounded-xl"
+            style={{ background: 'rgba(217,119,6,0.06)', border: '1px solid rgba(217,119,6,0.18)' }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <p className="text-xs leading-relaxed" style={{ color: '#92400E' }}>
+              <span className="font-bold">No compartas datos bancarios por chat.</span>{' '}
+              EspotHub gestiona todos los pagos. Si un cliente solicita pago directo, repórtalo.
+            </p>
           </div>
         </div>
         <div className="flex-1 overflow-y-auto">
@@ -257,6 +268,18 @@ export default function HostMensajesPage() {
               {active.cover ? <img src={active.cover} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Building2 size={16} style={{ color: '#CBD5E1' }} /></div>}
             </div>
             <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{active.spaceName}</div>
+          </div>
+
+          {/* Banner seguridad — fijo dentro del chat */}
+          <div className="flex items-start gap-2.5 px-4 py-3 shrink-0"
+            style={{ background: '#FFFBEB', borderBottom: '1px solid #FDE68A' }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <p className="text-xs leading-relaxed" style={{ color: '#92400E' }}>
+              <span className="font-bold">No acuerdes pagos fuera de EspotHub.</span>{' '}
+              Si aceptas pagos directos pierdes la protección de la plataforma. Los clientes pagan a través de EspotHub y tú recibes el neto.
+            </p>
           </div>
 
           {/* Messages */}

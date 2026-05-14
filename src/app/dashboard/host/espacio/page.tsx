@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Building2, Clock, DollarSign, Plus, Gift, Shield, CreditCard, CheckCircle, ChevronRight, ChevronLeft, X, Loader2, Eye, EyeOff, MapPin, Users, Pencil, PlusCircle, Wine, UtensilsCrossed, Sunset, Trees, Camera, Briefcase, Home, Package, MessageSquare, Music2, Volume2, Sun, Car, Wifi, Wind, Waves, Monitor, Zap, ShowerHead, Sparkles, Trash2, Save } from 'lucide-react'
+import { Building2, Clock, DollarSign, Plus, Gift, Shield, CreditCard, CheckCircle, ChevronRight, ChevronLeft, X, Loader2, Eye, EyeOff, MapPin, Users, Pencil, PlusCircle, Wine, UtensilsCrossed, Sunset, Trees, Camera, Briefcase, Home, Leaf, Package, MessageSquare, Music2, Volume2, Sun, Car, Wifi, Wind, Waves, Monitor, Zap, ShowerHead, Sparkles, Trash2, Save } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
 import { saveSpace, publishSpace, getMySpaces, saveSpaceImages, updateSpace, deactivateSpace, deleteSpaceByHost, updateCancellationPolicy } from '@/lib/actions/space'
 import PhotoUploader from '@/components/dashboard/PhotoUploader'
@@ -30,6 +30,7 @@ const categories: { value: SpaceCategory; label: string; icon: React.ElementType
   { value: 'bar',         label: 'Bar / Lounge',      icon: Wine },
   { value: 'rooftop',    label: 'Rooftop',            icon: Sunset },
   { value: 'terraza',    label: 'Terraza',            icon: Trees },
+  { value: 'jardin',     label: 'Jardín',             icon: Leaf },
   { value: 'estudio',    label: 'Estudio',            icon: Camera },
   { value: 'coworking',  label: 'Coworking',          icon: Briefcase },
   { value: 'hotel',      label: 'Hotel',              icon: Building2 },

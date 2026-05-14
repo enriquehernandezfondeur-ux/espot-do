@@ -2,6 +2,9 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { sendEmail } from '@/lib/email/send'
+import { emailBase, infoBox } from '@/lib/email/templates'
+import { formatCurrency, formatDate } from '@/lib/utils'
 
 const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
 
@@ -382,11 +385,63 @@ export async function getAdminPayouts(filter?: 'pending' | 'paid' | 'all') {
 export async function markPayoutPaid(bookingId: string) {
   const supabase = await requireAdmin()
   if (!supabase) return { error: 'No autorizado' }
+
   const { error } = await supabase
     .from('bookings')
     .update({ payout_status: 'paid', updated_at: new Date().toISOString() })
     .eq('id', bookingId)
-  return error ? { error: error.message } : { success: true }
+
+  if (error) return { error: error.message }
+
+  // Obtener datos del booking para notificar al host
+  const { data: booking } = await supabase
+    .from('bookings')
+    .select(`
+      total_amount, platform_fee, event_date, event_type,
+      spaces!space_id(name, profiles!host_id(full_name, email))
+    `)
+    .eq('id', bookingId)
+    .single()
+
+  if (booking) {
+    const space     = (booking as any).spaces as any
+    const host      = space?.profiles as any
+    const hostEmail = host?.email as string | undefined
+    const netAmount = Math.round(Number(booking.total_amount) * 0.90)
+    const SITE      = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espothub.com'
+
+    if (hostEmail) {
+      const html = emailBase({
+        title:    '¡Tu pago ha sido procesado!',
+        subtitle: `Hemos transferido el neto de tu reserva en ${space?.name ?? 'tu espacio'}.`,
+        body: `
+          <p style="font-size:15px;color:#374151;margin:0 0 20px;line-height:1.6;">
+            Hola ${host?.full_name ?? 'Propietario'}, el pago correspondiente a la siguiente reserva ha sido transferido a tu cuenta bancaria registrada.
+          </p>
+          ${infoBox([
+            { label: 'Espacio',        value: space?.name ?? '—' },
+            { label: 'Evento',         value: booking.event_type ?? '—' },
+            { label: 'Fecha',          value: formatDate(booking.event_date) },
+            { label: 'Total cliente',  value: formatCurrency(Number(booking.total_amount)) },
+            { label: 'Comisión Espot', value: formatCurrency(Number(booking.platform_fee ?? Number(booking.total_amount) * 0.10)) },
+            { label: 'Neto transferido', value: formatCurrency(netAmount) },
+          ])}
+          <p style="font-size:13px;color:#6B7280;margin:16px 0 0;line-height:1.6;">
+            Si tienes alguna pregunta sobre esta transferencia, responde a este email o escríbenos a contacto@espothub.com.
+          </p>
+        `,
+        cta: { text: 'Ver mis finanzas', url: `${SITE}/dashboard/host/pagos` },
+      })
+
+      await sendEmail({
+        to:      hostEmail,
+        subject: `Pago transferido — ${formatCurrency(netAmount)} · ${space?.name ?? 'Tu espacio'}`,
+        html,
+      })
+    }
+  }
+
+  return { success: true }
 }
 
 export async function getHostBankAccount(hostId: string) {

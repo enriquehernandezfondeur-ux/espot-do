@@ -915,8 +915,13 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               )
             }
           </div>
-          <div style={{ flex: '0 0 40%', position: 'sticky', top: 0, height: 'calc(100vh - 226px)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.08)', border: '1px solid var(--border-subtle)' }}>
-            <SpacesMap spaces={filtered} hoveredId={hoveredId} cityFilter={sector} onSpaceHover={handleCardHover} />
+          {/* El wrapper solo aplica border-radius + sombra, sin overflow:hidden
+              para que los popups de Leaflet no queden recortados */}
+          <div style={{ flex: '0 0 40%', position: 'sticky', top: 0, height: 'calc(100vh - 226px)', borderRadius: 20, boxShadow: '0 4px 24px rgba(0,0,0,0.08)', border: '1px solid var(--border-subtle)' }}>
+            {/* Capa interna que sí tiene overflow:hidden para recortar el tile del mapa */}
+            <div style={{ width: '100%', height: '100%', borderRadius: 20, overflow: 'hidden' }}>
+              <SpacesMap spaces={filtered} hoveredId={hoveredId} cityFilter={sector} onSpaceHover={handleCardHover} />
+            </div>
           </div>
         </div>
 

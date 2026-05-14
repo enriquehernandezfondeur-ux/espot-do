@@ -1109,6 +1109,30 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               </div>
             )}
 
+            {/* ── Garantía EspotHub ── */}
+            <div className="rounded-2xl overflow-hidden" style={{ border: '1.5px solid var(--brand-border)' }}>
+              <div className="flex items-center gap-2.5 px-4 py-3"
+                style={{ background: 'var(--brand-dim)', borderBottom: '1px solid var(--brand-border)' }}>
+                <ShieldCheck size={15} style={{ color: 'var(--brand)', flexShrink: 0 }} />
+                <span className="text-sm font-bold" style={{ color: 'var(--brand)' }}>
+                  Garantía EspotHub incluida
+                </span>
+              </div>
+              <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
+                {[
+                  { icon: '📄', text: 'Contrato oficial digital entre tú y el propietario' },
+                  { icon: '💳', text: 'Pago en cuotas automático — sin coordinar transferencias' },
+                  { icon: '🔒', text: 'Si el propietario cancela, te devolvemos el dinero' },
+                  { icon: '✅', text: 'Espacio verificado por el equipo de EspotHub' },
+                ].map(({ icon, text }) => (
+                  <div key={text} className="flex items-start gap-3 px-4 py-2.5">
+                    <span style={{ fontSize: 13, lineHeight: 1, marginTop: 1 }}>{icon}</span>
+                    <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Checkbox T&C — requerido por Azul Payments */}
             <label className="flex items-start gap-3 cursor-pointer select-none">
               <div className="relative mt-0.5 shrink-0">

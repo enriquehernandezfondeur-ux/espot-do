@@ -14,7 +14,7 @@ import {
 } from '@/lib/actions/admin'
 
 const CATEGORIES = [
-  'salon','restaurante','bar','rooftop','terraza','estudio','coworking','hotel','villa','otro'
+  'salon','restaurante','bar','rooftop','terraza','jardin','estudio','coworking','hotel','villa','otro'
 ]
 const PRICING_TYPES = [
   { value: 'hourly',              label: 'Precio por hora' },

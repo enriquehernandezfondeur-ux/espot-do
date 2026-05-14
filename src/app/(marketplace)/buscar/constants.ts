@@ -1,6 +1,6 @@
 import {
   LayoutList, Building2, UtensilsCrossed, Sunset, Wine, Hotel,
-  Briefcase, Home, Camera, Trees,
+  Briefcase, Home, Camera, Trees, Leaf,
   Timer, Package, MessageSquare,
 } from 'lucide-react'
 
@@ -10,6 +10,7 @@ export const CATEGORIES = [
   { value: 'restaurante',  label: 'Restaurantes', icon: UtensilsCrossed },
   { value: 'rooftop',      label: 'Rooftops',     icon: Sunset },
   { value: 'terraza',      label: 'Terrazas',     icon: Trees },
+  { value: 'jardin',       label: 'Jardines',     icon: Leaf },
   { value: 'bar',          label: 'Bares',        icon: Wine },
   { value: 'hotel',        label: 'Hoteles',      icon: Hotel },
   { value: 'villa',        label: 'Villas',       icon: Home },

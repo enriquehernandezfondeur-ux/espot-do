@@ -5,21 +5,35 @@ import Link from 'next/link'
 import {
   ArrowLeft, CalendarDays, Calendar, Clock, Users, MapPin, MessageCircle,
   CreditCard, CheckCircle, Sparkles, ExternalLink,
-  Phone, Mail, Loader2, Check, Building2, FileText,
+  Phone, Mail, Loader2, Check, Building2, FileText, Star,
 } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getClientBookingDetail } from '@/lib/actions/client'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
 import { countdownLabel } from '@/lib/payments/schedule'
+import { submitReview, getUserReviewedBookings } from '@/lib/actions/reviews'
 
 export default function BookingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
-  const [data, setData]       = useState<Awaited<ReturnType<typeof getClientBookingDetail>>>(null)
-  const [loading, setLoading] = useState(true)
+  const [data, setData]             = useState<Awaited<ReturnType<typeof getClientBookingDetail>>>(null)
+  const [loading, setLoading]       = useState(true)
+  const [alreadyReviewed, setAlreadyReviewed] = useState(false)
+  const [rating, setRating]         = useState(0)
+  const [hoverRating, setHoverRating] = useState(0)
+  const [comment, setComment]       = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [reviewDone, setReviewDone] = useState(false)
+  const [reviewError, setReviewError] = useState('')
 
   useEffect(() => {
-    getClientBookingDetail(id)
-      .then(setData)
+    Promise.all([
+      getClientBookingDetail(id),
+      getUserReviewedBookings(),
+    ])
+      .then(([detail, reviewed]) => {
+        setData(detail)
+        if (detail && reviewed.has(detail.booking.id)) setAlreadyReviewed(true)
+      })
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [id])
@@ -60,6 +74,25 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
     }
   }
   const pricingInfo = getPricingInfo()
+
+  async function handleSubmitReview(e: React.FormEvent) {
+    e.preventDefault()
+    if (rating < 1) { setReviewError('Selecciona una calificación'); return }
+    setSubmitting(true); setReviewError('')
+    const result = await submitReview({
+      bookingId: booking.id,
+      spaceId:   space?.id,
+      rating,
+      comment,
+    })
+    setSubmitting(false)
+    if (result.error) { setReviewError(result.error); return }
+    setReviewDone(true)
+    setAlreadyReviewed(true)
+  }
+
+  const today = new Date().toISOString().split('T')[0]
+  const eventPassed = data ? booking.event_date < today : false
   const cover   = space?.space_images?.find((i: any) => i.is_cover)?.url ?? space?.space_images?.[0]?.url
   const sc      = STATUS_COLORS[(booking as any).status as keyof typeof STATUS_COLORS] ?? { color: '#6B7280', bg: '#F4F6F8' }
   const sl      = STATUS_LABELS[(booking as any).status as keyof typeof STATUS_LABELS] ?? (booking as any).status
@@ -274,6 +307,17 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
           })}
           {nextInst && (
             <div className="p-3" style={{ borderTop: '1px solid var(--brand-border)', background: 'var(--brand-dim)' }}>
+              {/* Banner pago seguro */}
+              <div className="flex items-start gap-2.5 mb-3 px-3 py-2.5 rounded-xl"
+                style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                  <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>Pago seguro.</span>{' '}
+                  Procesado por Azul Payments con 3D Secure. EspotHub nunca almacena tu tarjeta.
+                </p>
+              </div>
               <Link href={`/pago/${booking.id}?cuota=${nextInst.id}`}
                 className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold"
                 style={{ background: 'var(--brand)', color: '#fff', boxShadow: '0 2px 12px rgba(53,196,147,0.3)' }}>
@@ -404,6 +448,96 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
         style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
         <FileText size={15} /> Ver contrato de reserva
       </a>
+
+      {/* Reseña — solo si el evento ya pasó */}
+      {eventPassed && (
+        <div className="rounded-2xl overflow-hidden mb-4"
+          style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+          <div className="px-5 py-4 flex items-center gap-2"
+            style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)' }}>
+            <Star size={14} style={{ color: 'var(--brand)' }} />
+            <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+              {alreadyReviewed ? 'Tu reseña' : '¿Cómo estuvo tu evento?'}
+            </span>
+          </div>
+
+          {alreadyReviewed || reviewDone ? (
+            <div className="flex items-center gap-3 px-5 py-5">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: 'rgba(22,163,74,0.1)' }}>
+                <CheckCircle size={18} style={{ color: '#16A34A' }} />
+              </div>
+              <div>
+                <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  Reseña enviada
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                  Gracias por compartir tu experiencia
+                </p>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmitReview} className="px-5 py-5 space-y-4">
+              {/* Estrellas */}
+              <div>
+                <p className="text-xs font-medium mb-2" style={{ color: 'var(--text-muted)' }}>
+                  Calificación
+                </p>
+                <div className="flex gap-1.5">
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <button
+                      key={star}
+                      type="button"
+                      onMouseEnter={() => setHoverRating(star)}
+                      onMouseLeave={() => setHoverRating(0)}
+                      onClick={() => setRating(star)}
+                      className="transition-transform hover:scale-110"
+                    >
+                      <Star
+                        size={28}
+                        fill={(hoverRating || rating) >= star ? 'var(--brand)' : 'none'}
+                        style={{ color: (hoverRating || rating) >= star ? 'var(--brand)' : 'var(--border-medium)' }}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Comentario */}
+              <div>
+                <p className="text-xs font-medium mb-2" style={{ color: 'var(--text-muted)' }}>
+                  Comentario (opcional)
+                </p>
+                <textarea
+                  value={comment}
+                  onChange={e => setComment(e.target.value)}
+                  placeholder="Cuéntanos sobre tu experiencia en el espacio..."
+                  rows={3}
+                  maxLength={500}
+                  className="w-full rounded-xl px-4 py-3 text-sm resize-none focus:outline-none"
+                  style={{ background: 'var(--bg-elevated)', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)', fontSize: 16 }}
+                />
+                <p className="text-right text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
+                  {comment.length}/500
+                </p>
+              </div>
+
+              {reviewError && (
+                <p className="text-xs font-medium" style={{ color: '#DC2626' }}>{reviewError}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={submitting || rating < 1}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-40"
+                style={{ background: 'var(--brand)', color: '#fff', boxShadow: rating > 0 ? '0 2px 12px rgba(53,196,147,0.3)' : 'none' }}>
+                {submitting ? <Loader2 size={15} className="animate-spin" /> : <Star size={15} fill="#fff" />}
+                {submitting ? 'Enviando...' : 'Publicar reseña'}
+              </button>
+            </form>
+          )}
+        </div>
+      )}
 
       {/* Acciones */}
       <div className="flex gap-3">
