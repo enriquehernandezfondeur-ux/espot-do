@@ -194,7 +194,7 @@ export default function DashboardPage() {
       <div className="grid lg:grid-cols-3 gap-4 md:gap-5 mb-6 md:mb-8">
 
         {/* Gráfica */}
-        <div className="lg:col-span-2 rounded-2xl p-6"
+        <div className="lg:col-span-2 rounded-2xl p-4 md:p-6"
           style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between sm:gap-3 mb-6 gap-0.5">
             <div>
@@ -233,7 +233,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Próximo evento */}
-        <div className="rounded-2xl p-6"
+        <div className="rounded-2xl p-4 md:p-6"
           style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
           <h2 className="font-semibold text-sm mb-4" style={{ color: 'var(--text-primary)' }}>Próximo evento</h2>
           {stats?.nextBooking ? (

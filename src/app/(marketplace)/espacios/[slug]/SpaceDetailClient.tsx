@@ -383,6 +383,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
               {images[0] ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={images[0].url} alt={space.name}
+                  loading="eager"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
@@ -433,6 +434,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   style={{ background: 'var(--bg-elevated)' }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={img.url} alt=""
+                    loading="lazy"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
                   {/* Overlay "+N más" en la última celda si hay más fotos */}
                   {isLastCell && hiddenCount > 0 && (
@@ -480,6 +482,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
             {images.length > 0 ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={images[photoIdx]?.url} alt={space.name}
+                loading="eager"
                 className="w-full h-full object-cover"
                 onClick={() => setShowLightbox(true)} />
             ) : (
@@ -572,7 +575,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                     className={cn('h-14 w-20 rounded-lg overflow-hidden shrink-0 transition-all', i === photoIdx ? 'ring-2 opacity-100 scale-105' : 'opacity-35 hover:opacity-65')}
                     style={{ ['--tw-ring-color' as any]: 'var(--brand)' }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img.url} alt="" className="w-full h-full object-cover" />
+                    <img src={img.url} alt="" loading="lazy" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -1008,7 +1011,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                     {/* Resumen compacto */}
                     <div className="flex items-center gap-3 p-4 rounded-2xl"
                       style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
-                      <div className="text-4xl font-bold" style={{ color: 'var(--text-primary)', lineHeight: 1 }}>
+                      <div className="text-3xl md:text-4xl font-bold" style={{ color: 'var(--text-primary)', lineHeight: 1 }}>
                         {reviewsData.average}
                       </div>
                       <div>
@@ -1291,6 +1294,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                           {cover ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={cover} alt={s.name}
+                              loading="lazy"
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center"

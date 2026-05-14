@@ -125,7 +125,7 @@ export default function ParaPropietariosPage() {
 
       {/* ── PASOS — TIMELINE VERTICAL ────────────────────────── */}
       <section style={{ background: 'var(--bg-base)' }}>
-        <div className="max-w-4xl mx-auto px-5 py-20">
+        <div className="max-w-4xl mx-auto px-5 py-12 md:py-20">
           <div className="mb-12">
             <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--brand)' }}>Proceso</p>
             <h2 className="font-bold" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', letterSpacing: '-0.04em', color: 'var(--text-primary)', lineHeight: 1.1 }}>
@@ -159,7 +159,7 @@ export default function ParaPropietariosPage() {
 
       {/* ── HERRAMIENTAS — LISTA ASIMÉTRICA ──────────────────── */}
       <section style={{ background: 'var(--bg-surface)' }}>
-        <div className="max-w-6xl mx-auto px-5 py-20">
+        <div className="max-w-6xl mx-auto px-5 py-12 md:py-20">
           <div className="grid md:grid-cols-[1fr_1.6fr] gap-16 items-start">
 
             {/* Izquierda — texto fijo */}
@@ -204,7 +204,7 @@ export default function ParaPropietariosPage() {
 
       {/* ── COMISIÓN — BARRA HORIZONTAL ──────────────────────── */}
       <section style={{ background: '#03313C' }}>
-        <div className="max-w-4xl mx-auto px-5 py-20">
+        <div className="max-w-4xl mx-auto px-5 py-12 md:py-20">
           <div className="mb-12">
             <h2 className="font-bold text-white mb-3"
               style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', letterSpacing: '-0.04em', lineHeight: 1.1 }}>
@@ -250,7 +250,7 @@ export default function ParaPropietariosPage() {
 
       {/* ── FAQ ───────────────────────────────────────────────── */}
       <section style={{ background: 'var(--bg-base)' }}>
-        <div className="max-w-5xl mx-auto px-5 py-20">
+        <div className="max-w-5xl mx-auto px-5 py-12 md:py-20">
           <div className="grid md:grid-cols-[1fr_2fr] gap-12 items-start">
 
             {/* Columna izquierda fija */}
@@ -293,7 +293,7 @@ export default function ParaPropietariosPage() {
 
       {/* ── CTA FINAL ─────────────────────────────────────────── */}
       <section style={{ background: 'var(--bg-surface)', borderTop: '1px solid var(--border-subtle)' }}>
-        <div className="max-w-6xl mx-auto px-5 py-16">
+        <div className="max-w-6xl mx-auto px-5 py-10 md:py-16">
           <div className="grid md:grid-cols-[1fr_auto] items-center gap-8">
             <div>
               <h2 className="font-bold mb-2"

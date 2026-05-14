@@ -184,7 +184,7 @@ export default function ParaClientesPage() {
 
       {/* ── CÓMO FUNCIONA — TIMELINE HORIZONTAL ──────────────── */}
       <section style={{ background: 'var(--bg-base)', overflow: 'hidden' }}>
-        <div className="max-w-6xl mx-auto px-5 py-20">
+        <div className="max-w-6xl mx-auto px-5 py-12 md:py-20">
 
           <div className="mb-14">
             <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--brand)' }}>Cómo funciona</p>
@@ -236,7 +236,7 @@ export default function ParaClientesPage() {
           pointerEvents: 'none',
         }} />
 
-        <div className="relative max-w-5xl mx-auto px-5 py-20">
+        <div className="relative max-w-5xl mx-auto px-5 py-12 md:py-20">
           <div className="mb-14">
             <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 mb-5 text-xs font-semibold"
               style={{ background: 'rgba(53,196,147,0.1)', color: '#35C493', border: '1px solid rgba(53,196,147,0.2)' }}>
@@ -295,7 +295,7 @@ export default function ParaClientesPage() {
 
       {/* ── FAQ — DOS COLUMNAS ────────────────────────────────── */}
       <section style={{ background: 'var(--bg-surface)' }}>
-        <div className="max-w-5xl mx-auto px-5 py-20">
+        <div className="max-w-5xl mx-auto px-5 py-12 md:py-20">
           <div className="grid md:grid-cols-[1fr_2fr] gap-12 items-start">
 
             {/* Columna izquierda */}
@@ -338,7 +338,7 @@ export default function ParaClientesPage() {
 
       {/* ── CTA FINAL ─────────────────────────────────────────── */}
       <section style={{ background: 'var(--bg-base)', borderTop: '1px solid var(--border-subtle)' }}>
-        <div className="max-w-6xl mx-auto px-5 py-16">
+        <div className="max-w-6xl mx-auto px-5 py-10 md:py-16">
           <div className="rounded-3xl overflow-hidden relative"
             style={{ background: 'linear-gradient(135deg, #03313C 0%, #0D2318 60%, #1A4D38 100%)' }}>
             <div style={{
