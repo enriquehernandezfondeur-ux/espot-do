@@ -70,6 +70,7 @@ export default function MisReservasPage() {
     setCancelModal(null)
     setCancelStep(1)
     setCancelReason('')
+    setRefundBank({ holderName: '', bank: '', accountNumber: '', accountType: 'ahorro' })
   }
 
   async function handleCancel() {
@@ -830,7 +831,7 @@ export default function MisReservasPage() {
                                 style={{ background: '#35C493', color: '#fff' }}>
                                 {submitting ? 'Publicando...' : 'Publicar reseña'}
                               </button>
-                              <button onClick={() => { setReviewFor(null); setRating(0); setComment(''); setReviewError('') }}
+                              <button onClick={() => { setReviewFor(null); setRating(0); setComment(''); setHoverStar(0); setReviewError('') }}
                                 className="px-4 py-2 rounded-xl text-sm"
                                 style={{ color: 'var(--text-secondary)' }}>
                                 Cancelar

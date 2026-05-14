@@ -100,6 +100,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
 
   useEffect(() => {
     if (!eventDate) { setDateBlocked(false); setBookedRanges([]); return }
+    let mounted = true
     const supabase = createClient()
     Promise.all([
       supabase.from('space_availability').select('start_time,end_time,block_type')
@@ -108,6 +109,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         .eq('space_id', space.id).eq('event_date', eventDate)
         .not('status', 'in', '("cancelled_guest","cancelled_host","rejected")'),
     ]).then(([{ data: avail }, { data: bks }]) => {
+      if (!mounted) return
       const fullDay = avail?.some(a => a.block_type === 'full_day' || !a.start_time || !a.end_time)
       setDateBlocked(!!fullDay)
       const ranges: {start:string;end:string}[] = []
@@ -121,6 +123,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
       })
       setBookedRanges(ranges)
     }).catch(() => {})
+    return () => { mounted = false }
   }, [eventDate, space.id])
 
   const finalEventType = eventType === 'Otro' ? (customEventType.trim() || 'Otro') : eventType
@@ -985,7 +988,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                   placeholder="Describe tu evento..." className="input-base w-full rounded-xl px-4 py-3 text-sm" autoFocus maxLength={80} style={{ fontSize: 16 }} />
                 <textarea value={guestNote} onChange={e => setGuestNote(e.target.value)}
                   placeholder="Cuéntale más al propietario (opcional)..."
-                  rows={2} maxLength={400} className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none" />
+                  rows={2} maxLength={400} className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none" style={{ fontSize: 16 }} />
               </div>
             )}
             {eventType && eventType !== 'Otro' && (
@@ -997,7 +1000,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               ) : (
                 <textarea value={guestNote} onChange={e => setGuestNote(e.target.value)}
                   placeholder="Ej: Llegaremos 2 horas antes para decorar..."
-                  rows={2} maxLength={400} className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none" />
+                  rows={2} maxLength={400} className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none" style={{ fontSize: 16 }} />
               )
             )}
 
@@ -1232,7 +1235,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
       {/* Navegación */}
       <div className="px-6 pb-6 space-y-3">
         {step === maxStep ? (
-          <button onClick={handleBook} disabled={booking || (!isQuote && !termsAccepted)}
+          <button onClick={handleBook} disabled={booking || (!isQuote && !termsAccepted) || (!isQuote && subtotal <= 0)}
             className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl font-bold text-base transition-all disabled:opacity-50"
             style={{
               background: isQuote ? '#0891B2' : 'var(--brand)', color: '#fff',

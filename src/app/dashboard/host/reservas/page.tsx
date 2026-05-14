@@ -104,6 +104,7 @@ export default function HostReservasPage() {
   }
 
   async function doAccept(id: string) {
+    if (bookings.find(b => b.id === id)?.status !== 'pending') return
     setActionId(id + 'a')
     const r = await acceptBooking(id)
     if ('error' in r) { showError(r.error ?? 'Error al aceptar'); }
