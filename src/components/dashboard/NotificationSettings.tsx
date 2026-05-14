@@ -2,17 +2,40 @@
 
 import { useState, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
-import { getNotificationSettings, updateNotificationSettings, type NotificationSettings } from '@/lib/actions/notifications'
+import { createClient } from '@/lib/supabase/client'
 
-interface NotifItem {
-  key: keyof NotificationSettings
-  label: string
+export interface NotificationSettings {
+  reserva_enviada:     boolean
+  reserva_aceptada:    boolean
+  reserva_rechazada:   boolean
+  reserva_confirmada:  boolean
+  reserva_cancelada:   boolean
+  recordatorio_pago:   boolean
+  recordatorio_evento: boolean
+  solicitud_resena:    boolean
+  nueva_solicitud:     boolean
+  pago_recibido:       boolean
+  cancelacion_host:    boolean
+  liquidacion:         boolean
 }
 
-interface NotifGroup {
-  title: string
-  items: NotifItem[]
+const DEFAULTS: NotificationSettings = {
+  reserva_enviada:     true,
+  reserva_aceptada:    true,
+  reserva_rechazada:   true,
+  reserva_confirmada:  true,
+  reserva_cancelada:   true,
+  recordatorio_pago:   true,
+  recordatorio_evento: true,
+  solicitud_resena:    true,
+  nueva_solicitud:     true,
+  pago_recibido:       true,
+  cancelacion_host:    true,
+  liquidacion:         true,
 }
+
+interface NotifItem { key: keyof NotificationSettings; label: string }
+interface NotifGroup { title: string; items: NotifItem[] }
 
 const CLIENT_GROUPS: NotifGroup[] = [
   {
@@ -39,9 +62,9 @@ const HOST_GROUPS: NotifGroup[] = [
   {
     title: 'Solicitudes y pagos',
     items: [
-      { key: 'nueva_solicitud',   label: 'Nueva solicitud de reserva' },
-      { key: 'pago_recibido',     label: 'Pago confirmado del cliente' },
-      { key: 'liquidacion',       label: 'Liquidación transferida por Espot' },
+      { key: 'nueva_solicitud', label: 'Nueva solicitud de reserva' },
+      { key: 'pago_recibido',   label: 'Pago confirmado del cliente' },
+      { key: 'liquidacion',     label: 'Liquidación transferida por Espot' },
     ],
   },
   {
@@ -52,27 +75,42 @@ const HOST_GROUPS: NotifGroup[] = [
   },
 ]
 
-interface Props { role: 'client' | 'host' }
-
-export default function NotificationSettings({ role }: Props) {
-  const [settings, setSettings] = useState<NotificationSettings | null>(null)
+export default function NotificationSettings({ role }: { role: 'client' | 'host' }) {
+  const [settings, setSettings] = useState<NotificationSettings>(DEFAULTS)
   const [pending,  setPending]  = useState<Set<string>>(new Set())
   const [loading,  setLoading]  = useState(true)
+  const supabase = createClient()
 
+  // Carga directa desde el cliente — más rápido y sin roundtrip al servidor
   useEffect(() => {
-    getNotificationSettings().then(s => { setSettings(s); setLoading(false) })
+    supabase.auth.getUser()
+      .then(({ data: { user } }) => {
+        if (user?.user_metadata?.notification_settings) {
+          setSettings({ ...DEFAULTS, ...user.user_metadata.notification_settings })
+        }
+      })
+      .catch(() => {}) // si falla, muestra los defaults
+      .finally(() => setLoading(false))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function toggle(key: keyof NotificationSettings) {
-    if (!settings || pending.has(key)) return
-    const next = { ...settings, [key]: !settings[key] }
-    setSettings(next)
+    if (pending.has(key)) return
+    const newVal = !settings[key]
+    setSettings(prev => ({ ...prev, [key]: newVal }))
     setPending(p => new Set([...p, key]))
-    await updateNotificationSettings({ [key]: !settings[key] })
-    setPending(p => { const s = new Set(p); s.delete(key); return s })
-  }
 
-  const groups = role === 'host' ? HOST_GROUPS : CLIENT_GROUPS
+    try {
+      const current = settings
+      const updated = { ...current, [key]: newVal }
+      await supabase.auth.updateUser({ data: { notification_settings: updated } })
+    } catch {
+      // revertir si falla
+      setSettings(prev => ({ ...prev, [key]: !newVal }))
+    } finally {
+      setPending(p => { const s = new Set(p); s.delete(key); return s })
+    }
+  }
 
   if (loading) return (
     <div className="flex items-center justify-center py-6">
@@ -80,7 +118,7 @@ export default function NotificationSettings({ role }: Props) {
     </div>
   )
 
-  if (!settings) return null
+  const groups = role === 'host' ? HOST_GROUPS : CLIENT_GROUPS
 
   return (
     <div className="space-y-5">
@@ -101,31 +139,24 @@ export default function NotificationSettings({ role }: Props) {
                     borderBottom: i < group.items.length - 1 ? '1px solid var(--border-subtle)' : 'none',
                     background: 'var(--bg-surface)',
                   }}>
-
-                  {/* Label */}
                   <span className="text-sm font-medium leading-snug"
                     style={{ color: enabled ? 'var(--text-primary)' : 'var(--text-muted)' }}>
                     {item.label}
                   </span>
-
-                  {/* Toggle */}
                   <button
                     type="button"
                     onClick={() => toggle(item.key)}
                     disabled={saving}
                     aria-label={enabled ? 'Desactivar' : 'Activar'}
-                    className="shrink-0 relative transition-opacity disabled:opacity-60"
-                    style={{ minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                    style={{ minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
                     {saving ? (
                       <Loader2 size={18} className="animate-spin" style={{ color: 'var(--brand)' }} />
                     ) : (
-                      <div
-                        className="transition-all duration-200"
-                        style={{
-                          width: 44, height: 24, borderRadius: 12, padding: 2,
-                          background: enabled ? 'var(--brand)' : 'var(--border-medium)',
-                          position: 'relative',
-                        }}>
+                      <div style={{
+                        width: 44, height: 24, borderRadius: 12, padding: 2,
+                        background: enabled ? 'var(--brand)' : 'var(--border-medium)',
+                        position: 'relative', transition: 'background 0.2s',
+                      }}>
                         <div style={{
                           width: 20, height: 20, borderRadius: '50%', background: '#fff',
                           boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
@@ -141,8 +172,7 @@ export default function NotificationSettings({ role }: Props) {
           </div>
         </div>
       ))}
-
-      <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
         Los emails de pagos y seguridad siempre se envían.
       </p>
     </div>
