@@ -8,7 +8,7 @@ import {
   ChevronRight, ChevronLeft, Loader2, CheckCircle,
   Minus, Plus, MessageCircle, Clock, ShieldCheck, Info,
   Timer, Mail, Volume2, Zap, Shield, Camera, Music2,
-  UtensilsCrossed, Wine, Package, Paintbrush, MonitorPlay,
+  UtensilsCrossed, Wine, Package, Paintbrush, MonitorPlay, FileText, Lock,
 } from 'lucide-react'
 import { formatCurrency, formatTime } from '@/lib/utils'
 import { createBooking } from '@/lib/actions/booking'
@@ -499,14 +499,9 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
           <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
             El propietario revisará tu solicitud y confirmará disponibilidad.
           </p>
-          <div className="flex items-start gap-2.5 text-left px-4 py-3 rounded-xl mb-5"
-            style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.18)' }}>
-            <ShieldCheck size={15} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: 1 }} />
-            <p className="text-xs" style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              <strong style={{ color: 'var(--text-primary)' }}>Solo pagas cuando el propietario acepte.</strong>{' '}
-              Recibirás un email con el enlace de pago una vez que confirme tu reserva.
-            </p>
-          </div>
+          <p className="text-xs mb-5" style={{ color: 'var(--text-muted)', lineHeight: 1.6 }}>
+            Recibirás un email con el enlace de pago una vez que confirmen tu reserva.
+          </p>
           <Link href="/dashboard/reservas"
             className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-3 rounded-xl"
             style={{ background: 'var(--brand)', color: '#fff' }}>
@@ -1109,24 +1104,24 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               </div>
             )}
 
-            {/* ── Garantía EspotHub ── */}
+            {/* ── Garantía Espot ── */}
             <div className="rounded-2xl overflow-hidden" style={{ border: '1.5px solid var(--brand-border)' }}>
               <div className="flex items-center gap-2.5 px-4 py-3"
                 style={{ background: 'var(--brand-dim)', borderBottom: '1px solid var(--brand-border)' }}>
                 <ShieldCheck size={15} style={{ color: 'var(--brand)', flexShrink: 0 }} />
                 <span className="text-sm font-bold" style={{ color: 'var(--brand)' }}>
-                  Garantía EspotHub incluida
+                  Garantía Espot incluida
                 </span>
               </div>
               <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
                 {[
-                  { icon: '📄', text: 'Contrato oficial digital entre tú y el propietario' },
-                  { icon: '💳', text: 'Pago en cuotas automático — sin coordinar transferencias' },
-                  { icon: '🔒', text: 'Si el propietario cancela, te devolvemos el dinero' },
-                  { icon: '✅', text: 'Espacio verificado por el equipo de EspotHub' },
-                ].map(({ icon, text }) => (
+                  { Icon: FileText,     text: 'Contrato oficial digital incluido' },
+                  { Icon: CreditCard,   text: 'Pago en cuotas automático — sin transferencias manuales' },
+                  { Icon: Lock,         text: 'Si el propietario cancela, te devolvemos el dinero' },
+                  { Icon: CheckCircle,  text: 'Espacio verificado por el equipo de Espot' },
+                ].map(({ Icon, text }) => (
                   <div key={text} className="flex items-start gap-3 px-4 py-2.5">
-                    <span style={{ fontSize: 13, lineHeight: 1, marginTop: 1 }}>{icon}</span>
+                    <Icon size={13} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: 1 }} />
                     <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{text}</p>
                   </div>
                 ))}
@@ -1161,7 +1156,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                 </a>{' '}y la{' '}
                 <a href="/reembolso" target="_blank" style={{ color: 'var(--brand)', textDecoration: 'underline' }}>
                   política de reembolso
-                </a>{' '}de EspotHub. *
+                </a>{' '}de Espot. *
               </p>
             </label>
 

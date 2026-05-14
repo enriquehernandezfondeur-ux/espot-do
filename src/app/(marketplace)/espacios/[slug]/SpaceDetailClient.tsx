@@ -6,7 +6,7 @@ import Link from 'next/link'
 import {
   MapPin, Users, Shield, ChevronLeft, ChevronRight,
   Clock, CheckCircle, X, Music, Ban,
-  ArrowLeft, Share2, CreditCard, Lock, ChevronDown, Play, Images, MessageCircle,
+  ArrowLeft, Share2, CreditCard, Lock, FileText, ChevronDown, Play, Images, MessageCircle,
   Car, Wifi, Wind, UtensilsCrossed, Volume2, Monitor, Music2, Trees, Waves, Wine,
   Sun, Zap, ShowerHead, Building2, Star, Video, Package, Sparkles, Camera,
 } from 'lucide-react'
@@ -243,12 +243,12 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
               {/* Garantía compacta en móvil */}
               <div className="flex items-center justify-center gap-4 flex-wrap py-4 mt-1">
                 {[
-                  { icon: '📄', text: 'Contrato incluido' },
-                  { icon: '💳', text: 'Pago en cuotas' },
-                  { icon: '🛡️', text: 'Reembolso garantizado' },
-                ].map(({ icon, text }) => (
+                  { Icon: FileText,   text: 'Contrato incluido' },
+                  { Icon: CreditCard, text: 'Pago en cuotas' },
+                  { Icon: Lock,       text: 'Reembolso garantizado' },
+                ].map(({ Icon, text }) => (
                   <div key={text} className="flex items-center gap-1.5">
-                    <span style={{ fontSize: 12 }}>{icon}</span>
+                    <Icon size={12} style={{ color: 'var(--brand)', flexShrink: 0 }} />
                     <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>{text}</span>
                   </div>
                 ))}
@@ -1228,23 +1228,23 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
 
             <BookingWidget space={space} onChat={() => setShowChat(true)} initialDate={initialDate} />
 
-            {/* ── Garantía EspotHub ── */}
+            {/* ── Garantía Espot ── */}
             <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)', background: 'var(--bg-surface)' }}>
               <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                 <Shield size={14} style={{ color: 'var(--brand)', flexShrink: 0 }} />
                 <span className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>
-                  Garantía EspotHub
+                  Garantía Espot
                 </span>
               </div>
               <div className="px-4 py-3 space-y-2.5">
                 {[
-                  { icon: '📄', label: 'Contrato oficial incluido', sub: 'Firmado entre tú y el propietario' },
-                  { icon: '💳', label: 'Paga en cuotas', sub: 'Sin coordinar transferencias manualmente' },
-                  { icon: '🛡️', label: 'Reembolso si cancela el propietario', sub: 'Tu dinero está protegido' },
-                  { icon: '✅', label: 'Espacios verificados', sub: 'Revisados por el equipo de EspotHub' },
-                ].map(({ icon, label, sub }) => (
+                  { icon: FileText,    label: 'Contrato oficial incluido',           sub: 'Firmado entre tú y el propietario' },
+                  { icon: CreditCard,  label: 'Paga en cuotas',                      sub: 'Sin coordinar transferencias manualmente' },
+                  { icon: Lock,        label: 'Reembolso si cancela el propietario', sub: 'Tu dinero está protegido' },
+                  { icon: CheckCircle, label: 'Espacios verificados',                sub: 'Revisados por el equipo de Espot' },
+                ].map(({ icon: Icon, label, sub }) => (
                   <div key={label} className="flex items-start gap-2.5">
-                    <span style={{ fontSize: 13, lineHeight: 1, marginTop: 2, flexShrink: 0 }}>{icon}</span>
+                    <Icon size={13} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: 2 }} />
                     <div>
                       <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{label}</p>
                       <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{sub}</p>
