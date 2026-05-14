@@ -673,6 +673,14 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   </div>
                   <div className="text-xs md:text-sm" style={{ color: 'var(--text-secondary)' }}>Propietario del espacio</div>
                 </div>
+                {/* Botón Preguntar junto al perfil del propietario */}
+                <button
+                  onClick={() => setShowChat(true)}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold shrink-0 transition-all hover:opacity-90"
+                  style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1.5px solid var(--brand-border)' }}>
+                  <MessageCircle size={14} />
+                  <span className="hidden sm:inline">Preguntar</span>
+                </button>
               </div>
             )}
 
