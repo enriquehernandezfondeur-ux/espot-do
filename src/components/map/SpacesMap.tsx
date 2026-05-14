@@ -207,27 +207,21 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
       const label  = getPricePin(space)
       const marker = L.marker(coords, { icon: buildIcon(L, label, false) })
 
+      // Solo sincronizar el card highlight — NO cambiar el ícono durante hover
+      // porque setIcon() destruye el elemento DOM y el evento click se pierde
       marker.on('mouseover', () => {
         onHoverRef.current?.(space.id)
-        marker.setIcon(buildIcon(L, label, true))
         marker.setZIndexOffset(1000)
       })
       marker.on('mouseout', () => {
         if (hoveredIdRef.current !== space.id) {
           onHoverRef.current?.(null)
-          marker.setIcon(buildIcon(L, label, false))
           marker.setZIndexOffset(0)
         }
       })
-      // click Y dblclick para máxima compatibilidad entre browsers/Leaflet
+
       const nav = () => { if (space.slug) window.location.href = '/espacios/' + space.slug }
       marker.on('click', nav)
-
-      // Fallback: listener DOM directo en el elemento del marcador
-      marker.once('add', () => {
-        const el = marker.getElement()
-        if (el) el.addEventListener('click', nav, { passive: true })
-      })
 
       marker.addTo(map)
       markersRef.current.set(space.id, marker)
@@ -278,9 +272,13 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
   return (
     <>
       <style>{`
-        .espot-pin svg { overflow: visible; }
         .espot-pin { cursor: pointer !important; }
+        .espot-pin svg { overflow: visible; pointer-events: none; }
         .leaflet-marker-icon.espot-pin { pointer-events: auto !important; }
+        .espot-pin:hover > div {
+          transform: scale(1.25) translateZ(0) !important;
+          filter: drop-shadow(0 3px 8px rgba(15,22,35,0.5)) !important;
+        }
         .leaflet-popup-content-wrapper {
           border-radius:16px !important;
           padding:0 !important;
@@ -322,13 +320,16 @@ function buildIcon(L: any, _label: string, active: boolean) {
   const shadow = active
     ? 'drop-shadow(0 3px 8px rgba(15,22,35,0.5))'
     : 'drop-shadow(0 2px 6px rgba(53,196,147,0.45))'
+  const scale  = active ? 'scale(1.25) translateZ(0)' : 'scale(1) translateZ(0)'
+
   return L.divIcon({
     html: `
-      <div style="position:relative;width:28px;height:36px;cursor:pointer;
-                  will-change:transform;
-                  transition:transform 0.15s ease, filter 0.15s ease;
-                  transform:${active ? 'scale(1.25) translateZ(0)' : 'scale(1) translateZ(0)'};
-                  filter:${shadow}">
+      <div style="
+        position:relative;width:28px;height:36px;
+        will-change:transform;
+        transition:transform 0.15s ease, filter 0.15s ease;
+        transform:${scale};
+        filter:${shadow}">
         <svg width="28" height="36" viewBox="0 0 28 36" fill="none"
              xmlns="http://www.w3.org/2000/svg"
              shape-rendering="geometricPrecision"
