@@ -62,8 +62,9 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, hostA
   const [attachment,  setAttachment] = useState<{
     file: File; preview: string; url?: string; type: 'image' | 'file'
   } | null>(null)
-  const bottomRef = useRef<HTMLDivElement>(null)
-  const fileRef   = useRef<HTMLInputElement>(null)
+  const bottomRef    = useRef<HTMLDivElement>(null)
+  const fileRef      = useRef<HTMLInputElement>(null)
+  const textareaRef  = useRef<HTMLTextAreaElement>(null)
   const supabase  = createClient()
 
   useEffect(() => {
@@ -153,6 +154,8 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, hostA
       setMessages(prev => [...prev, optimistic])
       setBody('')
       removeAttachment()
+      // Resetear altura del textarea
+      if (textareaRef.current) { textareaRef.current.style.height = 'auto' }
     }
     setSending(false)
   }
@@ -170,8 +173,8 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, hostA
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-      <div className="fixed right-0 top-0 h-full w-full max-w-md z-50 flex flex-col shadow-2xl"
-        style={{ background: '#fff', animation: 'slideInRight 0.25s ease-out' }}>
+      <div className="fixed right-0 top-0 w-full max-w-md z-50 flex flex-col shadow-2xl"
+        style={{ height: '100dvh', background: '#fff', animation: 'slideInRight 0.25s ease-out' }}>
         <style>{`@keyframes slideInRight{from{transform:translateX(100%)}to{transform:translateX(0)}}`}</style>
 
         {/* Header */}
@@ -191,11 +194,12 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, hostA
           </div>
           <div className="flex-1 min-w-0">
             <div className="font-bold text-sm truncate" style={{ color: 'var(--text-primary)' }}>{hostName}</div>
-            <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{spaceName}</div>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Propietario del espacio</span>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />
+              <span className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
+                {spaceName || 'Propietario'}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -313,7 +317,7 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, hostA
 
         {/* Input area */}
         {!notLoggedIn && (
-          <div className="px-4 py-3" style={{ borderTop: '1px solid var(--border-subtle)', background: '#fff' }}>
+          <div className="px-4 pt-3 pb-safe shrink-0" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))', borderTop: '1px solid var(--border-subtle)', background: '#fff' }}>
 
             {/* Preview del adjunto seleccionado */}
             {attachment && (
@@ -363,6 +367,7 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, hostA
 
               {/* Texto */}
               <textarea
+                ref={textareaRef}
                 value={body}
                 onChange={e => setBody(e.target.value)}
                 onKeyDown={handleKey}
@@ -395,7 +400,7 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, hostA
 
             {/* Tipos soportados / error */}
             <p className="text-xs text-center mt-2" style={{ color: sendError ? '#DC2626' : 'var(--text-muted)' }}>
-              {sendError || 'Fotos, PDF, Word · Máx 20MB · Enter para enviar'}
+              {sendError || 'Fotos, PDF, Word · Máx 20MB'}
             </p>
           </div>
         )}

@@ -51,8 +51,9 @@ export default function HostMensajesPage() {
     } catch {}
   }, [])
 
-  const bottomRef  = useRef<HTMLDivElement>(null)
-  const fileRef    = useRef<HTMLInputElement>(null)
+  const bottomRef    = useRef<HTMLDivElement>(null)
+  const fileRef      = useRef<HTMLInputElement>(null)
+  const textareaRef  = useRef<HTMLTextAreaElement>(null)
   const channelRef       = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
   const globalChannelRef = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
   const activeRef        = useRef<any | null>(null)
@@ -171,6 +172,7 @@ export default function HostMensajesPage() {
       setMessages(prev => [...prev, optimistic])
       setBody('')
       removeAttachment()
+      if (textareaRef.current) textareaRef.current.style.height = 'auto'
     }
     setSending(false)
   }
@@ -193,7 +195,7 @@ export default function HostMensajesPage() {
   )
 
   return (
-    <div className="flex flex-col md:flex-row md:h-dvh" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', minHeight: '100dvh' }}>
+    <div className="flex flex-col md:flex-row" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', height: '100dvh', overflow: 'hidden' }}>
 
       {/* Sidebar */}
       <div className={`w-full md:w-72 md:flex-col md:shrink-0 flex flex-col ${active ? 'hidden md:flex' : 'flex'}`}
@@ -327,7 +329,7 @@ export default function HostMensajesPage() {
           </div>
 
           {/* Input */}
-          <div className="px-4 py-3 shrink-0" style={{ background: 'var(--bg-surface)', borderTop: '1px solid var(--border-subtle)' }}>
+          <div className="px-4 pt-3 shrink-0" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))', background: 'var(--bg-surface)', borderTop: '1px solid var(--border-subtle)' }}>
             {/* Attachment preview */}
             {attachment && (
               <div className="flex items-center gap-3 mb-3 px-3 py-2.5 rounded-2xl"
@@ -382,7 +384,7 @@ export default function HostMensajesPage() {
                 style={{ background: 'var(--bg-elevated)', color: attachment ? 'var(--brand)' : 'var(--text-muted)', border: attachment ? '1.5px solid var(--brand-border)' : '1.5px solid var(--border-medium)' }}>
                 <Paperclip size={17} />
               </button>
-              <textarea value={body} onChange={e => setBody(e.target.value)}
+              <textarea ref={textareaRef} value={body} onChange={e => setBody(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
                 placeholder={attachment ? 'Añade un texto (opcional)...' : 'Responder al cliente...'}
                 rows={1}
@@ -397,7 +399,7 @@ export default function HostMensajesPage() {
               </button>
             </div>
             <p className="text-xs text-center mt-2" style={{ color: sendError ? '#DC2626' : 'var(--text-muted)' }}>
-              {sendError || 'Fotos, PDF, Word · Máx 20MB · Clip para adjuntar'}
+              {sendError || 'Fotos, PDF, Word · Máx 20MB'}
             </p>
           </div>
         </div>
