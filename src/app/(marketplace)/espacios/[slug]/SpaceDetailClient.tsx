@@ -252,7 +252,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                 {space.name}
               </h3>
               <button onClick={() => setShowMobileWidget(false)}
-                className="w-9 h-9 flex items-center justify-center rounded-full"
+                className="w-10 h-10 flex items-center justify-center rounded-full"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
                 <X size={18} />
               </button>
@@ -620,7 +620,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                 {/* Cerrar */}
                 <button
                   onClick={() => setShowVideoModal(false)}
-                  className="absolute -top-4 -right-4 z-10 w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110"
+                  className="absolute -top-4 -right-4 z-10 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110"
                   style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)' }}>
                   <X size={17} />
                 </button>

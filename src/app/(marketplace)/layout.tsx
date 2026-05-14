@@ -419,8 +419,8 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
         </>
       )}
 
-      {/* Espacio inferior siempre reservado en mobile — evita layout shift al cargar auth */}
-      <div className="pb-20 md:pb-0">
+      {/* Espacio inferior: pb-20 + safe-area para la barra de navegación y el home indicator */}
+      <div className="pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
         {children}
       </div>
 

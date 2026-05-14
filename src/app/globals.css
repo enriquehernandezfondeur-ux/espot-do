@@ -145,6 +145,15 @@ body {
   box-shadow: 0 0 0 3px var(--brand-dim);
 }
 
+/* ── OCULTAR SPINNERS en inputs type=number ──────── */
+/* Evita los botones +/- del browser que rompen diseño en mobile */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] { -moz-appearance: textfield; }
+
 /* ─────────────────────────────────────────────────────
    HOST-THEME: Overrides para clases dark del wizard
    Usa attribute selectors — no requiere editar el wizard

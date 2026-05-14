@@ -104,7 +104,7 @@ export default function CotizacionesPage() {
           </p>
         </div>
       ) : (
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 lg:h-[calc(100vh-14rem)]">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 lg:h-[calc(100dvh-14rem)]">
           {/* Lista */}
           <div className="w-full lg:w-80 lg:shrink-0 space-y-2 lg:overflow-y-auto">
             {quotes.map(q => {
