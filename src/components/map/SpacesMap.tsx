@@ -157,9 +157,20 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
       lRef.current = L
 
       const view = CITY_VIEW['default']
+
+      // Límites del Distrito Nacional — el mapa no permite salir de esta zona
+      const DN_BOUNDS = L.latLngBounds(
+        [18.40, -70.08],   // SW
+        [18.56, -69.82],   // NE
+      )
+
       const map  = L.map(containerRef.current, {
         center:             view.center,
         zoom:               view.zoom,
+        minZoom:            12,
+        maxZoom:            18,
+        maxBounds:          DN_BOUNDS,
+        maxBoundsViscosity: 1.0,   // rebote duro en los bordes
         zoomControl:        false,
         attributionControl: true,
       })
@@ -228,13 +239,16 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
       markersRef.current.set(space.id, marker)
     })
 
-    // Ajustar vista a los pins
+    // Ajustar vista a los pins, sin salir de Distrito Nacional
     const validCoords = Array.from(coordsRef.current.values())
     if (validCoords.length > 1) {
       const bounds = L.latLngBounds(validCoords)
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 })
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15, minZoom: 12 })
     } else if (validCoords.length === 1) {
       map.flyTo(validCoords[0], 15, { duration: 0.6 })
+    } else {
+      // Sin pins — volver al centro del DN
+      map.flyTo(CITY_VIEW['default'].center, CITY_VIEW['default'].zoom, { duration: 0.6 })
     }
   }
 
