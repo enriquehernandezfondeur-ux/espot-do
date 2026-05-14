@@ -610,7 +610,7 @@ export default function MisReservasPage() {
                       <div className="mt-4 space-y-3">
                         <div className="px-4 py-3 rounded-xl text-sm"
                           style={{ background: 'rgba(217,119,6,0.05)', border: '1px solid rgba(217,119,6,0.15)', color: '#92400E' }}>
-                          El propietario revisará tu solicitud y confirmará disponibilidad.
+                          El propietario revisará tu solicitud. Respuesta esperada en 24–48 horas. Te notificamos por email.
                         </div>
                         <div className="flex gap-2 flex-wrap">
                           <Link href="/dashboard/mensajes"
@@ -630,7 +630,7 @@ export default function MisReservasPage() {
                       <div className="mt-4 space-y-3">
                         <div className="px-4 py-3 rounded-xl text-sm"
                           style={{ background: 'rgba(8,145,178,0.05)', border: '1px solid rgba(8,145,178,0.2)', color: '#0369A1' }}>
-                          Esperando que el propietario te envíe el precio. Te notificaremos por email.
+                          El propietario confirmará el precio en 48 horas. Te notificamos por email cuando responda. Puedes escribirle mientras tanto.
                         </div>
                         <Link href="/dashboard/mensajes"
                           className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all w-fit"

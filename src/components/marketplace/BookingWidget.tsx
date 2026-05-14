@@ -254,7 +254,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
       const endMins      = timeToMins(realEndTime)
       const blockEndMins = blockEndToMins(allowedTimeRange.end, allowedTimeRange.start)
       if (endMins > blockEndMins)
-        return `El horario excede el cierre del espacio (${formatTime(allowedTimeRange.end)}). Elige una hora de llegada más temprana.`
+        return `Tu hora de salida sería después del cierre (${formatTime(allowedTimeRange.end)}). Elige una hora de llegada más temprana.`
     }
     return null
   }, [selectedHours, minHours, maxHours, effectiveStartTime, realEndTime, allowedTimeRange])
@@ -499,9 +499,14 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
           <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
             El propietario revisará tu solicitud y confirmará disponibilidad.
           </p>
-          <p className="text-xs mb-5" style={{ color: 'var(--text-muted)', lineHeight: 1.6 }}>
-            Recibirás un email con el enlace de pago una vez que confirmen tu reserva.
-          </p>
+          <div className="flex items-start gap-2.5 text-left px-4 py-3 rounded-xl mb-5"
+            style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.2)' }}>
+            <Clock size={14} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: 1 }} />
+            <p className="text-xs" style={{ color: '#065F46', lineHeight: 1.6 }}>
+              <strong>Respuesta en 24–48 horas.</strong>{' '}
+              Te notificaremos por email en cuanto el propietario responda. Solo pagas si acepta.
+            </p>
+          </div>
           <Link href="/dashboard/reservas"
             className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-3 rounded-xl"
             style={{ background: 'var(--brand)', color: '#fff' }}>
@@ -649,7 +654,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
           <div className="space-y-4">
             <div>
               <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>¿Cuándo es tu evento?</h3>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>El plan de cuotas se asigna según los días que faltan.</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Tu pago se divide en cuotas automáticamente según cuándo sea el evento.</p>
             </div>
 
             <DatePicker
@@ -675,7 +680,9 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                     style={{ background: 'var(--bg-elevated)' }}>
                     <span className="text-xs font-semibold flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
                       <CalendarDays size={12} style={{ color: 'var(--brand)' }} />
-                      {daysLabel} · {scheduleModelLabel(sched.model)}
+                      {daysLabel} · {sched.installments.length === 1
+                        ? 'Pago único al confirmar'
+                        : `${sched.installments.length} cuotas · ${sched.installments.map(i => `${i.percentage}%`).join(' + ')}`}
                     </span>
                     <ChevronRight size={13} style={{
                       color: 'var(--text-muted)',
@@ -1100,7 +1107,9 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                 style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.15)' }}>
                 <ShieldCheck size={16} style={{ color: 'var(--brand)', flexShrink: 0 }} />
                 <p className="text-xs" style={{ color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                  Solo pagarás cuando el propietario confirme tu solicitud.
+                  {space.instant_booking
+                    ? 'Tu fecha queda pre-reservada. Completa el pago para confirmarla.'
+                    : 'Solo pagas cuando el propietario acepte tu solicitud. Sin cobros hasta entonces.'}
                 </p>
               </div>
             )}

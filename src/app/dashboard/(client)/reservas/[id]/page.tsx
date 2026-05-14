@@ -442,11 +442,11 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
         )
       })()}
 
-      {/* Contrato */}
+      {/* Contrato — botón más prominente */}
       <a href={`/contrato/${booking.id}`} target="_blank" rel="noopener noreferrer"
         className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl text-sm font-semibold mb-3 transition-all"
-        style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
-        <FileText size={15} /> Ver contrato de reserva
+        style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1.5px solid var(--brand-border)' }}>
+        <FileText size={15} /> Ver contrato oficial · Descargar PDF
       </a>
 
       {/* Reseña — solo si el evento ya pasó */}

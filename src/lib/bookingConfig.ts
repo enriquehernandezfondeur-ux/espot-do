@@ -25,7 +25,7 @@ export type BookingStatus =
   | 'quote_requested'
 
 export const STATUS_LABELS: Record<BookingStatus, string> = {
-  pending:          'Pendiente',
+  pending:          'Pendiente de confirmación',
   accepted:         'Pendiente de pago',
   confirmed:        'Confirmada',
   rejected:         'Rechazada',

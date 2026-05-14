@@ -220,9 +220,9 @@ function ExitoContent() {
               {remaining > 0 && (
                 <div className="flex justify-between text-sm">
                   <div>
-                    <span style={{ color: 'rgba(255,255,255,0.5)' }}>Próximas cuotas</span>
+                    <span style={{ color: 'rgba(255,255,255,0.5)' }}>Pendiente de pago</span>
                     <p className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                      Se cobran vía Espot según tu plan
+                      Pagas el resto según tu plan de cuotas · revisa en "Mis reservas"
                     </p>
                   </div>
                   <span style={{ color: 'rgba(255,255,255,0.5)' }}>{formatCurrency(remaining)}</span>
@@ -253,8 +253,18 @@ function ExitoContent() {
           <Link href={`/dashboard/reservas/${bookingId}`}
             className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-bold text-base"
             style={{ background: '#35C493', color: '#071814', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
-            <Calendar size={17} /> Ver detalle de mi reserva <ArrowRight size={15} />
+            <Calendar size={17} /> Ver mi reserva y plan de pagos <ArrowRight size={15} />
           </Link>
+          {bookingId && (
+            <a href={`/contrato/${bookingId}`} target="_blank" rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-semibold text-sm"
+              style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.75)', border: '1px solid rgba(255,255,255,0.12)' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+              </svg>
+              Ver contrato de reserva
+            </a>
+          )}
           <Link href="/"
             className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-semibold text-sm"
             style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.65)', border: '1px solid rgba(255,255,255,0.09)' }}>
