@@ -132,17 +132,18 @@ interface Props {
 export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover }: Props) {
   const containerRef  = useRef<HTMLDivElement>(null)
   const mapRef        = useRef<any>(null)
-  const lRef          = useRef<any>(null)          // Leaflet module — loaded once
+  const lRef          = useRef<any>(null)
   const markersRef    = useRef<Map<string, any>>(new Map())
   const coordsRef     = useRef<Map<string, [number, number]>>(new Map())
-  const spacesRef     = useRef(spaces)             // always latest spaces
+  const spacesRef     = useRef(spaces)
   const onHoverRef    = useRef(onSpaceHover)
   const hoveredIdRef  = useRef(hoveredId)
+  const firstLoadRef  = useRef(true)   // solo fitBounds en la primera carga
 
   // Keep refs in sync
-  useEffect(() => { spacesRef.current   = spaces },       [spaces])
-  useEffect(() => { onHoverRef.current  = onSpaceHover }, [onSpaceHover])
-  useEffect(() => { hoveredIdRef.current = hoveredId },   [hoveredId])
+  useEffect(() => { spacesRef.current    = spaces },       [spaces])
+  useEffect(() => { onHoverRef.current   = onSpaceHover }, [onSpaceHover])
+  useEffect(() => { hoveredIdRef.current = hoveredId },    [hoveredId])
 
   // ── Inicializar el mapa UNA sola vez ─────────────────────
   useEffect(() => {
@@ -232,16 +233,16 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
       markersRef.current.set(space.id, marker)
     })
 
-    // Ajustar vista a los pins, sin salir de Distrito Nacional
-    const validCoords = Array.from(coordsRef.current.values())
-    if (validCoords.length > 1) {
-      const bounds = L.latLngBounds(validCoords)
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15, minZoom: 12 })
-    } else if (validCoords.length === 1) {
-      map.flyTo(validCoords[0], 15, { duration: 0.6 })
-    } else {
-      // Sin pins — volver al centro del DN
-      map.flyTo(CITY_VIEW['default'].center, CITY_VIEW['default'].zoom, { duration: 0.6 })
+    // Solo ajustar la vista en la primera carga — después el usuario controla el mapa
+    if (firstLoadRef.current) {
+      firstLoadRef.current = false
+      const validCoords = Array.from(coordsRef.current.values())
+      if (validCoords.length > 1) {
+        map.fitBounds(L.latLngBounds(validCoords), { padding: [50, 50], maxZoom: 15 })
+      } else if (validCoords.length === 1) {
+        map.flyTo(validCoords[0], 15, { duration: 0.6 })
+      }
+      // Si no hay pins, el mapa ya está centrado en DN por defecto
     }
   }
 
@@ -255,18 +256,28 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
   }, [spaces])
 
   // ── Actualizar highlight cuando cambia hoveredId ──────────
+  // Usa CSS class en lugar de setIcon() — setIcon() destruye el DOM y rompe el click
   useEffect(() => {
-    const L   = lRef.current
-    const map = mapRef.current
-    if (!L || !map) return
     markersRef.current.forEach((marker, id) => {
-      const space  = spaces.find(s => s.id === id)
-      const label  = getPricePin(space ?? {})
-      const active = id === hoveredId
-      marker.setIcon(buildIcon(L, label, active))
-      marker.setZIndexOffset(active ? 1000 : 0)
+      const el = marker.getElement()
+      if (!el) return
+      const inner = el.querySelector('div') as HTMLElement | null
+      if (!inner) return
+      if (id === hoveredId) {
+        inner.style.transform = 'scale(1.25) translateZ(0)'
+        inner.style.filter    = 'drop-shadow(0 3px 8px rgba(15,22,35,0.5))'
+        const path = inner.querySelector('path') as SVGPathElement | null
+        if (path) path.setAttribute('fill', '#0F1623')
+        marker.setZIndexOffset(1000)
+      } else {
+        inner.style.transform = 'scale(1) translateZ(0)'
+        inner.style.filter    = 'drop-shadow(0 2px 6px rgba(53,196,147,0.45))'
+        const path = inner.querySelector('path') as SVGPathElement | null
+        if (path) path.setAttribute('fill', '#35C493')
+        marker.setZIndexOffset(0)
+      }
     })
-  }, [hoveredId, spaces])
+  }, [hoveredId])
 
   // ── Re-centrar cuando cambia la ciudad ────────────────────
   useEffect(() => {
