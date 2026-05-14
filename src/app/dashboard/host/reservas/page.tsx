@@ -36,7 +36,7 @@ function HostInstallmentStatus({ bookingId, totalAmount }: { bookingId: string; 
               Vence: {inst.due_date}
               {inst.status !== 'paid' && (
                 <span className="ml-2 font-semibold" style={{ color: inst.status === 'overdue' ? '#DC2626' : 'var(--text-muted)' }}>
-                  {inst.status === 'overdue' ? 'Vencida' : `Faltan ${Math.max(0, Math.floor((new Date(inst.due_date).getTime() - Date.now()) / 86400000))} días`}
+                  {inst.status === 'overdue' ? 'Vencida' : `Faltan ${Math.max(0, Math.floor((new Date(inst.due_date + 'T12:00').getTime() - Date.now()) / 86400000))} días`}
                 </span>
               )}
             </div>

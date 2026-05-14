@@ -33,7 +33,7 @@ export default function ClientDashboard() {
 
   const next        = stats?.nextBooking as any
   const today       = new Date()
-  const daysUntilNext = next ? Math.ceil((new Date(next.event_date).getTime() - today.getTime()) / (1000*60*60*24)) : null
+  const daysUntilNext = next ? Math.ceil((new Date(next.event_date + 'T12:00').getTime() - today.getTime()) / (1000*60*60*24)) : null
   const hasBookings = (stats?.total ?? 0) > 0
 
   // ── Empty state: usuario sin reservas ─────────────────
