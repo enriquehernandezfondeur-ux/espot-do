@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const sections = [
   {
     num: '1', title: 'Objeto de la Plataforma',
-    content: `EspotHub (espot.do) es una plataforma digital propiedad de ESPOT, S.R.L. que actúa como intermediario tecnológico entre propietarios de espacios (Anfitriones) y personas o empresas que los buscan para realizar eventos (Huéspedes).
+    content: `Espot (espot.do) es una plataforma digital propiedad de ESPOT, S.R.L. que actúa como intermediario tecnológico entre propietarios de espacios (Anfitriones) y personas o empresas que los buscan para realizar eventos (Huéspedes).
 
 Los servicios que ofrece la plataforma incluyen:
 
@@ -118,11 +118,11 @@ Todos los derechos sobre la plataforma, su diseño, código y marca pertenecen a
   },
   {
     num: '12', title: 'Política de Entrega del Servicio',
-    content: `EspotHub es una plataforma digital de intermediación. La "entrega" del servicio consiste en:
+    content: `Espot es una plataforma digital de intermediación. La "entrega" del servicio consiste en:
 
 • Confirmación de reserva: el servicio se activa inmediatamente tras la confirmación del pago de la primera cuota. El Huésped recibe un correo de confirmación con los detalles de la reserva.
 • Acceso al espacio: el Anfitrión pone el espacio a disposición del Huésped en la fecha, hora y dirección acordadas en la reserva confirmada.
-• No aplica entrega física de productos: EspotHub no envía ni entrega bienes materiales. El servicio es el acceso a un espacio para eventos en la República Dominicana.
+• No aplica entrega física de productos: Espot no envía ni entrega bienes materiales. El servicio es el acceso a un espacio para eventos en la República Dominicana.
 • En caso de no poder acceder al espacio por causas imputables al Anfitrión, aplica la política de reembolso establecida en la Sección 5 de estos términos.`,
   },
   {
@@ -131,7 +131,7 @@ Todos los derechos sobre la plataforma, su diseño, código y marca pertenecen a
 
 • Los datos personales (nombre, email, teléfono) se utilizan exclusivamente para gestionar reservas, enviar notificaciones y mejorar el servicio.
 • No se venden ni comparten datos a terceros sin consentimiento, salvo requerimiento legal.
-• Los datos de tarjetas de crédito/débito NO son almacenados por EspotHub. El procesamiento es realizado íntegramente por Azul Payments bajo sus estándares PCI-DSS.
+• Los datos de tarjetas de crédito/débito NO son almacenados por Espot. El procesamiento es realizado íntegramente por Azul Payments bajo sus estándares PCI-DSS.
 • El usuario puede solicitar la eliminación de sus datos escribiendo a contacto@espothub.com.`,
   },
   {

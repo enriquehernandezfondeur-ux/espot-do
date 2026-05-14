@@ -217,7 +217,7 @@ export default function HostMensajesPage() {
             </svg>
             <p className="text-xs leading-relaxed" style={{ color: '#92400E' }}>
               <span className="font-bold">No compartas datos bancarios por chat.</span>{' '}
-              EspotHub gestiona todos los pagos. Si un cliente solicita pago directo, repórtalo.
+              Espot gestiona todos los pagos. Si un cliente solicita pago directo, repórtalo.
             </p>
           </div>
         </div>

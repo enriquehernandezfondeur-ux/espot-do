@@ -3,8 +3,8 @@ import Link from 'next/link'
 import { ArrowLeft, Mail, Phone, MapPin, Clock, MessageCircle } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Servicio al Cliente — EspotHub',
-  description: 'Contacta a EspotHub. Estamos aquí para ayudarte con tus reservas, pagos y cualquier consulta.',
+  title: 'Servicio al Cliente — Espot',
+  description: 'Contacta a Espot. Estamos aquí para ayudarte con tus reservas, pagos y cualquier consulta.',
 }
 
 export default function ContactoPage() {

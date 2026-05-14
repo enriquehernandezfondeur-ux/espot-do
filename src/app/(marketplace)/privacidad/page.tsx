@@ -3,14 +3,14 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Política de Privacidad — EspotHub',
-  description: 'Cómo EspotHub recopila, usa y protege tus datos personales.',
+  title: 'Política de Privacidad — Espot',
+  description: 'Cómo Espot recopila, usa y protege tus datos personales.',
 }
 
 const sections = [
   {
     num: '1', title: 'Responsable del tratamiento',
-    content: `ESPOT, S.R.L., con domicilio en la República Dominicana, es la empresa responsable del tratamiento de los datos personales recopilados a través de la plataforma EspotHub (espothub.com).
+    content: `ESPOT, S.R.L., con domicilio en la República Dominicana, es la empresa responsable del tratamiento de los datos personales recopilados a través de la plataforma Espot (espot.do).
 
 Contacto del responsable:
 • Correo electrónico: contacto@espot.do
@@ -18,7 +18,7 @@ Contacto del responsable:
   },
   {
     num: '2', title: 'Datos que recopilamos',
-    content: `Recopilamos los siguientes datos cuando utilizas EspotHub:
+    content: `Recopilamos los siguientes datos cuando utilizas Espot:
 
 Datos de registro:
 • Nombre completo
@@ -37,7 +37,7 @@ Datos técnicos:
 • Tipo de dispositivo y navegador
 • Páginas visitadas y tiempo de sesión (analytics anónimos)
 
-Nota importante: EspotHub NO almacena, procesa ni tiene acceso a los datos de tarjetas de crédito o débito. Esos datos son procesados directamente por Azul Payments, certificado PCI-DSS.`,
+Nota importante: Espot NO almacena, procesa ni tiene acceso a los datos de tarjetas de crédito o débito. Esos datos son procesados directamente por Azul Payments, certificado PCI-DSS.`,
   },
   {
     num: '3', title: 'Finalidad del tratamiento',
@@ -61,7 +61,7 @@ Nota importante: EspotHub NO almacena, procesa ni tiene acceso a los datos de ta
   },
   {
     num: '5', title: 'Compartir datos con terceros',
-    content: `EspotHub no vende ni alquila tus datos personales. Solo los compartimos en los siguientes casos:
+    content: `Espot no vende ni alquila tus datos personales. Solo los compartimos en los siguientes casos:
 
 • Con Azul Payments: para procesar pagos con tarjeta (solo datos necesarios para la transacción).
 • Con Resend (servicio de email): para enviar notificaciones de reservas.
@@ -96,7 +96,7 @@ Para ejercer estos derechos, escribe a contacto@espot.do con el asunto "Solicitu
   },
   {
     num: '8', title: 'Retención de datos',
-    content: `Conservamos tus datos mientras mantengas una cuenta activa en EspotHub.
+    content: `Conservamos tus datos mientras mantengas una cuenta activa en Espot.
 
 Al eliminar tu cuenta:
 • Los datos personales se eliminan en un plazo de 30 días.
@@ -105,7 +105,7 @@ Al eliminar tu cuenta:
   },
   {
     num: '9', title: 'Cookies',
-    content: `EspotHub utiliza cookies técnicas necesarias para el funcionamiento del sitio (sesión, autenticación) y cookies analíticas anónimas para mejorar la experiencia. Puedes gestionar las cookies en tu navegador o consultar nuestra Política de Cookies en /cookies.`,
+    content: `Espot utiliza cookies técnicas necesarias para el funcionamiento del sitio (sesión, autenticación) y cookies analíticas anónimas para mejorar la experiencia. Puedes gestionar las cookies en tu navegador o consultar nuestra Política de Cookies en /cookies.`,
   },
   {
     num: '10', title: 'Cambios en esta política',

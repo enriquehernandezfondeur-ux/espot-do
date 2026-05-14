@@ -112,7 +112,7 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
         })}
       </nav>
 
-      {/* Explorar EspotHub — vuelta al marketplace */}
+      {/* Explorar Espot — vuelta al marketplace */}
       <div className="px-4 pb-2" style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 12 }}>
         <Link href="/buscar"
           onClick={() => setMobileOpen(false)}

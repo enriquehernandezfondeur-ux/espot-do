@@ -72,7 +72,7 @@ export default function CookiesPage() {
         <div className="rounded-2xl p-6 mb-6"
           style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
           <p className="text-sm" style={{ color: 'var(--text-primary)' }}>
-            En <strong>EspotHub (espot.do)</strong>, propiedad de <strong>ESPOT, S.R.L.</strong>, utilizamos
+            En <strong>Espot (espot.do)</strong>, propiedad de <strong>ESPOT, S.R.L.</strong>, utilizamos
             cookies esenciales para el funcionamiento de la plataforma. Esta política explica qué cookies usamos y cómo puedes gestionarlas.
           </p>
         </div>

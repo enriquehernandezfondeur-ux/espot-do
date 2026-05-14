@@ -1151,10 +1151,10 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               </div>
               <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                 He leído y acepto los{' '}
-                <a href="/terminos" target="_blank" style={{ color: 'var(--brand)', textDecoration: 'underline' }}>
+                <a href="/terminos" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--brand)', textDecoration: 'underline' }}>
                   términos y condiciones
                 </a>{' '}y la{' '}
-                <a href="/reembolso" target="_blank" style={{ color: 'var(--brand)', textDecoration: 'underline' }}>
+                <a href="/reembolso" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--brand)', textDecoration: 'underline' }}>
                   política de reembolso
                 </a>{' '}de Espot. *
               </p>

@@ -284,7 +284,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
             </button>
           ))}
 
-          <Link href={`/espacios/${space.slug}`} target="_blank"
+          <Link href={`/espacios/${space.slug}`} target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl"
             style={{ background: '#F4F6F8', color: '#6B7280', border: '1px solid #E8ECF0' }}>
             <Eye size={13} /> Ver en marketplace

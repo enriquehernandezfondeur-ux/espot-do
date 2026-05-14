@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const firstName = (name ?? '').split(' ')[0] || 'allí'
     await sendEmail({
       to:      email,
-      subject: `Bienvenido a EspotHub`,
+      subject: `Bienvenido a Espot`,
       html:    tplBienvenida({ name: firstName }),
     })
     return NextResponse.json({ ok: true })

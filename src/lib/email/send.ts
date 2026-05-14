@@ -3,7 +3,7 @@ import { Resend } from 'resend'
 // FROM debe ser un email de un dominio verificado en Resend.
 // Verificar en: https://resend.com/domains
 // Añadir DNS: SPF, DKIM, DMARC en el proveedor DNS del dominio.
-const FROM      = process.env.EMAIL_FROM      ?? 'EspotHub <hola@espothub.com>'
+const FROM      = process.env.EMAIL_FROM      ?? 'Espot <hola@espothub.com>'
 const REPLY_TO  = process.env.EMAIL_REPLY_TO  ?? 'contacto@espothub.com'
 
 export async function sendEmail({

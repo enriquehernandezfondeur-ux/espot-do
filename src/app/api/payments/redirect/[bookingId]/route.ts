@@ -180,7 +180,7 @@ OrderNumber: <strong>${ORDER}</strong> · Amount: <strong>${AMT}</strong> · ITB
   td{border-bottom:1px solid #F0F2F5;padding:5px 12px}tr:last-child td{border:none}
   h3{font-size:14px;color:#374151;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid #E5E7EB}
 </style></head><body>
-<h2>🔧 Debug de Hash — EspotHub × Azul</h2>
+<h2>🔧 Debug de Hash — Espot × Azul</h2>
 <p class="sub">Prueba las ${NAMES.length * TYPES.length} combinaciones posibles de MerchantName + MerchantType. La que NO dé error de hash es la correcta.</p>
 <h3>Campos actuales enviados a Azul</h3>
 <table>${currentRows}</table>

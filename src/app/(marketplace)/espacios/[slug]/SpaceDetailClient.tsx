@@ -949,7 +949,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                         <Shield size={15} style={{ color: '#35C493', flexShrink: 0, marginTop: 1 }} />
                         <div>
                           <p className="text-xs font-bold mb-0.5" style={{ color: '#0F1623' }}>
-                            Comunícate siempre a través de EspotHub
+                            Comunícate siempre a través de Espot
                           </p>
                           <p className="text-xs leading-relaxed" style={{ color: '#6B7280' }}>
                             Para proteger tu reserva, nunca pagues ni acuerdes condiciones por fuera de la plataforma.

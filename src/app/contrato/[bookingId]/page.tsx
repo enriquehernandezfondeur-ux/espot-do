@@ -84,13 +84,13 @@ export default async function ContratoPage({ params }: { params: Promise<{ booki
         </div>
 
         <h1>CONTRATO DE RESERVA DE ESPACIO PARA EVENTO</h1>
-        <p className="subtitle">EspotHub · espothub.com</p>
+        <p className="subtitle">Espot · espot.do</p>
         <div className="ref">Referencia: <span>{bookingId.slice(0,8).toUpperCase()}</span></div>
 
         <p style={{ marginBottom: 24, fontSize: 13, color: '#444' }}>
           En Santo Domingo, República Dominicana, a {today}, las partes identificadas a continuación
           celebran el presente contrato de reserva de espacio para evento, de conformidad con los términos
-          y condiciones de la plataforma EspotHub.
+          y condiciones de la plataforma Espot.
         </p>
 
         <h2>1. PARTES</h2>
@@ -135,7 +135,7 @@ export default async function ContratoPage({ params }: { params: Promise<{ booki
 
         <h2>4. PLAN DE PAGOS</h2>
         <p style={{ marginBottom: 12, color: '#555' }}>
-          Los pagos se realizan a través de la plataforma EspotHub con Azul Payments.
+          Los pagos se realizan a través de la plataforma Espot con Azul Payments.
           El cliente recibe un plan de cuotas detallado en la plataforma al momento de la confirmación.
           Estado actual del pago: <strong>{booking.payment_status ?? 'Sin pago'}</strong>.
         </p>
@@ -144,19 +144,19 @@ export default async function ContratoPage({ params }: { params: Promise<{ booki
         <div className="clause">
           <div className="clause-title">5.1 Cancelaciones</div>
           <p>El cliente puede cancelar su reserva desde su panel de usuario. Los reembolsos se aplicarán según la
-          política de cancelación del espacio, visible en la plataforma. EspotHub actuará como intermediario
+          política de cancelación del espacio, visible en la plataforma. Espot actuará como intermediario
           en la devolución de los pagos procesados, descontando su comisión del 10%.</p>
         </div>
         <div className="clause">
           <div className="clause-title">5.2 Responsabilidades</div>
           <p>El cliente es responsable del uso adecuado del espacio, del cumplimiento de las reglas internas
-          del propietario y de cualquier daño causado durante el evento. EspotHub es una plataforma tecnológica
+          del propietario y de cualquier daño causado durante el evento. Espot es una plataforma tecnológica
           de intermediación y no asume responsabilidad directa por el estado o disponibilidad del espacio.</p>
         </div>
         <div className="clause">
           <div className="clause-title">5.3 Modificaciones</div>
           <p>Cualquier cambio en las condiciones del evento (fecha, horario, número de personas) debe realizarse
-          a través de la plataforma EspotHub, con la aprobación expresa del propietario.</p>
+          a través de la plataforma Espot, con la aprobación expresa del propietario.</p>
         </div>
         <div className="clause">
           <div className="clause-title">5.4 Ley aplicable</div>
@@ -178,7 +178,7 @@ export default async function ContratoPage({ params }: { params: Promise<{ booki
         </div>
 
         <div className="footer">
-          Documento generado automáticamente por EspotHub (espothub.com) · Referencia: {bookingId} · {today}
+          Documento generado automáticamente por Espot (espot.do) · Referencia: {bookingId} · {today}
         </div>
       </div>
     </body>

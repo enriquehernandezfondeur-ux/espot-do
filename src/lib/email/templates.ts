@@ -1,5 +1,5 @@
 /**
- * Sistema centralizado de emails — EspotHub
+ * Sistema centralizado de emails — Espot
  * Template base responsive con identidad de marca.
  * Compatible con: Gmail, Outlook, Apple Mail, Yahoo Mail, móviles.
  */
@@ -14,7 +14,7 @@ function logo() {
   return `
     <div style="text-align:center;margin-bottom:32px;">
       <!--[if !mso]><!-->
-      <img src="${SITE}/logo-email.png" alt="EspotHub" width="130" height="28"
+      <img src="${SITE}/logo-email.png" alt="Espot" width="130" height="28"
         style="height:28px;width:auto;display:inline-block;border:0;outline:none;text-decoration:none;"
         onerror="this.style.display='none'" />
       <!--<![endif]-->
@@ -87,7 +87,7 @@ export function emailBase({
   const footer = `
     <div style="text-align:center;margin-top:28px;padding:0 20px;">
       <p style="color:#9CA3AF;font-size:12px;margin:0 0 4px;font-family:Arial,sans-serif;">
-        EspotHub &middot; Espacios para eventos en Rep&uacute;blica Dominicana
+        Espot &middot; Espacios para eventos en Rep&uacute;blica Dominicana
       </p>
       <p style="color:#CBD5E1;font-size:11px;margin:0 0 4px;font-family:Arial,sans-serif;">
         &copy; 2026 ESPOT, S.R.L. &middot;
@@ -180,11 +180,11 @@ interface BookingData {
 
 export function tplBienvenida(data: { name: string }) {
   return emailBase({
-    title: `Bienvenido a EspotHub, ${data.name}`,
+    title: `Bienvenido a Espot, ${data.name}`,
     subtitle: 'Tu cuenta está lista. Explora los mejores espacios para tu próximo evento.',
     accentColor: '#35C493',
     body: `
-      <p style="color:#374151;margin:0 0 16px;">Hola <strong>${data.name}</strong>, nos alegra tenerte en EspotHub.</p>
+      <p style="color:#374151;margin:0 0 16px;">Hola <strong>${data.name}</strong>, nos alegra tenerte en Espot.</p>
       <p style="color:#374151;margin:0 0 20px;">Somos la plataforma donde puedes encontrar y reservar salones, rooftops, restaurantes, villas y más para cualquier tipo de evento en República Dominicana.</p>
       ${infoBox([
         { label: 'Lo que puedes hacer', value: 'Buscar y filtrar espacios por sector, capacidad y tipo de evento' },

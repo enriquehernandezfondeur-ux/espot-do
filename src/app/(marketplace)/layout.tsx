@@ -611,7 +611,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
 
             {/* Logo + redes + app */}
             <div className="flex flex-col items-start gap-3">
-              <Link href="/"><img src="/logo-dark.svg" alt="EspotHub" style={{height:22,width:'auto'}}/></Link>
+              <Link href="/"><img src="/logo-dark.svg" alt="Espot" style={{height:22,width:'auto'}}/></Link>
               <p className="text-sm" style={{color:'#9CA3AF',lineHeight:1.6}}>Marketplace de espacios para eventos en RD.</p>
               <div className="flex gap-1.5">
                 {[

@@ -269,7 +269,7 @@ export default function AdminSpacesPage() {
                         <Pencil size={14} />
                       </Link>
 
-                      <Link href={`/espacios/${space.slug}`} target="_blank"
+                      <Link href={`/espacios/${space.slug}`} target="_blank" rel="noopener noreferrer"
                         className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:bg-slate-100"
                         style={{ color: '#9CA3AF' }} title="Ver en marketplace">
                         <Eye size={14} />

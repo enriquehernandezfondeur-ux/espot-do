@@ -140,7 +140,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
             </span>
           </div>
           {space?.slug && (
-            <Link href={`/espacios/${space.slug}`} target="_blank"
+            <Link href={`/espacios/${space.slug}`} target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-xs mt-2"
               style={{ color: 'var(--brand)' }}>
               <ExternalLink size={11} /> Ver espacio

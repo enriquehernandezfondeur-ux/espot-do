@@ -85,7 +85,7 @@ export default function AdminLiquidacionesPage() {
   // Notas persistidas en localStorage por booking ID
   useEffect(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem('espothub_liq_notes') ?? '{}')
+      const saved = JSON.parse(localStorage.getItem('espot_liq_notes') ?? '{}')
       setNotes(saved)
     } catch {}
   }, [])
@@ -93,7 +93,7 @@ export default function AdminLiquidacionesPage() {
   function saveNote(bookingId: string, text: string) {
     const updated = { ...notes, [bookingId]: text }
     setNotes(updated)
-    try { localStorage.setItem('espothub_liq_notes', JSON.stringify(updated)) } catch {}
+    try { localStorage.setItem('espot_liq_notes', JSON.stringify(updated)) } catch {}
   }
 
   async function load() {
