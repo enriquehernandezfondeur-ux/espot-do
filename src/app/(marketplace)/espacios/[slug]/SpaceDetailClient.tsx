@@ -186,9 +186,12 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
   // Precio display para el sticky CTA móvil
   function getPriceDisplay() {
     if (!pricing) return null
-    if (pricing.pricing_type === 'hourly') return `${formatCurrency(pricing.hourly_price)} / hr`
-    if (pricing.pricing_type === 'minimum_consumption') return `Desde ${formatCurrency(pricing.minimum_consumption)}`
-    if (pricing.pricing_type === 'fixed_package') return formatCurrency(pricing.fixed_price)
+    if (pricing.pricing_type === 'hourly')
+      return pricing.hourly_price ? `${formatCurrency(pricing.hourly_price)} / hr` : 'Por hora'
+    if (pricing.pricing_type === 'minimum_consumption')
+      return pricing.minimum_consumption ? `Desde ${formatCurrency(pricing.minimum_consumption)}` : 'Consumo mínimo'
+    if (pricing.pricing_type === 'fixed_package')
+      return pricing.fixed_price ? formatCurrency(pricing.fixed_price) : 'Paquete'
     return 'Cotizar'
   }
   const priceDisplay = getPriceDisplay()
@@ -1218,15 +1221,15 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
               if (!p) return null
               const items = []
               if (p.pricing_type === 'hourly') {
-                items.push({ label: 'Precio', value: `${formatCurrency(p.hourly_price)} / hora` })
+                if (p.hourly_price) items.push({ label: 'Precio', value: `${formatCurrency(p.hourly_price)} / hora` })
                 if (p.min_hours) items.push({ label: 'Mínimo', value: `${p.min_hours} hora${p.min_hours > 1 ? 's' : ''}` })
               }
               if (p.pricing_type === 'minimum_consumption') {
-                items.push({ label: 'Consumo mínimo', value: formatCurrency(p.minimum_consumption) })
+                if (p.minimum_consumption) items.push({ label: 'Consumo mínimo', value: formatCurrency(p.minimum_consumption) })
                 if (p.session_hours) items.push({ label: 'Sesión', value: `${p.session_hours}h incluidas` })
               }
               if (p.pricing_type === 'fixed_package') {
-                items.push({ label: 'Paquete', value: formatCurrency(p.fixed_price) })
+                if (p.fixed_price) items.push({ label: 'Paquete', value: formatCurrency(p.fixed_price) })
                 if (p.package_hours) items.push({ label: 'Incluye', value: `${p.package_hours}h` })
                 if (p.extra_hour_price > 0) items.push({ label: 'Hora adicional', value: formatCurrency(p.extra_hour_price) })
               }

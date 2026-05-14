@@ -65,6 +65,7 @@ export async function adminUpdateSpace(spaceId: string, payload: {
   const { error } = await supabase.from('spaces').update(payload).eq('id', spaceId)
   if (!error) {
     revalidatePath('/buscar')
+    revalidatePath('/espacios', 'layout')
     revalidatePath('/', 'layout')
   }
   return error ? { error: error.message } : { success: true }
@@ -218,6 +219,7 @@ export async function updateSpaceStatus(spaceId: string, updates: {
   const { error } = await supabase.from('spaces').update(updates).eq('id', spaceId)
   if (!error) {
     revalidatePath('/buscar')
+    revalidatePath('/espacios', 'layout')
     revalidatePath('/', 'layout')
   }
   return error ? { error: error.message } : { success: true }
