@@ -16,7 +16,7 @@ function logo() {
   return `
     <div style="text-align:center;margin-bottom:28px;">
       <div style="display:inline-block;">
-        <span style="font-family:Arial,sans-serif;font-size:26px;font-weight:900;color:#03313C;letter-spacing:-0.05em;line-height:1;">espot</span><span style="font-family:Arial,sans-serif;font-size:26px;font-weight:900;color:#35C493;letter-spacing:-0.05em;line-height:1;">.do</span>
+        <span style="font-family:'Poppins',Arial,sans-serif;font-size:26px;font-weight:900;color:#03313C;letter-spacing:-0.05em;line-height:1;">espot</span><span style="font-family:'Poppins',Arial,sans-serif;font-size:26px;font-weight:900;color:#35C493;letter-spacing:-0.05em;line-height:1;">.do</span>
       </div>
       <div style="width:32px;height:3px;background:linear-gradient(90deg,#35C493,#03313C);border-radius:2px;margin:6px auto 0;"></div>
     </div>`
@@ -27,8 +27,8 @@ function logo() {
 function infoRow(label: string, value: string, last = false) {
   return `
     <tr>
-      <td style="padding:11px 18px;font-size:13px;color:#6B7280;${last ? '' : 'border-bottom:1px solid #F0F2F5;'}width:44%;background:#FAFBFC;vertical-align:top;font-family:Arial,sans-serif;">${label}</td>
-      <td style="padding:11px 18px;font-size:13px;color:#0F1623;font-weight:600;${last ? '' : 'border-bottom:1px solid #F0F2F5;'}vertical-align:top;font-family:Arial,sans-serif;">${value}</td>
+      <td style="padding:11px 18px;font-size:13px;color:#6B7280;${last ? '' : 'border-bottom:1px solid #F0F2F5;'}width:44%;background:#FAFBFC;vertical-align:top;font-family:'Poppins',Arial,sans-serif;">${label}</td>
+      <td style="padding:11px 18px;font-size:13px;color:#0F1623;font-weight:600;${last ? '' : 'border-bottom:1px solid #F0F2F5;'}vertical-align:top;font-family:'Poppins',Arial,sans-serif;">${value}</td>
     </tr>`
 }
 
@@ -63,12 +63,12 @@ export function emailBase({
         <!--[if mso]>
         <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${cta.url}" style="height:50px;v-text-anchor:middle;width:220px;" arcsize="28%" stroke="f" fillcolor="${accentColor}">
           <w:anchorlock/>
-          <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:800;">${cta.text} →</center>
+          <center style="color:#ffffff;font-family:'Poppins',Arial,sans-serif;font-size:15px;font-weight:800;">${cta.text} →</center>
         </v:roundrect>
         <![endif]-->
         <!--[if !mso]><!-->
         <a href="${cta.url}"
-          style="display:inline-block;background:${accentColor};color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:800;padding:15px 38px;border-radius:50px;text-decoration:none;letter-spacing:-0.01em;mso-hide:all;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+          style="display:inline-block;background:${accentColor};color:#ffffff;font-family:'Poppins',Arial,sans-serif;font-size:15px;font-weight:800;padding:15px 38px;border-radius:50px;text-decoration:none;letter-spacing:-0.01em;mso-hide:all;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
           ${cta.text} &rarr;
         </a>
         <!--<![endif]-->
@@ -76,28 +76,28 @@ export function emailBase({
 
   const noteHtml = note ? `
       <div style="margin:0 32px 24px;padding:14px 18px;background:#F0FDF9;border-left:3px solid #35C493;border-radius:0 10px 10px 0;">
-        <p style="color:#065F46;font-size:13px;margin:0;line-height:1.6;font-family:Arial,sans-serif;">&#128274; ${note}</p>
+        <p style="color:#065F46;font-size:13px;margin:0;line-height:1.6;font-family:'Poppins',Arial,sans-serif;"><span style="font-weight:700;margin-right:4px;">Nota:</span>${note}</p>
       </div>` : ''
 
   const footer = `
     <div style="text-align:center;margin-top:32px;padding:24px 20px;border-top:1px solid #E8ECF0;">
       <!-- Logo pequeño en footer -->
       <div style="margin-bottom:12px;">
-        <span style="font-family:Arial,sans-serif;font-size:15px;font-weight:900;color:#03313C;letter-spacing:-0.04em;">espot</span><span style="font-family:Arial,sans-serif;font-size:15px;font-weight:900;color:#35C493;letter-spacing:-0.04em;">.do</span>
+        <span style="font-family:'Poppins',Arial,sans-serif;font-size:15px;font-weight:900;color:#03313C;letter-spacing:-0.04em;">espot</span><span style="font-family:'Poppins',Arial,sans-serif;font-size:15px;font-weight:900;color:#35C493;letter-spacing:-0.04em;">.do</span>
       </div>
-      <p style="color:#9CA3AF;font-size:12px;margin:0 0 6px;font-family:Arial,sans-serif;">
+      <p style="color:#9CA3AF;font-size:12px;margin:0 0 6px;font-family:'Poppins',Arial,sans-serif;">
         Espacios para eventos en Rep&uacute;blica Dominicana
       </p>
-      <p style="color:#CBD5E1;font-size:11px;margin:0 0 6px;font-family:Arial,sans-serif;">
+      <p style="color:#CBD5E1;font-size:11px;margin:0 0 6px;font-family:'Poppins',Arial,sans-serif;">
         &copy; 2026 ESPOT, S.R.L. &middot;
         <a href="mailto:contacto@${DOMAIN}" style="color:#35C493;text-decoration:none;">contacto@${DOMAIN}</a>
         &middot; <a href="${SITE}" style="color:#9CA3AF;text-decoration:none;">${DOMAIN}</a>
       </p>
       ${unsubscribeUrl ? `
-      <p style="color:#CBD5E1;font-size:10px;margin:4px 0 0;font-family:Arial,sans-serif;">
+      <p style="color:#CBD5E1;font-size:10px;margin:4px 0 0;font-family:'Poppins',Arial,sans-serif;">
         <a href="${unsubscribeUrl}" style="color:#CBD5E1;text-decoration:underline;">Cancelar suscripci&oacute;n</a>
       </p>` : `
-      <p style="color:#CBD5E1;font-size:10px;margin:4px 0 0;font-family:Arial,sans-serif;">
+      <p style="color:#CBD5E1;font-size:10px;margin:4px 0 0;font-family:'Poppins',Arial,sans-serif;">
         <a href="${SITE}/dashboard/perfil" style="color:#CBD5E1;text-decoration:underline;">Gestionar notificaciones</a>
       </p>`}
     </div>`
@@ -110,6 +110,9 @@ export function emailBase({
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="x-apple-disable-message-reformatting">
   <title>${title}</title>
+  <!--[if !mso]><!-->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" type="text/css">
+  <!--<![endif]-->
   <!--[if mso]>
   <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
   <![endif]-->
@@ -129,7 +132,7 @@ export function emailBase({
     <!-- Header con logo -->
     <div style="background:#03313C;border-radius:20px 20px 0 0;padding:28px 36px 24px;text-align:center;">
       <div style="display:inline-block;background:rgba(255,255,255,0.08);border-radius:12px;padding:10px 24px;">
-        <span style="font-family:Arial,sans-serif;font-size:22px;font-weight:900;color:#ffffff;letter-spacing:-0.04em;line-height:1;">espot</span><span style="font-family:Arial,sans-serif;font-size:22px;font-weight:900;color:#35C493;letter-spacing:-0.04em;line-height:1;">.do</span>
+        <span style="font-family:'Poppins',Arial,sans-serif;font-size:22px;font-weight:900;color:#ffffff;letter-spacing:-0.04em;line-height:1;">espot</span><span style="font-family:'Poppins',Arial,sans-serif;font-size:22px;font-weight:900;color:#35C493;letter-spacing:-0.04em;line-height:1;">.do</span>
       </div>
     </div>
 
@@ -141,14 +144,14 @@ export function emailBase({
 
       <!-- Encabezado del contenido -->
       <div class="card-header" style="padding:32px 36px 20px;background:#fff;">
-        <h1 style="color:#03313C;font-size:22px;font-weight:800;margin:0 0 8px;letter-spacing:-0.03em;line-height:1.2;font-family:Arial,sans-serif;">${title}</h1>
-        ${subtitle ? `<p style="color:#6B7280;font-size:14px;margin:0;line-height:1.6;font-family:Arial,sans-serif;">${subtitle}</p>` : ''}
+        <h1 style="color:#03313C;font-size:22px;font-weight:800;margin:0 0 8px;letter-spacing:-0.03em;line-height:1.2;font-family:'Poppins',Arial,sans-serif;">${title}</h1>
+        ${subtitle ? `<p style="color:#6B7280;font-size:14px;margin:0;line-height:1.6;font-family:'Poppins',Arial,sans-serif;">${subtitle}</p>` : ''}
       </div>
 
       <div style="height:1px;background:#F0F2F5;font-size:0;line-height:0;">&nbsp;</div>
 
       <!-- Cuerpo -->
-      <div class="card-body" style="padding:24px 36px;color:#374151;font-size:14px;line-height:1.8;font-family:Arial,sans-serif;">
+      <div class="card-body" style="padding:24px 36px;color:#374151;font-size:14px;line-height:1.8;font-family:'Poppins',Arial,sans-serif;">
         ${body}
       </div>
 
