@@ -156,21 +156,14 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
       const L = LModule.default
       lRef.current = L
 
+      // Siempre inicia centrado en Distrito Nacional
       const view = CITY_VIEW['default']
-
-      // Límites del Distrito Nacional — el mapa no permite salir de esta zona
-      const DN_BOUNDS = L.latLngBounds(
-        [18.40, -70.08],   // SW
-        [18.56, -69.82],   // NE
-      )
 
       const map  = L.map(containerRef.current, {
         center:             view.center,
         zoom:               view.zoom,
-        minZoom:            12,
+        minZoom:            10,
         maxZoom:            18,
-        maxBounds:          DN_BOUNDS,
-        maxBoundsViscosity: 1.0,   // rebote duro en los bordes
         zoomControl:        false,
         attributionControl: true,
       })
