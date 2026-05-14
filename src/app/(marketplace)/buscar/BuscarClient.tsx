@@ -120,6 +120,13 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   const [selectedFacilities,  setSelectedFacilities]  = useState<string[]>([])
   const [pricingFilter,       setPricingFilter]       = useState('')
   const [moreOpen,       setMoreOpen]       = useState(false)
+  const [drawerFocus,    setDrawerFocus]    = useState<string | null>(null)
+  const drawerContentRef = useRef<HTMLDivElement>(null)
+
+  function openDrawer(section?: string) {
+    setMoreOpen(true)
+    if (section) setDrawerFocus(section)
+  }
   const [blockedIds,     setBlockedIds]     = useState<Set<string>>(
     () => new Set(spaces.filter((s: any) => s._dateFiltered && !s._available).map((s: any) => s.id))
   )
@@ -157,6 +164,19 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  // Scroll al section del drawer cuando se abre con foco
+  useEffect(() => {
+    if (!moreOpen || !drawerFocus || !drawerContentRef.current) return
+    // Pequeño delay para que el drawer termine de montar
+    const timer = setTimeout(() => {
+      const el = drawerContentRef.current?.querySelector(`[data-section="${drawerFocus}"]`) as HTMLElement | null
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      setDrawerFocus(null)
+    }, 120)
+    return () => clearTimeout(timer)
+  }, [moreOpen, drawerFocus])
+
 
   // Bloquear scroll cuando el drawer de filtros está abierto
   useEffect(() => {
@@ -788,7 +808,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
 
             {/* Tipo de espacio */}
             {(() => { const cat = CATEGORIES.find(c => c.value === categoria); const Icon = cat?.icon ?? LayoutList; return (
-              <button onClick={() => setMoreOpen(true)}
+              <button onClick={() => openDrawer('tipo-espacio')}
                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all"
                 style={{ background: categoria ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${categoria ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: categoria ? 'var(--brand)' : 'var(--text-primary)' }}>
                 <Icon size={13} style={{ flexShrink: 0 }} />
@@ -798,7 +818,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
             )})()}
 
             {/* Tipo de evento */}
-            <button onClick={() => setMoreOpen(true)}
+            <button onClick={() => openDrawer('tipo-evento')}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all"
               style={{ background: activity ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${activity ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: activity ? 'var(--brand)' : 'var(--text-primary)' }}>
               <Tag size={13} style={{ flexShrink: 0 }} />
@@ -807,7 +827,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
             </button>
 
             {/* Personas */}
-            <button onClick={() => setMoreOpen(true)}
+            <button onClick={() => openDrawer('personas')}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all"
               style={{ background: capacidad ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${capacidad ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: capacidad ? 'var(--brand)' : 'var(--text-primary)' }}>
               <Users size={13} style={{ flexShrink: 0 }} />
@@ -816,7 +836,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
             </button>
 
             {/* Sector */}
-            <button onClick={() => setMoreOpen(true)}
+            <button onClick={() => openDrawer('sector')}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all"
               style={{ background: sector ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${sector ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: sector ? 'var(--brand)' : 'var(--text-primary)' }}>
               <MapPin size={13} style={{ flexShrink: 0 }} />
@@ -825,7 +845,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
             </button>
 
             {/* Fecha */}
-            <button onClick={() => setMoreOpen(true)}
+            <button onClick={() => openDrawer('fecha')}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all"
               style={{ background: dateFrom ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${dateFrom ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: dateFrom ? 'var(--brand)' : 'var(--text-primary)' }}>
               <CalendarDays size={13} style={{ flexShrink: 0 }} />
@@ -834,7 +854,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
             </button>
 
             {/* Precio */}
-            <button onClick={() => setMoreOpen(true)}
+            <button onClick={() => openDrawer('precio')}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all"
               style={{ background: pricingFilter ? (PRICING_TYPES.find(p=>p.value===pricingFilter)?.bg ?? 'var(--brand-dim)') : '#fff', border: `1.5px solid ${pricingFilter ? (PRICING_TYPES.find(p=>p.value===pricingFilter)?.border ?? 'var(--brand-border)') : 'var(--border-medium)'}`, color: pricingFilter ? (PRICING_TYPES.find(p=>p.value===pricingFilter)?.text ?? 'var(--brand)') : 'var(--text-primary)' }}>
               <Clock size={13} style={{ flexShrink: 0 }} />
@@ -1082,9 +1102,10 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
             </div>
 
             {/* Contenido scrolleable */}
-            <div className="flex-1 overflow-y-auto px-5 py-5 space-y-7">
+            <div ref={drawerContentRef} className="flex-1 overflow-y-auto px-5 py-5 space-y-7">
 
               {/* ── SECTOR / CIUDAD ── */}
+              <div data-section="sector" />
               <div>
                 <h3 className="font-bold text-sm mb-3" style={{ color: 'var(--text-primary)' }}>
                   Sector o ciudad
@@ -1123,6 +1144,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               </div>
 
               {/* ── FECHA Y HORA ── */}
+              <div data-section="fecha" />
               <div>
                 <h3 className="font-bold text-sm mb-3" style={{ color: 'var(--text-primary)' }}>
                   Fecha y hora del evento
@@ -1145,6 +1167,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               </div>
 
               {/* ── CAPACIDAD ── */}
+              <div data-section="personas" />
               <div>
                 <h3 className="font-bold text-sm mb-1" style={{ color: 'var(--text-primary)' }}>
                   ¿Cuántos invitados?
@@ -1199,6 +1222,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               </div>
 
               {/* ── TIPO DE EVENTO ── */}
+              <div data-section="tipo-evento" />
               <div>
                 <h3 className="font-bold text-sm mb-1" style={{ color: 'var(--text-primary)' }}>Tipo de evento</h3>
                 <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>¿Qué tipo de evento vas a celebrar?</p>
@@ -1266,6 +1290,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               </div>
 
               {/* ── TIPO DE ESPACIO ── */}
+              <div data-section="tipo-espacio" />
               <div>
                 <h3 className="font-bold text-sm mb-3" style={{ color: 'var(--text-primary)' }}>Tipo de espacio</h3>
                 <div className="grid grid-cols-2 gap-2">
@@ -1290,6 +1315,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               </div>
 
               {/* ── TIPO DE PRECIO ── */}
+              <div data-section="precio" />
               <div>
                 <h3 className="font-bold text-sm mb-1" style={{ color: 'var(--text-primary)' }}>Tipo de precio</h3>
                 <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>¿Cómo prefieres pagar?</p>

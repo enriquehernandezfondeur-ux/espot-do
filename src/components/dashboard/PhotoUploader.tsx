@@ -10,28 +10,23 @@ interface Photo { url: string; path: string; isCover: boolean }
 interface Props {
   spaceId?:       string
   onChange:       (photos: Photo[]) => void
-  initialPhotos?: Photo[]  // Fotos existentes al editar
+  initialPhotos?: Photo[]
 }
 
 export default function PhotoUploader({ spaceId, onChange, initialPhotos }: Props) {
-  const [photos, setPhotos]         = useState<Photo[]>(initialPhotos ?? [])
-  const [uploading, setUploading]   = useState(false)
-  const [dragOver, setDragOver]     = useState(false)
+  const [photos, setPhotos]           = useState<Photo[]>(initialPhotos ?? [])
+  const [uploading, setUploading]     = useState(false)
+  const [dragOver, setDragOver]       = useState(false)
   const [uploadError, setUploadError] = useState('')
-  const [dragIdx, setDragIdx]       = useState<number | null>(null)
-  const [overIdx, setOverIdx]       = useState<number | null>(null)
+  const [dragIdx, setDragIdx]         = useState<number | null>(null)
+  const [overIdx, setOverIdx]         = useState<number | null>(null)
+  const [activeIdx, setActiveIdx]     = useState<number | null>(null)  // para touch
   const inputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
 
-  // ── Drag & drop reordering ─────────────────────────────
-  function onDragStart(i: number) {
-    setDragIdx(i)
-  }
-
-  function onDragEnter(i: number) {
-    setOverIdx(i)
-  }
-
+  // ── Reordenar por drag ────────────────────────────────────
+  function onDragStart(i: number) { setDragIdx(i) }
+  function onDragEnter(i: number) { setOverIdx(i) }
   function onDragEnd() {
     if (dragIdx === null || overIdx === null || dragIdx === overIdx) {
       setDragIdx(null); setOverIdx(null); return
@@ -39,76 +34,64 @@ export default function PhotoUploader({ spaceId, onChange, initialPhotos }: Prop
     const next = [...photos]
     const [moved] = next.splice(dragIdx, 1)
     next.splice(overIdx, 0, moved)
-    // La primera siempre es portada
     const updated = next.map((p, i) => ({ ...p, isCover: i === 0 }))
-    setPhotos(updated)
-    onChange(updated)
-    setDragIdx(null)
-    setOverIdx(null)
+    setPhotos(updated); onChange(updated)
+    setDragIdx(null); setOverIdx(null)
   }
 
+  // ── Subir archivos ────────────────────────────────────────
   async function uploadFiles(files: FileList) {
     if (!files.length) return
-    setUploading(true)
-    setUploadError('')
+    setUploading(true); setUploadError('')
 
     const uploaded: Photo[] = []
     const folder = spaceId ? `spaces/${spaceId}` : `temp/${Date.now()}`
 
     for (const file of Array.from(files)) {
       if (!file.type.startsWith('image/')) continue
-      if (file.size > 10 * 1024 * 1024) {
-        setUploadError(`"${file.name}" supera los 10MB`)
-        continue
-      }
-      const ext = file.name.split('.').pop()
+      if (file.size > 10 * 1024 * 1024) { setUploadError(`"${file.name}" supera los 10MB`); continue }
+      const ext  = file.name.split('.').pop()
       const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-
-      const { error } = await supabase.storage
-        .from('space-images')
-        .upload(path, file, { cacheControl: '3600', upsert: false })
-
-      if (error) {
-        setUploadError(`Error al subir ${file.name}: ${error.message}`)
-      } else {
+      const { error } = await supabase.storage.from('space-images').upload(path, file, { cacheControl: '3600', upsert: false })
+      if (error) { setUploadError(`Error al subir ${file.name}: ${error.message}`) }
+      else {
         const { data: { publicUrl } } = supabase.storage.from('space-images').getPublicUrl(path)
         uploaded.push({ url: publicUrl, path, isCover: false })
       }
     }
 
     const next = [...photos, ...uploaded].map((p, i) => ({ ...p, isCover: i === 0 }))
-    setPhotos(next)
-    onChange(next)
-    setUploading(false)
+    setPhotos(next); onChange(next); setUploading(false)
   }
 
   function setCover(index: number) {
     const next = photos.map((p, i) => ({ ...p, isCover: i === index }))
-    setPhotos(next)
-    onChange(next)
+    setPhotos(next); onChange(next)
   }
 
   async function remove(index: number) {
     const photo = photos[index]
     await supabase.storage.from('space-images').remove([photo.path])
     const next = photos.filter((_, i) => i !== index).map((p, i) => ({ ...p, isCover: i === 0 }))
-    setPhotos(next)
-    onChange(next)
+    setPhotos(next); onChange(next)
+    if (activeIdx === index) setActiveIdx(null)
   }
 
   return (
-    <div className="space-y-4">
-      {/* Drop zone */}
+    <div className="space-y-3">
+
+      {/* Drop zone — toca para seleccionar en mobile */}
       <div
         onDragOver={e => { e.preventDefault(); setDragOver(true) }}
         onDragLeave={() => setDragOver(false)}
         onDrop={e => { e.preventDefault(); setDragOver(false); uploadFiles(e.dataTransfer.files) }}
         onClick={() => inputRef.current?.click()}
         className={cn(
-          'border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all',
-          dragOver ? 'border-[#35C493] bg-[rgba(53,196,147,0.05)]' : 'border-gray-200 hover:border-[#35C493] hover:bg-[rgba(53,196,147,0.03)]'
-        )}
-      >
+          'border-2 border-dashed rounded-2xl p-5 md:p-8 text-center cursor-pointer transition-all',
+          dragOver
+            ? 'border-[#35C493] bg-[rgba(53,196,147,0.05)]'
+            : 'border-[var(--border-medium)] hover:border-[#35C493] hover:bg-[rgba(53,196,147,0.03)]'
+        )}>
         <input
           ref={inputRef}
           type="file"
@@ -119,35 +102,35 @@ export default function PhotoUploader({ spaceId, onChange, initialPhotos }: Prop
         />
         {uploading ? (
           <div className="flex flex-col items-center gap-2">
-            <Loader2 className="w-8 h-8 text-[#35C493] animate-spin" />
+            <Loader2 className="w-7 h-7 animate-spin" style={{ color: '#35C493' }} />
             <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Subiendo fotos...</p>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2">
-            <div className="w-12 h-12 bg-[rgba(53,196,147,0.12)] rounded-xl flex items-center justify-center">
-              <ImagePlus className="w-6 h-6 text-[#35C493]" />
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: 'rgba(53,196,147,0.12)' }}>
+              <ImagePlus className="w-5 h-5" style={{ color: '#35C493' }} />
             </div>
-            <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-              Arrastra tus fotos aquí
+            <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+              Subir fotos del espacio
             </p>
             <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              o <span className="text-[#35C493] underline underline-offset-2">haz click para seleccionar</span>
+              <span style={{ color: '#35C493' }}>Toca para seleccionar</span> · JPG o PNG
             </p>
-            <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>JPG, PNG · Máximo 10MB por foto · La primera es la portada</p>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Máx. 10MB · La primera foto es la portada</p>
           </div>
         )}
       </div>
 
       {uploadError && (
-        <div className="text-xs px-3 py-2 rounded-xl"
+        <div className="text-xs px-3 py-2 rounded-xl flex items-center gap-2"
           style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444' }}>
-          {uploadError}
+          <X size={12} className="shrink-0" /> {uploadError}
         </div>
       )}
 
-      {/* Grid de fotos */}
+      {/* Grid de fotos — 3 cols en mobile, 4 en desktop */}
       {photos.length > 0 && (
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 md:gap-3">
           {photos.map((photo, i) => (
             <div
               key={i}
@@ -156,66 +139,93 @@ export default function PhotoUploader({ spaceId, onChange, initialPhotos }: Prop
               onDragEnter={() => onDragEnter(i)}
               onDragEnd={onDragEnd}
               onDragOver={e => e.preventDefault()}
-              className="relative group rounded-xl overflow-hidden aspect-video cursor-grab active:cursor-grabbing transition-all duration-150"
+              // Touch: tap para activar/desactivar acciones
+              onClick={() => setActiveIdx(activeIdx === i ? null : i)}
+              className="relative rounded-xl overflow-hidden cursor-pointer transition-all duration-150"
               style={{
+                aspectRatio: '4/3',
                 background: 'var(--bg-elevated)',
-                opacity: dragIdx === i ? 0.4 : 1,
+                opacity:   dragIdx === i ? 0.4 : 1,
                 transform: overIdx === i && dragIdx !== i ? 'scale(1.03)' : 'scale(1)',
-                outline: overIdx === i && dragIdx !== i ? '2px solid #35C493' : 'none',
+                outline:   overIdx === i && dragIdx !== i ? '2px solid #35C493' : 'none',
                 outlineOffset: '2px',
               }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photo.url} alt="" className="w-full h-full object-cover" />
+              <img src={photo.url} alt="" className="w-full h-full object-cover" loading="lazy" />
 
-              {/* Overlay on hover */}
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                <button
-                  onClick={e => { e.stopPropagation(); setCover(i) }}
-                  title="Establecer como portada"
-                  className={cn(
-                    'p-1.5 rounded-lg transition-colors',
-                    photo.isCover ? 'bg-amber-500 text-white' : 'bg-white/20 text-white hover:bg-amber-500'
-                  )}
-                >
-                  <Star size={14} />
-                </button>
-                <button
-                  onClick={e => { e.stopPropagation(); remove(i) }}
-                  className="p-1.5 rounded-lg bg-red-500/80 text-white hover:bg-red-500 transition-colors"
-                >
-                  <X size={14} />
-                </button>
+              {/* Overlay — visible en hover (desktop) O al tocar (mobile) */}
+              <div className={cn(
+                'absolute inset-0 transition-opacity flex flex-col',
+                activeIdx === i ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 md:group-hover:opacity-100'
+              )}
+                style={{ background: 'rgba(0,0,0,0.55)' }}>
+                {/* Botones centrados */}
+                <div className="flex-1 flex items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={e => { e.stopPropagation(); setCover(i); setActiveIdx(null) }}
+                    title="Establecer como portada"
+                    className={cn(
+                      'p-2 rounded-xl transition-colors',
+                      photo.isCover ? 'bg-amber-500 text-white' : 'bg-white/20 text-white'
+                    )}>
+                    <Star size={15} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={e => { e.stopPropagation(); remove(i) }}
+                    className="p-2 rounded-xl bg-red-500/80 text-white">
+                    <X size={15} />
+                  </button>
+                </div>
               </div>
 
-              {/* Cover badge */}
+              {/* Badges siempre visibles */}
               {photo.isCover && (
-                <div className="absolute top-1.5 left-1.5 bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
-                  <Star size={10} /> Portada
+                <div className="absolute top-1.5 left-1.5 text-white text-[10px] px-1.5 py-0.5 rounded-full font-semibold flex items-center gap-0.5"
+                  style={{ background: 'rgba(245,158,11,0.9)' }}>
+                  <Star size={8} /> Portada
                 </div>
               )}
-
-              {/* Number */}
-              <div className="absolute bottom-1.5 right-1.5 bg-black/50 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+              <div className="absolute bottom-1 right-1 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold"
+                style={{ background: 'rgba(0,0,0,0.5)' }}>
                 {i + 1}
               </div>
+
+              {/* Indicador visual de "toca para editar" en mobile cuando no está activo */}
+              {activeIdx !== i && (
+                <div className="absolute bottom-1 left-1 md:hidden">
+                  <div className="w-4 h-4 rounded-full flex items-center justify-center"
+                    style={{ background: 'rgba(0,0,0,0.4)' }}>
+                    <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 9 }}>✎</span>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
 
-          {/* Add more */}
+          {/* Agregar más */}
           {photos.length < 10 && (
             <button
+              type="button"
               onClick={() => inputRef.current?.click()}
-              className="aspect-video rounded-xl border-2 border-dashed border-gray-200 hover:border-[#35C493] flex items-center justify-center transition-all" style={{ color: 'var(--text-muted)' }}
-            >
-              <Upload size={20} />
+              className="rounded-xl border-2 border-dashed flex items-center justify-center transition-all"
+              style={{ aspectRatio: '4/3', borderColor: 'var(--border-medium)', color: 'var(--text-muted)' }}>
+              <div className="flex flex-col items-center gap-1">
+                <Upload size={18} />
+                <span className="text-xs hidden sm:block">Agregar</span>
+              </div>
             </button>
           )}
         </div>
       )}
 
       {photos.length > 0 && (
-        <p className="text-slate-500 text-xs">
-          {photos.length}/10 fotos · Arrastra para reordenar · La primera foto es la portada
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+          {photos.length}/10 fotos ·{' '}
+          <span className="md:hidden">Toca una foto para editarla · </span>
+          <span className="hidden md:inline">Arrastra para reordenar · </span>
+          La primera es la portada
         </p>
       )}
     </div>
