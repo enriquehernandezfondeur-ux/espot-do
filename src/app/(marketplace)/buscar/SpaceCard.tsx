@@ -328,20 +328,11 @@ export function SpaceCard({
               })()}
             </div>
 
-            {/* Capacidad + botón Preguntar (#5) */}
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="flex items-center gap-1 text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-                <Users size={11} style={{ color: '#35C493', flexShrink: 0 }} />
-                {space.capacity_max ?? '—'}
-              </span>
-              <Link
-                href={`/espacios/${space.slug}?chat=1`}
-                onClick={e => e.stopPropagation()}
-                className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg shrink-0 transition-all"
-                style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
-                <MessageCircle size={11} /> Preguntar
-              </Link>
-            </div>
+            {/* Capacidad */}
+            <span className="flex items-center gap-1 text-xs font-medium shrink-0" style={{ color: 'var(--text-muted)' }}>
+              <Users size={11} style={{ color: '#35C493', flexShrink: 0 }} />
+              {space.capacity_max ?? '—'}
+            </span>
           </div>
 
         </div>
