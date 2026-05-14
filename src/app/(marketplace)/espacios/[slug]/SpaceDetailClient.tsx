@@ -764,10 +764,9 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                       style={{ background: 'rgba(217,119,6,0.06)', border: '1px solid rgba(217,119,6,0.15)' }}>
                       <Lock size={13} style={{ color: '#D97706', flexShrink: 0, marginTop: 1 }} />
                       <p className="text-xs leading-relaxed" style={{ color: '#92400E' }}>
-                        <strong>¿Qué es consumo mínimo?</strong> Tu grupo se compromete a consumir
-                        al menos <strong>{pricing.minimum_consumption ? formatCurrency(pricing.minimum_consumption) : 'ese monto'}</strong> en
-                        el lugar (comida, bebidas, etc.). Si consumen más, lo pagan directo allí.
-                        Espot cobra este monto al confirmar tu reserva.
+                        <strong>¿Qué es consumo mínimo?</strong> Pagas <strong>{pricing.minimum_consumption ? formatCurrency(pricing.minimum_consumption) : 'este monto'}</strong> a
+                        través de Espot y ese dinero es tu crédito de comida y bebidas en el lugar durante el evento.
+                        Si consumes más, pagas la diferencia directamente en el local.
                       </p>
                     </div>
                   )}

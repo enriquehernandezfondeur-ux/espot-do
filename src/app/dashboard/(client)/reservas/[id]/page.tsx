@@ -240,7 +240,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
           {pricing?.pricing_type === 'minimum_consumption' && (
             <div className="rounded-xl px-4 py-2.5 text-xs"
               style={{ background: 'rgba(217,119,6,0.05)', border: '1px solid rgba(217,119,6,0.2)', color: '#92400E' }}>
-              Tu grupo garantiza consumir este monto. Lo adicional se paga en el lugar.
+              Pagaste este monto a través de Espot — es tu crédito de comida y bebidas en el lugar. Si consumes más, pagas la diferencia directamente allí.
             </div>
           )}
         </div>

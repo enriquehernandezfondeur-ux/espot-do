@@ -554,7 +554,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         {isConsumption && (
           <div>
             <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>
-              Consumo mínimo garantizado
+              Consumo mínimo
             </div>
             <div className="flex items-baseline gap-1 mb-1">
               <span className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
@@ -573,7 +573,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               style={{ background: 'rgba(217,119,6,0.06)', border: '1px solid rgba(217,119,6,0.15)' }}>
               <Info size={12} style={{ color: '#D97706', flexShrink: 0, marginTop: 1 }} />
               <p className="text-xs leading-relaxed" style={{ color: '#92400E' }}>
-                Tu grupo se compromete a consumir al menos este monto en el lugar (comida, bebidas, etc.). Si consumen más, se paga directo allí.
+                Pagas este monto a través de Espot y lo usas en comida y bebidas durante tu evento. Si consumes más, pagas la diferencia directamente en el local.
               </p>
             </div>
           </div>
@@ -1071,7 +1071,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                     <div className="flex justify-between px-4 py-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
                       <span>
                         {isHourly && `${selectedHours % 1 === 0 ? selectedHours : selectedHours.toFixed(1)}h × ${formatCurrency(pricing?.hourly_price)}/hr`}
-                        {isConsumption && 'Consumo mínimo garantizado'}
+                        {isConsumption && 'Consumo mínimo'}
                         {isPackage && (() => {
                           const extra = Math.max(0, selectedHours - packageHours)
                           return extra > 0
@@ -1114,7 +1114,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                 style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.15)' }}>
                 <Info size={13} style={{ color: '#2563EB', flexShrink: 0, marginTop: 1 }} />
                 <p className="text-xs" style={{ color: '#1D4ED8', lineHeight: 1.6 }}>
-                  Tu grupo garantiza consumir al menos {formatCurrency(Number(pricing?.minimum_consumption ?? 0))} en el lugar (comida, bebidas, etc.). Espot cobra este monto como garantía al confirmar. Si consumen más, se paga directo al local.
+                  Pagas {formatCurrency(Number(pricing?.minimum_consumption ?? 0))} a través de Espot. Ese dinero es tu crédito de comida y bebidas en el lugar durante el evento. Si consumes más de ese monto, pagas la diferencia directamente en el local.
                 </p>
               </div>
             )}

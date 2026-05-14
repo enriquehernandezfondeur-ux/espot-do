@@ -43,8 +43,7 @@ export function getPriceInfo(space: any) {
   if (p.pricing_type === 'minimum_consumption') {
     const v = p.minimum_consumption
     if (!v) return { type: 'Consumo mínimo', unit: '', amount: null, full: 'Cotizar precio' }
-    // Mostrar "Desde" para dejar claro que es el mínimo a consumir, no el precio total
-    return { type: 'Consumo mínimo', unit: '', amount: `Desde ${formatCurrency(v)}`, full: `Desde ${formatCurrency(v)}` }
+    return { type: 'Consumo mínimo', unit: '', amount: formatCurrency(v), full: formatCurrency(v) }
   }
   if (p.pricing_type === 'fixed_package') {
     const v = p.fixed_price

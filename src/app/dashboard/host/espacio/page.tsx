@@ -49,7 +49,7 @@ const pricingOptions: { value: PricingType; label: string; desc: string; icon: R
   {
     value: 'minimum_consumption',
     label: 'Consumo mínimo',
-    desc: 'El cliente debe consumir un monto mínimo en comida/bebida.',
+    desc: 'El cliente paga este monto por adelantado a través de Espot y lo usa como crédito en comida y bebidas en tu local.',
     icon: Wine,
     ideal: 'Restaurantes, bares, lounges, rooftops',
   },
@@ -1163,8 +1163,8 @@ export default function EspacioPage() {
                   </div>
                 </div>
                 <div className="rounded-lg p-3 text-xs" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
-                  El cliente reserva el horario y se compromete a consumir mínimo <strong style={{ color: 'var(--text-primary)' }}>{minConsumption ? formatCurrency(Number(minConsumption)) : 'ese monto'}</strong> en comida y bebidas.
-                  Si consumen más, lo pagan directo en tu local. espot.do cobra el mínimo como garantía.
+                  El cliente paga <strong style={{ color: 'var(--text-primary)' }}>{minConsumption ? formatCurrency(Number(minConsumption)) : 'ese monto'}</strong> por adelantado a través de Espot.
+                  Ese dinero es su crédito de comida y bebidas en tu local durante el evento. Si consumen más, pagan la diferencia directamente contigo.
                 </div>
               </div>
             )}
