@@ -468,6 +468,32 @@ export async function completeBooking(bookingId: string) {
 
   if (error) return { error: error.message }
   if (!updated || updated.length === 0) return { error: 'La reserva no está en estado confirmado' }
+
+  // Enviar solicitud de reseña al cliente
+  const { data: bkFull } = await supabase
+    .from('bookings')
+    .select('event_date, spaces!space_id(name, slug), profiles!guest_id(full_name, email)')
+    .eq('id', bookingId)
+    .single()
+  if (bkFull) {
+    const guest = (bkFull as any).profiles
+    const space = (bkFull as any).spaces
+    if (guest?.email) {
+      const { tplSolicitudResena } = await import('@/lib/email/templates')
+      await sendEmail({
+        to:      guest.email,
+        subject: `¿Cómo estuvo tu evento en ${space?.name}?`,
+        html:    tplSolicitudResena({
+          guestName:  guest.full_name ?? 'Cliente',
+          spaceName:  space?.name ?? '',
+          eventDate:  bkFull.event_date,
+          bookingId,
+          spaceSlug:  space?.slug ?? '',
+        }),
+      })
+    }
+  }
+
   revalidatePath('/dashboard/host/reservas')
   revalidatePath('/dashboard/host/finanzas')
   return { success: true }

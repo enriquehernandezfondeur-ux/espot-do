@@ -156,7 +156,8 @@ export async function createBooking(payload: CreateBookingPayload) {
         .eq('space_id', payload.spaceId)
         .eq('event_date', payload.eventDate)
         .not('status', 'in', '("rejected","cancelled_guest","cancelled_host")')
-        .or(`start_time.lte.${payload.endTime},end_time.gte.${payload.startTime}`)
+        .lt('start_time', payload.endTime)   // overlap: start existente < fin nuevo
+        .gt('end_time', payload.startTime)   // overlap: fin existente > inicio nuevo
         .limit(1)
       if (overlapping && overlapping.length > 0) {
         return { error: 'Este espacio ya tiene una reserva en ese horario. Por favor elige otro horario o fecha.' }
@@ -288,8 +289,8 @@ export async function createBooking(payload: CreateBookingPayload) {
   await Promise.allSettled([
     guestEmail && sendEmail({
       to: guestEmail,
-      subject: isQuote ? `Cotización solicitada — ${spaceName}` : `Solicitud recibida — ${spaceName}`,
-      html: isQuote ? tplSolicitudCotizacionCliente(bookingData) : tplSolicitudCliente(bookingData),
+      subject: isQuote ? `Cotización solicitada — ${spaceName}` : isInstant ? `¡Reserva aceptada! Completa el pago — ${spaceName}` : `Solicitud recibida — ${spaceName}`,
+      html: isQuote ? tplSolicitudCotizacionCliente(bookingData) : isInstant ? tplAceptadaCliente({ ...bookingData, hostName: host?.full_name ?? '', platformFee: payload.totalAmount }) : tplSolicitudCliente(bookingData),
     }),
     hostEmail && sendEmail({
       to: hostEmail,
@@ -342,6 +343,11 @@ export async function acceptBooking(bookingId: string) {
   revalidatePath('/dashboard/host/reservas')
   revalidatePath('/dashboard/reservas')
 
+  // Calcular la primera cuota real para mostrar en el email
+  const { buildSchedule } = await import('@/lib/payments/schedule')
+  const schedule = buildSchedule(bk.event_date, Number(bk.total_amount))
+  const firstInstallmentAmount = schedule.installments[0]?.amount ?? Number(bk.total_amount)
+
   await Promise.allSettled([
     guest?.email && sendEmail({
       to: guest.email,
@@ -352,7 +358,7 @@ export async function acceptBooking(bookingId: string) {
         spaceName: space?.name ?? '', spaceAddress: space?.address ?? '',
         eventDate: bk.event_date, startTime: bk.start_time, endTime: bk.end_time,
         eventType: bk.event_type, guestCount: bk.guest_count,
-        totalAmount: Number(bk.total_amount), platformFee: Number(bk.platform_fee),
+        totalAmount: Number(bk.total_amount), platformFee: firstInstallmentAmount,
         basePrice: Number(bk.base_price ?? bk.total_amount), selectedAddons: [], bookingId,
       }),
     }),

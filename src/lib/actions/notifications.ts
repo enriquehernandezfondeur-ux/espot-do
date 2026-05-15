@@ -12,6 +12,8 @@ export interface NotificationSettings {
   recordatorio_pago:   boolean  // Recordatorio de cuota próxima
   recordatorio_evento: boolean  // 48h antes del evento
   solicitud_resena:    boolean  // Pedido de reseña post-evento
+  mensaje_nuevo:       boolean  // Nuevo mensaje en el chat
+  nueva_resena:        boolean  // Nueva reseña en el espacio
   // Propietario
   nueva_solicitud:     boolean  // Nueva solicitud de reserva
   pago_recibido:       boolean  // Pago confirmado
@@ -28,6 +30,8 @@ export const DEFAULT_NOTIFICATIONS: NotificationSettings = {
   recordatorio_pago:   true,
   recordatorio_evento: true,
   solicitud_resena:    true,
+  mensaje_nuevo:       true,
+  nueva_resena:        true,
   nueva_solicitud:     true,
   pago_recibido:       true,
   cancelacion_host:    true,

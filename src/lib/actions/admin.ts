@@ -160,17 +160,23 @@ export async function adminUpsertAddon(spaceId: string, addon: { id?: string; na
   if (addon.id) {
     const { id, ...updateData } = addon
     const { error } = await supabase.from('space_addons').update(updateData).eq('id', id)
-    return error ? { error: error.message } : { success: true }
+    if (error) return { error: error.message }
+    revalidateSpace()
+    return { success: true }
   }
   const { data, error } = await supabase.from('space_addons').insert({ ...addon, space_id: spaceId, is_available: true }).select('id').single()
-  return error ? { error: error.message } : { success: true, id: data?.id }
+  if (error) return { error: error.message }
+  revalidateSpace()
+  return { success: true, id: data?.id }
 }
 
 export async function adminDeleteAddon(addonId: string) {
   const supabase = await requireAdmin()
   if (!supabase) return { error: 'No autorizado' }
   const { error } = await supabase.from('space_addons').delete().eq('id', addonId)
-  return error ? { error: error.message } : { success: true }
+  if (error) return { error: error.message }
+  revalidateSpace()
+  return { success: true }
 }
 
 // ── MÉTRICAS DEL DASHBOARD ──────────────────────────────
@@ -308,7 +314,10 @@ export async function getAdminUsers(filter?: { role?: string; search?: string })
   return data ?? []
 }
 
+const VALID_ROLES = ['guest', 'host', 'admin'] as const
+
 export async function updateUserRole(userId: string, role: string) {
+  if (!VALID_ROLES.includes(role as any)) return { error: 'Rol inválido' }
   const supabase = await requireAdmin()
   if (!supabase) return { error: 'No autorizado' }
   const { error } = await supabase.from('profiles').update({ role }).eq('id', userId)
@@ -330,6 +339,7 @@ export async function getAdminPayments() {
       spaces!space_id(name, city),
       profiles!guest_id(full_name, email)
     `)
+    .not('status', 'in', '("cancelled_guest","cancelled_host","rejected")')
     .order('created_at', { ascending: false })
 
   return data ?? []
@@ -418,12 +428,20 @@ export async function markPayoutPaid(bookingId: string) {
   const supabase = await requireAdmin()
   if (!supabase) return { error: 'No autorizado' }
 
-  const { error } = await supabase
+  // Verificar idempotencia: no procesar si ya está pagado
+  const { data: current } = await supabase
+    .from('bookings').select('payout_status').eq('id', bookingId).single()
+  if (current?.payout_status === 'paid') return { success: true, already: true }
+
+  const { data: updated, error } = await supabase
     .from('bookings')
     .update({ payout_status: 'paid', updated_at: new Date().toISOString() })
     .eq('id', bookingId)
+    .eq('payout_status', 'pending')
+    .select('id')
 
   if (error) return { error: error.message }
+  if (!updated || updated.length === 0) return { success: true, already: true }
 
   // Obtener datos del booking para notificar al host
   const { data: booking } = await supabase
@@ -515,11 +533,16 @@ export async function getMarketplaceConfig() {
   return data ?? []
 }
 
+const ALLOWED_CONFIG_KEYS = ['platform_fee_pct', 'min_advance_pct', 'cancellation_window_hours', 'site_announcement'] as const
+
 export async function updateConfig(key: string, value: string) {
+  if (!ALLOWED_CONFIG_KEYS.includes(key as any)) return { error: 'Clave de configuración no permitida' }
   const supabase = await requireAdmin()
   if (!supabase) return { error: 'No autorizado' }
   const { error } = await supabase.from('marketplace_config').upsert({ key, value })
-  return error ? { error: error.message } : { success: true }
+  if (error) return { error: error.message }
+  revalidatePath('/', 'layout')
+  return { success: true }
 }
 
 // ── MENSAJES ──────────────────────────────────────────────

@@ -11,11 +11,18 @@ function generateSlug(name: string) {
     .replace(/\s+/g, '-') + '-' + Date.now().toString(36)
 }
 
+const SAFE_URL_PATTERN = /^https:\/\/(?!(?:10\.|172\.(?:1[6-9]|2\d|3[01])\.|192\.168\.|127\.|169\.254\.|::1|localhost))/i
+
 async function downloadImage(url: string): Promise<{ buffer: Buffer; contentType: string } | null> {
+  if (!SAFE_URL_PATTERN.test(url)) {
+    console.warn('[migrate] URL bloqueada por SSRF:', url)
+    return null
+  }
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(15000) })
     if (!res.ok) return null
     const contentType = res.headers.get('content-type') ?? 'image/jpeg'
+    if (!contentType.startsWith('image/')) return null
     const buffer = Buffer.from(await res.arrayBuffer())
     return { buffer, contentType }
   } catch { return null }
