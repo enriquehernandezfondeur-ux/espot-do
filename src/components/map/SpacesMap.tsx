@@ -226,7 +226,7 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
         }
       })
 
-      const nav = () => { if (space.slug) window.location.href = '/espacios/' + space.slug }
+      const nav = () => { if (space.slug) window.open('/espacios/' + space.slug, '_blank', 'noopener,noreferrer') }
       marker.on('click', nav)
 
       marker.addTo(map)

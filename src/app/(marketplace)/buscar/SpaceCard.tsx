@@ -144,7 +144,7 @@ export function SpaceCard({
   }
 
   return (
-    <Link href={href} className="group block" onClick={trackRecent}>
+    <Link href={href} className="group block" target="_blank" rel="noopener noreferrer" onClick={trackRecent}>
       <div
         className="rounded-2xl overflow-hidden h-full flex flex-col"
         style={{

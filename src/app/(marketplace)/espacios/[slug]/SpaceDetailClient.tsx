@@ -1329,7 +1329,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   const cover   = getCover(s)
                   const display = s._pricingDisplay ?? {}
                   return (
-                    <Link key={s.id} href={`/espacios/${s.slug}`} className="group block">
+                    <Link key={s.id} href={`/espacios/${s.slug}`} className="group block" target="_blank" rel="noopener noreferrer">
                       <div className="card-hover rounded-2xl overflow-hidden h-full flex flex-col"
                         style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
                         <div className="relative overflow-hidden shrink-0"
