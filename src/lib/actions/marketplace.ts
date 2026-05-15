@@ -303,6 +303,7 @@ export async function getSpaceBySlug(slug: string) {
     `)
     .eq('slug', slug)
     .eq('is_published', true)
+    .eq('is_active', true)
     .single()
   if (error && error.code !== 'PGRST116') {
     // PGRST116 = "no rows found" (esperado para slugs inexistentes)

@@ -27,16 +27,19 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
   const [copied,      setCopied]      = useState(false)
 
   useEffect(() => {
+    let cancelled = false
     Promise.all([
       getClientBookingDetail(id),
       getUserReviewedBookings(),
     ])
       .then(([detail, reviewed]) => {
+        if (cancelled) return
         setData(detail)
         if (detail && reviewed.has(detail.booking.id)) setAlreadyReviewed(true)
       })
       .catch(() => {})
-      .finally(() => setLoading(false))
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
   }, [id])
 
   if (loading) return (

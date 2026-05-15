@@ -392,7 +392,14 @@ export async function respondToQuote(bookingId: string, quotedPrice: number, mes
   // Crear plan de cuotas con el precio real de la cotización
   const { createInstallments } = await import('@/lib/actions/installments')
   const instResult = await createInstallments(bookingId, bk.event_date, quotedPrice)
-  if (!instResult.success) console.error('[respondToQuote] installments failed:', instResult.error)
+  if (!instResult.success) {
+    console.error('[respondToQuote] installments failed:', instResult.error)
+    // Revertir el booking a quote_requested si las cuotas no se pudieron crear
+    await supabase.from('bookings')
+      .update({ status: 'quote_requested', accepted_at: null })
+      .eq('id', bookingId)
+    return { error: 'Error al crear el plan de pagos. Por favor intenta de nuevo.' }
+  }
 
   // Email al cliente con precio, cuotas y CTA directo al pago
   const SITE  = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'

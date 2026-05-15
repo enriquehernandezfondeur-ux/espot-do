@@ -13,7 +13,8 @@ const STATUS_OPTIONS = [
   { value: 'confirmed',       label: 'Confirmadas' },
   { value: 'completed',       label: 'Completadas' },
   { value: 'quote_requested', label: 'Cotizaciones' },
-  { value: 'cancelled_guest', label: 'Canceladas' },
+  { value: 'cancelled_guest', label: 'Canceladas (cliente)' },
+  { value: 'cancelled_host',  label: 'Canceladas (host)' },
   { value: 'rejected',        label: 'Rechazadas' },
 ]
 

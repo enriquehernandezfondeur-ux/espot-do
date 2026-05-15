@@ -293,7 +293,11 @@ export default function MisReservasPage() {
                   setSelected(next)
                   setInstallments([])
                   if (next && (next.status === 'accepted' || next.status === 'confirmed')) {
-                    getInstallments(next.id).then(setInstallments).catch(() => {})
+                    const targetId = next.id
+                    getInstallments(targetId).then(data => {
+                      setSelected(prev => prev?.id === targetId ? prev : prev)
+                      setInstallments(data)
+                    }).catch(() => {})
                   }
                 }}>
                   <div className="flex items-center gap-3 p-4">

@@ -32,7 +32,9 @@ export default function PaymentPlanSelector({ totalEvent, eventDate, onSelect, s
 
   function selectPlan(plan: PaymentPlanConfig) {
     setActivePlan(plan)
-    if (schedule) onSelect(plan, schedule)
+    // Calcular el schedule del nuevo plan (no del anterior) antes de notificar al padre
+    const newSchedule = buildPaymentSchedule(plan, totalEvent, new Date(eventDate + 'T12:00'))
+    onSelect(plan, newSchedule)
   }
 
   if (!eventDate || totalEvent <= 0) return null

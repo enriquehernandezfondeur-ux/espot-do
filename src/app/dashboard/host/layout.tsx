@@ -8,15 +8,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   if (!user) redirect('/auth')
 
-  let userName: string | undefined
-  let avatarUrl: string | undefined
-  if (user) {
-    const { data } = await supabase.from('profiles').select('full_name, avatar_url').eq('id', user.id).single()
-    userName  = data?.full_name ?? user.email?.split('@')[0]
-    avatarUrl = data?.avatar_url ?? undefined
-  }
+  const { data: profile } = await supabase
+    .from('profiles').select('full_name, avatar_url, role').eq('id', user.id).single()
 
-  const isAdmin = user?.email === (process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com')
+  const isAdmin = user.email === (process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com')
+  if (profile?.role !== 'host' && !isAdmin) redirect('/dashboard')
+
+  const userName  = profile?.full_name ?? user.email?.split('@')[0]
+  const avatarUrl = profile?.avatar_url ?? undefined
 
   return (
     <div className="host-theme flex min-h-dvh" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>

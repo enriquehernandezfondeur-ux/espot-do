@@ -62,8 +62,11 @@ export default function BookingPaymentStatus({ payments, onPay, readOnly = false
 
   async function handlePay(id: string) {
     setPaying(id)
-    await onPay(id)
-    setPaying(null)
+    try {
+      await onPay(id)
+    } finally {
+      setPaying(null)
+    }
   }
 
   return (
@@ -117,7 +120,9 @@ export default function BookingPaymentStatus({ payments, onPay, readOnly = false
                       </div>
                       <div className="text-xs mt-0.5" style={{ color: isOverdue ? '#DC2626' : 'var(--text-muted)' }}>
                         {payment.status === 'paid'
-                          ? `Pagado el ${new Date((payment.paid_at ?? '') + '').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}`
+                          ? payment.paid_at
+                            ? `Pagado el ${new Date(payment.paid_at + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}`
+                            : 'Pagado'
                           : payment.is_final_onsite
                             ? 'Se paga directamente en el espacio'
                             : formatDueDate(payment.due_date)

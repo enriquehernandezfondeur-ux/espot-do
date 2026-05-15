@@ -77,7 +77,7 @@ export default function AnalyticsPage() {
           { label: 'Ingresos confirmados',  value: formatCurrency(totalRevenue),       color: 'var(--brand)', icon: TrendingUp },
           { label: 'Total de eventos',       value: confirmed.length,                  color: '#3B82F6',       icon: CalendarDays },
           { label: 'Ticket promedio',        value: formatCurrency(avgTicket),          color: '#F59E0B',       icon: Building2 },
-          { label: 'Tasa de confirmación',   value: bookings.length > 0 ? `${Math.round(confirmed.length / bookings.length * 100)}%` : '0%', color: '#8B5CF6', icon: Users },
+          { label: 'Tasa de confirmación',   value: (() => { const real = bookings.filter(b => !['quote_requested','cancelled_guest','cancelled_host','rejected'].includes(b.status)); return real.length > 0 ? `${Math.round(confirmed.length / real.length * 100)}%` : '0%' })(), color: '#8B5CF6', icon: Users },
         ].map(({ label, value, color, icon: Icon }) => (
           <div key={label} className="rounded-2xl p-5"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
