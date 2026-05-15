@@ -1,11 +1,12 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { acceptBooking, rejectBooking, confirmPayment, cancelBooking } from './booking'
 import { sendEmail } from '@/lib/email/send'
 import { emailBase, infoBox } from '@/lib/email/templates'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { userLogger, bookingLogger, logError } from '@/lib/logger'
+import { userLogger, logError } from '@/lib/logger'
 
 export { acceptBooking, rejectBooking, confirmPayment as confirmBooking, cancelBooking }
 
@@ -397,6 +398,9 @@ export async function respondToQuote(bookingId: string, quotedPrice: number, mes
   const guest = bk.profiles as any
   const space = bk.spaces as any
 
+  revalidatePath('/dashboard/host/cotizaciones')
+  revalidatePath('/dashboard/host/reservas')
+
   if (guest?.email) {
     // Calcular schedule para mostrar en el email
     const { buildSchedule } = await import('@/lib/payments/schedule')
@@ -455,5 +459,6 @@ export async function completeBooking(bookingId: string) {
 
   if (error) return { error: error.message }
   if (!updated || updated.length === 0) return { error: 'La reserva no está en estado confirmado' }
+  revalidatePath('/dashboard/host/reservas')
   return { success: true }
 }

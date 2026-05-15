@@ -247,7 +247,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
         </div>
         {(booking as any).event_notes && !(booking as any).event_notes.startsWith('[Cotización]') && (
           <div className="mt-4 pt-4 text-xs italic" style={{ borderTop: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
-            📝 "{(booking as any).event_notes}"
+            <span className="font-semibold not-italic" style={{ color: 'var(--text-muted)' }}>Nota: </span>"{(booking as any).event_notes}"
           </div>
         )}
       </div>

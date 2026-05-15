@@ -1,94 +1,30 @@
-import winston from 'winston'
-import DailyRotateFile from 'winston-daily-rotate-file'
+// Logger simple compatible con Vercel serverless (sin filesystem)
+// winston + DailyRotateFile no funcionan en producción serverless
 
-// Formato personalizado para logs
-const logFormat = winston.format.combine(
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-  winston.format.errors({ stack: true }),
-  winston.format.json(),
-  winston.format.printf(({ timestamp, level, message, ...meta }) => {
-    return JSON.stringify({
-      timestamp,
-      level: level.toUpperCase(),
-      message,
-      ...meta,
-    })
-  })
-)
+const isDev = process.env.NODE_ENV === 'development'
 
-// Transport para archivos rotativos
-const fileRotateTransport = new DailyRotateFile({
-  filename: 'logs/espot-%DATE%.log',
-  datePattern: 'YYYY-MM-DD',
-  maxSize: '20m',
-  maxFiles: '14d',
-  format: logFormat,
-})
-
-// Transport para errores
-const errorFileRotateTransport = new DailyRotateFile({
-  filename: 'logs/espot-error-%DATE%.log',
-  datePattern: 'YYYY-MM-DD',
-  level: 'error',
-  maxSize: '20m',
-  maxFiles: '30d',
-  format: logFormat,
-})
-
-// Logger principal
-export const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
-  format: logFormat,
-  transports: [
-    fileRotateTransport,
-    errorFileRotateTransport,
-    // Solo mostrar en consola en desarrollo
-    ...(process.env.NODE_ENV === 'development'
-      ? [new winston.transports.Console({
-          format: winston.format.combine(
-            winston.format.colorize(),
-            winston.format.simple()
-          )
-        })]
-      : []
-    ),
-  ],
-})
-
-// Logger específico para acciones de usuario
-export const userLogger = logger.child({ component: 'user-actions' })
-
-// Logger específico para pagos
-export const paymentLogger = logger.child({ component: 'payments' })
-
-// Logger específico para bookings
-export const bookingLogger = logger.child({ component: 'bookings' })
-
-// Función helper para logging de requests HTTP
-export function logRequest(req: any, res: any, next?: any) {
-  const start = Date.now()
-
-  // Log cuando termina la respuesta
-  res.on('finish', () => {
-    const duration = Date.now() - start
-    logger.info('HTTP Request', {
-      method: req.method,
-      url: req.url,
-      statusCode: res.statusCode,
-      duration: `${duration}ms`,
-      userAgent: req.get('User-Agent'),
-      ip: req.ip,
-    })
-  })
-
-  if (next) next()
+function log(level: string, message: string, meta?: any) {
+  if (!isDev) return
+  const line = meta ? `[${level}] ${message} ${JSON.stringify(meta)}` : `[${level}] ${message}`
+  if (level === 'error') console.error(line)
+  else console.log(line)
 }
 
-// Función helper para logging de errores
-export function logError(error: Error, context?: any) {
-  logger.error('Application Error', {
-    error: error.message,
-    stack: error.stack,
-    ...context,
-  })
+const makeLogger = (component: string) => ({
+  info:  (msg: string, meta?: any) => log('INFO',  msg, { component, ...meta }),
+  warn:  (msg: string, meta?: any) => log('WARN',  msg, { component, ...meta }),
+  error: (msg: string, meta?: any) => log('ERROR', msg, { component, ...meta }),
+})
+
+export const logger      = makeLogger('app')
+export const userLogger  = makeLogger('user-actions')
+export const paymentLogger = makeLogger('payments')
+export const bookingLogger = makeLogger('bookings')
+
+export function logError(error: Error | any, context?: any) {
+  log('ERROR', error?.message ?? String(error), { stack: error?.stack, ...context })
+}
+
+export function logRequest(_req: any, _res: any, next?: any) {
+  if (next) next()
 }

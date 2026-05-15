@@ -153,7 +153,7 @@ export default function AnalyticsPage() {
               <div className="w-full rounded-t-lg transition-all"
                 style={{
                   height: `${Math.max(8, (d.eventos / maxDay) * 96)}px`,
-                  background: d.eventos === Math.max(...popularDays.map(x => x.eventos))
+                  background: d.eventos === maxDay
                     ? 'var(--brand)'
                     : 'var(--bg-elevated)',
                 }} />
