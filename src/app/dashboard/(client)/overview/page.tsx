@@ -255,7 +255,8 @@ export default function ClientDashboard() {
 
       {stats?.nextInstallment && (stats?.overdueInstallments?.length ?? 0) === 0 && (stats?.pendingPayment ?? 0) === 0 && (() => {
         const inst = stats.nextInstallment!
-        const daysLeft = Math.ceil((new Date(inst.due_date + 'T12:00').getTime() - new Date().setHours(0,0,0,0)) / 86400000)
+        const today = new Date(); today.setHours(0, 0, 0, 0)
+        const daysLeft = Math.ceil((new Date(inst.due_date + 'T12:00').getTime() - today.getTime()) / 86400000)
         const isUrgent = daysLeft <= 7
         const color = isUrgent ? '#D97706' : '#2563EB'
         const bg    = isUrgent ? 'rgba(217,119,6,0.06)' : 'rgba(37,99,235,0.05)'

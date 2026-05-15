@@ -42,7 +42,7 @@ export async function createBooking(payload: CreateBookingPayload) {
   // Obtener info del espacio y host para los emails
   const { data: space } = await supabase
     .from('spaces')
-    .select('id, name, address, city, sector, host_id, profiles!host_id(id, full_name, email, phone)')
+    .select('id, name, address, city, sector, host_id, capacity_min, capacity_max, profiles!host_id(id, full_name, email, phone)')
     .eq('id', payload.spaceId)
     .single()
 
@@ -51,6 +51,12 @@ export async function createBooking(payload: CreateBookingPayload) {
   // Validar que la fecha no sea pasada
   const today = new Date().toISOString().split('T')[0]
   if (payload.eventDate < today) return { error: 'No puedes reservar para una fecha pasada' }
+
+  // Validar capacidad
+  if (space.capacity_min && payload.guestCount < space.capacity_min)
+    return { error: `Este espacio requiere un mínimo de ${space.capacity_min} personas` }
+  if (space.capacity_max && payload.guestCount > space.capacity_max)
+    return { error: `Este espacio tiene capacidad máxima de ${space.capacity_max} personas` }
 
   // Obtener perfil del guest
   const guestProfile = user ? await supabase

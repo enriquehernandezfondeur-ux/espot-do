@@ -523,8 +523,8 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   <ChevronRight size={18} />
                 </button>
                 <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                  {images.slice(0, 8).map((_: any, i: number) => (
-                    <button key={i} onClick={() => setPhotoIdx(i)}
+                  {images.slice(0, 8).map((img: any, i: number) => (
+                    <button key={img?.url ?? i} onClick={() => setPhotoIdx(i)}
                       className={cn('h-1.5 rounded-full bg-white transition-all', photoIdx === i ? 'w-5 opacity-100' : 'w-1.5 opacity-40')} />
                   ))}
                 </div>

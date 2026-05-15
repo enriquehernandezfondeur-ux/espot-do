@@ -36,6 +36,9 @@ export async function createInstallments(
   eventDate: string,
   totalAmount: number
 ): Promise<{ success: boolean; error?: string }> {
+  if (!totalAmount || totalAmount <= 0)
+    return { success: false, error: 'El monto total debe ser mayor a 0' }
+
   const supabase = await createClient()
 
   // No crear si ya existen

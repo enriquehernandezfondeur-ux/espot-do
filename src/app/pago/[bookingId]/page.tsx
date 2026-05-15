@@ -77,6 +77,7 @@ function PagoContent({ bookingId }: { bookingId: string }) {
         .find((i: any) => i.status !== 'paid')
 
       const amount = nextInst ? nextInst.amount : data.total_amount
+      if (!amount || Number(amount) <= 0) { router.push('/dashboard/reservas'); return }
       const cuotaParam = nextInst ? `&cuota=${nextInst.id}` : ''
 
       window.location.href = `/api/payments/redirect/${bookingId}?amount=${amount}${cuotaParam}`

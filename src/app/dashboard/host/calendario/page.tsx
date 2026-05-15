@@ -155,6 +155,14 @@ export default function CalendarioPage() {
     if (!selected || !spaceId) return
     if (!blockStart || !blockEnd) { setBlockError('Selecciona hora de inicio y fin'); return }
     if (hourToNum(blockEnd) <= hourToNum(blockStart)) { setBlockError('La hora de fin debe ser después de la hora de inicio'); return }
+
+    // No bloquear si hay reservas confirmadas ese día
+    const dayBkCheck = bookingsByDate[selected] ?? []
+    if (dayBkCheck.some((b: any) => b.status === 'confirmed')) {
+      setBlockError('No puedes bloquear un día con reservas confirmadas')
+      return
+    }
+
     setBlockSaving(true)
     setBlockError('')
 
