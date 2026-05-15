@@ -26,6 +26,7 @@ export const metadata: Metadata = {
     icon: '/icon.svg',
     apple: '/icon.svg',
   },
+  manifest: '/manifest.json',
   description: 'Reserva salones, rooftops, restaurantes y más para tu próximo evento en República Dominicana. Explora los mejores espacios y reserva el que más te convenga.',
   keywords: ['espacios para eventos', 'salones de eventos', 'reservar espacio Santo Domingo', 'rooftop RD', 'venue República Dominicana'],
   openGraph: {

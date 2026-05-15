@@ -675,11 +675,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                 <span style={{fontSize:10,fontWeight:600,color:'#1A1A1A',fontFamily:'Arial,Helvetica,sans-serif'}}>mastercard</span>
               </div>
 
-              {/* 4. Visa Secure */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/verified-by-visa.png" alt="Verified by Visa" style={{height:32,width:'auto',borderRadius:6,display:'block',objectFit:'contain'}} />
-
-              {/* 5. Mastercard ID Check */}
+              {/* 4. Mastercard ID Check */}
               <div style={{background:'#fff',border:'1px solid #E2E8F0',borderRadius:6,padding:'4px 8px',display:'flex',alignItems:'center',gap:5,height:32}}>
                 <svg viewBox="0 0 28 18" width="28" height="18" xmlns="http://www.w3.org/2000/svg">
                   <circle cx="10" cy="9" r="7.5" fill="#EB001B"/>

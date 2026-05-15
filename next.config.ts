@@ -13,7 +13,6 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   typedRoutes:     false,
 
-  // Turbopack (Next.js 16 default) — webpack config removed, not compatible
   turbopack: {},
 
   experimental: {
@@ -43,17 +42,19 @@ const nextConfig: NextConfig = {
 
   async headers() {
     return [
+      // Security headers — todas las rutas
       {
         source: '/(.*)',
         headers: [
-          { key: 'X-Frame-Options',           value: 'SAMEORIGIN' },
-          { key: 'X-Content-Type-Options',     value: 'nosniff' },
-          { key: 'Strict-Transport-Security',  value: 'max-age=31536000; includeSubDomains; preload' },
-          { key: 'Referrer-Policy',            value: 'strict-origin-when-cross-origin' },
-          { key: 'Permissions-Policy',         value: 'camera=(), microphone=(), geolocation=(self), payment=(self)' },
-          { key: 'X-XSS-Protection',           value: '1; mode=block' },
+          { key: 'X-Frame-Options',          value: 'SAMEORIGIN' },
+          { key: 'X-Content-Type-Options',    value: 'nosniff' },
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains; preload' },
+          { key: 'Referrer-Policy',           value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy',        value: 'camera=(), microphone=(), geolocation=(self), payment=(self)' },
+          { key: 'X-XSS-Protection',          value: '1; mode=block' },
         ],
       },
+      // CORS — solo rutas API
       {
         source: '/api/(.*)',
         headers: [
@@ -61,6 +62,20 @@ const nextConfig: NextConfig = {
           { key: 'Access-Control-Allow-Methods', value: 'GET,POST,PUT,DELETE,OPTIONS' },
           { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization, X-Requested-With' },
           { key: 'Access-Control-Max-Age',       value: '86400' },
+        ],
+      },
+      // PWA — service worker y manifest
+      {
+        source: '/sw.js',
+        headers: [
+          { key: 'Cache-Control',        value: 'public, max-age=0, must-revalidate' },
+          { key: 'Service-Worker-Allowed', value: '/' },
+        ],
+      },
+      {
+        source: '/manifest.json',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ],
       },
     ]
