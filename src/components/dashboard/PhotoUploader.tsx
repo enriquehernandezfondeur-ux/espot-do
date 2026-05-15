@@ -72,7 +72,14 @@ export default function PhotoUploader({ spaceId, onChange, initialPhotos }: Prop
 
   async function remove(index: number) {
     const photo = photos[index]
-    await supabase.storage.from('space-images').remove([photo.path])
+    // path puede ser null si la foto fue cargada antes de que se guardara el path en DB.
+    // Fallback: extraer el path del public URL de Supabase Storage.
+    const storagePath = photo.path || (() => {
+      const marker = '/object/public/space-images/'
+      const idx = photo.url.indexOf(marker)
+      return idx !== -1 ? decodeURIComponent(photo.url.slice(idx + marker.length).split('?')[0]) : null
+    })()
+    if (storagePath) await supabase.storage.from('space-images').remove([storagePath])
     const next = photos.filter((_, i) => i !== index).map((p, i) => ({ ...p, isCover: i === 0 }))
     setPhotos(next); onChange(next)
     if (activeIdx === index) setActiveIdx(null)

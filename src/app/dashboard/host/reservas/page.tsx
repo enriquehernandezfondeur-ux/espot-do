@@ -104,7 +104,8 @@ export default function HostReservasPage() {
   }
 
   async function doAccept(id: string) {
-    if (bookings.find(b => b.id === id)?.status !== 'pending') return
+    const status = bookings.find(b => b.id === id)?.status
+    if (status !== 'pending' && status !== 'quote_requested') return
     setActionId(id + 'a')
     const r = await acceptBooking(id)
     if ('error' in r) { showError(r.error ?? 'Error al aceptar'); }
@@ -116,6 +117,8 @@ export default function HostReservasPage() {
   }
 
   async function doReject(id: string) {
+    const status = bookings.find(b => b.id === id)?.status
+    if (status !== 'pending' && status !== 'quote_requested') return
     setActionId(id + 'r')
     const r = await rejectBooking(id, rejectReason || undefined)
     if ('error' in r) { showError(r.error ?? 'Error al rechazar'); }

@@ -362,13 +362,17 @@ export async function saveSpaceImages(
   const { error } = await supabase.from('space_images').insert(
     photos.map((p, i) => ({
       space_id: spaceId,
-      url: p.url,
+      url:      p.url,
+      path:     p.path ?? null,
       is_cover: p.isCover,
       position: i,
     }))
   )
 
-  if (!error) revalidatePath('/buscar')
+  if (!error) {
+    revalidatePath('/buscar')
+    revalidatePath('/espacios', 'layout')
+  }
   return error ? { error: error.message } : { success: true }
 }
 
