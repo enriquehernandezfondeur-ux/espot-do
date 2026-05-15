@@ -1219,7 +1219,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 18, width: 18 }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/azul-logo.svg" alt="Azul Payments" style={{ height: 18, width: 54, borderRadius: 3, objectFit: 'contain' }} />
+              <img src="/azul-logo.jpg" alt="Azul Payments" style={{ height: 18, width: 54, borderRadius: 3, objectFit: 'contain' }} />
             </div>
 
             {error && (

@@ -665,29 +665,8 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
               </div>
 
               {/* 2. AZUL */}
-              <svg viewBox="0 0 80 80" width="32" height="32" xmlns="http://www.w3.org/2000/svg" style={{borderRadius:6,display:'block'}}>
-                <defs>
-                  <linearGradient id="azulGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#29B6F6"/>
-                    <stop offset="50%" stopColor="#1565C0"/>
-                    <stop offset="100%" stopColor="#0D47A1"/>
-                  </linearGradient>
-                  <linearGradient id="azulGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#40C4FF" stopOpacity="0.35"/>
-                    <stop offset="100%" stopColor="#0D47A1" stopOpacity="0"/>
-                  </linearGradient>
-                </defs>
-                {/* Fondo */}
-                <rect width="80" height="80" rx="8" fill="url(#azulGrad)"/>
-                {/* Patrón cuadros estilo Azul */}
-                {[[0,0],[20,0],[40,0],[60,0],[10,10],[30,10],[50,10],[70,10],[0,20],[20,20],[40,20],[60,20],[10,30],[30,30],[50,30],[70,30],[0,40],[20,40],[40,40],[60,40],[10,50],[30,50],[50,50],[70,50],[0,60],[20,60],[40,60],[60,60],[10,70],[30,70],[50,70],[70,70]].map(([x,y])=>(
-                  <rect key={`${x}-${y}`} x={x} y={y} width="10" height="10" fill="#fff" fillOpacity="0.09"/>
-                ))}
-                {/* Overlay diagonal */}
-                <rect width="80" height="80" rx="8" fill="url(#azulGrad2)"/>
-                {/* Texto AZUL */}
-                <text x="40" y="48" textAnchor="middle" fontFamily="Arial Black,Arial,sans-serif" fontWeight="900" fontSize="22" fill="white" letterSpacing="1">{`AZUL`}</text>
-              </svg>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/azul-logo.jpg" alt="Azul Payments" style={{height:32,width:'auto',borderRadius:6,display:'block',objectFit:'contain'}} />
 
               {/* 3. Mastercard */}
               <div style={{background:'#fff',border:'1px solid #E2E8F0',borderRadius:6,padding:'4px 8px',display:'flex',alignItems:'center',gap:6,height:32}}>
