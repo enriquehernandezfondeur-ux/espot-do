@@ -52,12 +52,13 @@ export async function POST(req: NextRequest) {
     const totalAmount = Number(booking.total_amount)
     const orderNumber = `ESP-${bookingId.slice(0, 8).toUpperCase()}-${Date.now()}`
 
-    // 5. Update booking en background (no bloquea la respuesta)
-    supabase.from('bookings').update({
+    // 5. Update booking — awaited para garantizar que azul_custom_order quede grabado
+    // antes de que Azul devuelva al ApprovedUrl
+    await supabase.from('bookings').update({
       azul_custom_order: orderNumber,
       payment_status:    'processing',
       payment_attempts:  (booking.payment_attempts ?? 0) + 1,
-    }).eq('id', bookingId).then(() => {})
+    }).eq('id', bookingId)
 
     // 6. Generar campos firmados para Azul
     const { pageUrl, fields } = buildPaymentPageFields({

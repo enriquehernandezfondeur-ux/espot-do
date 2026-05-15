@@ -135,10 +135,9 @@ export async function updateClientProfile(updates: { full_name?: string; phone?:
 
   if (error) return { error: error.message }
 
-  // Si cambia nombre o foto, revalidar las páginas de espacio del propietario
+  const { revalidatePath } = await import('next/cache')
+  revalidatePath('/dashboard', 'layout')
   if (updates.full_name !== undefined || updates.avatar_url !== undefined) {
-    const { revalidatePath } = await import('next/cache')
-    // Revalidar todas las páginas de espacios (propietario o cliente)
     revalidatePath('/espacios', 'layout')
     revalidatePath('/buscar')
   }
@@ -151,7 +150,10 @@ export async function removeFavorite(favoriteId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
   const { error } = await supabase.from('favorites').delete().eq('id', favoriteId).eq('guest_id', user.id)
-  return error ? { error: error.message } : { success: true }
+  if (error) return { error: error.message }
+  const { revalidatePath } = await import('next/cache')
+  revalidatePath('/dashboard', 'layout')
+  return { success: true }
 }
 
 export async function getClientStats() {

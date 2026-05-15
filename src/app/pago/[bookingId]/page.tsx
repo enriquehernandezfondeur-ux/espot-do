@@ -44,9 +44,16 @@ function PagoContent({ bookingId }: { bookingId: string }) {
           .from('booking_installments')
           .select('id, amount, status, booking_id')
           .eq('id', cuotaId)
+          .eq('booking_id', bookingId)
           .single()
 
         if (!installment) { router.push('/dashboard/reservas'); return }
+
+        // Verificar que el booking pertenece al usuario autenticado
+        const { data: bk } = await supabase
+          .from('bookings').select('guest_id').eq('id', installment.booking_id).single()
+        if (!bk || bk.guest_id !== user.id) { router.push('/dashboard/reservas'); return }
+
         if (installment.status === 'paid') {
           router.push(`/pago/exitoso?b=${bookingId}`)
           return

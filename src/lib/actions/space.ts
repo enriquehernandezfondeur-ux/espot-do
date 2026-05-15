@@ -135,6 +135,13 @@ export async function saveSpace(payload: SaveSpacePayload) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
+  // Verificar que el usuario tiene rol de host
+  const { data: profile } = await supabase
+    .from('profiles').select('role').eq('id', user.id).single()
+  if (profile?.role !== 'host' && profile?.role !== 'admin') {
+    return { error: 'Solo los propietarios pueden publicar espacios' }
+  }
+
   const { data: space, error: spaceError } = await supabase
     .from('spaces')
     .insert({

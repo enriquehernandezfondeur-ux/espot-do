@@ -54,6 +54,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, already: true })
   }
 
+  // Idempotencia para cuotas: verificar si la cuota específica ya fue pagada
+  if (cuotaId) {
+    const { data: inst } = await supabase
+      .from('booking_installments').select('status').eq('id', cuotaId).single()
+    if (inst?.status === 'paid') {
+      return NextResponse.json({ success: true, already: true })
+    }
+  }
+
   const space  = booking.spaces as any
   const host   = space?.profiles as any
   const guest  = booking.profiles as any

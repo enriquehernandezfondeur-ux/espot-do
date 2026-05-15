@@ -59,7 +59,8 @@ interface Props {
 }
 
 export default function BookingWidget({ space, onChat, initialDate }: Props) {
-  const router   = useRouter()
+  const router      = useRouter()
+  const supabaseRef = useRef(createClient())
   const pricing  = space.space_pricing?.find((p: any) => p.is_active) ?? space.space_pricing?.[0]
   const addons   = space.space_addons ?? []
 
@@ -329,6 +330,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
       if (allowedTimeRange === null) return false
       if (isQuote) return true
       if (!effectiveStartTime || !realEndTime) return false
+      if (selectedHours <= 0) return false
       if (hoursError) return false
       return true
     }
@@ -375,7 +377,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   async function handleBook() {
     setBooking(true); setError('')
     try {
-      const { data: { user } } = await createClient().auth.getUser()
+      const { data: { user } } = await supabaseRef.current.auth.getUser()
       if (!user) {
         router.push(`/auth?redirect=${encodeURIComponent(window.location.pathname)}`)
         return

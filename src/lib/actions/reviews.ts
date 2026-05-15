@@ -114,20 +114,23 @@ export async function respondToReview(
   if (error) return { error: error.message }
 
   revalidatePath('/espacios', 'layout')
+  revalidatePath('/dashboard/host/resenas')
   return {}
 }
 
-export async function getUserPendingReview(userId: string): Promise<{
+export async function getUserPendingReview(_userId?: string): Promise<{
   bookingId: string
   spaceId:   string
   spaceName: string
 } | null> {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
 
   const { data: bookings } = await supabase
     .from('bookings')
     .select('id, space_id, spaces!space_id(name), event_date')
-    .eq('guest_id', userId)
+    .eq('guest_id', user.id)
     .eq('status', 'confirmed')
     .in('payment_status', ['advance', 'partial', 'paid'])
     .lt('event_date', new Date().toISOString().split('T')[0])
@@ -176,15 +179,16 @@ export async function submitReview(data: {
 
   const today = new Date().toISOString().split('T')[0]
   const { data: booking } = await supabase
-    .from('bookings').select('event_date, guest_id, status').eq('id', data.bookingId).single()
+    .from('bookings').select('event_date, guest_id, status, space_id').eq('id', data.bookingId).single()
   if (!booking || booking.guest_id !== user.id) return { error: 'Reserva no encontrada' }
+  if (booking.space_id !== data.spaceId) return { error: 'El espacio no corresponde a esta reserva' }
   if (booking.status === 'cancelled_guest' || booking.status === 'cancelled_host' || booking.status === 'rejected')
     return { error: 'No puedes dejar una reseña de una reserva cancelada' }
   if (booking.event_date >= today) return { error: 'Solo puedes dejar una reseña después de tu evento' }
 
   const { error } = await supabase.from('reviews').insert({
     booking_id: data.bookingId,
-    space_id:   data.spaceId,
+    space_id:   booking.space_id,
     guest_id:   user.id,
     rating:     data.rating,
     comment:    data.comment.trim() || null,

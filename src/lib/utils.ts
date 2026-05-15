@@ -5,27 +5,34 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatCurrency(amount: number): string {
+export function formatCurrency(amount: number | null | undefined): string {
+  if (amount == null || isNaN(Number(amount))) return 'RD$ —'
   return new Intl.NumberFormat('es-DO', {
     style: 'currency',
     currency: 'DOP',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(amount)
+  }).format(Number(amount))
 }
 
-export function formatDate(date: string | Date): string {
-  // "2026-06-15" sin hora se parsea como UTC midnight, lo que en UTC-4 retrocede al día anterior.
-  // Usamos UTC noon explícito (Z) para que el día sea siempre correcto en UTC-12 a UTC+11.
-  const d = typeof date === 'string' && date.length === 10
-    ? new Date(date + 'T12:00:00Z')
-    : new Date(date)
-  return new Intl.DateTimeFormat('es-DO', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'America/Santo_Domingo',
-  }).format(d)
+export function formatDate(date: string | Date | null | undefined): string {
+  if (!date) return '—'
+  try {
+    // "2026-06-15" sin hora se parsea como UTC midnight, lo que en UTC-4 retrocede al día anterior.
+    // Usamos UTC noon explícito (Z) para que el día sea siempre correcto en UTC-12 a UTC+11.
+    const d = typeof date === 'string' && date.length === 10
+      ? new Date(date + 'T12:00:00Z')
+      : new Date(date)
+    if (isNaN(d.getTime())) return '—'
+    return new Intl.DateTimeFormat('es-DO', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'America/Santo_Domingo',
+    }).format(d)
+  } catch {
+    return '—'
+  }
 }
 
 export function formatTime(time: string | null | undefined): string {

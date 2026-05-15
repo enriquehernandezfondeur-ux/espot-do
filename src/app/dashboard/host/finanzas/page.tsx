@@ -38,8 +38,10 @@ export default function FinanzasPage() {
     }).catch(() => setLoading(false))
   }, [])
 
-  const active = bookings.filter(b =>
-    !['cancelled_guest', 'cancelled_host', 'rejected'].includes(b.status)
+  // Solo reservas con pago real para los totales financieros
+  const paidBookings = bookings.filter(b =>
+    ['confirmed', 'completed'].includes(b.status) &&
+    ['advance', 'partial', 'paid'].includes(b.payment_status)
   )
   const filtered = bookings.filter(b => {
     if (filter === 'confirmed')  return b.status === 'confirmed'
@@ -48,10 +50,10 @@ export default function FinanzasPage() {
     return !['cancelled_guest', 'cancelled_host', 'rejected'].includes(b.status)
   })
 
-  const totalBruto     = active.reduce((s, b) => s + Number(b.total_amount), 0)
-  const totalComision  = active.reduce((s, b) => s + Number(b.total_amount) * 0.10, 0)
+  const totalBruto     = paidBookings.reduce((s, b) => s + Number(b.total_amount), 0)
+  const totalComision  = paidBookings.reduce((s, b) => s + Number(b.total_amount) * 0.10, 0)
   const totalNeto      = totalBruto - totalComision
-  const pendingPayout  = active
+  const pendingPayout  = paidBookings
     .filter(b => b.status === 'confirmed')
     .reduce((s, b) => s + Number(b.total_amount) * 0.90, 0)
   const thisMonth = stats?.revenueThisMonth ?? 0

@@ -19,9 +19,22 @@ export interface BookingInstallment {
   label:              string | null
 }
 
-/** Obtener cuotas de una reserva */
+/** Obtener cuotas de una reserva (verifica que pertenece al usuario autenticado) */
 export async function getInstallments(bookingId: string): Promise<BookingInstallment[]> {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  // Verificar ownership: el booking debe pertenecer al guest o al host del espacio
+  const { data: booking } = await supabase
+    .from('bookings')
+    .select('guest_id, spaces!space_id(host_id)')
+    .eq('id', bookingId)
+    .single()
+  if (!booking) return []
+  const space = booking.spaces as any
+  if (booking.guest_id !== user.id && space?.host_id !== user.id) return []
+
   const { data } = await supabase
     .from('booking_installments')
     .select('*')
@@ -65,12 +78,28 @@ export async function createInstallments(
   return error ? { success: false, error: error.message } : { success: true }
 }
 
-/** Marcar cuota como pagada */
+/** Marcar cuota como pagada (verifica que pertenece al usuario o es llamado desde webhook) */
 export async function markInstallmentPaid(
   installmentId: string,
   azulOrderId?: string
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'No autenticado' }
+
+  // Verificar que la cuota pertenece a una reserva del usuario (guest o host)
+  const { data: inst } = await supabase
+    .from('booking_installments')
+    .select('booking_id, bookings!booking_id(guest_id, spaces!space_id(host_id))')
+    .eq('id', installmentId)
+    .single()
+  if (!inst) return { success: false, error: 'Cuota no encontrada' }
+  const booking = inst.bookings as any
+  const space   = booking?.spaces as any
+  if (booking?.guest_id !== user.id && space?.host_id !== user.id) {
+    return { success: false, error: 'No autorizado' }
+  }
+
   const { error } = await supabase
     .from('booking_installments')
     .update({

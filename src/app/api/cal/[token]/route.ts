@@ -116,6 +116,23 @@ export async function GET(
       `Estado: ${label}`,
     ].join('\\n')
 
+    // Reservas sin horario explícito (paquete/consumo mínimo) → evento all-day
+    if (!bk.start_time || !bk.end_time) {
+      lines.push(
+        'BEGIN:VEVENT',
+        `UID:booking-${bk.id}@espot.do`,
+        `DTSTAMP:${now}`,
+        `DTSTART;VALUE=DATE:${icalDate(bk.event_date)}`,
+        `DTEND;VALUE=DATE:${nextDay(bk.event_date)}`,
+        fold(`SUMMARY:${esc(summary)}`),
+        fold(`DESCRIPTION:${esc(description)}`),
+        fold(`LOCATION:${esc(location)}`),
+        `STATUS:${bk.status === 'confirmed' || bk.status === 'completed' ? 'CONFIRMED' : 'TENTATIVE'}`,
+        'END:VEVENT',
+      )
+      continue
+    }
+
     const dtStart = icalDT(bk.event_date, bk.start_time)
     const dtEnd   = endDate(bk.event_date, bk.end_time) + 'T' + bk.end_time.replace(/:/g, '').slice(0, 6).padEnd(6, '0')
 

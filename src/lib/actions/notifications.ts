@@ -51,7 +51,12 @@ export async function updateNotificationSettings(
   if (!user) return { error: 'No autenticado' }
 
   const current = user.user_metadata?.notification_settings ?? {}
-  const updated = { ...DEFAULT_NOTIFICATIONS, ...current, ...settings }
+  // Filtrar el input para que solo contenga claves válidas de NotificationSettings
+  const validKeys = Object.keys(DEFAULT_NOTIFICATIONS) as (keyof NotificationSettings)[]
+  const safeSettings = Object.fromEntries(
+    validKeys.filter(k => k in settings).map(k => [k, settings[k]])
+  )
+  const updated = { ...DEFAULT_NOTIFICATIONS, ...current, ...safeSettings }
 
   const { error } = await supabase.auth.updateUser({
     data: { notification_settings: updated }

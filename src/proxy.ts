@@ -4,6 +4,11 @@ import { createServerClient } from '@supabase/ssr'
 
 const SITE_PASSWORD = process.env.SITE_PASSWORD
 const COOKIE_NAME   = 'espot_preview_access'
+
+function buildAccessToken(password: string): string {
+  const { createHmac } = require('crypto') as typeof import('crypto')
+  return createHmac('sha256', 'espot-preview-v1').update(password).digest('hex')
+}
 const AUTH_ROUTES   = ['/dashboard', '/admin']
 
 // ── Rate limiter en memoria (por instancia Vercel) ──────────────
@@ -93,8 +98,9 @@ export async function proxy(request: NextRequest) {
   }
 
   // Verificar cookie de acceso (preview)
-  const cookie = request.cookies.get(COOKIE_NAME)
-  if (cookie?.value !== SITE_PASSWORD) {
+  const cookie        = request.cookies.get(COOKIE_NAME)
+  const expectedToken = buildAccessToken(SITE_PASSWORD!)
+  if (cookie?.value !== expectedToken) {
     const url = request.nextUrl.clone()
     const returnTo = pathname + (request.nextUrl.search ?? '')
     url.pathname = '/acceso'

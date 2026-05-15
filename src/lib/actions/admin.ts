@@ -19,16 +19,16 @@ async function requireAdmin() {
     if (data?.role !== 'admin') return null
   }
 
-  // Para operaciones de escritura, usar service_role para bypassar RLS
+  // Las acciones de admin requieren service_role para bypassar RLS de forma segura
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (serviceKey) {
-    const { createClient: sc } = await import('@supabase/supabase-js')
-    return sc(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    })
+  if (!serviceKey) {
+    console.error('[requireAdmin] SUPABASE_SERVICE_ROLE_KEY no configurada — acceso admin denegado')
+    return null
   }
-
-  return supabase
+  const { createClient: sc } = await import('@supabase/supabase-js')
+  return sc(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
 }
 
 // ── OBTENER ESPACIO COMPLETO ─────────────────────────────

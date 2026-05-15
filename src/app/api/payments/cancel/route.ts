@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { bookingId } = body
-  if (!bookingId) return NextResponse.json({ ok: true })
+  if (!bookingId) return NextResponse.json({ error: 'bookingId requerido' }, { status: 400 })
 
   // Solo resetear si aún no hay pago completado — no tocar bookings con 'advance'
   const { error } = await supabase.from('bookings')

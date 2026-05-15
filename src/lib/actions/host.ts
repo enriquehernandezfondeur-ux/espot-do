@@ -273,8 +273,9 @@ export async function getHostStats() {
 
   const bookings = allBookings.data ?? []
 
+  const thisMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
   const revenueThisMonth = bookings
-    .filter(b => b.event_date >= thisMonthStart && b.status === 'confirmed')
+    .filter(b => b.event_date >= thisMonthStart && b.event_date <= thisMonthEnd && b.status === 'confirmed')
     .reduce((s, b) => s + Number(b.total_amount), 0)
 
   const revenuePrevMonth = bookings
@@ -400,6 +401,7 @@ export async function respondToQuote(bookingId: string, quotedPrice: number, mes
 
   revalidatePath('/dashboard/host/cotizaciones')
   revalidatePath('/dashboard/host/reservas')
+  revalidatePath('/dashboard/reservas')
 
   if (guest?.email) {
     // Calcular schedule para mostrar en el email
@@ -460,5 +462,6 @@ export async function completeBooking(bookingId: string) {
   if (error) return { error: error.message }
   if (!updated || updated.length === 0) return { error: 'La reserva no está en estado confirmado' }
   revalidatePath('/dashboard/host/reservas')
+  revalidatePath('/dashboard/host/finanzas')
   return { success: true }
 }

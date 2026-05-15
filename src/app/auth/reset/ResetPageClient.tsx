@@ -18,9 +18,10 @@ function ResetContent() {
   const supabase = createClient()
 
   useEffect(() => {
-    supabase.auth.onAuthStateChange((event) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') setReady(true)
     })
+    return () => subscription.unsubscribe()
   }, [])
 
   async function handleReset(e: React.FormEvent) {

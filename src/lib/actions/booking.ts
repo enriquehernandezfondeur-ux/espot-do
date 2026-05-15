@@ -52,6 +52,14 @@ export async function createBooking(payload: CreateBookingPayload) {
   const today = new Date().toISOString().split('T')[0]
   if (payload.eventDate < today) return { error: 'No puedes reservar para una fecha pasada' }
 
+  // Si es hoy, validar que el horario no haya comenzado ya
+  if (payload.eventDate === today && payload.startTime) {
+    const nowMins  = new Date().getHours() * 60 + new Date().getMinutes()
+    const [sh, sm] = payload.startTime.split(':').map(Number)
+    const startMins = sh * 60 + (sm ?? 0)
+    if (startMins <= nowMins) return { error: 'El horario de inicio ya pasó. Por favor elige un horario futuro.' }
+  }
+
   // Validar capacidad
   if (space.capacity_min && payload.guestCount < space.capacity_min)
     return { error: `Este espacio requiere un mínimo de ${space.capacity_min} personas` }
@@ -92,6 +100,8 @@ export async function createBooking(payload: CreateBookingPayload) {
         return 0
       })()
 
+      if (selectedH <= 0)
+        return { error: 'El horario seleccionado no es válido. Por favor elige inicio y fin correctos.' }
       if (minH > 0 && selectedH < minH)
         return { error: `Este Espot requiere mínimo ${minH} hora${minH > 1 ? 's' : ''} de reserva.` }
       if (effectiveMax > 0 && selectedH > effectiveMax + 0.25)
@@ -135,9 +145,22 @@ export async function createBooking(payload: CreateBookingPayload) {
       p_end_time:   payload.endTime,
       p_exclude_id: null,
     })
-    // Solo bloquear si la función existe Y confirma conflicto (data === false)
     if (!rpcError && availCheck === false) {
       return { error: 'Este espacio ya tiene una reserva en ese horario. Por favor elige otro horario o fecha.' }
+    }
+    // Si la función RPC no existe, hacer verificación de solapamiento directa
+    if (rpcError) {
+      const { data: overlapping } = await supabase
+        .from('bookings')
+        .select('id')
+        .eq('space_id', payload.spaceId)
+        .eq('event_date', payload.eventDate)
+        .not('status', 'in', '("rejected","cancelled_guest","cancelled_host")')
+        .or(`start_time.lte.${payload.endTime},end_time.gte.${payload.startTime}`)
+        .limit(1)
+      if (overlapping && overlapping.length > 0) {
+        return { error: 'Este espacio ya tiene una reserva en ese horario. Por favor elige otro horario o fecha.' }
+      }
     }
   } else {
     // Para espacios sin horario (paquete, consumo mínimo): verificar solo por fecha
@@ -154,15 +177,26 @@ export async function createBooking(payload: CreateBookingPayload) {
   }
 
   // Determinar si es cotización y si el espacio tiene reserva instantánea
+  // Reutiliza pricingCheck si ya fue cargado arriba para evitar query redundante
   let isQuote = false
   if (payload.pricingId) {
     const { data: pricingRow } = await supabase
-      .from('space_pricing').select('pricing_type').eq('id', payload.pricingId).single()
+      .from('space_pricing').select('pricing_type, instant_booking').eq('id', payload.pricingId).single()
     isQuote = pricingRow?.pricing_type === 'custom_quote'
   }
   const { data: spaceRow } = await supabase
     .from('spaces').select('instant_booking').eq('id', payload.spaceId).single()
   const isInstant = !isQuote && (spaceRow?.instant_booking === true)
+
+  // Validar que platformFee y totalAmount no hayan sido manipulados por el cliente
+  if (!isQuote && payload.basePrice > 0) {
+    const expectedFee   = Math.round(payload.basePrice * 0.10)
+    const expectedTotal = payload.basePrice + payload.addonsTotal
+    if (Math.abs(Number(payload.platformFee) - expectedFee) > 1)
+      return { error: 'Error en el cálculo de la comisión. Recarga la página e intenta de nuevo.' }
+    if (Math.abs(Number(payload.totalAmount) - expectedTotal) > 1)
+      return { error: 'El monto total no coincide. Recarga la página e intenta de nuevo.' }
+  }
 
   // Insertar reserva
   const { data: booking, error: bookingError } = await supabase
@@ -208,18 +242,27 @@ export async function createBooking(payload: CreateBookingPayload) {
         selectedH = Math.max(0, (en - sn) / 60)
       }
 
-      const { error: addonInsertError } = await supabase.from('booking_addons').insert(
-        addonData.map((a: any) => {
-          const qty = a.unit === 'persona' ? payload.guestCount
-                    : a.unit === 'hora'    ? Math.max(1, Math.round(selectedH))
-                    : 1
-          const subtotal = a.unit === 'persona' ? a.price * payload.guestCount
-                         : a.unit === 'hora'    ? Math.round(a.price * selectedH)
-                         : a.price
-          return { booking_id: booking.id, addon_id: a.id, quantity: qty, unit_price: a.price, subtotal }
-        })
-      )
-      if (addonInsertError) console.error('[createBooking] addon insert failed:', addonInsertError.message)
+      const addonRows = addonData.map((a: any) => {
+        const qty = a.unit === 'persona' ? payload.guestCount
+                  : a.unit === 'hora'    ? Math.max(1, Math.round(selectedH))
+                  : 1
+        const subtotal = a.unit === 'persona' ? a.price * payload.guestCount
+                       : a.unit === 'hora'    ? Math.round(a.price * selectedH)
+                       : a.price
+        return { booking_id: booking.id, addon_id: a.id, quantity: qty, unit_price: a.price, subtotal }
+      })
+      const { error: addonInsertError } = await supabase.from('booking_addons').insert(addonRows)
+      if (addonInsertError) {
+        console.error('[createBooking] addon insert failed:', addonInsertError.message)
+      } else {
+        // Recalcular addons_total en servidor y corregir el valor en el booking
+        const serverAddonsTotal = addonRows.reduce((s, r) => s + r.subtotal, 0)
+        if (serverAddonsTotal !== payload.addonsTotal) {
+          await supabase.from('bookings')
+            .update({ addons_total: serverAddonsTotal })
+            .eq('id', booking.id)
+        }
+      }
     }
   }
 
@@ -412,7 +455,7 @@ export async function rejectBooking(bookingId: string, reason?: string) {
   return { success: true }
 }
 
-// ── CONFIRMAR PAGO (cliente paga el 10%) ──────────────────
+// ── CONFIRMAR PAGO MANUAL (solo el HOST puede confirmar pago manual) ──────────────────
 export async function confirmPayment(bookingId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -422,10 +465,13 @@ export async function confirmPayment(bookingId: string) {
     .from('bookings')
     .select(`*, spaces!space_id(name, host_id, address, city, sector, profiles!host_id(full_name, email, phone, google_refresh_token, google_calendar_connected)), profiles!guest_id(full_name, email, phone)`)
     .eq('id', bookingId)
-    .eq('guest_id', user.id)
     .single()
 
   if (!bk) return { error: 'Reserva no encontrada' }
+
+  const space = bk.spaces as any
+  if (space?.host_id !== user.id) return { error: 'Solo el propietario puede confirmar un pago manual' }
+
   if (bk.status !== 'accepted') return { error: 'La reserva debe estar aceptada para confirmar el pago' }
 
   const { error } = await supabase

@@ -53,19 +53,23 @@ class SmartCache {
     this.cache.clear()
   }
 
+  // Sentinel para diferenciar "null almacenado" de "cache miss"
+  private static readonly NULL_SENTINEL = Symbol('cache_null')
+
   // Cache con fetch automático
   async getOrFetch<T>(
     key: string,
     fetcher: () => Promise<T>,
     ttl?: number
   ): Promise<T> {
-    let data = this.get<T>(key)
+    const cached = this.get<T | typeof SmartCache.NULL_SENTINEL>(key)
 
-    if (data === null) {
-      data = await fetcher()
-      this.set(key, data, ttl)
-    }
+    if (cached === SmartCache.NULL_SENTINEL) return null as unknown as T
+    if (cached !== null) return cached as T
 
+    const data = await fetcher()
+    // Almacenar sentinel para null/undefined para evitar re-fetch infinito
+    this.set(key, data ?? SmartCache.NULL_SENTINEL, ttl)
     return data
   }
 

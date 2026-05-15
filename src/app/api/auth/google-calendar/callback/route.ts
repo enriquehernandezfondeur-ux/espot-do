@@ -19,7 +19,13 @@ export async function GET(req: NextRequest) {
   }
 
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  let user: any = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch {
+    return NextResponse.redirect(`${BASE}/dashboard/host/ajustes?error=session_error`)
+  }
 
   // Verificar que el state coincide con el usuario actual (previene CSRF)
   if (!user || user.id !== state) {

@@ -183,7 +183,7 @@ export async function getPublishedSpaces(filters?: {
       .select('space_id, event_date, status')
       .gte('event_date', filters.dateFrom)
       .lte('event_date', filters.dateTo ?? filters.dateFrom)
-      .not('status', 'in', '("cancelled_guest","cancelled_host","rejected")')
+      .not('status', 'in', '("pending","cancelled_guest","cancelled_host","rejected")')
 
     const { data: availability } = await supabase
       .from('space_availability')
@@ -245,10 +245,28 @@ export async function getSimilarSpaces(
     .lte('capacity_max', capMax)
     .limit(30)
 
-  // Priorizar misma ciudad si la tiene
+  // Priorizar misma ciudad si la tiene; si no hay resultados, buscar en todo el país
   if (current.city) query = query.eq('city', current.city)
 
-  const { data: candidates } = await query.order('created_at', { ascending: false })
+  let { data: candidates } = await query.order('created_at', { ascending: false })
+
+  if (!candidates?.length && current.city) {
+    // Fallback sin filtro de ciudad
+    let fallbackQuery = supabase
+      .from('spaces')
+      .select(`id, name, slug, category, capacity_min, capacity_max, city, sector,
+               primary_activity, secondary_activities,
+               space_pricing(*), space_images(url, is_cover)`)
+      .eq('is_published', true)
+      .eq('is_active', true)
+      .neq('id', current.id)
+      .gte('capacity_max', capMin)
+      .lte('capacity_max', capMax)
+      .limit(30)
+    const { data: fallback } = await fallbackQuery.order('created_at', { ascending: false })
+    candidates = fallback ?? []
+  }
+
   if (!candidates?.length) return []
 
   // Puntuar y ordenar

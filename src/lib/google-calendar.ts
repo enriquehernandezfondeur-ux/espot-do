@@ -48,6 +48,10 @@ export async function exchangeCode(
     }),
   })
   const data = await res.json()
+  if (data.error) {
+    console.error('[exchangeCode] Google token error:', data.error, data.error_description)
+    return null
+  }
   if (!data.refresh_token || !data.access_token) return null
   return { access_token: data.access_token, refresh_token: data.refresh_token }
 }
@@ -96,6 +100,10 @@ async function createEvent(accessToken: string, body: object): Promise<string | 
     headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
     body:    JSON.stringify(body),
   })
+  if (!res.ok) {
+    console.error('[createEvent] Google Calendar API error:', res.status, await res.text())
+    return null
+  }
   const data = await res.json()
   return data.id ?? null
 }

@@ -141,7 +141,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
     fetch(`/api/availability?${params}`, { signal: controller.signal })
       .then(r => r.json())
       .then(({ blockedSpaceIds }) => { setBlockedIds(new Set(blockedSpaceIds)); setAvailLoading(false) })
-      .catch(() => { setBlockedIds(new Set()); setAvailLoading(false) })
+      .catch((err) => { if (err?.name !== 'AbortError') setAvailLoading(false) })
     return () => controller.abort()
   }, [dateFrom, timeFrom])
 

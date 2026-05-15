@@ -26,17 +26,22 @@ export async function GET(
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      const { data: booking } = await supabase
-        .from('bookings').select('guest_id').eq('id', bookingId).single()
-      if (booking && booking.guest_id !== user.id) {
-        return new NextResponse(errorHtml('No autorizado para este pago.'), {
-          status: 403, headers: { 'Content-Type': 'text/html' },
-        })
-      }
+    if (!user) {
+      return new NextResponse(errorHtml('Debes iniciar sesión para continuar con el pago.'), {
+        status: 401, headers: { 'Content-Type': 'text/html' },
+      })
+    }
+    const { data: booking } = await supabase
+      .from('bookings').select('guest_id').eq('id', bookingId).single()
+    if (!booking || booking.guest_id !== user.id) {
+      return new NextResponse(errorHtml('No autorizado para este pago.'), {
+        status: 403, headers: { 'Content-Type': 'text/html' },
+      })
     }
   } catch {
-    // Si falla la verificación de auth, se continúa (no bloquear el pago por error de session)
+    return new NextResponse(errorHtml('Error al verificar la sesión. Intenta de nuevo.'), {
+      status: 500, headers: { 'Content-Type': 'text/html' },
+    })
   }
 
   const missingVars = [
@@ -120,6 +125,12 @@ OrderNumber: <strong>${ORDER}</strong> · Amount: <strong>${AMT}</strong> · ITB
     }
 
     // Modo debug: prueba todas las combinaciones de MerchantName y MerchantType
+    // Solo disponible fuera de producción
+    if (isDebug && process.env.NODE_ENV === 'production') {
+      return new NextResponse(errorHtml('El modo debug no está disponible en producción.'), {
+        status: 403, headers: { 'Content-Type': 'text/html' },
+      })
+    }
     if (isDebug) {
       const { createHmac } = await import('crypto')
       const PRIV = process.env.AZUL_PRIVATE_KEY ?? ''

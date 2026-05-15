@@ -19,7 +19,9 @@ export default function PagosPage() {
   const [loading, setLoading]   = useState(true)
 
   useEffect(() => {
-    getClientBookings().then(d => { setBookings(d); setLoading(false) })
+    getClientBookings()
+      .then(d => { setBookings(d); setLoading(false) })
+      .catch(() => setLoading(false))
   }, [])
 
   const totalPaid    = bookings.filter(b => PAID_PS.includes(b.payment_status) && ['confirmed','completed'].includes(b.status)).reduce((s, b) => s + Number(b.total_amount), 0)

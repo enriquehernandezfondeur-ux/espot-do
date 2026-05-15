@@ -61,21 +61,21 @@ export function buildSchedule(
   } else if (days <= 30) {
     model = '50_50'
     defs  = [
-      { pct: 50, daysOffset: 0,       label: 'Al confirmar la reserva' },
-      { pct: 50, daysOffset: days - 2, label: '48 horas antes del evento' },
+      { pct: 50, daysOffset: 0,                   label: 'Al confirmar la reserva' },
+      { pct: 50, daysOffset: Math.max(1, days - 2), label: '48 horas antes del evento' },
     ]
   } else if (days <= 60) {
     model = '30_70'
     defs  = [
-      { pct: 30, daysOffset: 0,       label: 'Al confirmar la reserva' },
-      { pct: 70, daysOffset: days - 2, label: '48 horas antes del evento' },
+      { pct: 30, daysOffset: 0,                   label: 'Al confirmar la reserva' },
+      { pct: 70, daysOffset: Math.max(1, days - 2), label: '48 horas antes del evento' },
     ]
   } else {
     model = '25_50_25'
     defs  = [
-      { pct: 25, daysOffset: 0,              label: 'Al confirmar la reserva' },
-      { pct: 50, daysOffset: days - 60,      label: '60 días antes del evento' },
-      { pct: 25, daysOffset: days - 2,       label: '48 horas antes del evento' },
+      { pct: 25, daysOffset: 0,                        label: 'Al confirmar la reserva' },
+      { pct: 50, daysOffset: Math.max(1, days - 60),   label: '60 días antes del evento' },
+      { pct: 25, daysOffset: Math.max(2, days - 2),    label: '48 horas antes del evento' },
     ]
   }
 

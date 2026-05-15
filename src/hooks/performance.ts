@@ -92,13 +92,16 @@ export function usePrefetch<T>(
   enabled = true
 ) {
   const [isPrefetching, setIsPrefetching] = useState(false)
+  const fetcherRef = useRef(fetcher)
+  fetcherRef.current = fetcher
 
   useEffect(() => {
     if (!enabled) return
-
+    let cancelled = false
     setIsPrefetching(true)
-    fetcher().finally(() => setIsPrefetching(false))
-  }, [enabled, fetcher])
+    fetcherRef.current().finally(() => { if (!cancelled) setIsPrefetching(false) })
+    return () => { cancelled = true }
+  }, [enabled])
 
   return { isPrefetching }
 }

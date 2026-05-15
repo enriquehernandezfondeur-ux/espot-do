@@ -3,7 +3,7 @@
 // Azul recoge los datos de tarjeta en su dominio. Nosotros
 // solo generamos la firma HMAC-SHA512 y redirigimos al usuario.
 
-import { createHmac } from 'crypto'
+import { createHmac, timingSafeEqual } from 'crypto'
 
 // MerchantType debe coincidir EXACTAMENTE con lo registrado en Azul (ej: 'E-Commerce', 'Retail', 'Marketplace')
 // Configura AZUL_MERCHANT_TYPE en Vercel si 'Marketplace' no funciona.
@@ -132,7 +132,7 @@ export function buildPaymentPageFields(params: AzulPageParams): AzulPageFields {
   }
 }
 
-// ── Verificar hash de respuesta de Azul ──────────────────
+// ── Verificar hash de respuesta de Azul ─────────────────
 // Azul envía estos params al regresar al ApprovedUrl.
 // Debemos verificar el hash antes de confirmar la reserva.
 export interface AzulResponseParams {
@@ -175,7 +175,9 @@ export function verifyResponseHash(p: AzulResponseParams): boolean {
     .digest('hex')
     .toUpperCase()
 
-  return expected === (p.AuthHash ?? '').toUpperCase()
+  const received = (p.AuthHash ?? '').toUpperCase()
+  if (expected.length !== received.length) return false
+  return timingSafeEqual(Buffer.from(expected), Buffer.from(received))
 }
 
 // ── Utilidades de formato de tarjeta (para display) ──────

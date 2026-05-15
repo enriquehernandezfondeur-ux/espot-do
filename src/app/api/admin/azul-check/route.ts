@@ -47,7 +47,6 @@ export async function GET() {
       CURRENCY:     process.env.AZUL_CURRENCY_CODE ?? '(no set)',
       PAGE_URL:     PAGE_URL || '(no set)',
       PRIVATE_KEY_LENGTH: PRIVATE_KEY.length,
-      PRIVATE_KEY_PREVIEW: PRIVATE_KEY.slice(0, 12) + '...',
     },
     hashVerification: {
       ok:            hashOk,
