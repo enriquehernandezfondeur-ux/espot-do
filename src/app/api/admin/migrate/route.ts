@@ -11,10 +11,21 @@ function generateSlug(name: string) {
     .replace(/\s+/g, '-') + '-' + Date.now().toString(36)
 }
 
-const SAFE_URL_PATTERN = /^https:\/\/(?!(?:10\.|172\.(?:1[6-9]|2\d|3[01])\.|192\.168\.|127\.|169\.254\.|::1|localhost))/i
+const PRIVATE_HOST_PATTERN = /^(?:10\.|172\.(?:1[6-9]|2\d|3[01])\.|192\.168\.|127\.|169\.254\.|0\.|::1$|fc|fe80|localhost)/i
+
+function isSafeImageUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url)
+    if (parsed.protocol !== 'https:') return false
+    const host = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, '') // strip IPv6 brackets
+    return !PRIVATE_HOST_PATTERN.test(host)
+  } catch {
+    return false
+  }
+}
 
 async function downloadImage(url: string): Promise<{ buffer: Buffer; contentType: string } | null> {
-  if (!SAFE_URL_PATTERN.test(url)) {
+  if (!isSafeImageUrl(url)) {
     console.warn('[migrate] URL bloqueada por SSRF:', url)
     return null
   }

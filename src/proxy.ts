@@ -2,8 +2,14 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
-const SITE_PASSWORD = process.env.SITE_PASSWORD
-const COOKIE_NAME   = 'espot_preview_access'
+const SITE_PASSWORD   = process.env.SITE_PASSWORD
+const COOKIE_NAME     = 'espot_preview_access'
+const ALLOWED_ORIGINS = [
+  'https://espothub.com',
+  'https://www.espothub.com',
+  'https://espot.do',
+  'https://www.espot.do',
+]
 
 function buildAccessToken(password: string): string {
   const { createHmac } = require('crypto') as typeof import('crypto')
@@ -34,11 +40,19 @@ function checkRateLimit(key: string, limit: number, windowMs: number): boolean {
   return true
 }
 
-function secureHeaders(res: NextResponse): NextResponse {
+function secureHeaders(res: NextResponse, request?: NextRequest): NextResponse {
   res.headers.set('X-Content-Type-Options', 'nosniff')
   res.headers.set('X-Frame-Options', 'SAMEORIGIN')
   res.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
   res.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+  // CORS dinámico — solo un origen por respuesta (spec HTTP)
+  if (request) {
+    const origin = request.headers.get('origin') ?? ''
+    if (ALLOWED_ORIGINS.includes(origin)) {
+      res.headers.set('Access-Control-Allow-Origin', origin)
+      res.headers.set('Vary', 'Origin')
+    }
+  }
   return res
 }
 
@@ -86,7 +100,7 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/og-') ||
     pathname.includes('.')
   ) {
-    return secureHeaders(NextResponse.next())
+    return secureHeaders(NextResponse.next(), request)
   }
 
   // Si no hay contraseña configurada, acceso libre — igual proteger auth routes
@@ -94,7 +108,7 @@ export async function proxy(request: NextRequest) {
     if (AUTH_ROUTES.some(r => pathname.startsWith(r))) {
       return checkAuth(request, pathname)
     }
-    return secureHeaders(NextResponse.next())
+    return secureHeaders(NextResponse.next(), request)
   }
 
   // Verificar cookie de acceso (preview)

@@ -54,11 +54,11 @@ const nextConfig: NextConfig = {
           { key: 'X-XSS-Protection',          value: '1; mode=block' },
         ],
       },
-      // CORS — solo rutas API
+      // CORS — el origin correcto se resuelve dinámicamente en el middleware (proxy.ts)
+      // Access-Control-Allow-Origin no puede tener múltiples valores — se maneja en proxy
       {
         source: '/api/(.*)',
         headers: [
-          { key: 'Access-Control-Allow-Origin',  value: ALLOWED_ORIGINS.join(',') },
           { key: 'Access-Control-Allow-Methods', value: 'GET,POST,PUT,DELETE,OPTIONS' },
           { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization, X-Requested-With' },
           { key: 'Access-Control-Max-Age',       value: '86400' },

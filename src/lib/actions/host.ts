@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { acceptBooking, rejectBooking, confirmPayment, cancelBooking } from './booking'
 import { sendEmail } from '@/lib/email/send'
 import { emailBase, infoBox } from '@/lib/email/templates'
-import { formatCurrency, formatDate } from '@/lib/utils'
+import { formatCurrency, formatDate, escapeHtml } from '@/lib/utils'
 import { userLogger, logError } from '@/lib/logger'
 
 export { acceptBooking, rejectBooking, confirmPayment as confirmBooking, cancelBooking }
@@ -433,7 +433,7 @@ export async function respondToQuote(bookingId: string, quotedPrice: number, mes
             { label: 'Tipo de evento',   value: bk.event_type ?? '' },
             { label: 'Precio total',     value: formatCurrency(quotedPrice) },
             { label: 'Plan de pago',     value: cuotasInfo },
-            ...(message ? [{ label: 'Nota del propietario', value: message }] : []),
+            ...(message ? [{ label: 'Nota del propietario', value: escapeHtml(message) }] : []),
           ])}
           <p style="color:#6B7280;font-size:13px;margin:8px 0 0;">
             Para confirmar tu reserva, realiza el primer pago desde tu panel.

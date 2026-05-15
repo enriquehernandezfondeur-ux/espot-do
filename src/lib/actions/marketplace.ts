@@ -183,7 +183,7 @@ export async function getPublishedSpaces(filters?: {
       .select('space_id, event_date, status')
       .gte('event_date', filters.dateFrom)
       .lte('event_date', filters.dateTo ?? filters.dateFrom)
-      .not('status', 'in', '("pending","cancelled_guest","cancelled_host","rejected")')
+      .not('status', 'in', '("cancelled_guest","cancelled_host","rejected")')
 
     const { data: availability } = await supabase
       .from('space_availability')
