@@ -56,3 +56,13 @@ export function generateSlug(name: string): string {
 
 export const num = (v: string | undefined) => v ? parseFloat(v) : null
 export const int = (v: string | undefined) => v ? parseInt(v) : null
+
+export function escapeHtml(s: string | null | undefined): string {
+  if (!s) return ''
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+}

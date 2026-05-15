@@ -189,9 +189,11 @@ export async function createBooking(payload: CreateBookingPayload) {
   const isInstant = !isQuote && (spaceRow?.instant_booking === true)
 
   // Validar que platformFee y totalAmount no hayan sido manipulados por el cliente
+  // La comisión se calcula sobre el subtotal completo (base + addons)
   if (!isQuote && payload.basePrice > 0) {
-    const expectedFee   = Math.round(payload.basePrice * 0.10)
-    const expectedTotal = payload.basePrice + payload.addonsTotal
+    const subtotal      = payload.basePrice + payload.addonsTotal
+    const expectedFee   = Math.round(subtotal * 0.10)
+    const expectedTotal = subtotal
     if (Math.abs(Number(payload.platformFee) - expectedFee) > 1)
       return { error: 'Error en el cálculo de la comisión. Recarga la página e intenta de nuevo.' }
     if (Math.abs(Number(payload.totalAmount) - expectedTotal) > 1)
@@ -499,7 +501,6 @@ export async function confirmPayment(bookingId: string) {
   })
   if (payErr) console.error('[completeBooking] payments insert failed:', payErr.message)
 
-  const space  = bk.spaces as any
   const host   = space?.profiles as any
   const guest  = bk.profiles as any
   const remainingAmount = formatCurrency(Number(bk.total_amount) - Number(bk.platform_fee))
@@ -544,7 +545,7 @@ export async function confirmPayment(bookingId: string) {
     guest?.email && sendEmail({
       to: guest.email,
       subject: `Reserva confirmada — ${space?.name}`,
-      html: tplConfirmadaCliente({ ...confirmData, remainingAmount: Number(bk.total_amount) - Number(bk.platform_fee) }),
+      html: tplConfirmadaCliente({ ...confirmData, remainingAmount: Math.max(0, Number(bk.total_amount) - Number(bk.paid_amount ?? bk.platform_fee)) }),
     }),
     host?.email && sendEmail({
       to: host.email,

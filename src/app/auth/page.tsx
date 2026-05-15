@@ -33,7 +33,8 @@ type UserType = 'client' | 'host' | null
 function AuthContent() {
   const searchParams = useSearchParams()
   const raw        = searchParams.get('redirect') ?? ''
-  const redirectTo = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/dashboard'
+  // Validar que sea un path interno: debe empezar con '/' y no con '//' ni '/\'
+  const redirectTo = /^\/(?![/\\])/.test(raw) ? raw : '/dashboard'
   const isHost     = redirectTo.includes('host') || searchParams.get('mode') === 'host'
   const defaultScreen: Screen = searchParams.get('mode') === 'register' ? 'register' : 'login'
 

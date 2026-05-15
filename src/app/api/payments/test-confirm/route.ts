@@ -9,6 +9,10 @@ import { markInstallmentPaid } from '@/lib/actions/installments'
 // Solo activo cuando PAYMENT_TEST_MODE=1
 // Simula un pago exitoso sin pasar por Azul — solo para pruebas internas
 export async function POST(req: NextRequest) {
+  // Bloquear en producción independientemente de la variable
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'No disponible en producción' }, { status: 403 })
+  }
   if (process.env.PAYMENT_TEST_MODE !== '1') {
     return NextResponse.json({ error: 'No disponible en producción' }, { status: 403 })
   }

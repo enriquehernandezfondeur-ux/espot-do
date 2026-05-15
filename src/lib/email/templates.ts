@@ -4,10 +4,26 @@
  * Compatible con: Gmail, Outlook, Apple Mail, Yahoo Mail, móviles.
  */
 
-import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
+import { formatCurrency, formatDate, formatTime, escapeHtml } from '@/lib/utils'
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 const DOMAIN = SITE.replace('https://', '').replace('http://', '')
+
+// Alias corto para uso interno — escapa campos de texto de usuario en HTML
+const esc = escapeHtml
+
+// Sanitiza todos los campos de texto libre de un objeto BookingData
+function sanitizeBookingData<T extends Record<string, unknown>>(d: T): T {
+  const TEXT_FIELDS = ['guestName','hostName','spaceName','spaceAddress','eventType',
+    'guestEmail','recipientName','cancelledBy','reason','name','message']
+  const result = { ...d }
+  for (const key of TEXT_FIELDS) {
+    if (key in result && typeof result[key] === 'string') {
+      (result as any)[key] = escapeHtml(result[key] as string)
+    }
+  }
+  return result
+}
 
 // ── Logo de texto — funciona en TODOS los clientes de email ──
 // No depende de imágenes externas que pueden bloquearse
@@ -188,7 +204,8 @@ interface BookingData {
 
 // ── 1. BIENVENIDA (nuevo registro) ───────────────────────
 
-export function tplBienvenida(data: { name: string }) {
+export function tplBienvenida(rawData: { name: string }) {
+  const data = { name: esc(rawData.name) }
   return emailBase({
     title: `Bienvenido a Espot, ${data.name}`,
     subtitle: 'Tu cuenta está lista. Explora los mejores espacios para tu próximo evento.',
@@ -208,7 +225,8 @@ export function tplBienvenida(data: { name: string }) {
 
 // ── 2. SOLICITUD ENVIADA (cliente) ───────────────────────
 
-export function tplSolicitudCliente(d: BookingData) {
+export function tplSolicitudCliente(rawD: BookingData) {
+  const d = sanitizeBookingData(rawD)
   const rows = [
     { label: 'Espacio',          value: d.spaceName },
     { label: 'Tipo de evento',   value: d.eventType },
@@ -232,7 +250,8 @@ export function tplSolicitudCliente(d: BookingData) {
 
 // ── 3. NUEVA SOLICITUD (propietario) ─────────────────────
 
-export function tplSolicitudHost(d: BookingData & { isQuote?: boolean }) {
+export function tplSolicitudHost(rawD: BookingData & { isQuote?: boolean }) {
+  const d = sanitizeBookingData(rawD)
   const rows = [
     { label: 'Cliente',          value: `${d.guestName}${d.guestEmail ? ` &middot; ${d.guestEmail}` : ''}` },
     { label: 'Tipo de evento',   value: d.eventType },
@@ -257,7 +276,8 @@ export function tplSolicitudHost(d: BookingData & { isQuote?: boolean }) {
 
 // ── 4. RESERVA ACEPTADA — procede a pagar (cliente) ──────
 
-export function tplAceptadaCliente(d: BookingData) {
+export function tplAceptadaCliente(rawD: BookingData) {
+  const d = sanitizeBookingData(rawD)
   const rows = [
     { label: 'Espacio',              value: d.spaceName },
     { label: 'Fecha',                value: formatDate(d.eventDate) },
@@ -279,7 +299,8 @@ export function tplAceptadaCliente(d: BookingData) {
 
 // ── 5. RESERVA CONFIRMADA — pago inicial (cliente) ───────
 
-export function tplConfirmadaCliente(d: BookingData & { remainingAmount: number }) {
+export function tplConfirmadaCliente(rawD: BookingData & { remainingAmount: number }) {
+  const d = sanitizeBookingData(rawD)
   const rows = [
     { label: 'Espacio',              value: d.spaceName },
     { label: 'Direcci&oacute;n',     value: d.spaceAddress },
@@ -304,7 +325,8 @@ export function tplConfirmadaCliente(d: BookingData & { remainingAmount: number 
 
 // ── 6. RESERVA CONFIRMADA — notificación al propietario ──
 
-export function tplConfirmadaHost(d: BookingData) {
+export function tplConfirmadaHost(rawD: BookingData) {
+  const d = sanitizeBookingData(rawD)
   const rows = [
     { label: 'Cliente',              value: d.guestName },
     { label: 'Tipo de evento',       value: d.eventType },
@@ -327,9 +349,10 @@ export function tplConfirmadaHost(d: BookingData) {
 
 // ── 7. RESERVA RECHAZADA (cliente) ───────────────────────
 
-export function tplRechazadaCliente(data: {
+export function tplRechazadaCliente(rawData: {
   guestName: string; spaceName: string; eventDate: string; reason?: string
 }) {
+  const data = { ...rawData, guestName: esc(rawData.guestName), spaceName: esc(rawData.spaceName), reason: esc(rawData.reason) }
   return emailBase({
     title: 'El espacio no est&aacute; disponible',
     subtitle: `${data.spaceName} no pudo confirmar tu solicitud para esa fecha.`,
@@ -344,10 +367,11 @@ export function tplRechazadaCliente(data: {
 
 // ── 8. RESERVA CANCELADA (cualquier parte) ───────────────
 
-export function tplCancelada(data: {
+export function tplCancelada(rawData: {
   recipientName: string; cancelledBy: string; spaceName: string
   eventDate: string; reason?: string; isGuest: boolean
 }) {
+  const data = { ...rawData, recipientName: esc(rawData.recipientName), cancelledBy: esc(rawData.cancelledBy), spaceName: esc(rawData.spaceName), reason: esc(rawData.reason) }
   return emailBase({
     title: 'Reserva cancelada',
     subtitle: `La reserva en ${data.spaceName} fue cancelada.`,
@@ -364,11 +388,12 @@ export function tplCancelada(data: {
 
 // ── 9. RECORDATORIO DE CUOTA PRÓXIMA ─────────────────────
 
-export function tplRecordatorioCuota(data: {
+export function tplRecordatorioCuota(rawData: {
   guestName: string; spaceName: string; eventDate: string
   installmentNumber: number; totalInstallments: number
   amount: number; dueDate: string; daysLeft: number; paymentUrl: string
 }) {
+  const data = { ...rawData, guestName: esc(rawData.guestName), spaceName: esc(rawData.spaceName) }
   const urgency = data.daysLeft <= 1
   return emailBase({
     title: `Recordatorio de pago &mdash; Cuota ${data.installmentNumber} de ${data.totalInstallments}`,
@@ -391,12 +416,13 @@ export function tplRecordatorioCuota(data: {
 
 // ── 10. CONFIRMACIÓN DE CUOTA PAGADA ─────────────────────
 
-export function tplCuotaPagada(data: {
+export function tplCuotaPagada(rawData: {
   guestName: string; spaceName: string; eventDate: string
   installmentNumber: number; totalInstallments: number
   amountPaid: number; remainingAmount: number
   nextDueDate?: string; nextDueAmount?: number
 }) {
+  const data = { ...rawData, guestName: esc(rawData.guestName), spaceName: esc(rawData.spaceName) }
   const allPaid = data.remainingAmount <= 0
   const rows = [
     { label: 'Espacio',          value: data.spaceName },
@@ -423,7 +449,8 @@ export function tplCuotaPagada(data: {
 
 // ── 11. COTIZACIÓN SOLICITADA (cliente) ──────────────────
 
-export function tplSolicitudCotizacionCliente(d: BookingData) {
+export function tplSolicitudCotizacionCliente(rawD: BookingData) {
+  const d = sanitizeBookingData(rawD)
   const rows = [
     { label: 'Espacio',             value: d.spaceName },
     { label: 'Tipo de evento',      value: d.eventType },
@@ -448,10 +475,11 @@ export function tplSolicitudCotizacionCliente(d: BookingData) {
 
 // ── 12. REEMBOLSO EN PROCESO (cliente) ───────────────────
 
-export function tplReembolsoPendiente(data: {
+export function tplReembolsoPendiente(rawData: {
   guestName: string; spaceName: string; eventDate: string
   paidAmount: number; bookingId: string
 }) {
+  const data = { ...rawData, guestName: esc(rawData.guestName), spaceName: esc(rawData.spaceName) }
   return emailBase({
     title: 'Tu reembolso est&aacute; en proceso',
     subtitle: `Reserva cancelada en ${data.spaceName}`,
@@ -471,12 +499,25 @@ export function tplReembolsoPendiente(data: {
 
 // ── 13. ALERTA DE REEMBOLSO PENDIENTE (admin) ─────────────
 
-export function tplReembolsoPendienteAdmin(data: {
+export function tplReembolsoPendienteAdmin(rawData: {
   guestName: string; guestEmail: string; spaceName: string
   eventDate: string; paidAmount: number; bookingId: string
   cancelledBy: string
   refundBankInfo?: { holderName: string; bank: string; accountNumber: string; accountType: string }
 }) {
+  const data = {
+    ...rawData,
+    guestName:   esc(rawData.guestName),
+    guestEmail:  esc(rawData.guestEmail),
+    spaceName:   esc(rawData.spaceName),
+    cancelledBy: esc(rawData.cancelledBy),
+    refundBankInfo: rawData.refundBankInfo ? {
+      holderName:    esc(rawData.refundBankInfo.holderName),
+      bank:          esc(rawData.refundBankInfo.bank),
+      accountNumber: esc(rawData.refundBankInfo.accountNumber),
+      accountType:   rawData.refundBankInfo.accountType,
+    } : undefined,
+  }
   const bankRows = data.refundBankInfo ? [
     { label: '&mdash; Datos bancarios &mdash;', value: '' },
     { label: 'Titular',           value: data.refundBankInfo.holderName },
@@ -508,12 +549,13 @@ export function tplReembolsoPendienteAdmin(data: {
 
 // ── 14. PAGO COMPLETADO (admin/host/cliente) ─────────────
 
-export function tplPagoCompletado(data: {
+export function tplPagoCompletado(rawData: {
   recipientName: string; spaceName: string; guestName: string
   eventDate: string; eventInfo: string; totalAmount: number
   commissionAmount: number; netAmount: number; azulOrderId?: string
   isAdmin?: boolean; isHost?: boolean; siteUrl: string
 }) {
+  const data = { ...rawData, recipientName: esc(rawData.recipientName), spaceName: esc(rawData.spaceName), guestName: esc(rawData.guestName) }
   const rows = [
     { label: 'Espacio',                value: data.spaceName },
     { label: 'Cliente',                value: data.guestName },
@@ -540,11 +582,12 @@ export function tplPagoCompletado(data: {
 
 // ── 15. RECORDATORIO PRE-EVENTO (48h antes) ──────────────
 
-export function tplRecordatorioEvento(data: {
+export function tplRecordatorioEvento(rawData: {
   guestName: string; spaceName: string; spaceAddress: string
   eventDate: string; startTime: string; endTime: string
   guestCount: number; bookingId: string
 }) {
+  const data = { ...rawData, guestName: esc(rawData.guestName), spaceName: esc(rawData.spaceName), spaceAddress: esc(rawData.spaceAddress) }
   return emailBase({
     title: `Tu evento es ma&ntilde;ana`,
     subtitle: `${data.spaceName} &middot; ${formatDate(data.eventDate)}`,
@@ -571,10 +614,11 @@ export function tplRecordatorioEvento(data: {
 
 // ── 16. SOLICITUD DE RESEÑA (post-evento) ─────────────────
 
-export function tplSolicitudResena(data: {
+export function tplSolicitudResena(rawData: {
   guestName: string; spaceName: string; eventDate: string
   bookingId: string; spaceSlug: string
 }) {
+  const data = { ...rawData, guestName: esc(rawData.guestName), spaceName: esc(rawData.spaceName) }
   return emailBase({
     title: `&iquest;C&oacute;mo estuvo tu evento en ${data.spaceName}?`,
     subtitle: `${formatDate(data.eventDate)} &mdash; Ayuda a otros clientes con tu experiencia`,
