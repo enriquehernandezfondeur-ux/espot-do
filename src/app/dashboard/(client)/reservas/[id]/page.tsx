@@ -60,21 +60,17 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
   const addons  = (booking as any).booking_addons ?? []
   const pricing = (booking as any).space_pricing as any
 
-  function getPricingInfo() {
+  function getPricingLabel() {
     if (!pricing) return null
     switch (pricing.pricing_type) {
-      case 'hourly':
-        return { label: 'Por hora', detail: pricing.hourly_price ? formatCurrency(pricing.hourly_price) + ' / hora' : null, color: '#2563EB', bg: 'rgba(37,99,235,0.08)' }
-      case 'minimum_consumption':
-        return { label: 'Consumo mínimo garantizado', detail: pricing.minimum_consumption ? formatCurrency(pricing.minimum_consumption) : null, color: '#D97706', bg: 'rgba(217,119,6,0.08)' }
-      case 'fixed_package':
-        return { label: pricing.package_name ?? 'Paquete fijo', detail: pricing.fixed_price ? formatCurrency(pricing.fixed_price) : null, color: '#7C3AED', bg: 'rgba(124,58,237,0.08)' }
-      case 'custom_quote':
-        return { label: 'Precio personalizado (cotización)', detail: null, color: '#0891B2', bg: 'rgba(8,145,178,0.08)' }
+      case 'hourly':              return `Por hora · ${pricing.hourly_price ? formatCurrency(pricing.hourly_price) + '/hr' : '—'}`
+      case 'minimum_consumption': return `Consumo mínimo · ${pricing.minimum_consumption ? formatCurrency(pricing.minimum_consumption) : '—'}`
+      case 'fixed_package':       return `${pricing.package_name ?? 'Paquete'} · ${pricing.fixed_price ? formatCurrency(pricing.fixed_price) : '—'}`
+      case 'custom_quote':        return 'Cotización personalizada'
       default: return null
     }
   }
-  const pricingInfo = getPricingInfo()
+  const pricingLabel = getPricingLabel()
 
   async function handleSubmitReview(e: React.FormEvent) {
     e.preventDefault()
@@ -151,105 +147,43 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
       </div>
 
       {/* Detalles del evento */}
-      <div className="rounded-2xl p-5 mb-4"
+      <div className="rounded-2xl overflow-hidden mb-4"
         style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
-        <h2 className="text-sm font-bold uppercase tracking-wide mb-4" style={{ color: 'var(--text-muted)' }}>
-          Tu evento
-        </h2>
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: 'var(--brand-dim)' }}>
-              <CalendarDays size={16} style={{ color: 'var(--brand)' }} />
+        <div className="px-5 py-3.5" style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)' }}>
+          <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Detalles del evento</p>
+        </div>
+        <div>
+          {[
+            { label: 'Fecha',     value: `${formatDate(booking.event_date)} · ${countdownLabel(booking.event_date)}` },
+            booking.start_time ? { label: 'Horario',   value: `${formatTime(booking.start_time)} – ${formatTime(booking.end_time ?? '')}` } : null,
+            { label: 'Personas',  value: `${booking.guest_count}` },
+            booking.event_type  ? { label: 'Tipo',      value: booking.event_type } : null,
+            pricingLabel        ? { label: 'Precio',    value: pricingLabel } : null,
+            space?.address      ? { label: 'Dirección', value: `${space.address}, ${space?.sector ?? ''}, ${space?.city ?? ''}` } : null,
+          ].filter(Boolean).map((row: any) => (
+            <div key={row.label} className="flex items-baseline gap-4 px-5 py-3"
+              style={{ borderTop: '1px solid var(--border-subtle)' }}>
+              <span className="text-xs font-medium shrink-0 w-20" style={{ color: 'var(--text-muted)' }}>{row.label}</span>
+              <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{row.value}</span>
             </div>
-            <div>
-              <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                {formatDate(booking.event_date)}
-              </p>
-              <p className="text-xs" style={{ color: 'var(--brand)' }}>{countdownLabel(booking.event_date)}</p>
-            </div>
-          </div>
-          {booking.start_time && booking.end_time && (
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: 'var(--brand-dim)' }}>
-                <Clock size={16} style={{ color: 'var(--brand)' }} />
-              </div>
-              <div>
-                <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  {formatTime(booking.start_time)} – {formatTime(booking.end_time)}
-                </p>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Horario</p>
-              </div>
-            </div>
-          )}
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: 'var(--brand-dim)' }}>
-              <Users size={16} style={{ color: 'var(--brand)' }} />
-            </div>
-            <div>
-              <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                {booking.guest_count} personas
-              </p>
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Invitados</p>
-            </div>
-          </div>
-          {booking.event_type && (
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: 'var(--brand-dim)' }}>
-                <Sparkles size={16} style={{ color: 'var(--brand)' }} />
-              </div>
-              <div>
-                <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  {booking.event_type}
-                </p>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Tipo de evento</p>
-              </div>
-            </div>
-          )}
-          {/* Tipo de precio */}
-          {pricingInfo && (
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: pricingInfo.bg }}>
-                <CreditCard size={16} style={{ color: pricingInfo.color }} />
-              </div>
-              <div>
-                <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  {pricingInfo.label}
-                  {pricingInfo.detail && (
-                    <span className="ml-1.5 text-xs font-normal" style={{ color: 'var(--text-muted)' }}>
-                      · {pricingInfo.detail}
-                    </span>
-                  )}
-                </p>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Modalidad de cobro</p>
-              </div>
-            </div>
-          )}
-          {/* Descripción del paquete si aplica */}
-          {pricing?.pricing_type === 'fixed_package' && pricing?.package_includes && (
-            <div className="rounded-xl px-4 py-3 text-xs whitespace-pre-line"
-              style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.15)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-              <span className="font-semibold block mb-1" style={{ color: '#7C3AED' }}>Incluye:</span>
-              {pricing.package_includes}
-            </div>
-          )}
-          {/* Nota consumo mínimo */}
+          ))}
           {pricing?.pricing_type === 'minimum_consumption' && (
-            <div className="rounded-xl px-4 py-2.5 text-xs"
-              style={{ background: 'rgba(217,119,6,0.05)', border: '1px solid rgba(217,119,6,0.2)', color: '#92400E' }}>
-              Pagaste este monto a través de Espot — es tu crédito de comida y bebidas en el lugar. Si consumes más, pagas la diferencia directamente allí.
+            <div className="px-5 py-3 text-xs leading-relaxed" style={{ color: 'var(--text-muted)', borderTop: '1px solid var(--border-subtle)' }}>
+              El consumo mínimo pagado es tu crédito de F&B en el local. Diferencia la pagas directamente allí.
+            </div>
+          )}
+          {pricing?.pricing_type === 'fixed_package' && pricing?.package_includes && (
+            <div className="px-5 py-3 text-xs leading-relaxed whitespace-pre-line"
+              style={{ color: 'var(--text-muted)', borderTop: '1px solid var(--border-subtle)' }}>
+              <span className="font-semibold" style={{ color: 'var(--text-secondary)' }}>Incluye: </span>{pricing.package_includes}
+            </div>
+          )}
+          {(booking as any).event_notes && !(booking as any).event_notes.startsWith('[Cotización]') && (
+            <div className="px-5 py-3 text-xs italic" style={{ color: 'var(--text-muted)', borderTop: '1px solid var(--border-subtle)' }}>
+              <span className="font-semibold not-italic">Nota: </span>"{(booking as any).event_notes}"
             </div>
           )}
         </div>
-        {(booking as any).event_notes && !(booking as any).event_notes.startsWith('[Cotización]') && (
-          <div className="mt-4 pt-4 text-xs italic" style={{ borderTop: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
-            <span className="font-semibold not-italic" style={{ color: 'var(--text-muted)' }}>Nota: </span>"{(booking as any).event_notes}"
-          </div>
-        )}
       </div>
 
       {/* Plan de pagos — nota si es cotización sin plan aún */}
@@ -340,41 +274,26 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
 
       {/* Propietario */}
       {host && (
-        <div className="rounded-2xl p-5 mb-4"
+        <div className="rounded-2xl p-4 mb-4 flex items-center gap-3"
           style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
-          <h2 className="text-sm font-bold uppercase tracking-wide mb-4" style={{ color: 'var(--text-muted)' }}>
-            Tu anfitrión
-          </h2>
-          <div className="flex items-center gap-3 mb-4">
-            {host.avatar_url ? (
-              <img src={host.avatar_url} alt={host.full_name}
-                className="w-12 h-12 rounded-2xl object-cover shrink-0" />
-            ) : (
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold shrink-0"
-                style={{ background: 'var(--brand)' }}>
-                {host.full_name?.charAt(0)?.toUpperCase() ?? 'H'}
-              </div>
-            )}
-            <div className="min-w-0">
-              <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{host.full_name}</p>
-              {host.email && (
-                <a href={`mailto:${host.email}`} className="text-xs flex items-center gap-1 mt-0.5"
-                  style={{ color: 'var(--text-muted)' }}>
-                  <Mail size={11} /> {host.email}
-                </a>
-              )}
-              {host.phone && (
-                <a href={`tel:${host.phone}`} className="text-xs flex items-center gap-1 mt-0.5"
-                  style={{ color: 'var(--text-muted)' }}>
-                  <Phone size={11} /> {host.phone}
-                </a>
-              )}
+          {host.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={host.avatar_url} alt={host.full_name}
+              className="w-10 h-10 rounded-xl object-cover shrink-0" />
+          ) : (
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0"
+              style={{ background: 'var(--brand)' }}>
+              {host.full_name?.charAt(0)?.toUpperCase() ?? 'H'}
             </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{host.full_name}</p>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Propietario del espacio</p>
           </div>
           <Link href="/dashboard/mensajes"
-            className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-semibold transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold shrink-0 transition-all"
             style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
-            <MessageCircle size={15} /> Enviar mensaje al anfitrión
+            <MessageCircle size={13} /> Mensaje
           </Link>
         </div>
       )}
@@ -402,29 +321,6 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
         </div>
       )}
 
-      {/* Antes de tu evento */}
-      <div className="rounded-2xl p-5 mb-4"
-        style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
-        <h2 className="text-sm font-bold uppercase tracking-wide mb-4" style={{ color: 'var(--text-muted)' }}>
-          Antes de tu evento
-        </h2>
-        <div className="space-y-3">
-          {[
-            { icon: Clock,         text: 'Llega 15 minutos antes para revisar el espacio y coordinarte con el anfitrión.' },
-            { icon: CreditCard,    text: 'Ten a la mano tu confirmación de reserva (este pantalla o el email de confirmación).' },
-            { icon: MessageCircle, text: 'Coordina los detalles de decoración o acceso con anticipación vía mensajes.' },
-            { icon: MapPin,        text: space?.address ? `Dirección: ${space.address}, ${space?.sector}, ${space?.city}` : `El espacio está en ${space?.sector}, ${space?.city}.` },
-          ].map(({ icon: Icon, text }, i) => (
-            <div key={i} className="flex items-start gap-3">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-                style={{ background: 'var(--bg-elevated)' }}>
-                <Icon size={13} style={{ color: 'var(--brand)' }} />
-              </div>
-              <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{text}</p>
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* Acciones rápidas — calendarios + compartir */}
       {booking.event_date && (() => {

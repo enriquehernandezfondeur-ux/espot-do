@@ -576,8 +576,8 @@ export default function MisReservasPage() {
                       {(bk.event_notes || bk.booking_addons?.length > 0 || ((bk as any).space_pricing?.pricing_type === 'fixed_package' && (bk as any).space_pricing?.package_includes)) && (
                         <div className="space-y-3 md:w-56">
                           {(bk as any).space_pricing?.pricing_type === 'fixed_package' && (bk as any).space_pricing?.package_includes && (
-                            <div className="rounded-xl p-3" style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
-                              <p className="text-xs font-bold mb-1.5" style={{ color: 'var(--brand)' }}>
+                            <div className="rounded-xl p-3" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                              <p className="text-xs font-bold mb-1.5" style={{ color: 'var(--text-muted)' }}>
                                 {(bk as any).space_pricing.package_name ?? 'Paquete incluye'}
                               </p>
                               <p className="text-xs whitespace-pre-line leading-relaxed" style={{ color: 'var(--text-secondary)' }}>

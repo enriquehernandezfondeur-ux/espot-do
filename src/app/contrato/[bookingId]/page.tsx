@@ -34,7 +34,7 @@ export default async function ContratoPage({ params }: { params: Promise<{ booki
   const pricing = (booking as any).space_pricing as any
   const addons  = (booking as any).booking_addons ?? []
   const today   = new Date().toLocaleDateString('es-DO', { day: 'numeric', month: 'long', year: 'numeric' })
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do').replace('https://', '').replace('http://', '')
+  const siteUrl = 'espot.do'
 
   return (
     <>
@@ -180,18 +180,23 @@ export default async function ContratoPage({ params }: { params: Promise<{ booki
 
         <div className="sigs">
           <div className="sig">
-            <div style={{ height: 48 }} />
-            <div className="sig-line" />
-            <strong>{host?.full_name ?? 'Propietario del Espacio'}</strong><br />
-            Propietario / Arrendador
+            <strong>{host?.full_name ?? 'Propietario del Espacio'}</strong>
+            <span style={{ display: 'block', fontSize: 12, color: '#777', marginTop: 4 }}>
+              Propietario · {host?.email ?? ''}
+            </span>
           </div>
           <div className="sig">
-            <div style={{ height: 48 }} />
-            <div className="sig-line" />
-            <strong>{guest?.full_name ?? 'Cliente'}</strong><br />
-            Cliente / Reservante
+            <strong>{guest?.full_name ?? 'Cliente'}</strong>
+            <span style={{ display: 'block', fontSize: 12, color: '#777', marginTop: 4 }}>
+              Cliente · {guest?.email ?? ''}
+            </span>
           </div>
         </div>
+
+        <p style={{ fontSize: 11, color: '#999', textAlign: 'center', marginTop: 24, lineHeight: 1.6 }}>
+          Este es un contrato digital generado automáticamente. Al completar el pago en la plataforma, ambas partes
+          aceptan los términos aquí establecidos. No requiere firma manuscrita.
+        </p>
 
         <div className="footer">
           Documento generado por Espot ({siteUrl}) · Referencia: {bookingId.slice(0, 8).toUpperCase()} · {today}

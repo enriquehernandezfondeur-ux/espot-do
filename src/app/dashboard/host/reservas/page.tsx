@@ -428,14 +428,18 @@ export default function HostReservasPage() {
               )}
 
               {/* Finanzas */}
-              <div className="rounded-xl p-3 space-y-1.5" style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
+              <div className="rounded-xl p-3 space-y-1.5" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                 <div className="flex justify-between text-xs">
                   <span style={{ color: 'var(--text-secondary)' }}>Total evento</span>
                   <span className="font-bold" style={{ color: 'var(--text-primary)' }}>{formatCurrency(Number(selected.total_amount))}</span>
                 </div>
-                <div className="flex justify-between text-xs font-bold" style={{ color: 'var(--brand)' }}>
-                  <span>Comisión Espot</span>
+                <div className="flex justify-between text-xs" style={{ color: 'var(--text-muted)' }}>
+                  <span>Comisión Espot (10%)</span>
                   <span>{formatCurrency(Number(selected.platform_fee))}</span>
+                </div>
+                <div className="flex justify-between text-xs font-semibold pt-1" style={{ borderTop: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}>
+                  <span>Tu neto</span>
+                  <span style={{ color: 'var(--brand)' }}>{formatCurrency(Math.round(Number(selected.total_amount) * 0.90))}</span>
                 </div>
               </div>
 
