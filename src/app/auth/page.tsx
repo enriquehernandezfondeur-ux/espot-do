@@ -211,7 +211,7 @@ function AuthContent() {
               <Mail size={15} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
                 style={{ color: 'rgba(255,255,255,0.3)' }} />
               <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="tu@email.com" required
+                placeholder="tu@email.com" required autoComplete="email"
                 style={{ ...inputStyle, paddingLeft: 40 }} />
             </div>
           </div>
@@ -351,7 +351,7 @@ function AuthContent() {
               </label>
               <input type="text" value={fullName} onChange={e => setFullName(e.target.value)}
                 placeholder={userType === 'host' ? 'Ej: Rivera Eventos' : 'Ej: María González'}
-                required style={inputStyle} />
+                required autoComplete="name" style={inputStyle} />
               {userType === 'host' && (
                 <p className="text-xs mt-1.5" style={{ color: 'rgba(255,255,255,0.3)' }}>
                   El nombre de tu empresa o marca. Lo verán los clientes en el marketplace.
@@ -361,7 +361,7 @@ function AuthContent() {
             <div>
               <label style={labelStyle}>Teléfono / WhatsApp</label>
               <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
-                placeholder="+1 (809) 000-0000" style={inputStyle} />
+                placeholder="+1 (809) 000-0000" autoComplete="tel" style={inputStyle} />
             </div>
           </>
         )}
@@ -372,7 +372,7 @@ function AuthContent() {
             <Mail size={15} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
               style={{ color: 'rgba(255,255,255,0.3)' }} />
             <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="tu@email.com" required
+              placeholder="tu@email.com" required autoComplete="email"
               style={{ ...inputStyle, paddingLeft: 40 }} />
           </div>
         </div>
@@ -394,6 +394,7 @@ function AuthContent() {
               value={password} onChange={e => setPassword(e.target.value)}
               placeholder={screen === 'register' ? 'Mínimo 8 caracteres' : '········'}
               required minLength={8}
+              autoComplete={screen === 'register' ? 'new-password' : 'current-password'}
               style={{ ...inputStyle, paddingRight: 44 }} />
             <button type="button" onClick={() => setShowPwd(v => !v)}
               className="absolute right-4 top-1/2 -translate-y-1/2"

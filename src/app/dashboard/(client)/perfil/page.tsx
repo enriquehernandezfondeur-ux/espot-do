@@ -165,9 +165,9 @@ export default function PerfilPage() {
         style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
         <h2 className="font-bold" style={{ color: 'var(--text-primary)' }}>Información personal</h2>
         {[
-          { label: 'Nombre completo', value: fullName,  setter: setFullName,  placeholder: 'Tu nombre completo', type: 'text' },
-          { label: 'Teléfono',        value: phone,     setter: setPhone,     placeholder: '+1 (809) 000-0000',  type: 'tel' },
-          { label: 'WhatsApp',        value: whatsapp,  setter: setWhatsapp,  placeholder: '+1 (829) 000-0000',  type: 'tel' },
+          { label: 'Nombre completo', value: fullName,  setter: setFullName,  placeholder: 'Tu nombre completo', type: 'text', autoComplete: 'name' },
+          { label: 'Teléfono',        value: phone,     setter: setPhone,     placeholder: '+1 (809) 000-0000',  type: 'tel',  autoComplete: 'tel' },
+          { label: 'WhatsApp',        value: whatsapp,  setter: setWhatsapp,  placeholder: '+1 (829) 000-0000',  type: 'tel',  autoComplete: 'tel' },
         ].map(field => (
           <div key={field.label}>
             <label className="block text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-muted)' }}>
@@ -178,6 +178,7 @@ export default function PerfilPage() {
               value={field.value}
               onChange={e => field.setter(e.target.value)}
               placeholder={field.placeholder}
+              autoComplete={field.autoComplete}
               className="input-base w-full rounded-xl px-4 py-3.5 text-sm"
             />
           </div>

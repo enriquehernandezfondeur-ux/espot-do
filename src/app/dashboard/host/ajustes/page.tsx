@@ -244,15 +244,15 @@ function AjustesInner() {
         </div>
 
         {[
-          { label: 'Teléfono',  value: phone,    setter: setPhone,    placeholder: '+1 (809) 000-0000' },
-          { label: 'WhatsApp',  value: whatsapp, setter: setWhatsapp, placeholder: '+1 (829) 000-0000' },
+          { label: 'Teléfono',  value: phone,    setter: setPhone,    placeholder: '+1 (809) 000-0000', autoComplete: 'tel' },
+          { label: 'WhatsApp',  value: whatsapp, setter: setWhatsapp, placeholder: '+1 (829) 000-0000', autoComplete: 'tel' },
         ].map(field => (
           <div key={field.label}>
             <label className="block text-xs font-semibold uppercase tracking-wide mb-2"
               style={{ color: 'var(--text-muted)' }}>{field.label}</label>
             <input value={field.value} onChange={e => field.setter(e.target.value)}
-              placeholder={field.placeholder}
-              className="input-base w-full rounded-xl px-4 py-3.5 text-sm" />
+              placeholder={field.placeholder} autoComplete={field.autoComplete}
+              type="tel" className="input-base w-full rounded-xl px-4 py-3.5 text-sm" />
           </div>
         ))}
         <div>

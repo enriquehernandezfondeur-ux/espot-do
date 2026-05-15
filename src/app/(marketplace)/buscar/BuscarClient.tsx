@@ -1102,7 +1102,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
             </div>
 
             {/* Contenido scrolleable */}
-            <div ref={drawerContentRef} className="flex-1 overflow-y-auto px-5 py-5 space-y-7">
+            <div ref={drawerContentRef} className="flex-1 overflow-y-auto px-5 py-5 space-y-7" style={{ WebkitOverflowScrolling: 'touch' }}>
 
               {/* ── SECTOR / CIUDAD ── */}
               <div data-section="sector" />

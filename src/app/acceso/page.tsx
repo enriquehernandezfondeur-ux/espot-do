@@ -70,6 +70,7 @@ function AccessForm() {
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="Contraseña de acceso"
+              autoComplete="current-password"
               autoFocus
               required
               style={{
