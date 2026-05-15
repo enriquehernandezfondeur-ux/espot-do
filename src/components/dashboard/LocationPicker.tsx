@@ -161,19 +161,32 @@ export default function LocationPicker({ address, sector, lat, lng, onAddress, o
   const doSearch = useCallback(async (query: string) => {
     setLoading(true)
     setNoResults(false)
-    try {
-      // countrycodes=do → solo República Dominicana
-      // viewbox y bounded=1 → priorizar resultados dentro de RD
-      const q   = encodeURIComponent(query.trim())
-      const url = `https://nominatim.openstreetmap.org/search?` +
-                  `format=json&q=${q}&countrycodes=do&limit=6&addressdetails=1` +
-                  `&viewbox=-72.0,19.9,-68.3,17.5&bounded=0` +
-                  `&accept-language=es`
 
-      const res  = await fetch(url, {
-        headers: { 'User-Agent': 'espot.do/1.0 (contacto@espot.do)' }
-      })
-      const data: NominatimResult[] = await res.json()
+    const nominatimFetch = async (q: string) => {
+      const url = `https://nominatim.openstreetmap.org/search?` +
+                  `format=json&q=${encodeURIComponent(q.trim())}&countrycodes=do&limit=6&addressdetails=1` +
+                  `&viewbox=-72.0,19.9,-68.3,17.5&bounded=0&accept-language=es`
+      const res = await fetch(url, { headers: { 'User-Agent': 'espot.do/1.0 (contacto@espot.do)' } })
+      return res.json() as Promise<NominatimResult[]>
+    }
+
+    try {
+      let data = await nominatimFetch(query)
+
+      // Nominatim no tiene números de casa en RD — si falla, reintentar
+      // quitando el número al final (ej: "Av. Bolívar 1012" → "Av. Bolívar")
+      if (data.length === 0) {
+        const sinNumero = query.trim().replace(/\s+#?\d+[\w-]*$/, '').trim()
+        if (sinNumero.length >= 3 && sinNumero !== query.trim()) {
+          data = await nominatimFetch(sinNumero)
+        }
+      }
+
+      // Si sigue sin resultados, intentar agregando contexto de ciudad
+      if (data.length === 0) {
+        const conCiudad = `${query.trim()}, Santo Domingo, República Dominicana`
+        data = await nominatimFetch(conCiudad)
+      }
 
       if (data.length === 0) {
         setResults([])
