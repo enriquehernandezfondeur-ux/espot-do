@@ -233,16 +233,10 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
       markersRef.current.set(space.id, marker)
     })
 
-    // Solo ajustar la vista en la primera carga — después el usuario controla el mapa
+    // El mapa siempre inicia centrado en Distrito Nacional (zoom 13).
+    // Solo se mueve cuando el usuario aplica un filtro de ciudad (efecto cityFilter).
     if (firstLoadRef.current) {
       firstLoadRef.current = false
-      const validCoords = Array.from(coordsRef.current.values())
-      if (validCoords.length > 1) {
-        map.fitBounds(L.latLngBounds(validCoords), { padding: [50, 50], maxZoom: 15 })
-      } else if (validCoords.length === 1) {
-        map.flyTo(validCoords[0], 15, { duration: 0.6 })
-      }
-      // Si no hay pins, el mapa ya está centrado en DN por defecto
     }
   }
 
