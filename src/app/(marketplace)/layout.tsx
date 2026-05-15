@@ -658,11 +658,8 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
               <span className="text-[10px] font-bold uppercase tracking-widest mr-1" style={{color:'#9CA3AF'}}>Pago seguro</span>
 
               {/* 1. VISA */}
-              <div style={{background:'#fff',border:'1px solid #E2E8F0',borderRadius:6,padding:'5px 10px',display:'flex',alignItems:'center',height:32}}>
-                <svg viewBox="0 0 200 64" width="44" height="14" xmlns="http://www.w3.org/2000/svg">
-                  <text x="0" y="50" fontFamily="Arial,Helvetica,sans-serif" fontSize="64" fontWeight="bold" fill="#1A1F71" letterSpacing="-2">VISA</text>
-                </svg>
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/visa-logo.jpg" alt="Visa" style={{height:32,width:'auto',borderRadius:6,display:'block',objectFit:'contain'}} />
 
               {/* 2. AZUL */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -679,14 +676,8 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
               </div>
 
               {/* 4. Visa Secure */}
-              <div style={{background:'#fff',border:'1px solid #E2E8F0',borderRadius:6,overflow:'hidden',height:32,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'space-between'}}>
-                <div style={{background:'#1A1F71',width:'100%',padding:'3px 10px',textAlign:'center'}}>
-                  <span style={{color:'#fff',fontSize:11,fontWeight:900,fontFamily:'Arial,Helvetica,sans-serif',letterSpacing:'1px'}}>VISA</span>
-                </div>
-                <div style={{background:'#fff',padding:'2px 8px',textAlign:'center'}}>
-                  <span style={{color:'#1A1F71',fontSize:8,fontWeight:800,fontFamily:'Arial,Helvetica,sans-serif',letterSpacing:'0.5px'}}>SECURE</span>
-                </div>
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/verified-by-visa.png" alt="Verified by Visa" style={{height:32,width:'auto',borderRadius:6,display:'block',objectFit:'contain'}} />
 
               {/* 5. Mastercard ID Check */}
               <div style={{background:'#fff',border:'1px solid #E2E8F0',borderRadius:6,padding:'4px 8px',display:'flex',alignItems:'center',gap:5,height:32}}>
