@@ -923,7 +923,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
         >
           <div className="overflow-y-auto pr-2" style={{ flex: '0 0 60%' }}>
             {filtered.length === 0
-              ? <EmptyState onClear={clearAll} />
+              ? <EmptyState onClear={clearAll} recentSpaces={recentIds.map(id => spaces.find(s => s.id === id)).filter(Boolean)} />
               : (
                 <div className="grid grid-cols-2 xl:grid-cols-3 gap-4 pb-6">
                   {filtered.map(space => (
@@ -949,7 +949,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
         {mobileView === 'list' && (
           <div className="md:hidden w-full" style={{ overflowX: 'hidden' }}>
             {filtered.length === 0
-              ? <EmptyState onClear={clearAll} />
+              ? <EmptyState onClear={clearAll} recentSpaces={recentIds.map(id => spaces.find(s => s.id === id)).filter(Boolean)} />
               : (
                 <div className="grid grid-cols-1 gap-4 w-full"
                   style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))' }}>
@@ -1429,18 +1429,38 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
 }
 
 // ── Empty state ───────────────────────────────────────────
-function EmptyState({ onClear }: { onClear: () => void }) {
+function EmptyState({ onClear, recentSpaces }: { onClear: () => void; recentSpaces?: any[] }) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 md:py-20 rounded-3xl text-center mx-0"
-      style={{ background: '#fff', border: '2px dashed var(--border-medium)' }}>
-      <Search size={32} className="mb-3" style={{ color: 'var(--text-muted)' }} />
-      <h3 className="font-bold text-lg mb-2" style={{ color: 'var(--text-primary)' }}>Sin resultados</h3>
-      <p className="text-sm mb-5 px-4" style={{ color: 'var(--text-secondary)' }}>
-        Intenta con otros filtros o términos de búsqueda
+    <div>
+      <div className="flex flex-col items-center justify-center py-14 rounded-3xl text-center"
+        style={{ background: '#fff', border: '2px dashed var(--border-medium)' }}>
+        <Search size={32} className="mb-3" style={{ color: 'var(--text-muted)' }} />
+        <h3 className="font-bold text-lg mb-2" style={{ color: 'var(--text-primary)' }}>Sin resultados</h3>
+        <p className="text-sm mb-5 px-4" style={{ color: 'var(--text-secondary)' }}>
+          Intenta con otros filtros o términos de búsqueda
+        </p>
+        <button onClick={onClear} className="btn-brand text-sm font-semibold px-5 py-3 rounded-xl">
+          Limpiar búsqueda
+        </button>
+      </div>
+      {recentSpaces && recentSpaces.length > 0 && (
+        <RecentlyViewed spaces={recentSpaces} />
+      )}
+    </div>
+  )
+}
+
+function RecentlyViewed({ spaces }: { spaces: any[] }) {
+  return (
+    <div className="mt-8">
+      <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
+        Vistos recientemente
       </p>
-      <button onClick={onClear} className="btn-brand text-sm font-semibold px-5 py-3 rounded-xl">
-        Limpiar búsqueda
-      </button>
+      <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
+        {spaces.map(space => (
+          <SpaceCard key={space.id} space={space} isHovered={false} onHover={() => {}} />
+        ))}
+      </div>
     </div>
   )
 }

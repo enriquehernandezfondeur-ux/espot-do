@@ -5,7 +5,7 @@ import Link from 'next/link'
 import {
   ArrowLeft, CalendarDays, Calendar, Clock, Users, MapPin, MessageCircle,
   CreditCard, CheckCircle, Sparkles, ExternalLink,
-  Phone, Mail, Loader2, Check, Building2, FileText, Star,
+  Phone, Mail, Loader2, Check, Building2, FileText, Star, Copy, Share2,
 } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getClientBookingDetail } from '@/lib/actions/client'
@@ -24,6 +24,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
   const [submitting, setSubmitting] = useState(false)
   const [reviewDone, setReviewDone] = useState(false)
   const [reviewError, setReviewError] = useState('')
+  const [copied,      setCopied]      = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -425,20 +426,100 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
         </div>
       </div>
 
-      {/* Añadir al calendario */}
-      {booking.event_date && booking.start_time && (() => {
-        const dt = booking.event_date.replace(/-/g, '')
-        const st = (booking.start_time ?? '').slice(0,5).replace(':', '')
-        const et = (booking.end_time ?? '').slice(0,5).replace(':', '')
-        const title = encodeURIComponent(`${booking.event_type ?? 'Evento'} — ${space?.name ?? ''}`)
-        const loc   = encodeURIComponent(space?.address ? `${space.address}, ${space?.city}` : space?.city ?? '')
-        const gcal  = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dt}T${st}00/${dt}T${et}00&location=${loc}`
+      {/* Acciones rápidas — calendarios + compartir */}
+      {booking.event_date && (() => {
+        const dt    = booking.event_date.replace(/-/g, '')
+        const st    = (booking.start_time ?? '00:00').slice(0,5).replace(':', '')
+        const et    = (booking.end_time   ?? '23:59').slice(0,5).replace(':', '')
+        const title = `${booking.event_type ?? 'Evento'} — ${space?.name ?? ''}`
+        const loc   = space?.address ? `${space.address}, ${space?.sector ?? ''}, ${space?.city ?? ''}` : (space?.city ?? '')
+        const gcal  = `https://calendar.google.com/calendar/render?action=TEMPLATE` +
+                      `&text=${encodeURIComponent(title)}&dates=${dt}T${st}00/${dt}T${et}00` +
+                      `&location=${encodeURIComponent(loc)}&details=${encodeURIComponent(`Reserva Espot — ${loc}`)}`
+
+        function downloadIcal() {
+          const ics = [
+            'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//espot.do//ES',
+            'BEGIN:VEVENT',
+            `SUMMARY:${title}`,
+            `DTSTART:${dt}T${st}00`,
+            `DTEND:${dt}T${et}00`,
+            `LOCATION:${loc}`,
+            `DESCRIPTION:Reserva confirmada en espot.do`,
+            `UID:${booking.id}@espot.do`,
+            'END:VEVENT', 'END:VCALENDAR',
+          ].join('\r\n')
+          const blob = new Blob([ics], { type: 'text/calendar' })
+          const a    = document.createElement('a')
+          a.href     = URL.createObjectURL(blob)
+          a.download = `evento-${booking.event_date}.ics`
+          a.click()
+          URL.revokeObjectURL(a.href)
+        }
+
+        function copyDetails() {
+          const text = [
+            `📅 Mi evento en Espot`,
+            `Espacio: ${space?.name ?? ''}`,
+            `Fecha: ${formatDate(booking.event_date)}`,
+            booking.start_time ? `Horario: ${formatTime(booking.start_time)} – ${formatTime(booking.end_time ?? '')}` : '',
+            `Dirección: ${loc}`,
+            `Personas: ${booking.guest_count}`,
+            booking.event_type ? `Evento: ${booking.event_type}` : '',
+          ].filter(Boolean).join('\n')
+          navigator.clipboard.writeText(text).then(() => {
+            setCopied(true)
+            setTimeout(() => setCopied(false), 2500)
+          })
+        }
+
         return (
-          <a href={gcal} target="_blank" rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl text-sm font-semibold mb-3 transition-all"
-            style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
-            <Calendar size={15} /> Añadir a Google Calendar
-          </a>
+          <div className="rounded-2xl overflow-hidden mb-3"
+            style={{ border: '1px solid var(--border-subtle)' }}>
+            <div className="px-4 py-3 flex items-center gap-2"
+              style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
+              <Calendar size={13} style={{ color: 'var(--brand)' }} />
+              <span className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>
+                Guardar y compartir
+              </span>
+            </div>
+            <div className="grid grid-cols-3"
+              style={{ borderTop: '1px solid var(--border-subtle)' }}>
+              <a href={gcal} target="_blank" rel="noopener noreferrer"
+                className="flex flex-col items-center gap-1.5 py-3.5 px-2 transition-colors hover:bg-[var(--bg-elevated)]"
+                style={{ color: 'var(--text-secondary)', textDecoration: 'none', borderRight: '1px solid var(--border-subtle)' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <rect x="3" y="4" width="18" height="17" rx="2" stroke="#4285F4" strokeWidth="1.8"/>
+                  <path d="M3 9h18" stroke="#4285F4" strokeWidth="1.8"/>
+                  <path d="M8 2v4M16 2v4" stroke="#4285F4" strokeWidth="1.8" strokeLinecap="round"/>
+                  <circle cx="12" cy="15" r="2.5" fill="#EA4335"/>
+                </svg>
+                <span className="text-[11px] font-semibold text-center leading-tight" style={{ color: 'var(--text-secondary)' }}>Google Calendar</span>
+              </a>
+              <button onClick={downloadIcal}
+                className="flex flex-col items-center gap-1.5 py-3.5 px-2 transition-colors hover:bg-[var(--bg-elevated)]"
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', borderRight: '1px solid var(--border-subtle)' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <rect x="3" y="4" width="18" height="17" rx="2" stroke="#374151" strokeWidth="1.8"/>
+                  <path d="M3 9h18" stroke="#374151" strokeWidth="1.8"/>
+                  <path d="M8 2v4M16 2v4" stroke="#374151" strokeWidth="1.8" strokeLinecap="round"/>
+                  <path d="M12 13v4M9.5 15.5 12 18l2.5-2.5" stroke="#374151" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span className="text-[11px] font-semibold text-center leading-tight" style={{ color: 'var(--text-secondary)' }}>Apple / iCal</span>
+              </button>
+              <button onClick={copyDetails}
+                className="flex flex-col items-center gap-1.5 py-3.5 px-2 transition-colors hover:bg-[var(--bg-elevated)]"
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
+                {copied
+                  ? <CheckCircle size={18} style={{ color: '#16A34A' }} />
+                  : <Copy size={18} style={{ color: 'var(--text-secondary)' }} />}
+                <span className="text-[11px] font-semibold text-center leading-tight"
+                  style={{ color: copied ? '#16A34A' : 'var(--text-secondary)' }}>
+                  {copied ? '¡Copiado!' : 'Copiar datos'}
+                </span>
+              </button>
+            </div>
+          </div>
         )
       })()}
 

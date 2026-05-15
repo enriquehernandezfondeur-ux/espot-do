@@ -26,8 +26,15 @@ export default function ClientDashboard() {
   }, [])
 
   if (loading) return (
-    <div className="flex items-center justify-center h-dvh">
-      <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand)' }} />
+    <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-4 animate-pulse">
+      <div className="h-7 w-48 rounded-xl" style={{ background: 'var(--bg-elevated)' }} />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="h-24 rounded-2xl" style={{ background: 'var(--bg-elevated)' }} />
+        ))}
+      </div>
+      <div className="h-40 rounded-2xl" style={{ background: 'var(--bg-elevated)' }} />
+      <div className="h-32 rounded-2xl" style={{ background: 'var(--bg-elevated)' }} />
     </div>
   )
 

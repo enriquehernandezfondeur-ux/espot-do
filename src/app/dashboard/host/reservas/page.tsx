@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CalendarDays, Clock, Users, CheckCircle, XCircle, Eye, Search, Loader2 } from 'lucide-react'
+import { CalendarDays, Clock, Users, CheckCircle, XCircle, Eye, Search, Loader2, Download } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getHostBookings, acceptBooking, rejectBooking, completeBooking } from '@/lib/actions/host'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
@@ -95,8 +95,15 @@ export default function HostReservasPage() {
            (b.event_type ?? '').toLowerCase().includes(search.toLowerCase())
   })
 
-  const pending  = bookings.filter(b => b.status === 'pending').length
+  const pending  = bookings.filter(b => b.status === 'pending' || b.status === 'quote_requested').length
   const accepted = bookings.filter(b => b.status === 'accepted').length
+
+  // Notificación en el título de la pestaña
+  useEffect(() => {
+    const base = 'Reservas — Espot'
+    document.title = pending > 0 ? `(${pending}) ${base}` : base
+    return () => { document.title = 'Panel — Espot' }
+  }, [pending])
 
   function showError(msg: string) {
     setActionError(msg)
@@ -156,13 +163,49 @@ export default function HostReservasPage() {
           ✕ {actionError}
         </div>
       )}
-      <div className="mb-5 md:mb-6">
-        <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Reservas</h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
-          {bookings.length} en total
-          {pending > 0 && <span className="ml-2 font-semibold" style={{ color: '#D97706' }}>· {pending} por aceptar</span>}
-          {accepted > 0 && <span className="ml-2 font-semibold" style={{ color: '#2563EB' }}>· {accepted} esperando pago</span>}
-        </p>
+      <div className="mb-5 md:mb-6 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Reservas</h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
+            {bookings.length} en total
+            {pending > 0 && <span className="ml-2 font-semibold" style={{ color: '#D97706' }}>· {pending} por aceptar</span>}
+            {accepted > 0 && <span className="ml-2 font-semibold" style={{ color: '#2563EB' }}>· {accepted} esperando pago</span>}
+          </p>
+        </div>
+        {bookings.length > 0 && (
+          <button
+            onClick={() => {
+              const headers = ['ID', 'Cliente', 'Espacio', 'Fecha evento', 'Hora inicio', 'Hora fin', 'Personas', 'Tipo evento', 'Total', 'Estado', 'Creada']
+              const rows = bookings.map(b => {
+                const g = (b as any).profiles
+                const s = (b as any).spaces
+                return [
+                  b.id.slice(0, 8).toUpperCase(),
+                  g?.full_name ?? '—',
+                  s?.name ?? '—',
+                  b.event_date,
+                  b.start_time?.slice(0,5) ?? '—',
+                  b.end_time?.slice(0,5) ?? '—',
+                  b.guest_count,
+                  b.event_type ?? '—',
+                  b.total_amount,
+                  b.status,
+                  b.created_at?.slice(0, 10) ?? '—',
+                ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')
+              })
+              const csv  = [headers.join(','), ...rows].join('\n')
+              const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })
+              const a    = document.createElement('a')
+              a.href     = URL.createObjectURL(blob)
+              a.download = `espot-reservas-${new Date().toISOString().slice(0,10)}.csv`
+              a.click()
+              URL.revokeObjectURL(a.href)
+            }}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold shrink-0 transition-all"
+            style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+            <Download size={13} /> Exportar CSV
+          </button>
+        )}
       </div>
 
       {/* Métricas rápidas */}
