@@ -667,7 +667,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
 
               {/* 3. Mastercard */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/mastercard-logo.png" alt="Mastercard" style={{height:32,width:'auto',borderRadius:6,display:'block',objectFit:'contain'}} />
+              <img src="/mastercard-logo.svg" alt="Mastercard" style={{height:40,width:'auto',display:'block',objectFit:'contain'}} />
 
               {/* 4. Mastercard ID Check */}
               <div style={{background:'#fff',border:'1px solid #E2E8F0',borderRadius:6,padding:'4px 8px',display:'flex',alignItems:'center',gap:5,height:32}}>
