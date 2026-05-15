@@ -666,14 +666,8 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
               <img src="/azul-logo.jpg" alt="Azul Payments" style={{height:32,width:'auto',borderRadius:6,display:'block',objectFit:'contain'}} />
 
               {/* 3. Mastercard */}
-              <div style={{background:'#fff',border:'1px solid #E2E8F0',borderRadius:6,padding:'4px 8px',display:'flex',alignItems:'center',gap:6,height:32}}>
-                <svg viewBox="0 0 38 24" width="38" height="24" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="14" cy="12" r="10" fill="#EB001B"/>
-                  <circle cx="24" cy="12" r="10" fill="#F79E1B"/>
-                  <path d="M19 4.5a10 10 0 0 1 0 15A10 10 0 0 1 19 4.5z" fill="#FF5F00"/>
-                </svg>
-                <span style={{fontSize:10,fontWeight:600,color:'#1A1A1A',fontFamily:'Arial,Helvetica,sans-serif'}}>mastercard</span>
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/mastercard-logo.png" alt="Mastercard" style={{height:32,width:'auto',borderRadius:6,display:'block',objectFit:'contain'}} />
 
               {/* 4. Mastercard ID Check */}
               <div style={{background:'#fff',border:'1px solid #E2E8F0',borderRadius:6,padding:'4px 8px',display:'flex',alignItems:'center',gap:5,height:32}}>
