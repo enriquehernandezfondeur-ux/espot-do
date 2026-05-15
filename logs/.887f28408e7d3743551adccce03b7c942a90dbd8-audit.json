@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "logs/.887f28408e7d3743551adccce03b7c942a90dbd8-audit.json",
+    "files": [
+        {
+            "date": 1778810600601,
+            "name": "logs/espot-2026-05-14.log",
+            "hash": "99962641fd7ab479c5cd40258adbd47902b800c104d9e97d998b1549a7f3f5df"
+        }
+    ],
+    "hashType": "sha256"
+}

@@ -5,6 +5,7 @@ import { acceptBooking, rejectBooking, confirmPayment, cancelBooking } from './b
 import { sendEmail } from '@/lib/email/send'
 import { emailBase, infoBox } from '@/lib/email/templates'
 import { formatCurrency, formatDate } from '@/lib/utils'
+import { userLogger, bookingLogger, logError } from '@/lib/logger'
 
 export { acceptBooking, rejectBooking, confirmPayment as confirmBooking, cancelBooking }
 
@@ -12,21 +13,39 @@ export { acceptBooking, rejectBooking, confirmPayment as confirmBooking, cancelB
 export async function getOrCreateIcalToken(): Promise<string | null> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('ical_token')
-    .eq('id', user.id)
-    .single()
+  if (!user) {
+    userLogger.warn('iCal token request without authenticated user')
+    return null
+  }
 
-  if (profile?.ical_token) return profile.ical_token
+  try {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('ical_token')
+      .eq('id', user.id)
+      .single()
 
-  // Generar token único
-  const token = crypto.randomUUID().replace(/-/g, '')
-  const { error: saveErr } = await supabase.from('profiles').update({ ical_token: token }).eq('id', user.id)
-  if (saveErr) return null
-  return token
+    if (profile?.ical_token) {
+      userLogger.info('Existing iCal token retrieved', { userId: user.id })
+      return profile.ical_token
+    }
+
+    // Generar token único
+    const token = crypto.randomUUID().replace(/-/g, '')
+    const { error: saveErr } = await supabase.from('profiles').update({ ical_token: token }).eq('id', user.id)
+
+    if (saveErr) {
+      logError(saveErr, { userId: user.id, action: 'create_ical_token' })
+      return null
+    }
+
+    userLogger.info('New iCal token created', { userId: user.id })
+    return token
+  } catch (error) {
+    logError(error as Error, { userId: user.id, action: 'get_or_create_ical_token' })
+    return null
+  }
 }
 
 // ── iCal — regenerar token (invalida el anterior) ────────
