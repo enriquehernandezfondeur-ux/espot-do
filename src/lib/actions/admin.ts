@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { sendEmail } from '@/lib/email/send'
 import { emailBase, infoBox } from '@/lib/email/templates'
-import { formatCurrency, formatDate } from '@/lib/utils'
+import { formatCurrency, formatDate, escapeHtml } from '@/lib/utils'
 
 const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
 
@@ -320,8 +320,39 @@ export async function updateUserRole(userId: string, role: string) {
   if (!VALID_ROLES.includes(role as any)) return { error: 'Rol inválido' }
   const supabase = await requireAdmin()
   if (!supabase) return { error: 'No autorizado' }
+
+  // Obtener datos del usuario antes de actualizar para notificar si corresponde
+  const { data: profile } = await supabase
+    .from('profiles').select('full_name, email, role').eq('id', userId).single()
+
   const { error } = await supabase.from('profiles').update({ role }).eq('id', userId)
   if (error) return { error: error.message }
+
+  // Notificar al usuario cuando se le asigna el rol 'host' (si venía de otro rol)
+  if (role === 'host' && profile?.email && profile?.role !== 'host') {
+    const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
+    const name = profile.full_name ?? profile.email.split('@')[0]
+    await sendEmail({
+      to:      profile.email,
+      subject: '¡Tu cuenta fue aprobada como propietario en Espot!',
+      html: emailBase({
+        title:       '¡Ya puedes publicar tu espacio!',
+        subtitle:    'Tu cuenta fue activada como propietario (host) en espot.do.',
+        accentColor: '#35C493',
+        body: `
+          <p style="color:#374151;margin:0 0 16px;">Hola <strong>${escapeHtml(name)}</strong>, el equipo de Espot revisó tu solicitud y activó tu cuenta como propietario.</p>
+          <p style="color:#374151;margin:0 0 16px;">Ahora puedes publicar tu espacio, recibir solicitudes de reserva y gestionar tus eventos directamente desde el panel de propietario.</p>
+          ${infoBox([
+            { label: 'Tu nuevo rol',      value: 'Propietario (Host)' },
+            { label: 'Qué puedes hacer',  value: 'Publicar espacios, gestionar reservas y recibir pagos' },
+            { label: 'Comisi&oacute;n',   value: '10% por reserva confirmada — el 90% restante es tuyo' },
+          ])}
+          <p style="color:#6B7280;font-size:13px;margin:0;">Si tienes preguntas, cont&aacute;ctanos en contacto@espot.do.</p>`,
+        cta: { text: 'Ir a mi panel de propietario', url: `${SITE}/dashboard/host` },
+      }),
+    })
+  }
+
   revalidatePath('/admin/usuarios')
   revalidatePath('/dashboard', 'layout')
   return { success: true }
@@ -412,7 +443,8 @@ export async function getAdminPayouts(filter?: 'pending' | 'paid' | 'all') {
         id, name, city,
         profiles!host_id(id, full_name, email, phone)
       ),
-      profiles!guest_id(full_name)
+      profiles!guest_id(full_name),
+      liquidaciones!booking_id(admin_notes)
     `)
     .in('status', ['confirmed', 'completed'])
     .order('event_date', { ascending: false })
@@ -494,6 +526,17 @@ export async function markPayoutPaid(bookingId: string) {
   revalidatePath('/admin/payouts')
   revalidatePath('/admin/liquidaciones')
   revalidatePath('/admin')
+  return { success: true }
+}
+
+export async function saveLiquidacionNote(bookingId: string, note: string) {
+  const supabase = await requireAdmin()
+  if (!supabase) return { error: 'No autorizado' }
+  const { error } = await supabase
+    .from('liquidaciones')
+    .update({ admin_notes: note || null })
+    .eq('booking_id', bookingId)
+  if (error) return { error: error.message }
   return { success: true }
 }
 

@@ -2,6 +2,11 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { sendEmail } from '@/lib/email/send'
+import { emailBase, infoBox } from '@/lib/email/templates'
+import { escapeHtml, formatDate } from '@/lib/utils'
+
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 
 export interface Review {
   id:               string
@@ -197,6 +202,48 @@ export async function submitReview(data: {
   if (error) {
     if (error.code === '23505') return { error: 'Ya dejaste una reseña para esta reserva' }
     return { error: error.message }
+  }
+
+  // Notificar al host de la nueva reseña
+  const { data: spaceData } = await supabase
+    .from('spaces')
+    .select('name, slug, profiles!host_id(full_name, email)')
+    .eq('id', data.spaceId)
+    .single()
+
+  if (spaceData) {
+    const host      = (spaceData as any).profiles as any
+    const hostEmail = host?.email as string | undefined
+    const hostName  = host?.full_name ?? 'Propietario'
+
+    if (hostEmail) {
+      const { data: guestProfile } = await supabase
+        .from('profiles').select('full_name').eq('id', user.id).single()
+      const guestName   = guestProfile?.full_name ?? 'Un cliente'
+      const stars       = '★'.repeat(data.rating) + '☆'.repeat(5 - data.rating)
+      const commentSafe = data.comment.trim() ? escapeHtml(data.comment.trim()) : null
+
+      await sendEmail({
+        to:      hostEmail,
+        subject: `Nueva reseña en ${spaceData.name} — ${data.rating}/5 estrellas`,
+        html: emailBase({
+          title:       'Recibiste una nueva reseña',
+          subtitle:    `${guestName} dejó una reseña en ${spaceData.name}.`,
+          accentColor: '#F59E0B',
+          body: `
+            <p style="color:#374151;margin:0 0 16px;">Hola <strong>${escapeHtml(hostName)}</strong>, un cliente compartió su experiencia en tu espacio.</p>
+            ${infoBox([
+              { label: 'Espacio',     value: escapeHtml(spaceData.name) },
+              { label: 'Cliente',     value: escapeHtml(guestName) },
+              { label: 'Puntuación', value: `${stars} (${data.rating}/5)` },
+              { label: 'Fecha',       value: formatDate(today) },
+              ...(commentSafe ? [{ label: 'Comentario', value: commentSafe }] : []),
+            ])}
+            <p style="color:#6B7280;font-size:13px;margin:0;">Puedes responder a esta reseña desde tu panel de propietario.</p>`,
+          cta: { text: 'Ver reseña y responder', url: `${SITE}/dashboard/host/resenas` },
+        }),
+      })
+    }
   }
 
   revalidatePath('/espacios', 'layout')

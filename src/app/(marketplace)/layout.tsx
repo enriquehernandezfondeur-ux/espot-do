@@ -5,8 +5,10 @@ import { Search, Menu, X, User, ChevronDown, LogOut, Settings, LayoutDashboard, 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useMessageNotifications } from '@/hooks/useMessageNotifications'
 
 export default function MarketplaceLayout({ children }: { children: React.ReactNode }) {
+  useMessageNotifications()
   const router   = useRouter()
   const pathname = usePathname()
   const [menuOpen,      setMenuOpen]      = useState(false)

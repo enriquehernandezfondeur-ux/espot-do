@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import Sidebar from '@/components/dashboard/Sidebar'
+import MessageNotificationProvider from '@/components/providers/MessageNotificationProvider'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -34,6 +35,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="host-theme flex min-h-dvh" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
+      <MessageNotificationProvider />
       <Sidebar userName={userName} avatarUrl={avatarUrl} isAdmin={isAdmin} />
       {/* pt-14 compensa el top bar fijo en móvil; pb-20 para la barra inferior */}
       <main className="flex-1 overflow-auto pt-14 pb-20 md:pt-0 md:pb-0" style={{ background: 'var(--bg-base)' }}>

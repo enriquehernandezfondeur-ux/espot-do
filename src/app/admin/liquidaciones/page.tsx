@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useTransition } from 'react'
-import { getAdminPayouts, markPayoutPaid, getHostBankAccount } from '@/lib/actions/admin'
+import { getAdminPayouts, markPayoutPaid, getHostBankAccount, saveLiquidacionNote } from '@/lib/actions/admin'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import {
   Banknote, CheckCircle, Clock, Building2, User,
@@ -82,24 +82,29 @@ export default function AdminLiquidacionesPage() {
     setTimeout(() => setToast(null), 3000)
   }
 
-  // Notas persistidas en localStorage por booking ID
+  // Notas cargadas desde DB (admin_notes en liquidaciones)
   useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('espot_liq_notes') ?? '{}')
-      setNotes(saved)
-    } catch {}
+    // Migración: limpiar localStorage si existía
+    try { localStorage.removeItem('espot_liq_notes') } catch {}
   }, [])
 
-  function saveNote(bookingId: string, text: string) {
+  async function saveNote(bookingId: string, text: string) {
     const updated = { ...notes, [bookingId]: text }
     setNotes(updated)
-    try { localStorage.setItem('espot_liq_notes', JSON.stringify(updated)) } catch {}
+    await saveLiquidacionNote(bookingId, text)
   }
 
   async function load() {
     setLoading(true)
     const data = await getAdminPayouts(filter)
     setPayouts(data)
+    // Cargar notas guardadas en DB
+    const dbNotes: Record<string, string> = {}
+    data.forEach((b: any) => {
+      const note = (b.liquidaciones as any)?.[0]?.admin_notes ?? (b.liquidaciones as any)?.admin_notes
+      if (note) dbNotes[b.id] = note
+    })
+    setNotes(dbNotes)
     setLoading(false)
   }
 

@@ -1,13 +1,82 @@
-import { type Metadata } from 'next'
-import Link from 'next/link'
-import { ArrowLeft, Mail, Phone, MapPin, Clock, MessageCircle } from 'lucide-react'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Servicio al Cliente — Espot',
-  description: 'Contacta a Espot. Estamos aquí para ayudarte con tus reservas, pagos y cualquier consulta.',
+import Link from 'next/link'
+import { useState, useRef } from 'react'
+import { ArrowLeft, Mail, Phone, MapPin, Clock, MessageCircle, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { sendContactForm } from '@/lib/actions/contact'
+
+const SUBJECTS = [
+  'Consulta sobre una reserva',
+  'Problema con un pago',
+  'Quiero publicar mi espacio',
+  'Reporte de incidente',
+  'Otro',
+]
+
+const MAX_CHARS = 500
+
+// ── Estilos de inputs compartidos ────────────────────────────
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  fontSize: '16px', // previene zoom en iOS Safari
+  padding: '11px 14px',
+  borderRadius: '12px',
+  border: '1.5px solid var(--border-subtle)',
+  background: 'var(--bg-elevated)',
+  color: 'var(--text-primary)',
+  outline: 'none',
+  fontFamily: 'inherit',
+  transition: 'border-color 0.15s',
+  boxSizing: 'border-box',
+}
+
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: '13px',
+  fontWeight: 600,
+  color: 'var(--text-secondary)',
+  marginBottom: '6px',
 }
 
 export default function ContactoPage() {
+  const [name,    setName]    = useState('')
+  const [email,   setEmail]   = useState('')
+  const [phone,   setPhone]   = useState('')
+  const [subject, setSubject] = useState('')
+  const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error,   setError]   = useState<string | null>(null)
+  const formRef = useRef<HTMLFormElement>(null)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError(null)
+    setLoading(true)
+
+    try {
+      const result = await sendContactForm({
+        name:    name.trim(),
+        email:   email.trim(),
+        phone:   phone.trim() || undefined,
+        subject,
+        message: message.trim(),
+      })
+
+      if (result.success) {
+        setSuccess(true)
+        formRef.current?.reset()
+        setName(''); setEmail(''); setPhone(''); setSubject(''); setMessage('')
+      } else {
+        setError(result.error ?? 'Ocurrió un error. Inténtalo de nuevo.')
+      }
+    } catch {
+      setError('Error de red. Verifica tu conexión e inténtalo de nuevo.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div style={{ background: 'var(--bg-base)', minHeight: '100dvh' }}>
       <div className="max-w-3xl mx-auto px-4 md:px-6 py-8 md:py-12">
@@ -70,24 +139,17 @@ export default function ContactoPage() {
                   <div style={{ color: '#25D366' }}>+1 (829) 548-1998</div>
                 </div>
               </a>
-            </div>
-          </div>
 
-          {/* Información de la empresa */}
-          <div className="rounded-2xl p-6" style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
-            <h2 className="font-bold text-base mb-5" style={{ color: 'var(--text-primary)' }}>Información del comercio</h2>
-            <div className="space-y-4">
-              <div className="flex items-start gap-3 text-sm">
+              <div className="flex items-start gap-3 text-sm pt-1">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
                   style={{ background: 'var(--brand-dim)' }}>
                   <MapPin size={17} style={{ color: 'var(--brand)' }} />
                 </div>
                 <div>
-                  <div className="font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>Dirección permanente</div>
+                  <div className="font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>Dirección</div>
                   <div style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                    ESPOT, S.R.L.<br />
                     Calle Caonabo No. 42, Gazcue<br />
-                    Distrito Nacional, República Dominicana
+                    Distrito Nacional, RD
                   </div>
                 </div>
               </div>
@@ -98,14 +160,180 @@ export default function ContactoPage() {
                   <Clock size={17} style={{ color: 'var(--brand)' }} />
                 </div>
                 <div>
-                  <div className="font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>Horario de atención</div>
+                  <div className="font-semibold mb-0.5" style={{ color: 'var(--text-primary)' }}>Horario</div>
                   <div style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                    Lunes – Viernes: 9:00 AM – 6:00 PM<br />
-                    Sábados: 10:00 AM – 2:00 PM
+                    Lun – Vie: 9:00 AM – 6:00 PM<br />
+                    Sáb: 10:00 AM – 2:00 PM
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Formulario de contacto */}
+          <div className="rounded-2xl p-6" style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+            <h2 className="font-bold text-base mb-5" style={{ color: 'var(--text-primary)' }}>Envíanos un mensaje</h2>
+
+            {/* Estado de éxito */}
+            {success && (
+              <div className="flex items-start gap-3 rounded-xl p-4 mb-4"
+                style={{ background: 'rgba(53,196,147,0.08)', border: '1.5px solid rgba(53,196,147,0.3)' }}>
+                <CheckCircle size={18} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: '1px' }} />
+                <div>
+                  <p className="text-sm font-semibold" style={{ color: '#0A7A50' }}>
+                    ¡Mensaje enviado!
+                  </p>
+                  <p className="text-xs mt-0.5" style={{ color: '#0A7A50', opacity: 0.8 }}>
+                    Te respondemos en menos de 24 horas hábiles.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Estado de error */}
+            {error && (
+              <div className="flex items-start gap-3 rounded-xl p-4 mb-4"
+                style={{ background: 'rgba(220,38,38,0.06)', border: '1.5px solid rgba(220,38,38,0.2)' }}>
+                <AlertCircle size={18} style={{ color: '#DC2626', flexShrink: 0, marginTop: '1px' }} />
+                <p className="text-sm" style={{ color: '#B91C1C' }}>{error}</p>
+              </div>
+            )}
+
+            <form ref={formRef} onSubmit={handleSubmit} className="space-y-4" noValidate>
+              {/* Nombre */}
+              <div>
+                <label style={labelStyle}>
+                  Nombre completo <span style={{ color: '#DC2626' }}>*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Tu nombre"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  required
+                  style={inputStyle}
+                  onFocus={e => { e.currentTarget.style.borderColor = 'var(--brand)' }}
+                  onBlur={e  => { e.currentTarget.style.borderColor = 'var(--border-subtle)' }}
+                />
+              </div>
+
+              {/* Email */}
+              <div>
+                <label style={labelStyle}>
+                  Correo electrónico <span style={{ color: '#DC2626' }}>*</span>
+                </label>
+                <input
+                  type="email"
+                  placeholder="tu@email.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                  style={inputStyle}
+                  onFocus={e => { e.currentTarget.style.borderColor = 'var(--brand)' }}
+                  onBlur={e  => { e.currentTarget.style.borderColor = 'var(--border-subtle)' }}
+                />
+              </div>
+
+              {/* Teléfono (opcional) */}
+              <div>
+                <label style={labelStyle}>Teléfono <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(opcional)</span></label>
+                <input
+                  type="tel"
+                  placeholder="+1 (809) 000-0000"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  style={inputStyle}
+                  onFocus={e => { e.currentTarget.style.borderColor = 'var(--brand)' }}
+                  onBlur={e  => { e.currentTarget.style.borderColor = 'var(--border-subtle)' }}
+                />
+              </div>
+
+              {/* Motivo */}
+              <div>
+                <label style={labelStyle}>
+                  Motivo <span style={{ color: '#DC2626' }}>*</span>
+                </label>
+                <select
+                  value={subject}
+                  onChange={e => setSubject(e.target.value)}
+                  required
+                  style={{
+                    ...inputStyle,
+                    color: subject ? 'var(--text-primary)' : 'var(--text-muted)',
+                    cursor: 'pointer',
+                    appearance: 'none',
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 14px center',
+                    paddingRight: '40px',
+                  }}
+                  onFocus={e => { e.currentTarget.style.borderColor = 'var(--brand)' }}
+                  onBlur={e  => { e.currentTarget.style.borderColor = 'var(--border-subtle)' }}
+                >
+                  <option value="" disabled>Selecciona un motivo</option>
+                  {SUBJECTS.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Mensaje */}
+              <div>
+                <label style={{ ...labelStyle, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>Mensaje <span style={{ color: '#DC2626' }}>*</span></span>
+                  <span style={{
+                    fontWeight: 400,
+                    color: message.length > MAX_CHARS * 0.9 ? '#DC2626' : 'var(--text-muted)',
+                    fontSize: '12px',
+                  }}>
+                    {message.length}/{MAX_CHARS}
+                  </span>
+                </label>
+                <textarea
+                  placeholder="Escribe tu consulta con el mayor detalle posible…"
+                  value={message}
+                  onChange={e => setMessage(e.target.value.slice(0, MAX_CHARS))}
+                  required
+                  rows={4}
+                  style={{
+                    ...inputStyle,
+                    resize: 'vertical',
+                    minHeight: '100px',
+                  }}
+                  onFocus={e => { e.currentTarget.style.borderColor = 'var(--brand)' }}
+                  onBlur={e  => { e.currentTarget.style.borderColor = 'var(--border-subtle)' }}
+                />
+              </div>
+
+              {/* Botón submit */}
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  padding: '13px 20px',
+                  borderRadius: '50px',
+                  border: 'none',
+                  background: loading ? 'var(--brand-dim)' : 'var(--brand)',
+                  color: loading ? 'var(--brand)' : '#fff',
+                  fontSize: '15px',
+                  fontWeight: 700,
+                  fontFamily: 'inherit',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  transition: 'opacity 0.15s, background 0.15s',
+                  marginTop: '4px',
+                }}
+                onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = '0.88' }}
+                onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
+              >
+                {loading && <Loader2 size={16} className="animate-spin" />}
+                {loading ? 'Enviando…' : 'Enviar mensaje'}
+              </button>
+            </form>
           </div>
         </div>
 
@@ -123,16 +351,23 @@ export default function ContactoPage() {
               { title: 'Reportar un problema',           desc: 'Espacio que no cumple lo publicado o comportamiento inapropiado' },
               { title: 'Otro',                           desc: 'Cualquier otra consulta o sugerencia' },
             ].map(item => (
-              <a key={item.title} href={`mailto:contacto@espot.do?subject=${encodeURIComponent(item.title)}`}
-                className="flex flex-col gap-1 p-4 rounded-xl transition-all hover:opacity-80"
-                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+              <button
+                key={item.title}
+                type="button"
+                onClick={() => {
+                  const match = SUBJECTS.find(s => s.toLowerCase().includes(item.title.split(' ')[0].toLowerCase()))
+                  setSubject(match ?? 'Otro')
+                  document.querySelector<HTMLElement>('textarea')?.focus()
+                }}
+                className="flex flex-col gap-1 p-4 rounded-xl transition-all hover:opacity-80 text-left"
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', cursor: 'pointer' }}>
                 <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{item.title}</span>
                 <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{item.desc}</span>
-              </a>
+              </button>
             ))}
           </div>
           <p className="text-xs mt-4 text-center" style={{ color: 'var(--text-muted)' }}>
-            Al hacer clic en un tema, se abre tu cliente de correo con el asunto pre-llenado.
+            Haz clic en un tema para pre-llenar el formulario con ese motivo.
           </p>
         </div>
 
@@ -142,7 +377,7 @@ export default function ContactoPage() {
           <div className="flex flex-wrap gap-3">
             {[
               { href: '/reembolso', label: 'Política de reembolso' },
-              { href: '/terminos', label: 'Términos y condiciones' },
+              { href: '/terminos',  label: 'Términos y condiciones' },
               { href: '/privacidad', label: 'Política de privacidad' },
               { href: '/seguridad', label: 'Seguridad de pagos' },
             ].map(link => (

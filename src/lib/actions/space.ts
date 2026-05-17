@@ -4,6 +4,11 @@ import { createClient } from '@/lib/supabase/server'
 import { generateSlug, num, int } from '@/lib/utils'
 import { revalidatePath } from 'next/cache'
 import type { PricingType, PaymentTermType } from '@/types'
+import { sendEmail } from '@/lib/email/send'
+import { emailBase, infoBox } from '@/lib/email/templates'
+
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'contacto@espot.do'
+const SITE        = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 
 const DEFAULT_CANCELLATION_HOURS = 72
 const DEFAULT_CANCELLATION_REFUND_PCT = 50
@@ -321,7 +326,11 @@ export async function publishSpace(spaceId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
-  const { data: space } = await supabase.from('spaces').select('host_id').eq('id', spaceId).single()
+  const { data: space } = await supabase
+    .from('spaces')
+    .select('host_id, name, category, sector, profiles!host_id(full_name, email)')
+    .eq('id', spaceId)
+    .single()
   if (!space || space.host_id !== user.id) return { error: 'No autorizado' }
 
   // El espacio queda en revisión: is_active = true, is_published = false (sin cambiar)
@@ -331,7 +340,33 @@ export async function publishSpace(spaceId: string) {
     .update({ is_active: true })
     .eq('id', spaceId)
   if (!error) revalidatePath('/buscar')
-  return error ? { error: error.message } : { success: true, pending: true }
+  if (error) return { error: error.message }
+
+  // Notificar al admin para revisión manual
+  const host = (space as any).profiles as any
+  await sendEmail({
+    to:      ADMIN_EMAIL,
+    subject: `Nuevo espacio en revisión — ${space.name}`,
+    html: emailBase({
+      title:       'Nuevo espacio enviado a revisión',
+      subtitle:    `${host?.full_name ?? 'Un propietario'} publicó un espacio que requiere aprobación.`,
+      accentColor: '#D97706',
+      body: `
+        <p style="color:#374151;margin:0 0 16px;">Se ha enviado un nuevo espacio para revisión y publicación en el marketplace.</p>
+        ${infoBox([
+          { label: 'Espacio',       value: space.name ?? '—' },
+          { label: 'Categoría',     value: space.category ?? '—' },
+          { label: 'Sector',        value: (space as any).sector ?? '—' },
+          { label: 'Propietario',   value: host?.full_name ?? '—' },
+          { label: 'Email host',    value: host?.email ?? '—' },
+          { label: 'Estado',        value: 'En revisión — pendiente de aprobación' },
+        ])}
+        <p style="color:#6B7280;font-size:13px;margin:0;">Revisa el espacio en el panel de administración y aprueba o rechaza su publicación.</p>`,
+      cta: { text: 'Ver en panel admin', url: `${SITE}/admin/espacios` },
+    }),
+  })
+
+  return { success: true, pending: true }
 }
 
 export async function getMySpaces() {
