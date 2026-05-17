@@ -145,7 +145,7 @@ export function SpaceCard({
   }
 
   return (
-    <Link href={href} className="group block" target="_blank" rel="noopener noreferrer" onClick={trackRecent}>
+    <Link href={href} className="group block" onClick={trackRecent}>
       <div
         className="rounded-2xl overflow-hidden h-full flex flex-col"
         style={{
@@ -211,7 +211,7 @@ export function SpaceCard({
             <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 z-20">
               {images.slice(0, 8).map((url, i) => (
                 <button type="button" key={`${space.id}-dot-${i}`} onClick={e => dotClick(e, i)}
-                  style={{ width: i === photoIdx ? 20 : 7, height: 7, borderRadius: 4, padding: 0, border: 'none', cursor: 'pointer',
+                  style={{ width: i === photoIdx ? 20 : 7, height: 7, borderRadius: 4, padding: '8px 4px', boxSizing: 'content-box', border: 'none', cursor: 'pointer',
                     background: i === photoIdx ? '#fff' : 'rgba(255,255,255,0.55)', transition: 'all 0.3s ease' }} />
               ))}
             </div>

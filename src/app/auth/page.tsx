@@ -236,7 +236,7 @@ function AuthContent() {
         {(['login', 'register'] as const).map(s => (
           <button key={s}
             onClick={() => { setScreen(s); reset() }}
-            className="flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all"
+            className="flex-1 py-3 px-4 rounded-lg text-sm font-semibold transition-all"
             style={screen === s
               ? { background: '#35C493', color: '#0B0F0E' }
               : { color: 'rgba(255,255,255,0.45)' }}>

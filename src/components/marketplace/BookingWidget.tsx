@@ -645,7 +645,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             <button key={s.id}
               onClick={() => s.id < step && setStep(s.id)}
               disabled={s.id >= step}
-              className="flex-1 py-1.5 flex items-center"
+              className="flex-1 py-3 flex items-center"
               style={{ cursor: s.id < step ? 'pointer' : 'default' }}>
               <div className="w-full h-1 rounded-full transition-all"
                 style={{

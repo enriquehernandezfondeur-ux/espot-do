@@ -146,7 +146,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
 
       {/* Toast de error */}
       {actionError && (
-        <div className="fixed top-5 right-5 z-50 flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
+        <div className="fixed top-5 left-4 right-4 md:left-auto md:right-5 md:max-w-sm z-50 flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
           style={{ background: '#DC2626', color: '#fff' }}>
           ✕ {actionError}
         </div>

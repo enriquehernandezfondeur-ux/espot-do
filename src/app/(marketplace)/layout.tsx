@@ -495,7 +495,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
           <div className="md:hidden fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm"
             onClick={() => setAccountSheet(false)} />
           <div className="md:hidden fixed bottom-0 left-0 right-0 z-[61] rounded-t-3xl overflow-hidden slide-in-bottom"
-            style={{ background: '#fff', boxShadow: '0 -12px 48px rgba(0,0,0,0.18)', maxHeight: '85dvh' }}>
+            style={{ background: '#fff', boxShadow: '0 -12px 48px rgba(0,0,0,0.18)', maxHeight: '85dvh', overflowY: 'auto' }}>
 
             {/* Tirador */}
             <div className="flex justify-center pt-3 pb-2">
@@ -588,7 +588,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
             <div>
               <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{color:'#35C493'}}>Plataforma</p>
               {[{href:'/buscar',label:'Explorar espacios'},{href:'/para-clientes',label:'Para clientes'},{href:'/para-propietarios',label:'Para propietarios'}].map(({href,label})=>(
-                <Link key={href} href={href} className="ft-link block text-sm mb-2.5" style={{color:'#6B7280'}}>{label}</Link>
+                <Link key={href} href={href} className="ft-link block text-sm py-1" style={{color:'#6B7280'}}>{label}</Link>
               ))}
             </div>
 
@@ -596,7 +596,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
             <div>
               <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{color:'#35C493'}}>Anfitriones</p>
               {[{href:'/para-propietarios',label:'Publicar espacio'},{href:'/dashboard/host',label:'Panel de control'},{href:'/contacto',label:'Contacto'}].map(({href,label})=>(
-                <Link key={href} href={href} className="ft-link block text-sm mb-2.5" style={{color:'#6B7280'}}>{label}</Link>
+                <Link key={href} href={href} className="ft-link block text-sm py-1" style={{color:'#6B7280'}}>{label}</Link>
               ))}
             </div>
 
@@ -604,7 +604,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
             <div>
               <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{color:'#35C493'}}>Legal</p>
               {[{href:'/terminos',label:'Términos'},{href:'/privacidad',label:'Privacidad'},{href:'/reembolso',label:'Reembolsos'},{href:'/seguridad',label:'Seguridad'},{href:'/cookies',label:'Cookies'}].map(({href,label})=>(
-                <Link key={href} href={href} className="ft-link block text-sm mb-2.5" style={{color:'#6B7280'}}>{label}</Link>
+                <Link key={href} href={href} className="ft-link block text-sm py-1" style={{color:'#6B7280'}}>{label}</Link>
               ))}
             </div>
 
@@ -619,9 +619,9 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                   {href:'https://www.linkedin.com/company/espotdo/',path:'M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 23.2 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z',label:'LI'},
                 ].map(s=>(
                   <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label}
-                    className="ft-soc w-7 h-7 rounded-lg flex items-center justify-center"
+                    className="ft-soc w-10 h-10 rounded-lg flex items-center justify-center"
                     style={{background:'#E8EEE9',color:'#9CA3AF'}}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d={s.path}/></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d={s.path}/></svg>
                   </a>
                 ))}
               </div>

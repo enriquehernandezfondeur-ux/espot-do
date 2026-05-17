@@ -146,10 +146,12 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   }, [dateFrom, timeFrom])
 
   useEffect(() => {
-    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setDatePickerOpen(false) }
-    if (datePickerOpen) document.addEventListener('keydown', onKey)
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') { setDatePickerOpen(false); setMoreOpen(false) }
+    }
+    if (datePickerOpen || moreOpen) document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [datePickerOpen])
+  }, [datePickerOpen, moreOpen])
 
   useEffect(() => {
     function onScroll() {

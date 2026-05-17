@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -32,6 +32,11 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
   const router   = useRouter()
   const supabaseRef = useRef(createClient())
   const [mobileOpen, setMobileOpen] = useState(false)
+
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [mobileOpen])
 
   async function handleLogout() {
     await supabaseRef.current.auth.signOut()

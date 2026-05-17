@@ -182,11 +182,11 @@ function ExitoContent() {
             }}>
             <div className="px-6 py-5 flex items-center justify-between"
               style={{ background: 'rgba(53,196,147,0.1)', borderBottom: '1px solid rgba(53,196,147,0.15)' }}>
-              <div>
+              <div className="min-w-0 flex-1 mr-3">
                 <p className="text-xs font-semibold mb-0.5" style={{ color: '#35C493' }}>
                   {booking.event_type ? `${booking.event_type} · ` : ''}RESERVA CONFIRMADA
                 </p>
-                <p className="text-white font-bold">{space?.name}</p>
+                <p className="text-white font-bold truncate">{space?.name}</p>
               </div>
               <div className="text-right">
                 <p className="text-xs mb-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>ID Transacción</p>

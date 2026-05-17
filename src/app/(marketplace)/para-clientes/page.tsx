@@ -147,7 +147,7 @@ export default function ParaClientesPage() {
             </div>
 
             {/* Tipos de evento — grid visual */}
-            <div className="grid grid-cols-4 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 min-[400px]:grid-cols-4 gap-3">
               {eventTypes.map(({ icon: Icon, label }, i) => (
                 <div key={label} className="flex flex-col items-center gap-2 p-3 rounded-2xl text-center"
                   style={{
