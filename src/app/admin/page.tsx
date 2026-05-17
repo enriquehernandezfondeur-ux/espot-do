@@ -111,7 +111,7 @@ export default async function AdminDashboard() {
                   </div>
                   <span className="text-sm font-medium" style={{ color: '#0F1623' }}>{label}</span>
                 </div>
-                <ArrowRight size={14} className="text-slate-300 group-hover:text-slate-500 transition-colors" />
+                <ArrowRight size={14} className="text-gray-300 group-hover:text-gray-500 transition-colors" />
               </Link>
             ))}
           </div>
@@ -258,7 +258,7 @@ export default async function AdminDashboard() {
                     {badge}
                   </span>
                 ) : (
-                  <ArrowRight size={13} className="text-slate-300 group-hover:text-slate-500 transition-colors" />
+                  <ArrowRight size={13} className="text-gray-300 group-hover:text-gray-500 transition-colors" />
                 )}
               </Link>
             ))}

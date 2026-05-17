@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { CalendarDays, Clock, Users, CheckCircle, XCircle, Eye, Search, Loader2, Download } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getHostBookings, acceptBooking, rejectBooking, completeBooking } from '@/lib/actions/host'
@@ -336,11 +337,20 @@ export default function HostReservasPage() {
                       </div>
 
                       {/* Ver detalle — solo desktop */}
-                      <button onClick={e => { e.stopPropagation(); setSelected(isSelected ? null : bk) }}
-                        className="hidden md:flex w-8 h-8 items-center justify-center rounded-lg shrink-0"
-                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                        <Eye size={13} />
-                      </button>
+                      <div className="hidden md:flex items-center gap-1.5">
+                        <button onClick={e => { e.stopPropagation(); setSelected(isSelected ? null : bk) }}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg"
+                          style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
+                          <Eye size={13} />
+                        </button>
+                        <Link href={`/dashboard/host/reservas/${bk.id}`}
+                          onClick={e => e.stopPropagation()}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold"
+                          style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}
+                          title="Ver detalle completo">
+                          ↗
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 )

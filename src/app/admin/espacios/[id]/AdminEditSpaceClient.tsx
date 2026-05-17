@@ -259,7 +259,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
           <h1 className="text-xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.01em' }}>
             {name || space.name}
           </h1>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-gray-400 mt-0.5">
             Propietario: {host?.full_name} · {host?.email}
           </p>
         </div>
@@ -324,18 +324,18 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
           </div>
           <div className="p-6 space-y-5">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Nombre del espacio</label>
+              <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">Nombre del espacio</label>
               <input value={name} onChange={e => setName(e.target.value)} className={inputCls} style={inputStyle} placeholder="Nombre del espacio" />
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Descripción</label>
+              <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">Descripción</label>
               <textarea value={description} onChange={e => setDescription(e.target.value)}
                 rows={4} className={inputCls + ' resize-none'} style={inputStyle}
                 placeholder="Descripción completa del espacio..." />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Categoría</label>
+                <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">Categoría</label>
                 <select value={category} onChange={e => setCategory(e.target.value)}
                   className={inputCls} style={{ ...inputStyle, cursor: 'pointer' }}>
                   {CATEGORIES.map(c => (
@@ -346,27 +346,27 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Cap. mínima</label>
+                <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">Cap. mínima</label>
                 <input type="number" value={capacityMin} onChange={e => setCapacityMin(e.target.value)}
                   className={inputCls} style={inputStyle} placeholder="20" />
               </div>
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Cap. máxima</label>
+                <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">Cap. máxima</label>
                 <input type="number" value={capacityMax} onChange={e => setCapacityMax(e.target.value)}
                   className={inputCls} style={inputStyle} placeholder="200" />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Dirección</label>
+                <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">Dirección</label>
                 <input value={address} onChange={e => setAddress(e.target.value)} className={inputCls} style={inputStyle} placeholder="Av. Lincoln #123" />
               </div>
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Sector</label>
+                <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">Sector</label>
                 <input value={sector} onChange={e => setSector(e.target.value)} className={inputCls} style={inputStyle} placeholder="Piantini" />
               </div>
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Ciudad</label>
+                <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">Ciudad</label>
                 <input value={city} onChange={e => setCity(e.target.value)} className={inputCls} style={inputStyle} placeholder="Santo Domingo" />
               </div>
             </div>
@@ -384,7 +384,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
           </div>
           <div className="p-6 space-y-5">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest mb-3 text-slate-400">Tipo de precio</label>
+              <label className="block text-xs font-semibold uppercase tracking-widest mb-3 text-gray-400">Tipo de precio</label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {PRICING_TYPES.map(pt => (
                   <button key={pt.value} onClick={() => setPricingType(pt.value)}
@@ -401,15 +401,15 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
             {pricingType === 'hourly' && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Precio / hora (RD$)</label>
+                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">Precio / hora (RD$)</label>
                   <input type="number" value={hourlyPrice} onChange={e => setHourlyPrice(e.target.value)} className={inputCls} style={inputStyle} placeholder="5000" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Mín. horas</label>
+                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">Mín. horas</label>
                   <input type="number" value={minHours} onChange={e => setMinHours(e.target.value)} className={inputCls} style={inputStyle} placeholder="3" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Máx. horas</label>
+                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">Máx. horas</label>
                   <input type="number" value={maxHours} onChange={e => setMaxHours(e.target.value)} className={inputCls} style={inputStyle} placeholder="12" />
                 </div>
               </div>
@@ -418,11 +418,11 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
             {pricingType === 'minimum_consumption' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Consumo mínimo (RD$)</label>
+                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">Consumo mínimo (RD$)</label>
                   <input type="number" value={minConsumption} onChange={e => setMinConsumption(e.target.value)} className={inputCls} style={inputStyle} placeholder="60000" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Duración sesión (hrs)</label>
+                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">Duración sesión (hrs)</label>
                   <input type="number" value={sessionHours} onChange={e => setSessionHours(e.target.value)} className={inputCls} style={inputStyle} placeholder="4" />
                 </div>
               </div>
@@ -431,11 +431,11 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
             {pricingType === 'fixed_package' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Precio del paquete (RD$)</label>
+                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">Precio del paquete (RD$)</label>
                   <input type="number" value={fixedPrice} onChange={e => setFixedPrice(e.target.value)} className={inputCls} style={inputStyle} placeholder="35000" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Nombre del paquete</label>
+                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">Nombre del paquete</label>
                   <input value={packageName} onChange={e => setPackageName(e.target.value)} className={inputCls} style={inputStyle} placeholder="Paquete Cumpleaños Premium" />
                 </div>
               </div>
@@ -450,7 +450,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
             {/* Preview */}
             {((pricingType === 'hourly' && hourlyPrice) || (pricingType === 'minimum_consumption' && minConsumption) || (pricingType === 'fixed_package' && fixedPrice)) && (
               <div className="p-4 rounded-xl" style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.15)' }}>
-                <span className="text-xs text-slate-500 mr-2">Vista previa:</span>
+                <span className="text-xs text-gray-500 mr-2">Vista previa:</span>
                 <span className="font-bold" style={{ color: 'var(--brand)' }}>
                   {pricingType === 'hourly' ? `${formatCurrency(Number(hourlyPrice))} / hora` : ''}
                   {pricingType === 'minimum_consumption' ? `Consumo mín. ${formatCurrency(Number(minConsumption))}` : ''}
@@ -476,7 +476,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
               <div key={addon.id} className="flex items-center gap-4 px-6 py-4">
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-sm" style={{ color: '#0F1623' }}>{addon.name}</div>
-                  <div className="text-xs text-slate-400">{addon.category} · {addon.unit}</div>
+                  <div className="text-xs text-gray-400">{addon.category} · {addon.unit}</div>
                 </div>
                 <div className="font-bold text-sm" style={{ color: '#0F1623' }}>{formatCurrency(addon.price)}</div>
                 <button onClick={() => handleDeleteAddon(addon.id)}
@@ -491,7 +491,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
 
           {/* Add new addon */}
           <div className="px-6 py-5 space-y-4" style={{ borderTop: '1px solid #F0F2F5', background: '#FAFBFC' }}>
-            <div className="text-xs font-semibold uppercase tracking-widest text-slate-400">Agregar adicional</div>
+            <div className="text-xs font-semibold uppercase tracking-widest text-gray-400">Agregar adicional</div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div className="col-span-2">
                 <input value={newAddon.name} onChange={e => setNewAddon(p => ({ ...p, name: e.target.value }))}
@@ -533,7 +533,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
           <div className="p-6 space-y-6">
             {/* Permisos */}
             <div>
-              <div className="text-xs font-semibold uppercase tracking-widest mb-3 text-slate-400">Permisos</div>
+              <div className="text-xs font-semibold uppercase tracking-widest mb-3 text-gray-400">Permisos</div>
               <div className="space-y-2">
                 {[
                   { label: 'Decoración externa', val: allowDeco, set: setAllowDeco },
@@ -557,12 +557,12 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
             {/* Música y cancelación */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Hora límite de música</label>
+                <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">Hora límite de música</label>
                 <input type="time" value={musicCutoff} onChange={e => setMusicCutoff(e.target.value)}
                   className={inputCls} style={inputStyle} />
               </div>
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Política de cancelación</label>
+                <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">Política de cancelación</label>
                 <select value={cancelPolicy} onChange={e => setCancelPolicy(e.target.value)}
                   className={inputCls} style={{ ...inputStyle, cursor: 'pointer' }}>
                   <option value="flexible">Flexible</option>
@@ -571,19 +571,19 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Horas antes para cancelar</label>
+                <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">Horas antes para cancelar</label>
                 <input type="number" value={cancelHours} onChange={e => setCancelHours(e.target.value)}
                   className={inputCls} style={inputStyle} placeholder="72" />
               </div>
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">% de reembolso</label>
+                <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">% de reembolso</label>
                 <input type="number" value={cancelRefund} onChange={e => setCancelRefund(e.target.value)}
                   className={inputCls} style={inputStyle} placeholder="50" />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Reglas adicionales</label>
+              <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">Reglas adicionales</label>
               <textarea value={customRules} onChange={e => setCustomRules(e.target.value)}
                 rows={3} className={inputCls + ' resize-none'} style={inputStyle}
                 placeholder="Reglas específicas del espacio..." />

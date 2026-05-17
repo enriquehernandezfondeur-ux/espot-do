@@ -446,6 +446,39 @@ export async function respondToQuote(bookingId: string, quotedPrice: number, mes
   return { success: true }
 }
 
+// ── Detalle completo de una reserva (host) ───────────────
+export async function getHostBookingDetail(bookingId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  // Verificar que el usuario es host de ese booking
+  const { data: bk, error } = await supabase
+    .from('bookings')
+    .select(`
+      *,
+      profiles!guest_id(full_name, email, phone),
+      spaces!space_id(id, name, slug, address, sector, city, host_id, space_images(url, is_cover)),
+      space_pricing!pricing_id(pricing_type, package_name, package_includes, hourly_price, minimum_consumption, fixed_price),
+      booking_addons(addon_id, quantity, unit_price, subtotal, space_addons(name)),
+      booking_installments(*)
+    `)
+    .eq('id', bookingId)
+    .single()
+
+  if (error || !bk) return null
+
+  // Verificar ownership: el usuario debe ser el host del espacio
+  const space = (bk as any).spaces as any
+  if (space?.host_id !== user.id) return null
+
+  // Ordenar cuotas por número
+  const installments = ((bk as any).booking_installments ?? [])
+    .sort((a: any, b: any) => a.installment_number - b.installment_number)
+
+  return { booking: bk, installments }
+}
+
 // ── Marcar evento como completado ─────────────────────────
 export async function completeBooking(bookingId: string) {
   const supabase = await createClient()

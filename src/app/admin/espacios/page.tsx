@@ -84,7 +84,7 @@ export default function AdminSpacesPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Espacios</h1>
-          <p className="text-sm text-slate-500 mt-0.5">{spaces.length} espacio{spaces.length !== 1 ? 's' : ''}</p>
+          <p className="text-sm text-gray-500 mt-0.5">{spaces.length} espacio{spaces.length !== 1 ? 's' : ''}</p>
         </div>
         <button
           onClick={verifyAll}
@@ -117,10 +117,10 @@ export default function AdminSpacesPage() {
         </div>
         <div className="flex items-center gap-2 flex-1 px-4 py-2.5 rounded-xl"
           style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
-          <Search size={15} className="text-slate-400 shrink-0" />
+          <Search size={15} className="text-gray-400 shrink-0" />
           <input value={search} onChange={e => { setSearch(e.target.value); setLoading(true) }}
             placeholder="Buscar por nombre..."
-            className="bg-transparent text-sm flex-1 focus:outline-none text-slate-700 placeholder-slate-400" />
+            className="bg-transparent text-sm flex-1 focus:outline-none text-gray-700 placeholder-gray-400" />
         </div>
       </div>
 
@@ -132,13 +132,13 @@ export default function AdminSpacesPage() {
         <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <div className="overflow-x-auto scrollbar-hide">
           {/* Table header */}
-          <div className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-slate-400 min-w-[600px]"
+          <div className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-gray-400 min-w-[600px]"
             style={{ borderBottom: '1px solid #F0F2F5', background: '#FAFBFC' }}>
             <span>Espacio</span><span>Precio</span><span>Reservas</span><span>Estado</span><span>Acciones</span>
           </div>
 
           {spaces.length === 0 ? (
-            <div className="text-center py-16 text-slate-400">No hay espacios</div>
+            <div className="text-center py-16 text-gray-400">No hay espacios</div>
           ) : (
             <div className="divide-y divide-[#F0F2F5]">
               {spaces.map((space: any) => {
@@ -157,7 +157,7 @@ export default function AdminSpacesPage() {
                       </div>
                       <div className="min-w-0">
                         <div className="font-semibold text-sm truncate" style={{ color: '#0F1623' }}>{space.name}</div>
-                        <div className="text-xs text-slate-400 flex items-center gap-1">
+                        <div className="text-xs text-gray-400 flex items-center gap-1">
                           <MapPin size={10} /> {space.sector ?? space.city ?? '—'} · {host?.full_name ?? '—'}
                         </div>
                       </div>
@@ -167,7 +167,7 @@ export default function AdminSpacesPage() {
                     <div className="text-sm font-medium" style={{ color: '#374151' }}>{getPrice(space)}</div>
 
                     {/* Bookings */}
-                    <div className="flex items-center gap-1 text-sm text-slate-500">
+                    <div className="flex items-center gap-1 text-sm text-gray-500">
                       <Users size={13} /> {bookingsCount}
                     </div>
 

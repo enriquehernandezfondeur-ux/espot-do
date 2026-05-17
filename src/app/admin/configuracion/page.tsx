@@ -62,7 +62,7 @@ export default function AdminConfigPage() {
       )}
       <div className="mb-8">
         <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Configuración</h1>
-        <p className="text-sm text-slate-500 mt-0.5">Ajustes globales del marketplace</p>
+        <p className="text-sm text-gray-500 mt-0.5">Ajustes globales del marketplace</p>
       </div>
 
       {loading ? (
@@ -84,7 +84,7 @@ export default function AdminConfigPage() {
                   <div key={item.key} className="flex items-center gap-4 px-6 py-4">
                     <div className="flex-1">
                       <div className="font-medium text-sm" style={{ color: '#374151' }}>{item.label}</div>
-                      <div className="text-xs text-slate-400 mt-0.5 font-mono">{item.key}</div>
+                      <div className="text-xs text-gray-400 mt-0.5 font-mono">{item.key}</div>
                     </div>
                     <div className="flex items-center gap-2">
                       <input

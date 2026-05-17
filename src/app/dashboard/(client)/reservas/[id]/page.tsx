@@ -2,6 +2,7 @@
 
 import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
   ArrowLeft, CalendarDays, Calendar, Clock, Users, MapPin, MessageCircle,
   CreditCard, CheckCircle, Sparkles, ExternalLink,
@@ -12,6 +13,8 @@ import { getClientBookingDetail } from '@/lib/actions/client'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
 import { countdownLabel } from '@/lib/payments/schedule'
 import { submitReview, getUserReviewedBookings } from '@/lib/actions/reviews'
+import DisputeSection from './DisputeSection'
+import { getDisputeForBooking } from '@/lib/actions/disputes'
 
 export default function BookingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -24,18 +27,21 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
   const [submitting, setSubmitting] = useState(false)
   const [reviewDone, setReviewDone] = useState(false)
   const [reviewError, setReviewError] = useState('')
-  const [copied,      setCopied]      = useState(false)
+  const [copied,        setCopied]        = useState(false)
+  const [existingDispute, setExistingDispute] = useState<any>(null)
 
   useEffect(() => {
     let cancelled = false
     Promise.all([
       getClientBookingDetail(id),
       getUserReviewedBookings(),
+      getDisputeForBooking(id),
     ])
-      .then(([detail, reviewed]) => {
+      .then(([detail, reviewed, dispute]) => {
         if (cancelled) return
         setData(detail)
         if (detail && reviewed.has(detail.booking.id)) setAlreadyReviewed(true)
+        setExistingDispute(dispute)
       })
       .catch(() => {})
       .finally(() => { if (!cancelled) setLoading(false) })
@@ -113,8 +119,8 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
       <div className="rounded-3xl overflow-hidden mb-5"
         style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
         {cover ? (
-          <div className="h-52 md:h-64 overflow-hidden">
-            <img src={cover} alt={space?.name} className="w-full h-full object-cover" />
+          <div className="h-52 md:h-64 overflow-hidden relative">
+            <Image src={cover} alt={space?.name ?? 'Espacio'} fill priority sizes="(max-width: 768px) 100vw, 672px" className="object-cover" />
           </div>
         ) : (
           <div className="h-28 flex items-center justify-center"
@@ -280,9 +286,8 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
         <div className="rounded-2xl p-4 mb-4 flex items-center gap-3"
           style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
           {host.avatar_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={host.avatar_url} alt={host.full_name}
-              className="w-10 h-10 rounded-xl object-cover shrink-0" />
+            <Image src={host.avatar_url} alt={host.full_name ?? 'Host'}
+              width={40} height={40} className="rounded-xl object-cover shrink-0" />
           ) : (
             <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0"
               style={{ background: 'var(--brand)' }}>
@@ -518,6 +523,14 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
           )}
         </div>
       )}
+
+      {/* Disputas */}
+      <DisputeSection
+        bookingId={booking.id}
+        bookingStatus={(booking as any).status}
+        existingDispute={existingDispute}
+        onDisputeOpened={(disputeId) => setExistingDispute({ id: disputeId, status: 'abierta' })}
+      />
 
       {/* Acciones */}
       <div className="flex gap-3">

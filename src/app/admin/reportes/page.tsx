@@ -17,7 +17,7 @@ export default async function AdminReportesPage() {
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Reportes</h1>
-        <p className="text-sm text-slate-500 mt-0.5">Métricas de rendimiento del marketplace</p>
+        <p className="text-sm text-gray-500 mt-0.5">Métricas de rendimiento del marketplace</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -30,7 +30,7 @@ export default async function AdminReportesPage() {
           <div className="space-y-3">
             {(reports?.monthly ?? []).map(m => (
               <div key={m.mes} className="flex items-center gap-3">
-                <div className="w-8 text-xs text-right text-slate-400 shrink-0">{m.mes}</div>
+                <div className="w-8 text-xs text-right text-gray-400 shrink-0">{m.mes}</div>
                 <div className="flex-1 h-6 rounded-lg overflow-hidden" style={{ background: '#F4F6F8' }}>
                   <div className="h-full rounded-lg transition-all"
                     style={{ width: `${m.ingresos > 0 ? (m.ingresos / maxMonthly * 100) : 0}%`, background: 'var(--brand)' }} />
@@ -38,7 +38,7 @@ export default async function AdminReportesPage() {
                 <div className="w-24 text-xs font-bold text-right shrink-0" style={{ color: '#0F1623' }}>
                   {formatCurrency(m.ingresos)}
                 </div>
-                <div className="w-8 text-xs text-slate-400 shrink-0">{m.reservas}r</div>
+                <div className="w-8 text-xs text-gray-400 shrink-0">{m.reservas}r</div>
               </div>
             ))}
           </div>
@@ -57,7 +57,7 @@ export default async function AdminReportesPage() {
               .sort((a, b) => b[1] - a[1])
               .map(([cat, count]) => (
                   <div key={cat} className="flex items-center gap-3">
-                    <div className="w-24 text-xs text-slate-500 truncate shrink-0">
+                    <div className="w-24 text-xs text-gray-500 truncate shrink-0">
                       {CATEGORY_LABELS[cat] ?? cat}
                     </div>
                     <div className="flex-1 h-5 rounded-lg overflow-hidden" style={{ background: '#F4F6F8' }}>
@@ -80,7 +80,7 @@ export default async function AdminReportesPage() {
         </div>
         <div className="divide-y divide-[#F0F2F5]">
           {reports?.topSpaces?.length === 0 ? (
-            <div className="text-center py-10 text-slate-400 text-sm">Sin datos aún</div>
+            <div className="text-center py-10 text-gray-400 text-sm">Sin datos aún</div>
           ) : (
             reports?.topSpaces?.map((space, i) => (
               <div key={i} className="flex items-center gap-4 px-6 py-4">
@@ -90,7 +90,7 @@ export default async function AdminReportesPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-sm truncate" style={{ color: '#0F1623' }}>{space.name}</div>
-                  <div className="text-xs text-slate-400 capitalize">{CATEGORY_LABELS[space.category] ?? space.category}</div>
+                  <div className="text-xs text-gray-400 capitalize">{CATEGORY_LABELS[space.category] ?? space.category}</div>
                 </div>
                 <div className="text-right shrink-0">
                   <div className="font-bold text-sm" style={{ color: '#0F1623' }}>{space.count} reservas</div>

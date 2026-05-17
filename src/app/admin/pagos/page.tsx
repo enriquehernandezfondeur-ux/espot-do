@@ -24,7 +24,7 @@ export default async function AdminPagosPage() {
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Pagos</h1>
-        <p className="text-sm text-slate-500 mt-0.5">Historial de comisiones y pagos de la plataforma</p>
+        <p className="text-sm text-gray-500 mt-0.5">Historial de comisiones y pagos de la plataforma</p>
       </div>
 
       {/* Summary cards */}
@@ -42,7 +42,7 @@ export default async function AdminPagosPage() {
               <Icon size={18} style={{ color }} />
             </div>
             <div className="text-xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>{value}</div>
-            <div className="text-xs text-slate-500 mt-0.5">{label}</div>
+            <div className="text-xs text-gray-500 mt-0.5">{label}</div>
           </div>
         ))}
       </div>
@@ -50,7 +50,7 @@ export default async function AdminPagosPage() {
       {/* Table */}
       <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
         <div className="overflow-x-auto scrollbar-hide">
-        <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-3 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-slate-400 min-w-[640px]"
+        <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-3 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-gray-400 min-w-[640px]"
           style={{ borderBottom: '1px solid #F0F2F5', background: '#FAFBFC' }}>
           <span>Reserva</span><span>Fecha evento</span><span>Valor total</span><span>Comisión Espot</span><span>Estado pago</span>
         </div>
@@ -61,9 +61,9 @@ export default async function AdminPagosPage() {
               <div key={bk.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-3 items-center px-5 py-4 hover:bg-slate-50 transition-colors min-w-[640px]">
                 <div>
                   <div className="font-semibold text-sm" style={{ color: '#0F1623' }}>{bk.spaces?.name}</div>
-                  <div className="text-xs text-slate-400">{bk.profiles?.full_name} · {bk.event_type}</div>
+                  <div className="text-xs text-gray-400">{bk.profiles?.full_name} · {bk.event_type}</div>
                 </div>
-                <div className="text-sm text-slate-600">{formatDate(bk.event_date)}</div>
+                <div className="text-sm text-gray-600">{formatDate(bk.event_date)}</div>
                 <div className="text-sm font-bold" style={{ color: '#0F1623' }}>{formatCurrency(Number(bk.total_amount))}</div>
                 <div className="text-sm font-bold" style={{ color: '#35C493' }}>{formatCurrency(Number(bk.total_amount) * 0.10)}</div>
                 <span className="text-xs font-semibold px-2.5 py-1 rounded-full w-fit"

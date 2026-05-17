@@ -106,7 +106,7 @@ export default function AdminUsersPage() {
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Usuarios</h1>
-          <p className="text-sm text-slate-500 mt-0.5">{stats.total} registros en total</p>
+          <p className="text-sm text-gray-500 mt-0.5">{stats.total} registros en total</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {/* Copiar emails */}
@@ -138,7 +138,7 @@ export default function AdminUsersPage() {
             style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
             <div className="flex items-center gap-2 mb-1">
               <Icon size={13} style={{ color }} />
-              <span className="text-xs text-slate-400 font-medium">{label}</span>
+              <span className="text-xs text-gray-400 font-medium">{label}</span>
             </div>
             <div className="text-2xl font-bold" style={{ color, letterSpacing: '-0.03em' }}>{value}</div>
           </div>
@@ -173,13 +173,13 @@ export default function AdminUsersPage() {
         </div>
         <div className="flex items-center gap-2 flex-1 px-4 py-2.5 rounded-xl"
           style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
-          <Search size={15} className="text-slate-400 shrink-0" />
+          <Search size={15} className="text-gray-400 shrink-0" />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Buscar por nombre o email..."
-            className="bg-transparent text-sm flex-1 focus:outline-none text-slate-700 placeholder-slate-400"
+            className="bg-transparent text-sm flex-1 focus:outline-none text-gray-700 placeholder-gray-400"
             style={{ fontSize: 16 }} />
           {search && (
-            <span className="text-xs text-slate-400">{filtered.length} resultado{filtered.length !== 1 ? 's' : ''}</span>
+            <span className="text-xs text-gray-400">{filtered.length} resultado{filtered.length !== 1 ? 's' : ''}</span>
           )}
         </div>
       </div>
@@ -187,7 +187,7 @@ export default function AdminUsersPage() {
       {/* Tabla */}
       <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
         <div className="overflow-x-auto scrollbar-hide">
-          <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-slate-400 min-w-[700px]"
+          <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-gray-400 min-w-[700px]"
             style={{ borderBottom: '1px solid #F0F2F5', background: '#FAFBFC' }}>
             <span>Usuario</span><span>Rol</span><span>Teléfono</span><span>Registro</span><span>Cambiar rol</span>
           </div>
@@ -197,7 +197,7 @@ export default function AdminUsersPage() {
               <Loader2 className="w-6 h-6 animate-spin" style={{ color: 'var(--brand)' }} />
             </div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-16 text-slate-400 text-sm">Sin usuarios</div>
+            <div className="text-center py-16 text-gray-400 text-sm">Sin usuarios</div>
           ) : (
             <div className="divide-y divide-[#F0F2F5]">
               {filtered.map(user => {
@@ -233,10 +233,10 @@ export default function AdminUsersPage() {
                     </div>
 
                     {/* Teléfono */}
-                    <div className="text-sm text-slate-500">{user.phone ?? '—'}</div>
+                    <div className="text-sm text-gray-500">{user.phone ?? '—'}</div>
 
                     {/* Fecha de registro */}
-                    <div className="text-xs text-slate-400">{fmtDate(user.created_at)}</div>
+                    <div className="text-xs text-gray-400">{fmtDate(user.created_at)}</div>
 
                     {/* Cambiar rol */}
                     <div className="flex items-center gap-1">

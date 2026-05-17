@@ -143,7 +143,7 @@ export default function AdminDisputasPage() {
         <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>
           Disputas
         </h1>
-        <p className="text-sm text-slate-500 mt-0.5">
+        <p className="text-sm text-gray-500 mt-0.5">
           {disputes.length} disputas en total
         </p>
       </div>
@@ -165,7 +165,7 @@ export default function AdminDisputasPage() {
         </div>
         <div className="flex items-center gap-2 flex-1 px-4 py-2.5 rounded-xl"
           style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
-          <Search size={15} className="text-slate-400 shrink-0" />
+          <Search size={15} className="text-gray-400 shrink-0" />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Buscar por nombre, espacio o ID…"
             className="flex-1 text-sm outline-none bg-transparent"
@@ -176,12 +176,12 @@ export default function AdminDisputasPage() {
       {/* Tabla */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+          <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-20">
-          <ShieldAlert size={40} className="mx-auto mb-3 text-slate-300" />
-          <p className="text-slate-500 text-sm">No hay disputas con los filtros actuales.</p>
+          <ShieldAlert size={40} className="mx-auto mb-3 text-gray-300" />
+          <p className="text-gray-500 text-sm">No hay disputas con los filtros actuales.</p>
         </div>
       ) : (
         <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #E8ECF0', background: '#fff' }}>
@@ -189,13 +189,13 @@ export default function AdminDisputasPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr style={{ borderBottom: '1px solid #F0F2F5', background: '#FAFBFC' }}>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 whitespace-nowrap">Reserva</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 whitespace-nowrap">Espacio</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 whitespace-nowrap">Abrió</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 whitespace-nowrap">Contra</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 whitespace-nowrap">Categoría</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 whitespace-nowrap">Estado</th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 whitespace-nowrap">Fecha</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 whitespace-nowrap">Reserva</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 whitespace-nowrap">Espacio</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 whitespace-nowrap">Abrió</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 whitespace-nowrap">Contra</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 whitespace-nowrap">Categoría</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 whitespace-nowrap">Estado</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 whitespace-nowrap">Fecha</th>
                   <th className="px-5 py-3.5" />
                 </tr>
               </thead>
@@ -214,7 +214,7 @@ export default function AdminDisputasPage() {
                       style={{ borderBottom: idx < filtered.length - 1 ? '1px solid #F0F2F5' : 'none' }}
                       onClick={() => handleSelect(d)}>
                       <td className="px-5 py-4">
-                        <span className="font-mono text-xs font-semibold text-slate-600">
+                        <span className="font-mono text-xs font-semibold text-gray-600">
                           {(d as any).booking_id?.slice(0, 8).toUpperCase() ?? '—'}
                         </span>
                       </td>
@@ -222,13 +222,13 @@ export default function AdminDisputasPage() {
                         <span className="font-medium text-slate-800">{space?.name ?? '—'}</span>
                       </td>
                       <td className="px-5 py-4">
-                        <span className="text-slate-700">{opener?.full_name ?? '—'}</span>
+                        <span className="text-gray-700">{opener?.full_name ?? '—'}</span>
                       </td>
                       <td className="px-5 py-4">
-                        <span className="text-slate-700">{respondent?.full_name ?? '—'}</span>
+                        <span className="text-gray-700">{respondent?.full_name ?? '—'}</span>
                       </td>
                       <td className="px-5 py-4">
-                        <span className="text-xs text-slate-600">{catLabel}</span>
+                        <span className="text-xs text-gray-600">{catLabel}</span>
                       </td>
                       <td className="px-5 py-4">
                         <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
@@ -237,7 +237,7 @@ export default function AdminDisputasPage() {
                         </span>
                       </td>
                       <td className="px-5 py-4 whitespace-nowrap">
-                        <span className="text-xs text-slate-500">
+                        <span className="text-xs text-gray-500">
                           {formatDate((d as any).created_at?.split('T')[0] ?? '')}
                         </span>
                       </td>
@@ -275,7 +275,7 @@ export default function AdminDisputasPage() {
                 <h2 className="font-bold text-base" style={{ color: '#0F1623' }}>
                   Disputa — {(selected as any).id?.slice(0, 8).toUpperCase()}
                 </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-gray-500 mt-0.5">
                   Abierta el {formatDate((selected as any).created_at?.split('T')[0] ?? '')}
                 </p>
               </div>
@@ -320,8 +320,8 @@ export default function AdminDisputasPage() {
               <Section title="Detalle">
                 <Row label="Categoría" value={CATEGORY_LABELS[(selected as any).category as keyof typeof CATEGORY_LABELS] ?? (selected as any).category} />
                 <div>
-                  <span className="text-xs font-medium text-slate-500 block mb-1.5">Descripción</span>
-                  <p className="text-sm leading-relaxed text-slate-700 bg-slate-50 rounded-xl p-3.5">
+                  <span className="text-xs font-medium text-gray-500 block mb-1.5">Descripción</span>
+                  <p className="text-sm leading-relaxed text-gray-700 bg-slate-50 rounded-xl p-3.5">
                     {(selected as any).reason}
                   </p>
                 </div>
@@ -330,12 +330,12 @@ export default function AdminDisputasPage() {
               {/* Resolución existente */}
               {(selected as any).resolution && (
                 <Section title="Resolución previa">
-                  <p className="text-sm leading-relaxed text-slate-700">{(selected as any).resolution}</p>
+                  <p className="text-sm leading-relaxed text-gray-700">{(selected as any).resolution}</p>
                 </Section>
               )}
               {(selected as any).admin_notes && (
                 <Section title="Notas del admin">
-                  <p className="text-sm leading-relaxed text-slate-700">{(selected as any).admin_notes}</p>
+                  <p className="text-sm leading-relaxed text-gray-700">{(selected as any).admin_notes}</p>
                 </Section>
               )}
 
@@ -346,7 +346,7 @@ export default function AdminDisputasPage() {
                   <h3 className="font-semibold text-sm" style={{ color: '#0F1623' }}>Actualizar estado</h3>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1.5">Nuevo estado</label>
+                    <label className="block text-xs font-medium text-gray-500 mb-1.5">Nuevo estado</label>
                     <div className="relative">
                       <select
                         value={newStatus}
@@ -364,13 +364,13 @@ export default function AdminDisputasPage() {
                           <option key={t.value} value={t.value}>{t.label}</option>
                         ))}
                       </select>
-                      <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                      <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                      Resolución <span className="text-slate-400">(opcional pero recomendado)</span>
+                    <label className="block text-xs font-medium text-gray-500 mb-1.5">
+                      Resolución <span className="text-gray-400">(opcional pero recomendado)</span>
                     </label>
                     <textarea
                       value={resolution}
@@ -389,8 +389,8 @@ export default function AdminDisputasPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                      Notas internas <span className="text-slate-400">(solo admin)</span>
+                    <label className="block text-xs font-medium text-gray-500 mb-1.5">
+                      Notas internas <span className="text-gray-400">(solo admin)</span>
                     </label>
                     <textarea
                       value={adminNotes}
@@ -422,7 +422,7 @@ export default function AdminDisputasPage() {
 
               {STATUS_TRANSITIONS[(selected as any).status as DisputeStatus]?.length === 0 && (
                 <div className="text-center py-4">
-                  <p className="text-sm text-slate-400">Esta disputa ya fue cerrada y no admite más cambios.</p>
+                  <p className="text-sm text-gray-400">Esta disputa ya fue cerrada y no admite más cambios.</p>
                 </div>
               )}
             </div>
@@ -438,7 +438,7 @@ export default function AdminDisputasPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">{title}</h3>
+      <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">{title}</h3>
       <div className="space-y-2.5">{children}</div>
     </div>
   )
@@ -447,7 +447,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Row({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="flex items-start justify-between gap-4">
-      <span className="text-xs text-slate-500 shrink-0 pt-0.5">{label}</span>
+      <span className="text-xs text-gray-500 shrink-0 pt-0.5">{label}</span>
       <span className={cn('text-sm text-right break-all', mono ? 'font-mono text-xs' : 'font-medium text-slate-800')}>
         {value}
       </span>

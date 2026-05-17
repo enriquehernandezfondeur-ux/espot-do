@@ -192,6 +192,25 @@ export async function openDispute(
   return { disputeId: dispute.id }
 }
 
+// ── 1b. DISPUTA ACTIVA DE UN BOOKING ─────────────────────────
+
+export async function getDisputeForBooking(bookingId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data } = await supabase
+    .from('disputes')
+    .select('id, status, category, reason, created_at, resolution')
+    .eq('booking_id', bookingId)
+    .or(`opened_by.eq.${user.id},against.eq.${user.id}`)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  return data ?? null
+}
+
 // ── 2. MIS DISPUTAS (las partes) ─────────────────────────────
 
 export async function getMyDisputes() {
@@ -305,18 +324,24 @@ export async function updateDisputeStatus(
   resolution?: string,
   adminNotes?: string,
 ): Promise<{ error?: string; success?: boolean }> {
+  // Verificar identidad con el cliente anon primero
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
-  // Verificar que es admin
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
+  const SUPERADMIN = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
+  if (user.email !== SUPERADMIN) {
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+    if (profile?.role !== 'admin') return { error: 'No autorizado' }
+  }
 
-  if (profile?.role !== 'admin') return { error: 'No autorizado' }
+  // Usar service role para bypasear RLS en el UPDATE
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!serviceKey) return { error: 'Configuración de servidor incorrecta' }
+  const { createClient: createServiceClient } = await import('@supabase/supabase-js')
+  const sb = createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
 
   const updates: Record<string, unknown> = { status }
   if (resolution !== undefined) updates.resolution = resolution
@@ -325,10 +350,7 @@ export async function updateDisputeStatus(
     updates.resolved_at = new Date().toISOString()
   }
 
-  const { error } = await supabase
-    .from('disputes')
-    .update(updates)
-    .eq('id', disputeId)
+  const { error } = await sb.from('disputes').update(updates).eq('id', disputeId)
 
   if (error) {
     console.error('[updateDisputeStatus]', error)

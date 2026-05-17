@@ -37,9 +37,10 @@ interface Props {
   bookingId: string
   bookingStatus: string
   existingDispute?: ExistingDispute | null
+  onDisputeOpened?: (disputeId: string) => void
 }
 
-export default function DisputeSection({ bookingId, bookingStatus, existingDispute }: Props) {
+export default function DisputeSection({ bookingId, bookingStatus, existingDispute, onDisputeOpened }: Props) {
   const [open, setOpen]         = useState(false)
   const [category, setCategory] = useState<DisputeCategory | ''>('')
   const [reason, setReason]     = useState('')
@@ -192,6 +193,7 @@ export default function DisputeSection({ bookingId, bookingStatus, existingDispu
               if (result.error) { setError(result.error); return }
               setSubmitted(true)
               setOpen(false)
+              if (result.disputeId) onDisputeOpened?.(result.disputeId)
             }}
             className="px-5 py-5 space-y-4">
 

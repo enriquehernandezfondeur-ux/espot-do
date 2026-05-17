@@ -78,7 +78,7 @@ export default function AdminReservasPage() {
       )}
       <div className="mb-8">
         <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Reservas</h1>
-        <p className="text-sm text-slate-500 mt-0.5">{bookings.length} reservas en total</p>
+        <p className="text-sm text-gray-500 mt-0.5">{bookings.length} reservas en total</p>
       </div>
 
       {/* Filters */}
@@ -95,10 +95,10 @@ export default function AdminReservasPage() {
         </div>
         <div className="flex items-center gap-2 flex-1 px-4 py-2.5 rounded-xl"
           style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
-          <Search size={15} className="text-slate-400 shrink-0" />
+          <Search size={15} className="text-gray-400 shrink-0" />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Buscar espacio, cliente o evento..."
-            className="bg-transparent text-sm flex-1 focus:outline-none text-slate-700 placeholder-slate-400"
+            className="bg-transparent text-sm flex-1 focus:outline-none text-gray-700 placeholder-gray-400"
             style={{ fontSize: 16 }} />
         </div>
       </div>
@@ -107,7 +107,7 @@ export default function AdminReservasPage() {
         {/* Table */}
         <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <div className="overflow-x-auto scrollbar-hide">
-          <div className="grid grid-cols-[2fr_1fr_1fr_auto] gap-3 px-5 py-3 text-xs font-semibold min-w-[500px] uppercase tracking-widest text-slate-400"
+          <div className="grid grid-cols-[2fr_1fr_1fr_auto] gap-3 px-5 py-3 text-xs font-semibold min-w-[500px] uppercase tracking-widest text-gray-400"
             style={{ borderBottom: '1px solid #F0F2F5', background: '#FAFBFC' }}>
             <span>Reserva</span><span>Fecha</span><span>Total</span><span>Estado</span>
           </div>
@@ -117,7 +117,7 @@ export default function AdminReservasPage() {
               <Loader2 className="w-6 h-6 animate-spin" style={{ color: 'var(--brand)' }} />
             </div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-16 text-slate-400 text-sm">Sin reservas</div>
+            <div className="text-center py-16 text-gray-400 text-sm">Sin reservas</div>
           ) : (
             <div className="divide-y divide-[#F0F2F5]">
               {filtered.map(bk => {
@@ -131,11 +131,11 @@ export default function AdminReservasPage() {
                       <div className="font-semibold text-sm truncate" style={{ color: '#0F1623' }}>
                         {bk.spaces?.name}
                       </div>
-                      <div className="text-xs text-slate-400 truncate">
+                      <div className="text-xs text-gray-400 truncate">
                         {bk.profiles?.full_name} · {bk.event_type}
                       </div>
                     </div>
-                    <div className="text-sm text-slate-600">{formatDate(bk.event_date)}</div>
+                    <div className="text-sm text-gray-600">{formatDate(bk.event_date)}</div>
                     <div className="text-sm font-bold" style={{ color: '#0F1623' }}>{formatCurrency(Number(bk.total_amount))}</div>
                     <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
                       style={{ background: st.bg, color: st.color }}>
@@ -155,29 +155,29 @@ export default function AdminReservasPage() {
             style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
             <div className="px-5 py-4" style={{ borderBottom: '1px solid #F0F2F5' }}>
               <div className="font-bold text-sm" style={{ color: '#0F1623' }}>Detalle de reserva</div>
-              <div className="text-xs text-slate-400 mt-0.5">ID: {selected.id.slice(0,8).toUpperCase()}</div>
+              <div className="text-xs text-gray-400 mt-0.5">ID: {selected.id.slice(0,8).toUpperCase()}</div>
             </div>
             <div className="p-5 space-y-4">
               {/* Space */}
               <div>
-                <div className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Espacio</div>
+                <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Espacio</div>
                 <div className="font-semibold text-sm" style={{ color: '#0F1623' }}>{selected.spaces?.name}</div>
-                <div className="text-xs text-slate-500 flex items-center gap-1">
+                <div className="text-xs text-gray-500 flex items-center gap-1">
                   <MapPin size={10} /> {selected.spaces?.city}
                 </div>
               </div>
 
               {/* Client */}
               <div>
-                <div className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Cliente</div>
+                <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Cliente</div>
                 <div className="font-semibold text-sm" style={{ color: '#0F1623' }}>{selected.profiles?.full_name}</div>
-                <div className="text-xs text-slate-500">{selected.profiles?.email}</div>
-                {selected.profiles?.phone && <div className="text-xs text-slate-500">{selected.profiles.phone}</div>}
+                <div className="text-xs text-gray-500">{selected.profiles?.email}</div>
+                {selected.profiles?.phone && <div className="text-xs text-gray-500">{selected.profiles.phone}</div>}
               </div>
 
               {/* Host */}
               <div>
-                <div className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Propietario</div>
+                <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Propietario</div>
                 <div className="text-sm" style={{ color: '#374151' }}>{selected.spaces?.profiles?.full_name}</div>
               </div>
 
@@ -190,7 +190,7 @@ export default function AdminReservasPage() {
                   { label: 'Personas',  value: `${selected.guest_count}` },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex justify-between text-sm">
-                    <span className="text-slate-500">{label}</span>
+                    <span className="text-gray-500">{label}</span>
                     <span className="font-medium" style={{ color: '#0F1623' }}>{value}</span>
                   </div>
                 ))}
@@ -199,7 +199,7 @@ export default function AdminReservasPage() {
               {/* Paquete incluye */}
               {(selected as any).space_pricing?.pricing_type === 'fixed_package' && (selected as any).space_pricing?.package_includes && (
                 <div>
-                  <div className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">
+                  <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">
                     {(selected as any).space_pricing.package_name ? `Paquete · ${(selected as any).space_pricing.package_name}` : 'Incluye el paquete'}
                   </div>
                   <div className="rounded-xl px-3 py-2.5 text-xs whitespace-pre-line"
@@ -212,7 +212,7 @@ export default function AdminReservasPage() {
               {/* Addons */}
               {selected.booking_addons?.length > 0 && (
                 <div>
-                  <div className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Adicionales</div>
+                  <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Adicionales</div>
                   {selected.booking_addons.map((a: any, i: number) => (
                     <div key={i} className="flex justify-between text-xs py-1" style={{ color: '#6B7280' }}>
                       <span>{a.space_addons?.name}</span>
@@ -224,7 +224,7 @@ export default function AdminReservasPage() {
 
               {/* Financials */}
               <div className="rounded-xl p-4 space-y-2" style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid rgba(53,196,147,0.15)' }}>
-                <div className="flex justify-between text-sm text-slate-500">
+                <div className="flex justify-between text-sm text-gray-500">
                   <span>Total evento</span><span>{formatCurrency(Number(selected.total_amount))}</span>
                 </div>
                 <div className="flex justify-between text-sm font-bold" style={{ color: 'var(--brand)' }}>
@@ -238,7 +238,7 @@ export default function AdminReservasPage() {
 
               {/* Change status */}
               <div>
-                <div className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Cambiar estado</div>
+                <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Cambiar estado</div>
                 <div className="grid grid-cols-2 gap-2">
                   {['confirmed', 'pending', 'completed', 'cancelled_host'].map(status => {
                     const s = statusConfig[status]
@@ -260,8 +260,8 @@ export default function AdminReservasPage() {
           </div>
         ) : (
           <div className="rounded-2xl p-8 text-center" style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
-            <CalendarDays size={24} className="mx-auto mb-3 text-slate-300" />
-            <p className="text-sm text-slate-400">Selecciona una reserva para ver el detalle</p>
+            <CalendarDays size={24} className="mx-auto mb-3 text-gray-300" />
+            <p className="text-sm text-gray-400">Selecciona una reserva para ver el detalle</p>
           </div>
         )}
       </div>
