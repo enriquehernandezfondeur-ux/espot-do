@@ -295,7 +295,7 @@ export default function MisReservasPage() {
                   if (next && (next.status === 'accepted' || next.status === 'confirmed')) {
                     const targetId = next.id
                     getInstallments(targetId).then(data => {
-                      setSelected(prev => prev?.id === targetId ? prev : null)
+                      setSelected((prev: Booking | null) => prev?.id === targetId ? prev : null)
                       setInstallments(data)
                     }).catch(() => {})
                   }

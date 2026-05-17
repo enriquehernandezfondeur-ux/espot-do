@@ -185,6 +185,7 @@ export function emailBase({
 // ── Interfaces ────────────────────────────────────────────
 
 interface BookingData {
+  [key: string]: unknown
   guestName: string
   hostName: string
   spaceName: string

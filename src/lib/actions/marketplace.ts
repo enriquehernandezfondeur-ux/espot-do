@@ -256,8 +256,8 @@ export async function getSimilarSpaces(
     let fallbackQuery = supabase
       .from('spaces')
       .select(`id, name, slug, category, capacity_min, capacity_max, city, sector,
-               primary_activity, secondary_activities,
-               space_pricing(*), space_images(url, is_cover)`)
+               is_verified, primary_activity, secondary_activities,
+               space_pricing(*), space_images(url, is_cover, position)`)
       .eq('is_published', true)
       .eq('is_active', true)
       .neq('id', current.id)
