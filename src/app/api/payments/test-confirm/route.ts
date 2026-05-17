@@ -77,9 +77,9 @@ export async function POST(req: NextRequest) {
     newPaymentStatus = 'paid'
   }
 
-  // Confirmar reserva con valores correctos
+  // Confirmar reserva con valores correctos — lock optimista para evitar doble ejecución
   const isFirst = booking.status !== 'confirmed'
-  await supabase.from('bookings').update({
+  const { data: updateResult } = await supabase.from('bookings').update({
     status:             'confirmed',
     payment_status:     newPaymentStatus,
     paid_amount:        newPaidTotal,
@@ -90,7 +90,10 @@ export async function POST(req: NextRequest) {
     azul_response_code: '00',
     payout_status:      'pending',
     commission_status:  'collected',
-  }).eq('id', bookingId)
+  }).eq('id', bookingId).not('payment_status', 'in', '("paid")').select('id')
+  if (!updateResult || updateResult.length === 0) {
+    return NextResponse.json({ success: true, already: true })
+  }
 
   // Registrar en liquidaciones
   const commissionAmt = Number(booking.total_amount) * 0.10

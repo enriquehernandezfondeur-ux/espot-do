@@ -275,7 +275,7 @@ ${combos}
     <div class="spinner" id="sp"></div>
     <h2>Conectando con Azul Payments</h2>
     <p>Serás redirigido en un momento...</p>
-    <form id="azul-form" method="POST" action="${pageUrl}" style="display:none">
+    <form id="azul-form" method="POST" action="${escapeHtmlStatic(pageUrl)}" style="display:none">
       ${hiddenInputs}
     </form>
     <button class="btn" id="btn" type="button"

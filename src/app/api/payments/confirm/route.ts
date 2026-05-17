@@ -55,9 +55,12 @@ export async function POST(req: NextRequest) {
   }
 
   // Idempotencia para cuotas: verificar si la cuota específica ya fue pagada
+  // y que pertenece a este booking (evita marcar cuota de otra reserva del mismo usuario)
   if (cuotaId) {
     const { data: inst } = await supabase
-      .from('booking_installments').select('status').eq('id', cuotaId).single()
+      .from('booking_installments').select('status')
+      .eq('id', cuotaId).eq('booking_id', bookingId).single()
+    if (!inst) return NextResponse.json({ error: 'Cuota no encontrada para esta reserva' }, { status: 404 })
     if (inst?.status === 'paid') {
       return NextResponse.json({ success: true, already: true })
     }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
+import { createHmac } from 'crypto'
 
 const SITE_PASSWORD   = process.env.SITE_PASSWORD
 const COOKIE_NAME     = 'espot_preview_access'
@@ -12,7 +13,6 @@ const ALLOWED_ORIGINS = [
 ]
 
 function buildAccessToken(password: string): string {
-  const { createHmac } = require('crypto') as typeof import('crypto')
   return createHmac('sha256', 'espot-preview-v1').update(password).digest('hex')
 }
 const AUTH_ROUTES   = ['/dashboard', '/admin']

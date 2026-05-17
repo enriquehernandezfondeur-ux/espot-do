@@ -503,10 +503,10 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
               mobileTouchX.current = null
             }}>
             {images.length > 0 ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={images[photoIdx]?.url} alt={space.name}
-                loading="eager"
-                className="w-full h-full object-cover"
+              <Image src={images[photoIdx]?.url} alt={space.name}
+                fill priority
+                sizes="100vw"
+                className="object-cover cursor-zoom-in"
                 onClick={() => setShowLightbox(true)} />
             ) : (
               <div className="w-full h-full flex items-center justify-center">

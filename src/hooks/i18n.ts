@@ -51,7 +51,6 @@ export function useLocale() {
   return {
     locale: defaultLocale,
     setLocale: (newLocale: string) => {
-      console.log('Cambiar idioma a:', newLocale)
       // TODO: Implementar cambio de idioma
     },
   }

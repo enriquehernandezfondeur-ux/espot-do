@@ -6,7 +6,9 @@ import { useState, useEffect, useRef } from 'react'
 export function useLazyLoad(options?: IntersectionObserverInit) {
   const [isIntersecting, setIsIntersecting] = useState(false)
   const [hasIntersected, setHasIntersected] = useState(false)
-  const ref = useRef<HTMLElement>(null)
+  const ref        = useRef<HTMLElement>(null)
+  const optionsRef = useRef(options)
+  optionsRef.current = options  // siempre actualizado sin triggear el effect
 
   useEffect(() => {
     const element = ref.current
@@ -22,15 +24,12 @@ export function useLazyLoad(options?: IntersectionObserverInit) {
       {
         threshold: 0.1,
         rootMargin: '50px',
-        ...options,
+        ...optionsRef.current,
       }
     )
 
     observer.observe(element)
-
-    return () => {
-      observer.unobserve(element)
-    }
+    return () => { observer.unobserve(element) }
   }, [hasIntersected])
 
   return { ref, isIntersecting, hasIntersected }

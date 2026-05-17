@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react'
 import dynamic from 'next/dynamic'
+import Image from 'next/image'
 import Link from 'next/link'
 import { MapPin, Users, ArrowRight, Check, X, Building2, ChevronLeft, ChevronRight, Zap, Calendar, MessageCircle } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
@@ -167,9 +168,10 @@ export function SpaceCard({
               <CatIcon size={36} style={{ color: '#35C493', opacity: 0.6 }} />
             </div>
           ) : images.map((url, i) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img key={i} src={url} alt={space.name} loading="lazy"
-              className="absolute inset-0 w-full h-full object-cover transition-opacity duration-[400ms]"
+            <Image key={i} src={url} alt={space.name} fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              priority={i === 0}
+              className="object-cover transition-opacity duration-[400ms]"
               style={{ opacity: i === photoIdx ? 1 : 0, zIndex: i === photoIdx ? 1 : 0,
                 transform: i === photoIdx && isHovered ? 'scale(1.06)' : 'scale(1)',
                 transition: 'opacity 0.35s ease, transform 0.7s ease' }} />

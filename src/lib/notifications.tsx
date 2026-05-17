@@ -80,7 +80,7 @@ class NotificationManager {
         label: 'Ver detalles',
         onClick: () => {
           // TODO: Navigate to booking details
-          console.log('Navigate to booking details')
+          // TODO: Navigate to booking details
         },
       },
     })
@@ -115,7 +115,6 @@ class NotificationManager {
         label: 'Iniciar sesión',
         onClick: () => {
           // TODO: Navigate to login
-          console.log('Navigate to login')
         },
       },
     })

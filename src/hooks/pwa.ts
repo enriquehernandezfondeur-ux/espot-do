@@ -20,7 +20,7 @@ export function useServiceWorker() {
       navigator.serviceWorker
         .register('/sw.js')
         .then((reg) => {
-          console.log('Service Worker registrado:', reg.scope)
+          // Service Worker registrado
           setRegistration(reg)
 
           // Verificar si ya está instalado
