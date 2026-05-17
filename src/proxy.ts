@@ -58,6 +58,11 @@ function secureHeaders(res: NextResponse, request?: NextRequest): NextResponse {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  // Inyectar x-pathname en los headers del request para que los Server Components
+  // puedan leer la ruta actual (necesario para el onboarding del host)
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-pathname', pathname)
   const ip =
     request.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
     request.headers.get('x-real-ip') ?? 'unknown'
@@ -89,6 +94,8 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  const nextWithHeaders = () => NextResponse.next({ request: { headers: requestHeaders } })
+
   // Permitir siempre: auth, acceso privado, assets, API, favicon
   if (
     pathname.startsWith('/auth') ||
@@ -100,15 +107,15 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/og-') ||
     pathname.includes('.')
   ) {
-    return secureHeaders(NextResponse.next(), request)
+    return secureHeaders(nextWithHeaders(), request)
   }
 
   // Si no hay contraseña configurada, acceso libre — igual proteger auth routes
   if (!SITE_PASSWORD) {
     if (AUTH_ROUTES.some(r => pathname.startsWith(r))) {
-      return checkAuth(request, pathname)
+      return checkAuth(request, pathname, requestHeaders)
     }
-    return secureHeaders(NextResponse.next(), request)
+    return secureHeaders(nextWithHeaders(), request)
   }
 
   // Verificar cookie de acceso (preview)
@@ -124,14 +131,14 @@ export async function proxy(request: NextRequest) {
 
   // Preview OK — verificar autenticación para rutas protegidas
   if (AUTH_ROUTES.some(r => pathname.startsWith(r))) {
-    return checkAuth(request, pathname)
+    return checkAuth(request, pathname, requestHeaders)
   }
 
-  return secureHeaders(NextResponse.next())
+  return secureHeaders(nextWithHeaders())
 }
 
-async function checkAuth(request: NextRequest, pathname: string): Promise<NextResponse> {
-  const response = NextResponse.next()
+async function checkAuth(request: NextRequest, pathname: string, requestHeaders?: Headers): Promise<NextResponse> {
+  const response = NextResponse.next(requestHeaders ? { request: { headers: requestHeaders } } : undefined)
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

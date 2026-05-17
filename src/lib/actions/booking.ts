@@ -431,6 +431,7 @@ export async function rejectBooking(bookingId: string, reason?: string) {
           spaceName: space?.name ?? '',
           eventDate: bk.event_date,
           paidAmount,
+          refundAmount: paidAmount, // rechazo del host → reembolso completo
           bookingId,
         }),
       }),
@@ -443,6 +444,7 @@ export async function rejectBooking(bookingId: string, reason?: string) {
           spaceName: space?.name ?? '',
           eventDate: bk.event_date,
           paidAmount,
+          refundAmount: paidAmount,
           bookingId,
           cancelledBy: `Propietario (${hostName}) — rechazo`,
         }),
@@ -574,6 +576,44 @@ export interface RefundBankInfo {
   accountType:   string
 }
 
+// ── CÁLCULO DE REEMBOLSO SEGÚN POLÍTICA DE CANCELACIÓN ──────
+function calculateRefundAmount(paidAmount: number, eventDate: string, policy: string): number {
+  if (paidAmount <= 0) return 0
+
+  // Parsear eventDate con T12:00 para evitar bug de timezone en RD (UTC-4)
+  const event = new Date(eventDate + 'T12:00')
+  const now   = new Date()
+  const diffMs   = event.getTime() - now.getTime()
+  const diffDays = diffMs / (1000 * 60 * 60 * 24) // días fraccionarios hasta el evento
+
+  switch (policy) {
+    case 'very_flexible':
+      // 100% si cancela hasta 24h antes; 0% si < 24h
+      return diffDays >= 1 ? paidAmount : 0
+
+    case 'flexible':
+      // 100% si 7+ días; 50% si 2–6 días; 0% si < 48h
+      if (diffDays >= 7)  return paidAmount
+      if (diffDays >= 2)  return Math.round(paidAmount * 0.5)
+      return 0
+
+    case 'moderate':
+      // 100% si 14+ días; 50% si 7–13 días; 0% si < 7 días
+      if (diffDays >= 14) return paidAmount
+      if (diffDays >= 7)  return Math.round(paidAmount * 0.5)
+      return 0
+
+    case 'strict':
+      // 50% si 30+ días; 0% si < 30 días
+      if (diffDays >= 30) return Math.round(paidAmount * 0.5)
+      return 0
+
+    default:
+      // Política desconocida → sin reembolso (comportamiento seguro)
+      return 0
+  }
+}
+
 export async function cancelBooking(bookingId: string, reason?: string, refundBankInfo?: RefundBankInfo) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -581,7 +621,7 @@ export async function cancelBooking(bookingId: string, reason?: string, refundBa
 
   const { data: bk } = await supabase
     .from('bookings')
-    .select(`*, spaces!space_id(name, host_id, profiles!host_id(full_name, email, google_refresh_token, google_calendar_connected)), profiles!guest_id(full_name, email)`)
+    .select(`*, spaces!space_id(name, host_id, profiles!host_id(full_name, email, google_refresh_token, google_calendar_connected), space_conditions(cancellation_policy)), profiles!guest_id(full_name, email)`)
     .eq('id', bookingId)
     .single()
 
@@ -600,6 +640,11 @@ export async function cancelBooking(bookingId: string, reason?: string, refundBa
     .eq('booking_id', bookingId)
     .eq('status', 'paid')
   const paidAmount = paidInstallments?.reduce((sum, i) => sum + Number(i.amount), 0) ?? 0
+
+  // Calcular reembolso según política de cancelación del espacio
+  const spaceConditions = (space as any)?.space_conditions as any
+  const cancellationPolicy: string = spaceConditions?.cancellation_policy ?? 'strict'
+  const refundAmount = calculateRefundAmount(paidAmount, bk.event_date, cancellationPolicy)
 
   const newStatus = isGuest ? 'cancelled_guest' : 'cancelled_host'
 
@@ -649,6 +694,7 @@ export async function cancelBooking(bookingId: string, reason?: string, refundBa
           spaceName: space?.name ?? '',
           eventDate: bk.event_date,
           paidAmount,
+          refundAmount,
           bookingId,
         }),
       }),
@@ -661,6 +707,7 @@ export async function cancelBooking(bookingId: string, reason?: string, refundBa
           spaceName: space?.name ?? '',
           eventDate: bk.event_date,
           paidAmount,
+          refundAmount,
           bookingId,
           cancelledBy,
           refundBankInfo,

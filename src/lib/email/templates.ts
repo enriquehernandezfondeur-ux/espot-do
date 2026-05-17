@@ -478,23 +478,40 @@ export function tplSolicitudCotizacionCliente(rawD: BookingData) {
 
 export function tplReembolsoPendiente(rawData: {
   guestName: string; spaceName: string; eventDate: string
-  paidAmount: number; bookingId: string
+  paidAmount: number; refundAmount: number; bookingId: string
 }) {
   const data = { ...rawData, guestName: esc(rawData.guestName), spaceName: esc(rawData.spaceName) }
+  const hasRefund = data.refundAmount > 0
+
+  const refundRows = hasRefund
+    ? [
+        { label: 'Monto pagado',       value: formatCurrency(data.paidAmount) },
+        { label: 'Monto a reembolsar', value: `${formatCurrency(data.refundAmount)} (seg&uacute;n pol&iacute;tica de cancelaci&oacute;n)` },
+        { label: 'Estado reembolso',   value: 'En proceso' },
+        { label: 'Tiempo estimado',    value: '3&ndash;5 d&iacute;as h&aacute;biles' },
+        { label: 'Referencia',         value: data.bookingId.slice(0, 8).toUpperCase() },
+      ]
+    : [
+        { label: 'Monto pagado',       value: formatCurrency(data.paidAmount) },
+        { label: 'Reembolso',          value: 'Sin reembolso' },
+        { label: 'Referencia',         value: data.bookingId.slice(0, 8).toUpperCase() },
+      ]
+
+  const refundNote = hasRefund
+    ? `<p style="color:#374151;margin:0 0 12px;">Realizaremos la transferencia a tu cuenta bancaria en ese plazo. Para consultas incluye la referencia en tu mensaje.</p>`
+    : `<p style="color:#6B7280;font-size:13px;background:#FEF2F2;border:1px solid #FEE2E2;border-radius:10px;padding:12px 16px;margin:0 0 12px;">Seg&uacute;n la pol&iacute;tica de este espacio, esta cancelaci&oacute;n no genera reembolso.</p>`
+
   return emailBase({
-    title: 'Tu reembolso est&aacute; en proceso',
+    title: hasRefund ? 'Tu reembolso est&aacute; en proceso' : 'Reserva cancelada &mdash; Sin reembolso',
     subtitle: `Reserva cancelada en ${data.spaceName}`,
-    accentColor: '#D97706',
+    accentColor: hasRefund ? '#D97706' : '#6B7280',
     body: `
       <p style="color:#374151;margin:0 0 16px;">Hola <strong>${data.guestName}</strong>, tu reserva en <strong>${data.spaceName}</strong> para el ${formatDate(data.eventDate)} fue cancelada.</p>
-      ${infoBox([
-        { label: 'Monto pagado',      value: formatCurrency(data.paidAmount) },
-        { label: 'Estado reembolso',  value: 'En proceso' },
-        { label: 'Tiempo estimado',   value: '3&ndash;5 d&iacute;as h&aacute;biles' },
-        { label: 'Referencia',        value: data.bookingId.slice(0, 8).toUpperCase() },
-      ])}
-      <p style="color:#374151;margin:0 0 12px;">Realizaremos la transferencia a tu cuenta bancaria en ese plazo. Para consultas incluye la referencia en tu mensaje.</p>`,
-    cta: { text: 'Contactar soporte', url: `mailto:contacto@espot.do?subject=Reembolso ${data.bookingId.slice(0,8).toUpperCase()}` },
+      ${infoBox(refundRows)}
+      ${refundNote}`,
+    cta: hasRefund
+      ? { text: 'Contactar soporte', url: `mailto:contacto@espot.do?subject=Reembolso ${data.bookingId.slice(0,8).toUpperCase()}` }
+      : { text: 'Explorar otros espacios', url: `${SITE}/buscar` },
   })
 }
 
@@ -502,7 +519,7 @@ export function tplReembolsoPendiente(rawData: {
 
 export function tplReembolsoPendienteAdmin(rawData: {
   guestName: string; guestEmail: string; spaceName: string
-  eventDate: string; paidAmount: number; bookingId: string
+  eventDate: string; paidAmount: number; refundAmount: number; bookingId: string
   cancelledBy: string
   refundBankInfo?: { holderName: string; bank: string; accountNumber: string; accountType: string }
 }) {
@@ -519,6 +536,7 @@ export function tplReembolsoPendienteAdmin(rawData: {
       accountType:   rawData.refundBankInfo.accountType,
     } : undefined,
   }
+  const hasRefund = data.refundAmount > 0
   const bankRows = data.refundBankInfo ? [
     { label: '&mdash; Datos bancarios &mdash;', value: '' },
     { label: 'Titular',           value: data.refundBankInfo.holderName },
@@ -529,20 +547,27 @@ export function tplReembolsoPendienteAdmin(rawData: {
     { label: 'Datos bancarios',   value: 'PENDIENTE: El cliente no proporcion&oacute; datos. Contactarlo.' },
   ]
 
+  const actionNote = hasRefund
+    ? `<p style="color:#374151;margin:0 0 16px;">Una reserva con pagos procesados fue cancelada. <strong>Realiza la transferencia bancaria al cliente por el monto indicado seg&uacute;n la pol&iacute;tica de cancelaci&oacute;n.</strong></p>`
+    : `<p style="color:#374151;margin:0 0 16px;">Una reserva con pagos procesados fue cancelada. <strong>Seg&uacute;n la pol&iacute;tica del espacio, NO corresponde reembolso. No se requiere transferencia.</strong></p>`
+
   return emailBase({
-    title: 'ALERTA: Cancelaci&oacute;n con reembolso pendiente',
-    subtitle: `Reserva ${data.bookingId.slice(0, 8).toUpperCase()} &mdash; Transferencia requerida`,
-    accentColor: '#DC2626',
+    title: hasRefund
+      ? 'ALERTA: Cancelaci&oacute;n con reembolso pendiente'
+      : 'INFO: Cancelaci&oacute;n sin reembolso',
+    subtitle: `Reserva ${data.bookingId.slice(0, 8).toUpperCase()} &mdash; ${hasRefund ? 'Transferencia requerida' : 'Sin acci&oacute;n requerida'}`,
+    accentColor: hasRefund ? '#DC2626' : '#6B7280',
     body: `
-      <p style="color:#374151;margin:0 0 16px;">Una reserva con pagos procesados fue cancelada. <strong>Realiza la transferencia bancaria al cliente por el monto indicado.</strong></p>
+      ${actionNote}
       ${infoBox([
-        { label: 'Reserva ID',          value: data.bookingId },
-        { label: 'Cliente',             value: `${data.guestName} &middot; ${data.guestEmail}` },
-        { label: 'Espacio',             value: data.spaceName },
-        { label: 'Fecha del evento',    value: formatDate(data.eventDate) },
-        { label: 'Monto a transferir',  value: formatCurrency(data.paidAmount) },
-        { label: 'Cancelado por',       value: data.cancelledBy },
-        ...bankRows,
+        { label: 'Reserva ID',             value: data.bookingId },
+        { label: 'Cliente',                value: `${data.guestName} &middot; ${data.guestEmail}` },
+        { label: 'Espacio',                value: data.spaceName },
+        { label: 'Fecha del evento',       value: formatDate(data.eventDate) },
+        { label: 'Monto pagado',           value: formatCurrency(data.paidAmount) },
+        { label: 'Monto a reembolsar',     value: hasRefund ? formatCurrency(data.refundAmount) : 'Sin reembolso (pol&iacute;tica)' },
+        { label: 'Cancelado por',          value: data.cancelledBy },
+        ...(hasRefund ? bankRows : []),
       ])}`,
     cta: { text: 'Ver en panel admin', url: `${SITE}/admin/liquidaciones` },
   })
@@ -610,6 +635,111 @@ export function tplRecordatorioEvento(rawData: {
         <li>Coordina decoraci&oacute;n o acceso con anticipaci&oacute;n v&iacute;a mensajes</li>
       </ul>`,
     cta: { text: 'Ver detalle de mi reserva', url: `${SITE}/dashboard/reservas/${data.bookingId}` },
+  })
+}
+
+// ── 17. DISPUTA ABIERTA ───────────────────────────────────────
+
+/**
+ * Se llama en tres variantes:
+ *  - 'opener'     → confirmación a quien abrió la disputa
+ *  - 'respondent' → alerta a la parte acusada
+ *  - 'admin'      → alerta interna con todos los detalles
+ */
+export function tplDisputaAbierta(rawData: {
+  variant: 'opener' | 'respondent' | 'admin'
+  recipientName: string
+  spaceName: string
+  bookingId: string
+  category: string
+  reason: string
+  disputeId: string
+  ctaUrl: string
+  // solo para variant === 'admin'
+  openerName?:  string
+  openerEmail?: string
+  againstName?: string
+  againstEmail?: string
+  openerRole?:  string
+}) {
+  const data = {
+    ...rawData,
+    recipientName: esc(rawData.recipientName),
+    spaceName:     esc(rawData.spaceName),
+    category:      esc(rawData.category),
+    reason:        esc(rawData.reason),
+    openerName:    esc(rawData.openerName),
+    openerEmail:   esc(rawData.openerEmail),
+    againstName:   esc(rawData.againstName),
+    againstEmail:  esc(rawData.againstEmail),
+    openerRole:    esc(rawData.openerRole),
+  }
+
+  const shortBookingId = data.bookingId.slice(0, 8).toUpperCase()
+  const shortDisputeId = data.disputeId.slice(0, 8).toUpperCase()
+
+  if (data.variant === 'opener') {
+    return emailBase({
+      title:       'Disputa recibida',
+      subtitle:    `Tu disputa sobre ${data.spaceName} fue registrada y está siendo revisada.`,
+      accentColor: '#D97706',
+      body: `
+        <p style="color:#374151;margin:0 0 16px;">Hola <strong>${data.recipientName}</strong>, recibimos tu disputa correctamente.</p>
+        <p style="color:#374151;margin:0 0 20px;">Nuestro equipo revisar&aacute; los detalles y te contactar&aacute; dentro de las pr&oacute;ximas 48 horas h&aacute;biles con una resoluci&oacute;n.</p>
+        ${infoBox([
+          { label: 'ID disputa',          value: shortDisputeId },
+          { label: 'Reserva',             value: shortBookingId },
+          { label: 'Espacio',             value: data.spaceName },
+          { label: 'Categor&iacute;a',    value: data.category },
+          { label: 'Estado',              value: 'Abierta &mdash; en revisi&oacute;n' },
+        ])}
+        <p style="color:#6B7280;font-size:13px;margin:0;">Si tienes evidencia adicional (fotos, capturas, contratos) pu&eacute;des enviarla a <a href="mailto:contacto@espot.do" style="color:#35C493;">contacto@espot.do</a> indicando el ID de tu disputa.</p>`,
+      cta:  { text: 'Ver mis reservas', url: data.ctaUrl },
+      note: 'No tomes acciones unilaterales mientras la disputa est&aacute; activa. Espot mediar&aacute; de forma imparcial.',
+    })
+  }
+
+  if (data.variant === 'respondent') {
+    return emailBase({
+      title:       'Hay una disputa en tu contra',
+      subtitle:    `Alguien abri&oacute; una disputa relacionada con la reserva en ${data.spaceName}.`,
+      accentColor: '#DC2626',
+      body: `
+        <p style="color:#374151;margin:0 0 16px;">Hola <strong>${data.recipientName}</strong>, queremos informarte que se registr&oacute; una disputa relacionada con una reserva donde participas.</p>
+        <p style="color:#374151;margin:0 0 20px;">Nuestro equipo revisar&aacute; ambas versiones antes de tomar cualquier decisi&oacute;n. Si tienes informaci&oacute;n que aporte claridad, env&iacute;ala a <a href="mailto:contacto@espot.do" style="color:#35C493;">contacto@espot.do</a>.</p>
+        ${infoBox([
+          { label: 'ID disputa',            value: shortDisputeId },
+          { label: 'Reserva',               value: shortBookingId },
+          { label: 'Espacio',               value: data.spaceName },
+          { label: 'Categor&iacute;a',      value: data.category },
+          { label: 'Descripci&oacute;n',
+            value: data.reason.length > 120
+              ? data.reason.slice(0, 120) + '&hellip;'
+              : data.reason },
+        ])}
+        <p style="color:#6B7280;font-size:13px;margin:0;">Nuestro equipo podr&iacute;a contactarte para recopilar tu versi&oacute;n de los hechos.</p>`,
+      cta:  { text: 'Ver mi reserva', url: data.ctaUrl },
+      note: 'No realices cambios ni cancelaciones en la reserva mientras la disputa est&aacute; activa.',
+    })
+  }
+
+  // variant === 'admin'
+  return emailBase({
+    title:       'ALERTA: Nueva disputa abierta',
+    subtitle:    `Disputa ${shortDisputeId} &mdash; ${data.category}`,
+    accentColor: '#DC2626',
+    body: `
+      <p style="color:#374151;margin:0 0 16px;">Se abri&oacute; una nueva disputa que requiere revisi&oacute;n.</p>
+      ${infoBox([
+        { label: 'ID disputa',                 value: data.disputeId },
+        { label: 'Reserva',                    value: shortBookingId },
+        { label: 'Espacio',                    value: data.spaceName },
+        { label: 'Categor&iacute;a',           value: data.category },
+        { label: 'Qui&eacute;n abre',          value: `${data.openerName ?? '&mdash;'} (${data.openerRole ?? '&mdash;'}) &middot; ${data.openerEmail ?? '&mdash;'}` },
+        { label: 'Contra',                     value: `${data.againstName ?? '&mdash;'} &middot; ${data.againstEmail ?? '&mdash;'}` },
+        { label: 'Descripci&oacute;n completa', value: data.reason },
+      ])}`,
+    cta: { text: 'Gestionar disputa', url: data.ctaUrl },
   })
 }
 
