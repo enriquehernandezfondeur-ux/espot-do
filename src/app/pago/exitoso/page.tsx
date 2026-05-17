@@ -108,8 +108,13 @@ function ExitoContent() {
         router.push(`/pago/fallido?b=${bookingId}&code=${encodeURIComponent(isoCode)}&r=${encodeURIComponent(responseMessage || 'Pago no aprobado')}`)
         return
       } else {
-        // Recarga manual o llegó sin params de Azul — mostrar si ya está pagado en DB
-        setConfirmed(isPaid(data?.payment_status))
+        // Recarga manual o llegó sin params de Azul
+        if (!isPaid(data?.payment_status)) {
+          // No está pagado — redirigir al flujo de pago
+          router.push(`/pago/${bookingId}`)
+          return
+        }
+        setConfirmed(true)
       }
 
       setTimeout(() => setVisible(true), 80)

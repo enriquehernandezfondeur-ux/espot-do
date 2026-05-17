@@ -41,7 +41,7 @@ export default async function ContratoPage({ params }: { params: Promise<{ booki
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Poppins', sans-serif; color: #1a1a1a; background: #f4f6f5; font-size: 13px; line-height: 1.6; }
+        body { font-family: 'Poppins', sans-serif; color: #1a1a1a; background: #f4f6f5; font-size: 15px; line-height: 1.6; }
         .page { max-width: 720px; margin: 32px auto; padding: 48px; background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
         h1 { font-size: 20px; text-align: center; margin-bottom: 4px; letter-spacing: -0.02em; font-weight: 700; }
         .subtitle { text-align: center; color: #888; margin-bottom: 28px; font-size: 12px; }
@@ -50,7 +50,7 @@ export default async function ContratoPage({ params }: { params: Promise<{ booki
         .intro { margin-bottom: 24px; font-size: 13px; color: #555; line-height: 1.7; padding: 16px; background: #f8fafc; border-radius: 8px; border-left: 3px solid #35C493; }
         h2 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin: 28px 0 10px; padding-bottom: 6px; border-bottom: 2px solid #35C493; color: #03313C; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
-        td { padding: 7px 12px; vertical-align: top; font-size: 13px; }
+        td { padding: 7px 12px; vertical-align: top; font-size: 13px; word-break: break-word; }
         td:first-child { width: 42%; color: #666; font-weight: 400; }
         td:last-child { font-weight: 600; color: #1a1a1a; }
         tr:nth-child(even) td { background: #f8fafc; }
@@ -59,6 +59,7 @@ export default async function ContratoPage({ params }: { params: Promise<{ booki
         .clause p { color: #555; font-size: 12px; line-height: 1.6; }
         .total-row td { font-size: 15px; font-weight: 700; padding-top: 12px; border-top: 2px solid #03313C; color: #03313C; background: #f0fdf9 !important; }
         .sigs { display: flex; gap: 40px; margin-top: 48px; padding-top: 32px; border-top: 1px solid #e5e7eb; }
+        @media (max-width: 480px) { .sigs { flex-direction: column; gap: 24px; } }
         .sig { flex: 1; text-align: center; font-size: 12px; color: #666; }
         .sig-line { height: 1px; background: #333; margin-bottom: 8px; }
         .footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #f0f0f0; font-size: 10px; color: #bbb; text-align: center; }

@@ -10,6 +10,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Explorar espacios — espot.do',
     description: 'Salones, rooftops, villas y más para eventos en RD.',
+    images: [{ url: '/og-default.jpg', width: 1200, height: 630, alt: 'Explorar espacios para eventos — espot.do' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    images: ['/og-default.jpg'],
   },
 }
 

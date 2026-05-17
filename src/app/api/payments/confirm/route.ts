@@ -102,9 +102,10 @@ export async function POST(req: NextRequest) {
     newPaymentStatus = 'paid'
   }
 
-  // Actualizar booking — solo sobrescribir confirmed_at si es el PRIMER pago
+  // Actualizar booking con lock optimista — solo afecta si no fue ya procesado por otra request
+  // Esto previene doble inserción en payments si dos tabs llaman a confirm simultáneamente
   const isFirstConfirmation = booking.status !== 'confirmed'
-  const { error: updateError } = await supabase.from('bookings').update({
+  const { error: updateError, data: updateResult } = await supabase.from('bookings').update({
     status:             'confirmed',
     payment_status:     newPaymentStatus,
     paid_amount:        newPaidTotal,      // acumulado, no solo este pago
@@ -116,8 +117,15 @@ export async function POST(req: NextRequest) {
     azul_response_code: azulParams.IsoCode,
     payout_status:      'pending',
     commission_status:  'collected',
-  }).eq('id', bookingId)
+  })
+    .eq('id', bookingId)
+    .not('payment_status', 'in', '("paid")')  // lock: solo si no está ya pagado
+    .select('id')
   if (updateError) return NextResponse.json({ error: 'Error al confirmar la reserva' }, { status: 500 })
+  // Si el UPDATE no afectó ninguna fila es porque ya fue procesado por otra request concurrente
+  if (!updateResult || updateResult.length === 0) {
+    return NextResponse.json({ success: true, already: true })
+  }
 
   // Registrar en liquidaciones
   const { error: liqErr } = await supabase.from('liquidaciones').upsert({

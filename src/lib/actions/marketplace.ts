@@ -1,5 +1,6 @@
 'use server'
 
+import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { getBaseFromSub } from '@/lib/activities'
 
@@ -173,7 +174,7 @@ export async function getPublishedSpaces(filters?: {
     query = query.or(`primary_activity.eq.${filters.baseActivity},secondary_activities.cs.{${filters.baseActivity}}`)
   }
 
-  const { data: spaces } = await query.order('created_at', { ascending: false })
+  const { data: spaces } = await query.order('created_at', { ascending: false }).limit(100)
   if (!spaces) return []
 
   // Filtrar por disponibilidad de fecha si se especificó
@@ -287,7 +288,7 @@ export async function getSimilarSpaces(
   return scored
 }
 
-export async function getSpaceBySlug(slug: string) {
+export const getSpaceBySlug = cache(async function getSpaceBySlug(slug: string) {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('spaces')
@@ -310,4 +311,4 @@ export async function getSpaceBySlug(slug: string) {
     console.error('[getSpaceBySlug] DB error:', error.message)
   }
   return data
-}
+})

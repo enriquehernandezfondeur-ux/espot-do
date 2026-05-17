@@ -123,22 +123,22 @@ function PagoContent({ bookingId }: { bookingId: string }) {
 
         {/* Banner seguridad de pago */}
         <div className="mt-6 mx-auto max-w-xs flex items-start gap-2.5 px-4 py-3 rounded-2xl text-left"
-          style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.18)' }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#35C493" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
           <div>
-            <p className="text-xs font-bold mb-0.5" style={{ color: 'rgba(255,255,255,0.8)' }}>
+            <p className="text-xs font-bold mb-0.5" style={{ color: '#065F46' }}>
               Pago 100% seguro
             </p>
-            <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            <p className="text-xs leading-relaxed" style={{ color: '#374151' }}>
               Tus datos de tarjeta son procesados por Azul Payments con 3D Secure. Espot nunca almacena tu número de tarjeta.
             </p>
           </div>
         </div>
 
         <Link href={`/pago/cancelado?b=${bookingId}`}
-          className="block mt-4 text-xs" style={{ color: '#CBD5E1', textDecoration: 'underline' }}>
+          className="block mt-4 text-xs" style={{ color: '#6B7280', textDecoration: 'underline' }}>
           Cancelar
         </Link>
 

@@ -94,6 +94,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   const [createdBookingId, setCreatedBookingId] = useState<string | null>(null)
   const [error,            setError]            = useState('')
   const [termsAccepted,    setTermsAccepted]    = useState(false)
+  const errorRef = useRef<HTMLDivElement>(null)
 
   // ── Disponibilidad real de la fecha seleccionada ──────
   const [dateBlocked,  setDateBlocked]  = useState(false)
@@ -102,7 +103,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   useEffect(() => {
     if (!eventDate) { setDateBlocked(false); setBookedRanges([]); return }
     let mounted = true
-    const supabase = createClient()
+    const supabase = supabaseRef.current
     Promise.all([
       supabase.from('space_availability').select('start_time,end_time,block_type')
         .eq('space_id', space.id).eq('blocked_date', eventDate),
@@ -213,11 +214,11 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     return { start: allowedTimeRange.start, end: minsToTime(latestStartMins + SLOT_MINS) }
   }, [allowedTimeRange, fixedDuration])
 
-  // Rango para picker de salida: incluye la hora exacta de cierre del bloque
+  // Rango para picker de salida: el usuario puede salir hasta la hora exacta de cierre del bloque
   const endPickerAllowedRange = useMemo(() => {
     if (!allowedTimeRange) return allowedTimeRange
     const blockEndMins = blockEndToMins(allowedTimeRange.end, allowedTimeRange.start)
-    return { start: allowedTimeRange.start, end: minsToTime(blockEndMins + SLOT_MINS) }
+    return { start: allowedTimeRange.start, end: minsToTime(blockEndMins) }
   }, [allowedTimeRange])
 
   // Bloque demasiado corto para la duración fija
@@ -261,9 +262,9 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     if (selectedHours > 0 && selectedHours < 0.5)
       return 'La reserva mínima es de 30 minutos'
     if (minHours && selectedHours < minHours)
-      return `Este Espot requiere mínimo ${minHours} hora${minHours > 1 ? 's' : ''} de reserva`
+      return `Este espacio requiere mínimo ${minHours} hora${minHours > 1 ? 's' : ''} de reserva`
     if (maxHours && selectedHours > maxHours)
-      return `Este Espot permite máximo ${maxHours} hora${maxHours > 1 ? 's' : ''} de reserva`
+      return `Este espacio permite máximo ${maxHours} hora${maxHours > 1 ? 's' : ''} de reserva`
     if (allowedTimeRange) {
       const endMins      = timeToMins(realEndTime)
       const blockEndMins = blockEndToMins(allowedTimeRange.end, allowedTimeRange.start)
@@ -334,7 +335,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
       if (hoursError) return false
       return true
     }
-    if (step === 2) return guestCount >= 1
+    if (step === 2) return guestCount >= (space.capacity_min ?? 1) && guestCount <= (space.capacity_max ?? 9999)
     if (step === 3) return !!eventType && (eventType !== 'Otro' || customEventType.trim().length > 0)
     if (step === maxStep) return termsAccepted
     return true
@@ -393,6 +394,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
       })
       if ('error' in result) {
         setError(result.error ?? 'Error al procesar la solicitud')
+        setTimeout(() => errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50)
       } else {
         setCreatedBookingId(result.bookingId ?? null)
         setSuccessType(
@@ -1225,7 +1227,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             </div>
 
             {error && (
-              <div className="text-sm px-4 py-3 rounded-xl"
+              <div ref={errorRef} className="text-sm px-4 py-3 rounded-xl"
                 style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626' }}>
                 {error}
               </div>

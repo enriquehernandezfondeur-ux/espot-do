@@ -103,7 +103,7 @@ export async function createBooking(payload: CreateBookingPayload) {
       if (selectedH <= 0)
         return { error: 'El horario seleccionado no es válido. Por favor elige inicio y fin correctos.' }
       if (minH > 0 && selectedH < minH)
-        return { error: `Este Espot requiere mínimo ${minH} hora${minH > 1 ? 's' : ''} de reserva.` }
+        return { error: `Este espacio requiere mínimo ${minH} hora${minH > 1 ? 's' : ''} de reserva.` }
       if (effectiveMax > 0 && selectedH > effectiveMax + 0.25)
         return { error: `El máximo para este espacio es ${effectiveMax} hora${effectiveMax !== 1 ? 's' : ''}. Selecciona un horario dentro de ese rango.` }
 
@@ -257,6 +257,9 @@ export async function createBooking(payload: CreateBookingPayload) {
       const { error: addonInsertError } = await supabase.from('booking_addons').insert(addonRows)
       if (addonInsertError) {
         console.error('[createBooking] addon insert failed:', addonInsertError.message)
+        // Rollback: eliminar la reserva para evitar inconsistencia de precio
+        await supabase.from('bookings').delete().eq('id', booking.id)
+        return { error: 'Error al guardar los adicionales. Por favor intenta de nuevo.' }
       } else {
         // Recalcular addons_total en servidor y corregir el valor en el booking
         const serverAddonsTotal = addonRows.reduce((s, r) => s + r.subtotal, 0)
@@ -613,6 +616,13 @@ export async function cancelBooking(bookingId: string, reason?: string, refundBa
 
   if (error) return { error: error.message }
   if (!cancelUpdated || cancelUpdated.length === 0) return { error: 'La reserva no se puede cancelar en su estado actual' }
+
+  // Cancelar cuotas pendientes y vencidas para que el cron no envíe recordatorios de pago
+  await supabase
+    .from('booking_installments')
+    .update({ status: 'cancelled' })
+    .eq('booking_id', bookingId)
+    .in('status', ['pending', 'overdue'])
 
   // Google Calendar: eliminar evento si existe
   const hostProfile = space?.profiles as any

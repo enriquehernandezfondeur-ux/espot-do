@@ -24,7 +24,7 @@ export default function PagosPage() {
       .catch(() => setLoading(false))
   }, [])
 
-  const totalPaid    = bookings.filter(b => PAID_PS.includes(b.payment_status) && ['confirmed','completed'].includes(b.status)).reduce((s, b) => s + Number(b.total_amount), 0)
+  const totalPaid    = bookings.filter(b => PAID_PS.includes(b.payment_status) && ['confirmed','completed','accepted'].includes(b.status)).reduce((s, b) => s + Number(b.paid_amount ?? b.total_amount), 0)
   const totalPending = bookings.filter(b => b.status === 'accepted' && !PAID_PS.includes(b.payment_status)).reduce((s, b) => s + Number(b.total_amount), 0)
 
   if (loading) return (

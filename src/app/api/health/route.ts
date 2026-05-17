@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
   // Solo accesible desde Vercel Cron o con la clave interna
   const authHeader = request.headers.get('authorization')
   const healthSecret = process.env.HEALTH_SECRET ?? process.env.CRON_SECRET
-  if (healthSecret && authHeader !== `Bearer ${healthSecret}`) {
+  if (!healthSecret || authHeader !== `Bearer ${healthSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

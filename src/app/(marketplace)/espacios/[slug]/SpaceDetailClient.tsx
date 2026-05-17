@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 import { getSpaceReviews, type ReviewsSummary } from '@/lib/actions/reviews'
 import Link from 'next/link'
 import {
@@ -330,7 +331,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   const url = window.location.href
                   // En móvil con Web Share API → share sheet nativo (WhatsApp, Instagram, SMS...)
                   if (navigator.share) {
-                    navigator.share({ title: space.name, text: `¡Mira este Espot en espot.do! ${space.name}`, url })
+                    navigator.share({ title: space.name, text: `¡Mira este espacio en espot.do! ${space.name}`, url })
                   } else {
                     setShowShareMenu(s => !s)
                   }
@@ -349,7 +350,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
 
                     {/* WhatsApp */}
                     <a
-                      href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`¡Mira este Espot! ${space.name} — ${window.location.href}`)}`}
+                      href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`¡Mira este espacio en espot.do! ${space.name} — ${window.location.href}`)}`}
                       target="_blank" rel="noopener noreferrer"
                       onClick={() => setShowShareMenu(false)}
                       className="flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors hover:bg-gray-50"
@@ -400,10 +401,13 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
               className="relative row-span-2 overflow-hidden group cursor-zoom-in"
               style={{ background: 'var(--bg-elevated)' }}>
               {images[0] ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={images[0].url} alt={space.name}
-                  loading="eager"
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+                <Image
+                  src={images[0].url}
+                  alt={space.name}
+                  fill
+                  priority
+                  sizes="(max-width: 768px) 100vw, 60vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
                   <Building2 size={80} style={{ color: 'var(--text-muted)', opacity: 0.12 }} />
@@ -902,8 +906,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                           fullName={(host as any).full_name ?? null}
                           size={48}
                         />
-                        {/* Punto online */}
-                        <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white bg-green-400" />
+                        {/* Indicador online eliminado — hardcoded verde engañaría al usuario */}
                       </div>
 
                       <div className="flex-1 min-w-0">
@@ -935,7 +938,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                     {/* Body */}
                     <div className="px-5 pt-4 pb-5" style={{ background: '#fff' }}>
                       <h3 className="font-bold text-base mb-1" style={{ color: 'var(--text-primary)' }}>
-                        ¿Tienes preguntas sobre este Espot?
+                        ¿Tienes preguntas sobre este espacio?
                       </h3>
                       <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                         Habla directamente con {host.full_name?.split(' ')[0]} antes de reservar.

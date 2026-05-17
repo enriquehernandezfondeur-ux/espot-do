@@ -813,7 +813,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                 style={{ background: categoria ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${categoria ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: categoria ? 'var(--brand)' : 'var(--text-primary)' }}>
                 <Icon size={13} style={{ flexShrink: 0 }} />
                 <span>{categoria ? cat?.label : 'Espacio'}</span>
-                {categoria ? <span onClick={e => { e.stopPropagation(); setCategoria('') }} className="flex items-center justify-center w-4 h-4"><X size={10} /></span> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
+                {categoria ? <span onClick={e => { e.stopPropagation(); setCategoria('') }} className="flex items-center justify-center w-7 h-7 -mr-1"><X size={12} /></span> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
               </button>
             )})()}
 
@@ -823,7 +823,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               style={{ background: activity ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${activity ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: activity ? 'var(--brand)' : 'var(--text-primary)' }}>
               <Tag size={13} style={{ flexShrink: 0 }} />
               <span>{activityLabel || 'Evento'}</span>
-              {activity ? <span onClick={e => { e.stopPropagation(); setActivity('') }} className="flex items-center justify-center w-4 h-4"><X size={10} /></span> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
+              {activity ? <span onClick={e => { e.stopPropagation(); setActivity('') }} className="flex items-center justify-center w-7 h-7 -mr-1"><X size={12} /></span> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
             </button>
 
             {/* Personas */}
@@ -832,7 +832,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               style={{ background: capacidad ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${capacidad ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: capacidad ? 'var(--brand)' : 'var(--text-primary)' }}>
               <Users size={13} style={{ flexShrink: 0 }} />
               <span>{capacidad ? `${capacidad}+` : 'Personas'}</span>
-              {capacidad ? <span onClick={e => { e.stopPropagation(); applyCapacity('') }} className="flex items-center justify-center w-4 h-4"><X size={10} /></span> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
+              {capacidad ? <span onClick={e => { e.stopPropagation(); applyCapacity('') }} className="flex items-center justify-center w-7 h-7 -mr-1"><X size={12} /></span> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
             </button>
 
             {/* Sector */}
@@ -841,7 +841,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               style={{ background: sector ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${sector ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: sector ? 'var(--brand)' : 'var(--text-primary)' }}>
               <MapPin size={13} style={{ flexShrink: 0 }} />
               <span className="max-w-[90px] truncate">{sector || 'Dónde'}</span>
-              {sector ? <span onClick={e => { e.stopPropagation(); clearSector() }} className="flex items-center justify-center w-4 h-4"><X size={10} /></span> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
+              {sector ? <span onClick={e => { e.stopPropagation(); clearSector() }} className="flex items-center justify-center w-7 h-7 -mr-1"><X size={12} /></span> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
             </button>
 
             {/* Fecha */}
@@ -850,7 +850,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               style={{ background: dateFrom ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${dateFrom ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: dateFrom ? 'var(--brand)' : 'var(--text-primary)' }}>
               <CalendarDays size={13} style={{ flexShrink: 0 }} />
               <span>{dateFrom ? fmtDateShort(dateFrom) : 'Fecha'}</span>
-              {dateFrom ? <span onClick={e => { e.stopPropagation(); setDateFrom(''); setTimeFrom('') }} className="flex items-center justify-center w-4 h-4"><X size={10} /></span> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
+              {dateFrom ? <span onClick={e => { e.stopPropagation(); setDateFrom(''); setTimeFrom('') }} className="flex items-center justify-center w-7 h-7 -mr-1"><X size={12} /></span> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
             </button>
 
             {/* Precio */}
@@ -859,7 +859,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               style={{ background: pricingFilter ? (PRICING_TYPES.find(p=>p.value===pricingFilter)?.bg ?? 'var(--brand-dim)') : '#fff', border: `1.5px solid ${pricingFilter ? (PRICING_TYPES.find(p=>p.value===pricingFilter)?.border ?? 'var(--brand-border)') : 'var(--border-medium)'}`, color: pricingFilter ? (PRICING_TYPES.find(p=>p.value===pricingFilter)?.text ?? 'var(--brand)') : 'var(--text-primary)' }}>
               <Clock size={13} style={{ flexShrink: 0 }} />
               <span>{pricingFilter ? PRICING_TYPES.find(p=>p.value===pricingFilter)?.label : 'Precio'}</span>
-              {pricingFilter ? <span onClick={e => { e.stopPropagation(); setPricingFilter('') }} className="flex items-center justify-center w-4 h-4"><X size={10} /></span> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
+              {pricingFilter ? <span onClick={e => { e.stopPropagation(); setPricingFilter('') }} className="flex items-center justify-center w-7 h-7 -mr-1"><X size={12} /></span> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
             </button>
           </div>
 
@@ -925,12 +925,21 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
             {filtered.length === 0
               ? <EmptyState onClear={clearAll} recentSpaces={recentIds.map(id => spaces.find(s => s.id === id)).filter(Boolean)} />
               : (
-                <div className="grid grid-cols-2 xl:grid-cols-3 gap-4 pb-6">
-                  {filtered.map(space => (
-                    <SpaceCard key={space.id} space={space} isHovered={hoveredId === space.id}
-                      onHover={handleCardHover} dateFilter={dateFrom || undefined} timeFilter={timeFrom || undefined}
-                      isAvailable={dateFrom ? !blockedIds.has(space.id) : undefined} />
-                  ))}
+                <div className="relative">
+                  {availLoading && (
+                    <div className="absolute inset-0 z-10 flex items-start justify-center pt-8 rounded-xl pointer-events-none"
+                      style={{ background: 'rgba(255,255,255,0.6)' }}>
+                      <div className="w-5 h-5 rounded-full border-2 border-t-transparent animate-spin"
+                        style={{ borderColor: 'var(--brand)', borderTopColor: 'transparent' }} />
+                    </div>
+                  )}
+                  <div className={`grid grid-cols-2 xl:grid-cols-3 gap-4 pb-6 transition-opacity${availLoading ? ' opacity-50' : ''}`}>
+                    {filtered.map(space => (
+                      <SpaceCard key={space.id} space={space} isHovered={hoveredId === space.id}
+                        onHover={handleCardHover} dateFilter={dateFrom || undefined} timeFilter={timeFrom || undefined}
+                        isAvailable={dateFrom ? !blockedIds.has(space.id) : undefined} />
+                    ))}
+                  </div>
                 </div>
               )
             }

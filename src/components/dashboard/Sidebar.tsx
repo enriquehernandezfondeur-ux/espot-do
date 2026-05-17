@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard, Building2, CalendarDays, ClipboardList,
   MessageSquareQuote, MessageCircle, BarChart3, Settings,
-  LogOut, User, ArrowRight, Banknote, Shield, Menu, X, Star, Search,
+  LogOut, User, ArrowRight, Banknote, Shield, Menu, X, Star, Search, TrendingUp,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -21,6 +21,7 @@ const navItems = [
   { href: '/dashboard/host/resenas',      label: 'Reseñas',      icon: Star },
   { href: '/dashboard/host/pagos',        label: 'Pagos',        icon: Banknote },
   { href: '/dashboard/host/finanzas',     label: 'Finanzas',     icon: BarChart3 },
+  { href: '/dashboard/host/analytics',   label: 'Analytics',    icon: TrendingUp },
   { href: '/dashboard/host/ajustes',      label: 'Ajustes',      icon: Settings },
 ]
 

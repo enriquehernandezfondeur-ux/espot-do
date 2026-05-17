@@ -66,10 +66,11 @@ export function useServiceWorker() {
       }
 
       checkInstalled()
-      window.addEventListener('appinstalled', () => setIsInstalled(true))
+      const handleAppInstalled = () => setIsInstalled(true)
+      window.addEventListener('appinstalled', handleAppInstalled)
 
       return () => {
-        window.removeEventListener('appinstalled', () => setIsInstalled(true))
+        window.removeEventListener('appinstalled', handleAppInstalled)
       }
     }
   }, [])

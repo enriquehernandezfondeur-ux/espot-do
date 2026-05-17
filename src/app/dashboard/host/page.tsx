@@ -111,6 +111,7 @@ export default function DashboardPage() {
     }
   }
   async function handleReject(id: string) {
+    if (!window.confirm('¿Estás seguro de que quieres rechazar esta solicitud? Esta acción no se puede deshacer.')) return
     const r = await rejectBooking(id)
     if ('error' in r) {
       setActionError(r.error ?? 'Error al rechazar')
@@ -168,7 +169,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Métricas principales ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
         <StatCard
           label="Ingresos del mes"
           value={formatCurrency(stats?.revenueThisMonth ?? 0)}
@@ -323,12 +324,20 @@ export default function DashboardPage() {
 
         {/* Filas */}
         {upcomingBookings.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-14 gap-3">
+          <div className="flex flex-col items-center justify-center py-14 gap-3 text-center px-6">
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
               style={{ background: 'var(--bg-elevated)' }}>
               <CalendarDays size={20} style={{ color: 'var(--text-muted)' }} />
             </div>
-            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No hay reservas próximas</p>
+            <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>No hay reservas próximas</p>
+            <p className="text-xs max-w-xs" style={{ color: 'var(--text-muted)' }}>
+              Cuando alguien solicite tu espacio, aparecerá aquí. Comparte tu espacio para recibir más solicitudes.
+            </p>
+            <Link href="/dashboard/host/espacio"
+              className="mt-1 text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
+              style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
+              Ver mi espacio →
+            </Link>
           </div>
         ) : (
           <div>

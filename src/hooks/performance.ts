@@ -31,7 +31,7 @@ export function useLazyLoad(options?: IntersectionObserverInit) {
     return () => {
       observer.unobserve(element)
     }
-  }, [hasIntersected, options])
+  }, [hasIntersected])
 
   return { ref, isIntersecting, hasIntersected }
 }

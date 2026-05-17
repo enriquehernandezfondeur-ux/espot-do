@@ -3,15 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { getSpaceCoords } from '@/components/map/SpacesMap'
 
-const LEAFLET_CSS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
-
-function injectLeafletCSS() {
-  if (document.querySelector(`link[href="${LEAFLET_CSS}"]`)) return
-  const link = document.createElement('link')
-  link.rel = 'stylesheet'
-  link.href = LEAFLET_CSS
-  document.head.appendChild(link)
-}
+import 'leaflet/dist/leaflet.css'
 
 interface Props {
   space: any
@@ -25,8 +17,6 @@ export default function SpaceLocationMap({ space }: Props) {
     if (!containerRef.current || mapRef.current) return
     const coords = getSpaceCoords(space)
     if (!coords) return
-
-    injectLeafletCSS()
 
     import('leaflet').then(({ default: L }) => {
       if (!containerRef.current || mapRef.current) return

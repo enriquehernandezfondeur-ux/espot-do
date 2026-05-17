@@ -75,7 +75,7 @@ export default function ClientDashboard() {
           {[
             { num: '1', title: 'Elige tu espacio', desc: 'Busca por sector, tipo de evento o capacidad. Todos los espacios son verificados.', color: 'var(--brand)' },
             { num: '2', title: 'Selecciona fecha y horario', desc: 'Elige el día y las horas que necesitas. El propietario confirma disponibilidad.', color: '#2563EB' },
-            { num: '3', title: 'Paga en cuotas', desc: 'Solo pagas al confirmar. El resto según el plan de cuotas según cuánto falta para tu evento.', color: '#7C3AED' },
+            { num: '3', title: 'Paga en cuotas', desc: 'Solo pagas al confirmar. El saldo se divide en cuotas según cuánto falta para tu evento.', color: '#7C3AED' },
           ].map(step => (
             <div key={step.num} className="flex items-start gap-4 px-5 py-4">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold text-white shrink-0"

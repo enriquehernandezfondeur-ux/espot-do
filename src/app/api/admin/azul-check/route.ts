@@ -33,7 +33,8 @@ export async function GET() {
       '0', '', '', '0', '', '',
       PRIVATE_KEY,
     ].join('')
-    computedHash = createHmac('sha512', PRIVATE_KEY).update(msg).digest('hex')
+    const msgBuf = Buffer.from(msg, 'utf16le')
+    computedHash = createHmac('sha512', PRIVATE_KEY).update(msgBuf).digest('hex')
     hashOk = computedHash === EXPECTED
   } catch (e: any) {
     hashError = e.message

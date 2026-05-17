@@ -11,18 +11,12 @@ export async function GET(
   { params }: { params: Promise<{ bookingId: string }> }
 ) {
   const { bookingId } = await params
-  const amount        = Number(req.nextUrl.searchParams.get('amount') ?? '0')
   const cuotaRaw      = req.nextUrl.searchParams.get('cuota')
   const cuotaId       = cuotaRaw && cuotaRaw !== 'undefined' ? cuotaRaw : null
   const isDebug       = req.nextUrl.searchParams.get('debug') === '1'
 
-  if (!amount || amount <= 0) {
-    return new NextResponse(errorHtml('Monto de reserva inválido.'), {
-      status: 400, headers: { 'Content-Type': 'text/html' },
-    })
-  }
-
-  // Verificar que el usuario autenticado es el dueño de la reserva
+  // Verificar autenticación y calcular el monto real desde la DB (nunca del cliente)
+  let amount = 0
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -31,16 +25,57 @@ export async function GET(
         status: 401, headers: { 'Content-Type': 'text/html' },
       })
     }
-    const { data: booking } = await supabase
-      .from('bookings').select('guest_id').eq('id', bookingId).single()
-    if (!booking || booking.guest_id !== user.id) {
-      return new NextResponse(errorHtml('No autorizado para este pago.'), {
-        status: 403, headers: { 'Content-Type': 'text/html' },
-      })
+
+    if (cuotaId) {
+      // Pago de cuota: obtener monto real de la cuota en DB
+      const { data: inst } = await supabase
+        .from('booking_installments')
+        .select('amount, status, booking_id')
+        .eq('id', cuotaId)
+        .eq('booking_id', bookingId)
+        .single()
+      if (!inst) {
+        return new NextResponse(errorHtml('Cuota no encontrada.'), {
+          status: 404, headers: { 'Content-Type': 'text/html' },
+        })
+      }
+      // Verificar que la reserva pertenece al usuario
+      const { data: bk } = await supabase
+        .from('bookings').select('guest_id').eq('id', bookingId).single()
+      if (!bk || bk.guest_id !== user.id) {
+        return new NextResponse(errorHtml('No autorizado para este pago.'), {
+          status: 403, headers: { 'Content-Type': 'text/html' },
+        })
+      }
+      if (inst.status === 'paid') {
+        return new NextResponse(errorHtml('Esta cuota ya fue pagada.'), {
+          status: 400, headers: { 'Content-Type': 'text/html' },
+        })
+      }
+      amount = Math.round(Number(inst.amount))
+    } else {
+      // Pago único: obtener el total real de la reserva en DB
+      const { data: booking } = await supabase
+        .from('bookings')
+        .select('guest_id, total_amount')
+        .eq('id', bookingId)
+        .single()
+      if (!booking || booking.guest_id !== user.id) {
+        return new NextResponse(errorHtml('No autorizado para este pago.'), {
+          status: 403, headers: { 'Content-Type': 'text/html' },
+        })
+      }
+      amount = Math.round(Number(booking.total_amount))
     }
   } catch {
     return new NextResponse(errorHtml('Error al verificar la sesión. Intenta de nuevo.'), {
       status: 500, headers: { 'Content-Type': 'text/html' },
+    })
+  }
+
+  if (!amount || amount <= 0) {
+    return new NextResponse(errorHtml('Monto de reserva inválido.'), {
+      status: 400, headers: { 'Content-Type': 'text/html' },
     })
   }
 
@@ -74,7 +109,13 @@ export async function GET(
       .join('\n    ')
 
     // Modo test exacto: usa los valores del ejemplo oficial de Azul para verificar el hash
+    // Solo disponible en desarrollo/staging — nunca en producción
     if (req.nextUrl.searchParams.get('test_exact') === '1') {
+      if (process.env.NODE_ENV === 'production') {
+        return new NextResponse(errorHtml('El modo test no está disponible en producción.'), {
+          status: 403, headers: { 'Content-Type': 'text/html' },
+        })
+      }
       const { createHmac } = await import('crypto')
       const PRIV = process.env.AZUL_PRIVATE_KEY ?? ''
       const MERCHANT_ID   = process.env.AZUL_MERCHANT_ID   ?? ''
@@ -140,12 +181,17 @@ OrderNumber: <strong>${ORDER}</strong> · Amount: <strong>${AMT}</strong> · ITB
       const TYPES  = ['E-Commerce', 'Ecommerce', 'ecommerce', 'Retail', 'Marketplace']
 
       function makeHash(name: string, type: string) {
-        const str = [
+        const PRIV_KEY = process.env.AZUL_PRIVATE_KEY ?? ''
+        const msg = [
           fields.MerchantId, name, type, fields.CurrencyCode,
-          fields.OrderNumber, fields.Amount, fields.Itbis,
+          fields.OrderNumber, fields.Amount, fields.ITBIS,
           fields.ApprovedUrl, fields.DeclinedUrl, fields.CancelUrl,
+          fields.UseCustomField1, fields.CustomField1Label, fields.CustomField1Value,
+          fields.UseCustomField2, fields.CustomField2Label, fields.CustomField2Value,
+          PRIV_KEY,
         ].join('')
-        return createHmac('sha512', PRIV).update(str).digest('hex').toUpperCase()
+        const msgBuf = Buffer.from(msg, 'utf16le')
+        return createHmac('sha512', PRIV_KEY).update(msgBuf).digest('hex').toUpperCase()
       }
 
       function mkForm(name: string, type: string, hash: string, label: string, color: string) {
@@ -271,6 +317,10 @@ function errorHtml(msg: string) {
 min-height:100vh;background:#F4F6F8}
 .c{background:#fff;padding:32px;border-radius:20px;text-align:center;max-width:340px}
 h2{color:#DC2626;margin:0 0 8px}p{color:#6B7280;font-size:13px}a{color:#35C493}</style>
-</head><body><div class="c"><h2>Error</h2><p>${msg}</p><br>
+</head><body><div class="c"><h2>Error</h2><p>${escapeHtmlStatic(msg)}</p><br>
 <a href="javascript:history.back()">← Volver</a></div></body></html>`
+}
+
+function escapeHtmlStatic(s: string) {
+  return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }

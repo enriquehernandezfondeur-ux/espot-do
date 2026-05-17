@@ -51,6 +51,15 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   const pathname    = usePathname()
   const router      = useRouter()
   const supabaseRef = useRef(createClient())
+  const [adminName, setAdminName] = useState<string>('Admin')
+
+  useEffect(() => {
+    supabaseRef.current.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return
+      supabaseRef.current.from('profiles').select('full_name').eq('id', user.id).single()
+        .then(({ data }) => { if (data?.full_name) setAdminName(data.full_name.split(' ')[0]) })
+    })
+  }, [])
 
   async function handleLogout() {
     await supabaseRef.current.auth.signOut()
@@ -94,7 +103,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
             <Shield size={13} style={{ color: 'var(--brand)' }} />
           </div>
           <div className="min-w-0">
-            <div className="text-xs font-bold text-white truncate">Enrique H.</div>
+            <div className="text-xs font-bold text-white truncate">{adminName}</div>
             <div className="text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>Super Admin</div>
           </div>
         </div>

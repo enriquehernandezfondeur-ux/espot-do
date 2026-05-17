@@ -2,16 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 
-// Inyectar CSS de Leaflet via link tags
-const LEAFLET_CSS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
-
-function injectLeafletCSS() {
-  if (document.querySelector(`link[href="${LEAFLET_CSS}"]`)) return
-  const link = document.createElement('link')
-  link.rel = 'stylesheet'
-  link.href = LEAFLET_CSS
-  document.head.appendChild(link)
-}
+import 'leaflet/dist/leaflet.css'
 
 // ── Coordenadas de sectores de Santo Domingo y otras ciudades ──
 export const SECTOR_COORDS: Record<string, [number, number]> = {
@@ -149,8 +140,6 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return
     let cancelled = false
-
-    injectLeafletCSS()
 
     import('leaflet').then((LModule) => {
       if (cancelled || !containerRef.current || mapRef.current) return

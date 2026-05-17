@@ -305,20 +305,20 @@ export default function HostReservasPage() {
                           <div className="flex gap-2 mt-3" onClick={e => e.stopPropagation()}>
                             {bk.status === 'pending' && (
                               <button onClick={() => doAccept(bk.id)} disabled={!!actionId}
-                                className="flex-1 text-xs font-semibold py-2.5 rounded-xl transition-colors"
+                                className="flex-1 text-xs font-semibold py-3 rounded-xl transition-colors"
                                 style={{ background: 'rgba(22,163,74,0.12)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)' }}>
                                 {actionId === bk.id + 'a' ? '...' : '✓ Aceptar'}
                               </button>
                             )}
                             {bk.status === 'quote_requested' && (
                               <button onClick={() => { window.location.href = '/dashboard/host/cotizaciones' }} disabled={!!actionId}
-                                className="flex-1 text-xs font-semibold py-2.5 rounded-xl transition-colors"
+                                className="flex-1 text-xs font-semibold py-3 rounded-xl transition-colors"
                                 style={{ background: 'rgba(37,99,235,0.1)', color: '#2563EB', border: '1px solid rgba(37,99,235,0.15)' }}>
                                 Responder cotización →
                               </button>
                             )}
                             <button onClick={() => { setSelected(bk); setRejectReason(''); setShowRejectForm(true) }} disabled={!!actionId}
-                              className="flex-1 text-xs font-semibold py-2.5 rounded-xl transition-colors"
+                              className="flex-1 text-xs font-semibold py-3 rounded-xl transition-colors"
                               style={{ background: 'rgba(220,38,38,0.1)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }}>
                               ✕ Rechazar
                             </button>

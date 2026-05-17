@@ -11,6 +11,9 @@ export const metadata: Metadata = {
     description: 'Salones, rooftops, restaurantes y más para eventos en RD.',
     type: 'website',
   },
+  twitter: {
+    card: 'summary_large_image',
+  },
 }
 
 export default async function HomePage() {
