@@ -18,19 +18,42 @@ import Link from 'next/link'
 import DatePicker from '@/components/ui/DatePicker'
 import TimePicker from '@/components/ui/TimePicker'
 
-const EVENT_TYPES_BY_BASE: Record<string, string[]> = {
-  fiesta:      ['Cumpleaños', 'Boda', 'Quinceañera', 'Graduación', 'Baby Shower', 'Despedida de soltera', 'Despedida de soltero', 'Fiesta de empresa', 'Cena / Comida', 'Karaoke', 'Celebración', 'Otro'],
-  corporativo: ['Evento corporativo', 'Networking', 'Conferencia', 'Team Building', 'Lanzamiento de producto', 'Capacitación', 'Gala / Premiación', 'Afterwork', 'Desayuno de negocios', 'Otro'],
-  produccion:  ['Sesión de fotos', 'Video musical', 'Rodaje', 'Podcast / Radio', 'Shooting publicitario', 'Contenido digital', 'Desfile de modas', 'Casting', 'Otro'],
-  reunion:     ['Reunión de trabajo', 'Meeting', 'Coworking', 'Clase / Curso', 'Seminario / Charla', 'Taller', 'Entrevista', 'Otro'],
-}
-
-function getEventTypes(space: any): string[] {
-  const base = space.primary_activity as string | undefined
-  return EVENT_TYPES_BY_BASE[base ?? ''] ?? [
-    'Cumpleaños', 'Boda', 'Quinceañera', 'Corporativo', 'Sesión de fotos', 'Reunión', 'Otro',
-  ]
-}
+// Lista plana de tipos de evento — ordenada por popularidad general en RD
+// Sin segmentar por tipo de espacio para que el cliente siempre vea todas las opciones
+const ALL_EVENT_TYPES = [
+  'Cumpleaños',
+  'Boda',
+  'Quinceañera',
+  'Graduación',
+  'Baby Shower',
+  'Corporativo',
+  'Reunión de trabajo',
+  'Conferencia',
+  'Networking',
+  'Sesión de fotos',
+  'Despedida de soltera',
+  'Despedida de soltero',
+  'Team Building',
+  'Karaoke',
+  'Cena / Comida',
+  'Fiesta de empresa',
+  'Lanzamiento de producto',
+  'Capacitación',
+  'Podcast / Radio',
+  'Rodaje',
+  'Video musical',
+  'Gala / Premiación',
+  'Clase / Curso',
+  'Seminario / Charla',
+  'Taller',
+  'Afterwork',
+  'Shooting publicitario',
+  'Contenido digital',
+  'Desfile de modas',
+  'Casting',
+  'Celebración',
+  'Otro',
+]
 
 function AddonIcon({ name, size = 16 }: { name: string; size?: number }) {
   const n = name.toLowerCase()
@@ -979,7 +1002,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               </p>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              {getEventTypes(space).map(et => {
+              {ALL_EVENT_TYPES.map(et => {
                 const isSelected = eventType === et
                 return (
                   <button key={et} onClick={() => { setEventType(et); if (et !== 'Otro') setCustomEventType('') }}
