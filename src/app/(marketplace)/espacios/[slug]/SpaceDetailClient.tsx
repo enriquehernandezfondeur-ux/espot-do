@@ -56,8 +56,6 @@ function HostAvatar({ avatarUrl, fullName, size = 56 }: { avatarUrl: string | nu
   )
 }
 
-const DAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
-
 function daysToLabel(days: number[]): string {
   if (!days?.length) return '—'
   const s = [...days].sort((a, b) => a - b)

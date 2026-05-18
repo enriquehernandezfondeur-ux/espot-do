@@ -134,7 +134,7 @@ export async function proxy(request: NextRequest) {
     return checkAuth(request, pathname, requestHeaders)
   }
 
-  return secureHeaders(nextWithHeaders())
+  return secureHeaders(nextWithHeaders(), request)
 }
 
 async function checkAuth(request: NextRequest, pathname: string, requestHeaders?: Headers): Promise<NextResponse> {

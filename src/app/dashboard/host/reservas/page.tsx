@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { CalendarDays, Clock, Users, CheckCircle, XCircle, Eye, Search, Loader2, Download } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getHostBookings, acceptBooking, rejectBooking, completeBooking } from '@/lib/actions/host'
@@ -73,6 +74,7 @@ const FILTERS = [
 ]
 
 export default function HostReservasPage() {
+  const router = useRouter()
   const [bookings, setBookings]         = useState<Booking[]>([])
   const [loading, setLoading]           = useState(true)
   const [filter, setFilter]             = useState('all')
@@ -312,7 +314,7 @@ export default function HostReservasPage() {
                               </button>
                             )}
                             {bk.status === 'quote_requested' && (
-                              <button onClick={() => { window.location.href = '/dashboard/host/cotizaciones' }} disabled={!!actionId}
+                              <button onClick={() => router.push('/dashboard/host/cotizaciones')} disabled={!!actionId}
                                 className="flex-1 text-xs font-semibold py-3 rounded-xl transition-colors"
                                 style={{ background: 'rgba(37,99,235,0.1)', color: '#2563EB', border: '1px solid rgba(37,99,235,0.15)' }}>
                                 Responder cotización →

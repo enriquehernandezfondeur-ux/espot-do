@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import { CATEGORIES, PRICING_TYPES } from './constants'
 import { formatCurrency } from '@/lib/utils'
-import { SUB_ACTIVITIES, SUB_TO_BASE, SUB_BY_BASE, BASE_ACTIVITIES } from '@/lib/activities'
+import { SUB_ACTIVITIES, SUB_TO_BASE } from '@/lib/activities'
 import { SpaceCard } from './SpaceCard'
 import { DateTimePicker } from './DateTimePicker'
 
