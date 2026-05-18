@@ -198,7 +198,11 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
   const [showShareMenu,   setShowShareMenu]   = useState(false)
   const [copied,          setCopied]          = useState(false)
 
-  const images      = space.space_images ?? []
+  const images      = [...(space.space_images ?? [])].sort((a: any, b: any) => {
+    if (a.is_cover && !b.is_cover) return -1
+    if (!a.is_cover && b.is_cover) return 1
+    return (a.position ?? 99) - (b.position ?? 99)
+  })
   const pricing     = space.space_pricing?.find((p: any) => p.is_active) ?? space.space_pricing?.[0]
   const conditions  = space.space_conditions?.[0]
   const paymentTerms = space.space_payment_terms?.[0]

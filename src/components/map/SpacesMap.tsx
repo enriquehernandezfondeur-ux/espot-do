@@ -61,10 +61,10 @@ function stableJitter(id: string, range: number, seed: number): number {
 
 export function getSpaceCoords(space: any): [number, number] | null {
   // Solo usar lat/lng si son coordenadas válidas dentro de República Dominicana
-  const lat = parseFloat(space.lat)
-  const lng = parseFloat(space.lng)
+  const lat = parseFloat(space.latitude ?? space.lat)
+  const lng = parseFloat(space.longitude ?? space.lng)
   if (
-    space.lat && space.lng &&
+    (space.latitude || space.lat) && (space.longitude || space.lng) &&
     !isNaN(lat) && !isNaN(lng) &&
     lat >= 17.5 && lat <= 20.0 &&   // bounds approx. RD
     lng >= -72.0 && lng <= -68.0

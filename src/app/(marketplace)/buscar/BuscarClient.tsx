@@ -12,6 +12,7 @@ import {
   Wind, Projector, Zap, ShowerHead, MonitorPlay,
 } from 'lucide-react'
 import { CATEGORIES, PRICING_TYPES } from './constants'
+import { formatCurrency } from '@/lib/utils'
 import { SUB_ACTIVITIES, SUB_TO_BASE } from '@/lib/activities'
 import { SpaceCard } from './SpaceCard'
 import { DateTimePicker } from './DateTimePicker'
@@ -357,8 +358,8 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
     sector    && { key: 'sector',    label: sector,         onRemove: () => clearSector() },
     dateFrom  && { key: 'date',   label: timeFrom ? `${fmtDateShort(dateFrom)} · ${fmtTime(timeFrom)}` : fmtDateShort(dateFrom), onRemove: () => { setDateFrom(''); setTimeFrom('') } },
     capacidad && { key: 'cap',    label: `${capacidad}+ personas`, onRemove: () => applyCapacity('') },
-    priceMin  && { key: 'priceMin',  label: `Desde RD$${priceMin}`,   onRemove: () => setPriceMin('') },
-    priceMax  && { key: 'priceMax',  label: `Hasta RD$${priceMax}`,   onRemove: () => setPriceMax('') },
+    priceMin  && { key: 'priceMin',  label: `Desde ${formatCurrency(parseInt(priceMin))}`,   onRemove: () => setPriceMin('') },
+    priceMax  && { key: 'priceMax',  label: `Hasta ${formatCurrency(parseInt(priceMax))}`,   onRemove: () => setPriceMax('') },
     ...selectedAmenities.map(k => ({
       key: k,
       label: AMENITIES.find(a => a.key === k)?.label ?? k,
@@ -1024,9 +1025,9 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                 {filtered.map(space => {
                   const cover   = space.space_images?.find((i: any) => i.is_cover)?.url ?? space.space_images?.[0]?.url
                   const p       = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
-                  const price   = p?.pricing_type === 'hourly'              ? `RD$${Number(p.hourly_price).toLocaleString('es-DO')}/hr`
-                                : p?.pricing_type === 'minimum_consumption' ? `Desde RD$${Number(p.minimum_consumption).toLocaleString('es-DO')}`
-                                : p?.pricing_type === 'fixed_package'       ? `RD$${Number(p.fixed_price).toLocaleString('es-DO')}`
+                  const price   = p?.pricing_type === 'hourly'              ? `${formatCurrency(p.hourly_price)}/hr`
+                                : p?.pricing_type === 'minimum_consumption' ? `Desde ${formatCurrency(p.minimum_consumption)}`
+                                : p?.pricing_type === 'fixed_package'       ? formatCurrency(p.fixed_price)
                                 : 'Cotizar'
                   const isActive = hoveredId === space.id
                   return (
