@@ -298,7 +298,8 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
         const getPrice = (s: any) => {
           const p = s.space_pricing?.find((x: any) => x.is_active) ?? s.space_pricing?.[0]
           if (!p) return 0
-          return p.hourly_price ?? p.minimum_consumption ?? p.fixed_price ?? 0
+          if (p.pricing_type === 'hourly') return (p.hourly_price ?? 0) * (p.min_hours ?? 1)
+          return p.minimum_consumption ?? p.fixed_price ?? p.hourly_price ?? 0
         }
         return sortBy === 'precio_asc' ? getPrice(a) - getPrice(b) : getPrice(b) - getPrice(a)
       })
@@ -932,7 +933,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
         >
           <div className="overflow-y-auto pr-2" style={{ flex: '0 0 60%' }}>
             {filtered.length === 0
-              ? <EmptyState onClear={clearAll} recentSpaces={recentIds.map(id => spaces.find(s => s.id === id)).filter(Boolean)} />
+              ? <EmptyState onClear={clearAll} recentSpaces={recentIds.map(id => spaces.find(s => s.id === id)).filter(Boolean)} hasDateFilter={!!dateFrom} />
               : (
                 <div className="relative">
                   {availLoading && (
@@ -967,7 +968,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
         {mobileView === 'list' && (
           <div className="md:hidden w-full" style={{ overflowX: 'hidden' }}>
             {filtered.length === 0
-              ? <EmptyState onClear={clearAll} recentSpaces={recentIds.map(id => spaces.find(s => s.id === id)).filter(Boolean)} />
+              ? <EmptyState onClear={clearAll} recentSpaces={recentIds.map(id => spaces.find(s => s.id === id)).filter(Boolean)} hasDateFilter={!!dateFrom} />
               : (
                 <div className="grid grid-cols-1 gap-4 w-full"
                   style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))' }}>
@@ -1447,7 +1448,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
 }
 
 // ── Empty state ───────────────────────────────────────────
-function EmptyState({ onClear, recentSpaces }: { onClear: () => void; recentSpaces?: any[] }) {
+function EmptyState({ onClear, recentSpaces, hasDateFilter }: { onClear: () => void; recentSpaces?: any[]; hasDateFilter?: boolean }) {
   return (
     <div>
       <div className="flex flex-col items-center justify-center py-14 rounded-3xl text-center"
@@ -1455,10 +1456,12 @@ function EmptyState({ onClear, recentSpaces }: { onClear: () => void; recentSpac
         <Search size={32} className="mb-3" style={{ color: 'var(--text-muted)' }} />
         <h3 className="font-bold text-lg mb-2" style={{ color: 'var(--text-primary)' }}>Sin resultados</h3>
         <p className="text-sm mb-5 px-4" style={{ color: 'var(--text-secondary)' }}>
-          Intenta con otros filtros o términos de búsqueda
+          {hasDateFilter
+            ? 'No hay disponibilidad para esa fecha con los filtros actuales. Prueba otra fecha o limpia los filtros.'
+            : 'Intenta con otros filtros o términos de búsqueda'}
         </p>
         <button onClick={onClear} className="btn-brand text-sm font-semibold px-5 py-3 rounded-xl">
-          Limpiar búsqueda
+          {hasDateFilter ? 'Ver todos los espacios' : 'Limpiar búsqueda'}
         </button>
       </div>
       {recentSpaces && recentSpaces.length > 0 && (

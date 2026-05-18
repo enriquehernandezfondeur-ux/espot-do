@@ -34,6 +34,7 @@ export async function getSpaceReviews(spaceId: string): Promise<ReviewsSummary> 
     .eq('space_id', spaceId)
     .eq('is_public', true)
     .order('created_at', { ascending: false })
+    .limit(30)
 
   const reviews = (data ?? []).map((r: any) => ({
     id:               r.id,

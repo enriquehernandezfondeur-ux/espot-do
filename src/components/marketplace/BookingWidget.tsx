@@ -1156,6 +1156,32 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               </div>
             )}
 
+            {/* ── Plan de cuotas en resumen final ── */}
+            {!isQuote && eventDate && subtotal > 0 && (() => {
+              const sched = buildSchedule(eventDate, subtotal)
+              if (sched.installments.length === 1) return null
+              return (
+                <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
+                  <div className="px-4 py-2.5 flex items-center gap-2"
+                    style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
+                    <CreditCard size={13} style={{ color: 'var(--brand)', flexShrink: 0 }} />
+                    <span className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>
+                      Plan de pagos — {sched.installments.length} cuotas
+                    </span>
+                  </div>
+                  {sched.installments.map((inst, i) => (
+                    <div key={i} className="flex items-center justify-between px-4 py-2"
+                      style={{ borderBottom: i < sched.installments.length - 1 ? '1px solid var(--border-subtle)' : 'none', background: '#fff' }}>
+                      <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{inst.label}</span>
+                      <span className="text-xs font-semibold tabular-nums" style={{ color: 'var(--text-primary)' }}>
+                        {formatCurrency(inst.amount)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )
+            })()}
+
             {/* ── Garantía Espot ── */}
             <div className="rounded-2xl overflow-hidden" style={{ border: '1.5px solid var(--brand-border)' }}>
               <div className="flex items-center gap-2.5 px-4 py-3"

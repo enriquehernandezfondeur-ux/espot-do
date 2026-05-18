@@ -140,8 +140,7 @@ export async function getPublishedSpaces(filters?: {
       is_verified, instant_booking, primary_activity, secondary_activities,
       profiles!host_id(full_name, avatar_url),
       space_images(url, is_cover, position),
-      space_pricing(pricing_type, hourly_price, minimum_consumption, fixed_price, package_name, weekend_multiplier, min_advance_amount, is_active),
-      space_addons(id, name, price, unit),
+      space_pricing(pricing_type, hourly_price, minimum_consumption, fixed_price, package_name, weekend_multiplier, min_advance_amount, min_hours, is_active),
       space_conditions(
         allows_external_decoration, allows_external_food, allows_external_alcohol,
         music_cutoff_time, cancellation_policy,
@@ -160,7 +159,7 @@ export async function getPublishedSpaces(filters?: {
   if (filters?.category)    query = query.eq('category', filters.category)
   if (filters?.capacity)    query = query.gte('capacity_max', filters.capacity)
   if (filters?.sector)      query = query.ilike('sector', `%${filters.sector}%`)
-  if (filters?.search)      query = query.ilike('name', `%${filters.search}%`)
+  if (filters?.search)      query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%,sector.ilike.%${filters.search}%`)
 
   // Filtro por sub-actividad (mapea a categoría base)
   if (filters?.activity) {
