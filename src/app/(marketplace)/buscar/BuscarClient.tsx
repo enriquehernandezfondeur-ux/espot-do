@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import { CATEGORIES, PRICING_TYPES } from './constants'
 import { formatCurrency } from '@/lib/utils'
-import { SUB_ACTIVITIES, SUB_TO_BASE } from '@/lib/activities'
+import { SUB_ACTIVITIES, SUB_TO_BASE, SUB_BY_BASE, BASE_ACTIVITIES } from '@/lib/activities'
 import { SpaceCard } from './SpaceCard'
 import { DateTimePicker } from './DateTimePicker'
 
@@ -480,26 +480,38 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                         {actQ && <button onClick={() => setActQ('')} style={{ color: 'var(--text-muted)' }}><X size={11} /></button>}
                       </div>
                     </div>
-                    {/* Lista de opciones filtradas */}
-                    <div style={{ maxHeight: 220, overflowY: 'auto' }}>
-                      {QUICK_ACTIVITIES
-                        .filter(a => !actQ || a.label.toLowerCase().includes(actQ.toLowerCase()))
-                        .map(a => {
-                          const isActive = activity === a.slug
-                          return (
-                            <button key={a.slug} onClick={() => { setActivity(isActive ? '' : a.slug); setActQ(''); setActOpen(false) }}
-                              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-all text-left"
-                              style={{ color: isActive ? 'var(--brand)' : 'var(--text-primary)', fontWeight: isActive ? 600 : 400 }}
-                              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}
-                              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
-                              <Tag size={12} style={{ color: isActive ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
-                              {a.label}
-                              {isActive && <Check size={13} style={{ color: 'var(--brand)', marginLeft: 'auto' }} />}
-                            </button>
-                          )
-                        })}
+                    {/* Lista agrupada por categoría base */}
+                    <div style={{ maxHeight: 280, overflowY: 'auto' }}>
+                      {BASE_ACTIVITIES.map(base => {
+                        const subs = SUB_BY_BASE[base.key].filter(s =>
+                          !actQ || s.label.toLowerCase().includes(actQ.toLowerCase())
+                        )
+                        if (subs.length === 0) return null
+                        return (
+                          <div key={base.key}>
+                            <div className="px-4 py-1.5 text-xs font-bold uppercase tracking-widest"
+                              style={{ color: base.color, background: base.bg }}>
+                              {base.label}
+                            </div>
+                            {subs.map(a => {
+                              const isActive = activity === a.key
+                              return (
+                                <button key={a.key} onClick={() => { setActivity(isActive ? '' : a.key); setActQ(''); setActOpen(false) }}
+                                  className="w-full flex items-center gap-2.5 px-4 py-2 text-sm transition-all text-left"
+                                  style={{ color: isActive ? 'var(--brand)' : 'var(--text-primary)', fontWeight: isActive ? 600 : 400 }}
+                                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}
+                                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
+                                  <Tag size={11} style={{ color: isActive ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
+                                  {a.label}
+                                  {isActive && <Check size={13} style={{ color: 'var(--brand)', marginLeft: 'auto' }} />}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        )
+                      })}
                       {/* Opción búsqueda personalizada */}
-                      {actQ.trim() && !QUICK_ACTIVITIES.some(a => a.label.toLowerCase() === actQ.toLowerCase()) && (
+                      {actQ.trim() && !SUB_ACTIVITIES.some(a => a.label.toLowerCase() === actQ.toLowerCase()) && (
                         <button
                           onClick={() => { setQ(actQ.trim()); setActivity(''); setActQ(''); setActOpen(false) }}
                           className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-all text-left border-t"

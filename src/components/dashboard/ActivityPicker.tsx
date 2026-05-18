@@ -1,7 +1,7 @@
 'use client'
 
 import { CheckCircle, PartyPopper, Briefcase, Camera, Users } from 'lucide-react'
-import { BASE_ACTIVITIES, type BaseActivity } from '@/lib/activities'
+import { BASE_ACTIVITIES, SUB_BY_BASE, type BaseActivity } from '@/lib/activities'
 
 const ICONS: Record<string, any> = {
   party:    PartyPopper,
@@ -88,6 +88,12 @@ export default function ActivityPicker({ primary, secondary, onChange }: Props) 
               {/* Texto */}
               <div className="font-semibold text-sm mb-0.5" style={{ color: '#03313C' }}>{act.label}</div>
               <div className="text-xs leading-snug" style={{ color: '#64748B' }}>{act.description}</div>
+              {/* Hint: qué búsquedas activa */}
+              {isSelected && (
+                <div className="mt-2 text-[10px] leading-relaxed" style={{ color: act.color }}>
+                  Apareces en: {SUB_BY_BASE[act.key].slice(0, 4).map(s => s.label).join(', ')}{SUB_BY_BASE[act.key].length > 4 ? '...' : ''}
+                </div>
+              )}
 
               {/* Badge */}
               {isPrimary && (
