@@ -142,7 +142,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
   const cancelReason = bk.reject_reason ?? bk.cancellation_reason ?? null
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 md:py-8" style={{ background: 'var(--bg-base)' }}>
+    <div className="max-w-3xl mx-auto px-4 py-6 md:py-8" style={{ background: 'var(--bg-base)' }}>
 
       {/* Toast de error */}
       {actionError && (

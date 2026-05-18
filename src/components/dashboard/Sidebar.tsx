@@ -109,8 +109,8 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
               } : {
                 color: 'var(--text-secondary)',
               }}
-              onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }}
-              onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }}>
+              onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' } }}
+              onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'; (e.currentTarget as HTMLElement).style.background = 'transparent' } }}>
               <Icon size={16} className="shrink-0" />
               {label}
             </Link>

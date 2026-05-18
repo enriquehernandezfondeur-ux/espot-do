@@ -79,6 +79,12 @@ export default function AdminDisputasPage() {
 
   useEffect(() => { loadDisputes() }, [loadDisputes])
 
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setSelected(null) }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
+
   // Poblar el form al seleccionar una disputa
   function handleSelect(d: Dispute) {
     setSelected(d)
@@ -218,14 +224,14 @@ export default function AdminDisputasPage() {
                           {(d as any).booking_id?.slice(0, 8).toUpperCase() ?? '—'}
                         </span>
                       </td>
-                      <td className="px-5 py-4">
-                        <span className="font-medium text-slate-800">{space?.name ?? '—'}</span>
+                      <td className="px-5 py-4 max-w-[150px]">
+                        <span className="font-medium text-slate-800 truncate block" title={space?.name ?? '—'}>{space?.name ?? '—'}</span>
                       </td>
-                      <td className="px-5 py-4">
-                        <span className="text-gray-700">{opener?.full_name ?? '—'}</span>
+                      <td className="px-5 py-4 max-w-[120px]">
+                        <span className="text-gray-700 truncate block" title={opener?.full_name ?? '—'}>{opener?.full_name ?? '—'}</span>
                       </td>
-                      <td className="px-5 py-4">
-                        <span className="text-gray-700">{respondent?.full_name ?? '—'}</span>
+                      <td className="px-5 py-4 max-w-[120px]">
+                        <span className="text-gray-700 truncate block" title={respondent?.full_name ?? '—'}>{respondent?.full_name ?? '—'}</span>
                       </td>
                       <td className="px-5 py-4">
                         <span className="text-xs text-gray-600">{catLabel}</span>

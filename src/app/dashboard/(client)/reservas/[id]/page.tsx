@@ -106,7 +106,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
   const nextInst = installments.find(i => i.status !== 'paid')
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 md:py-8">
+    <div className="max-w-3xl mx-auto px-4 py-6 md:py-8">
 
       {/* Back */}
       <Link href="/dashboard/reservas"

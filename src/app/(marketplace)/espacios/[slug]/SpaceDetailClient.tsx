@@ -182,6 +182,17 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
   useEffect(() => {
     getSpaceReviews(space.id).then(setReviewsData).catch(() => {})
   }, [space.id])
+
+  useEffect(() => {
+    function onEscape(e: KeyboardEvent) {
+      if (e.key !== 'Escape') return
+      setShowLightbox(false)
+      setShowVideoModal(false)
+      setShowMobileWidget(false)
+    }
+    document.addEventListener('keydown', onEscape)
+    return () => document.removeEventListener('keydown', onEscape)
+  }, [])
   const [showMobileWidget,setShowMobileWidget]= useState(false)
   const [showVideoModal,  setShowVideoModal]  = useState(false)
   const [showShareMenu,   setShowShareMenu]   = useState(false)
@@ -1235,7 +1246,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
           </div>
 
           {/* ── DERECHA: resumen rápido + BOOKING WIDGET ── */}
-          <div className="order-1 lg:order-2 lg:sticky lg:top-20 hidden lg:block space-y-3" style={{ overflow: 'visible' }}>
+          <div className="order-1 lg:order-2 lg:sticky lg:top-20 hidden lg:block space-y-3 lg:max-h-[calc(100dvh-5rem)] lg:overflow-y-auto" style={{ overflow: 'visible' }}>
 
             {/* Resumen de precio antes del widget */}
             {(() => {

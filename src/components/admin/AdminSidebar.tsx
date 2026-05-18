@@ -123,7 +123,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
                 const isActive = pathname === href || (href !== '/admin' && pathname.startsWith(href))
                 return (
                   <Link key={href} href={href} onClick={onClose}
-                    className={cn('flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all')}
+                    className={cn('flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all hover:bg-white/5')}
                     style={isActive ? {
                       background: 'rgba(53,196,147,0.12)',
                       color: '#35C493',

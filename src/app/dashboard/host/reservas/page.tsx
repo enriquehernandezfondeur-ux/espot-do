@@ -263,7 +263,7 @@ export default function HostReservasPage() {
                 const isSelected = selected?.id === bk.id
                 return (
                   <div key={bk.id} onClick={() => setSelected(isSelected ? null : bk)}
-                    className="px-4 md:px-5 py-4 cursor-pointer transition-colors"
+                    className="px-4 md:px-5 py-4 cursor-pointer transition-colors hover:bg-[var(--bg-elevated)]"
                     style={{ background: isSelected ? 'var(--brand-dim)' : 'transparent' }}>
 
                     <div className="flex items-start gap-3">
@@ -361,7 +361,7 @@ export default function HostReservasPage() {
 
         {/* Panel de detalle */}
         {selected && (
-          <div className="w-full lg:w-72 shrink-0 rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+          <div className="w-full lg:w-72 shrink-0 rounded-2xl overflow-hidden lg:max-h-[calc(100dvh-200px)] lg:overflow-y-auto" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
             <div className="px-5 py-4 flex justify-between" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
               <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Detalle</span>
               <button onClick={() => { setSelected(null); setShowRejectForm(false); setRejectReason('') }} style={{ color: 'var(--text-muted)' }}>✕</button>

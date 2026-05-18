@@ -22,7 +22,7 @@ export default async function ClientDashboardLayout({ children }: { children: Re
       <MessageNotificationProvider />
       <ClientSidebar userName={userName} avatarUrl={avatarUrl} />
       {/* pt-14 compensa el top bar fijo en móvil; pb-20 para la barra inferior */}
-      <main className="flex-1 overflow-auto pt-14 pb-20 md:pt-0 md:pb-0" style={{ background: 'var(--bg-base)' }}>
+      <main className="flex-1 min-h-0 overflow-auto pt-14 pb-20 md:pt-0 md:pb-0" style={{ background: 'var(--bg-base)' }}>
         {children}
       </main>
     </div>

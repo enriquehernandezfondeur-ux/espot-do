@@ -132,6 +132,17 @@ function AuthContent() {
   }
 
   // ── Shared styles ────────────────────────────────────────
+  const focusHandlers = {
+    onFocus: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      e.currentTarget.style.borderColor = '#35C493'
+      e.currentTarget.style.boxShadow   = '0 0 0 3px rgba(53,196,147,0.2)'
+    },
+    onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'
+      e.currentTarget.style.boxShadow   = 'none'
+    },
+  }
+
   const inputStyle: React.CSSProperties = {
     background: 'rgba(255,255,255,0.06)',
     border: '1px solid rgba(255,255,255,0.12)',
@@ -141,7 +152,7 @@ function AuthContent() {
     padding: '12px 16px',
     fontSize: 16,
     outline: 'none',
-    transition: 'border-color 0.15s',
+    transition: 'border-color 0.15s, box-shadow 0.15s',
   }
   const labelStyle: React.CSSProperties = {
     display: 'block',
@@ -213,7 +224,7 @@ function AuthContent() {
                 style={{ color: 'rgba(255,255,255,0.3)' }} />
               <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                 placeholder="tu@email.com" required autoComplete="email"
-                style={{ ...inputStyle, paddingLeft: 40 }} />
+                style={{ ...inputStyle, paddingLeft: 40 }} {...focusHandlers} />
             </div>
           </div>
           <button type="submit" disabled={loading}
@@ -352,7 +363,7 @@ function AuthContent() {
               </label>
               <input type="text" value={fullName} onChange={e => setFullName(e.target.value)}
                 placeholder={userType === 'host' ? 'Ej: Rivera Eventos' : 'Ej: María González'}
-                required autoComplete="name" style={inputStyle} />
+                required autoComplete="name" style={inputStyle} {...focusHandlers} />
               {userType === 'host' && (
                 <p className="text-xs mt-1.5" style={{ color: 'rgba(255,255,255,0.3)' }}>
                   El nombre de tu empresa o marca. Lo verán los clientes en el marketplace.
@@ -362,7 +373,7 @@ function AuthContent() {
             <div>
               <label style={labelStyle}>Teléfono / WhatsApp</label>
               <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
-                placeholder="+1 (809) 000-0000" autoComplete="tel" style={inputStyle} />
+                placeholder="+1 (809) 000-0000" autoComplete="tel" style={inputStyle} {...focusHandlers} />
             </div>
           </>
         )}
@@ -374,7 +385,7 @@ function AuthContent() {
               style={{ color: 'rgba(255,255,255,0.3)' }} />
             <input type="email" value={email} onChange={e => setEmail(e.target.value)}
               placeholder="tu@email.com" required autoComplete="email"
-              style={{ ...inputStyle, paddingLeft: 40 }} />
+              style={{ ...inputStyle, paddingLeft: 40 }} {...focusHandlers} />
           </div>
         </div>
 
@@ -396,7 +407,7 @@ function AuthContent() {
               placeholder={screen === 'register' ? 'Mínimo 8 caracteres' : '········'}
               required minLength={8}
               autoComplete={screen === 'register' ? 'new-password' : 'current-password'}
-              style={{ ...inputStyle, paddingRight: 44 }} />
+              style={{ ...inputStyle, paddingRight: 44 }} {...focusHandlers} />
             <button type="button" onClick={() => setShowPwd(v => !v)}
               className="absolute right-4 top-1/2 -translate-y-1/2"
               style={{ color: 'rgba(255,255,255,0.3)' }}>
