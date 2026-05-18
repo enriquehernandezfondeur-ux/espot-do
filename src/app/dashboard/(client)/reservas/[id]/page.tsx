@@ -73,7 +73,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
     if (!pricing) return null
     switch (pricing.pricing_type) {
       case 'hourly':              return `Por hora · ${pricing.hourly_price ? formatCurrency(pricing.hourly_price) + '/hr' : '—'}`
-      case 'minimum_consumption': return `Consumo mínimo · ${pricing.minimum_consumption ? formatCurrency(pricing.minimum_consumption) : '—'}`
+      case 'minimum_consumption': return `Consumibles · ${pricing.minimum_consumption ? formatCurrency(pricing.minimum_consumption) : '—'}`
       case 'fixed_package':       return `${pricing.package_name ?? 'Paquete'} · ${pricing.fixed_price ? formatCurrency(pricing.fixed_price) : '—'}`
       case 'custom_quote':        return 'Cotización personalizada'
       default: return null

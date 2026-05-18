@@ -62,8 +62,8 @@ export function getPriceInfo(space: any) {
   }
   if (p.pricing_type === 'minimum_consumption') {
     const v = p.minimum_consumption
-    if (!v) return { type: 'Consumo mínimo', unit: '', amount: null, full: 'Cotizar precio' }
-    return { type: 'Consumo mínimo', unit: '', amount: formatCurrency(v), full: formatCurrency(v) }
+    if (!v) return { type: 'Consumibles', unit: '', amount: null, full: 'Cotizar precio' }
+    return { type: 'Consumibles', unit: '', amount: formatCurrency(v), full: formatCurrency(v) }
   }
   if (p.pricing_type === 'fixed_package') {
     const v = p.fixed_price
@@ -290,7 +290,7 @@ export function SpaceCard({
                     onClick={e => { e.preventDefault(); e.stopPropagation(); setShowPriceInfo(o => !o) }}
                     className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap"
                     style={{ background: pricingDef.bg, color: pricingDef.text, border: `1px solid ${pricingDef.border}` }}>
-                    {pricingDef.value === 'minimum_consumption' ? 'Consumo mínimo' : pricingDef.label}
+                    {pricingDef.value === 'minimum_consumption' ? 'Consumibles' : pricingDef.label}
                   </button>
                   {showPriceInfo && pricingTip && (
                     <div className="absolute bottom-full mb-1.5 left-0 z-50 w-52 rounded-xl px-3 py-2.5 shadow-xl text-xs leading-relaxed"

@@ -147,7 +147,7 @@ function getFacilities(space: any): { icon: any; label: string }[] {
 
 const pricingTypeLabel: Record<string, string> = {
   hourly:              'Precio por hora',
-  minimum_consumption: 'Consumo mínimo',
+  minimum_consumption: 'Consumibles',
   fixed_package:       'Paquete fijo',
   custom_quote:        'Cotización personalizada',
 }
@@ -217,7 +217,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
     if (pricing.pricing_type === 'hourly')
       return pricing.hourly_price ? `${formatCurrency(pricing.hourly_price)} / hr` : 'Por hora'
     if (pricing.pricing_type === 'minimum_consumption')
-      return pricing.minimum_consumption ? `Desde ${formatCurrency(pricing.minimum_consumption)}` : 'Consumo mínimo'
+      return pricing.minimum_consumption ? `Desde ${formatCurrency(pricing.minimum_consumption)}` : 'Consumibles'
     if (pricing.pricing_type === 'fixed_package')
       return pricing.fixed_price ? formatCurrency(pricing.fixed_price) : 'Paquete'
     return 'Cotizar'
@@ -814,7 +814,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                       style={{ background: 'rgba(217,119,6,0.06)', border: '1px solid rgba(217,119,6,0.15)' }}>
                       <Lock size={13} style={{ color: '#D97706', flexShrink: 0, marginTop: 1 }} />
                       <p className="text-xs leading-relaxed" style={{ color: '#92400E' }}>
-                        <strong>¿Qué es consumo mínimo?</strong> Pagas <strong>{pricing.minimum_consumption ? formatCurrency(pricing.minimum_consumption) : 'este monto'}</strong> a
+                        <strong>¿Qué son los consumibles?</strong> Pagas <strong>{pricing.minimum_consumption ? formatCurrency(pricing.minimum_consumption) : 'este monto'}</strong> a
                         través de Espot y ese dinero es tu crédito de comida y bebidas en el lugar durante el evento.
                         Si consumes más, pagas la diferencia directamente en el local.
                       </p>
@@ -1287,7 +1287,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                 if (p.min_hours) items.push({ label: 'Mínimo', value: `${p.min_hours} hora${p.min_hours > 1 ? 's' : ''}` })
               }
               if (p.pricing_type === 'minimum_consumption') {
-                if (p.minimum_consumption) items.push({ label: 'Consumo mínimo', value: formatCurrency(p.minimum_consumption) })
+                if (p.minimum_consumption) items.push({ label: 'Consumibles', value: formatCurrency(p.minimum_consumption) })
                 if (p.session_hours) items.push({ label: 'Sesión', value: `${p.session_hours}h incluidas` })
               }
               if (p.pricing_type === 'fixed_package') {

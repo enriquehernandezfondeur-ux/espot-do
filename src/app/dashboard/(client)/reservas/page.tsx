@@ -25,7 +25,7 @@ function getPricingLabel(pricing: any): { label: string; detail: string; color: 
     case 'hourly':
       return { label: 'Por hora', detail: p.hourly_price ? formatCurrency(p.hourly_price) + '/hr' : '', color: '#2563EB', bg: 'rgba(37,99,235,0.08)' }
     case 'minimum_consumption':
-      return { label: 'Consumo mín.', detail: p.minimum_consumption ? 'Desde ' + formatCurrency(p.minimum_consumption) : '', color: '#D97706', bg: 'rgba(217,119,6,0.08)' }
+      return { label: 'Consumibles', detail: p.minimum_consumption ? 'Desde ' + formatCurrency(p.minimum_consumption) : '', color: '#D97706', bg: 'rgba(217,119,6,0.08)' }
     case 'fixed_package':
       return { label: p.package_name ?? 'Paquete fijo', detail: p.fixed_price ? formatCurrency(p.fixed_price) : '', color: '#7C3AED', bg: 'rgba(124,58,237,0.08)' }
     case 'custom_quote':

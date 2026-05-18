@@ -187,7 +187,7 @@ export default function ClientDashboard() {
                     const p = (bk as any).space_pricing as any
                     if (!p) return null
                     const labels: Record<string, string> = {
-                      hourly: ' · Por hora', minimum_consumption: ' · Consumo mín.',
+                      hourly: ' · Por hora', minimum_consumption: ' · Consumibles',
                       fixed_package: ` · ${p.package_name ?? 'Paquete'}`, custom_quote: ' · Cotización',
                     }
                     return labels[p.pricing_type] ?? null
@@ -467,7 +467,7 @@ export default function ClientDashboard() {
                           if (!p) return null
                           const map: Record<string, { label: string; color: string }> = {
                             hourly:              { label: 'Por hora',      color: '#2563EB' },
-                            minimum_consumption: { label: 'Consumo mín.',  color: '#D97706' },
+                            minimum_consumption: { label: 'Consumibles',  color: '#D97706' },
                             fixed_package:       { label: p.package_name ?? 'Paquete', color: '#7C3AED' },
                             custom_quote:        { label: 'Cotización',    color: '#0891B2' },
                           }

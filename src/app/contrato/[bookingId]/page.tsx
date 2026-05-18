@@ -114,7 +114,7 @@ export default async function ContratoPage({ params }: { params: Promise<{ booki
             {pricing && (
               <tr><td>Modalidad de precio</td><td>{
                 pricing.pricing_type === 'hourly'              ? `Por hora — ${formatCurrency(pricing.hourly_price)}/hr` :
-                pricing.pricing_type === 'minimum_consumption' ? `Consumo mínimo — ${formatCurrency(pricing.minimum_consumption)}` :
+                pricing.pricing_type === 'minimum_consumption' ? `Consumibles — ${formatCurrency(pricing.minimum_consumption)}` :
                 pricing.pricing_type === 'fixed_package'       ? `Paquete — ${pricing.package_name ?? 'Paquete fijo'}` :
                 'Precio personalizado (cotización)'
               }</td></tr>

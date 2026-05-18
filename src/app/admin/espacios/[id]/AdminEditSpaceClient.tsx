@@ -18,7 +18,7 @@ const CATEGORIES = [
 ]
 const PRICING_TYPES = [
   { value: 'hourly',              label: 'Precio por hora' },
-  { value: 'minimum_consumption', label: 'Consumo mínimo' },
+  { value: 'minimum_consumption', label: 'Consumibles' },
   { value: 'fixed_package',       label: 'Paquete fijo' },
   { value: 'custom_quote',        label: 'Cotización personalizada' },
 ]
@@ -418,7 +418,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
             {pricingType === 'minimum_consumption' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">Consumo mínimo (RD$)</label>
+                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-gray-400">Consumibles (RD$)</label>
                   <input type="number" value={minConsumption} onChange={e => setMinConsumption(e.target.value)} className={inputCls} style={inputStyle} placeholder="60000" />
                 </div>
                 <div>
@@ -453,7 +453,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
                 <span className="text-xs text-gray-500 mr-2">Vista previa:</span>
                 <span className="font-bold" style={{ color: 'var(--brand)' }}>
                   {pricingType === 'hourly' ? `${formatCurrency(Number(hourlyPrice))} / hora` : ''}
-                  {pricingType === 'minimum_consumption' ? `Consumo mín. ${formatCurrency(Number(minConsumption))}` : ''}
+                  {pricingType === 'minimum_consumption' ? `Consumibles ${formatCurrency(Number(minConsumption))}` : ''}
                   {pricingType === 'fixed_package' ? `${packageName || 'Paquete'}: ${formatCurrency(Number(fixedPrice))}` : ''}
                 </span>
               </div>

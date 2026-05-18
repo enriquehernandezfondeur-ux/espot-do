@@ -48,7 +48,7 @@ const pricingOptions: { value: PricingType; label: string; desc: string; icon: R
   },
   {
     value: 'minimum_consumption',
-    label: 'Consumo mínimo',
+    label: 'Consumibles',
     desc: 'El cliente paga este monto por adelantado a través de Espot y lo usa como crédito en comida y bebidas en tu local.',
     icon: Wine,
     ideal: 'Restaurantes, bares, lounges, rooftops',
@@ -115,7 +115,7 @@ interface TimeBlock {
 
 const pricingLabel: Record<string, string> = {
   hourly: 'Por hora',
-  minimum_consumption: 'Consumo mínimo',
+  minimum_consumption: 'Consumibles',
   fixed_package: 'Paquete fijo',
   custom_quote: 'Cotización',
 }
@@ -274,7 +274,7 @@ export default function EspacioPage() {
       return
     }
     if (pricingType === 'minimum_consumption' && !minConsumption.trim()) {
-      setSaveError('Indica el consumo mínimo garantizado.')
+      setSaveError('Indica el monto de consumibles.')
       setSaving(false)
       return
     }
@@ -1202,10 +1202,10 @@ export default function EspacioPage() {
 
             {pricingType === 'minimum_consumption' && (
               <div className="bg-[rgba(53,196,147,0.07)] border border-[rgba(53,196,147,0.20)] rounded-xl p-5 space-y-4">
-                <h3 className="font-semibold text-sm" style={{ color: 'var(--brand)' }}>Configuración de consumo mínimo</h3>
+                <h3 className="font-semibold text-sm" style={{ color: 'var(--brand)' }}>Configuración de consumibles</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
                   <div>
-                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Consumo mínimo (RD$) *</label>
+                    <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Consumibles (RD$) *</label>
                     <input type="number" inputMode="numeric" min="0" value={minConsumption} onChange={e => setMinConsumption(e.target.value)}
                       placeholder="60000" className="w-full input-base rounded-xl px-4 py-2.5 text-sm" />
                   </div>
@@ -1758,7 +1758,7 @@ export default function EspacioPage() {
                 <div className="text-xs mb-2 uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Pricing</div>
                 <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                   {pricingType === 'hourly' && `${formatCurrency(Number(hourlyPrice))} / hora`}
-                  {pricingType === 'minimum_consumption' && `Consumo mín. ${formatCurrency(Number(minConsumption))}`}
+                  {pricingType === 'minimum_consumption' && `Consumibles ${formatCurrency(Number(minConsumption))}`}
                   {pricingType === 'fixed_package' && `Paquete ${formatCurrency(Number(fixedPrice))}`}
                   {pricingType === 'custom_quote' && 'Cotización personalizada'}
                   {!pricingType && 'No configurado'}

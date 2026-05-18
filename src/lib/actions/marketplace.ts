@@ -94,7 +94,7 @@ function buildPricingDisplay(p: any | null, capacityMax: number, currentPricingT
     return {
       main:  fmtDOP(p.minimum_consumption),
       sub:   perPerson ? `Aprox. ${fmtDOP(perPerson)} por persona` : null,
-      badge: 'Consumo mínimo',
+      badge: 'Consumibles',
       isAltModel,
     }
   }

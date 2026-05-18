@@ -36,7 +36,7 @@ export default function FixPricingPage() {
 
   const typeLabel = (t: string) =>
     t === 'hourly'              ? 'Por hora'        :
-    t === 'minimum_consumption' ? 'Consumo mínimo'  :
+    t === 'minimum_consumption' ? 'Consumibles'  :
     t === 'fixed_package'       ? 'Paquete fijo'     : t
 
   return (

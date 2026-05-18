@@ -579,7 +579,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         {isConsumption && (
           <div>
             <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>
-              Consumo mínimo
+              Consumibles
             </div>
             <div className="flex items-baseline gap-1 mb-1">
               <span className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
@@ -808,7 +808,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                         </div>
                         <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
                           Sesión de {fixedDuration} hora{fixedDuration !== 1 ? 's' : ''}
-                          {isConsumption ? ' · Consumo mínimo incluido' : ''}
+                          {isConsumption ? ' · Consumibles incluidos' : ''}
                         </div>
                       </div>
                       <div className="w-6 h-6 rounded-full flex items-center justify-center"
@@ -1096,7 +1096,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                     <div className="flex justify-between px-4 py-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
                       <span>
                         {isHourly && `${selectedHours % 1 === 0 ? selectedHours : selectedHours.toFixed(1)}h × ${formatCurrency(pricing?.hourly_price)}/hr`}
-                        {isConsumption && 'Consumo mínimo'}
+                        {isConsumption && 'Consumibles'}
                         {isPackage && (() => {
                           const extra = Math.max(0, selectedHours - packageHours)
                           return extra > 0

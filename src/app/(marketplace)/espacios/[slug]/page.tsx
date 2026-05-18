@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     pricing?.pricing_type === 'hourly'
       ? `Desde RD$${Number(pricing.hourly_price).toLocaleString('es-DO')}/hora`
     : pricing?.pricing_type === 'minimum_consumption'
-      ? `Consumo mínimo RD$${Number(pricing.minimum_consumption).toLocaleString('es-DO')}`
+      ? `Consumibles desde RD$${Number(pricing.minimum_consumption).toLocaleString('es-DO')}`
     : pricing?.pricing_type === 'fixed_package'
       ? `Paquete desde RD$${Number(pricing.fixed_price).toLocaleString('es-DO')}`
     : ''
