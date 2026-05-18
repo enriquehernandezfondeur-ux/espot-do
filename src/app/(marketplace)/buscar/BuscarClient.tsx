@@ -251,13 +251,19 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
       result = result.filter(s => {
         const p = s.space_pricing?.find((x: any) => x.is_active) ?? s.space_pricing?.[0]
         if (!p) return true
-        const price: number | null =
-          p.pricing_type === 'hourly'               ? p.hourly_price :
-          p.pricing_type === 'minimum_consumption'  ? p.minimum_consumption :
-          p.pricing_type === 'fixed_package'        ? p.fixed_price : null
-        if (price === null) return true
-        if (priceMin && price < parseInt(priceMin)) return false
-        if (priceMax && price > parseInt(priceMax)) return false
+        // Precio normalizado: para hourly, multiplica por mínimo de horas (o 1h si no hay mínimo)
+        // para que la comparación sea equivalente a lo que el cliente pagaría mínimo
+        const normalizedPrice: number | null =
+          p.pricing_type === 'hourly'
+            ? (p.hourly_price ?? 0) * (p.min_hours ?? 1)
+          : p.pricing_type === 'minimum_consumption'
+            ? p.minimum_consumption
+          : p.pricing_type === 'fixed_package'
+            ? p.fixed_price
+          : null
+        if (normalizedPrice === null) return true
+        if (priceMin && normalizedPrice < parseInt(priceMin)) return false
+        if (priceMax && normalizedPrice > parseInt(priceMax)) return false
         return true
       })
     }

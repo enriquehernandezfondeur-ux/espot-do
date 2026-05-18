@@ -29,18 +29,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const location = [space.sector, space.city].filter(Boolean).join(', ')
   const capacity = `Hasta ${space.capacity_max} personas`
 
-  const description = [
-    space.description?.slice(0, 100),
-    location,
-    capacity,
-    priceText,
-  ].filter(Boolean).join(' · ')
+  // Truncar descripción en la última palabra completa antes de 120 chars
+  const rawDesc = space.description ?? ''
+  const truncDesc = rawDesc.length > 120
+    ? rawDesc.slice(0, 120).replace(/\s\S*$/, '') + '…'
+    : rawDesc
 
-  const title = `${space.name} — ${location}`
+  const description = [truncDesc, location, capacity, priceText].filter(Boolean).join(' · ')
+  const title = `${space.name}${location ? ` — ${location}` : ''}`
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 
   return {
     title,
     description,
+    alternates: { canonical: `${SITE_URL}/espacios/${slug}` },
     openGraph: {
       title,
       description,

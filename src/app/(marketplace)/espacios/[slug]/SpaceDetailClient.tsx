@@ -322,7 +322,11 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
               </span>
               <span style={{ color: 'var(--border-medium)' }}>·</span>
               <span className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                <Users size={13} /> {space.capacity_min ? `${space.capacity_min}–` : 'hasta '}{space.capacity_max} personas
+                <Users size={13} /> {space.capacity_max
+                  ? (space.capacity_min && space.capacity_min !== space.capacity_max
+                    ? `${space.capacity_min}–${space.capacity_max}`
+                    : `Hasta ${space.capacity_max}`)
+                  : 'A consultar'} personas
               </span>
               {space.is_verified && (
                 <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
@@ -782,7 +786,11 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {[
                       { label: 'Tipo de espacio', value: space.category?.charAt(0).toUpperCase() + space.category?.slice(1), icon: Building2 },
-                      { label: 'Capacidad', value: `${space.capacity_min ? space.capacity_min + '–' : 'Hasta '}${space.capacity_max} personas`, icon: Users },
+                      { label: 'Capacidad', value: space.capacity_max
+                        ? (space.capacity_min && space.capacity_min !== space.capacity_max
+                          ? `${space.capacity_min}–${space.capacity_max} personas`
+                          : `Hasta ${space.capacity_max} personas`)
+                        : 'A consultar', icon: Users },
                       { label: 'Ubicación', value: `${space.sector ? space.sector + ', ' : ''}${space.city}`, icon: MapPin },
                       { label: 'Modalidad', value: pricingTypeLabel[pricing?.pricing_type] ?? '—', icon: CreditCard },
                       ...(pricing?.pricing_type === 'hourly' && pricing.min_hours ? [{ label: 'Mínimo de horas', value: `${pricing.min_hours} hora${pricing.min_hours > 1 ? 's' : ''}`, icon: Clock }] : []),
@@ -833,11 +841,12 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
 
                 {/* ── Horarios disponibles ── */}
                 {timeBlocks.length > 0 && (() => {
-                  // Mapear cada día → su primer bloque activo
-                  const map: Record<number, any> = {}
+                  // Mapear cada día → todos sus bloques activos (puede haber mañana y tarde)
+                  const map: Record<number, any[]> = {}
                   timeBlocks.forEach((b: any) => {
                     (b.days_of_week ?? []).forEach((d: number) => {
-                      if (!map[d]) map[d] = b
+                      if (!map[d]) map[d] = []
+                      map[d].push(b)
                     })
                   })
                   const DAY_NAMES = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
@@ -851,20 +860,20 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                       </h3>
                       <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
                         {ORDER.map((d, i) => {
-                          const block   = map[d]
+                          const blocks  = map[d] ?? []
                           const isToday = d === todayIdx
                           return (
                             <div key={d}
-                              className="flex items-center justify-between px-4 py-2.5"
+                              className="flex items-start justify-between px-4 py-2.5"
                               style={{
                                 borderBottom: i < 6 ? '1px solid var(--border-subtle)' : undefined,
                                 background: isToday ? 'rgba(53,196,147,0.05)' : '#fff',
                               }}>
 
                               {/* Día */}
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm w-8 shrink-0"
-                                  style={{ fontWeight: isToday ? 700 : 500, color: block ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                              <div className="flex items-center gap-2 shrink-0 pt-0.5">
+                                <span className="text-sm w-8"
+                                  style={{ fontWeight: isToday ? 700 : 500, color: blocks.length ? 'var(--text-primary)' : 'var(--text-muted)' }}>
                                   {DAY_NAMES[d]}
                                 </span>
                                 {isToday && (
@@ -875,12 +884,16 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                                 )}
                               </div>
 
-                              {/* Horario */}
-                              {block ? (
-                                <span className="text-sm font-semibold tabular-nums"
-                                  style={{ color: isToday ? 'var(--brand)' : 'var(--text-primary)' }}>
-                                  {formatTime(block.start_time)} – {formatTime(block.end_time)}
-                                </span>
+                              {/* Horarios — puede haber varios bloques */}
+                              {blocks.length > 0 ? (
+                                <div className="flex flex-col items-end gap-0.5">
+                                  {blocks.map((b: any, bi: number) => (
+                                    <span key={bi} className="text-sm font-semibold tabular-nums"
+                                      style={{ color: isToday ? 'var(--brand)' : 'var(--text-primary)' }}>
+                                      {formatTime(b.start_time)} – {formatTime(b.end_time)}
+                                    </span>
+                                  ))}
+                                </div>
                               ) : (
                                 <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
                                   No disponible
@@ -1428,7 +1441,11 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
               </div>
             )}
             <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-              {space.capacity_min ? `${space.capacity_min}–` : 'hasta '}{space.capacity_max} personas
+              {space.capacity_max
+                ? (space.capacity_min && space.capacity_min !== space.capacity_max
+                  ? `${space.capacity_min}–${space.capacity_max}`
+                  : `Hasta ${space.capacity_max}`)
+                : 'A consultar'} personas
               {pricing?.pricing_type !== 'custom_quote' && (
                 <span className="ml-1.5 px-1.5 py-0.5 rounded-md text-[10px] font-semibold"
                   style={{ background: 'var(--brand-dim)', color: 'var(--brand)' }}>

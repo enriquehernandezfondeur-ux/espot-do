@@ -52,9 +52,10 @@ export async function createBooking(payload: CreateBookingPayload) {
   const today = new Date().toISOString().split('T')[0]
   if (payload.eventDate < today) return { error: 'No puedes reservar para una fecha pasada' }
 
-  // Si es hoy, validar que el horario no haya comenzado ya
+  // Si es hoy, validar que el horario no haya comenzado ya (usando timezone de RD: UTC-4)
   if (payload.eventDate === today && payload.startTime) {
-    const nowMins  = new Date().getHours() * 60 + new Date().getMinutes()
+    const nowRD    = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Santo_Domingo' }))
+    const nowMins  = nowRD.getHours() * 60 + nowRD.getMinutes()
     const [sh, sm] = payload.startTime.split(':').map(Number)
     const startMins = sh * 60 + (sm ?? 0)
     if (startMins <= nowMins) return { error: 'El horario de inicio ya pasó. Por favor elige un horario futuro.' }
