@@ -142,9 +142,17 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
     setLoadingMore(true)
     const nextPage = currentPage + 1
     try {
+      // Pasar los mismos filtros activos para que la paginación sea coherente
       const newSpaces = await getPublishedSpaces({
-        page:     nextPage,
-        pageSize: PAGE_SIZE,
+        page:         nextPage,
+        pageSize:     PAGE_SIZE,
+        category:     categoria || undefined,
+        sector:       sector || undefined,
+        search:       q || undefined,
+        activity:     activity || undefined,
+        capacity:     capacidad ? parseInt(capacidad) : undefined,
+        dateFrom:     dateFrom || undefined,
+        dateTo:       dateFrom || undefined,
       })
       setSpaces(prev => [...prev, ...newSpaces])
       setCurrentPage(nextPage)

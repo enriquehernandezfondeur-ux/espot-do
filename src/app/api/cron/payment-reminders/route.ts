@@ -57,7 +57,8 @@ export async function GET(req: Request) {
       `)
       .eq('status', 'accepted')
       .eq('payment_status', 'unpaid')
-      .lt('updated_at', cutoff)
+      .not('accepted_at', 'is', null)
+      .lt('accepted_at', cutoff)
 
     for (const bk of stale ?? []) {
       try {

@@ -644,7 +644,8 @@ export async function cancelBooking(bookingId: string, reason?: string, refundBa
 
   // Calcular reembolso según política de cancelación del espacio
   const spaceConditions = (space as any)?.space_conditions as any
-  const cancellationPolicy: string = spaceConditions?.cancellation_policy ?? 'strict'
+  // space_conditions es un array (relación one-to-many) — acceder al primer elemento
+  const cancellationPolicy: string = (Array.isArray(spaceConditions) ? spaceConditions[0] : spaceConditions)?.cancellation_policy ?? 'strict'
   const refundAmount = calculateRefundAmount(paidAmount, bk.event_date, cancellationPolicy)
 
   const newStatus = isGuest ? 'cancelled_guest' : 'cancelled_host'
