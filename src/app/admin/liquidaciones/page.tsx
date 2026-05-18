@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useTransition } from 'react'
+import { useState, useEffect, useTransition, useRef, useCallback } from 'react'
 import { getAdminPayouts, markPayoutPaid, getHostBankAccount, saveLiquidacionNote } from '@/lib/actions/admin'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import {
@@ -88,10 +88,15 @@ export default function AdminLiquidacionesPage() {
     try { localStorage.removeItem('espot_liq_notes') } catch {}
   }, [])
 
-  async function saveNote(bookingId: string, text: string) {
-    const updated = { ...notes, [bookingId]: text }
-    setNotes(updated)
-    await saveLiquidacionNote(bookingId, text)
+  const saveNoteTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function saveNote(bookingId: string, text: string) {
+    setNotes(prev => ({ ...prev, [bookingId]: text }))
+    // Debounce 700ms para no disparar un server action en cada keystroke
+    if (saveNoteTimer.current) clearTimeout(saveNoteTimer.current)
+    saveNoteTimer.current = setTimeout(() => {
+      saveLiquidacionNote(bookingId, text)
+    }, 700)
   }
 
   async function load() {

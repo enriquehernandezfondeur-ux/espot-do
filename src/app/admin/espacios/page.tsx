@@ -171,17 +171,14 @@ export default function AdminSpacesPage() {
                       <Users size={13} /> {bookingsCount}
                     </div>
 
-                    {/* Status badges */}
+                    {/* Status badges — prioridad: Inactivo > Pendiente > Publicado */}
                     <div className="flex flex-wrap gap-1.5">
-                      {space.is_published && (
-                        <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(22,163,74,0.1)', color: '#16A34A' }}>Publicado</span>
-                      )}
-                      {!space.is_published && space.is_active && (
-                        <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(217,119,6,0.1)', color: '#D97706' }}>Pendiente</span>
-                      )}
-                      {!space.is_active && (
-                        <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(220,38,38,0.1)', color: '#DC2626' }}>Inactivo</span>
-                      )}
+                      {!space.is_active
+                        ? <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(220,38,38,0.1)', color: '#DC2626' }}>Inactivo</span>
+                        : !space.is_published
+                          ? <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(217,119,6,0.1)', color: '#D97706' }}>Pendiente</span>
+                          : <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(22,163,74,0.1)', color: '#16A34A' }}>Publicado</span>
+                      }
                       {space.is_verified && (
                         <span className="text-xs px-2 py-0.5 rounded-full font-medium flex items-center gap-0.5" style={{ background: 'rgba(37,99,235,0.1)', color: '#2563EB' }}>
                           <Shield size={9} /> Verificado

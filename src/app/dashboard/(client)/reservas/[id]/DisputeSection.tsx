@@ -208,7 +208,7 @@ export default function DisputeSection({ bookingId, bookingStatus, existingDispu
                 required
                 className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
                 style={{
-                  background:  'var(--bg-elevated, #1C2332)',
+                  background:  'var(--bg-elevated, #F8FAFB)',
                   border:      '1px solid var(--border-subtle, rgba(255,255,255,0.1))',
                   color:       'var(--text-primary)',
                   fontSize:    '16px', // previene zoom en iOS
@@ -237,7 +237,7 @@ export default function DisputeSection({ bookingId, bookingStatus, existingDispu
                 minLength={20}
                 className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none transition-all"
                 style={{
-                  background:  'var(--bg-elevated, #1C2332)',
+                  background:  'var(--bg-elevated, #F8FAFB)',
                   border:      '1px solid var(--border-subtle, rgba(255,255,255,0.1))',
                   color:       'var(--text-primary)',
                   fontSize:    '16px',

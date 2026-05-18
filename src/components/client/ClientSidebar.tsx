@@ -191,7 +191,7 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
         >
           <Menu size={20} />
         </button>
-        <Link href="/dashboard" className="flex-1 flex items-center">
+        <Link href="/dashboard/overview" className="flex-1 flex items-center">
           <img src="/logo-dark.svg" alt="espot.do" style={{ height: 22, width: 'auto' }} />
         </Link>
         {avatarUrl ? (

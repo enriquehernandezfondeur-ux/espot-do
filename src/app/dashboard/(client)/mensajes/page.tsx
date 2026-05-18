@@ -173,7 +173,7 @@ export default function ClientMensajesPage() {
   )
 
   return (
-    <div className="flex flex-col md:flex-row" style={{ background: 'var(--bg-base)', height: '100dvh', overflow: 'hidden' }}>
+    <div className="flex flex-col md:flex-row" style={{ background: 'var(--bg-base)', height: 'calc(100dvh - 56px)', overflow: 'hidden' }}>
 
       {/* Sidebar */}
       <div className={`w-full md:w-72 md:flex-col md:shrink-0 flex flex-col ${active ? 'hidden md:flex' : 'flex'}`}

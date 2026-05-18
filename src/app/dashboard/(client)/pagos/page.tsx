@@ -96,13 +96,24 @@ export default function PagosPage() {
                       {ps.sub}
                     </div>
                   )}
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
-                      {formatCurrency(Number(bk.total_amount))}
-                    </span>
-                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                      total del evento
-                    </span>
+                  <div className="flex flex-col items-end gap-0.5">
+                    {bk.paid_amount && Number(bk.paid_amount) < Number(bk.total_amount) ? (
+                      <>
+                        <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
+                          {formatCurrency(Number(bk.paid_amount))} <span className="font-normal text-xs" style={{ color: 'var(--text-muted)' }}>pagado</span>
+                        </span>
+                        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                          de {formatCurrency(Number(bk.total_amount))} total
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
+                          {formatCurrency(Number(bk.total_amount))}
+                        </span>
+                        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>total del evento</span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

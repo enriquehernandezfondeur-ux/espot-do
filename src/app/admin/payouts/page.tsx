@@ -248,7 +248,7 @@ export default function AdminPayoutsPage() {
                       {formatCurrency(Number(bk.total_amount))}
                     </div>
                     <div className="text-xs" style={{ color: '#94A3B8' }}>
-                      Fee: {formatCurrency(Number(bk.platform_fee))}
+                      Fee: {formatCurrency(Number(bk.platform_fee) || Math.round(Number(bk.total_amount) * 0.10))}
                     </div>
                   </div>
 

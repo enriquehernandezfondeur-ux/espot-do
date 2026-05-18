@@ -381,7 +381,8 @@ export default function MisReservasPage() {
                 </button>
 
                 {/* ── CTA de pago cuando está aceptada y NO ha pagado aún ── */}
-                {bk.status === 'accepted' && !isPaid(bk.payment_status) && (
+                {/* Solo cuando la tarjeta está colapsada — al expandir el detalle también lo muestra */}
+                {bk.status === 'accepted' && !isPaid(bk.payment_status) && !isSelected && (
                   <div className="mx-4 mb-4 px-4 py-4 rounded-2xl"
                     style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.2)' }}>
                     <div className="mb-3">
