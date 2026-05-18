@@ -458,7 +458,10 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
               }
 
               if (!img) return (
-                <div key={slot} style={{ background: 'var(--bg-elevated)' }} />
+                <div key={slot} className="flex items-center justify-center"
+                  style={{ background: 'var(--bg-elevated)' }}>
+                  <Images size={20} style={{ color: 'var(--text-muted)', opacity: 0.25 }} />
+                </div>
               )
 
               return (
@@ -934,7 +937,9 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                           )}
                         </div>
                         <div className="text-xs mt-0.5 font-medium" style={{ color: 'var(--brand)' }}>
-                          Propietario · Confirma disponibilidad
+                          Propietario{(host as any).created_at
+                            ? ` · Desde ${new Date((host as any).created_at).getFullYear()}`
+                            : ''}
                         </div>
                       </div>
 
@@ -1076,7 +1081,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                           {[1,2,3,4,5].map(s => (
                             <svg key={s} width="16" height="16" viewBox="0 0 16 16">
                               <path d="M8 1l1.8 3.6L14 5.3l-3 2.9.7 4.1L8 10.4l-3.7 1.9.7-4.1-3-2.9 4.2-.7z"
-                                fill={s <= Math.round(reviewsData.average) ? '#F59E0B' : '#E5E7EB'}/>
+                                fill={s <= Math.floor(reviewsData.average + 0.5) ? '#F59E0B' : '#E5E7EB'}/>
                             </svg>
                           ))}
                         </div>
@@ -1343,7 +1348,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   const cover   = getCover(s)
                   const display = s._pricingDisplay ?? {}
                   return (
-                    <Link key={s.id} href={`/espacios/${s.slug}`} className="group block" target="_blank" rel="noopener noreferrer">
+                    <Link key={s.id} href={`/espacios/${s.slug}`} className="group block">
                       <div className="card-hover rounded-2xl overflow-hidden h-full flex flex-col"
                         style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
                         <div className="relative overflow-hidden shrink-0"

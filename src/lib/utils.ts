@@ -13,6 +13,8 @@ export function formatCurrency(amount: number | null | undefined): string {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(Number(amount))
+    .replace('DOP', 'RD$')
+    .trim()
 }
 
 export function formatDate(date: string | Date | null | undefined): string {

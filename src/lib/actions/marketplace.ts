@@ -136,7 +136,9 @@ export async function getPublishedSpaces(filters?: {
     .select(`
       id, name, slug, description, category,
       capacity_min, capacity_max, address, city, sector,
+      latitude, longitude,
       is_verified, instant_booking, primary_activity, secondary_activities,
+      profiles!host_id(full_name, avatar_url),
       space_images(url, is_cover, position),
       space_pricing(pricing_type, hourly_price, minimum_consumption, fixed_price, package_name, weekend_multiplier, min_advance_amount, is_active),
       space_addons(id, name, price, unit),

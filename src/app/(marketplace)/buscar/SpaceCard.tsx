@@ -247,6 +247,7 @@ export function SpaceCard({
 
           {/* Nombre */}
           <h3 className="font-semibold text-sm leading-snug truncate"
+            title={space.name}
             style={{ color: '#0F1623', letterSpacing: '-0.01em' }}>
             {space.name}
           </h3>
@@ -325,7 +326,9 @@ export function SpaceCard({
             {/* Capacidad */}
             <span className="flex items-center gap-1 text-xs font-medium shrink-0" style={{ color: 'var(--text-muted)' }}>
               <Users size={11} style={{ color: '#35C493', flexShrink: 0 }} />
-              {space.capacity_max ?? '—'}
+              {space.capacity_min && space.capacity_min !== space.capacity_max
+                ? `${space.capacity_min}–${space.capacity_max}`
+                : space.capacity_max ?? '—'}
             </span>
           </div>
 
