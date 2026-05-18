@@ -16,6 +16,7 @@ import { formatCurrency } from '@/lib/utils'
 import { SUB_ACTIVITIES, SUB_TO_BASE } from '@/lib/activities'
 import { SpaceCard } from './SpaceCard'
 import { DateTimePicker } from './DateTimePicker'
+import { getPublishedSpaces } from '@/lib/actions/marketplace'
 
 const SpacesMap = dynamic(() => import('@/components/map/SpacesMap'), {
   ssr:     false,
@@ -105,7 +106,14 @@ interface Props {
   initialParams: Record<string, string | undefined>
 }
 
-export default function BuscarClient({ spaces, initialParams }: Props) {
+const PAGE_SIZE = 100
+
+export default function BuscarClient({ spaces: initialSpaces, initialParams }: Props) {
+  // Acumulación de páginas: inicialmente los espacios cargados en el servidor
+  const [spaces,       setSpaces]       = useState<any[]>(initialSpaces)
+  const [currentPage,  setCurrentPage]  = useState(0)
+  const [hasMore,      setHasMore]      = useState(initialSpaces.length === PAGE_SIZE)
+  const [loadingMore,  setLoadingMore]  = useState(false)
   const [activity,       setActivity]       = useState(initialParams.activity ?? '')
   const [actQ,           setActQ]           = useState('')
   const [actOpen,        setActOpen]        = useState(false)
@@ -128,6 +136,23 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
   const [moreOpen,       setMoreOpen]       = useState(false)
   const [drawerFocus,    setDrawerFocus]    = useState<string | null>(null)
   const drawerContentRef = useRef<HTMLDivElement>(null)
+
+  async function loadMore() {
+    if (loadingMore || !hasMore) return
+    setLoadingMore(true)
+    const nextPage = currentPage + 1
+    try {
+      const newSpaces = await getPublishedSpaces({
+        page:     nextPage,
+        pageSize: PAGE_SIZE,
+      })
+      setSpaces(prev => [...prev, ...newSpaces])
+      setCurrentPage(nextPage)
+      setHasMore(newSpaces.length === PAGE_SIZE)
+    } finally {
+      setLoadingMore(false)
+    }
+  }
 
   function openDrawer(section?: string) {
     setMoreOpen(true)
@@ -955,6 +980,26 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                         isAvailable={dateFrom ? !blockedIds.has(space.id) : undefined} />
                     ))}
                   </div>
+                  {hasMore && (
+                    <div className="flex justify-center pb-6">
+                      <button
+                        onClick={loadMore}
+                        disabled={loadingMore}
+                        className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all"
+                        style={{
+                          background: loadingMore ? 'var(--brand-dim)' : 'var(--brand)',
+                          color: '#fff',
+                          opacity: loadingMore ? 0.7 : 1,
+                          border: 'none',
+                        }}
+                      >
+                        {loadingMore
+                          ? <><span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin inline-block" /> Cargando...</>
+                          : 'Cargar más espacios'
+                        }
+                      </button>
+                    </div>
+                  )}
                 </div>
               )
             }
@@ -976,12 +1021,33 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
               ? <EmptyState onClear={clearAll} recentSpaces={recentIds.map(id => spaces.find(s => s.id === id)).filter(Boolean)} hasDateFilter={!!dateFrom} />
               : (
                 <div className="grid grid-cols-1 gap-4 w-full"
-                  style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))' }}>
+                  style={{ paddingBottom: hasMore ? '1rem' : 'calc(6rem + env(safe-area-inset-bottom, 0px))' }}>
                   {filtered.map(space => (
                     <SpaceCard key={space.id} space={space} isHovered={false} onHover={() => {}}
                       dateFilter={dateFrom || undefined} timeFilter={timeFrom || undefined}
                       isAvailable={dateFrom ? !blockedIds.has(space.id) : undefined} />
                   ))}
+                  {hasMore && (
+                    <div className="flex justify-center"
+                      style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))' }}>
+                      <button
+                        onClick={loadMore}
+                        disabled={loadingMore}
+                        className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all w-full justify-center"
+                        style={{
+                          background: loadingMore ? 'var(--brand-dim)' : 'var(--brand)',
+                          color: '#fff',
+                          opacity: loadingMore ? 0.7 : 1,
+                          border: 'none',
+                        }}
+                      >
+                        {loadingMore
+                          ? <><span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin inline-block" /> Cargando...</>
+                          : 'Cargar más espacios'
+                        }
+                      </button>
+                    </div>
+                  )}
                 </div>
               )
             }

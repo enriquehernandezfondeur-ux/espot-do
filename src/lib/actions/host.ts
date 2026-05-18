@@ -10,6 +10,54 @@ import { userLogger, logError } from '@/lib/logger'
 
 export { acceptBooking, rejectBooking, confirmPayment as confirmBooking, cancelBooking }
 
+// ── Analytics de visitas al espacio ──────────────────────
+export async function getSpaceViews(spaceId: string): Promise<{ week: string; views: number }[]> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  // Verificar que el espacio pertenece al host
+  const { data: space } = await supabase
+    .from('spaces')
+    .select('id')
+    .eq('id', spaceId)
+    .eq('host_id', user.id)
+    .single()
+  if (!space) return []
+
+  // Obtener vistas del último mes (28 días)
+  const today = new Date()
+  const since = new Date(today)
+  since.setDate(since.getDate() - 27)
+  const sinceStr = since.toISOString().split('T')[0]
+
+  const { data: rows } = await supabase
+    .from('space_views')
+    .select('view_date, view_count')
+    .eq('space_id', spaceId)
+    .gte('view_date', sinceStr)
+    .order('view_date')
+
+  if (!rows || rows.length === 0) return []
+
+  // Agrupar por semana (4 semanas)
+  const weeks: Record<string, number> = {}
+  rows.forEach(row => {
+    const d    = new Date(row.view_date + 'T12:00')
+    const diff = Math.floor((today.getTime() - d.getTime()) / (1000 * 60 * 60 * 24 * 7))
+    const wk   = diff === 0 ? 'Esta semana'
+                 : diff === 1 ? 'Semana pasada'
+                 : `Hace ${diff} semanas`
+    weeks[wk]  = (weeks[wk] ?? 0) + (row.view_count ?? 0)
+  })
+
+  // Devolver ordenado de más antiguo a más reciente
+  const order = ['Hace 3 semanas', 'Hace 2 semanas', 'Semana pasada', 'Esta semana']
+  return order
+    .filter(k => weeks[k] !== undefined)
+    .map(k => ({ week: k, views: weeks[k] }))
+}
+
 // ── iCal — obtener o crear token ─────────────────────────
 export async function getOrCreateIcalToken(): Promise<string | null> {
   const supabase = await createClient()

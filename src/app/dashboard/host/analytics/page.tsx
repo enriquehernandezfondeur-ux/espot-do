@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts'
 import { formatCurrency } from '@/lib/utils'
-import { getHostStats, getHostBookings } from '@/lib/actions/host'
-import { Loader2, TrendingUp, CalendarDays, Users, Building2 } from 'lucide-react'
+import { getHostStats, getHostBookings, getHostSpaces, getSpaceViews } from '@/lib/actions/host'
+import { Loader2, TrendingUp, CalendarDays, Users, Building2, Eye } from 'lucide-react'
 
 const CATEGORY_LABELS: Record<string, string> = {
   salon: 'Salones', restaurante: 'Restaurantes', rooftop: 'Rooftops',
@@ -15,9 +15,11 @@ const CATEGORY_LABELS: Record<string, string> = {
 const PIE_COLORS = ['#35C493', '#3B82F6', '#F59E0B', '#EC4899', '#8B5CF6', '#EF4444']
 
 export default function AnalyticsPage() {
-  const [stats, setStats]       = useState<any>(null)
-  const [bookings, setBookings] = useState<any[]>([])
-  const [loading, setLoading]   = useState(true)
+  const [stats, setStats]             = useState<any>(null)
+  const [bookings, setBookings]       = useState<any[]>([])
+  const [loading, setLoading]         = useState(true)
+  const [spaceViews, setSpaceViews]   = useState<{ week: string; views: number }[]>([])
+  const [viewsLoading, setViewsLoading] = useState(true)
 
   useEffect(() => {
     Promise.all([getHostStats(), getHostBookings()]).then(([s, b]) => {
@@ -25,6 +27,14 @@ export default function AnalyticsPage() {
       setBookings(b)
       setLoading(false)
     }).catch(() => setLoading(false))
+
+    // Cargar vistas del primer espacio activo del host
+    getHostSpaces().then(async spaces => {
+      if (!spaces.length) { setViewsLoading(false); return }
+      const views = await getSpaceViews(spaces[0].id)
+      setSpaceViews(views)
+      setViewsLoading(false)
+    }).catch(() => setViewsLoading(false))
   }, [])
 
   if (loading) return (
@@ -136,6 +146,59 @@ export default function AnalyticsPage() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Visitas a tu espacio */}
+      <div className="rounded-2xl p-6 mb-5 md:mb-6"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+        <div className="flex items-center gap-2 mb-5">
+          <Eye size={16} style={{ color: 'var(--brand)' }} />
+          <h2 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
+            Visitas a tu espacio
+          </h2>
+          <span className="ml-auto text-xs" style={{ color: 'var(--text-muted)' }}>Último mes</span>
+        </div>
+
+        {viewsLoading ? (
+          <div className="flex items-center justify-center h-20">
+            <Loader2 size={20} className="animate-spin" style={{ color: 'var(--brand)' }} />
+          </div>
+        ) : spaceViews.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-20 gap-2">
+            <Eye size={28} style={{ color: 'var(--text-muted)', opacity: 0.3 }} />
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+              Sin visitas registradas aún
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {spaceViews.map(item => {
+              const maxViews = Math.max(...spaceViews.map(v => v.views), 1)
+              const pct      = Math.round((item.views / maxViews) * 100)
+              return (
+                <div key={item.week} className="flex items-center gap-3">
+                  <span className="text-xs w-32 shrink-0" style={{ color: 'var(--text-secondary)' }}>
+                    {item.week}
+                  </span>
+                  <div className="flex-1 h-2 rounded-full overflow-hidden"
+                    style={{ background: 'var(--bg-elevated)' }}>
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{ width: `${pct}%`, background: 'var(--brand)' }}
+                    />
+                  </div>
+                  <span className="text-xs font-bold w-8 text-right tabular-nums"
+                    style={{ color: 'var(--text-primary)' }}>
+                    {item.views}
+                  </span>
+                </div>
+              )
+            })}
+            <p className="text-xs mt-3 pt-3" style={{ color: 'var(--text-muted)', borderTop: '1px solid var(--border-subtle)' }}>
+              Total últimas 4 semanas: {spaceViews.reduce((s, v) => s + v.views, 0)} visitas
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Días populares */}

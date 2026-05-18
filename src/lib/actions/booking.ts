@@ -750,3 +750,71 @@ export async function cancelBooking(bookingId: string, reason?: string, refundBa
   revalidatePath('/dashboard/reservas')
   return { success: true }
 }
+
+// ── RECHAZAR COTIZACIÓN (cliente) ─────────────────────────
+// Solo aplica cuando status === 'accepted' y la reserva fue por cotización
+// (event_notes comienza con '[Cotización]')
+export async function rejectQuotation(bookingId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+
+  const { data: bk } = await supabase
+    .from('bookings')
+    .select(`
+      id, guest_id, status, event_notes, event_date,
+      spaces!space_id(name, profiles!host_id(full_name, email))
+    `)
+    .eq('id', bookingId)
+    .single()
+
+  if (!bk) return { error: 'Reserva no encontrada' }
+  if (bk.guest_id !== user.id) return { error: 'No autorizado' }
+  if (bk.status !== 'accepted') return { error: 'Solo puedes rechazar cotizaciones aceptadas' }
+  if (!(bk.event_notes as string | null)?.startsWith('[Cotización]')) {
+    return { error: 'Esta reserva no es una cotización — usa "Cancelar reserva" si deseas cancelarla' }
+  }
+
+  const { error: updateError, data: updated } = await supabase
+    .from('bookings')
+    .update({
+      status: 'cancelled_guest',
+      cancelled_at: new Date().toISOString(),
+      cancellation_reason: 'Cliente rechazó el precio de la cotización',
+    })
+    .eq('id', bookingId)
+    .eq('status', 'accepted')
+    .select('id')
+
+  if (updateError) return { error: updateError.message }
+  if (!updated || updated.length === 0) return { error: 'No se pudo rechazar la cotización' }
+
+  // Cancelar cuotas pendientes
+  await supabase
+    .from('booking_installments')
+    .update({ status: 'cancelled' })
+    .eq('booking_id', bookingId)
+    .in('status', ['pending', 'overdue'])
+
+  // Email al host informando el rechazo
+  const space = bk.spaces as any
+  const host  = space?.profiles as any
+  if (host?.email) {
+    await sendEmail({
+      to: host.email,
+      subject: `El cliente rechazó tu cotización — ${space?.name}`,
+      html: tplCancelada({
+        recipientName: host.full_name ?? 'Propietario',
+        cancelledBy:   'el cliente',
+        spaceName:     space?.name ?? '',
+        eventDate:     bk.event_date,
+        reason:        'El cliente revisó el precio y decidió no continuar con la cotización. La fecha quedó liberada.',
+        isGuest:       false,
+      }),
+    })
+  }
+
+  revalidatePath('/dashboard/host/reservas')
+  revalidatePath('/dashboard/reservas')
+  return { success: true }
+}

@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { revalidatePath } from 'next/cache'
 import { sendEmail } from '@/lib/email/send'
 import { emailBase, infoBox } from '@/lib/email/templates'
@@ -20,15 +21,12 @@ async function requireAdmin() {
   }
 
   // Las acciones de admin requieren service_role para bypassar RLS de forma segura
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!serviceKey) {
+  try {
+    return createServiceClient()
+  } catch {
     console.error('[requireAdmin] SUPABASE_SERVICE_ROLE_KEY no configurada — acceso admin denegado')
     return null
   }
-  const { createClient: sc } = await import('@supabase/supabase-js')
-  return sc(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
 }
 
 // ── OBTENER ESPACIO COMPLETO ─────────────────────────────
@@ -186,7 +184,7 @@ export async function getAdminStats() {
 
   const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
 
-  const [spaces, bookings, profiles, payments, pendingSpaces, pendingBookings, monthRevenue] = await Promise.all([
+  const [spaces, bookings, profiles, payments, pendingSpaces, pendingBookings, monthRevenue, hosts, admins] = await Promise.all([
     supabase.from('spaces').select('id', { count: 'exact', head: true }),
     supabase.from('bookings').select('id', { count: 'exact', head: true }),
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
@@ -194,10 +192,9 @@ export async function getAdminStats() {
     supabase.from('spaces').select('id', { count: 'exact', head: true }).eq('is_published', false).eq('is_active', true),
     supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('bookings').select('total_amount').in('payment_status', ['advance', 'partial', 'paid']).gte('created_at', monthStart),
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'host'),
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'admin'),
   ])
-
-  const hosts = await supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'host')
-  const admins = await supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'admin')
 
   const totalRevenue   = (payments.data ?? []).reduce((s, b) => s + Number(b.total_amount) * 0.10, 0)
   const monthlyRevenue = (monthRevenue.data ?? []).reduce((s, b) => s + Number(b.total_amount) * 0.10, 0)
@@ -593,11 +590,12 @@ export async function getAdminConversations() {
   const supabase = await requireAdmin()
   if (!supabase) return []
 
+  // Solo los 200 más recientes — deduplicar sobre 200 filas es O(200), no O(2000)
   const { data: msgs } = await supabase
     .from('messages')
     .select('id, body, created_at, space_id, sender_id, receiver_id, attachment_type')
     .order('created_at', { ascending: false })
-    .limit(2000)
+    .limit(200)
 
   if (!msgs || !msgs.length) return []
 
@@ -612,6 +610,7 @@ export async function getAdminConversations() {
   const profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p]))
   const spaceMap   = Object.fromEntries((spaces ?? []).map(s => [s.id, s]))
 
+  // Deduplicar por (space_id + par de usuarios ordenado) — primera aparición = más reciente
   const seen = new Set<string>()
   const conversations: any[] = []
 

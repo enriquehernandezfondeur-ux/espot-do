@@ -120,14 +120,16 @@ function fmtDOP(n: number | null): string {
 }
 
 export async function getPublishedSpaces(filters?: {
-  category?:    string
-  capacity?:    number
-  sector?:      string
-  search?:      string
-  activity?:    string
+  category?:     string
+  capacity?:     number
+  sector?:       string
+  search?:       string
+  activity?:     string
   baseActivity?: string
-  dateFrom?:    string   // YYYY-MM-DD — filtrar por disponibilidad
-  dateTo?:      string
+  dateFrom?:     string   // YYYY-MM-DD — filtrar por disponibilidad
+  dateTo?:       string
+  page?:         number   // 0-indexed, default 0
+  pageSize?:     number   // default 100
 }) {
   const supabase = await createClient()
 
@@ -172,23 +174,32 @@ export async function getPublishedSpaces(filters?: {
     query = query.or(`primary_activity.eq.${filters.baseActivity},secondary_activities.cs.{${filters.baseActivity}}`)
   }
 
-  const { data: spaces } = await query.order('created_at', { ascending: false }).limit(100)
+  const page     = filters?.page ?? 0
+  const pageSize = filters?.pageSize ?? 100
+  const { data: spaces } = await query
+    .order('created_at', { ascending: false })
+    .range(page * pageSize, (page + 1) * pageSize - 1)
+
   if (!spaces) return []
 
   // Filtrar por disponibilidad de fecha si se especificó
   if (filters?.dateFrom) {
-    const { data: blocked } = await supabase
-      .from('bookings')
-      .select('space_id, event_date, status')
-      .gte('event_date', filters.dateFrom)
-      .lte('event_date', filters.dateTo ?? filters.dateFrom)
-      .not('status', 'in', '("cancelled_guest","cancelled_host","rejected")')
+    const spaceIds = spaces.map(s => s.id)
 
-    const { data: availability } = await supabase
-      .from('space_availability')
-      .select('space_id, blocked_date')
-      .gte('blocked_date', filters.dateFrom)
-      .lte('blocked_date', filters.dateTo ?? filters.dateFrom)
+    // Ambas queries en paralelo y acotadas a los space_ids del resultado actual
+    const [{ data: blocked }, { data: availability }] = await Promise.all([
+      supabase.from('bookings')
+        .select('space_id, event_date, status')
+        .in('space_id', spaceIds)
+        .gte('event_date', filters.dateFrom)
+        .lte('event_date', filters.dateTo ?? filters.dateFrom)
+        .not('status', 'in', '("cancelled_guest","cancelled_host","rejected")'),
+      supabase.from('space_availability')
+        .select('space_id, blocked_date')
+        .in('space_id', spaceIds)
+        .gte('blocked_date', filters.dateFrom)
+        .lte('blocked_date', filters.dateTo ?? filters.dateFrom),
+    ])
 
     // Marcar espacios con disponibilidad
     return spaces.map(space => {

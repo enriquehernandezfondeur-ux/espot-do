@@ -165,6 +165,15 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
   const [activeTab,       setActiveTab]       = useState<'info' | 'addons' | 'rules' | 'reviews'>('info')
   const [reviewsData,     setReviewsData]     = useState<ReviewsSummary | null>(null)
 
+  // Registrar visita al espacio — fire and forget, no bloquea el render
+  useEffect(() => {
+    fetch('/api/spaces/view', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ spaceId: space.id }),
+    }).catch(() => {})
+  }, [space.id])
+
   // Auto-abrir chat si viene de ?chat=1 (desde botón "Preguntar" en SpaceCard)
   useEffect(() => {
     if (typeof window === 'undefined') return

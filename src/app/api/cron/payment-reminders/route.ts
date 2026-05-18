@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
-import { sendEmail } from '@/lib/email/send'
-import { tplRecordatorioCuota, tplRecordatorioEvento, tplSolicitudResena } from '@/lib/email/templates'
+import { sendEmail, sendEmailIfEnabled } from '@/lib/email/send'
+import { tplRecordatorioCuota, tplRecordatorioEvento, tplSolicitudResena, emailBase, infoBox } from '@/lib/email/templates'
 import { daysUntilDate } from '@/lib/payments/schedule'
 import { createServiceClient } from '@/lib/supabase/service'
+import { formatDate } from '@/lib/utils'
 
 const SITE        = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 const CRON_SECRET = process.env.CRON_SECRET ?? ''
@@ -22,7 +23,135 @@ export async function GET(req: Request) {
   let sent = 0
   let errors = 0
 
-  // ── 1. Recordatorios de cuotas (7d y 1d antes de vencimiento) ──────────
+  // ── 0. Marcar cuotas vencidas como overdue ──────────────────────────────
+  try {
+    const today = new Date().toISOString().split('T')[0]
+    const { data: overdueData, error: overdueError } = await sb
+      .from('booking_installments')
+      .update({ status: 'overdue' })
+      .eq('status', 'pending')
+      .lt('due_date', today)
+      .select('id')
+    if (overdueError) {
+      console.error('[cron] overdue update failed:', overdueError.message)
+    } else {
+      console.info(`[cron] overdue marcadas: ${overdueData?.length ?? 0} cuotas actualizadas a 'overdue'`)
+    }
+  } catch (err: any) {
+    console.error('[cron] overdue update exception:', err.message)
+  }
+
+  // ── 1. Auto-cancelar reservas accepted + unpaid con más de 72h sin pago ──
+
+  let autoCancelled = 0
+
+  try {
+    const cutoff = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString()
+
+    const { data: stale } = await sb
+      .from('bookings')
+      .select(`
+        id, event_date,
+        spaces!space_id(name, profiles!host_id(email, full_name)),
+        profiles!guest_id(email, full_name)
+      `)
+      .eq('status', 'accepted')
+      .eq('payment_status', 'unpaid')
+      .lt('updated_at', cutoff)
+
+    for (const bk of stale ?? []) {
+      try {
+        // Cancelar la reserva
+        const { error: cancelErr } = await sb
+          .from('bookings')
+          .update({
+            status: 'cancelled_host',
+            cancelled_at: new Date().toISOString(),
+            cancellation_reason: 'Auto-cancelado: pago no recibido en 72 horas',
+          })
+          .eq('id', bk.id)
+
+        if (cancelErr) {
+          console.error(`[cron] auto-cancel booking ${bk.id} failed:`, cancelErr.message)
+          errors++
+          continue
+        }
+
+        // Cancelar cuotas pendientes y vencidas
+        await sb
+          .from('booking_installments')
+          .update({ status: 'cancelled' })
+          .eq('booking_id', bk.id)
+          .in('status', ['pending', 'overdue'])
+
+        const space = (bk as any).spaces
+        const guest = (bk as any).profiles
+        const host  = space?.profiles
+
+        // Email al cliente: reserva cancelada por falta de pago
+        if (guest?.email) {
+          await sendEmail({
+            to:      guest.email,
+            subject: `Tu reserva fue cancelada — ${space?.name ?? ''}`,
+            html:    emailBase({
+              title:       'Reserva cancelada por falta de pago',
+              subtitle:    `No recibimos el pago para confirmar tu fecha en ${space?.name ?? ''}.`,
+              accentColor: '#6B7280',
+              body: `
+                <p style="color:#374151;margin:0 0 16px;">Hola <strong>${guest.full_name ?? 'Cliente'}</strong>, tu reserva fue cancelada porque el pago no fue completado en las primeras 72 horas.</p>
+                ${infoBox([
+                  { label: 'Espacio',      value: space?.name ?? '—' },
+                  { label: 'Fecha',        value: formatDate(bk.event_date) },
+                  { label: 'Motivo',       value: 'Pago no recibido en 72 horas' },
+                ])}
+                <p style="color:#374151;margin:0 0 16px;">La fecha quedó libre. Si aún te interesa el espacio, puedes hacer una nueva solicitud.</p>
+                <p style="color:#6B7280;font-size:13px;margin:0;">¿Tienes preguntas? Escríbenos a <a href="mailto:contacto@espot.do" style="color:#35C493;">contacto@espot.do</a>.</p>`,
+              cta: { text: 'Explorar espacios', url: `${SITE}/buscar` },
+            }),
+          })
+          sent++
+        }
+
+        // Email al host: fecha liberada por falta de pago del cliente
+        if (host?.email) {
+          await sendEmail({
+            to:      host.email,
+            subject: `Fecha liberada — ${space?.name ?? ''} (pago no completado)`,
+            html:    emailBase({
+              title:       'La fecha volvió a estar disponible',
+              subtitle:    `El cliente no completó el pago en 72 horas.`,
+              accentColor: '#35C493',
+              body: `
+                <p style="color:#374151;margin:0 0 16px;">Hola <strong>${host.full_name ?? 'Propietario'}</strong>, la reserva para el ${formatDate(bk.event_date)} en <strong>${space?.name ?? ''}</strong> fue cancelada automáticamente porque el cliente no completó el pago.</p>
+                ${infoBox([
+                  { label: 'Espacio',      value: space?.name ?? '—' },
+                  { label: 'Fecha',        value: formatDate(bk.event_date) },
+                  { label: 'Cliente',      value: guest?.full_name ?? '—' },
+                  { label: 'Motivo',       value: 'Pago no recibido en 72 horas' },
+                ])}
+                <p style="color:#374151;margin:0;">La fecha <strong>${formatDate(bk.event_date)}</strong> volvió a estar disponible para nuevas reservas.</p>`,
+              cta: { text: 'Ver mis reservas', url: `${SITE}/dashboard/host/reservas` },
+            }),
+          })
+          sent++
+        }
+
+        autoCancelled++
+      } catch (err: any) {
+        console.error(`[cron] auto-cancel loop error for ${bk.id}:`, err.message)
+        errors++
+      }
+    }
+
+    if (autoCancelled > 0) {
+      console.info(`[cron] auto-cancelled ${autoCancelled} reservas por falta de pago`)
+    }
+  } catch (err: any) {
+    console.error('[cron] auto-cancel step failed:', err.message)
+    errors++
+  }
+
+  // ── 2. Recordatorios de cuotas (7d y 1d antes de vencimiento) ──────────
 
   async function getUpcoming(daysAhead: number) {
     const target = new Date()
@@ -34,7 +163,7 @@ export async function GET(req: Request) {
         id, installment_number, amount, due_date,
         reminder_7d_sent, reminder_1d_sent,
         bookings!booking_id(
-          id, event_date,
+          id, event_date, guest_id,
           spaces!space_id(name),
           profiles!guest_id(full_name, email)
         )
@@ -72,10 +201,10 @@ export async function GET(req: Request) {
       ? `Pago vence mañana — ${booking?.spaces?.name}`
       : `Recordatorio: pago vence en ${daysLeft} día${daysLeft !== 1 ? 's' : ''} — ${booking?.spaces?.name}`
 
-    await sendEmail({
-      to:      guest.email,
+    await sendEmailIfEnabled(
+      guest.email,
       subject,
-      html:    tplRecordatorioCuota({
+      tplRecordatorioCuota({
         guestName:         guest.full_name ?? 'Cliente',
         spaceName:         booking?.spaces?.name ?? '—',
         eventDate:         booking?.event_date ?? '',
@@ -86,7 +215,9 @@ export async function GET(req: Request) {
         daysLeft,
         paymentUrl:        `${SITE}/pago/${booking?.id}?cuota=${inst.id}`,
       }),
-    })
+      booking?.guest_id ?? undefined,
+      'payment_reminders',
+    )
     await markSent(inst.id, reminderType)
     sent++
   }
@@ -111,7 +242,7 @@ export async function GET(req: Request) {
     const { data: tomorrowBookings } = await supabase
       .from('bookings')
       .select(`
-        id, event_date, start_time, end_time, guest_count,
+        id, event_date, start_time, end_time, guest_count, guest_id,
         spaces!space_id(name, address, city, sector, slug),
         profiles!guest_id(full_name, email)
       `)
@@ -123,10 +254,10 @@ export async function GET(req: Request) {
       const space = (bk as any).spaces
       if (!guest?.email) continue
       try {
-        await sendEmail({
-          to:      guest.email,
-          subject: `Tu evento es mañana — ${space?.name}`,
-          html:    tplRecordatorioEvento({
+        await sendEmailIfEnabled(
+          guest.email,
+          `Tu evento es mañana — ${space?.name}`,
+          tplRecordatorioEvento({
             guestName:    guest.full_name ?? 'Cliente',
             spaceName:    space?.name ?? '—',
             spaceAddress: space?.address
@@ -138,7 +269,9 @@ export async function GET(req: Request) {
             guestCount: bk.guest_count ?? 0,
             bookingId:  bk.id,
           }),
-        })
+          (bk as any).guest_id ?? undefined,
+          'booking_updates',
+        )
         sent++
       } catch { errors++ }
     }
@@ -254,5 +387,5 @@ export async function GET(req: Request) {
     errors++
   }
 
-  return NextResponse.json({ ok: true, sent, errors, ts: new Date().toISOString() })
+  return NextResponse.json({ ok: true, sent, errors, autoCancelled, ts: new Date().toISOString() })
 }

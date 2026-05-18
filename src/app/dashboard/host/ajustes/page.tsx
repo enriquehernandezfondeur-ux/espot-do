@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, Suspense } from 'react'
 import { Save, Camera, Loader2, CheckCircle, Calendar, Copy, RefreshCw, ExternalLink, Link2, Link2Off } from 'lucide-react'
 import { getClientProfile, updateClientProfile } from '@/lib/actions/client'
 import NotificationSettings from '@/components/dashboard/NotificationSettings'
-import { getOrCreateIcalToken, regenerateIcalToken, getGoogleCalendarStatus, disconnectGoogleCalendar } from '@/lib/actions/host'
+import { getOrCreateIcalToken, regenerateIcalToken, getGoogleCalendarStatus, disconnectGoogleCalendar, getBankAccount, saveBankAccount } from '@/lib/actions/host'
 import { createClient } from '@/lib/supabase/client'
 import { useSearchParams } from 'next/navigation'
 
@@ -28,6 +28,16 @@ function AjustesInner() {
   const [email,     setEmail]     = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
 
+  // Cuenta bancaria
+  const [bankName,       setBankName]       = useState('')
+  const [accountType,    setAccountType]    = useState<'corriente' | 'ahorro'>('corriente')
+  const [accountNumber,  setAccountNumber]  = useState('')
+  const [accountHolder,  setAccountHolder]  = useState('')
+  const [cedulaOrRnc,    setCedulaOrRnc]    = useState('')
+  const [bankSaving,     setBankSaving]     = useState(false)
+  const [bankSaved,      setBankSaved]      = useState(false)
+  const [bankError,      setBankError]      = useState('')
+
   // iCal
   const [icalToken,      setIcalToken]      = useState<string | null>(null)
   const [icalLoading,    setIcalLoading]    = useState(false)
@@ -47,8 +57,8 @@ function AjustesInner() {
   useEffect(() => {
     async function load() {
       try {
-        const [[p, gcal], supabase] = await Promise.all([
-          Promise.all([getClientProfile(), getGoogleCalendarStatus()]),
+        const [[p, gcal, bank], supabase] = await Promise.all([
+          Promise.all([getClientProfile(), getGoogleCalendarStatus(), getBankAccount()]),
           Promise.resolve(createClient()),
         ])
         if (p) {
@@ -71,6 +81,13 @@ function AjustesInner() {
           }
         }
         setGcalConnected(gcal.connected)
+        if (bank) {
+          setBankName(bank.bank_name ?? '')
+          setAccountType(bank.account_type ?? 'corriente')
+          setAccountNumber(bank.account_number ?? '')
+          setAccountHolder(bank.account_holder ?? '')
+          setCedulaOrRnc(bank.cedula_or_rnc ?? '')
+        }
       } catch {}
       setLoading(false)
     }
@@ -124,6 +141,30 @@ function AjustesInner() {
       setTimeout(() => setSaved(false), 2500)
     }
     setSaving(false)
+  }
+
+  async function handleSaveBank() {
+    if (!bankName || !accountNumber || !accountHolder || !cedulaOrRnc) {
+      setBankError('Todos los campos son requeridos')
+      return
+    }
+    setBankSaving(true)
+    setBankError('')
+    const result = await saveBankAccount({
+      bank_name:      bankName,
+      account_type:   accountType,
+      account_number: accountNumber,
+      account_holder: accountHolder,
+      cedula_or_rnc:  cedulaOrRnc,
+      currency:       'DOP',
+    })
+    if ('error' in result) {
+      setBankError(result.error ?? 'Error al guardar')
+    } else {
+      setBankSaved(true)
+      setTimeout(() => setBankSaved(false), 2500)
+    }
+    setBankSaving(false)
   }
 
   async function handleGetIcal() {
@@ -277,6 +318,132 @@ function AjustesInner() {
         : saved  ? <><CheckCircle size={18} /> ¡Guardado!</>
         :          <><Save size={18} /> Guardar cambios</>}
       </button>
+
+      {/* ── Cuenta bancaria ── */}
+      <div className="rounded-2xl p-6 mb-5"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+            style={{ background: 'rgba(53,196,147,0.1)' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--brand)' }}>
+              <rect x="2" y="5" width="20" height="14" rx="2"/>
+              <line x1="2" y1="10" x2="22" y2="10"/>
+            </svg>
+          </div>
+          <div>
+            <h2 className="font-bold" style={{ color: 'var(--text-primary)' }}>Cuenta bancaria</h2>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              Para recibir tus liquidaciones en República Dominicana
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {/* Banco */}
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wide mb-2"
+              style={{ color: 'var(--text-muted)' }}>Banco</label>
+            <select
+              value={bankName}
+              onChange={e => setBankName(e.target.value)}
+              className="input-base w-full rounded-xl px-4 py-3.5 text-sm"
+              style={{ appearance: 'auto' }}>
+              <option value="">Selecciona un banco</option>
+              <option value="BHD León">BHD León</option>
+              <option value="Banreservas">Banreservas</option>
+              <option value="Popular">Popular</option>
+              <option value="Scotiabank">Scotiabank</option>
+              <option value="Asociación La Nacional">Asociación La Nacional</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+
+          {/* Tipo de cuenta */}
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wide mb-2"
+              style={{ color: 'var(--text-muted)' }}>Tipo de cuenta</label>
+            <div className="flex gap-3">
+              {(['corriente', 'ahorro'] as const).map(type => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => setAccountType(type)}
+                  className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all"
+                  style={accountType === type ? {
+                    background: 'var(--brand)',
+                    color: '#fff',
+                    border: '1.5px solid var(--brand)',
+                  } : {
+                    background: 'var(--bg-elevated)',
+                    color: 'var(--text-secondary)',
+                    border: '1.5px solid var(--border-subtle)',
+                  }}>
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Número de cuenta */}
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wide mb-2"
+              style={{ color: 'var(--text-muted)' }}>Número de cuenta</label>
+            <input
+              value={accountNumber}
+              onChange={e => setAccountNumber(e.target.value)}
+              placeholder="Ej: 027-601234-5"
+              className="input-base w-full rounded-xl px-4 py-3.5 text-sm"
+              inputMode="numeric"
+            />
+          </div>
+
+          {/* Titular */}
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wide mb-2"
+              style={{ color: 'var(--text-muted)' }}>Titular de la cuenta</label>
+            <input
+              value={accountHolder}
+              onChange={e => setAccountHolder(e.target.value)}
+              placeholder="Nombre completo del titular"
+              className="input-base w-full rounded-xl px-4 py-3.5 text-sm"
+            />
+          </div>
+
+          {/* Cédula */}
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wide mb-2"
+              style={{ color: 'var(--text-muted)' }}>Cédula del titular</label>
+            <input
+              value={cedulaOrRnc}
+              onChange={e => setCedulaOrRnc(e.target.value)}
+              placeholder="Ej: 001-1234567-8"
+              className="input-base w-full rounded-xl px-4 py-3.5 text-sm"
+              inputMode="numeric"
+            />
+          </div>
+
+          {bankError && (
+            <div className="text-sm px-4 py-3 rounded-xl"
+              style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626' }}>
+              {bankError}
+            </div>
+          )}
+
+          <button
+            onClick={handleSaveBank}
+            disabled={bankSaving}
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm transition-all disabled:opacity-50"
+            style={{ background: bankSaved ? 'rgba(22,163,74,0.1)' : 'var(--brand)', color: bankSaved ? '#16A34A' : '#fff' }}>
+            {bankSaving ? <><Loader2 size={16} className="animate-spin" /> Guardando...</>
+            : bankSaved  ? <><CheckCircle size={16} /> ¡Cuenta guardada!</>
+            :              <><Save size={16} /> Guardar cuenta bancaria</>}
+          </button>
+
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            Esta información se utiliza para procesar las liquidaciones. El equipo de Espot la verifica antes del primer pago.
+          </p>
+        </div>
+      </div>
 
       {/* ── Google Calendar ── */}
       <div className="rounded-2xl p-6 mb-5"

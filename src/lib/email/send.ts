@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { createServiceClient } from '@/lib/supabase/service'
 
 // FROM debe ser un email de un dominio verificado en Resend.
 // Verificar en: https://resend.com/domains
@@ -52,4 +53,55 @@ export async function sendEmail({
   }
 
   return { success: true, id: data?.id }
+}
+
+// ── FIX #4: Preferencias de notificación ────────────────────────────────────
+
+/**
+ * Lee notification_settings del user_metadata vía service role.
+ * Retorna un objeto con las keys de preferencia; si no hay configuración
+ * se asume que todas las notificaciones están habilitadas (opt-out model).
+ */
+export async function getUserNotificationSettings(
+  userId: string
+): Promise<Record<string, boolean>> {
+  try {
+    const sb = createServiceClient()
+    const { data, error } = await sb.auth.admin.getUserById(userId)
+    if (error || !data?.user) return {}
+    return (data.user.user_metadata?.notification_settings ?? {}) as Record<string, boolean>
+  } catch (err) {
+    console.error('[getUserNotificationSettings] error:', err)
+    return {}
+  }
+}
+
+/**
+ * Envía un email solo si la preferencia del usuario lo permite.
+ *
+ * @param to           - Dirección de destino
+ * @param subject      - Asunto del email
+ * @param html         - Cuerpo HTML
+ * @param userId       - ID del usuario (opcional; si no se pasa, siempre envía)
+ * @param preferenceKey - Key en notification_settings a verificar (ej. 'booking_updates')
+ *                        Si la key no existe en el objeto se asume habilitada (opt-out).
+ */
+export async function sendEmailIfEnabled(
+  to: string,
+  subject: string,
+  html: string,
+  userId?: string,
+  preferenceKey?: string
+): Promise<ReturnType<typeof sendEmail>> {
+  if (userId && preferenceKey) {
+    const settings = await getUserNotificationSettings(userId)
+    // La preferencia es explícitamente false → usuario la ha desactivado
+    if (settings[preferenceKey] === false) {
+      console.info(
+        `[sendEmailIfEnabled] Skipped — usuario ${userId} desactivó '${preferenceKey}' | to: ${to}`
+      )
+      return { success: true, skipped: true } as any
+    }
+  }
+  return sendEmail({ to, subject, html })
 }

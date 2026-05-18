@@ -9,7 +9,7 @@ import { getClientBookings } from '@/lib/actions/client'
 import { STATUS_LABELS, STATUS_COLORS, isPaid } from '@/lib/bookingConfig'
 import { cn } from '@/lib/utils'
 import { submitReview, getUserReviewedBookings } from '@/lib/actions/reviews'
-import { cancelBooking, type RefundBankInfo } from '@/lib/actions/booking'
+import { cancelBooking, rejectQuotation, type RefundBankInfo } from '@/lib/actions/booking'
 import { getInstallments, type BookingInstallment } from '@/lib/actions/installments'
 import { countdownLabel } from '@/lib/payments/schedule'
 
@@ -53,6 +53,7 @@ export default function MisReservasPage() {
   const [cancelReason, setCancelReason] = useState('')
   const [cancelling, setCancelling]   = useState(false)
   const [cancelError, setCancelError] = useState('')
+  const [rejectingId, setRejectingId] = useState<string | null>(null)
   const [refundBank, setRefundBank]   = useState<RefundBankInfo>({ holderName: '', bank: '', accountNumber: '', accountType: 'ahorro' })
   const [installments, setInstallments] = useState<BookingInstallment[]>([])
   const router = useRouter()
@@ -91,6 +92,23 @@ export default function MisReservasPage() {
       setSelected((prev: Booking | null) => prev ? { ...prev, status: 'cancelled_guest' as any } : null)
     setCancelling(false)
     closeCancelModal()
+  }
+
+  async function handleRejectQuotation(bk: Booking) {
+    const confirmed = window.confirm('¿Rechazar esta cotización? No podrás deshacer esta acción.')
+    if (!confirmed) return
+    setRejectingId(bk.id)
+    const result = await rejectQuotation(bk.id)
+    setRejectingId(null)
+    if ('error' in result) {
+      alert(result.error ?? 'No se pudo rechazar la cotización')
+      return
+    }
+    setBookings(prev => prev.map(b =>
+      b.id === bk.id ? { ...b, status: 'cancelled_guest' as any } : b
+    ))
+    if (selected?.id === bk.id)
+      setSelected((prev: Booking | null) => prev ? { ...prev, status: 'cancelled_guest' as any } : null)
   }
 
   useEffect(() => {
@@ -413,6 +431,15 @@ export default function MisReservasPage() {
                       style={{ background: '#2563EB', color: '#fff', boxShadow: '0 2px 8px rgba(37,99,235,0.3)' }}>
                       <CreditCard size={15} /> Pagar primera cuota →
                     </button>
+                    {(bk as any).event_notes?.startsWith('[Cotización]') && (
+                      <button
+                        onClick={() => handleRejectQuotation(bk)}
+                        disabled={rejectingId === bk.id}
+                        className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all disabled:opacity-50 mt-2"
+                        style={{ background: 'rgba(220,38,38,0.06)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.2)' }}>
+                        {rejectingId === bk.id ? <><Loader2 size={13} className="animate-spin" /> Rechazando...</> : <><X size={13} /> Rechazar precio</>}
+                      </button>
+                    )}
                   </div>
                 )}
 
@@ -704,11 +731,21 @@ export default function MisReservasPage() {
                             style={{ color: 'var(--brand)', background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
                             <MessageCircle size={12} /> Contactar propietario
                           </Link>
-                          <button onClick={() => openCancelModal(bk)}
-                            className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
-                            style={{ color: '#DC2626', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
-                            <X size={12} /> Cancelar reserva
-                          </button>
+                          {(bk as any).event_notes?.startsWith('[Cotización]') ? (
+                            <button
+                              onClick={() => handleRejectQuotation(bk)}
+                              disabled={rejectingId === bk.id}
+                              className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all disabled:opacity-50"
+                              style={{ color: '#DC2626', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
+                              {rejectingId === bk.id ? <><Loader2 size={12} className="animate-spin" /> Rechazando...</> : <><X size={12} /> Rechazar precio</>}
+                            </button>
+                          ) : (
+                            <button onClick={() => openCancelModal(bk)}
+                              className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
+                              style={{ color: '#DC2626', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
+                              <X size={12} /> Cancelar reserva
+                            </button>
+                          )}
                         </div>
                       </div>
                     )}

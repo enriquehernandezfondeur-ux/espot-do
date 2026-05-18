@@ -5,6 +5,7 @@ import { sendEmail } from '@/lib/email/send'
 import { tplPagoCompletado, tplCuotaPagada } from '@/lib/email/templates'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { markInstallmentPaid, getInstallments } from '@/lib/actions/installments'
+import { createBookingEvent } from '@/lib/google-calendar'
 
 // POST /api/payments/confirm
 // Body: los query params que Azul envió al ApprovedUrl
@@ -194,6 +195,42 @@ export async function POST(req: NextRequest) {
         html:    tplPagoCompletado({ ...paymentData, recipientName: 'Admin', isAdmin: true }),
       }),
     ])
+
+    // Sync Google Calendar — fire and forget, no bloquea la confirmación
+    const hostProfileResult = await supabase
+      .from('profiles')
+      .select('google_refresh_token, google_calendar_connected')
+      .eq('id', host?.id ?? space?.host_id)
+      .single()
+    const hostProfile = hostProfileResult.data
+
+    if (hostProfile?.google_calendar_connected && hostProfile?.google_refresh_token) {
+      createBookingEvent(
+        hostProfile.google_refresh_token,
+        {
+          id:          bookingId,
+          event_date:  booking.event_date,
+          start_time:  booking.start_time,
+          end_time:    booking.end_time,
+          event_type:  booking.event_type,
+          guest_count: booking.guest_count,
+        },
+        {
+          name:    space?.name    ?? '',
+          address: space?.address ?? null,
+          sector:  space?.sector  ?? null,
+          city:    space?.city    ?? null,
+        },
+        guest?.full_name ?? 'Cliente',
+      ).then(async gcalEventId => {
+        if (gcalEventId) {
+          await supabase
+            .from('bookings')
+            .update({ google_calendar_event_id: gcalEventId })
+            .eq('id', bookingId)
+        }
+      }).catch(err => console.error('[confirm] Google Calendar sync failed:', err))
+    }
   } else if (cuotaId && guestEmail) {
     // Cuota subsiguiente: solo confirmar al cliente con el resumen de la cuota
     const allInsts     = await getInstallments(bookingId)
