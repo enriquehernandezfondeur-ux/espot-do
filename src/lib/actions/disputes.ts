@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { sendEmail } from '@/lib/email/send'
 import { tplDisputaAbierta } from '@/lib/email/templates'
 
@@ -279,7 +280,7 @@ export async function getAdminDisputes(status?: DisputeStatus) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
 
-  // Verificar que es admin
+  // Verificar que es admin con el cliente anon (respeta RLS de profiles)
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')
@@ -288,7 +289,11 @@ export async function getAdminDisputes(status?: DisputeStatus) {
 
   if (profile?.role !== 'admin') return []
 
-  let query = supabase
+  // Usar service client para bypasear RLS en disputes (la política solo permite
+  // ver disputas propias, pero el admin necesita verlas todas)
+  const sb = createServiceClient()
+
+  let query = sb
     .from('disputes')
     .select(`
       id, booking_id, category, status, reason, evidence_urls,

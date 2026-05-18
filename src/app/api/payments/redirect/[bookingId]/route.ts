@@ -6,6 +6,8 @@ export const maxDuration = 30
 
 // GET /api/payments/redirect/[bookingId]?amount=1500
 // Verifica que la reserva pertenece al usuario autenticado antes de redirigir a Azul.
+const SUPERADMIN = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ bookingId: string }> }
@@ -14,9 +16,11 @@ export async function GET(
   const cuotaRaw      = req.nextUrl.searchParams.get('cuota')
   const cuotaId       = cuotaRaw && cuotaRaw !== 'undefined' ? cuotaRaw : null
   const isDebug       = req.nextUrl.searchParams.get('debug') === '1'
+  const isTestExact   = req.nextUrl.searchParams.get('test_exact') === '1'
 
   // Verificar autenticación y calcular el monto real desde la DB (nunca del cliente)
   let amount = 0
+  let currentUserEmail: string | undefined
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -25,6 +29,7 @@ export async function GET(
         status: 401, headers: { 'Content-Type': 'text/html' },
       })
     }
+    currentUserEmail = user.email
 
     if (cuotaId) {
       // Pago de cuota: obtener monto real de la cuota en DB
@@ -109,10 +114,10 @@ export async function GET(
       .join('\n    ')
 
     // Modo test exacto: usa los valores del ejemplo oficial de Azul para verificar el hash
-    // Solo disponible en desarrollo/staging — nunca en producción
-    if (req.nextUrl.searchParams.get('test_exact') === '1') {
-      if (process.env.NODE_ENV === 'production') {
-        return new NextResponse(errorHtml('El modo test no está disponible en producción.'), {
+    // Solo disponible para el superadmin — nunca en producción ni para usuarios normales
+    if (isTestExact) {
+      if (process.env.NODE_ENV === 'production' || currentUserEmail !== SUPERADMIN) {
+        return new NextResponse(errorHtml('No autorizado.'), {
           status: 403, headers: { 'Content-Type': 'text/html' },
         })
       }
@@ -166,13 +171,13 @@ OrderNumber: <strong>${ORDER}</strong> · Amount: <strong>${AMT}</strong> · ITB
     }
 
     // Modo debug: prueba todas las combinaciones de MerchantName y MerchantType
-    // Solo disponible fuera de producción
-    if (isDebug && process.env.NODE_ENV === 'production') {
-      return new NextResponse(errorHtml('El modo debug no está disponible en producción.'), {
-        status: 403, headers: { 'Content-Type': 'text/html' },
-      })
-    }
+    // Solo disponible para el superadmin — nunca en producción
     if (isDebug) {
+      if (process.env.NODE_ENV === 'production' || currentUserEmail !== SUPERADMIN) {
+        return new NextResponse(errorHtml('No autorizado.'), {
+          status: 403, headers: { 'Content-Type': 'text/html' },
+        })
+      }
       const { createHmac } = await import('crypto')
       const PRIV = process.env.AZUL_PRIVATE_KEY ?? ''
 

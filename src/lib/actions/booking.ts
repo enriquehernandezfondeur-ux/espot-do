@@ -151,15 +151,33 @@ export async function createBooking(payload: CreateBookingPayload) {
     }
     // Si la función RPC no existe, hacer verificación de solapamiento directa
     if (rpcError) {
-      const { data: overlapping } = await supabase
-        .from('bookings')
-        .select('id')
-        .eq('space_id', payload.spaceId)
-        .eq('event_date', payload.eventDate)
-        .not('status', 'in', '("rejected","cancelled_guest","cancelled_host")')
-        .lt('start_time', payload.endTime)   // overlap: start existente < fin nuevo
-        .gt('end_time', payload.startTime)   // overlap: fin existente > inicio nuevo
-        .limit(1)
+      const crossesMidnight = payload.endTime < payload.startTime
+      let overlapping: { id: string }[] | null = null
+
+      if (crossesMidnight) {
+        // Cruce de medianoche: hay overlap si el inicio existente < fin nuevo OR el fin existente > inicio nuevo
+        const { data } = await supabase
+          .from('bookings')
+          .select('id')
+          .eq('space_id', payload.spaceId)
+          .eq('event_date', payload.eventDate)
+          .not('status', 'in', '("rejected","cancelled_guest","cancelled_host")')
+          .or(`start_time.lt.${payload.endTime},end_time.gt.${payload.startTime}`)
+          .limit(1)
+        overlapping = data
+      } else {
+        const { data } = await supabase
+          .from('bookings')
+          .select('id')
+          .eq('space_id', payload.spaceId)
+          .eq('event_date', payload.eventDate)
+          .not('status', 'in', '("rejected","cancelled_guest","cancelled_host")')
+          .lt('start_time', payload.endTime)
+          .gt('end_time', payload.startTime)
+          .limit(1)
+        overlapping = data
+      }
+
       if (overlapping && overlapping.length > 0) {
         return { error: 'Este espacio ya tiene una reserva en ese horario. Por favor elige otro horario o fecha.' }
       }
@@ -290,11 +308,19 @@ export async function createBooking(payload: CreateBookingPayload) {
     basePrice: payload.basePrice, selectedAddons: [],
     bookingId: booking.id,
   }
+  // Para reservas instantáneas calcular la primera cuota antes del email
+  let firstInstallmentAmount = payload.totalAmount
+  if (isInstant) {
+    const { buildSchedule } = await import('@/lib/payments/schedule')
+    const schedule = buildSchedule(payload.eventDate, payload.totalAmount)
+    firstInstallmentAmount = schedule.installments[0]?.amount ?? payload.totalAmount
+  }
+
   await Promise.allSettled([
     guestEmail && sendEmail({
       to: guestEmail,
       subject: isQuote ? `Cotización solicitada — ${spaceName}` : isInstant ? `¡Reserva aceptada! Completa el pago — ${spaceName}` : `Solicitud recibida — ${spaceName}`,
-      html: isQuote ? tplSolicitudCotizacionCliente(bookingData) : isInstant ? tplAceptadaCliente({ ...bookingData, hostName: host?.full_name ?? '', platformFee: payload.totalAmount }) : tplSolicitudCliente(bookingData),
+      html: isQuote ? tplSolicitudCotizacionCliente(bookingData) : isInstant ? tplAceptadaCliente({ ...bookingData, hostName: host?.full_name ?? '', platformFee: firstInstallmentAmount }) : tplSolicitudCliente(bookingData),
     }),
     hostEmail && sendEmail({
       to: hostEmail,
@@ -587,7 +613,14 @@ function calculateRefundAmount(paidAmount: number, eventDate: string, policy: st
   const diffMs   = event.getTime() - now.getTime()
   const diffDays = diffMs / (1000 * 60 * 60 * 24) // días fraccionarios hasta el evento
 
-  switch (policy) {
+  // Normalizar valores en español (almacenados en DB) a los usados en el switch
+  const normalized = ({
+    'moderada':    'moderate',
+    'estricta':    'strict',
+    'muy_flexible':'very_flexible',
+  } as Record<string, string>)[policy] ?? policy
+
+  switch (normalized) {
     case 'very_flexible':
       // 100% si cancela hasta 24h antes; 0% si < 24h
       return diffDays >= 1 ? paidAmount : 0

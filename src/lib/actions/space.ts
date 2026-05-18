@@ -310,8 +310,12 @@ export async function deleteSpaceByHost(spaceId: string) {
     supabase.from('space_addons').delete().eq('space_id', spaceId),
     supabase.from('space_time_blocks').delete().eq('space_id', spaceId),
     supabase.from('space_payment_terms').delete().eq('space_id', spaceId),
+    supabase.from('space_conditions').delete().eq('space_id', spaceId),
     supabase.from('favorites').delete().eq('space_id', spaceId),
     supabase.from('messages').delete().eq('space_id', spaceId),
+    // Eliminar reservas históricas (completadas, canceladas, rechazadas)
+    // Las activas ya fueron bloqueadas arriba
+    supabase.from('bookings').delete().eq('space_id', spaceId),
   ])
   // Pricing después de addons (por si hay FK cruzada)
   await supabase.from('space_pricing').delete().eq('space_id', spaceId)

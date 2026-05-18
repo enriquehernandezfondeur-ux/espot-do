@@ -312,7 +312,7 @@ export async function getHostStats() {
 
   const [allBookings, quotes] = await Promise.all([
     supabase.from('bookings')
-      .select('id, status, payment_status, total_amount, event_date, start_time, end_time, guest_count, event_type, profiles!guest_id(full_name)')
+      .select('id, status, payment_status, total_amount, event_date, confirmed_at, start_time, end_time, guest_count, event_type, profiles!guest_id(full_name)')
       .in('space_id', spaceIds)
       .order('event_date', { ascending: true }),
     supabase.from('bookings')
@@ -322,12 +322,23 @@ export async function getHostStats() {
   const bookings = allBookings.data ?? []
 
   const thisMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
+
+  // Filtrar por confirmed_at (fecha real de pago) no event_date (fecha del evento)
+  const confirmedDateOf = (b: { confirmed_at?: string | null }) =>
+    b.confirmed_at ? b.confirmed_at.split('T')[0] : null
+
   const revenueThisMonth = bookings
-    .filter(b => b.event_date >= thisMonthStart && b.event_date <= thisMonthEnd && b.status === 'confirmed')
+    .filter(b => {
+      const d = confirmedDateOf(b)
+      return b.status === 'confirmed' && d && d >= thisMonthStart && d <= thisMonthEnd
+    })
     .reduce((s, b) => s + Number(b.total_amount), 0)
 
   const revenuePrevMonth = bookings
-    .filter(b => b.event_date >= prevMonthStart && b.event_date <= prevMonthEnd && b.status === 'confirmed')
+    .filter(b => {
+      const d = confirmedDateOf(b)
+      return b.status === 'confirmed' && d && d >= prevMonthStart && d <= prevMonthEnd
+    })
     .reduce((s, b) => s + Number(b.total_amount), 0)
 
   const today = now.toISOString().split('T')[0]
@@ -341,7 +352,10 @@ export async function getHostStats() {
     const end   = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split('T')[0]
     const mes   = d.toLocaleDateString('es-DO', { month: 'short' })
     const ingresos = bookings
-      .filter(b => b.event_date >= start && b.event_date <= end && b.status === 'confirmed')
+      .filter(b => {
+        const cd = confirmedDateOf(b)
+        return b.status === 'confirmed' && cd && cd >= start && cd <= end
+      })
       .reduce((s, b) => s + Number(b.total_amount), 0)
     return { mes: mes.charAt(0).toUpperCase() + mes.slice(1), ingresos }
   })

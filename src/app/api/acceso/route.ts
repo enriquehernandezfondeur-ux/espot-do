@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createHmac } from 'crypto'
+import { createHmac, timingSafeEqual } from 'crypto'
 
-const SITE_PASSWORD = process.env.SITE_PASSWORD
-const COOKIE_NAME   = 'espot_preview_access'
-const MAX_AGE       = 60 * 60 * 24 * 30
+const SITE_PASSWORD  = process.env.SITE_PASSWORD
+const HMAC_SECRET    = process.env.PREVIEW_HMAC_SECRET ?? 'espot-preview-v1'
+const COOKIE_NAME    = 'espot_preview_access'
+const MAX_AGE        = 60 * 60 * 24 * 30
 
 function buildAccessToken(password: string): string {
-  return createHmac('sha256', 'espot-preview-v1').update(password).digest('hex')
+  return createHmac('sha256', HMAC_SECRET).update(password).digest('hex')
 }
 
 export function getExpectedToken(): string | null {
@@ -21,7 +22,13 @@ export async function POST(req: NextRequest) {
 
   const { password } = await req.json()
 
-  if (password !== SITE_PASSWORD) {
+  // Comparación en tiempo constante para prevenir timing attacks
+  const inputBuf    = Buffer.from(String(password ?? ''), 'utf8')
+  const expectedBuf = Buffer.from(SITE_PASSWORD, 'utf8')
+  const match = inputBuf.length === expectedBuf.length &&
+    timingSafeEqual(inputBuf, expectedBuf)
+
+  if (!match) {
     return NextResponse.json({ error: 'Incorrect password' }, { status: 401 })
   }
 
