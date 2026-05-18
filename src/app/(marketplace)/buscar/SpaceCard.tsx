@@ -206,14 +206,11 @@ export function SpaceCard({
             </>
           )}
 
-          {/* Dots — visibles si hay >1 foto */}
-          {images.length > 1 && (
-            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 z-20">
-              {images.slice(0, 8).map((url, i) => (
-                <button type="button" key={`${space.id}-dot-${i}`} onClick={e => dotClick(e, i)}
-                  style={{ width: i === photoIdx ? 20 : 7, height: 7, borderRadius: 4, padding: '8px 4px', boxSizing: 'content-box', border: 'none', cursor: 'pointer',
-                    background: i === photoIdx ? '#fff' : 'rgba(255,255,255,0.55)', transition: 'all 0.3s ease' }} />
-              ))}
+          {/* Contador de fotos — solo cuando hay hover, discreto en esquina */}
+          {images.length > 1 && isHovered && (
+            <div className="absolute bottom-2.5 right-3 z-20 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold"
+              style={{ background: 'rgba(0,0,0,0.45)', color: '#fff', backdropFilter: 'blur(4px)' }}>
+              {photoIdx + 1} / {images.length}
             </div>
           )}
 
