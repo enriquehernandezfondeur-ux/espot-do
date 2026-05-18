@@ -1109,6 +1109,13 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                     </div>
 
                     {/* Lista de reseñas */}
+                    {/* Aviso si hay más de 30 reseñas */}
+                    {reviewsData.total > 30 && (
+                      <div className="text-xs text-center py-2 mb-2" style={{ color: 'var(--text-muted)' }}>
+                        Mostrando las 30 reseñas más recientes de {reviewsData.total}
+                      </div>
+                    )}
+
                     {reviewsData.reviews.map(r => {
                       const name    = r.guest.full_name ?? 'Usuario'
                       const initial = name.charAt(0).toUpperCase()

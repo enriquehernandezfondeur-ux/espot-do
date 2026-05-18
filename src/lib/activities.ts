@@ -121,10 +121,10 @@ export const SUB_ACTIVITIES: SubActivity[] = [
 // ── Mapping: sub-actividad → categoría base ───────────────
 export const SUB_TO_BASE: Record<string, BaseActivity> = {
   ...Object.fromEntries(SUB_ACTIVITIES.map(s => [s.key, s.base])),
-  // Aliases para slugs del homepage (plural / variantes)
-  bodas:        'fiesta',
-  quinceaneras: 'fiesta',
-  corporativo:  'corporativo',
+  // Aliases para retrocompatibilidad con URLs antiguas (plural / variantes)
+  bodas:        'fiesta',     // URL antigua ?activity=bodas → ahora ?activity=boda
+  quinceaneras: 'fiesta',     // URL antigua ?activity=quinceaneras → ahora ?activity=quinceanera
+  corporativo:  'corporativo', // Shortcut: cae directo a base sin pasar por sub-actividad
 }
 
 // Dado un slug de sub-actividad, devuelve la categoría base

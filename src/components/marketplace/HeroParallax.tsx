@@ -41,6 +41,7 @@ export default function HeroParallax({ spaceCount }: Props) {
       <video
         ref={videoRef}
         autoPlay muted loop playsInline
+        poster="/dia-poster.jpg"
         style={{
           position: 'absolute', inset: 0,
           width: '100%', height: '115%', // más alto para el parallax

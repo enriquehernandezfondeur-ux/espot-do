@@ -28,13 +28,18 @@ const SpacesMap = dynamic(() => import('@/components/map/SpacesMap'), {
 const QUICK_CAPACITIES = [20, 50, 100, 150]
 
 // Actividades que se muestran en el homepage — deben coincidir con SUB_ACTIVITIES
+// Actividades rápidas para el drawer mobile — slugs alineados con SUB_ACTIVITIES
 const QUICK_ACTIVITIES = [
-  { slug: 'cumpleanos',  label: 'Cumpleaños'  },
-  { slug: 'bodas',       label: 'Bodas'        },
-  { slug: 'corporativo', label: 'Corporativo'  },
-  { slug: 'graduacion',  label: 'Graduación'   },
-  { slug: 'quinceaneras',label: 'Quinceañera' },
-  { slug: 'baby-shower', label: 'Baby Shower'  },
+  { slug: 'cumpleanos',         label: 'Cumpleaños'    },
+  { slug: 'boda',               label: 'Boda'          },
+  { slug: 'evento-corporativo', label: 'Corporativo'   },
+  { slug: 'graduacion',         label: 'Graduación'    },
+  { slug: 'quinceanera',        label: 'Quinceañera'   },
+  { slug: 'baby-shower',        label: 'Baby Shower'   },
+  { slug: 'sesion-fotos',       label: 'Sesión fotos'  },
+  { slug: 'team-building',      label: 'Team Building' },
+  { slug: 'networking',         label: 'Networking'    },
+  { slug: 'reunion-trabajo',    label: 'Reunión'       },
 ]
 
 const AMENITIES = [
@@ -219,10 +224,10 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
     if (q) {
       const ql = q.toLowerCase()
       // Actividades que coinciden con el texto escrito
-      const actMatch = QUICK_ACTIVITIES.find(a =>
-        a.label.toLowerCase().includes(ql) || a.slug.replace('-', ' ').includes(ql)
+      const actMatch = SUB_ACTIVITIES.find(a =>
+        a.label.toLowerCase().includes(ql) || a.key.replace('-', ' ').includes(ql)
       )
-      const actBase = actMatch ? (SUB_TO_BASE[actMatch.slug] ?? null) : null
+      const actBase = actMatch ? actMatch.base : null
       result = result.filter(s =>
         s.name?.toLowerCase().includes(ql) ||
         s.description?.toLowerCase().includes(ql) ||
@@ -1301,7 +1306,7 @@ export default function BuscarClient({ spaces, initialParams }: Props) {
                       )
                     })}
                   {/* Búsqueda personalizada si no hay coincidencia exacta */}
-                  {actQ.trim() && !QUICK_ACTIVITIES.some(a => a.label.toLowerCase() === actQ.toLowerCase()) && (
+                  {actQ.trim() && !SUB_ACTIVITIES.some(a => a.label.toLowerCase() === actQ.toLowerCase()) && (
                     <button
                       onClick={() => { setQ(actQ.trim()); setActivity(''); setActQ(''); setMoreOpen(false) }}
                       className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition-all"
