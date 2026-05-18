@@ -175,7 +175,7 @@ export default function DashboardPage() {
           value={formatCurrency(stats?.revenueThisMonth ?? 0)}
           sub={stats?.revenuePrevMonth ? `vs ${formatCurrency(stats.revenuePrevMonth)} anterior` : 'Sin eventos aún'}
           icon={DollarSign}
-          iconColor="#35C493"
+          iconColor="var(--text-secondary)"
           trend={growth ? { value: `${growth}%`, positive: isPositive } : null}
         />
         <StatCard
@@ -183,21 +183,21 @@ export default function DashboardPage() {
           value={stats?.pendingCount ?? 0}
           sub={stats?.pendingCount ? 'Requieren respuesta' : 'Sin pendientes'}
           icon={Clock}
-          iconColor="#D97706"
+          iconColor="var(--text-secondary)"
         />
         <StatCard
           label="Confirmadas este mes"
           value={stats?.confirmedCount ?? 0}
           sub="eventos confirmados"
           icon={CheckCircle}
-          iconColor="#16A34A"
+          iconColor="var(--text-secondary)"
         />
         <StatCard
           label="Cotizaciones abiertas"
           value={stats?.pendingQuotes ?? 0}
           sub="sin responder"
           icon={MessageSquareQuote}
-          iconColor="#2563EB"
+          iconColor="var(--text-secondary)"
         />
       </div>
 
@@ -334,8 +334,8 @@ export default function DashboardPage() {
               Cuando alguien solicite tu espacio, aparecerá aquí. Comparte tu espacio para recibir más solicitudes.
             </p>
             <Link href="/dashboard/host/espacio"
-              className="mt-1 text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
-              style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
+              className="mt-1 text-xs font-medium px-4 py-2 rounded-xl transition-colors"
+              style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
               Ver mi espacio →
             </Link>
           </div>

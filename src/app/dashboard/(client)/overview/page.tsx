@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { CalendarDays, Clock, CheckCircle, ArrowRight, MapPin, Users, CreditCard, Heart, Loader2, MessageCircle, AlertTriangle, Bell, Sparkles } from 'lucide-react'
+import { CalendarDays, Clock, CheckCircle, ArrowRight, MapPin, Users, CreditCard, Heart, MessageCircle, AlertTriangle, Bell } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getClientStats } from '@/lib/actions/client'
 
@@ -48,12 +48,12 @@ export default function ClientDashboard() {
     <div className="p-4 md:p-6 max-w-3xl mx-auto">
       {/* Bienvenida */}
       <div className="text-center py-10 md:py-14">
-        <div className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-5"
-          style={{ background: 'linear-gradient(135deg, rgba(53,196,147,0.15), rgba(53,196,147,0.05))', border: '1.5px solid var(--brand-border)' }}>
-          <Sparkles size={32} style={{ color: 'var(--brand)' }} />
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5"
+          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+          <MapPin size={24} style={{ color: 'var(--text-muted)' }} />
         </div>
         <h1 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-          {stats?.userName ? `¡Hola, ${stats.userName}!` : '¡Bienvenido a Espot!'}
+          {stats?.userName ? `Hola, ${stats.userName}` : 'Bienvenido a Espot'}
         </h1>
         <p className="text-base mb-8 max-w-md mx-auto" style={{ color: 'var(--text-secondary)' }}>
           Reserva salones, rooftops, restaurantes y más para tu próximo evento en República Dominicana.
@@ -73,13 +73,13 @@ export default function ClientDashboard() {
         </div>
         <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
           {[
-            { num: '1', title: 'Elige tu espacio', desc: 'Busca por sector, tipo de evento o capacidad. Todos los espacios son verificados.', color: 'var(--brand)' },
-            { num: '2', title: 'Selecciona fecha y horario', desc: 'Elige el día y las horas que necesitas. El propietario confirma disponibilidad.', color: '#2563EB' },
-            { num: '3', title: 'Paga en cuotas', desc: 'Solo pagas al confirmar. El saldo se divide en cuotas según cuánto falta para tu evento.', color: '#7C3AED' },
+            { num: '1', title: 'Elige tu espacio', desc: 'Busca por sector, tipo de evento o capacidad. Todos los espacios son verificados.' },
+            { num: '2', title: 'Selecciona fecha y horario', desc: 'Elige el día y las horas que necesitas. El propietario confirma disponibilidad.' },
+            { num: '3', title: 'Paga en cuotas', desc: 'Solo pagas al confirmar. El saldo se divide en cuotas según cuánto falta para tu evento.' },
           ].map(step => (
             <div key={step.num} className="flex items-start gap-4 px-5 py-4">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold text-white shrink-0"
-                style={{ background: step.color }}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold shrink-0"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
                 {step.num}
               </div>
               <div className="min-w-0">
@@ -372,9 +372,9 @@ export default function ClientDashboard() {
 
             {/* CTA footer */}
             <div className="px-5 py-3 flex items-center justify-between"
-              style={{ background: 'var(--brand-dim)', borderTop: '1px solid var(--brand-border)' }}>
-              <span className="text-xs font-medium" style={{ color: 'var(--brand)' }}>Ver detalle completo</span>
-              <ArrowRight size={15} style={{ color: 'var(--brand)' }} />
+              style={{ background: 'var(--bg-elevated)', borderTop: '1px solid var(--border-subtle)' }}>
+              <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Ver detalle completo</span>
+              <ArrowRight size={15} style={{ color: 'var(--text-muted)' }} />
             </div>
           </Link>
         )
@@ -496,17 +496,17 @@ export default function ClientDashboard() {
       {/* Quick links — 2 cols en móvil, 4 en desktop */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {[
-          { href: '/buscar',              label: 'Explorar',     sub: 'Buscar espacios',        icon: MapPin,         color: 'var(--brand)' },
-          { href: '/dashboard/mensajes',  label: 'Mensajes',     sub: 'Hablar con el host',     icon: MessageCircle,  color: '#0891B2' },
-          { href: '/dashboard/favoritos', label: 'Favoritos',    sub: 'Espacios guardados',     icon: Heart,          color: '#EF4444' },
-          { href: '/dashboard/pagos',     label: 'Mis pagos',    sub: 'Historial y cuotas',     icon: CreditCard,     color: '#7C3AED' },
-        ].map(({ href, label, sub, icon: Icon, color }) => (
+          { href: '/buscar',              label: 'Explorar',     sub: 'Buscar espacios',        icon: MapPin        },
+          { href: '/dashboard/mensajes',  label: 'Mensajes',     sub: 'Hablar con el host',     icon: MessageCircle },
+          { href: '/dashboard/favoritos', label: 'Favoritos',    sub: 'Espacios guardados',     icon: Heart         },
+          { href: '/dashboard/pagos',     label: 'Mis pagos',    sub: 'Historial y cuotas',     icon: CreditCard    },
+        ].map(({ href, label, sub, icon: Icon }) => (
           <Link key={href} href={href}
             className="flex items-center gap-4 p-4 md:p-5 rounded-2xl transition-all card-hover"
             style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: `${color}15` }}>
-              <Icon size={18} style={{ color }} />
+              style={{ background: 'var(--bg-elevated)' }}>
+              <Icon size={18} style={{ color: 'var(--text-secondary)' }} />
             </div>
             <div className="flex-1 min-w-0">
               <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{label}</div>

@@ -65,27 +65,26 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
         </div>
       </div>
 
-      {/* Indicador de modo */}
+      {/* Perfil */}
       <div className="px-4 pt-4 pb-2">
-        <div className="flex items-center gap-3 px-3 py-3 rounded-2xl"
-          style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
+        <div className="flex items-center gap-3 px-2 py-2">
           {avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={avatarUrl} alt={userName ?? 'Avatar'}
-              className="w-9 h-9 rounded-xl object-cover shrink-0"
-              style={{ border: '1.5px solid var(--brand-border)' }} />
+              className="w-8 h-8 rounded-full object-cover shrink-0"
+              style={{ border: '1.5px solid var(--border-medium)' }} />
           ) : (
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-white text-sm font-bold"
-              style={{ background: 'var(--brand)' }}>
+            <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-semibold"
+              style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
               {userName?.charAt(0)?.toUpperCase() ?? 'U'}
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <div className="text-xs font-bold truncate" style={{ color: 'var(--text-primary)' }}>
+            <div className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
               {userName ?? 'Mi cuenta'}
             </div>
-            <div className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>
-              Panel de Cliente
+            <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
+              Cliente
             </div>
           </div>
         </div>
@@ -98,58 +97,43 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
           return (
             <Link key={href} href={href}
               onClick={() => setMobileOpen(false)}
-              className={cn('flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all')}
+              className={cn('flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all')}
               style={active ? {
-                background: 'var(--brand-dim)',
-                color: 'var(--brand)',
-                border: '1px solid var(--brand-border)',
+                background: 'var(--bg-elevated)',
+                color: 'var(--text-primary)',
               } : {
                 color: 'var(--text-secondary)',
               }}>
-              <Icon size={16} className="shrink-0" />
+              <Icon size={15} className="shrink-0" style={active ? { color: 'var(--brand)' } : undefined} />
               {label}
             </Link>
           )
         })}
       </nav>
 
-      {/* Explorar Espot — vuelta al marketplace */}
-      <div className="px-4 pb-2" style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 12 }}>
+      {/* Explorar */}
+      <div className="px-3 pb-1" style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 8 }}>
         <Link href="/buscar"
           onClick={() => setMobileOpen(false)}
-          className="flex items-center gap-3 w-full px-4 py-3 rounded-2xl transition-all"
-          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: 'var(--brand-dim)' }}>
-            <Search size={14} style={{ color: 'var(--brand)' }} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Explorar espacios</div>
-            <div className="text-xs" style={{ color: 'var(--text-muted)' }}>Ir al marketplace</div>
-          </div>
-          <ArrowRight size={13} style={{ color: 'var(--text-muted)' }} />
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all w-full"
+          style={{ color: 'var(--text-secondary)' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }}>
+          <Search size={15} className="shrink-0" />
+          Explorar espacios
         </Link>
       </div>
 
-      {/* Cambiar a modo Negocio */}
-      <div className="px-4 pb-3" style={{ paddingTop: 6 }}>
+      {/* Panel de Negocio */}
+      <div className="px-3 pb-1">
         <Link href="/dashboard/host"
           onClick={() => setMobileOpen(false)}
-          className="flex items-center gap-3 w-full px-4 py-3.5 rounded-2xl transition-all group"
-          style={{
-            background: 'var(--brand-navy)',
-            color: '#fff',
-            boxShadow: '0 2px 12px rgba(3,49,60,0.2)',
-          }}>
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: 'rgba(255,255,255,0.12)' }}>
-            <Building2 size={15} color="#fff" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-xs font-bold">Panel de Negocio</div>
-            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>Gestionar mis espacios</div>
-          </div>
-          <ArrowRight size={14} color="rgba(255,255,255,0.5)" />
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all w-full"
+          style={{ color: 'var(--text-secondary)' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }}>
+          <Building2 size={15} className="shrink-0" />
+          Panel de Negocio
         </Link>
       </div>
 
