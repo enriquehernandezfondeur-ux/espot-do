@@ -3,7 +3,24 @@ import { Poppins } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from '@/lib/notifications'
+import { getThemeColors } from '@/lib/actions/admin'
 import "./globals.css";
+
+// Mapeo de claves de la DB → variables CSS
+const CSS_VAR_MAP: Record<string, string> = {
+  theme_brand:        '--brand',
+  theme_brand_dark:   '--brand-dark',
+  theme_brand_light:  '--brand-light',
+  theme_brand_navy:   '--brand-navy',
+  theme_brand_lime:   '--brand-lime',
+}
+
+// Valida que el valor sea un color CSS seguro (hex, rgb, hsl, named)
+function isSafeColor(v: string): boolean {
+  return /^#[0-9a-fA-F]{3,8}$/.test(v) ||
+    /^rgba?\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+/.test(v) ||
+    /^hsla?\(/.test(v)
+}
 
 // Tipografía oficial de marca Espot — Poppins (Manual de marca)
 const poppins = Poppins({
@@ -44,16 +61,31 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Inyectar colores del tema desde la DB — falls back silently si falla
+  const themeColors = await getThemeColors()
+  const cssVars = Object.entries(CSS_VAR_MAP)
+    .map(([key, cssVar]) => {
+      const val = themeColors[key]
+      return val && isSafeColor(val) ? `${cssVar}: ${val};` : null
+    })
+    .filter(Boolean)
+    .join(' ')
+
   return (
     <html
       lang="es"
       className={`${poppins.variable} h-full antialiased`}
     >
+      <head>
+        {cssVars && (
+          <style dangerouslySetInnerHTML={{ __html: `:root { ${cssVars} }` }} />
+        )}
+      </head>
       <body className="min-h-full flex flex-col">
         {children}
         <Toaster />
