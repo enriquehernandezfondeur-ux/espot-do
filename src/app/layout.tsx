@@ -23,9 +23,8 @@ export const metadata: Metadata = {
     template: '%s | espot.do',
   },
   icons: {
-    icon:      [{ url: '/icon.svg', type: 'image/svg+xml' }],
-    shortcut:  '/icon.svg',
-    apple:     [{ url: '/apple-touch-icon.png' }],
+    icon:    [{ url: '/icon.svg', type: 'image/svg+xml' }],
+    shortcut: '/icon.svg',
   },
   manifest: '/manifest.json',
   description: 'Reserva salones, rooftops, restaurantes y más para tu próximo evento en República Dominicana. Explora los mejores espacios y reserva el que más te convenga.',
