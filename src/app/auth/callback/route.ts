@@ -16,18 +16,21 @@ export async function GET(request: NextRequest) {
   const { data: { user }, error: userError } = await supabase.auth.getUser()
   if (userError || !user) return NextResponse.redirect(`${origin}/auth?error=callback_failed`)
 
-  // Sincronizar avatar y nombre de OAuth (Google/Apple) al perfil si no están ya guardados
+  // Sincronizar avatar, nombre y rol del perfil si no están ya guardados
   const meta        = user.user_metadata ?? {}
   const oauthAvatar = meta.avatar_url || meta.picture || null
   const oauthName   = meta.full_name  || meta.name    || null
+  const metaRole    = (meta.role as string | undefined) === 'host' ? 'host' : null
 
-  if (oauthAvatar || oauthName) {
+  if (oauthAvatar || oauthName || metaRole) {
     const { data: existing } = await supabase
-      .from('profiles').select('avatar_url, full_name').eq('id', user.id).single()
+      .from('profiles').select('avatar_url, full_name, role').eq('id', user.id).single()
 
     const updates: Record<string, string> = { updated_at: new Date().toISOString() }
-    if (oauthAvatar && !existing?.avatar_url) updates.avatar_url = oauthAvatar
-    if (oauthName   && !existing?.full_name)  updates.full_name  = oauthName
+    if (oauthAvatar && !existing?.avatar_url)               updates.avatar_url = oauthAvatar
+    if (oauthName   && !existing?.full_name)                updates.full_name  = oauthName
+    // Si el usuario se registró como host pero el trigger no lo guardó, corregir el rol
+    if (metaRole    && existing?.role !== 'host')            updates.role       = 'host'
 
     if (Object.keys(updates).length > 1) {
       await supabase.from('profiles').update(updates).eq('id', user.id)
