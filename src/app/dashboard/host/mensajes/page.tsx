@@ -233,7 +233,7 @@ export default function HostMensajesPage() {
           ) : filtered.map(conv => (
             <button key={conv.spaceId} onClick={() => openConv(conv)}
               className="w-full text-left px-5 py-4 transition-colors"
-              style={{ background: active?.spaceId === conv.spaceId ? 'var(--brand-dim)' : 'transparent', borderBottom: '1px solid var(--border-subtle)' }}>
+              style={{ background: active?.spaceId === conv.spaceId ? 'rgba(3,49,60,0.05)' : 'transparent', borderBottom: '1px solid var(--border-subtle)' }}>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0" style={{ background: 'var(--bg-elevated)' }}>
                   {conv.cover ? <img src={conv.cover} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Building2 size={18} style={{ color: '#CBD5E1' }} /></div>}
@@ -338,7 +338,7 @@ export default function HostMensajesPage() {
                   ? <img src={attachment.preview} alt="" className="w-11 h-11 rounded-xl object-cover shrink-0" />
                   : (
                     <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-                      style={{ background: 'var(--brand-dim)' }}>
+                      style={{ background: 'var(--bg-elevated)' }}>
                       <FileText size={18} style={{ color: 'var(--brand)' }} />
                     </div>
                   )}
@@ -405,7 +405,7 @@ export default function HostMensajesPage() {
         </div>
       ) : (
         <div className="flex-1 flex flex-col items-center justify-center text-center">
-          <div className="w-16 h-16 rounded-3xl flex items-center justify-center mb-4" style={{ background: 'var(--brand-dim)' }}>
+          <div className="w-16 h-16 rounded-3xl flex items-center justify-center mb-4" style={{ background: 'var(--bg-elevated)' }}>
             <MessageCircle size={28} style={{ color: 'var(--brand)' }} />
           </div>
           <p className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>Selecciona una conversación</p>

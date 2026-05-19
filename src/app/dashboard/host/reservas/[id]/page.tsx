@@ -389,11 +389,11 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
       {/* ── Plan de cuotas (solo lectura para el host) ────── */}
       {installments.length > 0 && (
         <div className="rounded-2xl overflow-hidden mb-4"
-          style={{ border: '1.5px solid var(--brand-border)' }}>
+          style={{ border: '1px solid var(--border-subtle)' }}>
           <div className="flex items-center justify-between px-5 py-3.5"
-            style={{ background: 'var(--brand-dim)', borderBottom: '1px solid var(--brand-border)' }}>
-            <span className="text-sm font-bold" style={{ color: 'var(--brand)' }}>Plan de cuotas</span>
-            <span className="text-xs font-semibold" style={{ color: 'var(--brand)' }}>
+            style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
+            <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Plan de cuotas</span>
+            <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
               {installments.filter((i: any) => i.status === 'paid').length}/{installments.length} pagadas
             </span>
           </div>
@@ -411,9 +411,9 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
                 {/* Indicador numérico */}
                 <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
                   style={{
-                    background: paid ? 'rgba(22,163,74,0.1)' : overdue ? 'rgba(220,38,38,0.08)' : isNext ? 'var(--brand-dim)' : 'var(--bg-elevated)',
-                    color: paid ? '#16A34A' : overdue ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)',
-                    border: `1.5px solid ${paid ? 'rgba(22,163,74,0.3)' : overdue ? 'rgba(220,38,38,0.2)' : isNext ? 'var(--brand-border)' : 'var(--border-medium)'}`,
+                    background: paid ? 'rgba(22,163,74,0.1)' : overdue ? 'rgba(220,38,38,0.08)' : isNext ? 'rgba(3,49,60,0.08)' : 'var(--bg-elevated)',
+                    color: paid ? '#16A34A' : overdue ? '#DC2626' : isNext ? '#03313C' : 'var(--text-muted)',
+                    border: `1.5px solid ${paid ? 'rgba(22,163,74,0.3)' : overdue ? 'rgba(220,38,38,0.2)' : isNext ? 'rgba(3,49,60,0.2)' : 'var(--border-medium)'}`,
                   }}>
                   {paid ? <Check size={12} /> : i + 1}
                 </div>
@@ -440,9 +440,9 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
           })}
           {allPaid && (
             <div className="px-5 py-3.5 flex items-center gap-2"
-              style={{ borderTop: '1px solid var(--brand-border)', background: 'var(--brand-dim)' }}>
-              <CheckCircle size={14} style={{ color: 'var(--brand)' }} />
-              <span className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>
+              style={{ borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)' }}>
+              <CheckCircle size={14} style={{ color: '#16A34A' }} />
+              <span className="text-sm font-semibold" style={{ color: '#16A34A' }}>
                 Todas las cuotas recibidas
               </span>
             </div>
@@ -543,9 +543,9 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
       {/* Estado: esperando pago */}
       {bk.status === 'accepted' && (
         <div className="rounded-2xl px-4 py-4 mb-4 flex items-center gap-3"
-          style={{ background: 'rgba(37,99,235,0.06)', border: '1px solid rgba(37,99,235,0.15)' }}>
-          <Loader2 size={15} style={{ color: '#2563EB', flexShrink: 0 }} className="animate-spin" />
-          <p className="text-sm" style={{ color: '#1D4ED8' }}>
+          style={{ background: 'rgba(3,49,60,0.04)', border: '1px solid rgba(3,49,60,0.14)' }}>
+          <Loader2 size={15} style={{ color: '#03313C', flexShrink: 0 }} className="animate-spin" />
+          <p className="text-sm" style={{ color: '#03313C' }}>
             Esperando que el cliente realice el primer pago.
           </p>
         </div>
@@ -557,7 +557,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
           onClick={doComplete}
           disabled={!!actionId}
           className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-bold mb-4 transition-all disabled:opacity-50"
-          style={{ background: 'rgba(124,58,237,0.1)', color: '#7C3AED', border: '1.5px solid rgba(124,58,237,0.2)' }}>
+          style={{ background: 'rgba(3,49,60,0.07)', color: '#03313C', border: '1.5px solid rgba(3,49,60,0.15)' }}>
           {actionId === 'complete'
             ? <><Loader2 size={15} className="animate-spin" /> Procesando...</>
             : <><CheckCircle size={15} /> Marcar evento como completado</>}

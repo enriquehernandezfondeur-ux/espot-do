@@ -81,7 +81,7 @@ function PublishedToast() {
   if (!show) return null
   return (
     <div className="fixed top-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg flex items-center gap-2 text-sm font-medium text-white"
-      style={{ background: '#35C493' }}>
+      style={{ background: '#03313C' }}>
       <CheckCircle size={16} /> Espacio publicado correctamente
     </div>
   )
