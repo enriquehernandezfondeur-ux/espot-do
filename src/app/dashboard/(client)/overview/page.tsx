@@ -8,10 +8,10 @@ import { getClientStats } from '@/lib/actions/client'
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   pending:         { label: 'Pendiente',    color: '#D97706', bg: 'rgba(217,119,6,0.08)',    dot: 'bg-amber-400' },
-  accepted:        { label: 'Por pagar',    color: '#03313C', bg: 'rgba(3,49,60,0.07)',      dot: 'bg-blue-400' },
-  confirmed:       { label: 'Confirmada',   color: '#16A34A', bg: 'var(--bg-elevated)',      dot: 'bg-green-500' },
-  completed:       { label: 'Completada',   color: '#35C493', bg: 'var(--bg-elevated)',      dot: 'bg-emerald-400' },
-  quote_requested: { label: 'Cotización',   color: '#03313C', bg: 'rgba(3,49,60,0.07)',      dot: 'bg-blue-400' },
+  accepted:        { label: 'Por pagar',    color: '#2563EB', bg: 'rgba(37,99,235,0.08)',    dot: 'bg-blue-400' },
+  confirmed:       { label: 'Confirmada',   color: '#16A34A', bg: 'rgba(22,163,74,0.08)',    dot: 'bg-green-500' },
+  completed:       { label: 'Completada',   color: '#35C493', bg: 'rgba(53,196,147,0.08)',   dot: 'bg-emerald-400' },
+  quote_requested: { label: 'Cotización',   color: '#7C3AED', bg: 'rgba(124,58,237,0.08)',   dot: 'bg-purple-400' },
   rejected:        { label: 'Rechazada',    color: '#DC2626', bg: 'rgba(220,38,38,0.08)',    dot: 'bg-red-500' },
   cancelled_guest: { label: 'Cancelada',    color: '#6B7280', bg: 'rgba(107,114,128,0.08)', dot: 'bg-gray-400' },
   cancelled_host:  { label: 'Cancelada',    color: '#6B7280', bg: 'rgba(107,114,128,0.08)', dot: 'bg-gray-400' },
@@ -95,7 +95,7 @@ export default function ClientDashboard() {
       <div className="grid grid-cols-2 gap-3">
         {[
           { href: '/buscar', label: 'Buscar espacios', sub: 'Explora ahora', icon: MapPin, color: 'var(--brand)' },
-          { href: '/para-clientes', label: 'Cómo reservar', sub: 'Aprende más', icon: CalendarDays, color: '#03313C' },
+          { href: '/para-clientes', label: 'Cómo reservar', sub: 'Aprende más', icon: CalendarDays, color: '#2563EB' },
         ].map(({ href, label, sub, icon: Icon, color }) => (
           <Link key={href} href={href}
             className="flex items-center gap-3 p-4 rounded-2xl transition-all card-hover"
@@ -153,11 +153,11 @@ export default function ClientDashboard() {
 
       {(stats?.pendingPayment ?? 0) > 0 && (stats?.overdueInstallments?.length ?? 0) === 0 && (
         <div className="mb-4 rounded-2xl overflow-hidden"
-          style={{ border: '1.5px solid rgba(3,49,60,0.18)' }}>
+          style={{ border: '1.5px solid rgba(37,99,235,0.2)' }}>
           <div className="px-4 py-3 flex items-center gap-2.5"
-            style={{ background: 'rgba(3,49,60,0.04)', borderBottom: '1px solid rgba(3,49,60,0.10)' }}>
-            <Bell size={15} style={{ color: '#03313C', flexShrink: 0 }} />
-            <span className="text-sm font-semibold flex-1" style={{ color: '#03313C' }}>
+            style={{ background: 'rgba(37,99,235,0.06)', borderBottom: '1px solid rgba(37,99,235,0.12)' }}>
+            <Bell size={15} style={{ color: '#2563EB', flexShrink: 0 }} />
+            <span className="text-sm font-semibold flex-1" style={{ color: '#1D4ED8' }}>
               {stats!.pendingPayment === 1
                 ? 'Reserva aceptada — pendiente de pago'
                 : `${stats!.pendingPayment} reservas pendientes de pago`}
@@ -168,12 +168,12 @@ export default function ClientDashboard() {
             const cover = sp?.space_images?.find((i: any) => i.is_cover)?.url ?? sp?.space_images?.[0]?.url
             return (
             <div key={bk.id} className="flex items-center gap-3 justify-between px-4 py-3"
-              style={{ borderBottom: '1px solid var(--border-subtle)', background: '#fff' }}>
+              style={{ borderBottom: '1px solid rgba(37,99,235,0.08)', background: '#fff' }}>
               <Link href={`/dashboard/reservas/${bk.id}`} className="min-w-0 flex-1 flex items-center gap-3">
                 {cover
                   ? <img src={cover} alt={sp?.name} className="w-10 h-10 rounded-xl object-cover shrink-0" />
                   : <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shrink-0 text-sm"
-                      style={{ background: 'linear-gradient(135deg, #03313C, #0a4a5c)' }}>
+                      style={{ background: 'linear-gradient(135deg, #2563EB, #1D4ED8)' }}>
                       {sp?.name?.charAt(0)}
                     </div>
                 }
@@ -197,7 +197,7 @@ export default function ClientDashboard() {
               </Link>
               <Link href={`/pago/${bk.id}`}
                 className="text-xs font-bold px-3 py-2 rounded-xl shrink-0"
-                style={{ background: '#03313C', color: '#fff', whiteSpace: 'nowrap' }}>
+                style={{ background: '#2563EB', color: '#fff', whiteSpace: 'nowrap' }}>
                 Pagar →
               </Link>
             </div>
@@ -209,11 +209,11 @@ export default function ClientDashboard() {
       {/* ── Recién confirmadas — aparecen 48h después de pagar ── */}
       {(stats?.recentlyConfirmed?.length ?? 0) > 0 && (
         <div className="mb-4 rounded-2xl overflow-hidden"
-          style={{ border: '1px solid var(--border-subtle)' }}>
+          style={{ border: '1.5px solid rgba(22,163,74,0.25)', background: 'rgba(22,163,74,0.04)' }}>
           <div className="flex items-center gap-2.5 px-4 py-3"
-            style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+            style={{ borderBottom: '1px solid rgba(22,163,74,0.15)' }}>
             <CheckCircle size={14} style={{ color: '#16A34A' }} />
-            <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+            <span className="text-sm font-semibold" style={{ color: '#16A34A' }}>
               {stats!.recentlyConfirmed!.length === 1 ? 'Reserva confirmada' : `${stats!.recentlyConfirmed!.length} reservas confirmadas`} recientemente
             </span>
           </div>
@@ -222,13 +222,13 @@ export default function ClientDashboard() {
             const cover = sp?.space_images?.find((i: any) => i.is_cover)?.url ?? sp?.space_images?.[0]?.url
             return (
               <Link key={bk.id} href={`/dashboard/reservas/${bk.id}`}
-                className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-[var(--bg-elevated)]"
-                style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-[rgba(22,163,74,0.06)]"
+                style={{ borderBottom: '1px solid rgba(22,163,74,0.08)' }}>
                 <div className="flex items-center gap-3 min-w-0">
                   {cover
                     ? <img src={cover} alt={sp?.name} className="w-9 h-9 rounded-xl object-cover shrink-0" />
                     : <div className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold text-white shrink-0"
-                        style={{ background: 'linear-gradient(135deg, #03313C, #0a4a5c)' }}>
+                        style={{ background: 'linear-gradient(135deg, #35C493, #16A34A)' }}>
                         {sp?.name?.charAt(0)}
                       </div>
                   }
@@ -307,7 +307,7 @@ export default function ClientDashboard() {
 
               {/* Badge días */}
               <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-                style={{ background: 'rgba(3,49,60,0.88)', backdropFilter: 'blur(8px)' }}>
+                style={{ background: 'rgba(53,196,147,0.9)', backdropFilter: 'blur(8px)' }}>
                 <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                 <span className="text-xs font-bold text-white">
                   {daysUntilNext === 0 ? '¡Hoy!' : daysUntilNext === 1 ? 'Mañana' : `En ${daysUntilNext} días`}
@@ -384,16 +384,16 @@ export default function ClientDashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
         {[
           { label: 'Total reservas', value: stats?.total ?? 0,            icon: CalendarDays, color: 'var(--brand)',  featured: true },
-          { label: 'Por pagar',      value: stats?.pendingPayment ?? 0,   icon: Clock,        color: '#03313C',
+          { label: 'Por pagar',      value: stats?.pendingPayment ?? 0,   icon: Clock,        color: '#2563EB',
             urgent: (stats?.pendingPayment ?? 0) > 0 },
           { label: 'Confirmadas',    value: stats?.confirmed ?? 0,        icon: CheckCircle,  color: '#16A34A' },
-          { label: 'Total gastado',  value: formatCurrency(stats?.totalSpent ?? 0), icon: CreditCard, color: '#03313C' },
+          { label: 'Total gastado',  value: formatCurrency(stats?.totalSpent ?? 0), icon: CreditCard, color: '#7C3AED' },
         ].map(({ label, value, icon: Icon, color, urgent, featured }: any) => (
           <div key={label} className="rounded-2xl p-4 md:p-5 transition-all hover:-translate-y-0.5"
             style={{
-              background: urgent ? 'rgba(3,49,60,0.03)' : '#fff',
-              border: urgent ? '1.5px solid rgba(3,49,60,0.18)' : '1px solid var(--border-subtle)',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+              background: urgent ? 'rgba(37,99,235,0.04)' : '#fff',
+              border: urgent ? '1.5px solid rgba(37,99,235,0.25)' : featured ? '1px solid var(--brand-border)' : '1px solid var(--border-subtle)',
+              boxShadow: featured ? '0 4px 16px rgba(53,196,147,0.12)' : '0 2px 8px rgba(0,0,0,0.06)',
               borderTop: featured ? '3px solid var(--brand)' : undefined,
             }}>
             <div className="flex items-center justify-between mb-3">
@@ -403,7 +403,7 @@ export default function ClientDashboard() {
                 <Icon size={14} style={{ color }} />
               </div>
             </div>
-            <div className="text-xl md:text-2xl font-bold" style={{ color: urgent ? '#03313C' : featured ? 'var(--brand)' : 'var(--text-primary)' }}>{value}</div>
+            <div className="text-xl md:text-2xl font-bold" style={{ color: urgent ? color : featured ? 'var(--brand)' : 'var(--text-primary)' }}>{value}</div>
           </div>
         ))}
       </div>
@@ -445,7 +445,7 @@ export default function ClientDashboard() {
                     return cover
                       ? <img src={cover} alt={space?.name} className="w-10 h-10 rounded-xl object-cover shrink-0" />
                       : <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shrink-0 text-sm"
-                          style={{ background: 'linear-gradient(135deg, #03313C, #0a4a5c)' }}>
+                          style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-dark))' }}>
                           {space?.name?.charAt(0)}
                         </div>
                   })()}
@@ -505,18 +505,18 @@ export default function ClientDashboard() {
           <Link key={href} href={href}
             className="flex items-center gap-4 p-4 md:p-5 rounded-2xl transition-all card-hover"
             style={{
-              background: '#fff',
-              border: '1px solid var(--border-subtle)',
+              background: primary ? 'var(--brand-dim)' : '#fff',
+              border: primary ? '1px solid var(--brand-border)' : '1px solid var(--border-subtle)',
             }}>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: 'var(--bg-elevated)' }}>
+              style={{ background: primary ? 'rgba(53,196,147,0.15)' : 'var(--bg-elevated)' }}>
               <Icon size={18} style={{ color: primary ? 'var(--brand)' : 'var(--text-secondary)' }} />
             </div>
             <div className="flex-1 min-w-0">
               <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{label}</div>
               <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{sub}</div>
             </div>
-            <ArrowRight size={15} className="shrink-0" style={{ color: 'var(--text-muted)' }} />
+            <ArrowRight size={15} className="shrink-0" style={{ color: primary ? 'var(--brand)' : 'var(--text-muted)' }} />
           </Link>
         ))}
       </div>
