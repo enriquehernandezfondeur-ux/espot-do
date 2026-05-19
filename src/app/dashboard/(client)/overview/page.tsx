@@ -383,17 +383,18 @@ export default function ClientDashboard() {
       {/* Stats — 2 cols en móvil, 4 en desktop */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
         {[
-          { label: 'Total reservas', value: stats?.total ?? 0,            icon: CalendarDays, color: 'var(--brand)' },
+          { label: 'Total reservas', value: stats?.total ?? 0,            icon: CalendarDays, color: 'var(--brand)',  featured: true },
           { label: 'Por pagar',      value: stats?.pendingPayment ?? 0,   icon: Clock,        color: '#2563EB',
             urgent: (stats?.pendingPayment ?? 0) > 0 },
           { label: 'Confirmadas',    value: stats?.confirmed ?? 0,        icon: CheckCircle,  color: '#16A34A' },
           { label: 'Total gastado',  value: formatCurrency(stats?.totalSpent ?? 0), icon: CreditCard, color: '#7C3AED' },
-        ].map(({ label, value, icon: Icon, color, urgent }) => (
-          <div key={label} className="rounded-2xl p-4 md:p-5"
+        ].map(({ label, value, icon: Icon, color, urgent, featured }: any) => (
+          <div key={label} className="rounded-2xl p-4 md:p-5 transition-all hover:-translate-y-0.5"
             style={{
               background: urgent ? 'rgba(37,99,235,0.04)' : '#fff',
-              border: urgent ? '1.5px solid rgba(37,99,235,0.25)' : '1px solid var(--border-subtle)',
-              boxShadow: '0 1px 4px rgba(0,0,0,0.04)'
+              border: urgent ? '1.5px solid rgba(37,99,235,0.25)' : featured ? '1px solid var(--brand-border)' : '1px solid var(--border-subtle)',
+              boxShadow: featured ? '0 4px 16px rgba(53,196,147,0.12)' : '0 2px 8px rgba(0,0,0,0.06)',
+              borderTop: featured ? '3px solid var(--brand)' : undefined,
             }}>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs md:text-sm" style={{ color: 'var(--text-secondary)' }}>{label}</span>
@@ -402,7 +403,7 @@ export default function ClientDashboard() {
                 <Icon size={14} style={{ color }} />
               </div>
             </div>
-            <div className="text-xl md:text-2xl font-bold" style={{ color: urgent ? color : 'var(--text-primary)' }}>{value}</div>
+            <div className="text-xl md:text-2xl font-bold" style={{ color: urgent ? color : featured ? 'var(--brand)' : 'var(--text-primary)' }}>{value}</div>
           </div>
         ))}
       </div>
@@ -496,23 +497,26 @@ export default function ClientDashboard() {
       {/* Quick links — 2 cols en móvil, 4 en desktop */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {[
-          { href: '/buscar',              label: 'Explorar',     sub: 'Buscar espacios',        icon: MapPin        },
-          { href: '/dashboard/mensajes',  label: 'Mensajes',     sub: 'Hablar con el host',     icon: MessageCircle },
-          { href: '/dashboard/favoritos', label: 'Favoritos',    sub: 'Espacios guardados',     icon: Heart         },
-          { href: '/dashboard/pagos',     label: 'Mis pagos',    sub: 'Historial y cuotas',     icon: CreditCard    },
-        ].map(({ href, label, sub, icon: Icon }) => (
+          { href: '/buscar',              label: 'Explorar',     sub: 'Buscar espacios',        icon: MapPin,        primary: true  },
+          { href: '/dashboard/mensajes',  label: 'Mensajes',     sub: 'Hablar con el host',     icon: MessageCircle, primary: false },
+          { href: '/dashboard/favoritos', label: 'Favoritos',    sub: 'Espacios guardados',     icon: Heart,         primary: false },
+          { href: '/dashboard/pagos',     label: 'Mis pagos',    sub: 'Historial y cuotas',     icon: CreditCard,    primary: false },
+        ].map(({ href, label, sub, icon: Icon, primary }) => (
           <Link key={href} href={href}
             className="flex items-center gap-4 p-4 md:p-5 rounded-2xl transition-all card-hover"
-            style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+            style={{
+              background: primary ? 'var(--brand-dim)' : '#fff',
+              border: primary ? '1px solid var(--brand-border)' : '1px solid var(--border-subtle)',
+            }}>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: 'var(--bg-elevated)' }}>
-              <Icon size={18} style={{ color: 'var(--text-secondary)' }} />
+              style={{ background: primary ? 'rgba(53,196,147,0.15)' : 'var(--bg-elevated)' }}>
+              <Icon size={18} style={{ color: primary ? 'var(--brand)' : 'var(--text-secondary)' }} />
             </div>
             <div className="flex-1 min-w-0">
               <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{label}</div>
               <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{sub}</div>
             </div>
-            <ArrowRight size={15} className="shrink-0" style={{ color: 'var(--text-muted)' }} />
+            <ArrowRight size={15} className="shrink-0" style={{ color: primary ? 'var(--brand)' : 'var(--text-muted)' }} />
           </Link>
         ))}
       </div>

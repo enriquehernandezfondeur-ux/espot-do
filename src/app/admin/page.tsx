@@ -92,7 +92,7 @@ export default async function AdminDashboard() {
       {/* Alerts banner */}
       {alerts.length > 0 && (
         <div className="rounded-2xl overflow-hidden"
-          style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+          style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
           <div className="px-5 py-3 flex items-center gap-2"
             style={{ background: 'rgba(245,158,11,0.04)', borderBottom: '1px solid #FEF3C7' }}>
             <AlertTriangle size={14} style={{ color: '#F59E0B' }} />
@@ -121,21 +121,27 @@ export default async function AdminDashboard() {
       {/* Metric cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
         {[
-          { label: 'Espacios',      value: stats?.totalSpaces ?? 0,                  sub: `${stats?.pendingSpaces ?? 0} por aprobar`,      icon: Building2,  color: '#7C3AED', href: '/admin/espacios',      format: 'num' },
-          { label: 'Reservas',      value: stats?.totalBookings ?? 0,                sub: `${stats?.pendingBookings ?? 0} pendientes`,      icon: CalendarDays,color: '#2563EB', href: '/admin/reservas',      format: 'num' },
-          { label: 'Usuarios',      value: stats?.totalUsers ?? 0,                   sub: `${stats?.totalHosts ?? 0} propietarios`,        icon: Users,      color: '#16A34A', href: '/admin/usuarios',      format: 'num' },
-          { label: 'Ingresos mes',  value: stats?.monthlyRevenue ?? 0,               sub: 'comisión este mes',                              icon: TrendingUp, color: '#35C493', href: '/admin/pagos',          format: 'currency' },
-          { label: 'Total comisión',value: stats?.totalRevenue ?? 0,                 sub: 'histórico acumulado',                            icon: CreditCard, color: '#0EA5E9', href: '/admin/pagos',          format: 'currency' },
-          { label: 'Payouts pend.', value: pendingPayoutTotal,                       sub: `${pendingPayouts.length} propietarios`,          icon: Banknote,   color: '#F59E0B', href: '/admin/payouts',        format: 'currency' },
-        ].map(({ label, value, sub, icon: Icon, color, href, format }) => (
+          { label: 'Espacios',      value: stats?.totalSpaces ?? 0,    sub: `${stats?.pendingSpaces ?? 0} por aprobar`,    icon: Building2,   color: '#7C3AED', href: '/admin/espacios', format: 'num',      featured: false },
+          { label: 'Reservas',      value: stats?.totalBookings ?? 0,  sub: `${stats?.pendingBookings ?? 0} pendientes`,   icon: CalendarDays,color: '#2563EB', href: '/admin/reservas', format: 'num',      featured: false },
+          { label: 'Usuarios',      value: stats?.totalUsers ?? 0,     sub: `${stats?.totalHosts ?? 0} propietarios`,     icon: Users,       color: '#16A34A', href: '/admin/usuarios', format: 'num',      featured: false },
+          { label: 'Ingresos mes',  value: stats?.monthlyRevenue ?? 0, sub: 'comisión este mes',                          icon: TrendingUp,  color: '#35C493', href: '/admin/pagos',    format: 'currency', featured: true  },
+          { label: 'Total comisión',value: stats?.totalRevenue ?? 0,   sub: 'histórico acumulado',                        icon: CreditCard,  color: '#0EA5E9', href: '/admin/pagos',    format: 'currency', featured: false },
+          { label: 'Payouts pend.', value: pendingPayoutTotal,         sub: `${pendingPayouts.length} propietarios`,      icon: Banknote,    color: '#F59E0B', href: '/admin/payouts',  format: 'currency', featured: false,
+            urgent: pendingPayouts.length > 0 },
+        ].map(({ label, value, sub, icon: Icon, color, href, format, featured, urgent }: any) => (
           <Link key={label} href={href}
-            className="group rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
-            style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+            className="group rounded-2xl p-4 transition-all hover:-translate-y-1"
+            style={{
+              background: urgent ? 'rgba(245,158,11,0.04)' : '#fff',
+              border: featured ? '1px solid rgba(53,196,147,0.3)' : urgent ? '1px solid rgba(245,158,11,0.3)' : '1px solid #E8ECF0',
+              boxShadow: featured ? '0 4px 16px rgba(53,196,147,0.12)' : '0 2px 8px rgba(0,0,0,0.06)',
+              borderTop: featured ? '3px solid #35C493' : urgent ? '3px solid #F59E0B' : undefined,
+            }}>
             <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-3"
-              style={{ background: `${color}12` }}>
+              style={{ background: `${color}14` }}>
               <Icon size={15} style={{ color }} />
             </div>
-            <div className="text-xl font-bold mb-0.5" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>
+            <div className="text-xl font-bold mb-0.5" style={{ color: featured ? '#35C493' : '#0F1623', letterSpacing: '-0.02em' }}>
               {format === 'currency' ? formatCurrency(value as number) : value}
             </div>
             <div className="text-xs font-semibold mb-0.5" style={{ color: '#374151' }}>{label}</div>
@@ -149,7 +155,7 @@ export default async function AdminDashboard() {
 
         {/* Activity feed */}
         <div className="rounded-2xl overflow-hidden"
-          style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+          style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
           <div className="flex items-center justify-between px-6 py-4"
             style={{ borderBottom: '1px solid #F0F2F5' }}>
             <div className="flex items-center gap-2">
@@ -233,7 +239,7 @@ export default async function AdminDashboard() {
 
           {/* Quick nav */}
           <div className="rounded-2xl overflow-hidden"
-            style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+            style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
             <div className="px-5 py-3" style={{ borderBottom: '1px solid #F0F2F5' }}>
               <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: '#94A3B8' }}>
                 Acceso rápido
