@@ -9,9 +9,10 @@ import {
   Clock, CheckCircle, X, Music, Ban,
   ArrowLeft, Share2, CreditCard, Lock, FileText, ChevronDown, Play, Images, MessageCircle,
   Car, Wifi, Wind, UtensilsCrossed, Volume2, Monitor, Music2, Trees, Waves, Wine,
-  Sun, Zap, ShowerHead, Building2, Star, Video, Package, Sparkles, Camera,
+  Sun, Zap, ShowerHead, Building2, Star, Package, Sparkles, Camera,
 } from 'lucide-react'
 import { cn, formatCurrency, formatTime } from '@/lib/utils'
+import { addonIcon } from '@/lib/icon-map'
 import { scheduleModelLabel } from '@/lib/payments/schedule'
 import ChatDrawer from '@/components/marketplace/ChatDrawer'
 import BookingWidget from '@/components/marketplace/BookingWidget'
@@ -73,28 +74,6 @@ function daysToLabel(days: number[]): string {
   return `${N[s[0]]} – ${N[s[s.length - 1]]}`
 }
 
-function addonIcon(name: string) {
-  const n = name.toLowerCase()
-  if (n.includes('bartender') || n.includes('barra')) return Wine
-  if (n.includes('dj'))         return Music2
-  if (n.includes('sonido'))     return Volume2
-  if (n.includes('iluminaci'))  return Sun
-  if (n.includes('camarero'))   return Users
-  if (n.includes('seguridad'))  return Shield
-  if (n.includes('decorac'))    return Sparkles
-  if (n.includes('proyector'))  return Monitor
-  if (n.includes('torta') || n.includes('pastel')) return Package
-  if (n.includes('menú') || n.includes('catering')) return UtensilsCrossed
-  if (n.includes('vino') || n.includes('open bar')) return Wine
-  if (n.includes('fotóg') || n.includes('foto'))   return Camera
-  if (n.includes('video'))      return Video
-  if (n.includes('músico') || n.includes('orquesta')) return Music2
-  if (n.includes('maquill'))    return Sparkles
-  if (n.includes('extra') || n.includes('hora adicional')) return Clock
-  if (n.includes('suite'))      return Building2
-  if (n.includes('pantalla') || n.includes('led')) return Monitor
-  return Package
-}
 
 function getFacilities(space: any): { icon: any; label: string }[] {
   const cond = space.space_conditions?.[0]
@@ -231,12 +210,15 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
   }
   const priceDisplay = getPriceDisplay()
 
+  const RESTRICTIONS = [
+    { key: 'allows_external_food',       label: 'Comida externa' },
+    { key: 'allows_external_alcohol',    label: 'Alcohol externo' },
+    { key: 'allows_smoking',             label: 'Fumar en el local' },
+    { key: 'allows_pets',                label: 'Mascotas' },
+    { key: 'allows_external_decoration', label: 'Decoración externa' },
+  ] as const
   const notAllowed = [
-    ...(conditions?.allows_external_food    === false ? ['Comida externa']              : []),
-    ...(conditions?.allows_external_alcohol === false ? ['Alcohol externo']             : []),
-    ...(conditions?.allows_smoking          === false ? ['Fumar en el local']           : []),
-    ...(conditions?.allows_pets             === false ? ['Mascotas']                    : []),
-    ...(conditions?.allows_external_decoration === false ? ['Decoración externa']       : []),
+    ...RESTRICTIONS.filter(r => conditions?.[r.key] === false).map(r => r.label),
     'Subarrendamiento del espacio',
     'Eventos no autorizados',
   ]
@@ -815,7 +797,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                     ))}
                   </div>
 
-                  {/* Nota explicativa solo para consumo mínimo */}
+                  {/* Notas explicativas por tipo de pricing */}
                   {pricing?.pricing_type === 'minimum_consumption' && (
                     <div className="mt-3 flex items-start gap-2.5 px-4 py-3 rounded-xl"
                       style={{ background: 'rgba(217,119,6,0.06)', border: '1px solid rgba(217,119,6,0.15)' }}>
@@ -824,6 +806,40 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                         <strong>¿Qué son los consumibles?</strong> Pagas <strong>{pricing.minimum_consumption ? formatCurrency(pricing.minimum_consumption) : 'este monto'}</strong> a
                         través de Espot y ese dinero es tu crédito de comida y bebidas en el lugar durante el evento.
                         Si consumes más, pagas la diferencia directamente en el local.
+                      </p>
+                    </div>
+                  )}
+
+                  {pricing?.pricing_type === 'hourly' && (
+                    <div className="mt-3 flex items-start gap-2.5 px-4 py-3 rounded-xl"
+                      style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.18)' }}>
+                      <Clock size={13} style={{ color: '#059669', flexShrink: 0, marginTop: 1 }} />
+                      <p className="text-xs leading-relaxed" style={{ color: '#065F46' }}>
+                        <strong>¿Cómo se calcula el total?</strong> El precio final es <strong>{pricing.hourly_price ? formatCurrency(pricing.hourly_price) : 'la tarifa'} × las horas que elijas</strong> al momento de reservar.
+                        {pricing.min_hours ? ` Mínimo ${pricing.min_hours} hora${pricing.min_hours > 1 ? 's' : ''} por reserva.` : ''}
+                        {pricing.max_hours ? ` Máximo ${pricing.max_hours} horas.` : ''}
+                      </p>
+                    </div>
+                  )}
+
+                  {pricing?.pricing_type === 'fixed_package' && (
+                    <div className="mt-3 flex items-start gap-2.5 px-4 py-3 rounded-xl"
+                      style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.15)' }}>
+                      <Package size={13} style={{ color: '#2563EB', flexShrink: 0, marginTop: 1 }} />
+                      <p className="text-xs leading-relaxed" style={{ color: '#1E3A8A' }}>
+                        <strong>Precio todo incluido.</strong> {pricing.package_hours ? `El paquete cubre ${pricing.package_hours} hora${pricing.package_hours > 1 ? 's' : ''} de uso del espacio.` : 'El paquete cubre el tiempo de uso indicado.'}
+                        {pricing.extra_hour_price > 0 ? ` Puedes agregar horas adicionales a ${formatCurrency(pricing.extra_hour_price)}/hr.` : ''}{' '}
+                        El monto que ves es lo que pagas — sin cargos ocultos.
+                      </p>
+                    </div>
+                  )}
+
+                  {pricing?.pricing_type === 'custom_quote' && (
+                    <div className="mt-3 flex items-start gap-2.5 px-4 py-3 rounded-xl"
+                      style={{ background: 'rgba(124,58,237,0.05)', border: '1px solid rgba(124,58,237,0.15)' }}>
+                      <MessageCircle size={13} style={{ color: '#7C3AED', flexShrink: 0, marginTop: 1 }} />
+                      <p className="text-xs leading-relaxed" style={{ color: '#4C1D95' }}>
+                        <strong>No pagas nada ahora.</strong> Envías tu solicitud con los detalles del evento y el propietario te responde con un precio personalizado. Solo pagas una vez que ambos acuerden los términos.
                       </p>
                     </div>
                   )}
@@ -1045,8 +1061,14 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
             {activeTab === 'addons' && (
               <div>
                 {addons.length === 0 ? (
-                  <div className="text-center py-12" style={{ color: 'var(--text-muted)' }}>
-                    Este espacio no tiene servicios adicionales
+                  <div className="text-center py-12">
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3" style={{ background: 'var(--bg-elevated)' }}>
+                      <Package size={24} style={{ color: 'var(--text-muted)' }} />
+                    </div>
+                    <p className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>Sin servicios adicionales</p>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                      Este espacio no ofrece extras por el momento.
+                    </p>
                   </div>
                 ) : (
                   <>
