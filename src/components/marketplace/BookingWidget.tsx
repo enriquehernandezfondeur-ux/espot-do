@@ -7,11 +7,12 @@ import {
   CalendarDays, Users, Sparkles, CreditCard,
   ChevronRight, ChevronLeft, Loader2, CheckCircle,
   Minus, Plus, MessageCircle, Clock, ShieldCheck, Info, AlertCircle,
-  Timer, Mail, Volume2, Zap, Shield, Camera, Music2,
-  UtensilsCrossed, Wine, Package, Paintbrush, MonitorPlay, FileText, Lock,
+  Timer, Mail, Camera,
+  UtensilsCrossed, Package, FileText, Lock,
   Cake, Heart, GraduationCap, Baby, Briefcase,
 } from 'lucide-react'
 import { formatCurrency, formatTime } from '@/lib/utils'
+import { addonIcon } from '@/lib/icon-map'
 import { createBooking } from '@/lib/actions/booking'
 import { buildSchedule, scheduleModelLabel } from '@/lib/payments/schedule'
 import { cn } from '@/lib/utils'
@@ -31,25 +32,6 @@ const ALL_EVENT_TYPES: { label: string; Icon: React.ElementType }[] = [
   { label: 'Otro',            Icon: MessageCircle },
 ]
 
-function AddonIcon({ name, size = 16 }: { name: string; size?: number }) {
-  const n = name.toLowerCase()
-  const props = { size, style: { color: 'var(--brand)' } }
-  if (n.includes('bartender') || n.includes('barra')) return <Wine {...props} />
-  if (n.includes('dj'))         return <Music2 {...props} />
-  if (n.includes('sonido'))     return <Volume2 {...props} />
-  if (n.includes('iluminaci'))  return <Zap {...props} />
-  if (n.includes('camarero'))   return <Users {...props} />
-  if (n.includes('seguridad'))  return <Shield {...props} />
-  if (n.includes('decorac'))    return <Sparkles {...props} />
-  if (n.includes('proyector'))  return <MonitorPlay {...props} />
-  if (n.includes('menú') || n.includes('catering')) return <UtensilsCrossed {...props} />
-  if (n.includes('vino') || n.includes('open bar')) return <Wine {...props} />
-  if (n.includes('fotóg'))      return <Camera {...props} />
-  if (n.includes('músico') || n.includes('orquesta')) return <Music2 {...props} />
-  if (n.includes('maquill'))    return <Paintbrush {...props} />
-  if (n.includes('extra') || n.includes('hora adic')) return <Clock {...props} />
-  return <Package {...props} />
-}
 
 const STEPS = [
   { id: 1, label: 'Fecha',    icon: CalendarDays },
@@ -1025,7 +1007,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                       : { background: 'var(--bg-base)', borderColor: 'var(--border-subtle)' }}>
                     <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
                       style={{ background: sel ? 'rgba(53,196,147,0.12)' : 'var(--bg-elevated)' }}>
-                      <AddonIcon name={addon.name} size={15} />
+                      {(() => { const I = addonIcon(addon.name); return <I size={15} style={{ color: 'var(--brand)' }} /> })()}
                     </div>
                     <div className="flex-1 text-left">
                       <div className="text-sm font-semibold" style={{ color: sel ? 'var(--brand)' : 'var(--text-primary)' }}>
@@ -1112,7 +1094,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                   )}
                   {selectedAddonItems.map((a: any) => (
                     <div key={a.id} className="flex justify-between px-4 py-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      <span className="flex items-center gap-1.5"><AddonIcon name={a.name} size={13} /> {a.name}</span>
+                      <span className="flex items-center gap-1.5">{(() => { const I = addonIcon(a.name); return <I size={13} style={{ color: 'var(--brand)' }} /> })()} {a.name}</span>
                       <span>+ {formatCurrency(a.unit === 'persona' ? a.price * guestCount : a.unit === 'hora' ? a.price * selectedHours : a.price)}</span>
                     </div>
                   ))}

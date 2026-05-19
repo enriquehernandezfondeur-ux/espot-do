@@ -18,7 +18,7 @@ export default async function ClientDashboardLayout({ children }: { children: Re
   }
 
   return (
-    <div className="light-theme flex min-h-dvh" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
+    <div className="white-theme flex min-h-dvh" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       <MessageNotificationProvider />
       <ClientSidebar userName={userName} avatarUrl={avatarUrl} />
       {/* pt-14 compensa el top bar fijo en móvil; pb-nav-safe cubre la bottom nav + safe area de iOS */}

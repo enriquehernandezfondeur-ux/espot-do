@@ -93,9 +93,8 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
     setMenuOpen(false)
   }
 
-  const dashboardHref = user?.role === 'host'  ? '/dashboard/host'
-                      : user?.role === 'admin' ? '/admin'
-                      : '/dashboard'
+  const ROLE_ROUTES: Record<string, string> = { host: '/dashboard/host', admin: '/admin' }
+  const dashboardHref = ROLE_ROUTES[user?.role ?? ''] ?? '/dashboard'
 
   const settingsHref  = user?.role === 'host'  ? '/dashboard/host/ajustes'
                       : user?.role === 'admin' ? '/admin/configuracion'
@@ -627,7 +626,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
               </div>
 
               {/* Apple App Store badge — próximamente */}
-              <a href="#" onClick={e => e.preventDefault()} aria-label="Próximamente en App Store"
+              <div role="button" aria-disabled="true" aria-label="Próximamente en App Store"
                 className="inline-flex items-center gap-3 transition-opacity hover:opacity-75"
                 style={{
                   background:'#000',
@@ -635,7 +634,6 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                   borderRadius:10,
                   padding:'7px 14px',
                   cursor:'default',
-                  textDecoration:'none',
                   minWidth:130,
                 }}>
                 {/* Apple logo SVG */}
@@ -646,7 +644,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                   <div style={{color:'#aaa',fontSize:9,letterSpacing:'0.04em',marginBottom:2}}>Download on the</div>
                   <div style={{color:'#fff',fontSize:17,fontWeight:600,letterSpacing:'-0.02em',lineHeight:1}}>App Store</div>
                 </div>
-              </a>
+              </div>
             </div>
 
           </div>

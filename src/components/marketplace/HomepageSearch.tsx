@@ -169,19 +169,21 @@ export default function HomepageSearch() {
     }
   }, [panel])
 
+  const closeAllModals = useCallback(() => { setPanel(null); setMobileModal(null) }, [])
+
   function pickActivity(key: string, label: string) {
     setActivity(key); setActQ(label)
-    setPanel(null); setMobileModal(null)
+    closeAllModals()
   }
   function pickCity(s: string) {
     setCity(s); setCityQ(s)
-    setPanel(null); setMobileModal(null)
+    closeAllModals()
   }
   function pickDay(day: number) {
     const dYMD = `${view.year}-${String(view.month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`
     if (dYMD < todayYMD) return
     setDateFrom(dYMD)
-    setPanel(null); setMobileModal(null)
+    closeAllModals()
   }
 
   function search() {
@@ -257,7 +259,7 @@ export default function HomepageSearch() {
       {dateFrom && (
         <div className="px-4 py-3 flex items-center justify-between" style={{ borderTop: '1px solid #F3F4F6' }}>
           <span className="text-sm font-medium" style={{ color: '#374151' }}>{fmtDate(dateFrom)}</span>
-          <button type="button" onClick={() => { setDateFrom(''); setPanel(null); setMobileModal(null) }}
+          <button type="button" onClick={() => { setDateFrom(''); closeAllModals() }}
             className="text-xs font-semibold px-3 py-1.5 rounded-lg"
             style={{ background: 'rgba(220,38,38,0.07)', color: '#DC2626' }}>
             Limpiar

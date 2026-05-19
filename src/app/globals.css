@@ -57,20 +57,38 @@
   --shadow-hover: none;
 }
 
-/* ── HOST DASHBOARD — CLEAN WHITE THEME ─────────── */
+/* ── HOST DASHBOARD — PREMIUM WHITE THEME ───────── */
 .host-theme {
-  --bg-base:      #F4F6F5;
+  --bg-base:      #FFFFFF;
   --bg-surface:   #FFFFFF;
   --bg-card:      #FFFFFF;
-  --bg-elevated:  #EEF2F0;
-  --bg-hover:     #E8EDEB;
-  --text-primary:   #03313C;
-  --text-secondary: #527068;
-  --text-muted:     #93B0A8;
-  --border-subtle:  #E4EDEA;
-  --border-medium:  #CDDDD9;
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04);
-  --shadow-hover: 0 4px 24px rgba(0,0,0,0.08);
+  --bg-elevated:  #F7F7F7;
+  --bg-hover:     #F0F0F0;
+  --text-primary:   #1A1A1A;
+  --text-secondary: #717171;
+  --text-muted:     #B0B0B0;
+  --border-subtle:  #EBEBEB;
+  --border-medium:  #D5D5D5;
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-hover: 0 8px 28px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* ── PÁGINAS INTERNAS — WHITE THEME ─────────────── */
+/* Buscar, detalle espacio, dashboard cliente, pagos. */
+/* El homepage conserva light-theme (#F4F6F5).        */
+.white-theme {
+  --bg-base:      #FFFFFF;
+  --bg-surface:   #FFFFFF;
+  --bg-card:      #FFFFFF;
+  --bg-elevated:  #F7F7F7;
+  --bg-hover:     #F0F0F0;
+  --text-primary:   #1A1A1A;
+  --text-secondary: #717171;
+  --text-muted:     #B0B0B0;
+  --border-subtle: #EBEBEB;
+  --border-medium: #D5D5D5;
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-hover: 0 8px 28px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
 }
 
 @theme inline {
@@ -190,6 +208,28 @@ input[type='number'] { -moz-appearance: textfield; }
 .host-theme [class*="placeholder-slate"]::placeholder { color: var(--text-muted) !important; }
 .host-theme input::placeholder,
 .host-theme textarea::placeholder { color: var(--text-muted) !important; }
+
+/* ─────────────────────────────────────────────────────
+   WHITE-THEME: Mismos overrides para clases dark
+   ───────────────────────────────────────────────────── */
+.white-theme [class*="bg-white/5"]  { background-color: var(--bg-elevated) !important; }
+.white-theme [class*="bg-white/10"] { background-color: var(--bg-hover)    !important; }
+.white-theme [class*="border-white/10"],
+.white-theme [class*="border-white/20"] { border-color: var(--border-medium) !important; }
+.white-theme [class*="bg-white/5"] [class*="text-white"],
+.white-theme [class*="bg-white/10"] [class*="text-white"] { color: var(--text-primary) !important; }
+.white-theme [class*="bg-white/5"][class*="text-white"],
+.white-theme [class*="bg-white/10"][class*="text-white"] { color: var(--text-secondary) !important; }
+.white-theme h1[class*="text-white"],
+.white-theme h2[class*="text-white"],
+.white-theme h3[class*="text-white"],
+.white-theme h4[class*="text-white"] { color: var(--text-primary) !important; }
+.white-theme input[class*="text-white"],
+.white-theme textarea[class*="text-white"],
+.white-theme select[class*="text-white"] { color: var(--text-primary) !important; }
+.white-theme [class*="placeholder-slate"]::placeholder { color: var(--text-muted) !important; }
+.white-theme input::placeholder,
+.white-theme textarea::placeholder { color: var(--text-muted) !important; }
 
 /* ── SCROLLBAR ───────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }

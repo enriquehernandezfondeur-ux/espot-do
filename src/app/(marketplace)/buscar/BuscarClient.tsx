@@ -423,7 +423,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
   ].filter(Boolean) as { key: string; label: string; onRemove: () => void }[]
 
   return (
-    <div style={{ background: 'var(--bg-base)', minHeight: '100dvh', width: '100%' }}>
+    <div className="white-theme" style={{ background: 'var(--bg-base)', minHeight: '100dvh', width: '100%' }}>
 
       {/* ── Barra de filtros sticky ── */}
       <div className="sticky top-16 z-40 w-full"
