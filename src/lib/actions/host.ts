@@ -416,11 +416,7 @@ export async function getHostQuotes() {
   // Paso 2: bookings quote_requested en esos espacios
   const { data, error } = await supabase
     .from('bookings')
-    .select(`
-      *,
-      profiles!guest_id(full_name, email, phone),
-      spaces!space_id(name)
-    `)
+    .select('*, profiles!guest_id(full_name, email, phone)')
     .in('space_id', spaces.map(s => s.id))
     .eq('status', 'quote_requested')
     .order('created_at', { ascending: false })
