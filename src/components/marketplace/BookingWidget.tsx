@@ -1,14 +1,15 @@
 'use client'
 
-import { useState, useMemo, useEffect, useRef } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
   CalendarDays, Users, Sparkles, CreditCard,
   ChevronRight, ChevronLeft, Loader2, CheckCircle,
-  Minus, Plus, MessageCircle, Clock, ShieldCheck, Info,
+  Minus, Plus, MessageCircle, Clock, ShieldCheck, Info, AlertCircle,
   Timer, Mail, Volume2, Zap, Shield, Camera, Music2,
   UtensilsCrossed, Wine, Package, Paintbrush, MonitorPlay, FileText, Lock,
+  Cake, Heart, GraduationCap, Baby, Briefcase,
 } from 'lucide-react'
 import { formatCurrency, formatTime } from '@/lib/utils'
 import { createBooking } from '@/lib/actions/booking'
@@ -18,16 +19,16 @@ import Link from 'next/link'
 import DatePicker from '@/components/ui/DatePicker'
 import TimePicker from '@/components/ui/TimePicker'
 
-const ALL_EVENT_TYPES = [
-  'Cumpleaños',
-  'Boda',
-  'Quinceañera',
-  'Graduación',
-  'Baby Shower',
-  'Corporativo',
-  'Cena / Comida',
-  'Sesión de fotos',
-  'Otro',
+const ALL_EVENT_TYPES: { label: string; Icon: React.ElementType }[] = [
+  { label: 'Cumpleaños',      Icon: Cake },
+  { label: 'Boda',            Icon: Heart },
+  { label: 'Quinceañera',     Icon: Sparkles },
+  { label: 'Graduación',      Icon: GraduationCap },
+  { label: 'Baby Shower',     Icon: Baby },
+  { label: 'Corporativo',     Icon: Briefcase },
+  { label: 'Cena / Comida',   Icon: UtensilsCrossed },
+  { label: 'Sesión de fotos', Icon: Camera },
+  { label: 'Otro',            Icon: MessageCircle },
 ]
 
 function AddonIcon({ name, size = 16 }: { name: string; size?: number }) {
@@ -675,10 +676,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         {/* ── PASO 1: FECHA Y HORA ────────────────────────── */}
         {step === 1 && (
           <div className="space-y-4">
-            <div>
-              <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>¿Cuándo es tu evento?</h3>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Tu pago se divide en cuotas automáticamente según cuándo sea el evento.</p>
-            </div>
+            <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>¿Cuándo es tu evento?</h3>
 
             <DatePicker
               value={eventDate}
@@ -750,9 +748,8 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                     color:      isDiscount ? '#166534' : '#92400E',
                   }}>
                   <CalendarDays size={12} style={{ color: isDiscount ? '#16A34A' : '#D97706', flexShrink: 0 }} />
-                  <span>
-                    <strong>Precio de fin de semana:</strong> este espacio aplica una tarifa
-                    {isDiscount ? ` especial de -${pct}%` : ` especial de +${pct}%`} viernes, sábados y domingos.
+                  <span className="font-semibold">
+                    Fin de semana · {isDiscount ? `-${pct}%` : `+${pct}%`}
                   </span>
                 </div>
               )
@@ -892,7 +889,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             {hoursError && (
               <div className="flex items-start gap-2 px-4 py-3 rounded-xl"
                 style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.2)', color: '#DC2626' }}>
-                <span className="shrink-0 mt-0.5 text-base">⚠</span>
+                <AlertCircle size={15} style={{ color: '#DC2626', flexShrink: 0, marginTop: 2 }} />
                 <span className="text-xs md:text-sm leading-snug">{hoursError}</span>
               </div>
             )}
@@ -970,24 +967,19 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         {/* ── PASO 3: TIPO DE EVENTO ────────────────────── */}
         {step === 3 && (
           <div className="space-y-4">
-            <div>
-              <h3 className="font-bold text-base mb-1" style={{ color: 'var(--text-primary)' }}>¿Qué tipo de evento es?</h3>
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                Ayuda al propietario a preparar el espacio.
-              </p>
-            </div>
+            <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>¿Qué tipo de evento es?</h3>
             <div className="grid grid-cols-2 gap-2">
-              {ALL_EVENT_TYPES.map(et => {
-                const isSelected = eventType === et
+              {ALL_EVENT_TYPES.map(({ label, Icon }) => {
+                const isSelected = eventType === label
                 return (
-                  <button key={et} onClick={() => { setEventType(et); if (et !== 'Otro') setCustomEventType('') }}
+                  <button key={label} onClick={() => { setEventType(label); if (label !== 'Otro') setCustomEventType('') }}
                     className="flex items-center gap-2.5 px-3.5 py-3 rounded-2xl text-left transition-all"
                     style={isSelected
-                      ? { background: '#0F1623', color: '#fff', boxShadow: '0 2px 12px rgba(15,22,35,0.2)' }
+                      ? { background: 'var(--text-primary)', color: '#fff', boxShadow: '0 2px 12px rgba(3,49,60,0.15)' }
                       : { background: '#fff', color: 'var(--text-primary)', border: '1.5px solid var(--border-medium)' }}>
-                    <span className="w-2 h-2 rounded-full shrink-0"
-                      style={{ background: isSelected ? '#35C493' : 'var(--border-medium)' }} />
-                    <span className="text-sm font-medium leading-tight">{et}</span>
+                    <Icon size={15} className="shrink-0"
+                      style={{ color: isSelected ? 'var(--brand)' : 'var(--text-muted)' }} />
+                    <span className="text-sm font-medium leading-tight">{label}</span>
                   </button>
                 )
               })}
@@ -1131,16 +1123,6 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               </div>
             )}
 
-            {/* Nota del consumo mínimo en paso 5 */}
-            {isConsumption && (
-              <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl"
-                style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.15)' }}>
-                <Info size={13} style={{ color: '#2563EB', flexShrink: 0, marginTop: 1 }} />
-                <p className="text-xs" style={{ color: '#1D4ED8', lineHeight: 1.6 }}>
-                  Pagas {formatCurrency(Number(pricing?.minimum_consumption ?? 0))} a través de Espot. Ese dinero es tu crédito de comida y bebidas en el lugar durante el evento. Si consumes más de ese monto, pagas la diferencia directamente en el local.
-                </p>
-              </div>
-            )}
 
 
             {!isQuote && (
