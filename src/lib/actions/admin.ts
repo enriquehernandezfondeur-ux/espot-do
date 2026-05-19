@@ -577,11 +577,7 @@ export async function getMarketplaceConfig() {
   return data ?? []
 }
 
-const ALLOWED_CONFIG_KEYS = [
-  'platform_fee_pct', 'min_advance_pct', 'cancellation_window_hours', 'site_announcement',
-  'theme_brand', 'theme_brand_dark', 'theme_brand_light', 'theme_brand_navy', 'theme_brand_lime',
-  'theme_marker_color', 'theme_marker_text',
-] as const
+const ALLOWED_CONFIG_KEYS = ['platform_fee_pct', 'min_advance_pct', 'cancellation_window_hours', 'site_announcement'] as const
 
 export async function updateConfig(key: string, value: string) {
   if (!ALLOWED_CONFIG_KEYS.includes(key as any)) return { error: 'Clave de configuración no permitida' }
@@ -591,23 +587,6 @@ export async function updateConfig(key: string, value: string) {
   if (error) return { error: error.message }
   revalidatePath('/', 'layout')
   return { success: true }
-}
-
-// ── COLORES DEL TEMA — lectura pública (para el root layout) ──
-// No requiere auth — las filas de tema tienen RLS pública
-export async function getThemeColors(): Promise<Record<string, string>> {
-  try {
-    const { createClient: createAnon } = await import('@/lib/supabase/server')
-    const supabase = await createAnon()
-    const { data } = await supabase
-      .from('marketplace_config')
-      .select('key, value')
-      .eq('group_name', 'tema')
-    if (!data?.length) return {}
-    return Object.fromEntries(data.map(r => [r.key, r.value]))
-  } catch {
-    return {}
-  }
 }
 
 // ── MENSAJES ──────────────────────────────────────────────
