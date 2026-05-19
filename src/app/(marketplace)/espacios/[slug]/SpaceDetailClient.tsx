@@ -812,7 +812,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
 
                   {pricing?.pricing_type === 'hourly' && (
                     <div className="mt-3 flex items-start gap-2.5 px-4 py-3 rounded-xl"
-                      style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.18)' }}>
+                      style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.15)' }}>
                       <Clock size={13} style={{ color: '#059669', flexShrink: 0, marginTop: 1 }} />
                       <p className="text-xs leading-relaxed" style={{ color: '#065F46' }}>
                         <strong>¿Cómo se calcula el total?</strong> El precio final es <strong>{pricing.hourly_price ? formatCurrency(pricing.hourly_price) : 'la tarifa'} × las horas que elijas</strong> al momento de reservar.
@@ -824,7 +824,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
 
                   {pricing?.pricing_type === 'fixed_package' && (
                     <div className="mt-3 flex items-start gap-2.5 px-4 py-3 rounded-xl"
-                      style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.15)' }}>
+                      style={{ background: 'rgba(37,99,235,0.06)', border: '1px solid rgba(37,99,235,0.15)' }}>
                       <Package size={13} style={{ color: '#2563EB', flexShrink: 0, marginTop: 1 }} />
                       <p className="text-xs leading-relaxed" style={{ color: '#1E3A8A' }}>
                         <strong>Precio todo incluido.</strong> {pricing.package_hours ? `El paquete cubre ${pricing.package_hours} hora${pricing.package_hours > 1 ? 's' : ''} de uso del espacio.` : 'El paquete cubre el tiempo de uso indicado.'}
@@ -836,7 +836,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
 
                   {pricing?.pricing_type === 'custom_quote' && (
                     <div className="mt-3 flex items-start gap-2.5 px-4 py-3 rounded-xl"
-                      style={{ background: 'rgba(124,58,237,0.05)', border: '1px solid rgba(124,58,237,0.15)' }}>
+                      style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.15)' }}>
                       <MessageCircle size={13} style={{ color: '#7C3AED', flexShrink: 0, marginTop: 1 }} />
                       <p className="text-xs leading-relaxed" style={{ color: '#4C1D95' }}>
                         <strong>No pagas nada ahora.</strong> Envías tu solicitud con los detalles del evento y el propietario te responde con un precio personalizado. Solo pagas una vez que ambos acuerden los términos.
