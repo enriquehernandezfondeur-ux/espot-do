@@ -686,17 +686,17 @@ export default function EspacioPage() {
                         <Building2 size={32} style={{ color: 'var(--text-muted)' }} />
                       </div>
                     )}
-                    <div className="absolute top-3 right-3 flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
+                    <div className="absolute top-3 right-3 inline-flex items-center text-xs font-semibold px-2.5 py-1.5 rounded-full"
                       style={space.is_published
-                        ? { background: 'rgba(22,163,74,0.9)', color: '#fff' }
+                        ? { background: 'rgba(22,163,74,0.92)', color: '#fff', gap: 5 }
                         : space.is_active
-                          ? { background: 'rgba(217,119,6,0.9)', color: '#fff' }
-                          : { background: 'rgba(0,0,0,0.6)', color: '#fff' }}>
+                          ? { background: 'rgba(217,119,6,0.92)', color: '#fff', gap: 5 }
+                          : { background: 'rgba(0,0,0,0.65)', color: '#fff', gap: 5 }}>
                       {space.is_published
-                        ? <><Eye size={10} /> Publicado</>
+                        ? <><Eye size={11} style={{ flexShrink: 0 }} /><span>Publicado</span></>
                         : space.is_active
-                          ? <><Clock size={10} /> Pendiente revisión</>
-                          : <><EyeOff size={10} /> Borrador</>}
+                          ? <><Clock size={11} style={{ flexShrink: 0 }} /><span>En revisión</span></>
+                          : <><EyeOff size={11} style={{ flexShrink: 0 }} /><span>Borrador</span></>}
                     </div>
                   </div>
                   <div className="p-5">
@@ -772,17 +772,18 @@ export default function EspacioPage() {
                               if ('pending' in result && result.pending) setPublishedPending(true)
                             }
                           }}
-                          className="btn-brand flex-1 flex items-center justify-center gap-1.5 text-sm font-medium py-2 rounded-xl disabled:opacity-60">
+                          className="btn-brand flex-1 inline-flex items-center justify-center text-sm font-medium py-2 rounded-xl disabled:opacity-60"
+                          style={{ gap: 6 }}>
                           {publishingId === space.id
-                            ? <><Loader2 size={13} className="animate-spin" /> Enviando...</>
-                            : <><Eye size={13} /> Enviar a revisión</>
+                            ? <><Loader2 size={13} className="animate-spin" style={{ flexShrink: 0 }} /><span>Enviando...</span></>
+                            : <><Eye size={13} style={{ flexShrink: 0 }} /><span>Enviar a revisión</span></>
                           }
                         </button>
                       )}
                       {!space.is_published && space.is_active && (
-                        <div className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl"
-                          style={{ background: 'rgba(37,99,235,0.08)', color: '#2563EB', border: '1px solid rgba(37,99,235,0.2)' }}>
-                          <Clock size={12} /> En revisión
+                        <div className="flex-1 inline-flex items-center justify-center text-xs font-semibold px-3 py-2 rounded-xl"
+                          style={{ background: 'rgba(37,99,235,0.08)', color: '#2563EB', border: '1px solid rgba(37,99,235,0.2)', gap: 6 }}>
+                          <Clock size={12} style={{ flexShrink: 0 }} /><span>En revisión</span>
                         </div>
                       )}
 
