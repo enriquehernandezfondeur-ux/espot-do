@@ -1,5 +1,16 @@
 import '@testing-library/jest-dom'
 
+// Polyfill requerido por Next.js 16 en entorno jsdom (no incluye TextEncoder/TextDecoder)
+const { TextEncoder, TextDecoder } = require('util')
+Object.assign(global, { TextEncoder, TextDecoder })
+
+// Mock de next/cache (no disponible en jsdom — usa APIs de Node que jsdom no tiene)
+jest.mock('next/cache', () => ({
+  revalidatePath: jest.fn(),
+  revalidateTag:  jest.fn(),
+  unstable_cache: jest.fn((fn) => fn),
+}))
+
 // Mock de Next.js router
 jest.mock('next/navigation', () => ({
   useRouter() {

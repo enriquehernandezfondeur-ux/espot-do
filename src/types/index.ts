@@ -88,7 +88,7 @@ export interface SpaceConditions {
   allows_external_alcohol: boolean
   allows_smoking: boolean
   allows_pets: boolean
-  cancellation_policy: 'flexible' | 'moderada' | 'estricta'
+  cancellation_policy: 'flexible' | 'moderada' | 'estricta' | 'very_flexible' | 'moderate' | 'strict'
   cancellation_hours_before: number
   cancellation_refund_pct: number
   custom_rules?: string

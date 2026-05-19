@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildPaymentPageFields } from '@/lib/azul/client'
 import { createClient } from '@/lib/supabase/server'
+import { escapeHtml } from '@/lib/utils'
 
 export const maxDuration = 30
 
@@ -106,9 +107,6 @@ export async function GET(
       cuotaId:     cuotaId ?? undefined,
     })
 
-    function escapeHtml(s: string) {
-      return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    }
     const hiddenInputs = Object.entries(fields)
       .map(([k, v]) => `<input type="hidden" name="${k}" value="${escapeHtml(v)}">`)
       .join('\n    ')
@@ -280,7 +278,7 @@ ${combos}
     <div class="spinner" id="sp"></div>
     <h2>Conectando con Azul Payments</h2>
     <p>Serás redirigido en un momento...</p>
-    <form id="azul-form" method="POST" action="${escapeHtmlStatic(pageUrl)}" style="display:none">
+    <form id="azul-form" method="POST" action="${escapeHtml(pageUrl)}" style="display:none">
       ${hiddenInputs}
     </form>
     <button class="btn" id="btn" type="button"
@@ -322,10 +320,7 @@ function errorHtml(msg: string) {
 min-height:100vh;background:#F4F6F8}
 .c{background:#fff;padding:32px;border-radius:20px;text-align:center;max-width:340px}
 h2{color:#DC2626;margin:0 0 8px}p{color:#6B7280;font-size:13px}a{color:#35C493}</style>
-</head><body><div class="c"><h2>Error</h2><p>${escapeHtmlStatic(msg)}</p><br>
+</head><body><div class="c"><h2>Error</h2><p>${escapeHtml(msg)}</p><br>
 <a href="javascript:history.back()">← Volver</a></div></body></html>`
 }
 
-function escapeHtmlStatic(s: string) {
-  return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-}

@@ -1,6 +1,5 @@
 'use client'
 
-import { useTranslations as useNextIntlTranslations } from 'next-intl'
 import { defaultLocale } from '@/lib/i18n/config'
 
 // Hook personalizado para traducciones
