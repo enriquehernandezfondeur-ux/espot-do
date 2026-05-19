@@ -130,7 +130,7 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
 
       {/* Panel de Cliente */}
       <div className="px-3 pb-1">
-        <Link href="/dashboard/reservas"
+        <Link href="/dashboard/overview"
           onClick={() => setMobileOpen(false)}
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all w-full"
           style={{ color: 'rgba(255,255,255,0.4)' }}
