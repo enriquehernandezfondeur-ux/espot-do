@@ -637,7 +637,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   }
 
   return (
-    <div ref={contentRef} className="rounded-3xl"
+    <div ref={contentRef} className="rounded-3xl w-full max-w-full"
       style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 40px rgba(0,0,0,0.08)', overflow: 'visible' }}>
 
       {/* Precio */}
