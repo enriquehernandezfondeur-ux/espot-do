@@ -744,7 +744,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   { id: 'reviews', label: reviewsData?.total ? `Reseñas (${reviewsData.total})` : 'Reseñas' },
                 ] as const).map(tab => (
                   <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                    className="flex-1 md:flex-none px-3 md:px-5 py-3 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap"
+                    className="flex-1 md:flex-none min-w-0 px-3 md:px-5 py-3 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap"
                     style={activeTab === tab.id ? {
                       background: '#fff', color: 'var(--text-primary)',
                       boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
@@ -1304,7 +1304,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
           </div>
 
           {/* ── DERECHA: resumen rápido + BOOKING WIDGET ── */}
-          <div className="order-1 lg:order-2 lg:sticky lg:top-20 hidden lg:block space-y-3 lg:max-h-[calc(100dvh-5rem)] lg:overflow-y-auto" style={{ overflow: 'visible' }}>
+          <div className="order-1 lg:order-2 lg:sticky lg:top-20 hidden lg:block space-y-3 lg:max-h-[calc(100dvh-5rem)] lg:overflow-y-auto">
 
             {/* Resumen de precio antes del widget */}
             {(() => {

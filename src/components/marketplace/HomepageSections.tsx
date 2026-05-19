@@ -82,7 +82,7 @@ function SocialSection() {
         </div>
 
         {/* Widget — creado via DOM en useEffect para evitar errores SSR */}
-        <div ref={widgetRef} />
+        <div ref={widgetRef} style={{ minHeight: 320 }} />
 
       </div>
     </section>
@@ -330,7 +330,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
             </h2>
           </Reveal>
 
-          <div ref={catSection.ref} className="grid grid-cols-4 md:grid-cols-8 gap-3">
+          <div ref={catSection.ref} className="grid grid-cols-4 md:grid-cols-8 gap-2 md:gap-3">
             {categories.map((cat, i) => {
               const Icon = cat.icon
               return (
@@ -514,7 +514,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                     style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', letterSpacing: '-0.04em', lineHeight: 1.12 }}>
                     ¿Tienes un espacio<br className="hidden md:block" /> para eventos?
                   </h2>
-                  <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.95rem', lineHeight: 1.75, maxWidth: 460 }}>
+                  <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '1rem', lineHeight: 1.75, maxWidth: 460 }}>
                     Publica tu salón, restaurante, rooftop o villa. Recibe reservas online y gestiona todo desde tu panel.
                   </p>
                 </div>
