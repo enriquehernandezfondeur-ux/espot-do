@@ -98,6 +98,7 @@ export default function CalendarioPage() {
         const avail = await getSpaceAvailability(sid)
         const grouped: Record<string, BlockedSlot[]> = {}
         avail.forEach((a: any) => {
+          if (!a.blocked_date) return
           if (!grouped[a.blocked_date]) grouped[a.blocked_date] = []
           grouped[a.blocked_date].push(a)
         })
@@ -338,6 +339,7 @@ export default function CalendarioPage() {
               const avail = await getSpaceAvailability(sid)
               const grouped: Record<string, any[]> = {}
               avail.forEach((a: any) => {
+                if (!a.blocked_date) return
                 if (!grouped[a.blocked_date]) grouped[a.blocked_date] = []
                 grouped[a.blocked_date].push(a)
               })
