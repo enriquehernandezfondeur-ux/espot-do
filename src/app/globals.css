@@ -57,20 +57,20 @@
   --shadow-hover: none;
 }
 
-/* ── HOST DASHBOARD — PREMIUM WHITE THEME ───────── */
+/* ── HOST DASHBOARD — CLEAN WHITE THEME ─────────── */
 .host-theme {
-  --bg-base:      #FFFFFF;
+  --bg-base:      #F4F6F5;
   --bg-surface:   #FFFFFF;
   --bg-card:      #FFFFFF;
-  --bg-elevated:  #F7F7F7;
-  --bg-hover:     #F0F0F0;
-  --text-primary:   #1A1A1A;
-  --text-secondary: #717171;
-  --text-muted:     #B0B0B0;
-  --border-subtle:  #EBEBEB;
-  --border-medium:  #D5D5D5;
-  --shadow-card: 0 2px 8px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-hover: 0 8px 28px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
+  --bg-elevated:  #EEF2F0;
+  --bg-hover:     #E8EDEB;
+  --text-primary:   #03313C;
+  --text-secondary: #527068;
+  --text-muted:     #93B0A8;
+  --border-subtle:  #E4EDEA;
+  --border-medium:  #CDDDD9;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-hover: 0 4px 24px rgba(0,0,0,0.08);
 }
 
 /* ── PÁGINAS INTERNAS — WHITE THEME ─────────────── */
