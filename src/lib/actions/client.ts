@@ -69,7 +69,7 @@ export async function getClientFavorites() {
   const { data } = await supabase
     .from('favorites')
     .select(`
-      id,
+      id, folder_id,
       spaces!space_id(
         id, name, slug, category, city, sector, capacity_max,
         space_images(url, is_cover),
@@ -80,6 +80,67 @@ export async function getClientFavorites() {
     .order('created_at', { ascending: false })
 
   return (data ?? []).filter((f: any) => f.spaces !== null)
+}
+
+export async function getFavoriteFolders() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+  const { data } = await supabase
+    .from('favorite_folders')
+    .select('id, name, created_at')
+    .eq('guest_id', user.id)
+    .order('created_at', { ascending: true })
+  return data ?? []
+}
+
+export async function createFavoriteFolder(name: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+  const { data, error } = await supabase
+    .from('favorite_folders')
+    .insert({ guest_id: user.id, name: name.trim() })
+    .select('id, name')
+    .single()
+  if (error) return { error: error.message }
+  return { folder: data }
+}
+
+export async function renameFavoriteFolder(folderId: string, name: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+  const { error } = await supabase
+    .from('favorite_folders')
+    .update({ name: name.trim() })
+    .eq('id', folderId)
+    .eq('guest_id', user.id)
+  return error ? { error: error.message } : { success: true }
+}
+
+export async function deleteFavoriteFolder(folderId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+  const { error } = await supabase
+    .from('favorite_folders')
+    .delete()
+    .eq('id', folderId)
+    .eq('guest_id', user.id)
+  return error ? { error: error.message } : { success: true }
+}
+
+export async function moveFavoriteToFolder(favoriteId: string, folderId: string | null) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+  const { error } = await supabase
+    .from('favorites')
+    .update({ folder_id: folderId })
+    .eq('id', favoriteId)
+    .eq('guest_id', user.id)
+  return error ? { error: error.message } : { success: true }
 }
 
 export async function getClientPayments() {
