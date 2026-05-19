@@ -71,12 +71,20 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
     <aside className="w-64 md:w-56 min-h-dvh flex flex-col" style={{ background: '#0A1019' }}>
       {/* Logo + close (mobile only) */}
       <div className="px-5 pt-6 pb-5 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-        <Link href="/admin" className="flex flex-col gap-1.5" onClick={onClose}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-green.svg" alt="espot.do" style={{ height: 24, width: 'auto' }} />
-          <div className="text-[10px] font-semibold uppercase tracking-widest"
-            style={{ color: 'rgba(255,255,255,0.3)' }}>
-            Admin Console
+        <Link href="/admin" className="flex items-center gap-2.5" onClick={onClose}>
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-sm"
+            style={{ background: 'var(--brand)', color: '#0B0F0E' }}>
+            E
+          </div>
+          <div>
+            <div className="flex items-baseline gap-0.5">
+              <span className="font-bold text-base leading-none text-white">espot</span>
+              <span className="font-light text-base leading-none" style={{ color: 'var(--brand)' }}>.do</span>
+            </div>
+            <div className="text-[10px] mt-0.5 font-semibold uppercase tracking-widest"
+              style={{ color: 'rgba(255,255,255,0.25)' }}>
+              Admin Console
+            </div>
           </div>
         </Link>
         {onClose && (
@@ -188,10 +196,10 @@ export default function AdminSidebar() {
       {/* Mobile: top bar */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 h-14"
         style={{ background: '#0A1019', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-        <Link href="/admin" className="flex items-center gap-2.5">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-green.svg" alt="espot.do" style={{ height: 20, width: 'auto' }} />
-          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)' }}>Admin</span>
+        <Link href="/admin" className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs"
+            style={{ background: 'var(--brand)', color: '#0B0F0E' }}>E</div>
+          <span className="font-bold text-sm text-white">Admin Console</span>
         </Link>
         <button onClick={() => setOpen(true)}
           className="w-9 h-9 flex items-center justify-center rounded-xl"
