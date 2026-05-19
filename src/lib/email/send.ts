@@ -12,11 +12,13 @@ export async function sendEmail({
   subject,
   html,
   replyTo,
+  attachments,
 }: {
   to: string
   subject: string
   html: string
   replyTo?: string
+  attachments?: { filename: string; content: string }[]
 }) {
   // Guard: no enviar si no hay API key válida
   const missingKey = !process.env.RESEND_API_KEY ||
@@ -36,13 +38,13 @@ export async function sendEmail({
   const resend = new Resend(process.env.RESEND_API_KEY)
 
   const { data, error } = await resend.emails.send({
-    from:     FROM,
+    from:        FROM,
     to,
     subject,
     html,
-    replyTo:  replyTo ?? REPLY_TO,
+    replyTo:     replyTo ?? REPLY_TO,
+    attachments: attachments?.map(a => ({ filename: a.filename, content: a.content })),
     headers: {
-      // Identifica el proyecto para seguimiento en Resend dashboard
       'X-Entity-Ref-ID': 'espot-transactional',
     },
   })

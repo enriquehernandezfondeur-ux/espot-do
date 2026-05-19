@@ -453,7 +453,10 @@ export async function getAdminPayouts(filter?: 'pending' | 'paid' | 'all') {
   return data ?? []
 }
 
-export async function markPayoutPaid(bookingId: string) {
+export async function markPayoutPaid(
+  bookingId: string,
+  receipt?: { base64: string; filename: string }
+) {
   const supabase = await requireAdmin()
   if (!supabase) return { error: 'No autorizado' }
 
@@ -513,9 +516,10 @@ export async function markPayoutPaid(bookingId: string) {
       })
 
       await sendEmail({
-        to:      hostEmail,
-        subject: `Pago transferido — ${formatCurrency(netAmount)} · ${space?.name ?? 'Tu espacio'}`,
+        to:          hostEmail,
+        subject:     `Pago transferido — ${formatCurrency(netAmount)} · ${space?.name ?? 'Tu espacio'}`,
         html,
+        attachments: receipt ? [{ filename: receipt.filename, content: receipt.base64 }] : undefined,
       })
     }
   }

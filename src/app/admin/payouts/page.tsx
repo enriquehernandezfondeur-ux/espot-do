@@ -1,14 +1,14 @@
 'use client'
 
-import { useState, useEffect, useTransition } from 'react'
+import { useState, useEffect, useTransition, useRef } from 'react'
 import { getAdminPayouts, markPayoutPaid } from '@/lib/actions/admin'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import {
   Banknote, CheckCircle, Clock, Building2, User,
-  CalendarDays, Copy, Check, Loader2, Filter,
+  CalendarDays, Copy, Check, Loader2, Paperclip, X, Upload,
 } from 'lucide-react'
 
-type Filter = 'pending' | 'paid' | 'all'
+type PayoutFilter = 'pending' | 'paid' | 'all'
 
 function CopyBtn({ text }: { text: string }) {
   const [copied, setCopied] = useState(false)
@@ -23,13 +23,18 @@ function CopyBtn({ text }: { text: string }) {
 }
 
 export default function AdminPayoutsPage() {
-  const [filter, setFilter]       = useState<Filter>('pending')
+  const [filter, setFilter]       = useState<PayoutFilter>('pending')
   const [payouts, setPayouts]     = useState<any[]>([])
   const [banks, setBanks]         = useState<Record<string, any>>({})
   const [loading, setLoading]     = useState(true)
-  const [paying, setPaying]       = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const [toast, setToast]         = useState<{ msg: string; ok: boolean } | null>(null)
+
+  // Modal de confirmación con comprobante
+  const [confirmModal, setConfirmModal] = useState<any | null>(null)
+  const [receipt, setReceipt]           = useState<{ file: File; base64: string } | null>(null)
+  const [sending, setSending]           = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   function showToast(msg: string, ok: boolean) {
     setToast({ msg, ok })
@@ -45,17 +50,39 @@ export default function AdminPayoutsPage() {
 
   useEffect(() => { load() }, [filter])
 
-  async function handlePay(bookingId: string) {
-    setPaying(bookingId)
+  function openConfirm(bk: any) {
+    setConfirmModal(bk)
+    setReceipt(null)
+  }
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      const base64 = (reader.result as string).split(',')[1] // quitar el data:...;base64,
+      setReceipt({ file, base64 })
+    }
+    reader.readAsDataURL(file)
+  }
+
+  async function handleConfirmPay() {
+    if (!confirmModal) return
+    setSending(true)
     startTransition(async () => {
-      const result = await markPayoutPaid(bookingId)
+      const result = await markPayoutPaid(
+        confirmModal.id,
+        receipt ? { base64: receipt.base64, filename: receipt.file.name } : undefined
+      )
       if (result && 'error' in result) {
         showToast(`Error: ${result.error}`, false)
       } else {
         await load()
-        showToast('Payout marcado como pagado', true)
+        showToast(receipt ? 'Payout enviado con comprobante adjunto' : 'Payout marcado como pagado', true)
       }
-      setPaying(null)
+      setSending(false)
+      setConfirmModal(null)
+      setReceipt(null)
     })
   }
 
@@ -75,6 +102,98 @@ export default function AdminPayoutsPage() {
           {toast.ok ? '✓' : '✕'} {toast.msg}
         </div>
       )}
+
+      {/* ── Modal de confirmación de payout ── */}
+      {confirmModal && (() => {
+        const space   = confirmModal.spaces as any
+        const host    = confirmModal.profiles as any
+        const bank    = banks[confirmModal.id] as any
+        const net     = Math.round(Number(confirmModal.total_amount) * 0.90)
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
+            onClick={e => { if (e.target === e.currentTarget) { setConfirmModal(null); setReceipt(null) } }}>
+            <div className="w-full max-w-md rounded-2xl overflow-hidden"
+              style={{ background: '#fff', boxShadow: '0 24px 64px rgba(0,0,0,0.18)' }}>
+
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-4"
+                style={{ borderBottom: '1px solid #F0F2F5' }}>
+                <span className="font-bold text-base" style={{ color: '#0F1623' }}>Confirmar payout</span>
+                <button onClick={() => { setConfirmModal(null); setReceipt(null) }}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg"
+                  style={{ background: '#F3F4F6', color: '#6B7280' }}>
+                  <X size={15} />
+                </button>
+              </div>
+
+              {/* Resumen */}
+              <div className="px-6 py-4 space-y-2.5" style={{ borderBottom: '1px solid #F0F2F5' }}>
+                {[
+                  { label: 'Propietario',    value: host?.full_name ?? '—' },
+                  { label: 'Espacio',        value: space?.name ?? '—' },
+                  { label: 'Evento',         value: confirmModal.event_type ?? '—' },
+                  { label: 'Fecha',          value: formatDate(confirmModal.event_date) },
+                  { label: 'Neto a pagar',   value: formatCurrency(net) },
+                  ...(bank ? [{ label: 'Cuenta',  value: `${bank.bank_name} · ${bank.account_number?.slice(-4).padStart(bank.account_number.length, '·')}` }] : []),
+                ].map(({ label, value }) => (
+                  <div key={label} className="flex justify-between text-sm">
+                    <span style={{ color: '#6B7280' }}>{label}</span>
+                    <span className="font-semibold" style={{ color: '#0F1623' }}>{value}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Upload comprobante */}
+              <div className="px-6 py-4" style={{ borderBottom: '1px solid #F0F2F5' }}>
+                <p className="text-xs font-semibold mb-2" style={{ color: '#374151' }}>
+                  Comprobante de transferencia <span style={{ color: '#9CA3AF' }}>(opcional)</span>
+                </p>
+                <input ref={fileRef} type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden"
+                  onChange={handleFileChange} />
+                {receipt ? (
+                  <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl"
+                    style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.25)' }}>
+                    <Paperclip size={13} style={{ color: '#35C493', flexShrink: 0 }} />
+                    <span className="text-sm flex-1 truncate" style={{ color: '#0F1623' }}>{receipt.file.name}</span>
+                    <button onClick={() => { setReceipt(null); if (fileRef.current) fileRef.current.value = '' }}
+                      style={{ color: '#9CA3AF' }}>
+                      <X size={13} />
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={() => fileRef.current?.click()}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm transition-colors"
+                    style={{ border: '1.5px dashed #D1D5DB', color: '#6B7280', background: '#FAFAFA' }}>
+                    <Upload size={14} /> Subir comprobante (PDF, JPG, PNG)
+                  </button>
+                )}
+                {receipt && (
+                  <p className="text-xs mt-1.5" style={{ color: '#9CA3AF' }}>
+                    Se adjuntará automáticamente al email del propietario.
+                  </p>
+                )}
+              </div>
+
+              {/* Acciones */}
+              <div className="flex gap-3 px-6 py-4">
+                <button onClick={() => { setConfirmModal(null); setReceipt(null) }}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                  style={{ background: '#F3F4F6', color: '#374151' }}>
+                  Cancelar
+                </button>
+                <button onClick={handleConfirmPay} disabled={sending}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-50"
+                  style={{ background: '#0F1623', color: '#fff' }}>
+                  {sending
+                    ? <><Loader2 size={14} className="animate-spin" /> Enviando...</>
+                    : <><CheckCircle size={14} /> Confirmar y enviar</>}
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Header */}
       <div className="flex items-start justify-between mb-8">
@@ -147,12 +266,12 @@ export default function AdminPayoutsPage() {
 
       {/* Filter tabs */}
       <div className="flex items-center gap-2 mb-6">
-        <Filter size={14} style={{ color: '#94A3B8' }} />
+        <Banknote size={14} style={{ color: '#94A3B8' }} />
         {([
           { value: 'pending', label: 'Pendientes' },
           { value: 'paid',    label: 'Pagados' },
           { value: 'all',     label: 'Todos' },
-        ] as { value: Filter; label: string }[]).map(({ value, label }) => (
+        ] as { value: PayoutFilter; label: string }[]).map(({ value, label }) => (
           <button key={value} onClick={() => setFilter(value)}
             className="px-4 py-2 rounded-xl text-sm font-semibold transition-all"
             style={filter === value
@@ -272,15 +391,10 @@ export default function AdminPayoutsPage() {
                       </span>
                     ) : (
                       <button
-                        onClick={() => handlePay(bk.id)}
-                        disabled={paying === bk.id}
-                        className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl transition-all disabled:opacity-50"
+                        onClick={() => openConfirm(bk)}
+                        className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl transition-all"
                         style={{ background: '#0F1623', color: '#fff' }}>
-                        {paying === bk.id
-                          ? <Loader2 size={12} className="animate-spin" />
-                          : <CheckCircle size={12} />
-                        }
-                        Marcar pagado
+                        <CheckCircle size={12} /> Marcar pagado
                       </button>
                     )}
                   </div>
