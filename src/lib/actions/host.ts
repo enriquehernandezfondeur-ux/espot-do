@@ -401,22 +401,25 @@ export async function getHostQuotes() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
 
-  const { data: spaces } = await supabase
-    .from('spaces').select('id, name').eq('host_id', user.id)
-  if (!spaces?.length) return []
-
-  const { data } = await supabase
+  // Una sola query — las RLS (bookings_select_host) ya filtran por host_id = auth.uid()
+  // Evita falla silenciosa de la query previa de spaces que causaba return [] incorrecto
+  const { data, error } = await supabase
     .from('bookings')
     .select(`
       *,
       profiles!guest_id(full_name, email, phone),
-      spaces!space_id(name)
+      spaces!space_id(id, name, host_id)
     `)
-    .in('space_id', spaces.map(s => s.id))
     .eq('status', 'quote_requested')
     .order('created_at', { ascending: false })
 
-  return data ?? []
+  if (error) {
+    console.error('[getHostQuotes] error:', error.message, error.code)
+    return []
+  }
+
+  // Filtro adicional client-side por seguridad (RLS ya lo garantiza en prod)
+  return (data ?? []).filter(b => (b.spaces as any)?.host_id === user.id)
 }
 
 // ── Responder cotización (enviar precio) ──────────────────
