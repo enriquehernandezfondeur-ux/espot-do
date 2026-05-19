@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { CalendarDays, Clock, CheckCircle, ArrowRight, MapPin, Users, CreditCard, Heart, MessageCircle, AlertTriangle, Bell } from 'lucide-react'
+import { CalendarDays, Clock, CheckCircle, ArrowRight, MapPin, CreditCard, Heart, MessageCircle, AlertTriangle, Bell } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getClientStats } from '@/lib/actions/client'
 
