@@ -18,8 +18,6 @@ import Link from 'next/link'
 import DatePicker from '@/components/ui/DatePicker'
 import TimePicker from '@/components/ui/TimePicker'
 
-// Lista plana de tipos de evento — ordenada por popularidad general en RD
-// Sin segmentar por tipo de espacio para que el cliente siempre vea todas las opciones
 const ALL_EVENT_TYPES = [
   'Cumpleaños',
   'Boda',
@@ -27,31 +25,8 @@ const ALL_EVENT_TYPES = [
   'Graduación',
   'Baby Shower',
   'Corporativo',
-  'Reunión de trabajo',
-  'Conferencia',
-  'Networking',
-  'Sesión de fotos',
-  'Despedida de soltera',
-  'Despedida de soltero',
-  'Team Building',
-  'Karaoke',
   'Cena / Comida',
-  'Fiesta de empresa',
-  'Lanzamiento de producto',
-  'Capacitación',
-  'Podcast / Radio',
-  'Rodaje',
-  'Video musical',
-  'Gala / Premiación',
-  'Clase / Curso',
-  'Seminario / Charla',
-  'Taller',
-  'Afterwork',
-  'Shooting publicitario',
-  'Contenido digital',
-  'Desfile de modas',
-  'Casting',
-  'Celebración',
+  'Sesión de fotos',
   'Otro',
 ]
 
