@@ -389,7 +389,7 @@ export async function getMySpaces() {
 // Guardar URLs de fotos ya subidas a Storage en la tabla space_images
 export async function saveSpaceImages(
   spaceId: string,
-  photos: { url: string; path: string; isCover: boolean }[]
+  photos: { url: string; path?: string; isCover: boolean }[]
 ) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -408,7 +408,6 @@ export async function saveSpaceImages(
     photos.map((p, i) => ({
       space_id: spaceId,
       url:      p.url,
-      path:     p.path ?? null,
       is_cover: p.isCover,
       position: i,
     }))
