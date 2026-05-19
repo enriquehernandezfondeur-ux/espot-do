@@ -110,9 +110,9 @@ const PAGE_SIZE = 100
 
 export default function BuscarClient({ spaces: initialSpaces, initialParams }: Props) {
   // Acumulación de páginas: inicialmente los espacios cargados en el servidor
-  const [spaces,       setSpaces]       = useState<any[]>(initialSpaces)
+  const [spaces,       setSpaces]       = useState<any[]>(initialSpaces ?? [])
   const [currentPage,  setCurrentPage]  = useState(0)
-  const [hasMore,      setHasMore]      = useState(initialSpaces.length === PAGE_SIZE)
+  const [hasMore,      setHasMore]      = useState((initialSpaces ?? []).length === PAGE_SIZE)
   const [loadingMore,  setLoadingMore]  = useState(false)
   const [activity,       setActivity]       = useState(initialParams.activity ?? '')
   const [actQ,           setActQ]           = useState('')

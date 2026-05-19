@@ -79,7 +79,7 @@ export async function getClientFavorites() {
     .eq('guest_id', user.id)
     .order('created_at', { ascending: false })
 
-  return data ?? []
+  return (data ?? []).filter((f: any) => f.spaces !== null)
 }
 
 export async function getClientPayments() {
