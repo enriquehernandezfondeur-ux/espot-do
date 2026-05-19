@@ -24,7 +24,7 @@ const PAYOUT_STATUS: Record<string, { label: string; color: string; bg: string }
 }
 
 const inputCls = "w-full rounded-xl px-4 py-3 text-sm focus:outline-none transition-all"
-const inputStyle: React.CSSProperties = { background: '#F8FAFC', border: '1.5px solid #E2E8F0', color: '#0F1623', fontSize: 16 }
+const inputStyle: React.CSSProperties = { background: 'var(--bg-elevated)', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)', fontSize: 16 }
 
 export default function HostPagosPage() {
   const [bookings,   setBookings]   = useState<any[]>([])
@@ -75,8 +75,8 @@ export default function HostPagosPage() {
   }
 
   if (loading) return (
-    <div className="flex items-center justify-center h-dvh" style={{ background: '#F4F6F8' }}>
-      <Loader2 size={28} className="animate-spin" style={{ color: '#35C493' }} />
+    <div className="flex items-center justify-center h-dvh" style={{ background: 'var(--bg-base)' }}>
+      <Loader2 size={28} className="animate-spin" style={{ color: 'var(--brand)' }} />
     </div>
   )
 
@@ -93,11 +93,11 @@ export default function HostPagosPage() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <Banknote size={15} style={{ color: '#35C493' }} />
-          <span className="text-xs font-bold uppercase tracking-wide" style={{ color: '#35C493' }}>Finanzas</span>
+          <Banknote size={15} style={{ color: 'var(--brand)' }} />
+          <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--brand)' }}>Finanzas</span>
         </div>
-        <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Pagos y liquidaciones</h1>
-        <p className="text-sm mt-0.5" style={{ color: '#94A3B8' }}>
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Pagos y liquidaciones</h1>
+        <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
           Historial de reservas pagadas y estado de tus liquidaciones
         </p>
       </div>
@@ -105,21 +105,21 @@ export default function HostPagosPage() {
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {[
-          { label: 'Balance pendiente', value: pendingPayout, icon: Clock,       color: '#F59E0B', sub: 'Por liquidar' },
-          { label: 'Total generado',    value: totalNet,      icon: TrendingUp,  color: '#35C493', sub: 'Neto de comisiones' },
-          { label: 'Total liquidado',   value: liquidated,    icon: CheckCircle, color: '#16A34A', sub: 'Ya transferido' },
-          { label: 'Comisión Espot',    value: totalFee,      icon: CreditCard,  color: '#7C3AED', sub: `${paid.length} reservas` },
-        ].map(({ label, value, icon: Icon, color, sub }) => (
+          { label: 'Balance pendiente', value: pendingPayout, icon: Clock,       sub: 'Por liquidar' },
+          { label: 'Total generado',    value: totalNet,      icon: TrendingUp,  sub: 'Neto de comisiones' },
+          { label: 'Total liquidado',   value: liquidated,    icon: CheckCircle, sub: 'Ya transferido' },
+          { label: 'Comisión Espot',    value: totalFee,      icon: CreditCard,  sub: `${paid.length} reservas` },
+        ].map(({ label, value, icon: Icon, sub }) => (
           <div key={label} className="rounded-2xl p-5"
-            style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: `${color}12` }}>
-              <Icon size={16} style={{ color }} />
+            style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: 'var(--bg-elevated)' }}>
+              <Icon size={16} style={{ color: 'var(--text-secondary)' }} />
             </div>
-            <div className="text-xl font-bold mb-0.5" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>
+            <div className="text-xl font-bold mb-0.5" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
               {formatCurrency(value)}
             </div>
-            <div className="text-xs font-semibold" style={{ color: '#374151' }}>{label}</div>
-            <div className="text-xs mt-0.5" style={{ color: '#94A3B8' }}>{sub}</div>
+            <div className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>{label}</div>
+            <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{sub}</div>
           </div>
         ))}
       </div>
@@ -171,8 +171,8 @@ export default function HostPagosPage() {
                       </div>
                       <div className="text-sm" style={{ color: '#374151' }}>{formatDate(bk.event_date)}</div>
                       <div className="text-sm font-bold" style={{ color: '#0F1623' }}>{formatCurrency(Number(bk.total_amount))}</div>
-                      <div className="text-sm" style={{ color: '#7C3AED' }}>−{formatCurrency(Number(bk.total_amount) * 0.10)}</div>
-                      <div className="text-sm font-bold" style={{ color: '#35C493' }}>{formatCurrency(net)}</div>
+                      <div className="text-sm" style={{ color: 'var(--text-muted)' }}>−{formatCurrency(Number(bk.total_amount) * 0.10)}</div>
+                      <div className="text-sm font-bold" style={{ color: 'var(--brand)' }}>{formatCurrency(net)}</div>
                       <span className="text-xs font-semibold px-2.5 py-1.5 rounded-full w-fit"
                         style={{ background: ps?.bg, color: ps?.color }}>
                         {ps?.label ?? 'Pendiente'}
@@ -238,7 +238,7 @@ export default function HostPagosPage() {
                 {(['ahorro','corriente'] as const).map(t => (
                   <button key={t} type="button" onClick={() => setAccountType(t)}
                     className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all capitalize"
-                    style={accountType === t ? { background: '#0F1623', color: '#fff' } : { background: '#F8FAFC', color: '#6B7280', border: '1.5px solid #E2E8F0' }}>
+                    style={accountType === t ? { background: 'var(--text-primary)', color: '#fff' } : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1.5px solid var(--border-medium)' }}>
                     {t}
                   </button>
                 ))}
@@ -251,7 +251,7 @@ export default function HostPagosPage() {
                 {(['DOP','USD'] as const).map(c => (
                   <button key={c} type="button" onClick={() => setCurrency(c)}
                     className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all"
-                    style={currency === c ? { background: '#35C493', color: '#fff' } : { background: '#F8FAFC', color: '#6B7280', border: '1.5px solid #E2E8F0' }}>
+                    style={currency === c ? { background: 'var(--brand)', color: '#fff' } : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1.5px solid var(--border-medium)' }}>
                     {c}
                   </button>
                 ))}
@@ -293,7 +293,7 @@ export default function HostPagosPage() {
           <div className="flex items-center gap-3 pt-1">
             <button type="submit" disabled={saving}
               className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-50"
-              style={{ background: '#0F1623', color: '#fff' }}>
+              style={{ background: 'var(--text-primary)', color: '#fff' }}>
               {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
               {saving ? 'Guardando...' : 'Guardar cuenta bancaria'}
             </button>

@@ -141,17 +141,17 @@ export default function FinanzasPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-5 md:mb-8">
         {[
-          { label: 'Ingresos brutos',   value: formatCurrency(totalBruto),    icon: TrendingUp,  color: '#35C493', sub: 'cobrado a clientes' },
-          { label: 'Comisión Espot',    value: formatCurrency(totalComision),  icon: Building2,   color: '#D97706', sub: '10% por transacción' },
-          { label: 'Neto a recibir',    value: formatCurrency(totalNeto),      icon: DollarSign,  color: '#16A34A', sub: 'descontada comisión' },
-          { label: 'Este mes',          value: formatCurrency(thisMonth),      icon: ArrowUpRight, color: '#2563EB', sub: 'ingresos del mes' },
-        ].map(({ label, value, icon: Icon, color, sub }) => (
+          { label: 'Ingresos brutos',   value: formatCurrency(totalBruto),    icon: TrendingUp,   sub: 'cobrado a clientes' },
+          { label: 'Comisión Espot',    value: formatCurrency(totalComision),  icon: Building2,    sub: '10% por transacción' },
+          { label: 'Neto a recibir',    value: formatCurrency(totalNeto),      icon: DollarSign,   sub: 'descontada comisión' },
+          { label: 'Este mes',          value: formatCurrency(thisMonth),      icon: ArrowUpRight,  sub: 'ingresos del mes' },
+        ].map(({ label, value, icon: Icon, sub }) => (
           <div key={label} className="rounded-2xl p-5"
             style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>{label}</span>
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${color}12` }}>
-                <Icon size={14} style={{ color }} />
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--bg-elevated)' }}>
+                <Icon size={14} style={{ color: 'var(--text-secondary)' }} />
               </div>
             </div>
             <div className="font-bold text-lg" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>{value}</div>
@@ -297,7 +297,7 @@ export default function FinanzasPage() {
                     <div className="font-semibold text-sm text-right" style={{ color: 'var(--text-primary)' }}>
                       {formatCurrency(Number(b.total_amount))}
                     </div>
-                    <div className="font-bold text-sm text-right" style={{ color: '#16A34A' }}>
+                    <div className="font-bold text-sm text-right" style={{ color: 'var(--brand)' }}>
                       {formatCurrency(neto)}
                     </div>
                     <div>
@@ -325,7 +325,7 @@ export default function FinanzasPage() {
               <span className="text-sm text-right" style={{ color: 'var(--text-primary)' }}>
                 {formatCurrency(filtered.reduce((s, b) => s + Number(b.total_amount), 0))}
               </span>
-              <span className="text-sm text-right" style={{ color: '#16A34A' }}>
+              <span className="text-sm text-right" style={{ color: 'var(--brand)' }}>
                 {formatCurrency(filtered.reduce((s, b) => s + Number(b.total_amount) * 0.90, 0))}
               </span>
               <span></span>

@@ -214,13 +214,13 @@ export default function HostReservasPage() {
       {/* Métricas rápidas */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-5 md:mb-6">
         {[
-          { l: 'Por aceptar',    v: pending,   c: '#D97706' },
-          { l: 'Esperan pago',   v: accepted,  c: '#2563EB' },
-          { l: 'Confirmadas',    v: bookings.filter(b => b.status === 'confirmed').length, c: '#16A34A' },
-          { l: 'Ingresos conf.', v: formatCurrency(bookings.filter(b => b.status === 'confirmed').reduce((s, b) => s + (Number(b.total_amount) || 0), 0)), c: 'var(--brand)' },
+          { l: 'Por aceptar',    v: pending },
+          { l: 'Esperan pago',   v: accepted },
+          { l: 'Confirmadas',    v: bookings.filter(b => b.status === 'confirmed').length },
+          { l: 'Ingresos conf.', v: formatCurrency(bookings.filter(b => b.status === 'confirmed').reduce((s, b) => s + (Number(b.total_amount) || 0), 0)) },
         ].map(m => (
           <div key={m.l} className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-            <div className="text-xl font-bold" style={{ color: m.c }}>{m.v}</div>
+            <div className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{m.v}</div>
             <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{m.l}</div>
           </div>
         ))}
@@ -270,8 +270,8 @@ export default function HostReservasPage() {
 
                     <div className="flex items-start gap-3">
                       {/* Avatar */}
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold text-white shrink-0"
-                        style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-dark))' }}>
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-semibold shrink-0"
+                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
                         {g?.full_name?.charAt(0) ?? '?'}
                       </div>
 
@@ -310,7 +310,7 @@ export default function HostReservasPage() {
                               <button onClick={() => doAccept(bk.id)} disabled={!!actionId}
                                 className="flex-1 text-xs font-semibold py-3 rounded-xl transition-colors"
                                 style={{ background: 'rgba(22,163,74,0.12)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)' }}>
-                                {actionId === bk.id + 'a' ? '...' : '✓ Aceptar'}
+                                {actionId === bk.id + 'a' ? '...' : 'Aceptar'}
                               </button>
                             )}
                             {bk.status === 'quote_requested' && (
@@ -323,7 +323,7 @@ export default function HostReservasPage() {
                             <button onClick={() => { setSelected(bk); setRejectReason(''); setShowRejectForm(true) }} disabled={!!actionId}
                               className="flex-1 text-xs font-semibold py-3 rounded-xl transition-colors"
                               style={{ background: 'rgba(220,38,38,0.1)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }}>
-                              ✕ Rechazar
+                              Rechazar
                             </button>
                           </div>
                         )}
@@ -347,8 +347,8 @@ export default function HostReservasPage() {
                         </button>
                         <Link href={`/dashboard/host/reservas/${bk.id}`}
                           onClick={e => e.stopPropagation()}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold"
-                          style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg text-xs"
+                          style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
                           title="Ver detalle completo">
                           ↗
                         </Link>
@@ -486,15 +486,15 @@ export default function HostReservasPage() {
               )}
               {selected.status === 'accepted' && (
                 <div className="rounded-xl px-3 py-2.5 text-xs text-center"
-                  style={{ background: 'rgba(37,99,235,0.06)', border: '1px solid rgba(37,99,235,0.15)', color: '#2563EB' }}>
-                  ⏳ Esperando pago del cliente ({formatCurrency(Number(selected.platform_fee))})
+                  style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
+                  Esperando pago del cliente — {formatCurrency(Number(selected.platform_fee))}
                 </div>
               )}
               {selected.status === 'confirmed' && (
                 <button onClick={() => doComplete(selected.id)} disabled={!!actionId}
                   className="w-full text-xs font-semibold py-2.5 rounded-xl"
-                  style={{ background: 'rgba(124,58,237,0.1)', color: '#7C3AED', border: '1px solid rgba(124,58,237,0.2)' }}>
-                  {actionId === selected.id + 'c' ? 'Procesando...' : '✓ Marcar evento como completado'}
+                  style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+                  {actionId === selected.id + 'c' ? 'Procesando...' : 'Marcar evento como completado'}
                 </button>
               )}
             </div>

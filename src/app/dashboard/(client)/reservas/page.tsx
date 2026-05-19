@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { CalendarDays, Clock, Users, MapPin, ChevronRight, Loader2, Search, CreditCard, CheckCircle, X, AlertTriangle, Building2, Star, MessageCircle, ExternalLink, Bell, Check, Sparkles } from 'lucide-react'
+import { CalendarDays, Clock, Users, MapPin, ChevronRight, Loader2, Search, CreditCard, CheckCircle, X, AlertTriangle, Building2, Star, MessageCircle, ExternalLink, Bell, Check } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getClientBookings } from '@/lib/actions/client'
 import { STATUS_LABELS, STATUS_COLORS, isPaid } from '@/lib/bookingConfig'
@@ -23,13 +23,13 @@ function getPricingLabel(pricing: any): { label: string; detail: string; color: 
   const p = pricing
   switch (p.pricing_type) {
     case 'hourly':
-      return { label: 'Por hora', detail: p.hourly_price ? formatCurrency(p.hourly_price) + '/hr' : '', color: '#2563EB', bg: 'rgba(37,99,235,0.08)' }
+      return { label: 'Por hora', detail: p.hourly_price ? formatCurrency(p.hourly_price) + '/hr' : '', color: 'var(--text-secondary)', bg: 'var(--bg-elevated)' }
     case 'minimum_consumption':
-      return { label: 'Consumibles', detail: p.minimum_consumption ? 'Desde ' + formatCurrency(p.minimum_consumption) : '', color: '#D97706', bg: 'rgba(217,119,6,0.08)' }
+      return { label: 'Consumibles', detail: p.minimum_consumption ? 'Desde ' + formatCurrency(p.minimum_consumption) : '', color: 'var(--text-secondary)', bg: 'var(--bg-elevated)' }
     case 'fixed_package':
-      return { label: p.package_name ?? 'Paquete fijo', detail: p.fixed_price ? formatCurrency(p.fixed_price) : '', color: '#7C3AED', bg: 'rgba(124,58,237,0.08)' }
+      return { label: p.package_name ?? 'Paquete fijo', detail: p.fixed_price ? formatCurrency(p.fixed_price) : '', color: 'var(--text-secondary)', bg: 'var(--bg-elevated)' }
     case 'custom_quote':
-      return { label: 'Cotización', detail: 'Precio personalizado', color: '#0891B2', bg: 'rgba(8,145,178,0.08)' }
+      return { label: 'Cotización', detail: 'Precio personalizado', color: 'var(--text-secondary)', bg: 'var(--bg-elevated)' }
     default:
       return null
   }
