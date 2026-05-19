@@ -36,12 +36,12 @@ export const STATUS_LABELS: Record<BookingStatus, string> = {
 }
 
 export const STATUS_COLORS: Record<BookingStatus, { color: string; bg: string }> = {
-  pending:          { color: '#D97706', bg: 'rgba(217,119,6,0.08)'   },
-  accepted:         { color: '#03313C', bg: 'rgba(3,49,60,0.07)'     },
-  confirmed:        { color: '#16A34A', bg: '#F7F7F7'                },
-  rejected:         { color: '#DC2626', bg: 'rgba(220,38,38,0.08)'   },
-  cancelled_guest:  { color: '#DC2626', bg: 'rgba(220,38,38,0.08)'   },
-  cancelled_host:   { color: '#D97706', bg: 'rgba(217,119,6,0.08)'   },
-  completed:        { color: '#16A34A', bg: '#F7F7F7'                },
-  quote_requested:  { color: '#03313C', bg: 'rgba(3,49,60,0.07)'     },
+  pending:          { color: '#D97706', bg: 'rgba(217,119,6,0.08)'   },  // Naranja
+  accepted:         { color: '#2563EB', bg: 'rgba(37,99,235,0.08)'   },  // Azul
+  confirmed:        { color: '#16A34A', bg: 'rgba(22,163,74,0.08)'   },  // Verde
+  rejected:         { color: '#DC2626', bg: 'rgba(220,38,38,0.08)'   },  // Rojo
+  cancelled_guest:  { color: '#DC2626', bg: 'rgba(220,38,38,0.08)'   },  // Rojo — canceló el cliente
+  cancelled_host:   { color: '#D97706', bg: 'rgba(217,119,6,0.08)'   },  // Naranja — canceló el propietario
+  completed:        { color: '#16A34A', bg: 'rgba(22,163,74,0.08)'   },  // Verde — evento exitoso
+  quote_requested:  { color: '#0891B2', bg: 'rgba(8,145,178,0.08)'   },  // Cyan
 }

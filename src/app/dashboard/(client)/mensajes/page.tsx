@@ -203,7 +203,7 @@ export default function ClientMensajesPage() {
             </div>
           ) : filtered.map(conv => (
             <button key={conv.spaceId} onClick={() => openConv(conv)}
-              className={cn('w-full text-left px-5 py-4 transition-colors', active?.spaceId === conv.spaceId ? 'bg-[rgba(3,49,60,0.05)]' : 'hover:bg-[var(--bg-elevated)]')}
+              className={cn('w-full text-left px-5 py-4 transition-colors', active?.spaceId === conv.spaceId ? 'bg-[var(--brand-dim)]' : 'hover:bg-[var(--bg-elevated)]')}
               style={{ borderBottom: '1px solid var(--border-subtle)' }}>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl overflow-hidden shrink-0" style={{ background: 'var(--bg-elevated)' }}>
@@ -313,7 +313,7 @@ export default function ClientMensajesPage() {
                   ? <img src={attachment.preview} alt="" className="w-11 h-11 rounded-xl object-cover shrink-0" />
                   : (
                     <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-                      style={{ background: 'var(--bg-elevated)' }}>
+                      style={{ background: 'var(--brand-dim)' }}>
                       <FileText size={18} style={{ color: 'var(--brand)' }} />
                     </div>
                   )}
@@ -356,7 +356,7 @@ export default function ClientMensajesPage() {
         </div>
       ) : (
         <div className="flex-1 flex flex-col items-center justify-center text-center" style={{ background: '#FAFBFC' }}>
-          <div className="w-16 h-16 rounded-3xl flex items-center justify-center mb-4" style={{ background: 'var(--bg-elevated)' }}>
+          <div className="w-16 h-16 rounded-3xl flex items-center justify-center mb-4" style={{ background: 'var(--brand-dim)' }}>
             <MessageCircle size={28} style={{ color: 'var(--brand)' }} />
           </div>
           <p className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>Selecciona una conversación</p>

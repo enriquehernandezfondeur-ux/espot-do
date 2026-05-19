@@ -266,7 +266,7 @@ export default function HostReservasPage() {
                 return (
                   <div key={bk.id} onClick={() => setSelected(isSelected ? null : bk)}
                     className="px-4 md:px-5 py-4 cursor-pointer transition-colors hover:bg-[var(--bg-elevated)]"
-                    style={{ background: isSelected ? 'rgba(3,49,60,0.04)' : 'transparent' }}>
+                    style={{ background: isSelected ? 'var(--brand-dim)' : 'transparent' }}>
 
                     <div className="flex items-start gap-3">
                       {/* Avatar */}
@@ -316,7 +316,7 @@ export default function HostReservasPage() {
                             {bk.status === 'quote_requested' && (
                               <button onClick={() => router.push('/dashboard/host/cotizaciones')} disabled={!!actionId}
                                 className="flex-1 text-xs font-semibold py-3 rounded-xl transition-colors"
-                                style={{ background: 'rgba(3,49,60,0.07)', color: '#03313C', border: '1px solid rgba(3,49,60,0.15)' }}>
+                                style={{ background: 'rgba(37,99,235,0.1)', color: '#2563EB', border: '1px solid rgba(37,99,235,0.15)' }}>
                                 Responder cotización →
                               </button>
                             )}
@@ -331,7 +331,7 @@ export default function HostReservasPage() {
                           <div className="mt-2.5" onClick={e => e.stopPropagation()}>
                             <button onClick={() => doComplete(bk.id)} disabled={!!actionId}
                               className="text-xs font-semibold px-4 py-2 rounded-xl"
-                              style={{ background: 'rgba(3,49,60,0.07)', color: '#03313C', border: '1px solid rgba(3,49,60,0.15)' }}>
+                              style={{ background: 'rgba(124,58,237,0.1)', color: '#7C3AED', border: '1px solid rgba(124,58,237,0.2)' }}>
                               {actionId === bk.id + 'c' ? '...' : 'Marcar completado'}
                             </button>
                           </div>
@@ -442,7 +442,7 @@ export default function HostReservasPage() {
                     {(selected as any).space_pricing.package_name ? `Paquete · ${(selected as any).space_pricing.package_name}` : 'Incluye el paquete'}
                   </div>
                   <div className="rounded-xl px-3 py-2.5 text-xs whitespace-pre-line"
-                    style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                    style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid rgba(53,196,147,0.15)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
                     {(selected as any).space_pricing.package_includes}
                   </div>
                 </div>

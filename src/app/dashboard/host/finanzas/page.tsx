@@ -211,16 +211,16 @@ export default function FinanzasPage() {
 
       {/* Cómo funciona */}
       <div className="rounded-2xl p-5 mb-6 flex items-start gap-4"
-        style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+        style={{ background: 'rgba(53,196,147,0.04)', border: '1px solid rgba(53,196,147,0.15)' }}>
         <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-          style={{ background: '#fff' }}>
-          <CreditCard size={14} style={{ color: 'var(--text-secondary)' }} />
+          style={{ background: 'rgba(53,196,147,0.1)' }}>
+          <CreditCard size={14} color="#35C493" />
         </div>
         <div>
-          <p className="text-sm font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
+          <p className="text-sm font-semibold mb-1" style={{ color: '#0A7A50' }}>
             Cómo funciona el sistema de pagos
           </p>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-xs leading-relaxed" style={{ color: '#166534' }}>
             El cliente paga por Espot → Espot retiene el dinero → Después del evento, Espot descuenta el 10% de comisión y transfiere el neto a tu cuenta registrada.
             <span className="font-semibold"> El propietario nunca cobra directamente al cliente.</span>
           </p>
