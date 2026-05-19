@@ -1304,7 +1304,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
           </div>
 
           {/* ── DERECHA: resumen rápido + BOOKING WIDGET ── */}
-          <div className="order-1 lg:order-2 lg:sticky lg:top-20 hidden lg:block space-y-3 lg:max-h-[calc(100dvh-5rem)] lg:overflow-y-auto">
+          <div className="order-1 lg:order-2 lg:sticky lg:top-20 hidden lg:block space-y-3">
 
             {/* Resumen de precio antes del widget */}
             {(() => {
