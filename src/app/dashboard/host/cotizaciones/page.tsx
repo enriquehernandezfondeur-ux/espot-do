@@ -219,13 +219,6 @@ export default function CotizacionesPage() {
                       style={{ fontSize: 16 }} />
                   </div>
 
-                  {sendError && (
-                    <div className="text-xs px-3 py-2 rounded-xl mb-2"
-                      style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.2)', color: '#DC2626' }}>
-                      {sendError}
-                    </div>
-                  )}
-
                   <div className="flex gap-3">
                     <button onClick={handleRespond}
                       disabled={!price || sending}

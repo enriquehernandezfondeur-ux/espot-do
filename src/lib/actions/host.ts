@@ -443,7 +443,8 @@ export async function respondToQuote(bookingId: string, quotedPrice: number, mes
       total_amount:  quotedPrice,
       platform_fee:  platformFee,
       base_price:    quotedPrice,
-      status:        'accepted',      // listo para que el cliente pague
+      addons_total:  0,
+      status:        'accepted',
       accepted_at:   new Date().toISOString(),
       event_notes:   `[Cotización]${message ? ': ' + message : ''}`,
     })

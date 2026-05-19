@@ -20,16 +20,19 @@ export interface PaymentSchedule {
 
 /** Calcula la fecha limite de cada cuota */
 function addDays(date: string, days: number): string {
+  if (!days || isNaN(days)) return date
   const d = new Date(date + 'T12:00:00')
   d.setDate(d.getDate() + days)
   return d.toISOString().split('T')[0]
 }
 
 /** Días entre hoy y la fecha del evento (positivo = futuro, negativo = pasado) */
-export function daysUntilEvent(eventDate: string): number {
+export function daysUntilEvent(eventDate: string | null | undefined): number {
+  if (!eventDate) return 0
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const event = new Date(eventDate + 'T12:00:00')
+  if (isNaN(event.getTime())) return 0
   return Math.floor((event.getTime() - today.getTime()) / 86400000)
 }
 
@@ -47,7 +50,8 @@ export function buildSchedule(
   totalAmount: number,
   existingInstallments?: { number: number; status: string; paid_at?: string | null; amount: number }[]
 ): PaymentSchedule {
-  const days  = Math.max(0, daysUntilEvent(eventDate)) // siempre >= 0 para el schedule
+  const rawDays = daysUntilEvent(eventDate)
+  const days    = isNaN(rawDays) ? 0 : Math.max(0, rawDays)
   const today = new Date().toISOString().split('T')[0]
 
   type ScheduleDef = { pct: number; daysOffset: number; label: string }[]
