@@ -59,18 +59,18 @@
 
 /* ── HOST DASHBOARD — CLEAN WHITE THEME ─────────── */
 .host-theme {
-  --bg-base:      #F4F6F8;
+  --bg-base:      #F4F6F5;
   --bg-surface:   #FFFFFF;
   --bg-card:      #FFFFFF;
-  --bg-elevated:  #EEF1F4;
-  --bg-hover:     #E8ECF0;
-  --text-primary:   #0D1F2D;
-  --text-secondary: #5A6A78;
-  --text-muted:     #9AACB8;
-  --border-subtle:  #E2E8ED;
-  --border-medium:  #CDD6DF;
-  --shadow-card: 0 1px 2px rgba(0,0,0,0.05), 0 3px 10px rgba(0,0,0,0.04);
-  --shadow-hover: 0 6px 28px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+  --bg-elevated:  #EEF2F0;
+  --bg-hover:     #E8EDEB;
+  --text-primary:   #03313C;
+  --text-secondary: #527068;
+  --text-muted:     #93B0A8;
+  --border-subtle:  #E4EDEA;
+  --border-medium:  #CDDDD9;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-hover: 0 4px 24px rgba(0,0,0,0.08);
 }
 
 @theme inline {
