@@ -10,12 +10,10 @@ function SocialSection() {
     const container = widgetRef.current
     if (!container) return
 
-    // Crear el web component via DOM (evita problemas de SSR/hidratación)
     const widget = document.createElement('behold-widget')
     widget.setAttribute('feed-id', 'djCYJQQhkC3IfDDkpR0B')
     container.appendChild(widget)
 
-    // Cargar script exactamente como indica Behold.so
     if (!document.querySelector('script[src*="behold.so"]')) {
       const s = document.createElement('script')
       s.type = 'module'
@@ -23,19 +21,21 @@ function SocialSection() {
       document.head.append(s)
     }
 
-    // Ocultar branding "Made with Behold" cuando el shadow DOM esté listo
-    const observer = new MutationObserver(() => {
-      const shadow = (widget as any).shadowRoot
-      if (!shadow) return
-      const existing = shadow.querySelector('#hide-behold-brand')
-      if (existing) return
-      const style = document.createElement('style')
-      style.id = 'hide-behold-brand'
-      style.textContent = '[class*="attribution"],[class*="branding"],[class*="powered"],[href*="behold"]{display:none!important}'
-      shadow.appendChild(style)
+    // Inyectar CSS en el shadow DOM cuando el custom element esté definido.
+    // MutationObserver no puede cruzar el shadow boundary — hay que esperar
+    // a que customElements registre el tag y luego acceder al shadowRoot.
+    customElements.whenDefined('behold-widget').then(() => {
+      requestAnimationFrame(() => {
+        const shadow = (widget as any).shadowRoot
+        if (!shadow || shadow.querySelector('#hide-behold-brand')) return
+        const style = document.createElement('style')
+        style.id = 'hide-behold-brand'
+        style.textContent = '[class*="attribution"],[class*="branding"],[class*="powered"],[href*="behold"]{display:none!important}'
+        shadow.appendChild(style)
+      })
     })
-    observer.observe(widget, { childList: true, subtree: true })
-    return () => observer.disconnect()
+
+    return () => { widget.remove() }
   }, [])
 
   return (
