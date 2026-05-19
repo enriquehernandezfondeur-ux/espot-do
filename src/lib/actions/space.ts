@@ -176,13 +176,14 @@ export async function saveSpace(payload: SaveSpacePayload) {
 
   const spaceId = space.id
 
-  // Guardar video_url y menu_url por separado — no fallan si la columna aún no existe
+  // Guardar video_url y menu_url
   if (payload.videoUrl !== undefined || payload.menuUrl !== undefined) {
     const extras: Record<string, unknown> = {}
-    if (payload.videoUrl    !== undefined) extras.video_url      = payload.videoUrl    || null
-    if (payload.menuUrl     !== undefined) extras.menu_url       = payload.menuUrl     || null
+    if (payload.videoUrl     !== undefined) extras.video_url      = payload.videoUrl     || null
+    if (payload.menuUrl      !== undefined) extras.menu_url       = payload.menuUrl      || null
     if (payload.menuFileName !== undefined) extras.menu_file_name = payload.menuFileName || null
-    await supabase.from('spaces').update(extras).eq('id', spaceId)
+    const { error: mediaError } = await supabase.from('spaces').update(extras).eq('id', spaceId)
+    if (mediaError) console.error('[saveSpace] media columns update failed:', mediaError.message)
   }
 
   const inserts = [
@@ -473,13 +474,14 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
 
   if (spaceError) return { error: spaceError.message }
 
-  // Guardar video_url y menu_url por separado — no fallan si la columna aún no existe
+  // Guardar video_url y menu_url
   if (payload.videoUrl !== undefined || payload.menuUrl !== undefined) {
     const extras: Record<string, unknown> = {}
-    if (payload.videoUrl    !== undefined) extras.video_url      = payload.videoUrl    || null
-    if (payload.menuUrl     !== undefined) extras.menu_url       = payload.menuUrl     || null
+    if (payload.videoUrl     !== undefined) extras.video_url      = payload.videoUrl     || null
+    if (payload.menuUrl      !== undefined) extras.menu_url       = payload.menuUrl      || null
     if (payload.menuFileName !== undefined) extras.menu_file_name = payload.menuFileName || null
-    await supabase.from('spaces').update(extras).eq('id', spaceId)
+    const { error: mediaError } = await supabase.from('spaces').update(extras).eq('id', spaceId)
+    if (mediaError) console.error('[saveSpace] media columns update failed:', mediaError.message)
   }
 
   // Actualizar pricing
