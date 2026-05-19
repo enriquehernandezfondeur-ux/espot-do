@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { generateSlug, num, int } from '@/lib/utils'
 import { revalidatePath } from 'next/cache'
 import type { PricingType, PaymentTermType } from '@/types'
@@ -304,23 +305,21 @@ export async function deleteSpaceByHost(spaceId: string) {
   if (activeBookings && activeBookings.length > 0)
     return { error: 'No puedes eliminar un espacio con reservas activas. Cancélalas primero.' }
 
-  // Eliminar registros hijos en orden para evitar FK violations
+  // Usar service client para bypasear RLS en las tablas donde el host no tiene permiso de delete
+  const sb = createServiceClient()
   await Promise.all([
-    supabase.from('space_images').delete().eq('space_id', spaceId),
-    supabase.from('space_addons').delete().eq('space_id', spaceId),
-    supabase.from('space_time_blocks').delete().eq('space_id', spaceId),
-    supabase.from('space_payment_terms').delete().eq('space_id', spaceId),
-    supabase.from('space_conditions').delete().eq('space_id', spaceId),
-    supabase.from('favorites').delete().eq('space_id', spaceId),
-    supabase.from('messages').delete().eq('space_id', spaceId),
-    // Eliminar reservas históricas (completadas, canceladas, rechazadas)
-    // Las activas ya fueron bloqueadas arriba
-    supabase.from('bookings').delete().eq('space_id', spaceId),
+    sb.from('space_images').delete().eq('space_id', spaceId),
+    sb.from('space_addons').delete().eq('space_id', spaceId),
+    sb.from('space_time_blocks').delete().eq('space_id', spaceId),
+    sb.from('space_payment_terms').delete().eq('space_id', spaceId),
+    sb.from('space_conditions').delete().eq('space_id', spaceId),
+    sb.from('favorites').delete().eq('space_id', spaceId),
+    sb.from('messages').delete().eq('space_id', spaceId),
+    sb.from('bookings').delete().eq('space_id', spaceId),
   ])
-  // Pricing después de addons (por si hay FK cruzada)
-  await supabase.from('space_pricing').delete().eq('space_id', spaceId)
+  await sb.from('space_pricing').delete().eq('space_id', spaceId)
 
-  const { error } = await supabase.from('spaces').delete().eq('id', spaceId)
+  const { error } = await sb.from('spaces').delete().eq('id', spaceId)
   if (!error) revalidatePath('/buscar')
   return error ? { error: error.message } : { success: true }
 }
