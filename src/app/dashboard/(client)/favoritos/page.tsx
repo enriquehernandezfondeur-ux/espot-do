@@ -38,12 +38,13 @@ export default function FavoritosPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  // Cerrar menú al hacer clic fuera
+  // Cerrar menús al hacer clic fuera
   useEffect(() => {
     function handler(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setMenuFolder(null)
       }
+      setMovingFav(null)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
