@@ -32,6 +32,7 @@ export default function AdminUsersPage() {
   useEffect(() => {
     getAdminUsers({ role: filter === 'all' ? undefined : filter })
       .then(d => { setUsers(d); setLoading(false) })
+      .catch(() => { setUsers([]); setLoading(false) })
   }, [filter])
 
   const filtered = users.filter(u =>

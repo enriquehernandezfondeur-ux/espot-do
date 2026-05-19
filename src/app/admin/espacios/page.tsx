@@ -30,6 +30,7 @@ export default function AdminSpacesPage() {
   useEffect(() => {
     getAdminSpaces({ status: filter === 'all' ? undefined : filter, search: search || undefined })
       .then(d => { setSpaces(d); setLoading(false) })
+      .catch(() => { setSpaces([]); setLoading(false) })
   }, [filter, search])
 
   async function toggle(spaceId: string, field: string, current: boolean) {

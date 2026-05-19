@@ -26,7 +26,7 @@ export default function AdminConfigPage() {
   }
 
   useEffect(() => {
-    getMarketplaceConfig().then(d => { setConfig(d); setLoading(false) })
+    getMarketplaceConfig().then(d => { setConfig(d); setLoading(false) }).catch(() => setLoading(false))
   }, [])
 
   async function handleSave(key: string, value: string) {
