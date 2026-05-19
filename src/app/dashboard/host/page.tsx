@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import {
   TrendingUp, TrendingDown, Clock, CheckCircle,
   CalendarDays, MessageSquareQuote, ArrowRight,
-  Users, Loader2, DollarSign,
+  Users, Loader2, DollarSign, Building2,
 } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import Link from 'next/link'
@@ -159,13 +159,24 @@ export default function DashboardPage() {
       )}
 
       {/* ── Encabezado ── */}
-      <div className="mb-6 md:mb-8">
-        <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-          Panel de control
-        </h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-          Resumen de tu actividad en espot.do
-        </p>
+      <div className="mb-6 md:mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            Panel de control
+          </h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+            Resumen de tu actividad en espot.do
+          </p>
+        </div>
+        {(stats?.spaceCount ?? 0) > 0 && (
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl shrink-0"
+            style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
+            <Building2 size={13} style={{ color: 'var(--brand)' }} />
+            <span className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>
+              {stats?.spaceCount} {stats?.spaceCount === 1 ? 'espacio' : 'espacios'}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* ── Métricas principales ── */}

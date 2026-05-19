@@ -627,26 +627,6 @@ export default function EspacioPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Card: Crear nuevo espacio */}
-            <button
-              onClick={startNewSpace}
-              className="rounded-2xl overflow-hidden transition-all flex flex-col items-center justify-center gap-3 min-h-[280px]"
-              style={{
-                background: 'var(--brand-dim)',
-                border: '2px dashed var(--brand-border)',
-                color: 'var(--brand)',
-              }}
-            >
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                style={{ background: 'rgba(53,196,147,0.15)' }}>
-                <Plus size={24} style={{ color: 'var(--brand)' }} />
-              </div>
-              <div className="text-center">
-                <p className="font-semibold text-sm" style={{ color: 'var(--brand)' }}>Crear nuevo espacio</p>
-                <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Agrega otro espacio a tu cuenta</p>
-              </div>
-            </button>
-
             {spaces.map((space: any) => {
               const pricing = space.space_pricing?.find((p: any) => p.is_active) ?? space.space_pricing?.[0]
               const cover   = space.space_images?.find((i: any) => i.is_cover)?.url ?? space.space_images?.[0]?.url

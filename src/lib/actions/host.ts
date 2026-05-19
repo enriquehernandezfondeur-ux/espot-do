@@ -301,7 +301,7 @@ export async function getHostStats() {
   if (!spaces?.length) return {
     revenueThisMonth: 0, revenuePrevMonth: 0,
     pendingCount: 0, confirmedCount: 0, acceptedCount: 0,
-    pendingQuotes: 0, nextBooking: null, monthlyRevenue: [],
+    pendingQuotes: 0, nextBooking: null, monthlyRevenue: [], spaceCount: 0,
   }
 
   const spaceIds = spaces.map(s => s.id)
@@ -371,6 +371,7 @@ export async function getHostStats() {
     pendingQuotes: quotes.data?.length ?? 0,
     nextBooking,
     monthlyRevenue: monthly,
+    spaceCount: spaces.length,
   }
 }
 
