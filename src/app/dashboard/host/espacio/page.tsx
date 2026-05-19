@@ -124,6 +124,7 @@ export default function EspacioPage() {
   const [view, setView] = useState<'list' | 'create'>('list')
   const [spaces, setSpaces] = useState<Awaited<ReturnType<typeof getMySpaces>>>([])
   const [loadingSpaces, setLoadingSpaces] = useState(true)
+  const [spaceFilter, setSpaceFilter] = useState<'all' | 'published' | 'pending' | 'draft'>('all')
 
   useEffect(() => {
     getMySpaces()
@@ -588,10 +589,18 @@ export default function EspacioPage() {
 
         <div className="flex items-center justify-between mb-5 md:mb-8">
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-              Mis espacios
-            </h1>
-            <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+            <div className="flex items-center gap-3 mb-1">
+              <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+                Mis espacios
+              </h1>
+              {spaces.length > 0 && (
+                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-sm font-semibold"
+                  style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
+                  {spaces.length}
+                </span>
+              )}
+            </div>
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
               Gestiona tus espacios publicados en espot.do
             </p>
           </div>
@@ -602,6 +611,36 @@ export default function EspacioPage() {
             <PlusCircle size={16} /> Nuevo espacio
           </button>
         </div>
+
+        {/* Filtros — solo cuando hay espacios */}
+        {!loadingSpaces && spaces.length > 0 && (() => {
+          const counts = {
+            all:       spaces.length,
+            published: spaces.filter(s => s.is_published).length,
+            pending:   spaces.filter(s => !s.is_published && s.is_active).length,
+            draft:     spaces.filter(s => !s.is_published && !s.is_active).length,
+          }
+          const allTabs: { key: typeof spaceFilter; label: string }[] = [
+            { key: 'all',       label: `Todos (${counts.all})` },
+            { key: 'published', label: `Publicados (${counts.published})` },
+            { key: 'pending',   label: `En revisión (${counts.pending})` },
+            { key: 'draft',     label: `Borradores (${counts.draft})` },
+          ]
+          const tabs = allTabs.filter(t => t.key === 'all' || counts[t.key] > 0)
+          return (
+            <div className="flex gap-1.5 mb-5 overflow-x-auto scrollbar-hide">
+              {tabs.map(({ key, label }) => (
+                <button key={key} onClick={() => setSpaceFilter(key)}
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all shrink-0"
+                  style={spaceFilter === key
+                    ? { background: 'var(--text-primary)', color: '#fff' }
+                    : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          )
+        })()}
 
         {loadingSpaces ? (
           <div className="flex items-center justify-center py-20">
@@ -627,7 +666,12 @@ export default function EspacioPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {spaces.map((space: any) => {
+            {spaces.filter(s => {
+              if (spaceFilter === 'published') return s.is_published
+              if (spaceFilter === 'pending')   return !s.is_published && s.is_active
+              if (spaceFilter === 'draft')     return !s.is_published && !s.is_active
+              return true
+            }).map((space: any) => {
               const pricing = space.space_pricing?.find((p: any) => p.is_active) ?? space.space_pricing?.[0]
               const cover   = space.space_images?.find((i: any) => i.is_cover)?.url ?? space.space_images?.[0]?.url
               return (
