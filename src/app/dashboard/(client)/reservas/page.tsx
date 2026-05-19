@@ -458,7 +458,7 @@ export default function MisReservasPage() {
                       {bk.event_type && (
                         <span className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full"
                           style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
-                          <Sparkles size={11} style={{ color: 'var(--brand)' }} /> {bk.event_type}
+                          {bk.event_type}
                         </span>
                       )}
                       <span className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full"
