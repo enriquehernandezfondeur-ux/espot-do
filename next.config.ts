@@ -54,10 +54,10 @@ const nextConfig: NextConfig = {
       "default-src 'self'",
       // Next.js App Router necesita 'unsafe-inline' para scripts de hidratación
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
       "font-src 'self' https://fonts.gstatic.com",
-      `img-src 'self' data: blob: https://${supabaseHost} https://images.unsplash.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://*.tile.openstreetmap.org`,
-      `connect-src 'self' https://${supabaseHost} wss://${supabaseHost} https://pagos.azul.com.do https://pruebas.azul.com.do`,
+      `img-src 'self' data: blob: https://${supabaseHost} https://images.unsplash.com https://*.googleusercontent.com https://lh3.googleusercontent.com https://*.tile.openstreetmap.org https://*.basemaps.cartocdn.com`,
+      `connect-src 'self' https://${supabaseHost} wss://${supabaseHost} https://pagos.azul.com.do https://pruebas.azul.com.do https://nominatim.openstreetmap.org`,
       "frame-src 'none'",
       "frame-ancestors 'none'",
       "object-src 'none'",

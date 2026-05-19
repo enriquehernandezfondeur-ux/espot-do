@@ -59,18 +59,18 @@
 
 /* ── HOST DASHBOARD — CLEAN WHITE THEME ─────────── */
 .host-theme {
-  --bg-base:      #F7F8FA;
+  --bg-base:      #F4F6F8;
   --bg-surface:   #FFFFFF;
   --bg-card:      #FFFFFF;
-  --bg-elevated:  #F3F4F6;
-  --bg-hover:     #ECEEF1;
-  --text-primary:   #03313C;
-  --text-secondary: #6B7280;
-  --text-muted:     #9CA3AF;
-  --border-subtle:  #E5E7EB;
-  --border-medium:  #D1D5DB;
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04);
-  --shadow-hover: 0 4px 24px rgba(0,0,0,0.08);
+  --bg-elevated:  #EEF1F4;
+  --bg-hover:     #E8ECF0;
+  --text-primary:   #0D1F2D;
+  --text-secondary: #5A6A78;
+  --text-muted:     #9AACB8;
+  --border-subtle:  #E2E8ED;
+  --border-medium:  #CDD6DF;
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.05), 0 3px 10px rgba(0,0,0,0.04);
+  --shadow-hover: 0 6px 28px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
 }
 
 @theme inline {
@@ -96,11 +96,11 @@ body {
 
 /* ── HOVER UTILITIES ─────────────────────────────── */
 .card-hover {
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   box-shadow: var(--shadow-card);
 }
 .card-hover:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-hover);
   border-color: var(--brand-border) !important;
 }

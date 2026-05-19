@@ -56,15 +56,14 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
   const SidebarInner = () => (
     <>
       {/* Logo */}
-      <div className="px-5 pt-5 pb-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+      <div className="px-5 pt-5 pb-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
         <div className="flex items-center justify-between">
           <Link href="/" onClick={() => setMobileOpen(false)}>
-            <img src="/logo-dark.svg" alt="espot.do" style={{ height: 26, width: 'auto' }} />
+            <img src="/logo-green.svg" alt="espot.do" style={{ height: 26, width: 'auto' }} />
           </Link>
-          {/* Cerrar drawer en móvil */}
           <button
             className="md:hidden p-2 rounded-lg"
-            style={{ color: 'var(--text-muted)' }}
+            style={{ color: 'rgba(255,255,255,0.4)' }}
             onClick={() => setMobileOpen(false)}
           >
             <X size={20} />
@@ -79,16 +78,16 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
             // eslint-disable-next-line @next/next/no-img-element
             <img src={avatarUrl} alt={userName ?? 'Avatar'}
               className="w-8 h-8 rounded-full object-cover shrink-0"
-              style={{ border: '1.5px solid var(--border-medium)' }} />
+              style={{ border: '1.5px solid rgba(255,255,255,0.2)' }} />
           ) : (
             <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-semibold"
-              style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+              style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}>
               {userName?.charAt(0)?.toUpperCase() ?? <Building2 size={14} />}
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{userName ?? 'Propietario'}</div>
-            <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>Propietario</div>
+            <div className="text-sm font-semibold truncate" style={{ color: '#fff' }}>{userName ?? 'Propietario'}</div>
+            <div className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>Propietario</div>
           </div>
         </div>
       </div>
@@ -102,13 +101,13 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
               onClick={() => setMobileOpen(false)}
               className={cn('flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all')}
               style={active ? {
-                background: 'var(--bg-elevated)',
-                color: 'var(--text-primary)',
+                background: 'rgba(53,196,147,0.15)',
+                color: 'var(--brand)',
               } : {
-                color: 'var(--text-secondary)',
+                color: 'rgba(255,255,255,0.5)',
               }}
-              onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' } }}
-              onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'; (e.currentTarget as HTMLElement).style.background = 'transparent' } }}>
+              onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.9)'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)' } }}
+              onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.5)'; (e.currentTarget as HTMLElement).style.background = 'transparent' } }}>
               <Icon size={15} className="shrink-0" style={active ? { color: 'var(--brand)' } : undefined} />
               {label}
             </Link>
@@ -117,13 +116,13 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
       </nav>
 
       {/* Explorar */}
-      <div className="px-3 pb-1" style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 8 }}>
+      <div className="px-3 pb-1" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 8 }}>
         <Link href="/buscar"
           onClick={() => setMobileOpen(false)}
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all w-full"
-          style={{ color: 'var(--text-secondary)' }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }}>
+          style={{ color: 'rgba(255,255,255,0.4)' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.85)' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.4)' }}>
           <Search size={15} className="shrink-0" />
           Explorar espacios
         </Link>
@@ -134,9 +133,9 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
         <Link href="/dashboard/reservas"
           onClick={() => setMobileOpen(false)}
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all w-full"
-          style={{ color: 'var(--text-secondary)' }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }}>
+          style={{ color: 'rgba(255,255,255,0.4)' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.85)' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.4)' }}>
           <User size={15} className="shrink-0" />
           Panel de Cliente
         </Link>
@@ -148,9 +147,9 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
           <Link href="/admin"
             onClick={() => setMobileOpen(false)}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all w-full"
-            style={{ color: 'var(--text-secondary)' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }}>
+            style={{ color: 'rgba(255,255,255,0.4)' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.85)' }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.4)' }}>
             <Shield size={15} className="shrink-0" />
             Admin Console
           </Link>
@@ -160,10 +159,10 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
       {/* Logout */}
       <div className="px-3 pb-5">
         <button onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm w-full text-left transition-all"
-          style={{ color: 'var(--text-muted)' }}
+          className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm w-full text-left transition-all"
+          style={{ color: 'rgba(255,255,255,0.3)' }}
           onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = '#f87171')}
-          onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'var(--text-muted)')}>
+          onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.3)')}>
           <LogOut size={15} />
           Cerrar sesión
         </button>
@@ -175,7 +174,7 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
     <>
       {/* ── DESKTOP: Sidebar fijo a la izquierda ── */}
       <aside className="hidden md:flex w-60 min-h-dvh flex-col shrink-0"
-        style={{ background: 'var(--bg-surface)', borderRight: '1px solid var(--border-subtle)' }}>
+        style={{ background: 'var(--brand-navy)', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
         <SidebarInner />
       </aside>
 
@@ -225,8 +224,8 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
           <aside
             className="md:hidden fixed inset-y-0 left-0 z-50 w-72 flex flex-col slide-in-left"
             style={{
-              background: 'var(--bg-surface)',
-              boxShadow: '4px 0 32px rgba(0,0,0,0.15)',
+              background: 'var(--brand-navy)',
+              boxShadow: '4px 0 40px rgba(0,0,0,0.3)',
             }}
           >
             <SidebarInner />
