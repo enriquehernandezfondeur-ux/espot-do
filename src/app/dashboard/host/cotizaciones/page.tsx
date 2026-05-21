@@ -1,12 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { CalendarDays, Users, MessageSquare, X, Send, Loader2, CheckCircle, ArrowLeft } from 'lucide-react'
 import { formatDate, formatCurrency } from '@/lib/utils'
 import { getHostQuotes, respondToQuote } from '@/lib/actions/host'
 import { rejectBooking } from '@/lib/actions/booking'
 import { buildSchedule, daysUntilEvent } from '@/lib/payments/schedule'
 import { cn } from '@/lib/utils'
+import { getConversation, sendMessage, markMessagesRead } from '@/lib/actions/messages'
+import { createClient } from '@/lib/supabase/client'
 
 type Quote = Awaited<ReturnType<typeof getHostQuotes>>[0]
 
@@ -42,9 +44,58 @@ export default function CotizacionesPage() {
   const [sendError, setSendError]     = useState('')
   const [rejectError, setRejectError] = useState('')
 
+  // ── Chat ──────────────────────────────────────────────────
+  const [chatMessages, setChatMessages] = useState<any[]>([])
+  const [chatInput,    setChatInput]    = useState('')
+  const [chatSending,  setChatSending]  = useState(false)
+  const [chatLoading,  setChatLoading]  = useState(false)
+  const [chatUserId,   setChatUserId]   = useState<string | null>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     getHostQuotes().then(d => { setQuotes(d); setLoading(false) }).catch(() => setLoading(false))
   }, [])
+
+  // Cargar chat al seleccionar cotización
+  useEffect(() => {
+    if (!selected) { setChatMessages([]); return }
+    setChatLoading(true)
+    getConversation(selected.space_id).then(conv => {
+      setChatMessages(conv?.messages ?? [])
+      setChatUserId(conv?.userId ?? null)
+      markMessagesRead(selected.space_id)
+      setChatLoading(false)
+    }).catch(() => setChatLoading(false))
+  }, [selected?.id])
+
+  // Realtime del chat
+  useEffect(() => {
+    if (!selected) return
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`cot-chat:${selected.space_id}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `space_id=eq.${selected.space_id}` },
+        payload => setChatMessages(prev => [...prev, payload.new])
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [selected?.space_id])
+
+  // Auto-scroll al último mensaje
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [chatMessages])
+
+  async function handleSendChat(e: React.FormEvent) {
+    e.preventDefault()
+    if (!chatInput.trim() || !selected || chatSending) return
+    const receiverId = (selected as any).guest_id
+    if (!receiverId) return
+    setChatSending(true)
+    await sendMessage(selected.space_id, receiverId, chatInput.trim())
+    setChatInput('')
+    setChatSending(false)
+  }
 
   async function handleRespond() {
     if (!selected || !price) return
@@ -139,111 +190,151 @@ export default function CotizacionesPage() {
             })}
           </div>
 
-          {/* Panel de respuesta */}
+          {/* Panel de respuesta — split: formulario izquierda + chat derecha */}
           {selected ? (
-            <div className="flex-1 rounded-2xl overflow-y-auto" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-              <div className="p-6" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                {/* Botón volver en mobile */}
-                <button
-                  onClick={() => setSelected(null)}
-                  className="lg:hidden flex items-center gap-1.5 text-sm font-medium mb-4"
-                  style={{ color: 'var(--text-muted)' }}>
-                  <ArrowLeft size={14} /> Volver a cotizaciones
-                </button>
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>
+            <div className="flex-1 flex flex-col lg:flex-row rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+
+              {/* ── IZQUIERDA: formulario de cotización ── */}
+              <div className="flex-1 flex flex-col overflow-y-auto lg:border-r" style={{ borderColor: 'var(--border-subtle)' }}>
+                <div className="p-5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                  <button onClick={() => setSelected(null)}
+                    className="lg:hidden flex items-center gap-1.5 text-sm font-medium mb-3"
+                    style={{ color: 'var(--text-muted)' }}>
+                    <ArrowLeft size={14} /> Volver
+                  </button>
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <span className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>
                         {(selected as any).profiles?.full_name ?? 'Cliente'}
                       </span>
-                    </div>
-                    <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      {(selected as any).profiles?.email}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-semibold" style={{ color: 'var(--brand)' }}>{selected.event_type}</div>
-                    {selected.event_date && (
-                      <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                        {formatDate(selected.event_date)} · {selected.guest_count} personas
+                      <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                        {(selected as any).profiles?.email}
                       </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-6 space-y-6">
-                {/* Mensaje del cliente */}
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--text-muted)' }}>
-                    Solicitud del cliente
-                  </div>
-                  <div className="rounded-xl p-4 text-sm leading-relaxed"
-                    style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
-                    "{(selected as any).event_notes ?? 'El cliente no dejó descripción adicional.'}"
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>{selected.event_type}</div>
+                      {selected.event_date && (
+                        <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                          {formatDate(selected.event_date)} · {selected.guest_count} personas
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                {/* Formulario de cotización */}
-                <div className="space-y-4">
-                  <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>
-                    Tu propuesta de precio
+                <div className="p-5 space-y-5 flex-1">
+                  {/* Solicitud del cliente */}
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-muted)' }}>Solicitud</div>
+                    <div className="rounded-xl p-3.5 text-sm leading-relaxed"
+                      style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                      "{(selected as any).event_notes ?? 'Sin descripción adicional.'}"
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
-                      Precio total del evento (RD$)
-                    </label>
-                    <input type="number" value={price} onChange={e => setPrice(e.target.value)}
-                      placeholder="Ej: 85000"
-                      className="input-base w-full rounded-xl px-4 py-3 text-sm"
-                      style={{ fontSize: 16 }} />
-                    {price && !isNaN(parseFloat(price)) && (
-                      <div className="mt-2 space-y-1">
-                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                          Comisión espot.do (10%): {formatCurrency(parseFloat(price) * 0.10)} · <strong>Recibes: {formatCurrency(parseFloat(price) * 0.90)}</strong>
-                        </p>
-                        <QuoteSchedulePreview price={parseFloat(price)} eventDate={selected?.event_date ?? ''} />
-                      </div>
+                  {/* Formulario de precio */}
+                  <div className="space-y-3.5">
+                    <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Tu propuesta</div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Precio total (RD$)</label>
+                      <input type="number" value={price} onChange={e => setPrice(e.target.value)}
+                        placeholder="Ej: 85000"
+                        className="input-base w-full rounded-xl px-4 py-2.5 text-sm"
+                        style={{ fontSize: 16 }} />
+                      {price && !isNaN(parseFloat(price)) && (
+                        <div className="mt-1.5 space-y-1">
+                          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                            Comisión 10%: {formatCurrency(parseFloat(price) * 0.10)} · <strong>Recibes: {formatCurrency(parseFloat(price) * 0.90)}</strong>
+                          </p>
+                          <QuoteSchedulePreview price={parseFloat(price)} eventDate={selected?.event_date ?? ''} />
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Mensaje al cliente (opcional)</label>
+                      <textarea value={response} onChange={e => setResponse(e.target.value)}
+                        placeholder="Ej: Buenos días, con gusto podemos atender su evento..."
+                        rows={3}
+                        className="input-base w-full rounded-xl px-4 py-2.5 text-sm resize-none"
+                        style={{ fontSize: 16 }} />
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={handleRespond} disabled={!price || sending}
+                        className="flex-1 flex items-center justify-center gap-1.5 text-sm font-bold py-2.5 rounded-xl transition-all disabled:opacity-40"
+                        style={{ background: 'var(--brand)', color: '#fff' }}>
+                        {sending ? <><Loader2 size={14} className="animate-spin" /> Enviando...</> : <><Send size={14} /> Enviar cotización</>}
+                      </button>
+                      <button onClick={() => handleReject(selected.id)} disabled={actionId === selected.id + 'r'}
+                        className="px-3.5 py-2.5 rounded-xl text-sm font-semibold"
+                        style={{ background: 'rgba(220,38,38,0.08)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.2)' }}>
+                        {actionId === selected.id + 'r' ? '...' : <X size={15} />}
+                      </button>
+                    </div>
+                    {(sendError || rejectError) && (
+                      <p className="text-xs text-center font-semibold" style={{ color: '#DC2626' }}>{sendError || rejectError}</p>
                     )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
-                      Mensaje al cliente (opcional)
-                    </label>
-                    <textarea value={response} onChange={e => setResponse(e.target.value)}
-                      placeholder="Ej: Buenos días, con gusto podemos atender su evento. El precio incluye..."
-                      rows={4}
-                      className="input-base w-full rounded-xl px-4 py-3 text-sm resize-none"
-                      style={{ fontSize: 16 }} />
-                  </div>
-
-                  <div className="flex gap-3">
-                    <button onClick={handleRespond}
-                      disabled={!price || sending}
-                      className="flex-1 flex items-center justify-center gap-2 text-sm font-bold py-3 rounded-xl transition-all disabled:opacity-40"
-                      style={{ background: 'var(--brand)', color: '#fff', boxShadow: price ? '0 2px 8px rgba(53,196,147,0.3)' : 'none' }}>
-                      {sending ? <><Loader2 size={16} className="animate-spin" /> Enviando...</> : <><Send size={16} /> Enviar cotización</>}
-                    </button>
-                    <button onClick={() => handleReject(selected.id)}
-                      disabled={actionId === selected.id + 'r'}
-                      className="px-4 py-3 rounded-xl text-sm font-semibold transition-all"
-                      style={{ background: 'rgba(220,38,38,0.08)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.2)' }}>
-                      {actionId === selected.id + 'r' ? '...' : <X size={16} />}
-                    </button>
-                  </div>
-
-                  {(sendError || rejectError) && (
-                    <p className="text-xs text-center font-semibold" style={{ color: '#DC2626' }}>
-                      {sendError || rejectError}
+                    <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
+                      Al enviar, el cliente recibe el precio y plan de cuotas por email.
                     </p>
-                  )}
-                  <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
-                    Al enviar, el cliente recibirá el precio y el plan de cuotas por email. La reserva queda lista para pago.
-                  </p>
+                  </div>
                 </div>
               </div>
+
+              {/* ── DERECHA: chat en tiempo real ── */}
+              <div className="lg:w-96 flex flex-col border-t lg:border-t-0" style={{ borderColor: 'var(--border-subtle)' }}>
+                {/* Header chat */}
+                <div className="flex items-center gap-2 px-4 py-3 shrink-0" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                  <MessageSquare size={15} style={{ color: 'var(--brand)' }} />
+                  <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Chat con el cliente</span>
+                </div>
+
+                {/* Mensajes */}
+                <div className="flex-1 overflow-y-auto p-3 space-y-2" style={{ minHeight: 0, maxHeight: '340px' }}>
+                  {chatLoading ? (
+                    <div className="flex justify-center pt-8">
+                      <Loader2 size={20} className="animate-spin" style={{ color: 'var(--text-muted)' }} />
+                    </div>
+                  ) : chatMessages.length === 0 ? (
+                    <div className="text-center pt-8">
+                      <MessageSquare size={20} className="mx-auto mb-2" style={{ color: 'var(--text-muted)' }} />
+                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Sin mensajes aún. Escribe al cliente aquí.</p>
+                    </div>
+                  ) : (
+                    chatMessages.map((msg, i) => {
+                      const isMe = msg.sender_id === chatUserId
+                      return (
+                        <div key={msg.id ?? i} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                          <div className="max-w-[80%] rounded-2xl px-3 py-2 text-xs leading-relaxed"
+                            style={isMe
+                              ? { background: 'var(--brand)', color: '#fff', borderBottomRightRadius: 6 }
+                              : { background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)', borderBottomLeftRadius: 6 }
+                            }>
+                            {msg.body}
+                          </div>
+                        </div>
+                      )
+                    })
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+
+                {/* Input enviar */}
+                <form onSubmit={handleSendChat} className="flex items-center gap-2 p-3 shrink-0" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                  <input
+                    value={chatInput}
+                    onChange={e => setChatInput(e.target.value)}
+                    placeholder="Escribe un mensaje..."
+                    className="flex-1 min-w-0 text-sm rounded-xl px-3 py-2 input-base"
+                    style={{ fontSize: 16 }}
+                  />
+                  <button type="submit" disabled={!chatInput.trim() || chatSending}
+                    className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all disabled:opacity-40"
+                    style={{ background: 'var(--brand)', color: '#fff' }}>
+                    {chatSending ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
+                  </button>
+                </form>
+              </div>
+
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center rounded-2xl"
