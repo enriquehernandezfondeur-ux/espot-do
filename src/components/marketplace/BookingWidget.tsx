@@ -555,9 +555,9 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               </span>
             </div>
             <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              {minHours > 0 && `Mínimo ${minHours}h`}
+              {minHours > 0 && `Mínimo ${minHours} hora${minHours > 1 ? 's' : ''}`}
               {minHours > 0 && maxHours > 0 && ' · '}
-              {maxHours > 0 && `Máximo ${maxHours}h`}
+              {maxHours > 0 && `Máximo ${maxHours} hora${maxHours > 1 ? 's' : ''}`}
               {!minHours && !maxHours && 'Elige tu horario'}
             </div>
           </div>
@@ -571,11 +571,10 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               </span>
             </div>
             <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              {minHours > 0 && maxHours > 0
-                ? `${minHours}h – ${maxHours}h`
-                : minHours > 0 ? `Mínimo ${minHours}h`
-                : maxHours > 0 ? `Máximo ${maxHours}h`
-                : 'Elige tu horario'}
+              {minHours > 0 && `Mínimo ${minHours} hora${minHours > 1 ? 's' : ''}`}
+              {minHours > 0 && maxHours > 0 && ' · '}
+              {maxHours > 0 && `Máximo ${maxHours} hora${maxHours > 1 ? 's' : ''}`}
+              {!minHours && !maxHours && 'Elige tu horario'}
             </div>
           </div>
         )}
