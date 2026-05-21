@@ -348,32 +348,40 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
         </div>
       </section>
 
-      {/* ── CÓMO FUNCIONA — sección con patrón de marca ── */}
+      {/* ── CÓMO FUNCIONA — sección con patrón de marca animado ── */}
       <section className="py-20 md:py-28 relative overflow-hidden"
-        style={{
-          background: '#03313C',
-          backgroundImage: 'url(/patron-contorno.png)',
-          backgroundSize: '380px',
-          backgroundRepeat: 'repeat',
-        }}>
+        style={{ background: '#03313C' }}>
 
-        {/* Overlay semitransparente — protege la legibilidad del texto sobre el patrón */}
+        {/* Keyframe del desplazamiento diagonal del patrón */}
+        <style>{`@keyframes patternDrift { from { background-position: 0 0; } to { background-position: 620px 310px; } }`}</style>
+
+        {/* Layer del patrón animado */}
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
-          background: 'rgba(3, 49, 60, 0.52)',
+          backgroundImage: 'url(/patron-contorno.png)',
+          backgroundSize: '620px',
+          backgroundRepeat: 'repeat',
+          animation: 'patternDrift 70s linear infinite',
+          opacity: 0.5,
+        }} />
+
+        {/* Overlay ligero — protege legibilidad sin apagar el patrón */}
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1,
+          background: 'rgba(3, 49, 60, 0.35)',
         }} />
 
         {/* Orbes */}
-        <div style={{ position: 'absolute', top: -100, right: -100, width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(53,196,147,0.07) 0%, transparent 65%)', pointerEvents: 'none', zIndex: 0 }} />
-        <div style={{ position: 'absolute', bottom: -80, left: '20%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(53,196,147,0.05) 0%, transparent 65%)', pointerEvents: 'none', zIndex: 0 }} />
+        <div style={{ position: 'absolute', top: -100, right: -100, width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(53,196,147,0.07) 0%, transparent 65%)', pointerEvents: 'none', zIndex: 1 }} />
+        <div style={{ position: 'absolute', bottom: -80, left: '20%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(53,196,147,0.05) 0%, transparent 65%)', pointerEvents: 'none', zIndex: 1 }} />
 
-        <div className="max-w-5xl mx-auto px-4 md:px-6" style={{ position: 'relative', zIndex: 1 }}>
+        <div className="max-w-5xl mx-auto px-4 md:px-6" style={{ position: 'relative', zIndex: 2 }}>
 
           <Reveal className="text-center mb-16 md:mb-20">
             <h2 className="font-bold text-white" style={{ fontSize: 'clamp(1.8rem, 5vw, 3rem)', letterSpacing: '-0.04em', lineHeight: 1.1 }}>
               Reserva en tres pasos
             </h2>
-            <p className="mt-3 text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            <p className="mt-3 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
               Sin llamadas, sin complicaciones, sin sorpresas
             </p>
           </Reveal>
@@ -400,7 +408,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                     {step.num}
                   </div>
 
-                  {/* Línea conectora — se dibuja después que la card aparece */}
+                  {/* Línea conectora */}
                   {i < 2 && (
                     <div className="hidden md:block absolute top-6 left-full h-px overflow-hidden" style={{ width: 32, zIndex: 1 }}>
                       <div style={{
@@ -414,7 +422,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                   )}
 
                   <div className="relative p-6 md:p-8 rounded-2xl"
-                    style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.18)' }}>
                     {/* Icono con micro-bounce */}
                     <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5"
                       style={{
@@ -426,13 +434,13 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                       }}>
                       <Icon size={18} style={{ color: '#35C493' }} />
                     </div>
-                    <div className="text-xs font-bold tracking-widest mb-2" style={{ color: 'rgba(53,196,147,0.6)' }}>
+                    <div className="text-xs font-bold tracking-widest mb-2" style={{ color: '#35C493' }}>
                       PASO {step.num}
                     </div>
                     <h3 className="font-bold text-white mb-2" style={{ letterSpacing: '-0.02em' }}>
                       {step.title}
                     </h3>
-                    <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                    <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.72)' }}>
                       {step.desc}
                     </p>
                   </div>
