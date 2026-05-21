@@ -351,9 +351,9 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
       {/* ── REDES SOCIALES ── */}
       <SocialSection />
 
-      {/* ── CÓMO FUNCIONA — sección oscura ── */}
+      {/* ── CÓMO FUNCIONA — sección navy ── */}
       <section className="py-20 md:py-28 relative overflow-hidden"
-        style={{ background: '#060D09' }}>
+        style={{ background: '#03313C' }}>
 
         {/* Patrón de puntos */}
         <div style={{
@@ -449,7 +449,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <Reveal>
             <div className="relative overflow-hidden rounded-3xl"
-              style={{ background: 'linear-gradient(140deg, #060D09 0%, #0D2318 50%, #1A4D38 100%)' }}>
+              style={{ background: 'linear-gradient(140deg, #03313C 0%, #0A3530 50%, #1A4D38 100%)' }}>
 
               <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl"
@@ -476,7 +476,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                 <div className="flex flex-col gap-3 shrink-0">
                   <Link href="/auth?mode=register&redirect=/dashboard/host/espacio"
                     className="inline-flex items-center justify-center gap-2 font-bold px-8 py-4 rounded-2xl text-sm whitespace-nowrap"
-                    style={{ background: '#35C493', color: '#060D09', boxShadow: '0 4px 24px rgba(53,196,147,0.3)' }}>
+                    style={{ background: '#35C493', color: '#03313C', boxShadow: '0 4px 24px rgba(53,196,147,0.3)' }}>
                     Publicar espacio gratis <ArrowRight size={15} />
                   </Link>
                   <Link href="/auth?mode=login"
@@ -580,7 +580,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
               {/* Card propietarios */}
               <Link href="/para-propietarios"
                 className="guide-card guide-card-dark relative overflow-hidden rounded-3xl p-7 flex flex-col gap-4"
-                style={{ background: '#060D09', border: '1px solid rgba(53,196,147,0.15)' }}>
+                style={{ background: '#03313C', border: '1px solid rgba(53,196,147,0.15)' }}>
                 {/* Borde superior animado */}
                 <div className="guide-shimmer" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, borderRadius: '12px 12px 0 0' }} />
                 <div className="flex items-center justify-between">
