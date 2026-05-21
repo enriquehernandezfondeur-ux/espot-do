@@ -155,7 +155,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
   const evSection   = useReveal()
   const spSection   = useReveal()
   const catSection  = useReveal()
-  const howSection  = useReveal()
+
   const [hoveredId, setHoveredId] = useState<string | null>(null)
 
   return (
@@ -349,17 +349,8 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
       </section>
 
       {/* ── CÓMO FUNCIONA ── */}
-      <section className="py-14 md:py-20" style={{ background: '#fff', position: 'relative', overflow: 'hidden' }}>
-        {/* Dot grid decorativo */}
-        <div style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none',
-          backgroundImage: 'radial-gradient(circle, rgba(53,196,147,0.08) 1px, transparent 1px)',
-          backgroundSize: '28px 28px',
-          maskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%)',
-        }} />
-
-        <div className="relative max-w-7xl mx-auto px-4 md:px-6">
+      <section className="py-14 md:py-20" style={{ background: '#F8FAFC' }}>
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
           <Reveal>
             <h2 className="font-bold mb-8 md:mb-10" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
               Reserva en{' '}
