@@ -14,7 +14,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
     .from('profiles').select('full_name, avatar_url, role').eq('id', user.id).single()
 
   const isAdmin = user.email === (process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com')
-  if (profile?.role !== 'host' && !isAdmin) redirect('/dashboard')
 
   // Onboarding: si el host no tiene espacios y no está ya en /bienvenida → redirigir
   const headersList = await headers()

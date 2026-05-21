@@ -529,17 +529,18 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
             {/* Accesos rápidos */}
             <div className="px-4 space-y-0.5">
               {(user?.role === 'host' || user?.role === 'admin' ? [
-                // Propietario: primero su panel, luego opciones como cliente
+                // Propietario: su panel + acceso al panel cliente
                 { href: '/dashboard/host',          label: 'Mi panel propietario', icon: LayoutDashboard, desc: 'Reservas, ingresos, espacios' },
                 { href: '/dashboard/host/mensajes', label: 'Mensajes',             icon: MessageCircle,   desc: 'Chats con clientes' },
                 { href: '/dashboard/host/reservas', label: 'Reservas recibidas',   icon: CalendarDays,    desc: 'Solicitudes de mis espacios' },
-                { href: '/dashboard/reservas',      label: 'Mis reservas',         icon: Heart,           desc: 'Como cliente' },
+                { href: '/dashboard/overview',      label: 'Panel de cliente',     icon: Home,            desc: 'Mis reservas y pagos' },
               ] : [
-                // Cliente: panel cliente
+                // Cliente: panel cliente + acceso al panel propietario
                 { href: '/dashboard/overview',  label: 'Inicio',             icon: LayoutDashboard, desc: 'Ver resumen y alertas' },
                 { href: '/dashboard/reservas',  label: 'Mis reservas',       icon: CalendarDays,    desc: 'Ver y gestionar reservas' },
                 { href: '/dashboard/favoritos', label: 'Espacios guardados', icon: Heart,           desc: 'Mis espacios favoritos' },
                 { href: '/dashboard/pagos',     label: 'Mis pagos',          icon: CreditCard,      desc: 'Historial de pagos y cuotas' },
+                { href: '/dashboard/host',      label: 'Panel de propietario', icon: Building2,     desc: 'Publicar y gestionar tu espacio' },
               ]).map(({ href, label, icon: Icon, desc }) => (
                 <Link key={href} href={href} onClick={() => setAccountSheet(false)}
                   className="flex items-center gap-3 px-3 py-3 rounded-2xl transition-colors active:bg-[var(--bg-elevated)]"
