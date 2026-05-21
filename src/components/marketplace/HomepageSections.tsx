@@ -351,17 +351,19 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
       {/* ── REDES SOCIALES ── */}
       <SocialSection />
 
-      {/* ── CÓMO FUNCIONA — sección navy ── */}
+      {/* ── CÓMO FUNCIONA — sección con patrón de marca ── */}
       <section className="py-20 md:py-28 relative overflow-hidden"
-        style={{ background: '#03313C' }}>
+        style={{
+          background: '#03313C',
+          backgroundImage: 'url(/patron-contorno.png)',
+          backgroundSize: '380px',
+          backgroundRepeat: 'repeat',
+        }}>
 
-        {/* Patrón de puntos */}
+        {/* Overlay semitransparente — protege la legibilidad del texto sobre el patrón */}
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
-          backgroundImage: 'radial-gradient(circle, rgba(53,196,147,0.12) 1px, transparent 1px)',
-          backgroundSize: '32px 32px',
-          maskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%)',
+          background: 'rgba(3, 49, 60, 0.52)',
         }} />
 
         {/* Orbes */}
