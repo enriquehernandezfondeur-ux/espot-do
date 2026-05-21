@@ -348,9 +348,6 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
         </div>
       </section>
 
-      {/* ── REDES SOCIALES ── */}
-      <SocialSection />
-
       {/* ── CÓMO FUNCIONA — sección con patrón de marca ── */}
       <section className="py-20 md:py-28 relative overflow-hidden"
         style={{
@@ -607,6 +604,9 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
           </Reveal>
         </div>
       </section>
+
+      {/* ── REDES SOCIALES ── */}
+      <SocialSection />
 
     </div>
   )
