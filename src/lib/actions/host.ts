@@ -472,7 +472,7 @@ export async function respondToQuote(bookingId: string, quotedPrice: number, mes
       event_notes:   `[Cotización]${message ? ': ' + message : ''}`,
     })
     .eq('id', bookingId)
-    .eq('status', 'quote_requested')
+    .in('status', ['quote_requested', 'pending'])
 
   if (error) return { error: error.message }
 
