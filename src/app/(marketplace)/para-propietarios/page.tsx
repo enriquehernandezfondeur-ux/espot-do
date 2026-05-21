@@ -3,6 +3,7 @@ import Link from 'next/link'
 import {
   CalendarCheck, MessageSquare, BarChart3,
   Check, ChevronDown, Clock, Shield, Star, ArrowRight,
+  BadgeCheck, Banknote,
 } from 'lucide-react'
 
 export const metadata: Metadata = {
@@ -202,49 +203,63 @@ export default function ParaPropietariosPage() {
         </div>
       </section>
 
-      {/* ── COMISIÓN — BARRA HORIZONTAL ──────────────────────── */}
-      <section style={{ background: '#03313C' }}>
-        <div className="max-w-4xl mx-auto px-5 py-12 md:py-20">
+      {/* ── POR QUÉ ESPOT ────────────────────────────────────── */}
+      <section style={{ background: '#03313C', position: 'relative', overflow: 'hidden' }}>
+        {/* Orbe decorativo */}
+        <div style={{
+          position: 'absolute', top: '-80px', right: '-80px',
+          width: 400, height: 400, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(53,196,147,0.08) 0%, transparent 65%)',
+          pointerEvents: 'none',
+        }} />
+
+        <div className="relative max-w-5xl mx-auto px-5 py-14 md:py-20">
+
           <div className="mb-12">
             <h2 className="font-bold text-white mb-3"
               style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', letterSpacing: '-0.04em', lineHeight: 1.1 }}>
-              Una comisión justa.<br />Así de simple.
+              Tu espacio en manos de una plataforma<br className="hidden md:block" /> que trabaja para ti.
             </h2>
             <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.95rem' }}>
-              Así se distribuye el valor total de cada reserva
+              Diseñada desde República Dominicana, para propietarios dominicanos.
             </p>
           </div>
 
-          {/* Barra de distribución */}
-          <div className="rounded-3xl p-6 md:p-8 mb-8"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <div className="flex gap-1 h-10 rounded-xl overflow-hidden mb-5">
-              <div className="flex items-center justify-center text-xs font-bold"
-                style={{ width: '90%', background: '#35C493', color: '#03313C' }}>90%</div>
-              <div className="flex items-center justify-center text-xs font-bold"
-                style={{ width: '10%', background: 'rgba(53,196,147,0.3)', color: '#35C493' }}>10%</div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-2xl font-bold mb-1" style={{ color: '#35C493', letterSpacing: '-0.03em' }}>90%</p>
-                <p className="text-sm font-semibold text-white mb-1">Para ti</p>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Tu ganancia neta por reserva confirmada</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold mb-1" style={{ color: 'rgba(255,255,255,0.6)', letterSpacing: '-0.03em' }}>10%</p>
-                <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.7)' }}>espot.do</p>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Plataforma, soporte y procesamiento</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-x-8 gap-y-3">
-            {['Sin suscripción mensual', 'Sin costo por publicar', 'Sin contrato de permanencia'].map(item => (
-              <div key={item} className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                {item}
+          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              {
+                icon: BadgeCheck,
+                title: 'Clientes verificados',
+                body: 'Cada cliente pasa por verificación antes de reservar. Solo personas serias acceden a tu espacio.',
+              },
+              {
+                icon: Banknote,
+                title: 'Pagos garantizados',
+                body: 'Todos los cobros pasan por la plataforma. Sin efectivo informal, sin riesgo de impago.',
+              },
+              {
+                icon: CalendarCheck,
+                title: 'Tú controlas tu agenda',
+                body: 'Define horarios, bloquea fechas y ajusta precios cuando quieras. Sin restricciones ni compromisos.',
+              },
+              {
+                icon: MessageSquare,
+                title: 'Soporte local en RD',
+                body: 'Un equipo dominicano te respalda. Respondemos rápido porque entendemos el mercado local.',
+              },
+            ].map(({ icon: Icon, title, body }) => (
+              <div key={title} className="rounded-2xl p-5"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
+                  style={{ background: 'rgba(53,196,147,0.12)', border: '1px solid rgba(53,196,147,0.2)' }}>
+                  <Icon size={18} style={{ color: '#35C493' }} />
+                </div>
+                <h3 className="font-bold text-white text-sm mb-2" style={{ letterSpacing: '-0.01em' }}>{title}</h3>
+                <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>{body}</p>
               </div>
             ))}
           </div>
+
         </div>
       </section>
 
