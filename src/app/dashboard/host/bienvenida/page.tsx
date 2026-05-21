@@ -28,20 +28,20 @@ export default async function BienvenidaPage() {
 
   const steps = [
     {
-      number: '①',
+      number: '1',
       title: 'Crea tu espacio',
       description: 'Nombre, descripción, ubicación y precio',
       status: 'action' as const,
       href: '/dashboard/host/espacio',
     },
     {
-      number: '②',
+      number: '2',
       title: 'Sube tus fotos',
       description: 'Directamente en el formulario del espacio',
       status: 'pending' as const,
     },
     {
-      number: '③',
+      number: '3',
       title: 'Publica y empieza a recibir reservas',
       description: 'Tu espacio estará visible en el marketplace',
       status: 'pending' as const,
@@ -90,7 +90,7 @@ export default async function BienvenidaPage() {
                 className="text-2xl font-black leading-tight"
                 style={{ color: '#fff', letterSpacing: '-0.03em' }}
               >
-                Bienvenido a Espot, {firstName} 👋
+                Bienvenido, {firstName}
               </h1>
             </div>
           </div>
