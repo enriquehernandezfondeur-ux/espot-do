@@ -40,7 +40,7 @@ export default function FinanzasPage() {
 
   // Solo reservas con pago real para los totales financieros
   const paidBookings = bookings.filter(b =>
-    ['confirmed', 'completed'].includes(b.status) &&
+    ['accepted', 'confirmed', 'completed'].includes(b.status) &&
     ['advance', 'partial', 'paid'].includes(b.payment_status)
   )
   const filtered = bookings.filter(b => {

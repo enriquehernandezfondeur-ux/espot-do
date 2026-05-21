@@ -57,7 +57,7 @@ export default function HostPagosPage() {
     }).catch(() => setLoading(false))
   }, [])
 
-  const paid    = bookings.filter(b => ['advance','partial','paid'].includes(b.payment_status) && ['confirmed','completed'].includes(b.status))
+  const paid    = bookings.filter(b => ['advance','partial','paid'].includes(b.payment_status) && ['accepted','confirmed','completed'].includes(b.status))
   const totalGross    = paid.reduce((s, b) => s + Number(b.total_amount), 0)
   const totalFee      = paid.reduce((s, b) => s + Number(b.total_amount) * 0.10, 0)
   const totalNet      = totalGross - totalFee

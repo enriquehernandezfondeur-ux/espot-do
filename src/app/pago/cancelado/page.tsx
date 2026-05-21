@@ -23,7 +23,7 @@ function CanceladoContent() {
   }, [bookingId])
 
   return (
-    <div className="min-h-dvh" style={{ background: 'linear-gradient(160deg, #080f12 0%, #0B0F0E 55%)' }}>
+    <div className="min-h-dvh" style={{ background: 'linear-gradient(160deg, #03313C 0%, #03313C 55%)' }}>
 
       {/* Fondo decorativo neutro */}
       <div style={{
@@ -98,7 +98,7 @@ function CanceladoContent() {
           {bookingId && (
             <Link href={`/pago/${bookingId}`}
               className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-bold text-base"
-              style={{ background: '#35C493', color: '#071814', boxShadow: '0 4px 20px rgba(53,196,147,0.2)' }}>
+              style={{ background: '#35C493', color: '#03313C', boxShadow: '0 4px 20px rgba(53,196,147,0.2)' }}>
               Completar pago <ArrowRight size={16} />
             </Link>
           )}
@@ -124,7 +124,7 @@ function CanceladoContent() {
 
 export default function CanceladoPage() {
   return <Suspense fallback={
-    <div className="min-h-dvh flex items-center justify-center" style={{ background: '#0B0F0E' }}>
+    <div className="min-h-dvh flex items-center justify-center" style={{ background: '#03313C' }}>
       <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#94A3B8' }} />
     </div>
   }><CanceladoContent /></Suspense>

@@ -340,7 +340,7 @@ export default function ParaClientesPage() {
       <section style={{ background: 'var(--bg-base)', borderTop: '1px solid var(--border-subtle)' }}>
         <div className="max-w-6xl mx-auto px-5 py-10 md:py-16">
           <div className="rounded-3xl overflow-hidden relative"
-            style={{ background: 'linear-gradient(135deg, #03313C 0%, #0D2318 60%, #1A4D38 100%)' }}>
+            style={{ background: '#03313C' }}>
             <div style={{
               position: 'absolute', top: 0, right: 0, width: 400, height: 400,
               background: 'radial-gradient(circle, rgba(53,196,147,0.12) 0%, transparent 70%)',
@@ -359,7 +359,7 @@ export default function ParaClientesPage() {
               <div className="flex flex-col gap-3 shrink-0">
                 <Link href="/buscar"
                   className="inline-flex items-center justify-center gap-2 font-bold px-8 py-4 rounded-2xl text-sm whitespace-nowrap"
-                  style={{ background: '#35C493', color: '#060D09', boxShadow: '0 4px 24px rgba(53,196,147,0.3)' }}>
+                  style={{ background: '#35C493', color: '#03313C', boxShadow: '0 4px 24px rgba(53,196,147,0.3)' }}>
                   Ver todos los espacios <ArrowRight size={15} />
                 </Link>
                 <p className="text-xs text-center" style={{ color: 'rgba(255,255,255,0.3)' }}>

@@ -125,7 +125,7 @@ function ExitoContent() {
 
   if (verifying) return (
     <div className="min-h-dvh flex flex-col items-center justify-center gap-4"
-      style={{ background: 'linear-gradient(160deg, #071814 0%, #0B0F0E 55%)' }}>
+      style={{ background: 'linear-gradient(160deg, #03313C 0%, #03313C 55%)' }}>
       <Loader2 size={32} className="animate-spin" style={{ color: '#35C493' }} />
       <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>Verificando pago con Azul...</p>
     </div>
@@ -133,7 +133,7 @@ function ExitoContent() {
 
   if (!booking) return (
     <div className="min-h-dvh flex flex-col items-center justify-center gap-4"
-      style={{ background: 'linear-gradient(160deg, #071814 0%, #0B0F0E 55%)' }}>
+      style={{ background: 'linear-gradient(160deg, #03313C 0%, #03313C 55%)' }}>
       <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>No se encontró información del pago.</p>
       <a href="/" className="text-sm font-semibold" style={{ color: '#35C493' }}>Volver al inicio</a>
     </div>
@@ -146,7 +146,7 @@ function ExitoContent() {
   const txId      = booking?.azul_order_id ?? azulOrderId ?? booking?.id?.slice(0, 8).toUpperCase()
 
   return (
-    <div className="min-h-dvh" style={{ background: 'linear-gradient(160deg, #071814 0%, #0B0F0E 55%)' }}>
+    <div className="min-h-dvh" style={{ background: 'linear-gradient(160deg, #03313C 0%, #03313C 55%)' }}>
       <div style={{
         position: 'fixed', top: 0, left: 0, right: 0, height: 320,
         background: 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(53,196,147,0.14) 0%, transparent 70%)',
@@ -257,7 +257,7 @@ function ExitoContent() {
           style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.2s' }}>
           <Link href={`/dashboard/reservas/${bookingId}`}
             className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-bold text-base"
-            style={{ background: '#35C493', color: '#071814', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
+            style={{ background: '#35C493', color: '#03313C', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
             <Calendar size={17} /> Ver mi reserva y plan de pagos <ArrowRight size={15} />
           </Link>
           {bookingId && (
@@ -287,7 +287,7 @@ function ExitoContent() {
 
 export default function ExitoPage() {
   return <Suspense fallback={
-    <div className="min-h-dvh flex items-center justify-center" style={{ background: '#0B0F0E' }}>
+    <div className="min-h-dvh flex items-center justify-center" style={{ background: '#03313C' }}>
       <Loader2 size={28} className="animate-spin" style={{ color: '#35C493' }} />
     </div>
   }><ExitoContent /></Suspense>

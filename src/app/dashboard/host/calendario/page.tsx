@@ -145,7 +145,7 @@ export default function CalendarioPage() {
   const selectedBlocks   = selected ? (blockedSlots[selected] ?? []) : []
 
   const monthRevenue = bookings
-    .filter(b => b.event_date.startsWith(`${current.year}-${String(current.month+1).padStart(2,'0')}`) && b.status === 'confirmed')
+    .filter(b => b.event_date.startsWith(`${current.year}-${String(current.month+1).padStart(2,'0')}`) && ['confirmed', 'completed'].includes(b.status))
     .reduce((s, b) => s + Number(b.total_amount), 0)
 
   const monthEvents = bookings.filter(b =>
@@ -159,8 +159,8 @@ export default function CalendarioPage() {
 
     // No bloquear si hay reservas confirmadas ese día
     const dayBkCheck = bookingsByDate[selected] ?? []
-    if (dayBkCheck.some((b: any) => b.status === 'confirmed')) {
-      setBlockError('No puedes bloquear un día con reservas confirmadas')
+    if (dayBkCheck.some((b: any) => ['confirmed', 'accepted'].includes(b.status))) {
+      setBlockError('No puedes bloquear un día con reservas confirmadas o aceptadas')
       return
     }
 
