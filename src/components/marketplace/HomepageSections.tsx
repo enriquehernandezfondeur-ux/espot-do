@@ -422,7 +422,12 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                   )}
 
                   <div className="relative p-6 md:p-8 rounded-2xl"
-                    style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.18)' }}>
+                    style={{
+                      background: 'rgba(3, 49, 60, 0.82)',
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      backdropFilter: 'blur(12px)',
+                      WebkitBackdropFilter: 'blur(12px)',
+                    }}>
                     {/* Icono con micro-bounce */}
                     <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5"
                       style={{
