@@ -11,7 +11,7 @@ import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts'
 const paymentLabel: Record<string, { label: string; color: string; bg: string }> = {
   unpaid:  { label: 'Sin pago',         color: '#D97706', bg: 'rgba(217,119,6,0.08)' },
   partial: { label: 'Pago parcial',     color: 'var(--brand)', bg: 'var(--bg-elevated)' },
-  advance: { label: 'Anticipo recibido',color: '#7C3AED', bg: 'rgba(124,58,237,0.08)' },
+  advance: { label: 'Anticipo recibido',color: '#D97706', bg: 'rgba(217,119,6,0.08)' },
   paid:    { label: 'Pagado completo',  color: 'var(--brand)', bg: 'var(--bg-elevated)' },
 }
 

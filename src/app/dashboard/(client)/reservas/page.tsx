@@ -917,7 +917,7 @@ export default function MisReservasPage() {
         <>
           <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={closeCancelModal} />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="w-full max-w-md rounded-3xl p-6 space-y-5"
+            <div className="w-full max-w-md rounded-3xl p-6 space-y-5 max-h-[90dvh] overflow-y-auto"
               style={{ background: '#fff', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
 
               {/* ── PASO 1: Confirmar cancelación + motivo ── */}

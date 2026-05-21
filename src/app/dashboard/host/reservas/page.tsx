@@ -48,7 +48,7 @@ function HostInstallmentStatus({ bookingId, totalAmount }: { bookingId: string; 
               {formatCurrency(Number(inst.amount))}
             </div>
             <div className="text-[11px] font-semibold"
-              style={{ color: inst.status === 'paid' ? '#16A34A' : inst.status === 'overdue' ? '#DC2626' : 'var(--text-muted)' }}>
+              style={{ color: inst.status === 'paid' ? 'var(--brand)' : inst.status === 'overdue' ? '#DC2626' : 'var(--text-muted)' }}>
               {inst.status === 'paid' ? 'Recibido' : inst.status === 'overdue' ? 'Vencido' : 'Pendiente'}
             </div>
           </div>
@@ -56,7 +56,7 @@ function HostInstallmentStatus({ bookingId, totalAmount }: { bookingId: string; 
       ))}
       <div className="flex items-center justify-between px-4 py-3">
         <span className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Cobrado hasta ahora</span>
-        <span className="text-sm font-bold" style={{ color: '#16A34A' }}>{formatCurrency(paid)}</span>
+        <span className="text-sm font-bold" style={{ color: 'var(--brand)' }}>{formatCurrency(paid)}</span>
       </div>
     </div>
   )
@@ -172,7 +172,7 @@ export default function HostReservasPage() {
           <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
             {bookings.length} en total
             {pending > 0 && <span className="ml-2 font-semibold" style={{ color: '#D97706' }}>· {pending} por aceptar</span>}
-            {accepted > 0 && <span className="ml-2 font-semibold" style={{ color: '#2563EB' }}>· {accepted} esperando pago</span>}
+            {accepted > 0 && <span className="ml-2 font-semibold" style={{ color: 'var(--brand)' }}>· {accepted} esperando pago</span>}
           </p>
         </div>
         {bookings.length > 0 && (
@@ -517,7 +517,7 @@ export default function HostReservasPage() {
                 <div className="flex gap-2">
                   <button onClick={() => doAccept(selected.id)} disabled={!!actionId}
                     className="flex-1 flex items-center justify-center gap-1 text-xs font-semibold py-2.5 rounded-xl"
-                    style={{ background: '#16A34A', color: '#fff' }}>
+                    style={{ background: 'var(--brand)', color: '#fff' }}>
                     <CheckCircle size={13} /> Aceptar
                   </button>
                   <button onClick={() => setShowRejectForm(true)}

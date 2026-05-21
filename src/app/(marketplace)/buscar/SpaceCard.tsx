@@ -293,13 +293,17 @@ export function SpaceCard({
                     {pricingDef.value === 'minimum_consumption' ? 'Consumibles' : pricingDef.label}
                   </button>
                   {showPriceInfo && pricingTip && (
-                    <div className="absolute bottom-full mb-1.5 left-0 z-50 w-52 rounded-xl px-3 py-2.5 shadow-xl text-xs leading-relaxed"
-                      style={{ background: '#0F1623', color: '#E2E8F0' }}
-                      onClick={e => e.stopPropagation()}>
-                      {pricingTip}
-                      <div style={{ position: 'absolute', bottom: -5, left: 12, width: 10, height: 10,
-                        background: '#0F1623', transform: 'rotate(45deg)' }} />
-                    </div>
+                    <>
+                      {/* Backdrop para cerrar en móvil */}
+                      <div className="fixed inset-0 z-40" onClick={e => { e.preventDefault(); e.stopPropagation(); setShowPriceInfo(false) }} />
+                      <div className="absolute bottom-full mb-1.5 left-0 z-50 w-52 rounded-xl px-3 py-2.5 shadow-xl text-xs leading-relaxed"
+                        style={{ background: '#0F1623', color: '#E2E8F0' }}
+                        onClick={e => e.stopPropagation()}>
+                        {pricingTip}
+                        <div style={{ position: 'absolute', bottom: -5, left: 12, width: 10, height: 10,
+                          background: '#0F1623', transform: 'rotate(45deg)' }} />
+                      </div>
+                    </>
                   )}
                 </div>
               )}
