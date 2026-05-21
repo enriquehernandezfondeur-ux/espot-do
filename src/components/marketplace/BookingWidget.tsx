@@ -548,19 +548,18 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         )}
         {isHourly && (
           <div>
+            <div className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Por hora</div>
             <div className="flex items-baseline gap-1 mb-1.5">
               <span className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
                 {formatCurrency(pricing.hourly_price)}
               </span>
-              <span className="text-sm" style={{ color: 'var(--text-muted)' }}> / hora</span>
             </div>
-            {minHours > 0 && (
-              <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                Desde {formatCurrency(pricing.hourly_price * minHours)}{' '}
-                <span style={{ color: 'var(--text-muted)' }}>· mínimo {minHours} hora{minHours > 1 ? 's' : ''}</span>
-                {maxHours > 0 && <span>, máximo {maxHours}h</span>}
-              </div>
-            )}
+            <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              {minHours > 0 && `Mínimo ${minHours}h`}
+              {minHours > 0 && maxHours > 0 && ' · '}
+              {maxHours > 0 && `Máximo ${maxHours}h`}
+              {!minHours && !maxHours && 'Elige tu horario'}
+            </div>
           </div>
         )}
         {isConsumption && (
@@ -582,26 +581,19 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         )}
         {isPackage && (
           <div>
-            {pricing.package_name && (
-              <div className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>
-                {pricing.package_name}
-              </div>
-            )}
-            <div className="flex items-baseline gap-1 mb-1.5">
+            <div className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>
+              {pricing.package_name ?? 'Paquete'}
+            </div>
+            <div className="mb-1.5">
               <span className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
                 {formatCurrency(pricing.fixed_price)}
               </span>
-              {packageHours > 0 && (
-                <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                  · {packageHours} hora{packageHours > 1 ? 's' : ''} incluidas
-                </span>
-              )}
             </div>
-            {pricing.extra_hour_price > 0 && (
-              <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                Hora extra: {formatCurrency(pricing.extra_hour_price)}
-              </div>
-            )}
+            <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              {packageHours > 0 && `${packageHours} hora${packageHours > 1 ? 's' : ''} incluidas`}
+              {packageHours > 0 && pricing.extra_hour_price > 0 && ' · '}
+              {pricing.extra_hour_price > 0 && `Hora extra ${formatCurrency(pricing.extra_hour_price)}`}
+            </div>
           </div>
         )}
 
