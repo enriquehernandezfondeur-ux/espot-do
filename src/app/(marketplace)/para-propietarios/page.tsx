@@ -208,7 +208,7 @@ export default function ParaPropietariosPage() {
           <div className="mb-12">
             <h2 className="font-bold text-white mb-3"
               style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', letterSpacing: '-0.04em', lineHeight: 1.1 }}>
-              Sin sorpresas.<br />Solo una comisión justa.
+              Una comisión justa.<br />Así de simple.
             </h2>
             <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.95rem' }}>
               Así se distribuye el valor total de cada reserva
@@ -240,8 +240,8 @@ export default function ParaPropietariosPage() {
 
           <div className="flex flex-wrap gap-x-8 gap-y-3">
             {['Sin suscripción mensual', 'Sin costo por publicar', 'Sin contrato de permanencia'].map(item => (
-              <div key={item} className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                <Check size={13} style={{ color: '#35C493' }} /> {item}
+              <div key={item} className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                {item}
               </div>
             ))}
           </div>
@@ -260,7 +260,7 @@ export default function ParaPropietariosPage() {
                 Preguntas frecuentes
               </h2>
               <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                ¿Tienes más dudas? Escríbenos a{' '}
+                Escríbenos directo a{' '}
                 <a href="mailto:contacto@espot.do" style={{ color: 'var(--brand)' }}>contacto@espot.do</a>
               </p>
             </div>
