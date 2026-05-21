@@ -527,18 +527,23 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   function PriceHeader() {
     if (!pricing) return null
     if (isQuote) return (
-      <div className="flex items-center gap-2">
-        <MessageCircle size={20} style={{ color: 'var(--brand)' }} />
-        <span className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>Cotización personalizada</span>
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          <MessageCircle size={18} style={{ color: 'var(--brand)' }} />
+          <span className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>Cotización personalizada</span>
+        </div>
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+          Describe tu evento y el propietario te enviará un precio.
+        </p>
       </div>
     )
     return (
       <div>
         {space.instant_booking && (
           <div className="flex items-center gap-1.5 mb-3 px-3 py-1.5 rounded-xl w-fit"
-            style={{ background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.2)' }}>
+            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
             <span style={{ fontSize: 13 }}>⚡</span>
-            <span className="text-xs font-bold" style={{ color: '#1D4ED8' }}>Confirmación instantánea</span>
+            <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Confirmación instantánea</span>
           </div>
         )}
         {isHourly && (
@@ -560,41 +565,42 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         )}
         {isConsumption && (
           <div>
-            <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>
-              Consumibles
-            </div>
-            <div className="flex items-baseline gap-1 mb-1">
+            <div className="flex items-baseline gap-1 mb-1.5">
               <span className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
                 {formatCurrency(pricing.minimum_consumption)}
               </span>
+              <span className="text-sm" style={{ color: 'var(--text-muted)' }}> consumo mínimo</span>
             </div>
-            <div className="text-xs mb-2" style={{ color: 'var(--text-muted)' }}>
+            <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
               {minHours > 0 && maxHours > 0
-                ? `Entre ${minHours} y ${maxHours} horas`
-                : minHours > 0 ? `Mínimo ${minHours} horas`
-                : maxHours > 0 ? `Máximo ${maxHours} horas`
+                ? `Desde ${minHours}h hasta ${maxHours}h`
+                : minHours > 0 ? `Mínimo ${minHours} hora${minHours > 1 ? 's' : ''}`
+                : maxHours > 0 ? `Máximo ${maxHours}h`
                 : 'Elige tu horario'}
+              {' · se aplica en consumo del local'}
             </div>
           </div>
         )}
         {isPackage && (
           <div>
-            <div className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>
-              {pricing.package_name ?? 'Paquete'}
-            </div>
-            <div className="flex items-baseline gap-1 mb-1">
+            {pricing.package_name && (
+              <div className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>
+                {pricing.package_name}
+              </div>
+            )}
+            <div className="flex items-baseline gap-1 mb-1.5">
               <span className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
                 {formatCurrency(pricing.fixed_price)}
               </span>
               {packageHours > 0 && (
                 <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                  · {packageHours}h incluidas
+                  · {packageHours} hora{packageHours > 1 ? 's' : ''} incluidas
                 </span>
               )}
             </div>
             {pricing.extra_hour_price > 0 && (
               <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                Hora adicional: {formatCurrency(pricing.extra_hour_price)}
+                Hora extra: {formatCurrency(pricing.extra_hour_price)}
               </div>
             )}
           </div>
