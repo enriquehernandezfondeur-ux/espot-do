@@ -144,6 +144,12 @@ export default function MisReservasPage() {
 
   const today = new Date().toISOString().split('T')[0]
 
+  const filterCounts: Record<string, number> = {
+    'Pendientes':   bookings.filter(b => b.status === 'pending').length,
+    'Cotizaciones': bookings.filter(b => b.status === 'quote_requested').length,
+    'Por pagar':    bookings.filter(b => b.status === 'accepted').length,
+  }
+
   const filtered = bookings
     .filter(b => {
       const matchFilter =
@@ -239,11 +245,17 @@ export default function MisReservasPage() {
         <div className="flex gap-1 p-1 rounded-2xl overflow-x-auto scrollbar-hide" style={{ background: 'var(--bg-elevated)' }}>
           {FILTERS.map(f => (
             <button key={f} onClick={() => setFilter(f)}
-              className="px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0"
+              className="flex-1 min-w-0 flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl text-xs font-semibold whitespace-nowrap"
               style={filter === f
                 ? { background: '#fff', color: 'var(--text-primary)', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }
                 : { color: 'var(--text-secondary)', background: 'transparent' }}>
               {f}
+              {(filterCounts[f] ?? 0) > 0 && (
+                <span className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                  style={{ background: '#EF4444', color: '#fff' }}>
+                  {filterCounts[f]}
+                </span>
+              )}
             </button>
           ))}
         </div>
