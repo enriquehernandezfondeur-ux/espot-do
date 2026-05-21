@@ -372,9 +372,8 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
               {/* Card 1 — Busca — light */}
               <div className="guide-card guide-card-light relative overflow-hidden rounded-3xl p-7 flex flex-col gap-4"
                 style={{ background: '#F8FAFC', border: '1px solid #E5EAE8' }}>
-                <div className="guide-shimmer" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, borderRadius: '12px 12px 0 0' }} />
                 <div className="flex items-center justify-between">
-                  <div className="guide-icon-wrap w-10 h-10 rounded-2xl flex items-center justify-center"
+                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
                     style={{ background: 'rgba(53,196,147,0.1)', color: '#35C493' }}>
                     <Search size={18} />
                   </div>
@@ -392,9 +391,8 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
               {/* Card 2 — Fecha — dark */}
               <div className="guide-card guide-card-dark relative overflow-hidden rounded-3xl p-7 flex flex-col gap-4"
                 style={{ background: '#03313C', border: '1px solid rgba(53,196,147,0.15)' }}>
-                <div className="guide-shimmer" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, borderRadius: '12px 12px 0 0' }} />
                 <div className="flex items-center justify-between">
-                  <div className="guide-icon-wrap w-10 h-10 rounded-2xl flex items-center justify-center"
+                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
                     style={{ background: 'rgba(53,196,147,0.12)', color: '#35C493' }}>
                     <Clock size={18} />
                   </div>
@@ -412,9 +410,8 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
               {/* Card 3 — Paga — light */}
               <div className="guide-card guide-card-light relative overflow-hidden rounded-3xl p-7 flex flex-col gap-4"
                 style={{ background: '#F8FAFC', border: '1px solid #E5EAE8' }}>
-                <div className="guide-shimmer" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, borderRadius: '12px 12px 0 0' }} />
                 <div className="flex items-center justify-between">
-                  <div className="guide-icon-wrap w-10 h-10 rounded-2xl flex items-center justify-center"
+                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
                     style={{ background: 'rgba(53,196,147,0.1)', color: '#35C493' }}>
                     <CreditCard size={18} />
                   </div>
