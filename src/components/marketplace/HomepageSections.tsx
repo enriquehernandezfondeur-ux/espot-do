@@ -348,34 +348,19 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
         </div>
       </section>
 
-      {/* ── CÓMO FUNCIONA — sección con patrón de marca animado ── */}
+      {/* ── CÓMO FUNCIONA ── */}
       <section className="py-20 md:py-28 relative overflow-hidden"
         style={{ background: '#03313C' }}>
 
-        {/* Keyframe del desplazamiento diagonal del patrón */}
-        <style>{`@keyframes patternDrift { from { background-position: 0 0; } to { background-position: 620px 310px; } }`}</style>
-
-        {/* Layer del patrón animado */}
+        {/* Dot pattern decorativo — textura muy sutil */}
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
-          backgroundImage: 'url(/patron-contorno.png)',
-          backgroundSize: '620px',
-          backgroundRepeat: 'repeat',
-          animation: 'patternDrift 70s linear infinite',
-          opacity: 0.5,
+          backgroundImage: 'radial-gradient(circle, rgba(53,196,147,0.1) 1px, transparent 1px)',
+          backgroundSize: '28px 28px',
+          opacity: 0.6,
         }} />
 
-        {/* Overlay ligero — protege legibilidad sin apagar el patrón */}
-        <div style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1,
-          background: 'rgba(3, 49, 60, 0.35)',
-        }} />
-
-        {/* Orbes */}
-        <div style={{ position: 'absolute', top: -100, right: -100, width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(53,196,147,0.07) 0%, transparent 65%)', pointerEvents: 'none', zIndex: 1 }} />
-        <div style={{ position: 'absolute', bottom: -80, left: '20%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(53,196,147,0.05) 0%, transparent 65%)', pointerEvents: 'none', zIndex: 1 }} />
-
-        <div className="max-w-5xl mx-auto px-4 md:px-6" style={{ position: 'relative', zIndex: 2 }}>
+        <div className="max-w-5xl mx-auto px-4 md:px-6" style={{ position: 'relative', zIndex: 1 }}>
 
           <Reveal className="text-center mb-16 md:mb-20">
             <h2 className="font-bold text-white" style={{ fontSize: 'clamp(1.8rem, 5vw, 3rem)', letterSpacing: '-0.04em', lineHeight: 1.1 }}>
@@ -386,7 +371,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
             </p>
           </Reveal>
 
-          <div ref={howSection.ref} className="grid md:grid-cols-3 gap-6 md:gap-8" style={{ perspective: 1000 }}>
+          <div ref={howSection.ref} className="grid md:grid-cols-3 gap-6 md:gap-8">
             {[
               { num: '01', icon: Search,     title: 'Busca tu espacio',     desc: 'Filtra por sector, tipo y capacidad. Todos los espacios son verificados por nuestro equipo antes de publicarse.' },
               { num: '02', icon: Clock,      title: 'Elige fecha y horario', desc: 'Selecciona el día, horario y adicionales. El propietario revisará tu solicitud y confirmará disponibilidad.' },
@@ -395,25 +380,19 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
               const Icon = step.icon
               const delay = i * 180
               return (
-                <div key={step.num} className="relative"
+                <div key={step.num}
                   style={{
                     opacity:    howSection.on ? 1 : 0,
-                    transform:  howSection.on ? 'translateY(0) rotateX(0deg)' : 'translateY(28px) rotateX(14deg)',
-                    transition: `opacity 0.65s cubic-bezier(0.22,1,0.36,1) ${delay}ms, transform 0.65s cubic-bezier(0.22,1,0.36,1) ${delay}ms`,
-                    transformOrigin: 'bottom center',
+                    transform:  howSection.on ? 'translateY(0)' : 'translateY(28px)',
+                    transition: `opacity 0.65s ease ${delay}ms, transform 0.65s ease ${delay}ms`,
                   }}>
-                  {/* Número de fondo */}
-                  <div className="absolute -top-4 -left-2 font-bold select-none pointer-events-none"
-                    style={{ fontSize: 96, color: 'rgba(255,255,255,0.03)', lineHeight: 1, letterSpacing: '-0.05em' }}>
-                    {step.num}
-                  </div>
 
                   {/* Línea conectora */}
                   {i < 2 && (
                     <div className="hidden md:block absolute top-6 left-full h-px overflow-hidden" style={{ width: 32, zIndex: 1 }}>
                       <div style={{
                         height: '100%',
-                        background: 'rgba(53,196,147,0.25)',
+                        background: 'rgba(53,196,147,0.4)',
                         transform: howSection.on ? 'scaleX(1)' : 'scaleX(0)',
                         transformOrigin: 'left center',
                         transition: `transform 0.35s ease ${delay + 500}ms`,
@@ -421,31 +400,33 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                     </div>
                   )}
 
-                  <div className="relative p-6 md:p-8 rounded-2xl"
-                    style={{
-                      background: 'rgba(3, 49, 60, 0.82)',
-                      border: '1px solid rgba(255,255,255,0.15)',
-                      backdropFilter: 'blur(12px)',
-                      WebkitBackdropFilter: 'blur(12px)',
-                    }}>
-                    {/* Icono con micro-bounce */}
-                    <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5"
+                  <div className="p-6 md:p-8 rounded-2xl h-full"
+                    style={{ background: '#fff', boxShadow: '0 8px 32px rgba(0,0,0,0.14)' }}>
+
+                    {/* Número grande decorativo */}
+                    <div className="text-6xl font-bold mb-4 leading-none" style={{ color: 'rgba(53,196,147,0.15)', letterSpacing: '-0.04em' }}>
+                      {step.num}
+                    </div>
+
+                    {/* Ícono */}
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
                       style={{
-                        background: 'rgba(53,196,147,0.12)',
+                        background: 'rgba(53,196,147,0.1)',
                         border: '1px solid rgba(53,196,147,0.2)',
-                        transform:  howSection.on ? 'scale(1)' : 'scale(0.6)',
+                        transform:  howSection.on ? 'scale(1)' : 'scale(0.7)',
                         opacity:    howSection.on ? 1 : 0,
-                        transition: `transform 0.5s cubic-bezier(0.34,1.56,0.64,1) ${delay + 280}ms, opacity 0.4s ease ${delay + 280}ms`,
+                        transition: `transform 0.5s cubic-bezier(0.34,1.56,0.64,1) ${delay + 200}ms, opacity 0.4s ease ${delay + 200}ms`,
                       }}>
                       <Icon size={18} style={{ color: '#35C493' }} />
                     </div>
+
                     <div className="text-xs font-bold tracking-widest mb-2" style={{ color: '#35C493' }}>
                       PASO {step.num}
                     </div>
-                    <h3 className="font-bold text-white mb-2" style={{ letterSpacing: '-0.02em' }}>
+                    <h3 className="font-bold mb-2 text-base" style={{ color: '#03313C', letterSpacing: '-0.02em' }}>
                       {step.title}
                     </h3>
-                    <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.72)' }}>
+                    <p className="text-sm leading-relaxed" style={{ color: '#527068' }}>
                       {step.desc}
                     </p>
                   </div>
@@ -463,14 +444,28 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
             <div className="relative overflow-hidden rounded-3xl"
               style={{ background: 'linear-gradient(140deg, #03313C 0%, #0A3530 50%, #1A4D38 100%)' }}>
 
-              <div className="absolute inset-0 pointer-events-none">
+              {/* Keyframe del patrón animado */}
+              <style>{`@keyframes patternDrift { from { background-position: 0 0; } to { background-position: 620px 310px; } }`}</style>
+
+              {/* Patrón de marca animado — inset negativo evita íconos cortados en los bordes */}
+              <div style={{
+                position: 'absolute', inset: '-100px', pointerEvents: 'none', zIndex: 0,
+                backgroundImage: 'url(/patron-contorno.png)',
+                backgroundSize: '520px',
+                backgroundRepeat: 'repeat',
+                animation: 'patternDrift 70s linear infinite',
+                opacity: 0.3,
+              }} />
+
+              {/* Overlay para proteger legibilidad */}
+              <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
                 <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl"
                   style={{ background: 'rgba(53,196,147,0.08)', transform: 'translate(30%,-30%)' }} />
                 <div className="absolute bottom-0 left-1/3 w-72 h-72 rounded-full blur-3xl"
                   style={{ background: 'rgba(53,196,147,0.06)', transform: 'translateY(35%)' }} />
               </div>
 
-              <div className="relative grid md:grid-cols-[1fr_auto] items-center gap-6 md:gap-10 px-8 py-10 md:px-14 md:py-14">
+              <div className="relative grid md:grid-cols-[1fr_auto] items-center gap-6 md:gap-10 px-8 py-10 md:px-14 md:py-14" style={{ zIndex: 2 }}>
                 <div>
                   <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-5 text-xs font-semibold"
                     style={{ background: 'rgba(53,196,147,0.12)', color: '#6EE7C7', border: '1px solid rgba(53,196,147,0.18)' }}>
@@ -481,7 +476,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                     style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', letterSpacing: '-0.04em', lineHeight: 1.12 }}>
                     ¿Tienes un espacio<br className="hidden md:block" /> para eventos?
                   </h2>
-                  <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '1rem', lineHeight: 1.75, maxWidth: 460 }}>
+                  <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '1rem', lineHeight: 1.75, maxWidth: 460 }}>
                     Publica tu salón, restaurante, rooftop o villa. Recibe reservas online y gestiona todo desde tu panel.
                   </p>
                 </div>
