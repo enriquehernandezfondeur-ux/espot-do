@@ -47,13 +47,16 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
 
   // Re-consultar conteos reales en cada navegación
   useEffect(() => {
-    // Si está en mensajes → limpiar badge de inmediato
-    if (pathname?.includes('/mensajes')) setUnread(0)
+    // En mensajes: poner a 0 y NO re-consultar (la query sobreescribiría el 0)
+    if (pathname?.includes('/mensajes')) {
+      setUnread(0)
+      return
+    }
 
     const supabase = createClient()
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return
-      // Mensajes no leídos — siempre desde DB
+      // Mensajes no leídos — solo cuando NO estamos en mensajes
       supabase.from('messages').select('id', { count: 'exact', head: true })
         .eq('receiver_id', user.id).is('read_at', null)
         .then(({ count }) => setUnread(count ?? 0))

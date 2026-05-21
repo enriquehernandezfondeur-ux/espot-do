@@ -54,13 +54,31 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
 
   // Re-consultar conteos reales en cada navegación
   useEffect(() => {
-    // Si está en mensajes → limpiar badge de inmediato (ya está viendo los mensajes)
-    if (pathname?.includes('/mensajes')) setUnread(0)
+    // En mensajes: poner a 0 y NO re-consultar (la query sobreescribiría el 0)
+    if (pathname?.includes('/mensajes')) {
+      setUnread(0)
+      // Solo actualizar reservas/cotizaciones si hace falta
+      const supabase = createClient()
+      supabase.auth.getUser().then(async ({ data: { user } }) => {
+        if (!user) return
+        const { data: spaces } = await supabase.from('spaces').select('id').eq('host_id', user.id)
+        const spaceIds = spaces?.map((s: any) => s.id) ?? []
+        if (spaceIds.length > 0) {
+          supabase.from('bookings').select('id', { count: 'exact', head: true })
+            .in('space_id', spaceIds).eq('status', 'pending')
+            .then(({ count }) => setReservasCount(count ?? 0))
+          supabase.from('bookings').select('id', { count: 'exact', head: true })
+            .in('space_id', spaceIds).eq('status', 'quote_requested')
+            .then(({ count }) => setCotizCount(count ?? 0))
+        }
+      })
+      return
+    }
 
     const supabase = createClient()
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return
-      // Mensajes no leídos — siempre desde DB (markMessagesRead puede haber corrido)
+      // Mensajes no leídos — solo cuando NO estamos en la página de mensajes
       supabase.from('messages').select('id', { count: 'exact', head: true })
         .eq('receiver_id', user.id).is('read_at', null)
         .then(({ count }) => setUnread(count ?? 0))
