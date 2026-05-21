@@ -1420,6 +1420,13 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                     )
                   })}
                 </div>
+                {categoria && (
+                  <button onClick={() => setCategoria('')}
+                    className="flex items-center gap-1.5 mt-3 text-xs font-medium"
+                    style={{ color: '#DC2626' }}>
+                    <X size={11} /> Quitar tipo de espacio
+                  </button>
+                )}
               </div>
 
               {/* ── TIPO DE PRECIO ── */}
@@ -1445,6 +1452,13 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                     )
                   })}
                 </div>
+                {pricingFilter && (
+                  <button onClick={() => setPricingFilter('')}
+                    className="flex items-center gap-1.5 mt-3 text-xs font-medium"
+                    style={{ color: '#DC2626' }}>
+                    <X size={11} /> Quitar tipo de reserva
+                  </button>
+                )}
               </div>
 
               {/* ── PRECIO ── */}
