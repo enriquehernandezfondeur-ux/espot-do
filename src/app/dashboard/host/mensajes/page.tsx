@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Loader2, MessageCircle, Send, Search, Paperclip, FileText, Download, X, ArrowLeft, Building2, Zap, ChevronDown } from 'lucide-react'
-import { getMyConversations, getConversation, sendMessage, markMessagesRead } from '@/lib/actions/messages'
+import { Loader2, MessageCircle, Send, Search, Paperclip, FileText, Download, X, ArrowLeft, Building2, Zap, ChevronDown, Trash2 } from 'lucide-react'
+import { getMyConversations, getConversation, sendMessage, markMessagesRead, hideConversation } from '@/lib/actions/messages'
 import type { MessageAttachment } from '@/lib/actions/messages'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
@@ -231,27 +231,44 @@ export default function HostMensajesPage() {
               </p>
             </div>
           ) : filtered.map(conv => (
-            <button key={conv.spaceId} onClick={() => openConv(conv)}
-              className="w-full text-left px-5 py-4 transition-colors"
-              style={{ background: active?.spaceId === conv.spaceId ? 'var(--brand-dim)' : 'transparent', borderBottom: '1px solid var(--border-subtle)' }}>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0" style={{ background: 'var(--bg-elevated)' }}>
-                  {conv.cover ? <img src={conv.cover} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Building2 size={18} style={{ color: '#CBD5E1' }} /></div>}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>{conv.spaceName}</span>
-                    <span className="text-xs shrink-0" style={{ color: 'var(--text-muted)' }}>{timeLabel(conv.lastAt)}</span>
+            <div key={conv.spaceId} className="group relative"
+              style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+              <button onClick={() => openConv(conv)}
+                className="w-full text-left px-5 py-4 transition-colors"
+                style={{ background: active?.spaceId === conv.spaceId ? 'var(--brand-dim)' : 'transparent' }}>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0" style={{ background: 'var(--bg-elevated)' }}>
+                    {conv.cover ? <img src={conv.cover} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Building2 size={18} style={{ color: '#CBD5E1' }} /></div>}
                   </div>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <p className="text-xs truncate flex-1" style={{ color: 'var(--text-secondary)' }}>
-                      {conv.lastMessage ?? (conv.hasAttachment ? 'Archivo adjunto' : '')}
-                    </p>
-                    {conv.unread && <span className="w-2 h-2 rounded-full shrink-0" style={{ background: 'var(--brand)' }} />}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>{conv.spaceName}</span>
+                      <span className="text-xs shrink-0" style={{ color: 'var(--text-muted)' }}>{timeLabel(conv.lastAt)}</span>
+                    </div>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <p className="text-xs truncate flex-1" style={{ color: 'var(--text-secondary)' }}>
+                        {conv.lastMessage ?? (conv.hasAttachment ? 'Archivo adjunto' : '')}
+                      </p>
+                      {conv.unread && <span className="w-2 h-2 rounded-full shrink-0" style={{ background: 'var(--brand)' }} />}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </button>
+              </button>
+              {/* Botón eliminar — aparece en hover */}
+              <button
+                onClick={async e => {
+                  e.stopPropagation()
+                  if (!window.confirm('¿Eliminar esta conversación de tu lista? Los mensajes quedan guardados en el sistema.')) return
+                  await hideConversation(conv.spaceId)
+                  setConvs(prev => prev.filter(c => c.spaceId !== conv.spaceId))
+                  if (active?.spaceId === conv.spaceId) setActive(null)
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
+                title="Eliminar conversación">
+                <Trash2 size={13} />
+              </button>
+            </div>
           ))}
         </div>
       </div>

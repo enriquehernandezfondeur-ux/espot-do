@@ -133,9 +133,17 @@ export async function getMyConversations() {
     .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
     .order('created_at', { ascending: false })
 
-  // Agrupar por space_id y quedarse con el último mensaje de cada conversación
+  // Obtener conversaciones ocultas por este usuario
+  const { data: hidden } = await supabase
+    .from('conversation_hides')
+    .select('space_id')
+    .eq('user_id', user.id)
+  const hiddenIds = new Set((hidden ?? []).map((h: any) => h.space_id))
+
+  // Agrupar por space_id, excluir ocultas y quedarse con el último mensaje
   const seen = new Set<string>()
   const conversations = (data ?? []).filter(m => {
+    if (hiddenIds.has(m.space_id)) return false
     if (seen.has(m.space_id)) return false
     seen.add(m.space_id)
     return true
@@ -151,6 +159,17 @@ export async function getMyConversations() {
     unread:    !m.read_at && m.receiver_id === user.id,
     userId:    user.id,
   }))
+}
+
+// Ocultar conversación para el usuario (soft delete — mensajes siguen en el sistema)
+export async function hideConversation(spaceId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+  const { error } = await supabase
+    .from('conversation_hides')
+    .upsert({ user_id: user.id, space_id: spaceId }, { onConflict: 'user_id,space_id' })
+  return error ? { error: error.message } : { success: true }
 }
 
 // Marcar mensajes como leídos
