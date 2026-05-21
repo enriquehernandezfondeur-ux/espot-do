@@ -106,13 +106,13 @@ export default function FavoriteButton({ spaceId, size = 'md', className = '' }:
       disabled={loading}
       className={`${dims.btn} rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 disabled:cursor-wait ${className}`}
       style={{
-        background: saved ? 'rgba(239,68,68,0.10)' : 'rgba(255,255,255,0.96)',
+        background: saved ? 'rgba(53,196,147,0.12)' : 'rgba(255,255,255,0.96)',
         backdropFilter: 'blur(10px)',
         boxShadow: saved
-          ? '0 2px 10px rgba(239,68,68,0.22), 0 1px 3px rgba(0,0,0,0.10)'
+          ? '0 2px 10px rgba(53,196,147,0.22), 0 1px 3px rgba(0,0,0,0.10)'
           : '0 2px 10px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.08)',
         border: saved
-          ? '1.5px solid rgba(239,68,68,0.25)'
+          ? '1.5px solid rgba(53,196,147,0.3)'
           : '1.5px solid rgba(255,255,255,0.85)',
         transform: pulse ? 'scale(1.25)' : undefined,
         transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s, box-shadow 0.2s',
@@ -120,8 +120,8 @@ export default function FavoriteButton({ spaceId, size = 'md', className = '' }:
       <Heart
         size={dims.icon}
         style={{
-          color:      saved ? '#EF4444' : '#374151',
-          fill:       saved ? '#EF4444' : 'transparent',
+          color:      saved ? '#35C493' : '#374151',
+          fill:       saved ? '#35C493' : 'transparent',
           transition: 'fill 0.2s ease, color 0.2s ease, transform 0.2s ease',
           transform:  saved ? 'scale(1.05)' : 'scale(1)',
           strokeWidth: saved ? 2 : 1.75,

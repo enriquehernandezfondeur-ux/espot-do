@@ -438,6 +438,30 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
           {/* ── Desktop: filtros ── */}
           <div className="hidden md:flex items-center gap-2">
 
+              {/* Búsqueda de texto — filtra en tiempo real */}
+              <div className="flex items-center gap-2 rounded-xl px-3.5 py-2 shrink-0"
+                style={{
+                  background: '#fff',
+                  border: `1.5px solid ${q ? 'var(--brand-border)' : 'var(--border-medium)'}`,
+                  width: 220,
+                }}>
+                <Search size={14} style={{ color: q ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
+                <input
+                  value={q}
+                  onChange={e => setQ(e.target.value)}
+                  placeholder="Buscar espacios..."
+                  className="flex-1 min-w-0 bg-transparent focus:outline-none text-sm"
+                  style={{ color: 'var(--text-primary)' }}
+                />
+                {q && (
+                  <button onClick={() => setQ('')} className="shrink-0">
+                    <X size={10} style={{ color: 'var(--text-muted)' }} />
+                  </button>
+                )}
+              </div>
+
+              <div className="w-px h-5 shrink-0" style={{ background: 'var(--border-medium)' }} />
+
               {/* Tipo de espacio */}
               <div className="relative">
                 {catOpen && <div className="fixed inset-0 z-40" onClick={() => setCatOpen(false)} />}
