@@ -32,45 +32,86 @@ const MOBILE_NAV = [
 ]
 
 export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: string; avatarUrl?: string; isAdmin?: boolean }) {
-  const [unread, setUnread] = useState(0)
+  const [unread,           setUnread]           = useState(0)
+  const [reservasCount,    setReservasCount]    = useState(0)
+  const [cotizCount,       setCotizCount]       = useState(0)
   const pathname = usePathname()
 
-  // Resetear al entrar a mensajes
+  // Resetear al entrar a cada sección
   useEffect(() => {
-    if (pathname?.includes('/mensajes')) setUnread(0)
+    if (pathname?.includes('/mensajes'))     setUnread(0)
+    if (pathname?.includes('/reservas'))     setReservasCount(0)
+    if (pathname?.includes('/cotizaciones')) setCotizCount(0)
   }, [pathname])
 
   useEffect(() => {
     const supabase = createClient()
     let cleanup: (() => void) | undefined
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return
 
-      // Conteo inicial
+      // ── Mensajes no leídos ───────────────────────────────
       supabase.from('messages').select('id', { count: 'exact', head: true })
         .eq('receiver_id', user.id).is('read_at', null)
         .then(({ count }) => setUnread(count ?? 0))
 
-      // Realtime: nuevo mensaje
-      const channel = supabase
-        .channel(`sidebar-unread:${user.id}`)
+      // ── Espacios del host ────────────────────────────────
+      const { data: spaces } = await supabase.from('spaces').select('id').eq('host_id', user.id)
+      const spaceIds = spaces?.map(s => s.id) ?? []
+
+      if (spaceIds.length > 0) {
+        // Reservas pendientes de respuesta
+        supabase.from('bookings').select('id', { count: 'exact', head: true })
+          .in('space_id', spaceIds).eq('status', 'pending')
+          .then(({ count }) => setReservasCount(count ?? 0))
+
+        // Cotizaciones pendientes
+        supabase.from('bookings').select('id', { count: 'exact', head: true })
+          .in('space_id', spaceIds).eq('status', 'quote_requested')
+          .then(({ count }) => setCotizCount(count ?? 0))
+      }
+
+      // ── Realtime: mensajes + bookings ────────────────────
+      const ch1 = supabase.channel(`sidebar-msg:${user.id}`)
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${user.id}` },
           () => setUnread(prev => prev + 1))
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: `receiver_id=eq.${user.id}` },
+          () => supabase.from('messages').select('id', { count: 'exact', head: true })
+            .eq('receiver_id', user.id).is('read_at', null)
+            .then(({ count }) => setUnread(count ?? 0)))
         .subscribe()
 
-      cleanup = () => supabase.removeChannel(channel)
+      const ch2 = supabase.channel(`sidebar-bk:${user.id}`)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bookings' },
+          async () => {
+            if (spaceIds.length === 0) return
+            const [{ count: r }, { count: q }] = await Promise.all([
+              supabase.from('bookings').select('id', { count: 'exact', head: true }).in('space_id', spaceIds).eq('status', 'pending'),
+              supabase.from('bookings').select('id', { count: 'exact', head: true }).in('space_id', spaceIds).eq('status', 'quote_requested'),
+            ])
+            setReservasCount(r ?? 0)
+            setCotizCount(q ?? 0)
+          })
+        .subscribe()
+
+      cleanup = () => { supabase.removeChannel(ch1); supabase.removeChannel(ch2) }
     })
 
     return () => cleanup?.()
   }, [])
 
-  const navItems = BASE_NAV.map(item =>
-    item.href === '/dashboard/host/mensajes' ? { ...item, badge: unread } : item
-  )
-  const mobileBottomNav = MOBILE_NAV.map(item =>
-    item.href === '/dashboard/host/mensajes' ? { ...item, badge: unread } : item
-  )
+  const navItems = BASE_NAV.map(item => {
+    if (item.href === '/dashboard/host/mensajes')     return { ...item, badge: unread }
+    if (item.href === '/dashboard/host/reservas')     return { ...item, badge: reservasCount }
+    if (item.href === '/dashboard/host/cotizaciones') return { ...item, badge: cotizCount }
+    return item
+  })
+  const mobileBottomNav = MOBILE_NAV.map(item => {
+    if (item.href === '/dashboard/host/mensajes') return { ...item, badge: unread }
+    if (item.href === '/dashboard/host/reservas') return { ...item, badge: reservasCount }
+    return item
+  })
 
   return (
     <AppSidebar

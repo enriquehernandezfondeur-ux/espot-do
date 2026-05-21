@@ -26,11 +26,14 @@ const MOBILE_NAV = [
 ]
 
 export default function ClientSidebar({ userName, avatarUrl }: { userName?: string; avatarUrl?: string }) {
-  const [unread, setUnread] = useState(0)
+  const [unread,        setUnread]        = useState(0)
+  const [pendingPay,    setPendingPay]    = useState(0)
   const pathname = usePathname()
 
+  // Resetear al entrar a cada sección
   useEffect(() => {
     if (pathname?.includes('/mensajes')) setUnread(0)
+    if (pathname?.includes('/reservas')) setPendingPay(0)
   }, [pathname])
 
   useEffect(() => {
@@ -39,27 +42,50 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
 
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return
+
+      // Mensajes no leídos
       supabase.from('messages').select('id', { count: 'exact', head: true })
         .eq('receiver_id', user.id).is('read_at', null)
         .then(({ count }) => setUnread(count ?? 0))
 
-      const channel = supabase
-        .channel(`client-unread:${user.id}`)
+      // Reservas aceptadas pendientes de pago
+      supabase.from('bookings').select('id', { count: 'exact', head: true })
+        .eq('guest_id', user.id).eq('status', 'accepted').eq('payment_status', 'unpaid')
+        .then(({ count }) => setPendingPay(count ?? 0))
+
+      // Realtime mensajes
+      const ch1 = supabase.channel(`client-msg:${user.id}`)
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${user.id}` },
           () => setUnread(prev => prev + 1))
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: `receiver_id=eq.${user.id}` },
+          () => supabase.from('messages').select('id', { count: 'exact', head: true })
+            .eq('receiver_id', user.id).is('read_at', null)
+            .then(({ count }) => setUnread(count ?? 0)))
         .subscribe()
 
-      cleanup = () => supabase.removeChannel(channel)
+      // Realtime bookings (pagos)
+      const ch2 = supabase.channel(`client-bk:${user.id}`)
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'bookings', filter: `guest_id=eq.${user.id}` },
+          () => supabase.from('bookings').select('id', { count: 'exact', head: true })
+            .eq('guest_id', user.id).eq('status', 'accepted').eq('payment_status', 'unpaid')
+            .then(({ count }) => setPendingPay(count ?? 0)))
+        .subscribe()
+
+      cleanup = () => { supabase.removeChannel(ch1); supabase.removeChannel(ch2) }
     })
     return () => cleanup?.()
   }, [])
 
-  const navItems = BASE_NAV.map(item =>
-    item.href === '/dashboard/mensajes' ? { ...item, badge: unread } : item
-  )
-  const mobileBottomNav = MOBILE_NAV.map(item =>
-    item.href === '/dashboard/mensajes' ? { ...item, badge: unread } : item
-  )
+  const navItems = BASE_NAV.map(item => {
+    if (item.href === '/dashboard/mensajes') return { ...item, badge: unread }
+    if (item.href === '/dashboard/reservas') return { ...item, badge: pendingPay }
+    return item
+  })
+  const mobileBottomNav = MOBILE_NAV.map(item => {
+    if (item.href === '/dashboard/mensajes') return { ...item, badge: unread }
+    if (item.href === '/dashboard/reservas') return { ...item, badge: pendingPay }
+    return item
+  })
 
   return (
     <AppSidebar
