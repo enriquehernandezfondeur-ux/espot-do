@@ -197,7 +197,7 @@ export default function MisReservasPage() {
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
           {bookings.length} reserva{bookings.length !== 1 ? 's' : ''} en total
           {pendingPayment > 0 && (
-            <span className="ml-2 font-semibold" style={{ color: '#2563EB' }}>
+            <span className="ml-2 font-semibold" style={{ color: 'var(--brand)' }}>
               · {pendingPayment} esperan tu pago
             </span>
           )}
@@ -209,23 +209,23 @@ export default function MisReservasPage() {
         const firstPending = bookings.find(b => b.status === 'accepted')
         return (
           <div className="mb-6 rounded-2xl px-5 py-4 flex items-center gap-4"
-            style={{ background: 'rgba(37,99,235,0.06)', border: '1.5px solid rgba(37,99,235,0.2)' }}>
+            style={{ background: 'var(--brand-dim)', border: '1.5px solid var(--brand-border)' }}>
             <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: 'rgba(37,99,235,0.12)' }}>
-              <Bell size={16} style={{ color: '#2563EB' }} />
+              style={{ background: 'var(--brand-dim)' }}>
+              <Bell size={16} style={{ color: 'var(--brand)' }} />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="font-semibold text-sm" style={{ color: '#1D4ED8' }}>
+              <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
                 ¡Tu reserva fue aceptada!
               </div>
-              <div className="text-xs mt-0.5" style={{ color: '#3B82F6' }}>
+              <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
                 Completa el pago para confirmar tu fecha.
               </div>
             </div>
             {firstPending && (
               <Link href={`/pago/${firstPending.id}`}
                 className="text-xs font-bold px-4 py-2.5 rounded-xl shrink-0"
-                style={{ background: '#2563EB', color: '#fff', whiteSpace: 'nowrap' }}>
+                style={{ background: 'var(--brand)', color: '#fff', whiteSpace: 'nowrap' }}>
                 Pagar ahora
               </Link>
             )}
@@ -286,7 +286,7 @@ export default function MisReservasPage() {
 
             return (
               <div key={bk.id} className="rounded-2xl overflow-hidden transition-all"
-                style={{ background: '#fff', border: `1.5px solid ${isSelected ? 'var(--brand)' : isNextActive ? 'rgba(53,196,147,0.4)' : bk.status === 'accepted' ? 'rgba(37,99,235,0.3)' : 'var(--border-subtle)'}` }}>
+                style={{ background: '#fff', border: `1.5px solid ${isSelected ? 'var(--brand)' : isNextActive ? 'rgba(53,196,147,0.4)' : bk.status === 'accepted' ? 'var(--brand-border)' : 'var(--border-subtle)'}` }}>
 
                 {/* Banner "Tu próxima reserva" */}
                 {isNextActive && (
@@ -402,24 +402,24 @@ export default function MisReservasPage() {
                 {/* Solo cuando la tarjeta está colapsada — al expandir el detalle también lo muestra */}
                 {bk.status === 'accepted' && !isPaid(bk.payment_status) && !isSelected && (
                   <div className="mx-4 mb-4 px-4 py-4 rounded-2xl"
-                    style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.2)' }}>
+                    style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
                     <div className="mb-3">
                       {/* Diferenciar cotización respondida de reserva normal aceptada */}
                       {(bk as any).event_notes?.startsWith('[Cotización]') ? (
                         <>
-                          <div className="text-sm font-semibold" style={{ color: '#1D4ED8' }}>
+                          <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                             Cotización respondida — precio confirmado
                           </div>
-                          <div className="text-xs mt-0.5" style={{ color: '#3B82F6' }}>
+                          <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
                             El propietario fijó el precio en {formatCurrency(Number(bk.total_amount))}. Paga la primera cuota para reservar.
                           </div>
                         </>
                       ) : (
                         <>
-                          <div className="text-sm font-semibold" style={{ color: '#1D4ED8' }}>
+                          <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                             El propietario aceptó tu reserva
                           </div>
-                          <div className="text-xs mt-0.5" style={{ color: '#3B82F6' }}>
+                          <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
                             Completa el pago para confirmar tu fecha
                           </div>
                         </>
@@ -428,7 +428,7 @@ export default function MisReservasPage() {
                     <button
                       onClick={() => handlePay(bk.id)}
                       className="w-full flex items-center justify-center gap-1.5 text-sm font-bold px-4 py-3 rounded-xl transition-all"
-                      style={{ background: '#2563EB', color: '#fff', boxShadow: '0 2px 8px rgba(37,99,235,0.3)' }}>
+                      style={{ background: 'var(--brand)', color: '#fff', boxShadow: '0 2px 8px var(--brand-border)' }}>
                       <CreditCard size={15} /> Pagar primera cuota →
                     </button>
                     {(bk as any).event_notes?.startsWith('[Cotización]') && (
@@ -477,7 +477,7 @@ export default function MisReservasPage() {
                         )
                       })()}
                       <span className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full ml-auto"
-                        style={{ background: isPaid(bk.payment_status) ? 'rgba(22,163,74,0.08)' : 'var(--bg-elevated)', color: isPaid(bk.payment_status) ? '#16A34A' : 'var(--text-primary)', border: `1px solid ${isPaid(bk.payment_status) ? 'rgba(22,163,74,0.2)' : 'var(--border-subtle)'}` }}>
+                        style={{ background: isPaid(bk.payment_status) ? 'var(--brand-dim)' : 'var(--bg-elevated)', color: isPaid(bk.payment_status) ? 'var(--brand)' : 'var(--text-primary)', border: `1px solid ${isPaid(bk.payment_status) ? 'var(--brand-border)' : 'var(--border-subtle)'}` }}>
                         {formatCurrency(Number(bk.total_amount))} total
                       </span>
                     </div>
@@ -508,7 +508,7 @@ export default function MisReservasPage() {
                                 </span>
                               </div>
                               <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
-                                style={{ background: allPaid ? 'rgba(22,163,74,0.1)' : 'rgba(53,196,147,0.15)', color: allPaid ? '#16A34A' : 'var(--brand)' }}>
+                                style={{ background: allPaid ? 'var(--brand-dim)' : 'rgba(53,196,147,0.15)', color: allPaid ? 'var(--brand)' : 'var(--brand)' }}>
                                 {allPaid ? 'Completado' : `${paidCount}/${installments.length} pagadas`}
                               </span>
                             </div>
@@ -530,9 +530,9 @@ export default function MisReservasPage() {
                                     {/* Círculo */}
                                     <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
                                       style={{
-                                        background: isPaidI ? 'rgba(22,163,74,0.1)' : isOvD ? 'rgba(220,38,38,0.08)' : isNext ? 'var(--brand-dim)' : 'var(--bg-elevated)',
-                                        color:      isPaidI ? '#16A34A' : isOvD ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)',
-                                        border:     `1.5px solid ${isPaidI ? 'rgba(22,163,74,0.3)' : isOvD ? 'rgba(220,38,38,0.2)' : isNext ? 'var(--brand-border)' : 'var(--border-medium)'}`,
+                                        background: isPaidI ? 'var(--brand-dim)' : isOvD ? 'rgba(220,38,38,0.08)' : isNext ? 'var(--brand-dim)' : 'var(--bg-elevated)',
+                                        color:      isPaidI ? 'var(--brand)' : isOvD ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)',
+                                        border:     `1.5px solid ${isPaidI ? 'var(--brand-border)' : isOvD ? 'rgba(220,38,38,0.2)' : isNext ? 'var(--brand-border)' : 'var(--border-medium)'}`,
                                       }}>
                                       {isPaidI ? <Check size={13} /> : i + 1}
                                     </div>
@@ -547,7 +547,7 @@ export default function MisReservasPage() {
                                           {formatCurrency(inst.amount)}
                                         </span>
                                         <span className="text-xs shrink-0 font-medium" style={{
-                                          color: isPaidI ? '#16A34A' : isOvD ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)',
+                                          color: isPaidI ? 'var(--brand)' : isOvD ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)',
                                         }}>
                                           {isPaidI
                                             ? `✓ Pagado${inst.paid_at ? ' · ' + formatDate(inst.paid_at.split('T')[0]) : ''}`
@@ -709,7 +709,7 @@ export default function MisReservasPage() {
                             </span>
                           </div>
                           <div className="w-full h-1.5 rounded-full mb-2" style={{ background: 'var(--border-subtle)' }}>
-                            <div className="h-1.5 rounded-full" style={{ width: `${Math.min(100, (hoursElapsed / 48) * 100)}%`, background: expired ? '#DC2626' : '#0891B2' }} />
+                            <div className="h-1.5 rounded-full" style={{ width: `${Math.min(100, (hoursElapsed / 48) * 100)}%`, background: expired ? '#DC2626' : 'var(--brand)' }} />
                           </div>
                           <p className="text-xs">
                             {expired ? 'El propietario no respondió en el plazo. Escríbele directamente o cancela.' : 'Te notificamos por email cuando el propietario envíe el precio. Puedes escribirle mientras tanto.'}
@@ -752,7 +752,7 @@ export default function MisReservasPage() {
                     {bk.status === 'confirmed' && (
                       <div className="mt-4 space-y-3">
                         <div className="px-4 py-3 rounded-xl text-sm"
-                          style={{ background: 'rgba(22,163,74,0.05)', border: '1px solid rgba(22,163,74,0.15)', color: '#166534' }}>
+                          style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)', color: 'var(--text-primary)' }}>
                           Reserva confirmada. Las cuotas restantes se cobrarán según el plan de pagos.
                         </div>
                         <div className="flex gap-2 flex-wrap">
@@ -774,7 +774,7 @@ export default function MisReservasPage() {
                     {bk.status === 'rejected' && (
                       <div className="mt-4 space-y-3">
                         <div className="px-4 py-3 rounded-xl text-sm"
-                          style={{ background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)', color: '#991B1B' }}>
+                          style={{ background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)', color: '#DC2626' }}>
                           El propietario no pudo aceptar tu solicitud para esta fecha.
                           {bk.rejection_reason && (
                             <p className="mt-1 font-medium">Motivo: {bk.rejection_reason}</p>
@@ -788,7 +788,7 @@ export default function MisReservasPage() {
                     {bk.status === 'cancelled_host' && (
                       <div className="mt-4 space-y-3">
                         <div className="px-4 py-3 rounded-xl text-sm"
-                          style={{ background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)', color: '#991B1B' }}>
+                          style={{ background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)', color: '#DC2626' }}>
                           El propietario canceló esta reserva.
                           {bk.cancellation_reason && (
                             <p className="mt-1 font-medium">Motivo: {bk.cancellation_reason}</p>
@@ -816,7 +816,7 @@ export default function MisReservasPage() {
                       <div className="mt-4">
                         {reviewed.has(bk.id) ? (
                           <div className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm"
-                            style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.2)', color: '#166534' }}>
+                            style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.2)', color: 'var(--text-primary)' }}>
                             <Star size={14} style={{ color: '#F59E0B', fill: '#F59E0B' }} /> ¡Gracias por tu reseña!
                           </div>
                         ) : reviewFor === bk.id ? (
@@ -934,14 +934,14 @@ export default function MisReservasPage() {
                           <div className="space-y-2">
                             {refundAmt != null ? (
                               <div className="rounded-xl px-4 py-3 text-sm"
-                                style={{ background: refundAmt > 0 ? 'rgba(22,163,74,0.06)' : 'rgba(220,38,38,0.05)', border: `1px solid ${refundAmt > 0 ? 'rgba(22,163,74,0.2)' : 'rgba(220,38,38,0.15)'}` }}>
+                                style={{ background: refundAmt > 0 ? 'var(--brand-dim)' : 'rgba(220,38,38,0.05)', border: `1px solid ${refundAmt > 0 ? 'var(--brand-border)' : 'rgba(220,38,38,0.15)'}` }}>
                                 {refundAmt > 0 ? (
-                                  <span style={{ color: '#166534' }}>
+                                  <span style={{ color: 'var(--text-primary)' }}>
                                     <strong>Reembolso estimado: {formatCurrency(refundAmt)}</strong>
                                     {' '}({refundPct}% de lo pagado). Política: {cond?.cancellation_policy ?? 'estándar'}.
                                   </span>
                                 ) : (
-                                  <span style={{ color: '#991B1B' }}>
+                                  <span style={{ color: '#DC2626' }}>
                                     <strong>Sin reembolso</strong> — cancelación con menos de {cond.cancellation_hours_before}h de anticipación. Política: {cond?.cancellation_policy ?? 'estándar'}.
                                   </span>
                                 )}
@@ -998,8 +998,8 @@ export default function MisReservasPage() {
                 <>
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                      style={{ background: 'rgba(37,99,235,0.08)', border: '1px solid rgba(37,99,235,0.15)' }}>
-                      <CreditCard size={18} style={{ color: '#2563EB' }} />
+                      style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
+                      <CreditCard size={18} style={{ color: 'var(--brand)' }} />
                     </div>
                     <div>
                       <h3 className="font-bold text-base mb-1" style={{ color: 'var(--text-primary)' }}>
