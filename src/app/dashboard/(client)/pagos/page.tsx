@@ -9,8 +9,8 @@ const PAID_PS = ['advance', 'partial', 'paid']
 
 const paymentStatusConfig: Record<string, { label: string; sub: string; color: string; bg: string; icon: any }> = {
   unpaid:  { label: 'Sin pago',              sub: 'Pendiente de primer pago',       color: '#D97706', bg: 'rgba(217,119,6,0.08)',    icon: Clock },
-  partial: { label: 'Cuotas en progreso',    sub: 'Quedan pagos pendientes',        color: '#2563EB', bg: 'rgba(37,99,235,0.08)',    icon: CreditCard },
-  advance: { label: 'Anticipo pagado',       sub: '1ª cuota confirmada — pendiente saldo', color: '#16A34A', bg: 'rgba(22,163,74,0.08)', icon: CheckCircle },
+  partial: { label: 'Cuotas en progreso',    sub: 'Quedan pagos pendientes',        color: 'var(--brand)', bg: 'var(--bg-elevated)',    icon: CreditCard },
+  advance: { label: 'Anticipo pagado',       sub: '1ª cuota confirmada — pendiente saldo', color: 'var(--brand)', bg: 'var(--bg-elevated)', icon: CheckCircle },
   paid:    { label: 'Pagado completo',       sub: 'Todas las cuotas saldadas',      color: '#35C493', bg: 'rgba(53,196,147,0.08)',   icon: CheckCircle },
 }
 
@@ -45,7 +45,7 @@ export default function PagosPage() {
       {/* Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
         {[
-          { label: 'Total pagado',   value: formatCurrency(totalPaid),    color: '#16A34A' },
+          { label: 'Total pagado',   value: formatCurrency(totalPaid),    color: 'var(--brand)' },
           { label: 'Por confirmar',  value: formatCurrency(totalPending), color: '#D97706' },
           { label: 'Transacciones',  value: bookings.length,              color: 'var(--brand)' },
         ].map(({ label, value, color }) => (

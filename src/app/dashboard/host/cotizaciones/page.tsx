@@ -235,7 +235,7 @@ export default function CotizacionesPage() {
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{g?.full_name ?? 'Cliente'}</span>
                     <span className="text-xs px-2 py-0.5 rounded-full font-medium"
-                      style={{ background: 'rgba(8,145,178,0.1)', color: '#0891B2' }}>Cotización</span>
+                      style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>Cotización</span>
                   </div>
                   <div className="text-xs font-medium mb-1" style={{ color: 'var(--brand)' }}>{q.event_type}</div>
                   <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--text-muted)' }}>

@@ -688,7 +688,7 @@ export default function EspacioPage() {
                     )}
                     <div className="absolute top-3 right-3 inline-flex items-center text-xs font-semibold px-2.5 py-1.5 rounded-full"
                       style={space.is_published
-                        ? { background: 'rgba(22,163,74,0.92)', color: '#fff', gap: 5 }
+                        ? { background: 'var(--brand)', color: '#fff', gap: 5 }
                         : space.is_active
                           ? { background: 'rgba(217,119,6,0.92)', color: '#fff', gap: 5 }
                           : { background: 'rgba(0,0,0,0.65)', color: '#fff', gap: 5 }}>
@@ -782,7 +782,7 @@ export default function EspacioPage() {
                       )}
                       {!space.is_published && space.is_active && (
                         <div className="flex-1 inline-flex items-center justify-center text-xs font-semibold px-3 py-2 rounded-xl"
-                          style={{ background: 'rgba(37,99,235,0.08)', color: '#2563EB', border: '1px solid rgba(37,99,235,0.2)', gap: 6 }}>
+                          style={{ background: 'var(--bg-elevated)', color: 'var(--brand)', border: '1px solid var(--border-subtle)', gap: 6 }}>
                           <Clock size={12} style={{ flexShrink: 0 }} /><span>En revisión</span>
                         </div>
                       )}
@@ -1802,14 +1802,14 @@ export default function EspacioPage() {
 
             {/* Reserva instantánea */}
             <div className="rounded-2xl p-4"
-              style={{ background: instantBooking ? 'rgba(37,99,235,0.05)' : 'var(--bg-elevated)', border: `1.5px solid ${instantBooking ? 'rgba(37,99,235,0.25)' : 'var(--border-subtle)'}` }}>
+              style={{ background: instantBooking ? 'var(--bg-elevated)' : 'var(--bg-elevated)', border: `1.5px solid ${instantBooking ? 'var(--border-subtle)' : 'var(--border-subtle)'}` }}>
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>⚡ Reserva instantánea</span>
                     {instantBooking && (
                       <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
-                        style={{ background: 'rgba(37,99,235,0.1)', color: '#1D4ED8' }}>Activa</span>
+                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)' }}>Activa</span>
                     )}
                   </div>
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
@@ -1818,7 +1818,7 @@ export default function EspacioPage() {
                 </div>
                 <button onClick={() => setInstantBooking(v => !v)}
                   className="w-11 h-6 rounded-full relative transition-all shrink-0 ml-4"
-                  style={{ background: instantBooking ? '#2563EB' : 'var(--border-medium)' }}>
+                  style={{ background: instantBooking ? 'var(--brand)' : 'var(--border-medium)' }}>
                   <span className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
                     style={{ left: instantBooking ? 22 : 2 }} />
                 </button>

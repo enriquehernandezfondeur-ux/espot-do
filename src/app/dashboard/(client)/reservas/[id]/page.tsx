@@ -199,7 +199,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
       {installments.length === 0 && (booking as any).status === 'quote_requested' && (
         <div className="rounded-2xl px-5 py-4 mb-4 flex items-center gap-3"
           style={{ background: 'rgba(8,145,178,0.08)', border: '1px solid rgba(8,145,178,0.2)' }}>
-          <CreditCard size={16} style={{ color: '#0891B2', flexShrink: 0 }} />
+          <CreditCard size={16} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} />
           <p className="text-sm" style={{ color: '#0369A1' }}>
             El plan de pagos se mostrará cuando el anfitrión confirme el precio de tu cotización.
           </p>
@@ -209,9 +209,9 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
       {/* Plan de pagos */}
       {installments.length > 0 && (
         <div className="rounded-2xl overflow-hidden mb-4"
-          style={{ border: '1.5px solid var(--brand-border)' }}>
+          style={{ border: '1.5px solid var(--border-subtle)' }}>
           <div className="flex items-center justify-between px-5 py-3.5"
-            style={{ background: 'var(--brand-dim)', borderBottom: '1px solid var(--brand-border)' }}>
+            style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
             <div className="flex items-center gap-2">
               <CreditCard size={14} style={{ color: 'var(--brand)' }} />
               <span className="text-sm font-bold" style={{ color: 'var(--brand)' }}>Plan de pagos</span>
@@ -229,9 +229,9 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
                 style={{ borderBottom: i < installments.length - 1 ? '1px solid var(--border-subtle)' : 'none', background: '#fff' }}>
                 <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
                   style={{
-                    background: paid ? 'rgba(22,163,74,0.1)' : overdue ? 'rgba(220,38,38,0.08)' : isNext ? 'var(--brand-dim)' : 'var(--bg-elevated)',
-                    color: paid ? '#16A34A' : overdue ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)',
-                    border: `1.5px solid ${paid ? 'rgba(22,163,74,0.3)' : overdue ? 'rgba(220,38,38,0.2)' : isNext ? 'var(--brand-border)' : 'var(--border-medium)'}`,
+                    background: paid ? 'var(--bg-elevated)' : overdue ? 'rgba(220,38,38,0.08)' : isNext ? 'var(--bg-elevated)' : 'var(--bg-elevated)',
+                    color: paid ? 'var(--brand)' : overdue ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)',
+                    border: `1.5px solid ${paid ? 'var(--bg-elevated)' : overdue ? 'rgba(220,38,38,0.2)' : isNext ? 'var(--border-subtle)' : 'var(--border-medium)'}`,
                   }}>
                   {paid ? <Check size={12} /> : i + 1}
                 </div>
@@ -240,7 +240,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
                     <span className="text-sm font-semibold" style={{ color: paid ? 'var(--text-secondary)' : 'var(--text-primary)' }}>
                       {formatCurrency(inst.amount)}
                     </span>
-                    <span className="text-xs font-medium" style={{ color: paid ? '#16A34A' : overdue ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)' }}>
+                    <span className="text-xs font-medium" style={{ color: paid ? 'var(--brand)' : overdue ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)' }}>
                       {paid ? `Pagado${inst.paid_at ? ' · ' + formatDate(inst.paid_at.split('T')[0]) : ''}` : countdownLabel(inst.due_date)}
                     </span>
                   </div>
@@ -250,7 +250,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
             )
           })}
           {nextInst && (
-            <div className="p-3" style={{ borderTop: '1px solid var(--brand-border)', background: 'var(--brand-dim)' }}>
+            <div className="p-3" style={{ borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)' }}>
               {/* Banner pago seguro */}
               <div className="flex items-start gap-2.5 mb-3 px-3 py-2.5 rounded-xl"
                 style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
@@ -271,7 +271,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
           )}
           {allPaid && (
             <div className="px-5 py-3.5 flex items-center gap-2"
-              style={{ borderTop: '1px solid var(--brand-border)', background: 'var(--brand-dim)' }}>
+              style={{ borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)' }}>
               <CheckCircle size={14} style={{ color: 'var(--brand)' }} />
               <span className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>
                 Todas las cuotas pagadas
@@ -300,7 +300,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
           </div>
           <Link href="/dashboard/mensajes"
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold shrink-0 transition-all"
-            style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
+            style={{ background: 'var(--bg-elevated)', color: 'var(--brand)', border: '1px solid var(--border-subtle)' }}>
             <MessageCircle size={13} /> Mensaje
           </Link>
         </div>
@@ -415,10 +415,10 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
                 className="flex flex-col items-center gap-1.5 py-3.5 px-2 transition-colors hover:bg-[var(--bg-elevated)]"
                 style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
                 {copied
-                  ? <CheckCircle size={18} style={{ color: '#16A34A' }} />
+                  ? <CheckCircle size={18} style={{ color: 'var(--brand)' }} />
                   : <Copy size={18} style={{ color: 'var(--text-secondary)' }} />}
                 <span className="text-[11px] font-semibold text-center leading-tight"
-                  style={{ color: copied ? '#16A34A' : 'var(--text-secondary)' }}>
+                  style={{ color: copied ? 'var(--brand)' : 'var(--text-secondary)' }}>
                   {copied ? '¡Copiado!' : 'Copiar datos'}
                 </span>
               </button>
@@ -430,7 +430,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
       {/* Contrato — botón más prominente */}
       <a href={`/contrato/${booking.id}`} target="_blank" rel="noopener noreferrer"
         className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl text-sm font-semibold mb-3 transition-all"
-        style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1.5px solid var(--brand-border)' }}>
+        style={{ background: 'var(--bg-elevated)', color: 'var(--brand)', border: '1.5px solid var(--border-subtle)' }}>
         <FileText size={15} /> Ver contrato oficial · Descargar PDF
       </a>
 
@@ -449,8 +449,8 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
           {alreadyReviewed || reviewDone ? (
             <div className="flex items-center gap-3 px-5 py-5">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: 'rgba(22,163,74,0.1)' }}>
-                <CheckCircle size={18} style={{ color: '#16A34A' }} />
+                style={{ background: 'var(--bg-elevated)' }}>
+                <CheckCircle size={18} style={{ color: 'var(--brand)' }} />
               </div>
               <div>
                 <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -542,7 +542,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
         {space?.slug && (
           <Link href={`/espacios/${space.slug}`}
             className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-semibold"
-            style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
+            style={{ background: 'var(--bg-elevated)', color: 'var(--brand)', border: '1px solid var(--border-subtle)' }}>
             <ExternalLink size={15} /> Ver espacio
           </Link>
         )}

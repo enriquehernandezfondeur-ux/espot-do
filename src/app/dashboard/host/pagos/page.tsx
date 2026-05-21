@@ -16,9 +16,9 @@ const BANKS = [
 
 const PAYOUT_STATUS: Record<string, { label: string; color: string; bg: string }> = {
   pending:     { label: 'Pendiente',   color: '#D97706', bg: 'rgba(217,119,6,0.08)'  },
-  en_revision: { label: 'En revisión', color: '#2563EB', bg: 'rgba(37,99,235,0.08)'  },
-  paid:        { label: 'Liquidado',   color: '#16A34A', bg: 'rgba(22,163,74,0.08)'  },
-  liquidado:   { label: 'Liquidado',   color: '#16A34A', bg: 'rgba(22,163,74,0.08)'  },
+  en_revision: { label: 'En revisión', color: 'var(--brand)', bg: 'var(--bg-elevated)'  },
+  paid:        { label: 'Liquidado',   color: 'var(--brand)', bg: 'var(--bg-elevated)'  },
+  liquidado:   { label: 'Liquidado',   color: 'var(--brand)', bg: 'var(--bg-elevated)'  },
   retenido:    { label: 'Retenido',    color: '#DC2626', bg: 'rgba(220,38,38,0.08)'  },
   reembolsado: { label: 'Reembolsado', color: '#6B7280', bg: 'rgba(107,114,128,0.08)'},
 }
@@ -82,7 +82,7 @@ export default function HostPagosPage() {
 
   const verConfig: Record<string, { label: string; color: string; bg: string }> = {
     pending:  { label: 'Verificación pendiente', color: '#D97706', bg: 'rgba(217,119,6,0.06)' },
-    verified: { label: 'Cuenta verificada',      color: '#16A34A', bg: 'rgba(22,163,74,0.06)'  },
+    verified: { label: 'Cuenta verificada',      color: 'var(--brand)', bg: 'var(--bg-elevated)'  },
     rejected: { label: 'Cuenta rechazada',       color: '#DC2626', bg: 'rgba(220,38,38,0.06)'  },
   }
   const ver = verConfig[bankStatus] ?? verConfig.pending
@@ -126,8 +126,8 @@ export default function HostPagosPage() {
 
       {/* Info */}
       <div className="flex items-start gap-3 px-5 py-4 rounded-2xl"
-        style={{ background: 'rgba(37,99,235,0.04)', border: '1px solid rgba(37,99,235,0.12)' }}>
-        <Info size={15} style={{ color: '#2563EB', flexShrink: 0, marginTop: 1 }} />
+        style={{ background: 'var(--bg-elevated)', border: '1px solid var(--bg-elevated)' }}>
+        <Info size={15} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: 1 }} />
         <p className="text-sm" style={{ color: '#1E40AF', lineHeight: 1.6 }}>
           espot.do cobra el 100% de cada reserva al cliente y te transfiere el neto después de descontar la comisión de la plataforma. Las liquidaciones se procesan manualmente y recibirás una notificación por email cuando se complete la transferencia.
         </p>
@@ -298,7 +298,7 @@ export default function HostPagosPage() {
               {saving ? 'Guardando...' : 'Guardar cuenta bancaria'}
             </button>
             {saved && (
-              <div className="flex items-center gap-1.5 text-sm font-medium" style={{ color: '#16A34A' }}>
+              <div className="flex items-center gap-1.5 text-sm font-medium" style={{ color: 'var(--brand)' }}>
                 <CheckCircle size={15} /> Guardado
               </div>
             )}

@@ -17,8 +17,8 @@ const CATEGORY_OPTIONS: { value: DisputeCategory; label: string }[] = [
 
 const STATUS_CONFIG: Record<DisputeStatus, { label: string; color: string; bg: string }> = {
   abierta:          { label: 'Abierta',                   color: '#D97706', bg: 'rgba(217,119,6,0.08)'   },
-  en_revision:      { label: 'En revisión',               color: '#2563EB', bg: 'rgba(37,99,235,0.08)'   },
-  resuelta_cliente: { label: 'Resuelta: a tu favor',      color: '#16A34A', bg: 'rgba(22,163,74,0.08)'   },
+  en_revision:      { label: 'En revisión',               color: 'var(--brand)', bg: 'var(--bg-elevated)'   },
+  resuelta_cliente: { label: 'Resuelta: a tu favor',      color: 'var(--brand)', bg: 'var(--bg-elevated)'   },
   resuelta_host:    { label: 'Resuelta: a favor del host', color: '#7C3AED', bg: 'rgba(124,58,237,0.08)' },
   cerrada:          { label: 'Cerrada',                   color: '#6B7280', bg: 'rgba(107,114,128,0.08)' },
 }
@@ -107,8 +107,8 @@ export default function DisputeSection({ bookingId, bookingStatus, existingDispu
             </div>
             {dispute.resolution && (
               <div className="rounded-xl p-3.5"
-                style={{ background: 'rgba(22,163,74,0.06)', border: '1px solid rgba(22,163,74,0.15)' }}>
-                <span className="text-xs font-semibold block mb-1" style={{ color: '#16A34A' }}>
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                <span className="text-xs font-semibold block mb-1" style={{ color: 'var(--brand)' }}>
                   Resolución del equipo Espot:
                 </span>
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>
@@ -118,8 +118,8 @@ export default function DisputeSection({ bookingId, bookingStatus, existingDispu
             )}
             {dispute.admin_notes && (
               <div className="rounded-xl p-3.5"
-                style={{ background: 'rgba(37,99,235,0.04)', border: '1px solid rgba(37,99,235,0.12)' }}>
-                <span className="text-xs font-semibold block mb-1" style={{ color: '#2563EB' }}>
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                <span className="text-xs font-semibold block mb-1" style={{ color: 'var(--brand)' }}>
                   Notas adicionales:
                 </span>
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>
@@ -132,7 +132,7 @@ export default function DisputeSection({ bookingId, bookingStatus, existingDispu
 
         {submitted && !dispute && (
           <div className="px-5 py-4 flex items-center gap-2.5">
-            <CheckCircle2 size={16} style={{ color: '#16A34A' }} />
+            <CheckCircle2 size={16} style={{ color: 'var(--brand)' }} />
             <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
               Tu disputa fue recibida. Te contactaremos en las próximas 48 horas hábiles.
             </p>

@@ -313,7 +313,7 @@ function AjustesInner() {
 
       <button onClick={handleSave} disabled={saving}
         className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm transition-all disabled:opacity-50 mb-6"
-        style={{ background: saved ? 'rgba(22,163,74,0.1)' : 'var(--brand)', color: saved ? '#16A34A' : '#fff' }}>
+        style={{ background: saved ? 'var(--bg-elevated)' : 'var(--brand)', color: saved ? 'var(--brand)' : '#fff' }}>
         {saving ? <><Loader2 size={18} className="animate-spin" /> Guardando...</>
         : saved  ? <><CheckCircle size={18} /> ¡Guardado!</>
         :          <><Save size={18} /> Guardar cambios</>}
@@ -433,7 +433,7 @@ function AjustesInner() {
             onClick={handleSaveBank}
             disabled={bankSaving}
             className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm transition-all disabled:opacity-50"
-            style={{ background: bankSaved ? 'rgba(22,163,74,0.1)' : 'var(--brand)', color: bankSaved ? '#16A34A' : '#fff' }}>
+            style={{ background: bankSaved ? 'var(--bg-elevated)' : 'var(--brand)', color: bankSaved ? 'var(--brand)' : '#fff' }}>
             {bankSaving ? <><Loader2 size={16} className="animate-spin" /> Guardando...</>
             : bankSaved  ? <><CheckCircle size={16} /> ¡Cuenta guardada!</>
             :              <><Save size={16} /> Guardar cuenta bancaria</>}
@@ -463,7 +463,7 @@ function AjustesInner() {
           </div>
           {gcalConnected && (
             <span className="ml-auto flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
-              style={{ background: 'rgba(22,163,74,0.1)', color: '#16A34A' }}>
+              style={{ background: 'var(--bg-elevated)', color: 'var(--brand)' }}>
               <CheckCircle size={11} /> Conectado
             </span>
           )}
@@ -473,9 +473,9 @@ function AjustesInner() {
           <div className="mb-4 px-4 py-3 rounded-xl text-sm"
             style={{
               background: gcalMessage.includes('conectado') || gcalMessage.includes('Conectado')
-                ? 'rgba(22,163,74,0.06)' : 'rgba(220,38,38,0.06)',
+                ? 'var(--bg-elevated)' : 'rgba(220,38,38,0.06)',
               border: `1px solid ${gcalMessage.includes('conectado') || gcalMessage.includes('Conectado')
-                ? 'rgba(22,163,74,0.2)' : 'rgba(220,38,38,0.2)'}`,
+                ? 'var(--border-subtle)' : 'rgba(220,38,38,0.2)'}`,
               color: gcalMessage.includes('conectado') || gcalMessage.includes('Conectado')
                 ? '#166534' : '#991B1B',
             }}>
@@ -564,7 +564,7 @@ function AjustesInner() {
                 <button onClick={copyIcalUrl}
                   className="flex items-center gap-1.5 px-4 py-3 rounded-xl text-xs font-semibold shrink-0 transition-all"
                   style={icalCopied
-                    ? { background: 'rgba(22,163,74,0.1)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)' }
+                    ? { background: 'var(--bg-elevated)', color: 'var(--brand)', border: '1px solid var(--border-subtle)' }
                     : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
                   {icalCopied ? <><CheckCircle size={13} /> Copiado</> : <><Copy size={13} /> Copiar</>}
                 </button>

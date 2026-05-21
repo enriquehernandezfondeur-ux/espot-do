@@ -337,7 +337,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
           {paidAmount > 0 && (
             <div className="flex justify-between items-center pt-1">
               <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Pagado hasta ahora</span>
-              <span className="text-xs font-semibold" style={{ color: '#16A34A' }}>{formatCurrency(paidAmount)}</span>
+              <span className="text-xs font-semibold" style={{ color: 'var(--brand)' }}>{formatCurrency(paidAmount)}</span>
             </div>
           )}
 
@@ -348,8 +348,8 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
               <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Estado de pago al host</span>
               <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
                 style={{
-                  background: bk.payout_status === 'paid' ? 'rgba(22,163,74,0.1)' : 'rgba(217,119,6,0.1)',
-                  color: bk.payout_status === 'paid' ? '#16A34A' : '#D97706',
+                  background: bk.payout_status === 'paid' ? 'var(--bg-elevated)' : 'rgba(217,119,6,0.1)',
+                  color: bk.payout_status === 'paid' ? 'var(--brand)' : '#D97706',
                 }}>
                 {bk.payout_status === 'paid' ? 'Transferido' : 'Pendiente de transferir'}
               </span>
@@ -389,9 +389,9 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
       {/* ── Plan de cuotas (solo lectura para el host) ────── */}
       {installments.length > 0 && (
         <div className="rounded-2xl overflow-hidden mb-4"
-          style={{ border: '1.5px solid var(--brand-border)' }}>
+          style={{ border: '1.5px solid var(--border-subtle)' }}>
           <div className="flex items-center justify-between px-5 py-3.5"
-            style={{ background: 'var(--brand-dim)', borderBottom: '1px solid var(--brand-border)' }}>
+            style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
             <span className="text-sm font-bold" style={{ color: 'var(--brand)' }}>Plan de cuotas</span>
             <span className="text-xs font-semibold" style={{ color: 'var(--brand)' }}>
               {installments.filter((i: any) => i.status === 'paid').length}/{installments.length} pagadas
@@ -411,9 +411,9 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
                 {/* Indicador numérico */}
                 <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
                   style={{
-                    background: paid ? 'rgba(22,163,74,0.1)' : overdue ? 'rgba(220,38,38,0.08)' : isNext ? 'var(--brand-dim)' : 'var(--bg-elevated)',
-                    color: paid ? '#16A34A' : overdue ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)',
-                    border: `1.5px solid ${paid ? 'rgba(22,163,74,0.3)' : overdue ? 'rgba(220,38,38,0.2)' : isNext ? 'var(--brand-border)' : 'var(--border-medium)'}`,
+                    background: paid ? 'var(--bg-elevated)' : overdue ? 'rgba(220,38,38,0.08)' : isNext ? 'var(--bg-elevated)' : 'var(--bg-elevated)',
+                    color: paid ? 'var(--brand)' : overdue ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)',
+                    border: `1.5px solid ${paid ? 'var(--bg-elevated)' : overdue ? 'rgba(220,38,38,0.2)' : isNext ? 'var(--border-subtle)' : 'var(--border-medium)'}`,
                   }}>
                   {paid ? <Check size={12} /> : i + 1}
                 </div>
@@ -425,7 +425,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
                       {formatCurrency(Number(inst.amount))}
                     </span>
                     <span className="text-xs font-medium"
-                      style={{ color: paid ? '#16A34A' : overdue ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)' }}>
+                      style={{ color: paid ? 'var(--brand)' : overdue ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)' }}>
                       {paid
                         ? `Recibido${inst.paid_at ? ' · ' + formatDate(inst.paid_at.split('T')[0]) : ''}`
                         : countdownLabel(inst.due_date)}
@@ -440,7 +440,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
           })}
           {allPaid && (
             <div className="px-5 py-3.5 flex items-center gap-2"
-              style={{ borderTop: '1px solid var(--brand-border)', background: 'var(--brand-dim)' }}>
+              style={{ borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)' }}>
               <CheckCircle size={14} style={{ color: 'var(--brand)' }} />
               <span className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>
                 Todas las cuotas recibidas
@@ -454,7 +454,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
       {(bk.status === 'confirmed' || bk.status === 'completed') && (
         <a href={`/contrato/${bk.id}`} target="_blank" rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl text-sm font-semibold mb-4 transition-all"
-          style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1.5px solid var(--brand-border)' }}>
+          style={{ background: 'var(--bg-elevated)', color: 'var(--brand)', border: '1.5px solid var(--border-subtle)' }}>
           <FileText size={15} /> Ver contrato oficial · Descargar PDF
         </a>
       )}
@@ -475,7 +475,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
             onClick={doAccept}
             disabled={!!actionId}
             className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-bold transition-all disabled:opacity-50"
-            style={{ background: '#16A34A', color: '#fff' }}>
+            style={{ background: 'var(--brand)', color: '#fff' }}>
             {actionId === 'accept'
               ? <><Loader2 size={15} className="animate-spin" /> Aceptando...</>
               : <><CheckCircle size={15} /> Aceptar reserva</>}
@@ -543,9 +543,9 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
       {/* Estado: esperando pago */}
       {bk.status === 'accepted' && (
         <div className="rounded-2xl px-4 py-4 mb-4 flex items-center gap-3"
-          style={{ background: 'rgba(37,99,235,0.06)', border: '1px solid rgba(37,99,235,0.15)' }}>
-          <Loader2 size={15} style={{ color: '#2563EB', flexShrink: 0 }} className="animate-spin" />
-          <p className="text-sm" style={{ color: '#1D4ED8' }}>
+          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--bg-elevated)' }}>
+          <Loader2 size={15} style={{ color: 'var(--brand)', flexShrink: 0 }} className="animate-spin" />
+          <p className="text-sm" style={{ color: 'var(--text-primary)' }}>
             Esperando que el cliente realice el primer pago.
           </p>
         </div>

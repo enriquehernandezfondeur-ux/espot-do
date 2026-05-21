@@ -258,7 +258,7 @@ export default function CalendarioPage() {
           {/* Google Calendar */}
           {gcalConnected ? (
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium"
-              style={{ background: 'rgba(22,163,74,0.08)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)' }}>
+              style={{ background: 'var(--bg-elevated)', color: 'var(--brand)', border: '1px solid var(--border-subtle)' }}>
               <CheckCircle size={13} />
               Google Calendar
               <button
@@ -266,7 +266,7 @@ export default function CalendarioPage() {
                 disabled={gcalDisconnecting}
                 title="Desconectar"
                 className="ml-1 opacity-50 hover:opacity-100 transition-opacity"
-                style={{ color: '#16A34A' }}>
+                style={{ color: 'var(--brand)' }}>
                 <Link2Off size={11} />
               </button>
             </div>
@@ -284,7 +284,7 @@ export default function CalendarioPage() {
             onClick={copyIcal}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all"
             style={icalCopied
-              ? { background: 'rgba(22,163,74,0.08)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)' }
+              ? { background: 'var(--bg-elevated)', color: 'var(--brand)', border: '1px solid var(--border-subtle)' }
               : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }
             }>
             {icalCopied ? <><CheckCircle size={13} /> Copiado</> : <><Calendar size={13} /> Copiar iCal</>}

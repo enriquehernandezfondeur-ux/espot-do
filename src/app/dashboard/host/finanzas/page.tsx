@@ -10,15 +10,15 @@ import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts'
 // ── Estados de pago unificados ─────────────────────────────
 const paymentLabel: Record<string, { label: string; color: string; bg: string }> = {
   unpaid:  { label: 'Sin pago',         color: '#D97706', bg: 'rgba(217,119,6,0.08)' },
-  partial: { label: 'Pago parcial',     color: '#2563EB', bg: 'rgba(37,99,235,0.08)' },
+  partial: { label: 'Pago parcial',     color: 'var(--brand)', bg: 'var(--bg-elevated)' },
   advance: { label: 'Anticipo recibido',color: '#7C3AED', bg: 'rgba(124,58,237,0.08)' },
-  paid:    { label: 'Pagado completo',  color: '#16A34A', bg: 'rgba(22,163,74,0.08)' },
+  paid:    { label: 'Pagado completo',  color: 'var(--brand)', bg: 'var(--bg-elevated)' },
 }
 
 // ── Estado de payout por reserva (simplificado) ───────────
 function getPayoutStatus(booking: any): { label: string; color: string; bg: string } {
   if (booking.status === 'completed' && booking.payment_status === 'paid')
-    return { label: 'Pago recibido',    color: '#16A34A', bg: 'rgba(22,163,74,0.08)' }
+    return { label: 'Pago recibido',    color: 'var(--brand)', bg: 'var(--bg-elevated)' }
   if (booking.status === 'confirmed')
     return { label: 'Cuotas activas',   color: '#D97706', bg: 'rgba(217,119,6,0.08)' }
   if (['cancelled_guest', 'cancelled_host', 'rejected'].includes(booking.status))

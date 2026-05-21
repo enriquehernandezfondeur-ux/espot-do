@@ -8,8 +8,8 @@ import { getClientStats } from '@/lib/actions/client'
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   pending:         { label: 'Pendiente',    color: '#D97706', bg: 'rgba(217,119,6,0.08)',    dot: 'bg-amber-400' },
-  accepted:        { label: 'Por pagar',    color: '#2563EB', bg: 'rgba(37,99,235,0.08)',    dot: 'bg-blue-400' },
-  confirmed:       { label: 'Confirmada',   color: '#16A34A', bg: 'rgba(22,163,74,0.08)',    dot: 'bg-green-500' },
+  accepted:        { label: 'Por pagar',    color: 'var(--brand)', bg: 'var(--bg-elevated)',    dot: 'bg-blue-400' },
+  confirmed:       { label: 'Confirmada',   color: 'var(--brand)', bg: 'var(--bg-elevated)',    dot: 'bg-green-500' },
   completed:       { label: 'Completada',   color: '#35C493', bg: 'rgba(53,196,147,0.08)',   dot: 'bg-emerald-400' },
   quote_requested: { label: 'Cotización',   color: '#7C3AED', bg: 'rgba(124,58,237,0.08)',   dot: 'bg-purple-400' },
   rejected:        { label: 'Rechazada',    color: '#DC2626', bg: 'rgba(220,38,38,0.08)',    dot: 'bg-red-500' },
@@ -95,7 +95,7 @@ export default function ClientDashboard() {
       <div className="grid grid-cols-2 gap-3">
         {[
           { href: '/buscar', label: 'Buscar espacios', sub: 'Explora ahora', icon: MapPin, color: 'var(--brand)' },
-          { href: '/para-clientes', label: 'Cómo reservar', sub: 'Aprende más', icon: CalendarDays, color: '#2563EB' },
+          { href: '/para-clientes', label: 'Cómo reservar', sub: 'Aprende más', icon: CalendarDays, color: 'var(--brand)' },
         ].map(({ href, label, sub, icon: Icon, color }) => (
           <Link key={href} href={href}
             className="flex items-center gap-3 p-4 rounded-2xl transition-all card-hover"
@@ -153,11 +153,11 @@ export default function ClientDashboard() {
 
       {(stats?.pendingPayment ?? 0) > 0 && (stats?.overdueInstallments?.length ?? 0) === 0 && (
         <div className="mb-4 rounded-2xl overflow-hidden"
-          style={{ border: '1.5px solid rgba(37,99,235,0.2)' }}>
+          style={{ border: '1.5px solid var(--border-subtle)' }}>
           <div className="px-4 py-3 flex items-center gap-2.5"
-            style={{ background: 'rgba(37,99,235,0.06)', borderBottom: '1px solid rgba(37,99,235,0.12)' }}>
-            <Bell size={15} style={{ color: '#2563EB', flexShrink: 0 }} />
-            <span className="text-sm font-semibold flex-1" style={{ color: '#1D4ED8' }}>
+            style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
+            <Bell size={15} style={{ color: 'var(--brand)', flexShrink: 0 }} />
+            <span className="text-sm font-semibold flex-1" style={{ color: 'var(--text-primary)' }}>
               {stats!.pendingPayment === 1
                 ? 'Reserva aceptada — pendiente de pago'
                 : `${stats!.pendingPayment} reservas pendientes de pago`}
@@ -168,12 +168,12 @@ export default function ClientDashboard() {
             const cover = sp?.space_images?.find((i: any) => i.is_cover)?.url ?? sp?.space_images?.[0]?.url
             return (
             <div key={bk.id} className="flex items-center gap-3 justify-between px-4 py-3"
-              style={{ borderBottom: '1px solid rgba(37,99,235,0.08)', background: '#fff' }}>
+              style={{ borderBottom: '1px solid var(--bg-elevated)', background: '#fff' }}>
               <Link href={`/dashboard/reservas/${bk.id}`} className="min-w-0 flex-1 flex items-center gap-3">
                 {cover
                   ? <img src={cover} alt={sp?.name} className="w-10 h-10 rounded-xl object-cover shrink-0" />
                   : <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shrink-0 text-sm"
-                      style={{ background: 'linear-gradient(135deg, #2563EB, #1D4ED8)' }}>
+                      style={{ background: 'linear-gradient(135deg, var(--brand), var(--text-primary))' }}>
                       {sp?.name?.charAt(0)}
                     </div>
                 }
@@ -197,7 +197,7 @@ export default function ClientDashboard() {
               </Link>
               <Link href={`/pago/${bk.id}`}
                 className="text-xs font-bold px-3 py-2 rounded-xl shrink-0"
-                style={{ background: '#2563EB', color: '#fff', whiteSpace: 'nowrap' }}>
+                style={{ background: 'var(--brand)', color: '#fff', whiteSpace: 'nowrap' }}>
                 Pagar →
               </Link>
             </div>
@@ -209,11 +209,11 @@ export default function ClientDashboard() {
       {/* ── Recién confirmadas — aparecen 48h después de pagar ── */}
       {(stats?.recentlyConfirmed?.length ?? 0) > 0 && (
         <div className="mb-4 rounded-2xl overflow-hidden"
-          style={{ border: '1.5px solid rgba(22,163,74,0.25)', background: 'rgba(22,163,74,0.04)' }}>
+          style={{ border: '1.5px solid var(--border-subtle)', background: 'var(--bg-elevated)' }}>
           <div className="flex items-center gap-2.5 px-4 py-3"
-            style={{ borderBottom: '1px solid rgba(22,163,74,0.15)' }}>
-            <CheckCircle size={14} style={{ color: '#16A34A' }} />
-            <span className="text-sm font-semibold" style={{ color: '#16A34A' }}>
+            style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+            <CheckCircle size={14} style={{ color: 'var(--brand)' }} />
+            <span className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>
               {stats!.recentlyConfirmed!.length === 1 ? 'Reserva confirmada' : `${stats!.recentlyConfirmed!.length} reservas confirmadas`} recientemente
             </span>
           </div>
@@ -222,13 +222,13 @@ export default function ClientDashboard() {
             const cover = sp?.space_images?.find((i: any) => i.is_cover)?.url ?? sp?.space_images?.[0]?.url
             return (
               <Link key={bk.id} href={`/dashboard/reservas/${bk.id}`}
-                className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-[rgba(22,163,74,0.06)]"
-                style={{ borderBottom: '1px solid rgba(22,163,74,0.08)' }}>
+                className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-[var(--bg-elevated)]"
+                style={{ borderBottom: '1px solid var(--bg-elevated)' }}>
                 <div className="flex items-center gap-3 min-w-0">
                   {cover
                     ? <img src={cover} alt={sp?.name} className="w-9 h-9 rounded-xl object-cover shrink-0" />
                     : <div className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold text-white shrink-0"
-                        style={{ background: 'linear-gradient(135deg, #35C493, #16A34A)' }}>
+                        style={{ background: 'var(--brand)' }}>
                         {sp?.name?.charAt(0)}
                       </div>
                   }
@@ -258,9 +258,9 @@ export default function ClientDashboard() {
         const today = new Date(); today.setHours(0, 0, 0, 0)
         const daysLeft = Math.ceil((new Date(inst.due_date + 'T12:00').getTime() - today.getTime()) / 86400000)
         const isUrgent = daysLeft <= 7
-        const color = isUrgent ? '#D97706' : '#2563EB'
-        const bg    = isUrgent ? 'rgba(217,119,6,0.06)' : 'rgba(37,99,235,0.05)'
-        const bdr   = isUrgent ? 'rgba(217,119,6,0.2)'  : 'rgba(37,99,235,0.2)'
+        const color = isUrgent ? '#D97706' : 'var(--brand)'
+        const bg    = isUrgent ? 'rgba(217,119,6,0.06)' : 'var(--bg-elevated)'
+        const bdr   = isUrgent ? 'rgba(217,119,6,0.2)'  : 'var(--border-subtle)'
         return (
           <div className="mb-4 rounded-2xl px-4 py-3.5 flex items-center gap-3"
             style={{ background: bg, border: `1.5px solid ${bdr}` }}>
@@ -268,11 +268,11 @@ export default function ClientDashboard() {
             <div className="flex-1 min-w-0">
               <div className="text-sm font-semibold" style={{ color }}>
                 {formatCurrency(Number(inst.amount))}
-                <span className="font-normal ml-1.5 text-xs" style={{ color: isUrgent ? '#92400E' : '#1D4ED8' }}>
+                <span className="font-normal ml-1.5 text-xs" style={{ color: isUrgent ? '#92400E' : 'var(--text-primary)' }}>
                   · {daysLeft === 0 ? 'vence hoy' : daysLeft === 1 ? 'vence mañana' : `vence en ${daysLeft} días`}
                 </span>
               </div>
-              <div className="text-xs mt-0.5" style={{ color: isUrgent ? '#B45309' : '#3B82F6' }}>
+              <div className="text-xs mt-0.5" style={{ color: isUrgent ? '#B45309' : 'var(--text-secondary)' }}>
                 Próxima cuota · {formatDate(inst.due_date)}
               </div>
             </div>
@@ -384,15 +384,15 @@ export default function ClientDashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
         {[
           { label: 'Total reservas', value: stats?.total ?? 0,            icon: CalendarDays, color: 'var(--brand)',  featured: true },
-          { label: 'Por pagar',      value: stats?.pendingPayment ?? 0,   icon: Clock,        color: '#2563EB',
+          { label: 'Por pagar',      value: stats?.pendingPayment ?? 0,   icon: Clock,        color: 'var(--brand)',
             urgent: (stats?.pendingPayment ?? 0) > 0 },
-          { label: 'Confirmadas',    value: stats?.confirmed ?? 0,        icon: CheckCircle,  color: '#16A34A' },
+          { label: 'Confirmadas',    value: stats?.confirmed ?? 0,        icon: CheckCircle,  color: 'var(--brand)' },
           { label: 'Total gastado',  value: formatCurrency(stats?.totalSpent ?? 0), icon: CreditCard, color: '#7C3AED' },
         ].map(({ label, value, icon: Icon, color, urgent, featured }: any) => (
           <div key={label} className="rounded-2xl p-4 md:p-5 transition-all hover:-translate-y-0.5"
             style={{
-              background: urgent ? 'rgba(37,99,235,0.04)' : '#fff',
-              border: urgent ? '1.5px solid rgba(37,99,235,0.25)' : featured ? '1px solid var(--brand-border)' : '1px solid var(--border-subtle)',
+              background: urgent ? 'var(--bg-elevated)' : '#fff',
+              border: urgent ? '1.5px solid var(--border-subtle)' : featured ? '1px solid var(--brand-border)' : '1px solid var(--border-subtle)',
               boxShadow: featured ? '0 4px 16px rgba(53,196,147,0.12)' : '0 2px 8px rgba(0,0,0,0.06)',
               borderTop: featured ? '3px solid var(--brand)' : undefined,
             }}>
@@ -467,10 +467,10 @@ export default function ClientDashboard() {
                           const p = (bk as any).space_pricing as any
                           if (!p) return null
                           const map: Record<string, { label: string; color: string }> = {
-                            hourly:              { label: 'Por hora',      color: '#2563EB' },
+                            hourly:              { label: 'Por hora',      color: 'var(--brand)' },
                             minimum_consumption: { label: 'Consumibles',  color: '#D97706' },
                             fixed_package:       { label: p.package_name ?? 'Paquete', color: '#7C3AED' },
-                            custom_quote:        { label: 'Cotización',    color: '#0891B2' },
+                            custom_quote:        { label: 'Cotización',    color: 'var(--text-secondary)' },
                           }
                           const cfg = map[p.pricing_type]
                           if (!cfg) return null

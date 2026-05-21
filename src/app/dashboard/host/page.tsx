@@ -63,8 +63,8 @@ function StatCard({
         {trend && (
           <div className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
             style={{
-              background: trend.positive ? 'rgba(22,163,74,0.08)' : 'rgba(220,38,38,0.08)',
-              color:      trend.positive ? '#16A34A' : '#DC2626',
+              background: trend.positive ? 'var(--bg-elevated)' : 'rgba(220,38,38,0.08)',
+              color:      trend.positive ? 'var(--brand)' : '#DC2626',
             }}>
             {trend.positive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
             {trend.value}
@@ -393,7 +393,7 @@ export default function DashboardPage() {
                       <div className="flex gap-2 mt-3">
                         <button onClick={() => handleConfirm(booking.id)}
                           className="flex-1 text-xs font-semibold py-2 rounded-xl transition-all"
-                          style={{ background: 'rgba(22,163,74,0.08)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)' }}>
+                          style={{ background: 'var(--bg-elevated)', color: 'var(--brand)', border: '1px solid var(--bg-elevated)' }}>
                           Aceptar
                         </button>
                         <button onClick={() => handleReject(booking.id)}

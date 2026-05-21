@@ -152,7 +152,7 @@ export default function PerfilPage() {
               {uploading ? 'Subiendo foto...' : 'Click en la cámara para cambiar tu foto'}
             </p>
             {profile?.id_verified && (
-              <div className="flex items-center gap-1.5 text-xs font-medium mt-1.5" style={{ color: '#16A34A' }}>
+              <div className="flex items-center gap-1.5 text-xs font-medium mt-1.5" style={{ color: 'var(--brand)' }}>
                 <Shield size={12} /> Identidad verificada
               </div>
             )}
