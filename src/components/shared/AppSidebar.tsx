@@ -14,6 +14,7 @@ export interface NavItem {
   href: string
   label: string
   icon: LucideIcon
+  badge?: number
 }
 
 export interface AppSidebarProps {
@@ -137,7 +138,7 @@ export default function AppSidebar({
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-2 space-y-0.5">
-        {navItems.map(({ href, label, icon: Icon }) => {
+        {navItems.map(({ href, label, icon: Icon, badge }) => {
           const active = isActive(href)
           return (
             <Link key={href} href={href}
@@ -154,7 +155,13 @@ export default function AppSidebar({
                 onMouseLeave: (e: React.MouseEvent<HTMLAnchorElement>) => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'; (e.currentTarget as HTMLElement).style.background = 'transparent' } },
               } : {})}>
               <Icon size={15} className="shrink-0" style={active ? { color: 'var(--brand)' } : undefined} />
-              {label}
+              <span className="flex-1">{label}</span>
+              {badge != null && badge > 0 && (
+                <span className="flex items-center justify-center text-xs font-bold rounded-full shrink-0"
+                  style={{ minWidth: 18, height: 18, padding: '0 4px', background: '#EF4444', color: '#fff', fontSize: 10 }}>
+                  {badge > 99 ? '99+' : badge}
+                </span>
+              )}
             </Link>
           )
         })}

@@ -1,12 +1,15 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import {
   LayoutDashboard, CalendarDays, Heart,
   CreditCard, User, MessageCircle, Building2,
 } from 'lucide-react'
 import AppSidebar from '@/components/shared/AppSidebar'
+import { createClient } from '@/lib/supabase/client'
+import { usePathname } from 'next/navigation'
 
-const navItems = [
+const BASE_NAV = [
   { href: '/dashboard/overview',   label: 'Inicio',       icon: LayoutDashboard },
   { href: '/dashboard/reservas',   label: 'Mis reservas', icon: CalendarDays },
   { href: '/dashboard/favoritos',  label: 'Favoritos',    icon: Heart },
@@ -15,7 +18,7 @@ const navItems = [
   { href: '/dashboard/perfil',     label: 'Mi perfil',    icon: User },
 ]
 
-const mobileBottomNav = [
+const MOBILE_NAV = [
   { href: '/dashboard/overview',   label: 'Inicio',    icon: LayoutDashboard },
   { href: '/dashboard/reservas',   label: 'Reservas',  icon: CalendarDays },
   { href: '/dashboard/mensajes',   label: 'Mensajes',  icon: MessageCircle },
@@ -23,6 +26,41 @@ const mobileBottomNav = [
 ]
 
 export default function ClientSidebar({ userName, avatarUrl }: { userName?: string; avatarUrl?: string }) {
+  const [unread, setUnread] = useState(0)
+  const pathname = usePathname()
+
+  useEffect(() => {
+    if (pathname?.includes('/mensajes')) setUnread(0)
+  }, [pathname])
+
+  useEffect(() => {
+    const supabase = createClient()
+    let cleanup: (() => void) | undefined
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return
+      supabase.from('messages').select('id', { count: 'exact', head: true })
+        .eq('receiver_id', user.id).is('read_at', null)
+        .then(({ count }) => setUnread(count ?? 0))
+
+      const channel = supabase
+        .channel(`client-unread:${user.id}`)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${user.id}` },
+          () => setUnread(prev => prev + 1))
+        .subscribe()
+
+      cleanup = () => supabase.removeChannel(channel)
+    })
+    return () => cleanup?.()
+  }, [])
+
+  const navItems = BASE_NAV.map(item =>
+    item.href === '/dashboard/mensajes' ? { ...item, badge: unread } : item
+  )
+  const mobileBottomNav = MOBILE_NAV.map(item =>
+    item.href === '/dashboard/mensajes' ? { ...item, badge: unread } : item
+  )
+
   return (
     <AppSidebar
       userName={userName}
