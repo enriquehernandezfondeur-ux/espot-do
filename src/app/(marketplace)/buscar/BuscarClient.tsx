@@ -6,7 +6,7 @@ import Link from 'next/link'
 import {
   Search, MapPin, Users, SlidersHorizontal, X, CalendarDays, Clock,
   LayoutList, Map,
-  Check, Building2, UtensilsCrossed, ChevronDown, Tag,
+  Check, Building2, UtensilsCrossed, ChevronDown,
   Wine, Trees, Camera,
   Car, Volume2, Music2, Waves, Minus, Plus, Wifi,
   Wind, Projector, Zap, ShowerHead, MonitorPlay,
@@ -489,7 +489,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                     border: `1.5px solid ${activity ? 'var(--brand-border)' : 'var(--border-medium)'}`,
                     color: activity ? 'var(--brand)' : 'var(--text-primary)',
                   }}>
-                  <Tag size={14} style={{ flexShrink: 0 }} />
+                  <LayoutList size={14} style={{ flexShrink: 0 }} />
                   <span>{activityLabel || 'Tipo de evento'}</span>
                   {activity
                     ? <button onClick={e => { e.stopPropagation(); setActivity(''); setActQ('') }}><X size={12} /></button>
@@ -530,7 +530,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                               style={{ color: isActive ? 'var(--brand)' : 'var(--text-primary)', fontWeight: isActive ? 600 : 400 }}
                               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}
                               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
-                              <Tag size={11} style={{ color: isActive ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
+                              <LayoutList size={11} style={{ color: isActive ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
                               {a.label}
                               {isActive && <Check size={13} style={{ color: 'var(--brand)', marginLeft: 'auto' }} />}
                             </button>
@@ -869,7 +869,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
             <button onClick={() => openDrawer('tipo-evento')}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all"
               style={{ background: activity ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${activity ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: activity ? 'var(--brand)' : 'var(--text-primary)' }}>
-              <Tag size={13} style={{ flexShrink: 0 }} />
+              <LayoutList size={13} style={{ flexShrink: 0 }} />
               <span>{activityLabel || 'Evento'}</span>
               {activity ? <span onClick={e => { e.stopPropagation(); setActivity('') }} className="flex items-center justify-center w-7 h-7 -mr-1"><X size={12} /></span> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
             </button>
@@ -1326,7 +1326,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                 <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>¿Qué tipo de evento vas a celebrar?</p>
                 {/* Input libre */}
                 <div className="relative mb-3">
-                  <Tag size={15} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
+                  <LayoutList size={15} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
                     style={{ color: activity ? 'var(--brand)' : 'var(--text-muted)' }} />
                   <input
                     value={actQ}

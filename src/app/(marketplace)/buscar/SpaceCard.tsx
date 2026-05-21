@@ -219,7 +219,7 @@ export function SpaceCard({
             <FavoriteButton spaceId={space.id} size="sm" />
           </div>
 
-          {/* Badge top-left: disponibilidad > instantánea > verificado */}
+          {/* Badge top-left: disponibilidad > instantánea */}
           {isAvailable !== undefined ? (
             <span className="absolute top-3 left-3 z-20 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
               style={{ background: isAvailable ? 'rgba(53,196,147,0.92)' : 'rgba(220,38,38,0.85)', color: '#fff', backdropFilter: 'blur(8px)' }}>
@@ -231,11 +231,6 @@ export function SpaceCard({
               style={{ background: 'rgba(37,99,235,0.9)', color: '#fff', backdropFilter: 'blur(8px)' }}>
               <Zap size={9} style={{ fill: '#fff' }} /> Instantánea
             </span>
-          ) : space.is_verified ? (
-            <span className="absolute top-3 left-3 z-20 flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
-              style={{ background: 'rgba(53,196,147,0.9)', color: '#fff', backdropFilter: 'blur(8px)' }}>
-              <Check size={9} /> Verificado
-            </span>
           ) : null}
         </div>
 
@@ -243,11 +238,19 @@ export function SpaceCard({
         <div className="p-4 flex flex-col gap-2 flex-1">
 
           {/* Nombre */}
-          <h3 className="font-semibold text-sm leading-snug truncate"
-            title={space.name}
-            style={{ color: '#0F1623', letterSpacing: '-0.01em' }}>
-            {space.name}
-          </h3>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <h3 className="font-semibold text-sm leading-snug truncate min-w-0"
+              title={space.name}
+              style={{ color: '#0F1623', letterSpacing: '-0.01em' }}>
+              {space.name}
+            </h3>
+            {space.is_verified && (
+              <span className="flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center"
+                style={{ background: '#35C493' }}>
+                <Check size={9} style={{ color: '#fff', strokeWidth: 3 }} />
+              </span>
+            )}
+          </div>
 
           {/* Ubicación + categoría + rating — todo en una línea */}
           <div className="flex items-center justify-between gap-2">
