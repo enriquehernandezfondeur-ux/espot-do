@@ -30,10 +30,18 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
   const [pendingPay,    setPendingPay]    = useState(0)
   const pathname = usePathname()
 
-  // Resetear al entrar a cada sección
+  // Re-consultar conteos reales en cada navegación
   useEffect(() => {
-    if (pathname?.includes('/mensajes')) setUnread(0)
-    if (pathname?.includes('/reservas')) setPendingPay(0)
+    const supabase = createClient()
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return
+      // Mensajes no leídos — siempre desde DB
+      supabase.from('messages').select('id', { count: 'exact', head: true })
+        .eq('receiver_id', user.id).is('read_at', null)
+        .then(({ count }) => setUnread(count ?? 0))
+      // Reservas — reset al entrar
+      if (pathname?.includes('/reservas')) setPendingPay(0)
+    })
   }, [pathname])
 
   useEffect(() => {
@@ -57,10 +65,6 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
       const ch1 = supabase.channel(`client-msg:${user.id}`)
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${user.id}` },
           () => setUnread(prev => prev + 1))
-        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: `receiver_id=eq.${user.id}` },
-          () => supabase.from('messages').select('id', { count: 'exact', head: true })
-            .eq('receiver_id', user.id).is('read_at', null)
-            .then(({ count }) => setUnread(count ?? 0)))
         .subscribe()
 
       // Realtime bookings (pagos)
