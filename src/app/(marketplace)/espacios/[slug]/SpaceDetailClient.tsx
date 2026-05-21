@@ -1298,44 +1298,6 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
           {/* ── DERECHA: resumen rápido + BOOKING WIDGET ── */}
           <div className="order-1 lg:order-2 lg:sticky lg:top-20 hidden lg:block space-y-3">
 
-            {/* Resumen de precio antes del widget */}
-            {(() => {
-              const p = pricing
-              if (!p) return null
-              const items = []
-              if (p.pricing_type === 'hourly') {
-                if (p.hourly_price) items.push({ label: 'Precio', value: `${formatCurrency(p.hourly_price)} / hora` })
-                if (p.min_hours) items.push({ label: 'Mínimo', value: `${p.min_hours} hora${p.min_hours > 1 ? 's' : ''}` })
-              }
-              if (p.pricing_type === 'minimum_consumption') {
-                if (p.minimum_consumption) items.push({ label: 'Consumibles', value: formatCurrency(p.minimum_consumption) })
-                if (p.session_hours) items.push({ label: 'Sesión', value: `${p.session_hours}h incluidas` })
-              }
-              if (p.pricing_type === 'fixed_package') {
-                if (p.fixed_price) items.push({ label: 'Paquete', value: formatCurrency(p.fixed_price) })
-                if (p.package_hours) items.push({ label: 'Incluye', value: `${p.package_hours}h` })
-                if (p.extra_hour_price > 0) items.push({ label: 'Hora adicional', value: formatCurrency(p.extra_hour_price) })
-              }
-              if (!items.length) return null
-              return (
-                <div className="rounded-2xl px-4 py-3 flex items-center justify-between gap-4 flex-wrap"
-                  style={{ background: 'var(--brand-dim)', border: '1.5px solid var(--brand-border)' }}>
-                  {items.map((item, i) => (
-                    <div key={i} className="text-center flex-1 min-w-0">
-                      <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--brand)' }}>{item.label}</p>
-                      <p className="text-sm font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>{item.value}</p>
-                    </div>
-                  ))}
-                  {space.instant_booking && (
-                    <span className="flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full shrink-0"
-                      style={{ background: 'rgba(37,99,235,0.12)', color: '#1D4ED8', border: '1px solid rgba(37,99,235,0.2)' }}>
-                      ⚡ Confirmación instantánea
-                    </span>
-                  )}
-                </div>
-              )
-            })()}
-
             <BookingWidget space={space} onChat={() => setShowChat(true)} initialDate={initialDate} />
 
             {/* ── Garantía Espot ── */}
