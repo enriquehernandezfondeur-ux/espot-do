@@ -301,10 +301,6 @@ export default function ClientDashboard() {
                 <img src={cover} alt={sp?.name}
                   className="w-full h-full object-cover" />
               )}
-              {/* Gradiente sobre la foto */}
-              <div className="absolute inset-0"
-                style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.1) 50%, transparent 100%)' }} />
-
               {/* Badge días */}
               <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full"
                 style={{ background: 'rgba(53,196,147,0.9)', backdropFilter: 'blur(8px)' }}>
@@ -313,24 +309,21 @@ export default function ClientDashboard() {
                   {daysUntilNext === 0 ? '¡Hoy!' : daysUntilNext === 1 ? 'Mañana' : `En ${daysUntilNext} días`}
                 </span>
               </div>
-
-              {/* Nombre sobre la foto */}
-              <div className="absolute bottom-0 left-0 right-0 px-5 pb-4">
-                <p className="text-xs font-semibold mb-0.5" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                  TU PRÓXIMO EVENTO
-                </p>
-                <h2 className="font-bold text-white leading-tight" style={{ fontSize: 'clamp(1.15rem,4vw,1.4rem)' }}>
-                  {sp?.name}
-                </h2>
-                {sp?.sector && (
-                  <p className="text-xs mt-0.5 flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                    <MapPin size={11} /> {sp.sector}, {sp.city}
-                  </p>
-                )}
-              </div>
             </div>
 
             {/* Info — blanco */}
+            <div className="px-5 pt-4 pb-3" style={{ background: '#fff', borderBottom: '1px solid var(--border-subtle)' }}>
+              <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'var(--text-muted)' }}>Tu próximo evento</p>
+              <h2 className="font-bold leading-tight mb-0.5" style={{ fontSize: 'clamp(1.05rem,3vw,1.25rem)', color: 'var(--text-primary)' }}>
+                {sp?.name}
+              </h2>
+              {sp?.sector && (
+                <p className="text-xs flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
+                  <MapPin size={10} /> {sp.sector}, {sp.city}
+                </p>
+              )}
+            </div>
+
             <div className="px-5 py-4 flex items-center justify-between gap-4"
               style={{ background: '#fff' }}>
               <div className="flex items-center gap-4 flex-wrap">
