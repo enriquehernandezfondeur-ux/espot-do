@@ -686,14 +686,6 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   </div>
                   <div className="text-xs md:text-sm" style={{ color: 'var(--text-secondary)' }}>Propietario del espacio</div>
                 </div>
-                {/* Botón Preguntar junto al perfil del propietario */}
-                <button
-                  onClick={() => setShowChat(true)}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold shrink-0 transition-all hover:opacity-90"
-                  style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1.5px solid var(--brand-border)' }}>
-                  <MessageCircle size={14} />
-                  <span className="hidden sm:inline">Preguntar</span>
-                </button>
               </div>
             )}
 
@@ -879,7 +871,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   return (
                     <div>
                       <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                        Horarios disponibles
+                        Horario del espot
                       </h3>
                       <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
                         {ORDER.map((d, i) => {
@@ -1383,7 +1375,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
               <div className="flex items-start justify-between gap-4 mb-5 md:mb-6">
                 <div>
                   <h2 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                    Espacios similares
+                    Espots similares
                   </h2>
                   {!hasExact && (
                     <p className="text-sm mt-1.5" style={{ color: 'var(--text-secondary)' }}>
