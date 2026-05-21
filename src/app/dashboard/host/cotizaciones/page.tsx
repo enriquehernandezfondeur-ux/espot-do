@@ -94,7 +94,7 @@ export default function CotizacionesPage() {
     getConversation(selected.space_id).then(conv => {
       setChatMessages(conv?.messages ?? [])
       setChatUserId(conv?.userId ?? null)
-      markMessagesRead(selected.space_id)
+      markMessagesRead(selected.space_id).then(() => window.dispatchEvent(new Event('espot:messages-read')))
       setChatLoading(false)
     }).catch(() => setChatLoading(false))
   }, [selected?.id])
@@ -398,9 +398,17 @@ export default function CotizacionesPage() {
                             )}
                           </div>
                           {showTime && (
-                            <span className="text-[10px] px-1" style={{ color: 'var(--text-muted)' }}>
-                              {new Date(msg.created_at).toLocaleTimeString('es-DO', { hour: '2-digit', minute: '2-digit' })}
-                            </span>
+                            <div className={`flex items-center gap-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                              <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
+                                {new Date(msg.created_at).toLocaleTimeString('es-DO', { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                              {isMe && (
+                                <svg width="15" height="10" viewBox="0 0 15 10" fill="none" style={{ display:'inline-block', flexShrink:0 }}>
+                                  <path d="M1 5.5L3.5 8L8.5 2"  stroke={msg.read_at ? 'var(--brand)' : 'var(--text-muted)'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                  <path d="M6 5.5L8.5 8L13.5 2" stroke={msg.read_at ? 'var(--brand)' : 'var(--text-muted)'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              )}
+                            </div>
                           )}
                         </div>
                       )

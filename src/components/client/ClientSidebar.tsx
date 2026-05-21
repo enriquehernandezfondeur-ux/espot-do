@@ -30,6 +30,21 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
   const [pendingPay,    setPendingPay]    = useState(0)
   const pathname = usePathname()
 
+  // Limpiar badge inmediatamente cuando se leen mensajes (evento custom)
+  useEffect(() => {
+    function requery() {
+      const supabase = createClient()
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (!user) return
+        supabase.from('messages').select('id', { count: 'exact', head: true })
+          .eq('receiver_id', user.id).is('read_at', null)
+          .then(({ count }) => setUnread(count ?? 0))
+      })
+    }
+    window.addEventListener('espot:messages-read', requery)
+    return () => window.removeEventListener('espot:messages-read', requery)
+  }, [])
+
   // Re-consultar conteos reales en cada navegación
   useEffect(() => {
     const supabase = createClient()

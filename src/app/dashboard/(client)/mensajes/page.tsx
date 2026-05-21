@@ -91,7 +91,7 @@ export default function ClientMensajesPage() {
     setMessages(data?.messages ?? [])
     const space = data?.space as any
     setHostId(space?.host_id ?? null)
-    markMessagesRead(conv.spaceId)
+    markMessagesRead(conv.spaceId).then(() => window.dispatchEvent(new Event('espot:messages-read')))
     setConvs(prev => prev.map(c => c.spaceId === conv.spaceId ? { ...c, unread: false } : c))
 
     channelRef.current?.unsubscribe()
@@ -293,8 +293,14 @@ export default function ClientMensajesPage() {
                       )}
                       {msg.body && <div className="px-4 py-3 text-sm leading-relaxed">{msg.body}</div>}
                     </div>
-                    <div className={cn('text-xs mt-1', isMe ? 'text-right' : '')} style={{ color: 'var(--text-muted)' }}>
-                      {timeLabel(msg.created_at)}
+                    <div className={cn('flex items-center gap-1 mt-1', isMe ? 'justify-end' : 'justify-start')}>
+                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{timeLabel(msg.created_at)}</span>
+                      {isMe && (
+                        <svg width="15" height="10" viewBox="0 0 15 10" fill="none" style={{ display:'inline-block', flexShrink:0 }}>
+                          <path d="M1 5.5L3.5 8L8.5 2"  stroke={msg.read_at ? 'var(--brand)' : 'var(--text-muted)'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M6 5.5L8.5 8L13.5 2" stroke={msg.read_at ? 'var(--brand)' : 'var(--text-muted)'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
                     </div>
                   </div>
                 </div>

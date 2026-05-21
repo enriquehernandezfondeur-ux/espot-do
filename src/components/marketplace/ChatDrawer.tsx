@@ -74,7 +74,7 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, hostA
       if (!user) { setNotLoggedIn(true); setLoading(false); return }
       setUserId(user.id)
       const conv = await getConversation(spaceId)
-      if (conv) { setMessages(conv.messages); markMessagesRead(spaceId) }
+      if (conv) { setMessages(conv.messages); markMessagesRead(spaceId).then(() => window.dispatchEvent(new Event('espot:messages-read'))) }
       setLoading(false)
     }
     init()
@@ -88,7 +88,7 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, hostA
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `space_id=eq.${spaceId}` },
         payload => {
           setMessages(prev => prev.find(m => m.id === payload.new.id) ? prev : [...prev, payload.new])
-          if (payload.new.receiver_id === userId) markMessagesRead(spaceId)
+          if (payload.new.receiver_id === userId) markMessagesRead(spaceId).then(() => window.dispatchEvent(new Event('espot:messages-read')))
         })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
@@ -302,9 +302,14 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, hostA
                       </div>
 
                       {showTime && (
-                        <div className={`text-xs mt-1 ${isMe ? 'text-right' : 'text-left'}`}
-                          style={{ color: 'var(--text-muted)' }}>
-                          {timeLabel(msg.created_at)}
+                        <div className={`flex items-center gap-1 mt-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{timeLabel(msg.created_at)}</span>
+                          {isMe && (
+                            <svg width="15" height="10" viewBox="0 0 15 10" fill="none" style={{ display:'inline-block', flexShrink:0 }}>
+                              <path d="M1 5.5L3.5 8L8.5 2"  stroke={msg.read_at ? 'var(--brand)' : 'var(--text-muted)'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              <path d="M6 5.5L8.5 8L13.5 2" stroke={msg.read_at ? 'var(--brand)' : 'var(--text-muted)'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          )}
                         </div>
                       )}
                     </div>
