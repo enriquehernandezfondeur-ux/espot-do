@@ -124,12 +124,12 @@ const categories = [
 ]
 
 const eventTypes = [
-  { label: 'Cumpleaños',   slug: 'cumpleanos',    img: 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=700&q=85&fit=crop' },
-  { label: 'Bodas',        slug: 'boda',          img: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=700&q=85&fit=crop' },
-  { label: 'Corporativo',  slug: 'corporativo',   img: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=700&q=85&fit=crop' },
-  { label: 'Graduación',   slug: 'graduacion',    img: 'https://images.unsplash.com/photo-1627556704302-624286467c65?w=700&q=85&fit=crop' },
-  { label: 'Quinceañera',  slug: 'quinceanera',   img: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=700&q=85&fit=crop' },
-  { label: 'Baby Shower',  slug: 'baby-shower',   img: 'https://images.unsplash.com/photo-1529634806980-85c3dd6d34ac?w=700&q=85&fit=crop' },
+  { label: 'Cumpleaños',   slug: 'cumpleanos',    img: 'https://images.unsplash.com/photo-Vev3io5WxUY?w=700&q=85&fit=crop' },
+  { label: 'Bodas',        slug: 'boda',          img: 'https://images.unsplash.com/photo-FeO_txj9yVc?w=700&q=85&fit=crop' },
+  { label: 'Corporativo',  slug: 'corporativo',   img: 'https://images.unsplash.com/photo-TVpMTnvJxlI?w=700&q=85&fit=crop' },
+  { label: 'Graduación',   slug: 'graduacion',    img: 'https://images.unsplash.com/photo-hCc0EooJHrY?w=700&q=85&fit=crop' },
+  { label: 'Quinceañera',  slug: 'quinceanera',   img: 'https://images.unsplash.com/photo-FqWGtl7gjjI?w=700&q=85&fit=crop' },
+  { label: 'Baby Shower',  slug: 'baby-shower',   img: 'https://images.unsplash.com/photo-iDQQ8RGOe7c?w=700&q=85&fit=crop' },
 ]
 
 // ── Fade + slide wrapper ──────────────────────────────────
