@@ -574,12 +574,11 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                 : maxHours > 0 ? `Máximo ${maxHours} horas`
                 : 'Elige tu horario'}
             </div>
-            {/* Explicación clara del modelo de consumo mínimo */}
             <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl"
-              style={{ background: 'rgba(217,119,6,0.06)', border: '1px solid rgba(217,119,6,0.15)' }}>
-              <Info size={12} style={{ color: '#D97706', flexShrink: 0, marginTop: 1 }} />
-              <p className="text-xs leading-relaxed" style={{ color: '#92400E' }}>
-                Pagas este monto a través de Espot y lo usas en comida y bebidas durante tu evento. Si consumes más, pagas la diferencia directamente en el local.
+              style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+              <Info size={12} style={{ color: 'var(--text-muted)', flexShrink: 0, marginTop: 1 }} />
+              <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                Este monto se descuenta de tu consumo de alimentos y bebidas el día del evento. Si consumes más, pagas la diferencia directamente en el local.
               </p>
             </div>
           </div>
@@ -657,7 +656,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
 
         {/* ── PASO 1: FECHA Y HORA ────────────────────────── */}
         {step === 1 && (
-          <div className="space-y-4">
+          <div className="space-y-5">
             <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>¿Cuándo es tu evento?</h3>
 
             <DatePicker
@@ -1068,7 +1067,9 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                     <div className="flex justify-between px-4 py-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
                       <span>
                         {isHourly && `${selectedHours % 1 === 0 ? selectedHours : selectedHours.toFixed(1)}h × ${formatCurrency(pricing?.hourly_price)}/hr`}
-                        {isConsumption && 'Consumibles'}
+                        {isConsumption && (effectiveStartTime && realEndTime
+                          ? `${selectedHours % 1 === 0 ? selectedHours : selectedHours.toFixed(1)}h · Consumibles`
+                          : 'Consumibles')}
                         {isPackage && (() => {
                           const extra = Math.max(0, selectedHours - packageHours)
                           return extra > 0
@@ -1107,17 +1108,6 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
 
 
 
-            {!isQuote && (
-              <div className="flex items-center gap-3 px-4 py-3 rounded-2xl"
-                style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.15)' }}>
-                <ShieldCheck size={16} style={{ color: 'var(--brand)', flexShrink: 0 }} />
-                <p className="text-xs" style={{ color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                  {space.instant_booking
-                    ? 'Tu fecha queda pre-reservada. Completa el pago para confirmarla.'
-                    : 'Solo pagas cuando el propietario acepte tu solicitud. Sin cobros hasta entonces.'}
-                </p>
-              </div>
-            )}
 
             {guestNote && (
               <div className="px-4 py-3 rounded-xl text-sm italic"
@@ -1153,11 +1143,11 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             })()}
 
             {/* ── Garantía Espot ── */}
-            <div className="rounded-2xl overflow-hidden" style={{ border: '1.5px solid var(--brand-border)' }}>
+            <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
               <div className="flex items-center gap-2.5 px-4 py-3"
-                style={{ background: 'var(--brand-dim)', borderBottom: '1px solid var(--brand-border)' }}>
+                style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
                 <ShieldCheck size={15} style={{ color: 'var(--brand)', flexShrink: 0 }} />
-                <span className="text-sm font-bold" style={{ color: 'var(--brand)' }}>
+                <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                   Garantía Espot incluida
                 </span>
               </div>
@@ -1168,7 +1158,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                   { Icon: Lock,         text: 'Si el propietario cancela, te devolvemos el dinero' },
                   { Icon: CheckCircle,  text: 'Espacio verificado por el equipo de Espot' },
                 ].map(({ Icon, text }) => (
-                  <div key={text} className="flex items-start gap-3 px-4 py-2.5">
+                  <div key={text} className="flex items-start gap-3 px-4 py-3">
                     <Icon size={13} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: 1 }} />
                     <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{text}</p>
                   </div>
