@@ -213,9 +213,9 @@ export default function HostReservasPage() {
 
       {/* Filtros */}
       <div className="flex items-center gap-2 mb-5">
-        {/* Pills — flex-1 en cada uno para distribución simétrica (estilo Airbnb) */}
+        {/* Pills — fondo navy, distribución simétrica */}
         <div className="flex flex-1 gap-1 p-1 rounded-2xl"
-          style={{ background: 'var(--bg-elevated)' }}>
+          style={{ background: '#03313C' }}>
           {FILTERS.map(f => {
             const badge = f.key === 'pending' ? pending : f.key === 'accepted' ? accepted : 0
             const active = filter === f.key
@@ -223,12 +223,12 @@ export default function HostReservasPage() {
               <button key={f.key} onClick={() => setFilter(f.key)}
                 className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap"
                 style={active
-                  ? { background: '#fff', color: 'var(--text-primary)', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }
-                  : { color: 'var(--text-secondary)', background: 'transparent' }}>
+                  ? { background: '#fff', color: '#03313C', boxShadow: '0 1px 6px rgba(0,0,0,0.2)' }
+                  : { color: 'rgba(255,255,255,0.65)', background: 'transparent' }}>
                 {f.label}
                 {badge > 0 && (
                   <span className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
-                    style={{ background: active ? 'var(--brand)' : '#EF4444', color: '#fff' }}>
+                    style={{ background: '#EF4444', color: '#fff' }}>
                     {badge}
                   </span>
                 )}

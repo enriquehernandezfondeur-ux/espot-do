@@ -30,24 +30,34 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
   const [pendingPay,    setPendingPay]    = useState(0)
   const pathname = usePathname()
 
-  // Limpiar badge inmediatamente cuando se leen mensajes (evento custom)
+  // Helper: cuenta mensajes no leídos excluyendo conversaciones ocultas
+  async function fetchUnread(supabase: ReturnType<typeof createClient>, userId: string) {
+    const { data: hidden } = await supabase
+      .from('conversation_hides').select('space_id').eq('user_id', userId)
+    const hiddenIds = (hidden ?? []).map((h: any) => h.space_id as string)
+    let q = supabase.from('messages').select('id', { count: 'exact', head: true })
+      .eq('receiver_id', userId).is('read_at', null)
+    if (hiddenIds.length > 0) q = q.not('space_id', 'in', `(${hiddenIds.join(',')})`)
+    const { count } = await q
+    return count ?? 0
+  }
+
+  // Limpiar badge cuando se leen mensajes (evento custom)
   useEffect(() => {
     function requery() {
       const supabase = createClient()
-      supabase.auth.getUser().then(({ data: { user } }) => {
+      supabase.auth.getUser().then(async ({ data: { user } }) => {
         if (!user) return
-        supabase.from('messages').select('id', { count: 'exact', head: true })
-          .eq('receiver_id', user.id).is('read_at', null)
-          .then(({ count }) => setUnread(count ?? 0))
+        setUnread(await fetchUnread(supabase, user.id))
       })
     }
     window.addEventListener('espot:messages-read', requery)
     return () => window.removeEventListener('espot:messages-read', requery)
   }, [])
 
-  // Re-consultar conteos reales en cada navegación
+  // Re-consultar conteos en cada navegación
   useEffect(() => {
-    // En mensajes: poner a 0 y NO re-consultar (la query sobreescribiría el 0)
+    // En mensajes: poner a 0 inmediatamente, sin re-consultar
     if (pathname?.includes('/mensajes')) {
       setUnread(0)
       return
@@ -56,11 +66,7 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
     const supabase = createClient()
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return
-      // Mensajes no leídos — solo cuando NO estamos en mensajes
-      supabase.from('messages').select('id', { count: 'exact', head: true })
-        .eq('receiver_id', user.id).is('read_at', null)
-        .then(({ count }) => setUnread(count ?? 0))
-      // Reservas — reset al entrar
+      setUnread(await fetchUnread(supabase, user.id))
       if (pathname?.includes('/reservas')) setPendingPay(0)
     })
   }, [pathname])
