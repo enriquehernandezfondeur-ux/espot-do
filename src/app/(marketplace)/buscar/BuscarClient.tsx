@@ -1416,7 +1416,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
               {/* ── TIPO DE PRECIO ── */}
               <div data-section="precio" />
               <div>
-                <h3 className="font-bold text-sm mb-1" style={{ color: 'var(--text-primary)' }}>Tipo de precio</h3>
+                <h3 className="font-bold text-sm mb-1" style={{ color: 'var(--text-primary)' }}>Tipo de reserva</h3>
                 <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>¿Cómo prefieres pagar?</p>
                 <div className="grid grid-cols-2 gap-2">
                   {PRICING_TYPES.filter(p => p.value).map(pt => {

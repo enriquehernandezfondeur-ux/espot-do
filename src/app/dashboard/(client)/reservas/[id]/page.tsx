@@ -167,7 +167,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
             booking.start_time ? { label: 'Horario',   value: `${formatTime(booking.start_time)} – ${formatTime(booking.end_time ?? '')}` } : null,
             { label: 'Personas',  value: `${booking.guest_count}` },
             booking.event_type  ? { label: 'Tipo',      value: booking.event_type } : null,
-            pricingLabel        ? { label: 'Precio',    value: pricingLabel } : null,
+            pricingLabel        ? { label: 'Tipo de reserva', value: pricingLabel } : null,
             space?.address      ? { label: 'Dirección', value: `${space.address}, ${space?.sector ?? ''}, ${space?.city ?? ''}` } : null,
           ].filter(Boolean).map((row: any) => (
             <div key={row.label} className="flex items-baseline gap-4 px-5 py-3"

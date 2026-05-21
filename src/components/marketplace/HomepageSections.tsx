@@ -240,9 +240,9 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
           <Reveal className="flex items-end justify-between mb-10 md:mb-12">
             <div>
               <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
-                ¿Qué tipo de{' '}
+                ¿Qué tipo de actividad{' '}
                 <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                  actividad?
+                  deseas realizar?
                 </span>
               </h2>
             </div>
