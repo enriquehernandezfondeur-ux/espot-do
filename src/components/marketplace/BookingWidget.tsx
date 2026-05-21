@@ -569,7 +569,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               <span className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
                 {formatCurrency(pricing.minimum_consumption)}
               </span>
-              <span className="text-sm" style={{ color: 'var(--text-muted)' }}> consumo mínimo</span>
+              <span className="text-sm" style={{ color: 'var(--text-muted)' }}> consumibles</span>
             </div>
             <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
               {minHours > 0 && maxHours > 0
