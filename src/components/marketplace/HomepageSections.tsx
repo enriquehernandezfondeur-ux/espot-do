@@ -150,32 +150,6 @@ function Reveal({ children, delay = 0, className = '', style = {} }: {
   )
 }
 
-// ── Marquee ticker ────────────────────────────────────────
-const TICKER_ITEMS = [
-  'Salones de eventos', 'Rooftops exclusivos', 'Restaurantes privados',
-  'Villas de lujo', 'Terrazas con vista', 'Bares privados',
-  'Estudios creativos', 'Espacios Coworking', 'Punta Cana',
-  'Santo Domingo', 'Santiago', 'Cap Cana',
-]
-
-function Ticker() {
-  const items = [...TICKER_ITEMS, ...TICKER_ITEMS]
-  return (
-    <div className="overflow-hidden py-3.5" style={{ background: '#060D09', borderTop: '1px solid rgba(53,196,147,0.08)', borderBottom: '1px solid rgba(53,196,147,0.08)' }}>
-      <div style={{ display: 'flex', animation: 'ticker 28s linear infinite', whiteSpace: 'nowrap', willChange: 'transform' }}>
-        {items.map((item, i) => (
-          <span key={i} className="inline-flex items-center gap-3 mx-4 text-xs font-semibold tracking-widest uppercase"
-            style={{ color: 'rgba(255,255,255,0.25)' }}>
-            <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#35C493', display: 'inline-block', flexShrink: 0 }} />
-            {item}
-          </span>
-        ))}
-      </div>
-      <style>{`@keyframes ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
-    </div>
-  )
-}
-
 // ── Componente principal ──────────────────────────────────
 export default function HomepageSections({ spaces }: { spaces: any[] }) {
 
@@ -187,9 +161,6 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
 
   return (
     <div style={{ background: '#fff' }}>
-
-      {/* ── TICKER ── */}
-      <Ticker />
 
       {/* ── TIPOS DE EVENTO ── */}
       <section className="py-14 md:py-20" style={{ background: '#fff' }}>

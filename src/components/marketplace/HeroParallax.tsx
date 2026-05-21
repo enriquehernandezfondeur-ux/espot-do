@@ -3,11 +3,7 @@
 import { useEffect, useRef } from 'react'
 import HomepageSearch from './HomepageSearch'
 
-interface Props {
-  spaceCount: number
-}
-
-export default function HeroParallax({ spaceCount }: Props) {
+export default function HeroParallax() {
   const videoRef   = useRef<HTMLVideoElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
@@ -80,13 +76,6 @@ export default function HeroParallax({ spaceCount }: Props) {
         className="relative flex flex-col items-center justify-center text-center px-4 md:px-6"
         style={{ height: '100%', zIndex: 2 }}>
 
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-7 text-xs font-semibold tracking-wide"
-          style={{ background: 'rgba(53,196,147,0.08)', border: '1px solid rgba(53,196,147,0.18)', color: '#6EE7C7' }}>
-          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#35C493' }} />
-          Espacios para eventos · República Dominicana
-        </div>
-
         {/* Headline */}
         <h1
           className="font-bold text-white mb-5"
@@ -117,49 +106,13 @@ export default function HeroParallax({ spaceCount }: Props) {
             lineHeight: 1.8,
             maxWidth: 500,
           }}>
-          Reserva salones, rooftops, restaurantes y más.
+          Salones, rooftops, restaurantes y más.
           <br className="hidden md:block" />
-          Explora los mejores espacios y reserva el que más te convenga.
+          Encuentra el espacio ideal y resérvalo en minutos.
         </p>
 
         {/* Search */}
         <HomepageSearch />
-
-        {/* Métricas */}
-        <div className="flex items-center justify-center gap-5 md:gap-14 mt-10">
-          {[
-            { value: `${spaceCount}+`, label: 'espacios' },
-            { value: '100%',           label: 'en línea' },
-          ].map((s, i) => (
-            <div key={s.label} className="flex items-center">
-              {i > 0 && (
-                <div className="hidden md:block w-px h-8 mr-14"
-                  style={{ background: 'rgba(255,255,255,0.07)' }} />
-              )}
-              <div className="text-center">
-                <div className="font-bold text-white"
-                  style={{ fontSize: 'clamp(1.2rem, 4vw, 2rem)', letterSpacing: '-0.04em' }}>
-                  {s.value}
-                </div>
-                <div className="text-[10px] md:text-xs tracking-wider"
-                  style={{ color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
-                  {s.label.toUpperCase()}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Indicador de scroll */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5"
-          style={{ opacity: 0.35 }}>
-          <div className="w-px h-10" style={{
-            background: 'linear-gradient(to bottom, transparent, #35C493)',
-          }} />
-          <span className="text-xs tracking-widest" style={{ color: '#35C493', fontSize: 9 }}>
-            SCROLL
-          </span>
-        </div>
 
       </div>
     </section>

@@ -21,7 +21,7 @@ export default async function HomePage() {
 
   return (
     <div style={{ background: '#fff' }}>
-      <HeroParallax spaceCount={spaces.length} />
+      <HeroParallax />
       <HomepageSections spaces={spaces} />
     </div>
   )
