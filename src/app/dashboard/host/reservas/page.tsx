@@ -211,21 +211,6 @@ export default function HostReservasPage() {
         )}
       </div>
 
-      {/* Métricas rápidas */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-5 md:mb-6">
-        {[
-          { l: 'Por aceptar',    v: pending },
-          { l: 'Esperan pago',   v: accepted },
-          { l: 'Confirmadas',    v: bookings.filter(b => b.status === 'confirmed').length },
-          { l: 'Ingresos conf.', v: formatCurrency(bookings.filter(b => b.status === 'confirmed').reduce((s, b) => s + (Number(b.total_amount) || 0), 0)) },
-        ].map(m => (
-          <div key={m.l} className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-            <div className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{m.v}</div>
-            <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{m.l}</div>
-          </div>
-        ))}
-      </div>
-
       {/* Filtros — scrollable en móvil */}
       <div className="flex items-center gap-2 mb-4">
         <div className="flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide flex-1"
@@ -255,128 +240,172 @@ export default function HostReservasPage() {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-5 items-start">
-        {/* Lista */}
-        <div className="flex-1 min-w-0 rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-          {filtered.length === 0 ? (
-            <div className="text-center py-16 px-4">
-              <p className="font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Sin reservas</p>
-              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                {filter === 'all' ? 'Aún no tienes reservas. Aparecerán aquí cuando los clientes reserven tu espacio.' : 'No hay reservas en este estado.'}
-              </p>
-            </div>
-          ) : (
-            <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
-              {filtered.map((bk: any) => {
-                const sc  = STATUS_COLORS[bk.status as keyof typeof STATUS_COLORS] ?? { color: '#6B7280', bg: '#F4F6F8' }
-                const sl  = STATUS_LABELS[bk.status as keyof typeof STATUS_LABELS] ?? bk.status
-                const g   = bk.profiles
-                const isSelected = selected?.id === bk.id
-                return (
-                  <div key={bk.id} onClick={() => setSelected(isSelected ? null : bk)}
-                    className="px-4 md:px-5 py-4 cursor-pointer transition-colors hover:bg-[var(--bg-elevated)]"
-                    style={{ background: isSelected ? 'var(--brand-dim)' : 'transparent' }}>
+      <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
 
+        {/* Header tabla — solo desktop */}
+        {filtered.length > 0 && (
+          <div className="hidden md:grid px-5 py-3 text-xs font-semibold uppercase tracking-wide"
+            style={{ gridTemplateColumns: '1fr 1fr 1.2fr 80px 100px 110px 120px', borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
+            <span>Cliente</span>
+            <span>Evento</span>
+            <span>Fecha y horario</span>
+            <span className="text-center">Personas</span>
+            <span className="text-right">Monto</span>
+            <span className="text-center">Estado</span>
+            <span className="text-center">Acciones</span>
+          </div>
+        )}
+
+        {filtered.length === 0 ? (
+          <div className="text-center py-16 px-4">
+            <p className="font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Sin reservas</p>
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+              {filter === 'all' ? 'Aún no tienes reservas. Aparecerán aquí cuando los clientes reserven tu espacio.' : 'No hay reservas en este estado.'}
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
+            {filtered.map((bk: any) => {
+              const sc  = STATUS_COLORS[bk.status as keyof typeof STATUS_COLORS] ?? { color: '#6B7280', bg: '#F4F6F8' }
+              const sl  = STATUS_LABELS[bk.status as keyof typeof STATUS_LABELS] ?? bk.status
+              const g   = bk.profiles
+              const isSelected = selected?.id === bk.id
+              return (
+                <div key={bk.id}>
+                  {/* ── DESKTOP: fila tabla ── */}
+                  <div className="hidden md:grid items-center px-5 py-3.5 hover:bg-[var(--bg-elevated)] transition-colors cursor-pointer"
+                    style={{ gridTemplateColumns: '1fr 1fr 1.2fr 80px 100px 110px 120px', background: isSelected ? 'var(--bg-elevated)' : 'transparent' }}
+                    onClick={() => setSelected(isSelected ? null : bk)}>
+
+                    {/* Cliente */}
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
+                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+                        {g?.full_name?.charAt(0) ?? '?'}
+                      </div>
+                      <span className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                        {g?.full_name ?? 'Cliente'}
+                      </span>
+                    </div>
+
+                    {/* Evento */}
+                    <span className="text-sm truncate" style={{ color: 'var(--text-secondary)' }}>
+                      {bk.event_type ?? '—'}
+                    </span>
+
+                    {/* Fecha y horario */}
+                    <div className="min-w-0">
+                      <div className="text-sm" style={{ color: 'var(--text-primary)' }}>{formatDate(bk.event_date)}</div>
+                      <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                        {bk.start_time ? `${formatTime(bk.start_time)} – ${formatTime(bk.end_time)}` : '—'}
+                      </div>
+                    </div>
+
+                    {/* Personas */}
+                    <div className="text-sm text-center" style={{ color: 'var(--text-secondary)' }}>
+                      {bk.guest_count}
+                    </div>
+
+                    {/* Monto */}
+                    <div className="text-sm font-semibold text-right" style={{ color: 'var(--text-primary)' }}>
+                      {formatCurrency(Number(bk.total_amount))}
+                    </div>
+
+                    {/* Estado */}
+                    <div className="flex justify-center">
+                      <span className="text-xs font-semibold px-2 py-1 rounded-full"
+                        style={{ background: sc.bg, color: sc.color }}>{sl}</span>
+                    </div>
+
+                    {/* Acciones */}
+                    <div className="flex items-center justify-center gap-1.5" onClick={e => e.stopPropagation()}>
+                      {bk.status === 'pending' && (
+                        <button onClick={() => doAccept(bk.id)} disabled={!!actionId}
+                          className="text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors"
+                          style={{ background: 'var(--bg-elevated)', color: 'var(--brand)', border: '1px solid var(--border-subtle)' }}>
+                          {actionId === bk.id + 'a' ? '...' : 'Aceptar'}
+                        </button>
+                      )}
+                      {bk.status === 'quote_requested' && (
+                        <button onClick={() => router.push('/dashboard/host/cotizaciones')}
+                          className="text-xs font-semibold px-2 py-1.5 rounded-lg"
+                          style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+                          Cotizar →
+                        </button>
+                      )}
+                      {(bk.status === 'pending' || bk.status === 'quote_requested') && (
+                        <button onClick={() => { setSelected(bk); setRejectReason(''); setShowRejectForm(true) }} disabled={!!actionId}
+                          className="text-xs font-semibold px-2.5 py-1.5 rounded-lg"
+                          style={{ background: 'var(--bg-elevated)', color: '#DC2626', border: '1px solid var(--border-subtle)' }}>
+                          ✕
+                        </button>
+                      )}
+                      {bk.status === 'confirmed' && (
+                        <button onClick={() => doComplete(bk.id)} disabled={!!actionId}
+                          className="text-xs font-semibold px-2 py-1.5 rounded-lg"
+                          style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+                          {actionId === bk.id + 'c' ? '...' : 'Completar'}
+                        </button>
+                      )}
+                      <Link href={`/dashboard/host/reservas/${bk.id}`} onClick={e => e.stopPropagation()}
+                        className="w-7 h-7 flex items-center justify-center rounded-lg text-xs"
+                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
+                        title="Ver detalle">
+                        ↗
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* ── MÓVIL: card (igual que antes) ── */}
+                  <div className="md:hidden px-4 py-4 cursor-pointer transition-colors hover:bg-[var(--bg-elevated)]"
+                    style={{ background: isSelected ? 'var(--bg-elevated)' : 'transparent' }}
+                    onClick={() => setSelected(isSelected ? null : bk)}>
                     <div className="flex items-start gap-3">
-                      {/* Avatar */}
                       <div className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-semibold shrink-0"
                         style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
                         {g?.full_name?.charAt(0) ?? '?'}
                       </div>
-
-                      {/* Info */}
                       <div className="flex-1 min-w-0">
-                        {/* Fila: nombre + monto */}
                         <div className="flex items-center justify-between gap-2 mb-1">
-                          <span className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
-                            {g?.full_name ?? 'Cliente'}
-                          </span>
-                          <span className="font-bold text-sm shrink-0" style={{ color: 'var(--text-primary)' }}>
-                            {formatCurrency(Number(bk.total_amount))}
-                          </span>
+                          <span className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{g?.full_name ?? 'Cliente'}</span>
+                          <span className="font-bold text-sm shrink-0" style={{ color: 'var(--text-primary)' }}>{formatCurrency(Number(bk.total_amount))}</span>
                         </div>
-
-                        {/* Fila: evento + estado */}
                         <div className="flex items-center justify-between gap-2 mb-1.5">
-                          <span className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
-                            {bk.event_type}
-                          </span>
-                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0"
-                            style={{ background: sc.bg, color: sc.color }}>{sl}</span>
+                          <span className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{bk.event_type}</span>
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0" style={{ background: sc.bg, color: sc.color }}>{sl}</span>
                         </div>
-
-                        {/* Meta: fecha/hora/personas — wrap en móvil */}
-                        <div className="flex gap-2 md:gap-3 flex-wrap text-xs" style={{ color: 'var(--text-muted)' }}>
+                        <div className="flex gap-2 flex-wrap text-xs" style={{ color: 'var(--text-muted)' }}>
                           <span className="flex items-center gap-1"><CalendarDays size={10} />{formatDate(bk.event_date)}</span>
                           <span className="flex items-center gap-1"><Clock size={10} />{formatTime(bk.start_time)}–{formatTime(bk.end_time)}</span>
                           <span className="flex items-center gap-1"><Users size={10} />{bk.guest_count}</span>
                         </div>
-
-                        {/* Acciones para pendientes y cotizaciones */}
                         {(bk.status === 'pending' || bk.status === 'quote_requested') && (
                           <div className="flex gap-2 mt-3" onClick={e => e.stopPropagation()}>
                             {bk.status === 'pending' && (
                               <button onClick={() => doAccept(bk.id)} disabled={!!actionId}
-                                className="flex-1 text-xs font-semibold py-3 rounded-xl transition-colors"
-                                style={{ background: 'rgba(22,163,74,0.12)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)' }}>
+                                className="flex-1 text-xs font-semibold py-2.5 rounded-xl"
+                                style={{ background: 'var(--bg-elevated)', color: 'var(--brand)', border: '1px solid var(--border-subtle)' }}>
                                 {actionId === bk.id + 'a' ? '...' : 'Aceptar'}
                               </button>
                             )}
-                            {bk.status === 'quote_requested' && (
-                              <button onClick={() => router.push('/dashboard/host/cotizaciones')} disabled={!!actionId}
-                                className="flex-1 text-xs font-semibold py-3 rounded-xl transition-colors"
-                                style={{ background: 'rgba(37,99,235,0.1)', color: '#2563EB', border: '1px solid rgba(37,99,235,0.15)' }}>
-                                Responder cotización →
-                              </button>
-                            )}
                             <button onClick={() => { setSelected(bk); setRejectReason(''); setShowRejectForm(true) }} disabled={!!actionId}
-                              className="flex-1 text-xs font-semibold py-3 rounded-xl transition-colors"
-                              style={{ background: 'rgba(220,38,38,0.1)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }}>
+                              className="flex-1 text-xs font-semibold py-2.5 rounded-xl"
+                              style={{ background: 'var(--bg-elevated)', color: '#DC2626', border: '1px solid var(--border-subtle)' }}>
                               Rechazar
                             </button>
                           </div>
                         )}
-                        {bk.status === 'confirmed' && (
-                          <div className="mt-2.5" onClick={e => e.stopPropagation()}>
-                            <button onClick={() => doComplete(bk.id)} disabled={!!actionId}
-                              className="text-xs font-semibold px-4 py-2 rounded-xl"
-                              style={{ background: 'rgba(124,58,237,0.1)', color: '#7C3AED', border: '1px solid rgba(124,58,237,0.2)' }}>
-                              {actionId === bk.id + 'c' ? '...' : 'Marcar completado'}
-                            </button>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Ver detalle — solo desktop */}
-                      <div className="hidden md:flex items-center gap-1.5">
-                        <button onClick={e => { e.stopPropagation(); setSelected(isSelected ? null : bk) }}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg"
-                          style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                          <Eye size={13} />
-                        </button>
-                        <Link href={`/dashboard/host/reservas/${bk.id}`}
-                          onClick={e => e.stopPropagation()}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg text-xs"
-                          style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
-                          title="Ver detalle completo">
-                          ↗
-                        </Link>
                       </div>
                     </div>
                   </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
 
-        {/* Panel de detalle */}
-        {selected && (
-          <div className="w-full lg:w-72 shrink-0 rounded-2xl overflow-hidden lg:max-h-[calc(100dvh-200px)] lg:overflow-y-auto" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-            <div className="px-5 py-4 flex justify-between" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-              <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Detalle</span>
-              <button onClick={() => { setSelected(null); setShowRejectForm(false); setRejectReason('') }} style={{ color: 'var(--text-muted)' }}>✕</button>
-            </div>
+                  {/* Panel detalle inline (expandible) */}
+                  {isSelected && (
+                    <div className="border-t" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-elevated)' }}>
+                      <div className="px-5 py-3 flex justify-between items-center" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                        <span className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Detalle de la reserva</span>
+                        <button onClick={() => { setSelected(null); setShowRejectForm(false); setRejectReason('') }} style={{ color: 'var(--text-muted)' }}>✕</button>
+                      </div>
 
             {/* Rechazar form */}
             {showRejectForm && (
@@ -509,6 +538,11 @@ export default function HostReservasPage() {
             </div>
           </div>
         )}
+              </div>
+            )
+          })}
+        </div>
+      )}
       </div>
     </div>
   )
