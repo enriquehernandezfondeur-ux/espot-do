@@ -349,91 +349,88 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
       </section>
 
       {/* ── CÓMO FUNCIONA ── */}
-      <section className="py-20 md:py-28 relative overflow-hidden"
-        style={{ background: '#03313C' }}>
-
-        {/* Dot pattern decorativo — textura muy sutil */}
+      <section className="py-14 md:py-20" style={{ background: '#fff', position: 'relative', overflow: 'hidden' }}>
+        {/* Dot grid decorativo */}
         <div style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
-          backgroundImage: 'radial-gradient(circle, rgba(53,196,147,0.1) 1px, transparent 1px)',
+          position: 'absolute', inset: 0, pointerEvents: 'none',
+          backgroundImage: 'radial-gradient(circle, rgba(53,196,147,0.08) 1px, transparent 1px)',
           backgroundSize: '28px 28px',
-          opacity: 0.6,
+          maskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%)',
         }} />
 
-        <div className="max-w-5xl mx-auto px-4 md:px-6" style={{ position: 'relative', zIndex: 1 }}>
-
-          <Reveal className="text-center mb-16 md:mb-20">
-            <h2 className="font-bold text-white" style={{ fontSize: 'clamp(1.8rem, 5vw, 3rem)', letterSpacing: '-0.04em', lineHeight: 1.1 }}>
-              Reserva en tres pasos
+        <div className="relative max-w-7xl mx-auto px-4 md:px-6">
+          <Reveal>
+            <h2 className="font-bold mb-8 md:mb-10" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
+              Reserva en{' '}
+              <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                tres pasos
+              </span>
             </h2>
-            <p className="mt-3 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
-              Sin llamadas, sin complicaciones, sin sorpresas
-            </p>
-          </Reveal>
+            <div className="grid md:grid-cols-3 gap-4">
 
-          <div ref={howSection.ref} className="grid md:grid-cols-3 gap-6 md:gap-8">
-            {[
-              { num: '01', icon: Search,     title: 'Busca tu espacio',     desc: 'Filtra por sector, tipo y capacidad. Todos los espacios son verificados por nuestro equipo antes de publicarse.' },
-              { num: '02', icon: Clock,      title: 'Elige fecha y horario', desc: 'Selecciona el día, horario y adicionales. El propietario revisará tu solicitud y confirmará disponibilidad.' },
-              { num: '03', icon: CreditCard, title: 'Paga y asegura tu fecha', desc: 'Una vez confirmada tu reserva, paga de forma segura con Azul Payments. El precio que ves es el que pagas.' },
-            ].map((step, i) => {
-              const Icon = step.icon
-              const delay = i * 180
-              return (
-                <div key={step.num}
-                  style={{
-                    opacity:    howSection.on ? 1 : 0,
-                    transform:  howSection.on ? 'translateY(0)' : 'translateY(28px)',
-                    transition: `opacity 0.65s ease ${delay}ms, transform 0.65s ease ${delay}ms`,
-                  }}>
-
-                  {/* Línea conectora */}
-                  {i < 2 && (
-                    <div className="hidden md:block absolute top-6 left-full h-px overflow-hidden" style={{ width: 32, zIndex: 1 }}>
-                      <div style={{
-                        height: '100%',
-                        background: 'rgba(53,196,147,0.4)',
-                        transform: howSection.on ? 'scaleX(1)' : 'scaleX(0)',
-                        transformOrigin: 'left center',
-                        transition: `transform 0.35s ease ${delay + 500}ms`,
-                      }} />
-                    </div>
-                  )}
-
-                  <div className="p-6 md:p-8 rounded-2xl h-full"
-                    style={{ background: '#fff', boxShadow: '0 8px 32px rgba(0,0,0,0.14)' }}>
-
-                    {/* Número grande decorativo */}
-                    <div className="text-6xl font-bold mb-4 leading-none" style={{ color: 'rgba(53,196,147,0.15)', letterSpacing: '-0.04em' }}>
-                      {step.num}
-                    </div>
-
-                    {/* Ícono */}
-                    <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
-                      style={{
-                        background: 'rgba(53,196,147,0.1)',
-                        border: '1px solid rgba(53,196,147,0.2)',
-                        transform:  howSection.on ? 'scale(1)' : 'scale(0.7)',
-                        opacity:    howSection.on ? 1 : 0,
-                        transition: `transform 0.5s cubic-bezier(0.34,1.56,0.64,1) ${delay + 200}ms, opacity 0.4s ease ${delay + 200}ms`,
-                      }}>
-                      <Icon size={18} style={{ color: '#35C493' }} />
-                    </div>
-
-                    <div className="text-xs font-bold tracking-widest mb-2" style={{ color: '#35C493' }}>
-                      PASO {step.num}
-                    </div>
-                    <h3 className="font-bold mb-2 text-base" style={{ color: '#03313C', letterSpacing: '-0.02em' }}>
-                      {step.title}
-                    </h3>
-                    <p className="text-sm leading-relaxed" style={{ color: '#527068' }}>
-                      {step.desc}
-                    </p>
+              {/* Card 1 — Busca — light */}
+              <div className="guide-card guide-card-light relative overflow-hidden rounded-3xl p-7 flex flex-col gap-4"
+                style={{ background: '#F8FAFC', border: '1px solid #E5EAE8' }}>
+                <div className="guide-shimmer" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, borderRadius: '12px 12px 0 0' }} />
+                <div className="flex items-center justify-between">
+                  <div className="guide-icon-wrap w-10 h-10 rounded-2xl flex items-center justify-center"
+                    style={{ background: 'rgba(53,196,147,0.1)', color: '#35C493' }}>
+                    <Search size={18} />
                   </div>
+                  <ArrowRight size={16} className="guide-arrow" style={{ color: '#35C493' }} />
                 </div>
-              )
-            })}
-          </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: '#35C493' }}>Paso 01</p>
+                  <h3 className="font-bold text-lg mb-2" style={{ color: '#03313C', letterSpacing: '-0.025em' }}>Busca tu espacio</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: '#527068' }}>
+                    Filtra por sector, tipo y capacidad. Todos los espacios son verificados por nuestro equipo antes de publicarse.
+                  </p>
+                </div>
+              </div>
+
+              {/* Card 2 — Fecha — dark */}
+              <div className="guide-card guide-card-dark relative overflow-hidden rounded-3xl p-7 flex flex-col gap-4"
+                style={{ background: '#03313C', border: '1px solid rgba(53,196,147,0.15)' }}>
+                <div className="guide-shimmer" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, borderRadius: '12px 12px 0 0' }} />
+                <div className="flex items-center justify-between">
+                  <div className="guide-icon-wrap w-10 h-10 rounded-2xl flex items-center justify-center"
+                    style={{ background: 'rgba(53,196,147,0.12)', color: '#35C493' }}>
+                    <Clock size={18} />
+                  </div>
+                  <ArrowRight size={16} className="guide-arrow" style={{ color: '#35C493' }} />
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: '#35C493' }}>Paso 02</p>
+                  <h3 className="font-bold text-lg mb-2" style={{ color: '#fff', letterSpacing: '-0.025em' }}>Elige fecha y horario</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                    Selecciona el día, horario y adicionales. El propietario revisará tu solicitud y confirmará disponibilidad.
+                  </p>
+                </div>
+              </div>
+
+              {/* Card 3 — Paga — light */}
+              <div className="guide-card guide-card-light relative overflow-hidden rounded-3xl p-7 flex flex-col gap-4"
+                style={{ background: '#F8FAFC', border: '1px solid #E5EAE8' }}>
+                <div className="guide-shimmer" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, borderRadius: '12px 12px 0 0' }} />
+                <div className="flex items-center justify-between">
+                  <div className="guide-icon-wrap w-10 h-10 rounded-2xl flex items-center justify-center"
+                    style={{ background: 'rgba(53,196,147,0.1)', color: '#35C493' }}>
+                    <CreditCard size={18} />
+                  </div>
+                  <ArrowRight size={16} className="guide-arrow" style={{ color: '#35C493' }} />
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: '#35C493' }}>Paso 03</p>
+                  <h3 className="font-bold text-lg mb-2" style={{ color: '#03313C', letterSpacing: '-0.025em' }}>Paga y asegura tu fecha</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: '#527068' }}>
+                    Una vez confirmada tu reserva, paga de forma segura con Azul Payments. El precio que ves es el que pagas.
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          </Reveal>
         </div>
       </section>
 
@@ -454,29 +451,30 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                 backgroundSize: '520px',
                 backgroundRepeat: 'repeat',
                 animation: 'patternDrift 70s linear infinite',
-                opacity: 0.3,
+                opacity: 0.22,
               }} />
 
-              {/* Overlay para proteger legibilidad */}
-              <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
+              {/* Overlay oscuro sobre el patrón — garantiza legibilidad del texto blanco */}
+              <div style={{
+                position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1,
+                background: 'rgba(3, 49, 60, 0.55)',
+              }} />
+
+              {/* Orbes decorativos */}
+              <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 2 }}>
                 <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl"
-                  style={{ background: 'rgba(53,196,147,0.08)', transform: 'translate(30%,-30%)' }} />
+                  style={{ background: 'rgba(53,196,147,0.1)', transform: 'translate(30%,-30%)' }} />
                 <div className="absolute bottom-0 left-1/3 w-72 h-72 rounded-full blur-3xl"
-                  style={{ background: 'rgba(53,196,147,0.06)', transform: 'translateY(35%)' }} />
+                  style={{ background: 'rgba(53,196,147,0.07)', transform: 'translateY(35%)' }} />
               </div>
 
-              <div className="relative grid md:grid-cols-[1fr_auto] items-center gap-6 md:gap-10 px-8 py-10 md:px-14 md:py-14" style={{ zIndex: 2 }}>
+              <div className="relative grid md:grid-cols-[1fr_auto] items-center gap-6 md:gap-10 px-8 py-10 md:px-14 md:py-14" style={{ zIndex: 3 }}>
                 <div>
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-5 text-xs font-semibold"
-                    style={{ background: 'rgba(53,196,147,0.12)', color: '#6EE7C7', border: '1px solid rgba(53,196,147,0.18)' }}>
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#35C493' }} />
-                    Para propietarios
-                  </div>
                   <h2 className="font-bold text-white mb-3"
                     style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', letterSpacing: '-0.04em', lineHeight: 1.12 }}>
                     ¿Tienes un espacio<br className="hidden md:block" /> para eventos?
                   </h2>
-                  <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '1rem', lineHeight: 1.75, maxWidth: 460 }}>
+                  <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '1rem', lineHeight: 1.75, maxWidth: 460 }}>
                     Publica tu salón, restaurante, rooftop o villa. Recibe reservas online y gestiona todo desde tu panel.
                   </p>
                 </div>
@@ -488,7 +486,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                   </Link>
                   <Link href="/auth?mode=login"
                     className="inline-flex items-center justify-center gap-2 font-medium px-8 py-4 rounded-2xl text-sm whitespace-nowrap"
-                    style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    style={{ background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.9)', border: '1px solid rgba(255,255,255,0.25)' }}>
                     Ya tengo cuenta
                   </Link>
                 </div>
