@@ -95,11 +95,6 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return
 
-      // ── Mensajes no leídos ───────────────────────────────
-      supabase.from('messages').select('id', { count: 'exact', head: true })
-        .eq('receiver_id', user.id).is('read_at', null)
-        .then(({ count }) => setUnread(count ?? 0))
-
       // ── Espacios del host ────────────────────────────────
       const { data: spaces } = await supabase.from('spaces').select('id').eq('host_id', user.id)
       const spaceIds = spaces?.map(s => s.id) ?? []

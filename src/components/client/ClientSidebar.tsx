@@ -72,11 +72,6 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return
 
-      // Mensajes no leídos
-      supabase.from('messages').select('id', { count: 'exact', head: true })
-        .eq('receiver_id', user.id).is('read_at', null)
-        .then(({ count }) => setUnread(count ?? 0))
-
       // Reservas aceptadas pendientes de pago
       supabase.from('bookings').select('id', { count: 'exact', head: true })
         .eq('guest_id', user.id).eq('status', 'accepted').eq('payment_status', 'unpaid')
