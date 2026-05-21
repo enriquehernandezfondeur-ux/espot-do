@@ -525,7 +525,7 @@ export default function MisReservasPage() {
                                   <div key={inst.id} className="flex items-center gap-3 px-4 py-3.5"
                                     style={{
                                       borderBottom: isLast ? 'none' : '1px solid var(--border-subtle)',
-                                      background: isNext ? ''#fff'' : '#fff',
+                                      background: '#fff',
                                     }}>
                                     {/* Círculo */}
                                     <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
