@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation'
-import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import Sidebar from '@/components/dashboard/Sidebar'
 import MessageNotificationProvider from '@/components/providers/MessageNotificationProvider'
@@ -14,20 +13,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
     .from('profiles').select('full_name, avatar_url, role').eq('id', user.id).single()
 
   const isAdmin = user.email === (process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com')
-
-  // Onboarding: si el host no tiene espacios y no está ya en /bienvenida → redirigir
-  const headersList = await headers()
-  const pathname = headersList.get('x-pathname') ?? headersList.get('x-invoke-path') ?? ''
-  const isOnBienvenida = pathname.includes('/bienvenida')
-
-  if (!isOnBienvenida) {
-    const { count: spaceCount } = await supabase
-      .from('spaces')
-      .select('id', { count: 'exact', head: true })
-      .eq('host_id', user.id)
-
-    if (!spaceCount || spaceCount === 0) redirect('/dashboard/host/bienvenida')
-  }
 
   const userName  = profile?.full_name ?? user.email?.split('@')[0]
   const avatarUrl = profile?.avatar_url ?? undefined
