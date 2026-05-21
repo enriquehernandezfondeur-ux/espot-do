@@ -399,104 +399,117 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
         {/* ── Galería de medios ── */}
         <div className="mb-6 md:mb-10">
 
-          {/* ────────────────────── DESKTOP: Grid 5 celdas ── */}
-          <div className="hidden md:grid gap-2 rounded-3xl overflow-hidden relative"
-            style={{ gridTemplateColumns: '1.65fr 1fr 1fr', gridTemplateRows: '224px 224px' }}>
+          {/* ────────────────────── DESKTOP: Grid adaptativo ── */}
+          {(() => {
+            const hasVideo = !!space.video_url
+            const photoCount = images.length
+            // Slots totales: fotos + video (max 5). Video siempre en la esquina.
+            const totalMedia = Math.min(photoCount + (hasVideo ? 1 : 0), 5)
+            // Slots de la columna derecha (el primero es siempre la foto grande)
+            const rightCount = Math.max(0, totalMedia - 1)
+            // Cuántas fotos van en los slots derechos (el último puede ser video)
+            const rightPhotoCount = hasVideo ? Math.min(photoCount - 1, rightCount - 1) : rightCount
+            // "+N más" en el último slot
+            const hiddenCount = (photoCount + (hasVideo ? 1 : 0)) - 5
 
-            {/* Celda 1: foto principal (span 2 filas) */}
-            <button
-              onClick={() => { setPhotoIdx(0); setShowLightbox(true) }}
-              className="relative row-span-2 overflow-hidden group cursor-zoom-in"
-              style={{ background: 'var(--bg-elevated)' }}>
-              {images[0] ? (
-                <Image
-                  src={images[0].url}
-                  alt={space.name}
-                  fill
-                  priority
-                  sizes="(max-width: 768px) 100vw, 60vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Building2 size={80} style={{ color: 'var(--text-muted)', opacity: 0.12 }} />
-                </div>
-              )}
-            </button>
+            // Template según cantidad de media
+            const gridCols = totalMedia <= 1 ? '1fr' :
+                             totalMedia <= 3 ? '1.65fr 1fr' :
+                             '1.65fr 1fr 1fr'
+            const gridRows = totalMedia <= 2 ? '448px' : '224px 224px'
 
-            {/* Celdas 2-5 */}
-            {[1, 2, 3, 4].map(slot => {
-              const img = images[slot]
-              const totalMedia = images.length + (space.video_url ? 1 : 0)
-              const isLastCell = slot === 4
-              const hiddenCount = totalMedia - 5
+            return (
+              <div className="hidden md:grid gap-2 rounded-3xl overflow-hidden relative"
+                style={{ gridTemplateColumns: gridCols, gridTemplateRows: gridRows }}>
 
-              // Slot 4 → video si no hay 5ª foto
-              if (!img && slot === 4 && space.video_url) {
-                return (
-                  <button key="video-cell"
-                    onClick={() => setShowVideoModal(true)}
-                    className="relative overflow-hidden group cursor-pointer"
-                    style={{ background: '#080808' }}>
+                {/* Celda principal — foto cover */}
+                <button
+                  onClick={() => { setPhotoIdx(0); setShowLightbox(true) }}
+                  className={`relative overflow-hidden group cursor-zoom-in ${totalMedia > 2 ? 'row-span-2' : ''}`}
+                  style={{ background: 'var(--bg-elevated)' }}>
+                  {images[0] ? (
+                    <Image src={images[0].url} alt={space.name} fill priority
+                      sizes="(max-width: 768px) 100vw, 60vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+                  ) : hasVideo ? (
+                    // No hay foto pero sí video — mostrar video como cover
                     <video src={`${space.video_url}#t=0.5`} muted preload="metadata"
-                      className="w-full h-full object-cover opacity-70" />
-                    <div className="absolute inset-0 flex items-center justify-center"
-                      style={{ background: 'rgba(0,0,0,0.38)' }}>
-                      <div className="w-11 h-11 rounded-full flex items-center justify-center shadow-xl transition-transform duration-200 group-hover:scale-110"
-                        style={{ background: 'rgba(255,255,255,0.95)' }}>
-                        <Play size={18} className="ml-0.5" style={{ color: '#111' }} />
-                      </div>
-                    </div>
-                    <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
-                      style={{ background: 'rgba(0,0,0,0.6)', color: '#fff', backdropFilter: 'blur(6px)' }}>
-                      <Play size={10} /> Ver video
-                    </div>
-                  </button>
-                )
-              }
-
-              if (!img) return (
-                <div key={slot} className="flex items-center justify-center"
-                  style={{ background: 'var(--bg-elevated)' }}>
-                  <Images size={20} style={{ color: 'var(--text-muted)', opacity: 0.25 }} />
-                </div>
-              )
-
-              return (
-                <button key={slot}
-                  onClick={() => { setPhotoIdx(slot); setShowLightbox(true) }}
-                  className="relative overflow-hidden group cursor-zoom-in"
-                  style={{ background: 'var(--bg-elevated)' }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={img.url} alt=""
-                    loading="lazy"
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
-                  {/* Overlay "+N más" en la última celda si hay más fotos */}
-                  {isLastCell && hiddenCount > 0 && (
-                    <div className="absolute inset-0 flex items-center justify-center"
-                      style={{ background: 'rgba(3,49,60,0.65)', backdropFilter: 'blur(2px)' }}>
-                      <div className="text-white text-center">
-                        <div className="text-2xl font-bold tracking-tight">+{hiddenCount}</div>
-                        <div className="text-xs font-medium opacity-80 mt-0.5">
-                          {hiddenCount === 1 ? 'foto más' : 'fotos más'}
-                        </div>
-                      </div>
+                      className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Building2 size={80} style={{ color: 'var(--text-muted)', opacity: 0.12 }} />
                     </div>
                   )}
                 </button>
-              )
-            })}
 
-            {/* Botón "Ver todas las fotos" */}
-            {images.length > 0 && (
-              <button
-                onClick={() => { setPhotoIdx(0); setShowLightbox(true) }}
-                className="absolute bottom-4 right-4 flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl shadow-lg transition-all hover:shadow-xl hover:-translate-y-px"
-                style={{ background: '#fff', color: 'var(--text-primary)', border: '1px solid rgba(0,0,0,0.08)' }}>
-                <Images size={15} />
-                Ver fotos{images.length > 1 ? ` (${images.length})` : ''}
-              </button>
-            )}
-          </div>
+                {/* Celdas derechas: fotos primero, video siempre al final */}
+                {Array.from({ length: rightCount }, (_, i) => {
+                  const isVideoSlot = hasVideo && i === rightCount - 1
+                  const isLastPhotoSlot = !isVideoSlot && i === rightCount - 1
+                  const photoIndex = i + 1  // +1 porque la foto 0 es el cover
+                  const img = images[photoIndex]
+
+                  // Celda de video — siempre en la esquina
+                  if (isVideoSlot) return (
+                    <button key="video"
+                      onClick={() => setShowVideoModal(true)}
+                      className="relative overflow-hidden group cursor-pointer"
+                      style={{ background: '#080808' }}>
+                      <video src={`${space.video_url}#t=0.5`} muted preload="metadata"
+                        className="w-full h-full object-cover opacity-70" />
+                      <div className="absolute inset-0 flex items-center justify-center"
+                        style={{ background: 'rgba(0,0,0,0.38)' }}>
+                        <div className="w-11 h-11 rounded-full flex items-center justify-center shadow-xl transition-transform duration-200 group-hover:scale-110"
+                          style={{ background: 'rgba(255,255,255,0.95)' }}>
+                          <Play size={18} className="ml-0.5" style={{ color: '#111' }} />
+                        </div>
+                      </div>
+                      <div className="absolute bottom-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+                        style={{ background: 'rgba(0,0,0,0.6)', color: '#fff', backdropFilter: 'blur(6px)' }}>
+                        <Play size={10} /> Ver video
+                      </div>
+                    </button>
+                  )
+
+                  // Celda de foto
+                  if (!img) return null
+                  return (
+                    <button key={i}
+                      onClick={() => { setPhotoIdx(photoIndex); setShowLightbox(true) }}
+                      className="relative overflow-hidden group cursor-zoom-in"
+                      style={{ background: 'var(--bg-elevated)' }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={img.url} alt="" loading="lazy"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+                      {/* Overlay "+N más" en la última celda de fotos */}
+                      {isLastPhotoSlot && hiddenCount > 0 && (
+                        <div className="absolute inset-0 flex items-center justify-center"
+                          style={{ background: 'rgba(3,49,60,0.65)', backdropFilter: 'blur(2px)' }}>
+                          <div className="text-white text-center">
+                            <div className="text-2xl font-bold tracking-tight">+{hiddenCount}</div>
+                            <div className="text-xs font-medium opacity-80 mt-0.5">
+                              {hiddenCount === 1 ? 'foto más' : 'fotos más'}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </button>
+                  )
+                })}
+
+                {/* Botón "Ver todas las fotos" */}
+                {images.length > 0 && (
+                  <button
+                    onClick={() => { setPhotoIdx(0); setShowLightbox(true) }}
+                    className="absolute bottom-4 right-4 flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl shadow-lg transition-all hover:shadow-xl hover:-translate-y-px"
+                    style={{ background: '#fff', color: 'var(--text-primary)', border: '1px solid rgba(0,0,0,0.08)' }}>
+                    <Images size={15} />
+                    Ver fotos{images.length > 1 ? ` (${images.length})` : ''}
+                  </button>
+                )}
+              </div>
+            )
+          })()}
 
           {/* ────────────────────── MÓVIL: Carousel con swipe ── */}
           <div className="md:hidden relative rounded-2xl overflow-hidden"
