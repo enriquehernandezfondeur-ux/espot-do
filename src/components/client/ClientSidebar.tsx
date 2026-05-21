@@ -47,6 +47,9 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
 
   // Re-consultar conteos reales en cada navegación
   useEffect(() => {
+    // Si está en mensajes → limpiar badge de inmediato
+    if (pathname?.includes('/mensajes')) setUnread(0)
+
     const supabase = createClient()
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return
