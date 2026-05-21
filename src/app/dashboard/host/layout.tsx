@@ -20,13 +20,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const pathname = headersList.get('x-pathname') ?? headersList.get('x-invoke-path') ?? ''
   const isOnBienvenida = pathname.includes('/bienvenida')
 
-  if (!isOnBienvenida) {
-    const { count } = await supabase
-      .from('spaces')
-      .select('id', { count: 'exact', head: true })
-      .eq('host_id', user.id)
+  const { count: spaceCount } = await supabase
+    .from('spaces')
+    .select('id', { count: 'exact', head: true })
+    .eq('host_id', user.id)
 
-    if (!count || count === 0) redirect('/dashboard/host/bienvenida')
+  const hasSpaces = !!spaceCount && spaceCount > 0
+
+  if (isOnBienvenida && hasSpaces) {
+    redirect('/dashboard/host')
+  } else if (!isOnBienvenida && !hasSpaces) {
+    redirect('/dashboard/host/bienvenida')
   }
 
   const userName  = profile?.full_name ?? user.email?.split('@')[0]

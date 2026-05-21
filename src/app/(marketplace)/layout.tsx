@@ -128,7 +128,12 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
             <input
               ref={searchRef}
               value={searchQ}
-              onChange={e => setSearchQ(e.target.value)}
+              onChange={e => {
+                setSearchQ(e.target.value)
+                if (pathname === '/buscar') {
+                  window.dispatchEvent(new CustomEvent('espot:search', { detail: { q: e.target.value } }))
+                }
+              }}
               onKeyDown={e => { if (e.key === 'Enter') handleSearch(searchQ) }}
               placeholder="Buscar espacios..."
               className="flex-1 bg-transparent text-sm focus:outline-none"

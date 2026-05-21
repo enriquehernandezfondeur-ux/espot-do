@@ -171,6 +171,15 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
   )
   const [availLoading, setAvailLoading] = useState(false)
 
+  // Escuchar búsquedas en tiempo real desde el navbar
+  useEffect(() => {
+    function onNavSearch(e: Event) {
+      setQ((e as CustomEvent<{ q: string }>).detail.q)
+    }
+    window.addEventListener('espot:search', onNavSearch)
+    return () => window.removeEventListener('espot:search', onNavSearch)
+  }, [])
+
   useEffect(() => {
     if (!dateFrom) { setBlockedIds(new Set()); return }
     setAvailLoading(true)
@@ -437,30 +446,6 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
 
           {/* ── Desktop: filtros ── */}
           <div className="hidden md:flex items-center gap-2">
-
-              {/* Búsqueda de texto — filtra en tiempo real */}
-              <div className="flex items-center gap-2 rounded-xl px-3.5 py-2 shrink-0"
-                style={{
-                  background: '#fff',
-                  border: `1.5px solid ${q ? 'var(--brand-border)' : 'var(--border-medium)'}`,
-                  width: 220,
-                }}>
-                <Search size={14} style={{ color: q ? 'var(--brand)' : 'var(--text-muted)', flexShrink: 0 }} />
-                <input
-                  value={q}
-                  onChange={e => setQ(e.target.value)}
-                  placeholder="Buscar espacios..."
-                  className="flex-1 min-w-0 bg-transparent focus:outline-none text-sm"
-                  style={{ color: 'var(--text-primary)' }}
-                />
-                {q && (
-                  <button onClick={() => setQ('')} className="shrink-0">
-                    <X size={10} style={{ color: 'var(--text-muted)' }} />
-                  </button>
-                )}
-              </div>
-
-              <div className="w-px h-5 shrink-0" style={{ background: 'var(--border-medium)' }} />
 
               {/* Tipo de espacio */}
               <div className="relative">
