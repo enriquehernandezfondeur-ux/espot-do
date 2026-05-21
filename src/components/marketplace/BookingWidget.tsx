@@ -565,19 +565,18 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         )}
         {isConsumption && (
           <div>
+            <div className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Consumibles</div>
             <div className="flex items-baseline gap-1 mb-1.5">
               <span className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
                 {formatCurrency(pricing.minimum_consumption)}
               </span>
-              <span className="text-sm" style={{ color: 'var(--text-muted)' }}> consumibles</span>
             </div>
             <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
               {minHours > 0 && maxHours > 0
-                ? `Desde ${minHours}h hasta ${maxHours}h`
-                : minHours > 0 ? `Mínimo ${minHours} hora${minHours > 1 ? 's' : ''}`
+                ? `${minHours}h – ${maxHours}h`
+                : minHours > 0 ? `Mínimo ${minHours}h`
                 : maxHours > 0 ? `Máximo ${maxHours}h`
                 : 'Elige tu horario'}
-              {' · se aplica en consumo del local'}
             </div>
           </div>
         )}
