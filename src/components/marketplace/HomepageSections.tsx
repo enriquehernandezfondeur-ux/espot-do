@@ -55,7 +55,6 @@ function SocialSection() {
               </div>
               <span className="text-sm font-semibold" style={{ color: '#6B7280' }}>@espot.do</span>
             </div>
-            <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: '#35C493' }}>Comunidad</p>
             <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
               Espacios reales,{' '}
               <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
@@ -162,141 +161,14 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
   return (
     <div style={{ background: '#fff' }}>
 
-      {/* ── TIPOS DE EVENTO ── */}
-      <section className="py-14 md:py-20" style={{ background: '#fff' }}>
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
-
-          <Reveal className="flex items-end justify-between mb-10 md:mb-12">
-            <div>
-              <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: '#35C493' }}>
-                Por tipo de evento
-              </p>
-              <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
-                ¿Qué estás{' '}
-                <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                  celebrando?
-                </span>
-              </h2>
-            </div>
-            <Link href="/buscar" className="hidden md:flex items-center gap-1.5 text-sm font-semibold"
-              style={{ color: '#6B7280' }}>
-              Ver todos <ArrowRight size={14} />
-            </Link>
-          </Reveal>
-
-          <div ref={evSection.ref} className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-            {eventTypes.map((et, i) => (
-              <Link key={et.slug} href={`/buscar?activity=${et.slug}`}
-                className="group relative block overflow-hidden"
-                style={{
-                  borderRadius: 20,
-                  aspectRatio: '4/3',
-                  boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
-                  opacity: evSection.on ? 1 : 0,
-                  transform: evSection.on ? 'translateY(0) scale(1)' : 'translateY(24px) scale(0.97)',
-                  transition: `opacity 0.6s ease ${i * 80}ms, transform 0.6s ease ${i * 80}ms`,
-                }}>
-                <Image src={et.img} alt={et.label} fill
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
-                  sizes="(max-width: 768px) 50vw, 33vw" />
-                <div className="absolute inset-0"
-                  style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.05) 60%, transparent 100%)' }} />
-                <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5 flex items-end justify-between">
-                  <span className="text-white font-bold text-base md:text-lg" style={{ letterSpacing: '-0.02em' }}>
-                    {et.label}
-                  </span>
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0"
-                    style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)' }}>
-                    <ArrowRight size={13} className="text-white" />
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          <div className="md:hidden mt-5 text-center">
-            <Link href="/buscar" className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-3 rounded-xl"
-              style={{ border: '1.5px solid #E2E8F0', color: '#0F1623' }}>
-              Ver todos los eventos <ArrowRight size={14} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── ESPACIOS DESTACADOS ── */}
-      <section className="py-14 md:py-20" style={{ background: '#F8FAFC' }}>
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
-
-          <Reveal className="flex items-end justify-between mb-10 md:mb-12">
-            <div>
-              <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: '#35C493' }}>
-                Espacios disponibles
-              </p>
-              <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
-                {spaces.length > 0 ? (
-                  <>{spaces.length}{' '}
-                    <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                      espacio{spaces.length !== 1 ? 's' : ''}
-                    </span>
-                    {' '}en República Dominicana</>
-                ) : 'Espacios en República Dominicana'}
-              </h2>
-            </div>
-            <Link href="/buscar" className="hidden md:flex items-center gap-1.5 text-sm font-semibold"
-              style={{ color: '#6B7280' }}>
-              Ver todos <ArrowRight size={14} />
-            </Link>
-          </Reveal>
-
-          {spaces.length > 0 ? (
-            <div ref={spSection.ref} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-              {spaces.slice(0, 6).map((space: any, i: number) => (
-                <div key={space.id} style={{
-                  opacity: spSection.on ? 1 : 0,
-                  transform: spSection.on ? 'translateY(0)' : 'translateY(32px)',
-                  transition: `opacity 0.65s ease ${i * 90}ms, transform 0.65s ease ${i * 90}ms`,
-                }}>
-                  <SpaceCard
-                    space={space}
-                    isHovered={hoveredId === space.id}
-                    onHover={setHoveredId}
-                  />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <Reveal className="py-20 text-center rounded-2xl" style={{ background: '#fff', border: '1px solid #E2E8F0' }}>
-              <Building2 size={32} style={{ color: '#35C493', margin: '0 auto 12px' }} />
-              <h3 className="font-bold text-lg mb-2" style={{ color: '#0F1623' }}>Próximamente más espacios</h3>
-              <p className="text-sm mb-6" style={{ color: '#6B7280' }}>Sé el primero en publicar tu espacio</p>
-              <Link href="/auth?mode=register&redirect=/dashboard/host/espacio"
-                className="inline-flex items-center gap-2 text-sm font-bold px-6 py-3 rounded-xl"
-                style={{ background: '#35C493', color: '#fff' }}>
-                Publicar espacio gratis
-              </Link>
-            </Reveal>
-          )}
-
-          <div className="text-center mt-8 md:hidden">
-            <Link href="/buscar" className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-xl"
-              style={{ border: '1.5px solid #E2E8F0', color: '#0F1623' }}>
-              Ver todos <ArrowRight size={14} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* ── CATEGORÍAS ── */}
       <section className="py-14 md:py-20" style={{ background: '#fff' }}>
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <Reveal className="mb-10 md:mb-12">
-            <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: '#35C493' }}>
-              Por tipo de espacio
-            </p>
             <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
               Explora{' '}
               <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                tu opción
+                tu espacio
               </span>
             </h2>
           </Reveal>
@@ -361,6 +233,121 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
         </div>
       </section>
 
+      {/* ── TIPOS DE EVENTO ── */}
+      <section className="py-14 md:py-20" style={{ background: '#F8FAFC' }}>
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+
+          <Reveal className="flex items-end justify-between mb-10 md:mb-12">
+            <div>
+              <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
+                ¿Qué tipo de{' '}
+                <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  actividad?
+                </span>
+              </h2>
+            </div>
+            <Link href="/buscar" className="hidden md:flex items-center gap-1.5 text-sm font-semibold"
+              style={{ color: '#6B7280' }}>
+              Ver todos <ArrowRight size={14} />
+            </Link>
+          </Reveal>
+
+          <div ref={evSection.ref} className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+            {eventTypes.map((et, i) => (
+              <Link key={et.slug} href={`/buscar?activity=${et.slug}`}
+                className="group relative block overflow-hidden"
+                style={{
+                  borderRadius: 20,
+                  aspectRatio: '4/3',
+                  boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
+                  opacity: evSection.on ? 1 : 0,
+                  transform: evSection.on ? 'translateY(0) scale(1)' : 'translateY(24px) scale(0.97)',
+                  transition: `opacity 0.6s ease ${i * 80}ms, transform 0.6s ease ${i * 80}ms`,
+                }}>
+                <Image src={et.img} alt={et.label} fill
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
+                  sizes="(max-width: 768px) 50vw, 33vw" />
+                <div className="absolute inset-0"
+                  style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.05) 60%, transparent 100%)' }} />
+                <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5 flex items-end justify-between">
+                  <span className="text-white font-bold text-base md:text-lg" style={{ letterSpacing: '-0.02em' }}>
+                    {et.label}
+                  </span>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0"
+                    style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)' }}>
+                    <ArrowRight size={13} className="text-white" />
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <div className="md:hidden mt-5 text-center">
+            <Link href="/buscar" className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-3 rounded-xl"
+              style={{ border: '1.5px solid #E2E8F0', color: '#0F1623' }}>
+              Ver todos los eventos <ArrowRight size={14} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── ESPACIOS DESTACADOS ── */}
+      <section className="py-14 md:py-20" style={{ background: '#fff' }}>
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+
+          <Reveal className="flex items-end justify-between mb-10 md:mb-12">
+            <div>
+              <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
+                Espacios{' '}
+                <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  en República Dominicana
+                </span>
+              </h2>
+            </div>
+            <Link href="/buscar" className="hidden md:flex items-center gap-1.5 text-sm font-semibold"
+              style={{ color: '#6B7280' }}>
+              Ver todos <ArrowRight size={14} />
+            </Link>
+          </Reveal>
+
+          {spaces.length > 0 ? (
+            <div ref={spSection.ref} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+              {spaces.slice(0, 6).map((space: any, i: number) => (
+                <div key={space.id} style={{
+                  opacity: spSection.on ? 1 : 0,
+                  transform: spSection.on ? 'translateY(0)' : 'translateY(32px)',
+                  transition: `opacity 0.65s ease ${i * 90}ms, transform 0.65s ease ${i * 90}ms`,
+                }}>
+                  <SpaceCard
+                    space={space}
+                    isHovered={hoveredId === space.id}
+                    onHover={setHoveredId}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Reveal className="py-20 text-center rounded-2xl" style={{ background: '#fff', border: '1px solid #E2E8F0' }}>
+              <Building2 size={32} style={{ color: '#35C493', margin: '0 auto 12px' }} />
+              <h3 className="font-bold text-lg mb-2" style={{ color: '#0F1623' }}>Próximamente más espacios</h3>
+              <p className="text-sm mb-6" style={{ color: '#6B7280' }}>Sé el primero en publicar tu espacio</p>
+              <Link href="/auth?mode=register&redirect=/dashboard/host/espacio"
+                className="inline-flex items-center gap-2 text-sm font-bold px-6 py-3 rounded-xl"
+                style={{ background: '#35C493', color: '#fff' }}>
+                Publicar espacio gratis
+              </Link>
+            </Reveal>
+          )}
+
+          <div className="text-center mt-8 md:hidden">
+            <Link href="/buscar" className="inline-flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-xl"
+              style={{ border: '1.5px solid #E2E8F0', color: '#0F1623' }}>
+              Ver todos <ArrowRight size={14} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* ── REDES SOCIALES ── */}
       <SocialSection />
 
@@ -384,9 +371,6 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
         <div className="max-w-5xl mx-auto px-4 md:px-6">
 
           <Reveal className="text-center mb-16 md:mb-20">
-            <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{ color: '#35C493' }}>
-              Proceso simple
-            </p>
             <h2 className="font-bold text-white" style={{ fontSize: 'clamp(1.8rem, 5vw, 3rem)', letterSpacing: '-0.04em', lineHeight: 1.1 }}>
               Reserva en tres pasos
             </h2>
@@ -561,9 +545,6 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
 
         <div className="relative max-w-7xl mx-auto px-4 md:px-6">
           <Reveal>
-            <p className="text-xs font-bold tracking-widest uppercase mb-6 text-center" style={{ color: '#35C493' }}>
-              Conoce la plataforma
-            </p>
             <div className="grid md:grid-cols-2 gap-4">
 
               {/* Card clientes */}
