@@ -413,12 +413,22 @@ export async function getHostQuotes() {
   }
   if (!spaces?.length) return []
 
-  // Paso 2: bookings pendientes de cotización en esos espacios
-  // Incluye quote_requested (caso normal) y pending en espacios custom_quote (edge case)
+  const spaceIds = spaces.map(s => s.id)
+
+  // Paso 2: obtener espacios con pricing de cotización personalizada
+  const { data: customPricing } = await supabase
+    .from('space_pricing')
+    .select('space_id')
+    .eq('pricing_type', 'custom_quote')
+    .in('space_id', spaceIds)
+
+  const customQuoteSpaceIds = new Set(customPricing?.map(p => p.space_id) ?? [])
+
+  // Paso 3: bookings pendientes — quote_requested siempre, pending solo en espacios custom_quote
   const { data, error } = await supabase
     .from('bookings')
-    .select('*, profiles!guest_id(full_name, email, phone), space_pricing!pricing_id(pricing_type)')
-    .in('space_id', spaces.map(s => s.id))
+    .select('*, profiles!guest_id(full_name, email, phone)')
+    .in('space_id', spaceIds)
     .in('status', ['quote_requested', 'pending'])
     .order('created_at', { ascending: false })
 
@@ -427,11 +437,9 @@ export async function getHostQuotes() {
     return []
   }
 
-  // quote_requested siempre; pending solo si el pricing es custom_quote
-  return (data ?? []).filter(b => {
-    const pt = (b as any).space_pricing?.pricing_type
-    return b.status === 'quote_requested' || pt === 'custom_quote'
-  })
+  return (data ?? []).filter(b =>
+    b.status === 'quote_requested' || customQuoteSpaceIds.has(b.space_id)
+  )
 }
 
 // ── Responder cotización (enviar precio) ──────────────────

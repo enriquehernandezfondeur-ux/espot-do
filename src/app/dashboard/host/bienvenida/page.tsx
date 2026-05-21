@@ -16,13 +16,13 @@ export default async function BienvenidaPage() {
     .eq('id', user.id)
     .single()
 
-  // Si el host ya tiene espacios publicados → ir al dashboard principal
-  const { count } = await supabase
+  // Si el host ya tiene espacios → ir al dashboard principal
+  const { count, error: countErr } = await supabase
     .from('spaces')
     .select('id', { count: 'exact', head: true })
     .eq('host_id', user.id)
 
-  if (count && count > 0) redirect('/dashboard/host')
+  if (!countErr && count !== null && count > 0) redirect('/dashboard/host')
 
   const firstName = profile?.full_name?.split(' ')[0] ?? 'Propietario'
 
