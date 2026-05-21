@@ -728,7 +728,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
 
             {/* Tabs */}
             <div className="mb-6 md:mb-8">
-              <div className="flex gap-1 p-1 rounded-2xl overflow-x-auto scrollbar-hide w-full md:w-fit" style={{ background: 'var(--bg-elevated)' }}>
+              <div className="flex gap-1 p-1 rounded-2xl overflow-x-auto scrollbar-hide w-full" style={{ background: 'var(--bg-elevated)' }}>
                 {([
                   { id: 'info',    label: 'Descripción' },
                   { id: 'addons',  label: `Adicionales${addons.length ? ` (${addons.length})` : ''}` },
@@ -736,7 +736,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   { id: 'reviews', label: reviewsData?.total ? `Reseñas (${reviewsData.total})` : 'Reseñas' },
                 ] as const).map(tab => (
                   <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                    className="flex-1 md:flex-none min-w-0 px-3 md:px-5 py-3 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap"
+                    className="flex-1 min-w-0 px-3 md:px-5 py-3 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap"
                     style={activeTab === tab.id ? {
                       background: '#fff', color: 'var(--text-primary)',
                       boxShadow: '0 1px 4px rgba(0,0,0,0.08)',

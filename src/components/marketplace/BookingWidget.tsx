@@ -574,13 +574,6 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                 : maxHours > 0 ? `Máximo ${maxHours} horas`
                 : 'Elige tu horario'}
             </div>
-            <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl"
-              style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-              <Info size={12} style={{ color: 'var(--text-muted)', flexShrink: 0, marginTop: 1 }} />
-              <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                Este monto se descuenta de tu consumo de alimentos y bebidas el día del evento. Si consumes más, pagas la diferencia directamente en el local.
-              </p>
-            </div>
           </div>
         )}
         {isPackage && (
@@ -1067,9 +1060,16 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                     <div className="flex justify-between px-4 py-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
                       <span>
                         {isHourly && `${selectedHours % 1 === 0 ? selectedHours : selectedHours.toFixed(1)}h × ${formatCurrency(pricing?.hourly_price)}/hr`}
-                        {isConsumption && (effectiveStartTime && realEndTime
-                          ? `${selectedHours % 1 === 0 ? selectedHours : selectedHours.toFixed(1)}h · Consumibles`
-                          : 'Consumibles')}
+                        {isConsumption && (
+                          <span>
+                            {effectiveStartTime && realEndTime
+                              ? `${selectedHours % 1 === 0 ? selectedHours : selectedHours.toFixed(1)}h · Consumibles`
+                              : 'Consumibles'}
+                            <span className="block text-[11px] font-normal mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                              Se aplica en consumo del local · diferencia se paga en sitio
+                            </span>
+                          </span>
+                        )}
                         {isPackage && (() => {
                           const extra = Math.max(0, selectedHours - packageHours)
                           return extra > 0
@@ -1142,29 +1142,6 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               )
             })()}
 
-            {/* ── Garantía Espot ── */}
-            <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
-              <div className="flex items-center gap-2.5 px-4 py-3"
-                style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
-                <ShieldCheck size={15} style={{ color: 'var(--brand)', flexShrink: 0 }} />
-                <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  Garantía Espot incluida
-                </span>
-              </div>
-              <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
-                {[
-                  { Icon: FileText,     text: 'Contrato oficial digital incluido' },
-                  { Icon: CreditCard,   text: 'Pago en cuotas automático — sin transferencias manuales' },
-                  { Icon: Lock,         text: 'Si el propietario cancela, te devolvemos el dinero' },
-                  { Icon: CheckCircle,  text: 'Espacio verificado por el equipo de Espot' },
-                ].map(({ Icon, text }) => (
-                  <div key={text} className="flex items-start gap-3 px-4 py-3">
-                    <Icon size={13} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: 1 }} />
-                    <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{text}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
 
             {/* Checkbox T&C — requerido por Azul Payments */}
             <label className="flex items-start gap-3 cursor-pointer select-none">
