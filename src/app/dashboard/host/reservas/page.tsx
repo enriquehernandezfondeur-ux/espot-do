@@ -211,20 +211,24 @@ export default function HostReservasPage() {
         )}
       </div>
 
-      {/* Filtros — scrollable en móvil */}
-      <div className="flex items-center gap-2 mb-4">
-        <div className="flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide flex-1"
-          style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+      {/* Filtros */}
+      <div className="flex items-center gap-2 mb-5">
+        {/* Pills — flex-1 en cada uno para distribución simétrica (estilo Airbnb) */}
+        <div className="flex flex-1 gap-1 p-1 rounded-2xl"
+          style={{ background: 'var(--bg-elevated)' }}>
           {FILTERS.map(f => {
             const badge = f.key === 'pending' ? pending : f.key === 'accepted' ? accepted : 0
+            const active = filter === f.key
             return (
               <button key={f.key} onClick={() => setFilter(f.key)}
-                className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap"
-                style={filter === f.key ? { background: 'var(--brand)', color: '#fff' } : { color: 'var(--text-secondary)' }}>
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap"
+                style={active
+                  ? { background: '#fff', color: 'var(--text-primary)', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }
+                  : { color: 'var(--text-secondary)', background: 'transparent' }}>
                 {f.label}
                 {badge > 0 && (
-                  <span className="w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0"
-                    style={{ background: filter === f.key ? 'rgba(255,255,255,0.3)' : '#EF4444', color: '#fff' }}>
+                  <span className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                    style={{ background: active ? 'var(--brand)' : '#EF4444', color: '#fff' }}>
                     {badge}
                   </span>
                 )}
@@ -232,11 +236,12 @@ export default function HostReservasPage() {
             )
           })}
         </div>
-        <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl shrink-0 w-36"
-          style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-          <Search size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar..."
-            className="bg-transparent text-sm flex-1 focus:outline-none" style={{ color: 'var(--text-primary)' }} />
+        {/* Buscador compacto */}
+        <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl shrink-0 w-44"
+          style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+          <Search size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar reserva..."
+            className="bg-transparent text-sm flex-1 focus:outline-none min-w-0" style={{ color: 'var(--text-primary)' }} />
         </div>
       </div>
 
