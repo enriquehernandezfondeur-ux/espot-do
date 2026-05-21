@@ -227,18 +227,18 @@ export default function HostReservasPage() {
       </div>
 
       {/* Filtros — scrollable en móvil */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 mb-4">
-        <div className="flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide"
+      <div className="flex items-center gap-2 mb-4">
+        <div className="flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide flex-1"
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
           {FILTERS.map(f => {
             const badge = f.key === 'pending' ? pending : f.key === 'accepted' ? accepted : 0
             return (
               <button key={f.key} onClick={() => setFilter(f.key)}
-                className="flex-1 min-w-0 flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap"
+                className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap"
                 style={filter === f.key ? { background: 'var(--brand)', color: '#fff' } : { color: 'var(--text-secondary)' }}>
                 {f.label}
                 {badge > 0 && (
-                  <span className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                  <span className="w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0"
                     style={{ background: filter === f.key ? 'rgba(255,255,255,0.3)' : '#EF4444', color: '#fff' }}>
                     {badge}
                   </span>
@@ -247,10 +247,10 @@ export default function HostReservasPage() {
             )
           })}
         </div>
-        <div className="flex items-center gap-2 px-3 py-3 rounded-xl flex-1"
-          style={{ background: 'var(--bg-card)', border: '1.5px solid var(--border-medium)' }}>
-          <Search size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar reserva..."
+        <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl shrink-0 w-36"
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+          <Search size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar..."
             className="bg-transparent text-sm flex-1 focus:outline-none" style={{ color: 'var(--text-primary)' }} />
         </div>
       </div>
