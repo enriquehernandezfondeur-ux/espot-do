@@ -545,6 +545,12 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
 
         <div className="relative max-w-7xl mx-auto px-4 md:px-6">
           <Reveal>
+            <h2 className="font-bold mb-8 md:mb-10" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
+              Todo sobre{' '}
+              <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                Espot
+              </span>
+            </h2>
             <div className="grid md:grid-cols-2 gap-4">
 
               {/* Card clientes */}
