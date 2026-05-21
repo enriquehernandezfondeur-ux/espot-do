@@ -520,9 +520,10 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                     </div>
                     {/* Lista plana ordenada por popularidad */}
                     <div style={{ maxHeight: 280, overflowY: 'auto' }}>
-                      {SUB_ACTIVITIES
-                        .filter(a => !actQ || a.label.toLowerCase().includes(actQ.toLowerCase()))
-                        .map(a => {
+                      {(actQ
+                        ? SUB_ACTIVITIES.filter(a => a.label.toLowerCase().includes(actQ.toLowerCase()))
+                        : QUICK_ACTIVITIES.map(q => ({ key: q.slug, label: q.label }))
+                      ).map(a => {
                           const isActive = activity === a.key
                           return (
                             <button key={a.key} onClick={() => { setActivity(isActive ? '' : a.key); setActQ(''); setActOpen(false) }}
@@ -725,7 +726,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                     color: pricingFilter ? (PRICING_TYPES.find(p => p.value === pricingFilter)?.text ?? 'var(--brand)') : 'var(--text-primary)',
                   }}>
                   <Clock size={14} style={{ flexShrink: 0 }} />
-                  <span>{pricingFilter ? PRICING_TYPES.find(p => p.value === pricingFilter)?.label : 'Precio'}</span>
+                  <span>{pricingFilter ? PRICING_TYPES.find(p => p.value === pricingFilter)?.label : 'Tipo de reserva'}</span>
                   {pricingFilter
                     ? <button onClick={e => { e.stopPropagation(); setPricingFilter('') }}><X size={12} /></button>
                     : <ChevronDown size={13} style={{ opacity: 0.5 }} />
@@ -906,7 +907,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all"
               style={{ background: pricingFilter ? (PRICING_TYPES.find(p=>p.value===pricingFilter)?.bg ?? 'var(--brand-dim)') : '#fff', border: `1.5px solid ${pricingFilter ? (PRICING_TYPES.find(p=>p.value===pricingFilter)?.border ?? 'var(--brand-border)') : 'var(--border-medium)'}`, color: pricingFilter ? (PRICING_TYPES.find(p=>p.value===pricingFilter)?.text ?? 'var(--brand)') : 'var(--text-primary)' }}>
               <Clock size={13} style={{ flexShrink: 0 }} />
-              <span>{pricingFilter ? PRICING_TYPES.find(p=>p.value===pricingFilter)?.label : 'Precio'}</span>
+              <span>{pricingFilter ? PRICING_TYPES.find(p=>p.value===pricingFilter)?.label : 'Tipo de reserva'}</span>
               {pricingFilter ? <span onClick={e => { e.stopPropagation(); setPricingFilter('') }} className="flex items-center justify-center w-7 h-7 -mr-1"><X size={12} /></span> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
             </button>
           </div>
