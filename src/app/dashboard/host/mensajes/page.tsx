@@ -195,7 +195,7 @@ export default function HostMensajesPage() {
   )
 
   return (
-    <div className="flex flex-col md:flex-row" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)', height: '100dvh', overflow: 'hidden' }}>
+    <div className="flex flex-col md:flex-row h-[calc(100dvh-136px)] md:h-dvh overflow-hidden" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
 
       {/* Sidebar */}
       <div className={`w-full md:w-72 md:flex-col md:shrink-0 flex flex-col ${active ? 'hidden md:flex' : 'flex'}`}
@@ -263,7 +263,7 @@ export default function HostMensajesPage() {
                   setConvs(prev => prev.filter(c => c.spaceId !== conv.spaceId))
                   if (active?.spaceId === conv.spaceId) setActive(null)
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
                 title="Eliminar conversación">
                 <Trash2 size={13} />
@@ -332,7 +332,7 @@ export default function HostMensajesPage() {
                           )}
                         </div>
                       )}
-                      {msg.body && <div className="px-4 py-3 text-sm leading-relaxed">{msg.body}</div>}
+                      {msg.body && <div className="px-4 py-3 text-sm leading-relaxed break-words">{msg.body}</div>}
                       {!msg.body && !hasAttach && <div className="px-4 py-3 text-sm opacity-40 italic">Mensaje vacío</div>}
                     </div>
                     <div className={cn('flex items-center gap-1 mt-1', isMe ? 'justify-end' : 'justify-start')}>

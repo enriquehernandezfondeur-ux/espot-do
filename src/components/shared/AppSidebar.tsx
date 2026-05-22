@@ -293,15 +293,21 @@ export default function AppSidebar({
           boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
         }}>
         <div className="flex items-stretch">
-          {mobileBottomNav.map(({ href, label, icon: Icon }) => {
+          {mobileBottomNav.map(({ href, label, icon: Icon, badge }) => {
             const active = isActive(href)
             return (
               <Link key={href} href={href}
                 className="flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-all"
                 style={{ color: active ? 'var(--brand)' : 'var(--text-muted)' }}>
-                <div className="w-8 h-8 flex items-center justify-center rounded-xl transition-all"
+                <div className="relative w-8 h-8 flex items-center justify-center rounded-xl transition-all"
                   style={{ background: active ? 'var(--brand-dim)' : 'transparent' }}>
                   <Icon size={18} />
+                  {badge != null && badge > 0 && (
+                    <span className="absolute -top-1 -right-1 flex items-center justify-center rounded-full text-[9px] font-bold text-white"
+                      style={{ minWidth: 14, height: 14, padding: '0 3px', background: '#EF4444' }}>
+                      {badge > 9 ? '9+' : badge}
+                    </span>
+                  )}
                 </div>
                 <span className="text-xs font-semibold leading-tight">{label}</span>
               </Link>

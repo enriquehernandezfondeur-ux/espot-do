@@ -855,7 +855,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
 
             {/* Filtros — primero */}
             <button onClick={() => setMoreOpen(true)}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 transition-all"
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 transition-all min-h-[44px]"
               style={{ background: activeFiltersCount > 0 ? 'var(--brand)' : '#fff', border: `1.5px solid ${activeFiltersCount > 0 ? 'var(--brand)' : 'var(--border-medium)'}`, color: activeFiltersCount > 0 ? '#fff' : 'var(--text-primary)' }}>
               <SlidersHorizontal size={13} />
               Filtros
@@ -867,7 +867,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
             {/* Tipo de espacio */}
             {(() => { const cat = CATEGORIES.find(c => c.value === categoria); const Icon = cat?.icon ?? LayoutList; return (
               <button onClick={() => openDrawer('tipo-espacio')}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all"
+                className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all min-h-[44px]"
                 style={{ background: categoria ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${categoria ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: categoria ? 'var(--brand)' : 'var(--text-primary)' }}>
                 <Icon size={13} style={{ flexShrink: 0 }} />
                 <span>{categoria ? cat?.label : 'Espacio'}</span>
@@ -877,7 +877,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
 
             {/* Tipo de evento */}
             <button onClick={() => openDrawer('tipo-evento')}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all"
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all min-h-[44px]"
               style={{ background: activity ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${activity ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: activity ? 'var(--brand)' : 'var(--text-primary)' }}>
               <LayoutList size={13} style={{ flexShrink: 0 }} />
               <span>{activityLabel || 'Evento'}</span>
@@ -886,7 +886,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
 
             {/* Personas */}
             <button onClick={() => openDrawer('personas')}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all"
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all min-h-[44px]"
               style={{ background: capacidad ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${capacidad ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: capacidad ? 'var(--brand)' : 'var(--text-primary)' }}>
               <Users size={13} style={{ flexShrink: 0 }} />
               <span>{capacidad ? `${capacidad}+` : 'Personas'}</span>
@@ -895,7 +895,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
 
             {/* Sector */}
             <button onClick={() => openDrawer('sector')}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all"
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all min-h-[44px]"
               style={{ background: sector ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${sector ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: sector ? 'var(--brand)' : 'var(--text-primary)' }}>
               <MapPin size={13} style={{ flexShrink: 0 }} />
               <span className="max-w-[90px] truncate">{sector || 'Dónde'}</span>
@@ -904,7 +904,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
 
             {/* Fecha */}
             <button onClick={() => openDrawer('fecha')}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all"
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all min-h-[44px]"
               style={{ background: dateFrom ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${dateFrom ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: dateFrom ? 'var(--brand)' : 'var(--text-primary)' }}>
               <CalendarDays size={13} style={{ flexShrink: 0 }} />
               <span>{dateFrom ? fmtDateShort(dateFrom) : 'Fecha'}</span>
@@ -913,7 +913,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
 
             {/* Precio */}
             <button onClick={() => openDrawer('precio')}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all"
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all min-h-[44px]"
               style={{ background: pricingFilter ? (PRICING_TYPES.find(p=>p.value===pricingFilter)?.bg ?? 'var(--brand-dim)') : '#fff', border: `1.5px solid ${pricingFilter ? (PRICING_TYPES.find(p=>p.value===pricingFilter)?.border ?? 'var(--brand-border)') : 'var(--border-medium)'}`, color: pricingFilter ? (PRICING_TYPES.find(p=>p.value===pricingFilter)?.text ?? 'var(--brand)') : 'var(--text-primary)' }}>
               <Clock size={13} style={{ flexShrink: 0 }} />
               <span>{pricingFilter ? PRICING_TYPES.find(p=>p.value===pricingFilter)?.label : 'Tipo de reserva'}</span>
