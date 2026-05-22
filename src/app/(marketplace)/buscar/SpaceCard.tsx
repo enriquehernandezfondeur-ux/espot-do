@@ -279,7 +279,8 @@ export function SpaceCard({
                   <span className="font-bold leading-none" style={{ color: '#0F1623', fontSize: 15 }}>
                     {priceInfo.amount}
                   </span>
-                  {priceInfo.unit && (
+                  {/* Solo mostrar unidad para hourly ("/ hora"), no para paquete */}
+                  {priceInfo.unit && priceInfo.unit !== 'paquete' && (
                     <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{priceInfo.unit}</span>
                   )}
                 </div>
@@ -287,14 +288,15 @@ export function SpaceCard({
                 <span className="text-sm font-semibold shrink-0" style={{ color: 'var(--text-muted)' }}>Cotizar precio</span>
               )}
 
-              {pricingDef?.value && (
+              {/* Badge solo para consumibles — hora y paquete ya tienen texto junto al precio */}
+              {pricingDef?.value === 'minimum_consumption' && (
                 <div className="relative shrink-0">
                   <button
                     type="button"
                     onClick={e => { e.preventDefault(); e.stopPropagation(); setShowPriceInfo(o => !o) }}
                     className="text-[11px] font-semibold px-2 py-1 rounded-lg whitespace-nowrap"
                     style={{ background: pricingDef.bg, color: pricingDef.text, border: `1px solid ${pricingDef.border}` }}>
-                    {pricingDef.value === 'minimum_consumption' ? 'Consumibles' : pricingDef.label}
+                    Consumibles
                   </button>
                   {showPriceInfo && pricingTip && (
                     <>
