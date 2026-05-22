@@ -133,6 +133,8 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
       drawerShadow="4px 0 32px rgba(0,0,0,0.15)"
       isActiveVariant="client"
       navHoverHandlers={false}
+      totalBadge={unread + pendingPay}
+      bellHref="/dashboard/mensajes"
     />
   )
 }

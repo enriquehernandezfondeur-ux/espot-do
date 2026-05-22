@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
-  LogOut, Building2, Menu, X, Search, Shield, User,
+  LogOut, Building2, Menu, X, Search, Shield, User, Bell,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { LucideIcon } from 'lucide-react'
@@ -52,6 +52,10 @@ export interface AppSidebarProps {
   isAdmin?: boolean
   /** Whether nav items have onMouseEnter/Leave hover handlers */
   navHoverHandlers?: boolean
+  /** Total pending notifications (messages + reservations + etc.) */
+  totalBadge?: number
+  /** Where the bell icon links to */
+  bellHref?: string
 }
 
 export default function AppSidebar({
@@ -74,6 +78,8 @@ export default function AppSidebar({
   isActiveVariant,
   isAdmin,
   navHoverHandlers = false,
+  totalBadge,
+  bellHref,
 }: AppSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
@@ -249,6 +255,20 @@ export default function AppSidebar({
         <Link href={mobileLogoHref} className="flex-1 flex items-center">
           <img src="/logo-dark.svg" alt="espot.do" style={{ height: 22, width: 'auto' }} />
         </Link>
+
+        {/* Campana de notificaciones */}
+        {bellHref && (
+          <Link href={bellHref} className="relative w-10 h-10 flex items-center justify-center rounded-xl shrink-0"
+            style={{ color: totalBadge ? 'var(--text-primary)' : 'var(--text-muted)' }}
+            aria-label="Notificaciones">
+            <Bell size={18} />
+            {totalBadge != null && totalBadge > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
+                style={{ background: '#EF4444' }} />
+            )}
+          </Link>
+        )}
+
         {avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={avatarUrl} alt={userName ?? 'Avatar'}

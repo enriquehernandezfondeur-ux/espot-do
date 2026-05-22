@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Search, Menu, X, User, ChevronDown, LogOut, Settings, LayoutDashboard, MapPin, Building2, CalendarDays, Heart, ChevronRight, CreditCard, MessageCircle, Home } from 'lucide-react'
+import { Search, Menu, X, User, ChevronDown, LogOut, Settings, LayoutDashboard, MapPin, Building2, CalendarDays, Heart, ChevronRight, CreditCard, MessageCircle, Home, Compass } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -238,12 +238,12 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
 
           {/* Mobile: acciones rápidas */}
           <div className="md:hidden flex items-center gap-2 ml-auto">
-            {/* Buscar rápido móvil — siempre visible */}
+            {/* Explorar rápido móvil — ícono de brújula */}
             <Link href="/buscar"
               className="w-10 h-10 flex items-center justify-center rounded-xl"
               style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
-              aria-label="Explorar">
-              <Search size={18} />
+              aria-label="Explorar espacios">
+              <Compass size={18} />
             </Link>
             {/* Hamburger — solo cuando NO está logueado (el bottom nav reemplaza la nav para logueados) */}
             {authReady && !user && (

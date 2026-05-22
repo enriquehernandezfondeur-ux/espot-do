@@ -174,6 +174,8 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
       drawerShadow="4px 0 32px rgba(0,0,0,0.12)"
       isActiveVariant="host"
       navHoverHandlers={true}
+      totalBadge={unread + reservasCount + cotizCount}
+      bellHref="/dashboard/host/mensajes"
     />
   )
 }
