@@ -214,7 +214,7 @@ export default function HostReservasPage() {
       {/* Filtros + búsqueda */}
       <div className="mb-5 space-y-2">
         {/* Pills — grid 3×2 en móvil (sin scroll), fila completa en desktop */}
-        <div className="p-1 rounded-2xl" style={{ background: '#03313C' }}>
+        <div className="p-1 rounded-2xl" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
           <div className="grid grid-cols-3 md:flex gap-1">
             {FILTERS.map(f => {
               const badge = f.key === 'pending' ? pending : f.key === 'accepted' ? accepted : 0
@@ -223,12 +223,12 @@ export default function HostReservasPage() {
                 <button key={f.key} onClick={() => setFilter(f.key)}
                   className="md:flex-1 flex items-center justify-center gap-1 py-2.5 px-1 md:px-3.5 rounded-xl text-xs md:text-sm font-medium transition-all min-h-[40px]"
                   style={active
-                    ? { background: '#fff', color: '#03313C', boxShadow: '0 1px 6px rgba(0,0,0,0.2)' }
-                    : { color: 'rgba(255,255,255,0.65)', background: 'transparent' }}>
+                    ? { background: '#35C493', color: '#fff', boxShadow: '0 2px 8px rgba(53,196,147,0.3)' }
+                    : { color: 'var(--text-secondary)', background: 'transparent' }}>
                   {f.label}
                   {badge > 0 && (
                     <span className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
-                      style={{ background: '#EF4444', color: '#fff' }}>
+                      style={{ background: active ? 'rgba(255,255,255,0.3)' : '#EF4444', color: '#fff' }}>
                       {badge}
                     </span>
                   )}

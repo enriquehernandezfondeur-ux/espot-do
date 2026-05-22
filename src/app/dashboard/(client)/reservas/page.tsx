@@ -340,26 +340,20 @@ export default function MisReservasPage() {
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      {/* Nombre + estado */}
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <div className="font-semibold text-sm leading-tight truncate" style={{ color: 'var(--text-primary)' }}>
-                            {space?.name}
-                          </div>
-                          {space?.slug && (
-                            <Link href={`/espacios/${space.slug}`}
-                              onClick={e => e.stopPropagation()}
-                              className="shrink-0 w-5 h-5 flex items-center justify-center rounded"
-                              style={{ color: 'var(--text-muted)' }}
-                              title="Ver espacio">
-                              <ExternalLink size={11} />
-                            </Link>
-                          )}
+                      {/* Nombre del espacio */}
+                      <div className="flex items-center gap-1.5 min-w-0 mb-1">
+                        <div className="font-semibold text-sm leading-tight truncate" style={{ color: 'var(--text-primary)' }}>
+                          {space?.name}
                         </div>
-                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0"
-                          style={{ background: sc.bg, color: sc.color }}>
-                          {sl}
-                        </span>
+                        {space?.slug && (
+                          <Link href={`/espacios/${space.slug}`}
+                            onClick={e => e.stopPropagation()}
+                            className="shrink-0 w-5 h-5 flex items-center justify-center rounded"
+                            style={{ color: 'var(--text-muted)' }}
+                            title="Ver espacio">
+                            <ExternalLink size={11} />
+                          </Link>
+                        )}
                       </div>
                       {/* Ubicación + tipo de precio */}
                       <div className="flex items-start gap-1 text-xs mb-1.5" style={{ color: 'var(--text-muted)' }}>
@@ -384,23 +378,28 @@ export default function MisReservasPage() {
                           </div>
                         )
                       })()}
-                      {/* Meta: fecha + hora + monto en fila */}
-                      <div className="flex items-center justify-between gap-2 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap min-w-0">
-                          <span className="flex items-center gap-1 text-xs min-w-0" style={{ color: 'var(--text-secondary)' }}>
-                            <CalendarDays size={10} className="shrink-0" /> {formatDate(bk.event_date)}
+                      {/* Meta: fecha + hora + personas */}
+                      <div className="flex items-center gap-2 flex-wrap min-w-0 mb-2">
+                        <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                          <CalendarDays size={10} className="shrink-0" /> {formatDate(bk.event_date)}
+                        </span>
+                        {bk.start_time && bk.end_time && (
+                          <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                            <Clock size={10} className="shrink-0" /> {formatTime(bk.start_time)} – {formatTime(bk.end_time)}
                           </span>
-                          {bk.start_time && bk.end_time && (
-                            <span className="flex items-center gap-1 text-xs min-w-0" style={{ color: 'var(--text-secondary)' }}>
-                              <Clock size={10} className="shrink-0" /> {formatTime(bk.start_time)} – {formatTime(bk.end_time)}
-                            </span>
-                          )}
-                          <span className="flex items-center gap-1 text-xs min-w-0" style={{ color: 'var(--text-secondary)' }}>
-                            <Users size={10} className="shrink-0" /> {bk.guest_count}
-                          </span>
-                        </div>
-                        <span className="font-bold text-sm shrink-0" style={{ color: 'var(--text-primary)' }}>
+                        )}
+                        <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                          <Users size={10} className="shrink-0" /> {bk.guest_count}
+                        </span>
+                      </div>
+                      {/* Monto + estado en su propia fila */}
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
                           {formatCurrency(Number(bk.total_amount))}
+                        </span>
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0"
+                          style={{ background: sc.bg, color: sc.color }}>
+                          {sl}
                         </span>
                       </div>
                     </div>
