@@ -13,10 +13,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   typedRoutes:     false,
 
-  turbopack: {},
-
   experimental: {
-    optimizeCss:       true,
     scrollRestoration: true,
   },
 
