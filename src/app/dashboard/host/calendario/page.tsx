@@ -389,7 +389,7 @@ export default function CalendarioPage() {
           {/* Day headers */}
           <div className="grid grid-cols-7 mb-1">
             {DAYS.map(d => (
-              <div key={d} className="text-center text-xs py-2 font-semibold" style={{ color: 'var(--text-muted)' }}>{d}</div>
+              <div key={d} className="text-center text-[10px] md:text-xs py-2 font-semibold" style={{ color: 'var(--text-muted)' }}>{d}</div>
             ))}
           </div>
 
@@ -412,7 +412,7 @@ export default function CalendarioPage() {
                 <button
                   key={day}
                   onClick={() => { setSelected(isSel ? null : dk); setBlocking(false) }}
-                  className={cn('relative flex flex-col items-center justify-center rounded-xl py-2 px-1 text-sm font-medium transition-all aspect-square')}
+                  className={cn('relative flex flex-col items-center justify-center rounded-xl py-2 px-1 text-xs md:text-sm font-medium transition-all aspect-square')}
                   style={{
                     background: isToday ? 'var(--brand)' :
                                 isSel  ? 'var(--brand-dim)' :
@@ -559,7 +559,7 @@ export default function CalendarioPage() {
               )}
 
               {/* Timeline de horas */}
-              <div className="overflow-y-auto" style={{ maxHeight: 480 }}>
+              <div className="overflow-y-auto" style={{ maxHeight: 'min(480px, 45dvh)' }}>
                 {HOURS.map(hour => {
                   const status = getHourStatus(hour, selected)
                   return (

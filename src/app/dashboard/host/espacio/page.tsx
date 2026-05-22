@@ -1474,7 +1474,7 @@ export default function EspacioPage() {
                         {(() => { const I = addon.icon as any; return <I size={16} style={{ color: 'var(--text-secondary)', flexShrink: 0 }} /> })()}
                         <span className="text-sm font-medium flex-1 min-w-0 truncate" style={{ color: 'var(--text-primary)' }}>{addon.name}</span>
                         <button onClick={() => toggleAddon(addon)}
-                          className="w-7 h-7 flex items-center justify-center rounded-lg transition-all shrink-0"
+                          className="w-9 h-9 flex items-center justify-center rounded-lg transition-all shrink-0"
                           style={{ color: 'rgba(248,113,113,0.6)', background: 'rgba(248,113,113,0.08)' }}>
                           <X size={13} />
                         </button>
