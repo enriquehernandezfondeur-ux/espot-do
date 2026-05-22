@@ -267,11 +267,6 @@ export function SpaceCard({
             )}
           </div>
 
-          {/* Tipo de espacio — fila propia */}
-          <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
-            <CatIcon size={10} className="shrink-0" />
-            <span>{catLabel}</span>
-          </div>
 
           {/* Precio + badge + capacidad */}
           <div className="flex items-center justify-between gap-2 pt-2.5 mt-auto"
