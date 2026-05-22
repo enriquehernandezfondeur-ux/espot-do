@@ -17,6 +17,12 @@ export interface NavItem {
   badge?: number
 }
 
+export interface NotificationItem {
+  label: string
+  count: number
+  href: string
+}
+
 export interface AppSidebarProps {
   userName?: string
   avatarUrl?: string
@@ -54,8 +60,8 @@ export interface AppSidebarProps {
   navHoverHandlers?: boolean
   /** Total pending notifications (messages + reservations + etc.) */
   totalBadge?: number
-  /** Where the bell icon links to */
-  bellHref?: string
+  /** Individual notification items shown in the dropdown */
+  notifications?: NotificationItem[]
 }
 
 export default function AppSidebar({
@@ -79,12 +85,15 @@ export default function AppSidebar({
   isAdmin,
   navHoverHandlers = false,
   totalBadge,
-  bellHref,
+  notifications,
 }: AppSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const supabaseRef = useRef(createClient())
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [bellOpen,   setBellOpen]   = useState(false)
+
+  const activeNotifs = (notifications ?? []).filter(n => n.count > 0)
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : ''
@@ -256,17 +265,65 @@ export default function AppSidebar({
           <img src="/logo-dark.svg" alt="espot.do" style={{ height: 22, width: 'auto' }} />
         </Link>
 
-        {/* Campana de notificaciones */}
-        {bellHref && (
-          <Link href={bellHref} className="relative w-10 h-10 flex items-center justify-center rounded-xl shrink-0"
-            style={{ color: totalBadge ? 'var(--text-primary)' : 'var(--text-muted)' }}
-            aria-label="Notificaciones">
-            <Bell size={18} />
-            {totalBadge != null && totalBadge > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
-                style={{ background: '#EF4444' }} />
+        {/* Campana de notificaciones — desplegable */}
+        {notifications && (
+          <div className="relative shrink-0">
+            <button
+              onClick={() => setBellOpen(o => !o)}
+              className="relative w-10 h-10 flex items-center justify-center rounded-xl"
+              style={{ color: activeNotifs.length > 0 ? 'var(--text-primary)' : 'var(--text-muted)' }}
+              aria-label="Notificaciones">
+              <Bell size={18} />
+              {activeNotifs.length > 0 && (
+                <span className="absolute top-2 right-2 w-2 h-2 rounded-full"
+                  style={{ background: '#EF4444' }} />
+              )}
+            </button>
+
+            {/* Dropdown */}
+            {bellOpen && (
+              <>
+                {/* Backdrop */}
+                <div className="fixed inset-0 z-[54]" onClick={() => setBellOpen(false)} />
+                {/* Panel */}
+                <div className="fixed right-3 z-[55] w-72 rounded-2xl overflow-hidden"
+                  style={{
+                    top: 64,
+                    background: '#fff',
+                    border: '1px solid var(--border-subtle)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.14)',
+                  }}>
+                  <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                    <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                      Notificaciones
+                    </p>
+                  </div>
+                  {activeNotifs.length === 0 ? (
+                    <div className="px-4 py-5 text-sm text-center" style={{ color: 'var(--text-muted)' }}>
+                      Sin notificaciones pendientes
+                    </div>
+                  ) : (
+                    activeNotifs.map(n => (
+                      <Link
+                        key={n.href}
+                        href={n.href}
+                        onClick={() => setBellOpen(false)}
+                        className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-[var(--bg-elevated)]"
+                        style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                        <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                          {n.label}
+                        </span>
+                        <span className="flex items-center justify-center text-xs font-bold rounded-full px-2 py-0.5"
+                          style={{ background: '#EF4444', color: '#fff', minWidth: 22 }}>
+                          {n.count}
+                        </span>
+                      </Link>
+                    ))
+                  )}
+                </div>
+              </>
             )}
-          </Link>
+          </div>
         )}
 
         {avatarUrl ? (

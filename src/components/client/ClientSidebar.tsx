@@ -134,7 +134,10 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
       isActiveVariant="client"
       navHoverHandlers={false}
       totalBadge={unread + pendingPay}
-      bellHref="/dashboard/mensajes"
+      notifications={[
+        { label: 'Mensajes sin leer',    count: unread,      href: '/dashboard/mensajes' },
+        { label: 'Pagos pendientes',     count: pendingPay,  href: '/dashboard/reservas' },
+      ]}
     />
   )
 }

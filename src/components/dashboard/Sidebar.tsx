@@ -175,7 +175,11 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
       isActiveVariant="host"
       navHoverHandlers={true}
       totalBadge={unread + reservasCount + cotizCount}
-      bellHref="/dashboard/host/mensajes"
+      notifications={[
+        { label: 'Mensajes sin leer',     count: unread,        href: '/dashboard/host/mensajes' },
+        { label: 'Reservas por aceptar',  count: reservasCount, href: '/dashboard/host/reservas' },
+        { label: 'Cotizaciones nuevas',   count: cotizCount,    href: '/dashboard/host/cotizaciones' },
+      ]}
     />
   )
 }
