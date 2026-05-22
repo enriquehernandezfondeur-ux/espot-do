@@ -270,21 +270,28 @@ export function SpaceCard({
             )}
           </div>
 
-          {/* Precio · badge tipo · capacidad */}
-          <div className="flex items-center gap-2 pt-2.5 mt-auto"
+          {/* Precio + badges — 2 filas para evitar colisión */}
+          <div className="flex flex-col gap-1 pt-2.5 mt-auto"
             style={{ borderTop: '1px solid #F0F2F5' }}>
 
-            {/* Grupo izquierdo: precio + badge + tooltip (#4) */}
-            <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-hidden">
-              {priceInfo?.amount ? (
-                <span className="font-bold text-sm shrink-0" style={{ color: '#0F1623' }}>
+            {/* Fila 1: precio prominente */}
+            {priceInfo?.amount ? (
+              <div className="flex items-baseline gap-1">
+                <span className="font-bold leading-none" style={{ color: '#0F1623', fontSize: 15 }}>
                   {priceInfo.amount}
                 </span>
-              ) : (
-                <span className="text-sm font-semibold shrink-0" style={{ color: 'var(--text-muted)' }}>Cotizar</span>
-              )}
+                {priceInfo.unit && (
+                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{priceInfo.unit}</span>
+                )}
+              </div>
+            ) : (
+              <span className="text-sm font-semibold" style={{ color: 'var(--text-muted)' }}>Cotizar precio</span>
+            )}
+
+            {/* Fila 2: badge tipo + fines semana + capacidad */}
+            <div className="flex items-center gap-1.5 flex-wrap">
               {pricingDef?.value && (
-                <div className="relative shrink-0">
+                <div className="relative">
                   <button
                     type="button"
                     onClick={e => { e.preventDefault(); e.stopPropagation(); setShowPriceInfo(o => !o) }}
@@ -294,7 +301,6 @@ export function SpaceCard({
                   </button>
                   {showPriceInfo && pricingTip && (
                     <>
-                      {/* Backdrop para cerrar en móvil */}
                       <div className="fixed inset-0 z-40" onClick={e => { e.preventDefault(); e.stopPropagation(); setShowPriceInfo(false) }} />
                       <div className="absolute bottom-full mb-1.5 left-0 z-50 w-52 rounded-xl px-3 py-2.5 shadow-xl text-xs leading-relaxed"
                         style={{ background: '#0F1623', color: '#E2E8F0' }}
@@ -315,7 +321,7 @@ export function SpaceCard({
                 if (pct === 0) return null
                 const isDiscount = wm < 1
                 return (
-                  <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap shrink-0"
+                  <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap"
                     style={{
                       background: isDiscount ? 'rgba(34,197,94,0.1)' : 'rgba(245,158,11,0.1)',
                       color:      isDiscount ? '#16A34A' : '#D97706',
@@ -325,15 +331,13 @@ export function SpaceCard({
                   </span>
                 )
               })()}
+              <span className="flex items-center gap-1 text-xs font-medium ml-auto shrink-0" style={{ color: 'var(--text-muted)' }}>
+                <Users size={11} style={{ color: '#35C493', flexShrink: 0 }} />
+                {space.capacity_min && space.capacity_min !== space.capacity_max
+                  ? `${space.capacity_min}–${space.capacity_max}`
+                  : space.capacity_max ?? '—'}
+              </span>
             </div>
-
-            {/* Capacidad */}
-            <span className="flex items-center gap-1 text-xs font-medium shrink-0" style={{ color: 'var(--text-muted)' }}>
-              <Users size={11} style={{ color: '#35C493', flexShrink: 0 }} />
-              {space.capacity_min && space.capacity_min !== space.capacity_max
-                ? `${space.capacity_min}–${space.capacity_max}`
-                : space.capacity_max ?? '—'}
-            </span>
           </div>
 
         </div>
