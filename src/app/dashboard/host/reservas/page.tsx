@@ -161,7 +161,7 @@ export default function HostReservasPage() {
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {actionError && (
-        <div className="fixed top-5 right-5 z-50 flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
+        <div className="fixed top-20 md:top-5 right-4 md:right-5 z-50 flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
           style={{ background: '#DC2626', color: '#fff' }}>
           ✕ {actionError}
         </div>
@@ -211,37 +211,39 @@ export default function HostReservasPage() {
         )}
       </div>
 
-      {/* Filtros */}
-      <div className="flex items-center gap-2 mb-5">
-        {/* Pills — fondo navy, distribución simétrica */}
-        <div className="flex flex-1 gap-1 p-1 rounded-2xl"
-          style={{ background: '#03313C' }}>
-          {FILTERS.map(f => {
-            const badge = f.key === 'pending' ? pending : f.key === 'accepted' ? accepted : 0
-            const active = filter === f.key
-            return (
-              <button key={f.key} onClick={() => setFilter(f.key)}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap"
-                style={active
-                  ? { background: '#fff', color: '#03313C', boxShadow: '0 1px 6px rgba(0,0,0,0.2)' }
-                  : { color: 'rgba(255,255,255,0.65)', background: 'transparent' }}>
-                {f.label}
-                {badge > 0 && (
-                  <span className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
-                    style={{ background: '#EF4444', color: '#fff' }}>
-                    {badge}
-                  </span>
-                )}
-              </button>
-            )
-          })}
+      {/* Filtros + búsqueda */}
+      <div className="mb-5 flex flex-col md:flex-row md:items-center gap-2">
+        {/* Pills — scroll horizontal en móvil, distribución simétrica en desktop */}
+        <div className="overflow-x-auto scrollbar-hide flex-1">
+          <div className="flex gap-1 p-1 rounded-2xl w-max md:w-full"
+            style={{ background: '#03313C' }}>
+            {FILTERS.map(f => {
+              const badge = f.key === 'pending' ? pending : f.key === 'accepted' ? accepted : 0
+              const active = filter === f.key
+              return (
+                <button key={f.key} onClick={() => setFilter(f.key)}
+                  className="md:flex-1 flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap min-h-[44px]"
+                  style={active
+                    ? { background: '#fff', color: '#03313C', boxShadow: '0 1px 6px rgba(0,0,0,0.2)' }
+                    : { color: 'rgba(255,255,255,0.65)', background: 'transparent' }}>
+                  {f.label}
+                  {badge > 0 && (
+                    <span className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                      style={{ background: '#EF4444', color: '#fff' }}>
+                      {badge}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
         </div>
-        {/* Buscador compacto */}
-        <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl shrink-0 w-32 md:w-44"
+        {/* Buscador — fila completa en móvil, ancho fijo en desktop */}
+        <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl w-full md:w-44 md:shrink-0"
           style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <Search size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar reserva..."
-            className="bg-transparent text-sm flex-1 focus:outline-none min-w-0" style={{ color: 'var(--text-primary)' }} />
+            className="bg-transparent text-sm flex-1 focus:outline-none min-w-0" style={{ color: 'var(--text-primary)', fontSize: 16 }} />
         </div>
       </div>
 
@@ -484,7 +486,7 @@ export default function HostReservasPage() {
                   <div className="text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--text-muted)' }}>
                     {(selected as any).space_pricing.package_name ? `Paquete · ${(selected as any).space_pricing.package_name}` : 'Incluye el paquete'}
                   </div>
-                  <div className="rounded-xl px-3 py-2.5 text-xs whitespace-pre-line"
+                  <div className="rounded-xl px-3 py-2.5 text-xs whitespace-pre-line break-words"
                     style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid rgba(53,196,147,0.15)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
                     {(selected as any).space_pricing.package_includes}
                   </div>
