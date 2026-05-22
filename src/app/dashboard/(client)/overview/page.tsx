@@ -296,7 +296,7 @@ export default function ClientDashboard() {
             style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}>
 
             {/* Foto + overlay */}
-            <div className="relative h-48 md:h-56" style={{ background: '#0F2A22' }}>
+            <div className="relative h-48 md:h-56" style={{ background: '#03313C' }}>
               {cover && (
                 <img src={cover} alt={sp?.name}
                   className="w-full h-full object-cover" />

@@ -991,7 +991,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                       <button
                         onClick={() => setShowChat(true)}
                         className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl transition-all hover:opacity-90"
-                        style={{ background: '#03313C', color: '#fff' }}>
+                        style={{ background: 'var(--brand)', color: '#fff' }}>
                         <MessageCircle size={13} /> Mensaje
                       </button>
                     </div>
@@ -1031,9 +1031,9 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                         onClick={() => setShowChat(true)}
                         className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl font-bold text-sm transition-all hover:opacity-90 active:scale-[0.99]"
                         style={{
-                          background: '#03313C',
+                          background: 'var(--brand)',
                           color: '#fff',
-                          boxShadow: '0 4px 16px rgba(3,49,60,0.18)',
+                          boxShadow: '0 4px 16px rgba(53,196,147,0.25)',
                         }}>
                         <MessageCircle size={17} />
                         Enviar mensaje a {host.full_name?.split(' ')[0]}

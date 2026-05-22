@@ -162,10 +162,10 @@ export default function FinanzasPage() {
 
       {/* ── Gráfica de ingresos mensuales ── */}
       <div className="rounded-2xl p-6 mb-6"
-        style={{ background: '#fff', border: '1px solid #E5E7EB', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between sm:gap-3 mb-6 gap-0.5">
           <div>
-            <h2 className="font-bold text-sm" style={{ color: '#03313C' }}>Ingresos por mes</h2>
+            <h2 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Ingresos por mes</h2>
             <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>Últimos 6 meses · Ingresos brutos confirmados</p>
           </div>
           <div>
@@ -190,8 +190,8 @@ export default function FinanzasPage() {
                 axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={{
-                  background: '#fff', border: '1px solid #E5E7EB',
-                  borderRadius: 12, color: '#03313C', fontSize: 12,
+                  background: '#fff', border: '1px solid var(--border-subtle)',
+                  borderRadius: 12, color: 'var(--text-primary)', fontSize: 12,
                   boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                 }}
                 formatter={(v: any) => [formatCurrency(Number(v)), 'Ingresos']}

@@ -390,7 +390,7 @@ export default function HostReservasPage() {
                         </div>
                         <div className="flex items-center justify-between gap-2 mb-1.5">
                           <span className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{bk.event_type}</span>
-                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0" style={{ background: sc.bg, color: sc.color }}>{sl}</span>
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0" style={{ background: sc.bg, color: sc.color }}>{STATUS_SHORT[bk.status] ?? sl}</span>
                         </div>
                         <div className="flex gap-2 flex-wrap text-xs" style={{ color: 'var(--text-muted)' }}>
                           <span className="flex items-center gap-1"><CalendarDays size={10} />{formatDate(bk.event_date)}</span>

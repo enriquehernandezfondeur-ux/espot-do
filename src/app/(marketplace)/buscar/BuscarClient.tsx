@@ -1172,10 +1172,8 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
           onClick={() => setMobileView(v => v === 'list' ? 'map' : 'list')}
           className="flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold text-white shadow-lg"
           style={{
-            background: mobileView === 'map' ? '#03313C' : 'var(--brand)',
-            boxShadow: mobileView === 'map'
-              ? '0 4px 16px rgba(3,49,60,0.4)'
-              : '0 4px 16px rgba(53,196,147,0.45)',
+            background: 'var(--brand)',
+            boxShadow: '0 4px 16px rgba(53,196,147,0.45)',
           }}>
           {mobileView === 'list'
             ? <><Map size={14} /> Mapa</>

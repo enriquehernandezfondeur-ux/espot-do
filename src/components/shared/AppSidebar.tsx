@@ -254,7 +254,7 @@ export default function AppSidebar({
           boxShadow: '0 1px 8px rgba(0,0,0,0.06)',
         }}>
         <button
-          onClick={() => setMobileOpen(true)}
+          onClick={() => { setMobileOpen(true); setBellOpen(false) }}
           className="w-10 h-10 flex items-center justify-center rounded-xl"
           style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)' }}
           aria-label="Abrir menú"
@@ -286,9 +286,11 @@ export default function AppSidebar({
                 {/* Backdrop */}
                 <div className="fixed inset-0 z-[54]" onClick={() => setBellOpen(false)} />
                 {/* Panel */}
-                <div className="fixed right-3 z-[55] w-72 rounded-2xl overflow-hidden"
+                <div className="fixed z-[55] rounded-2xl overflow-hidden"
                   style={{
                     top: 60,
+                    right: 'max(12px, env(safe-area-inset-right))',
+                    width: 'min(288px, calc(100vw - 24px))',
                     background: '#fff',
                     border: '1px solid var(--border-subtle)',
                     boxShadow: '0 8px 32px rgba(0,0,0,0.14)',
