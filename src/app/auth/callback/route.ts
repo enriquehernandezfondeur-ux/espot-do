@@ -33,7 +33,10 @@ export async function GET(request: NextRequest) {
     if (metaRole    && existing?.role !== 'host')            updates.role       = 'host'
 
     if (Object.keys(updates).length > 1) {
-      await supabase.from('profiles').update(updates).eq('id', user.id)
+      await supabase.from('profiles').upsert(
+        { id: user.id, ...updates },
+        { onConflict: 'id', ignoreDuplicates: false }
+      )
     }
   }
 

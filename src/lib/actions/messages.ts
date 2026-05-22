@@ -127,8 +127,7 @@ export async function getMyConversations() {
       id, body, created_at, read_at,
       sender_id, receiver_id,
       space_id,
-      spaces!space_id(id, name, slug, space_images(url, is_cover)),
-      profiles!sender_id(full_name, avatar_url)
+      spaces!space_id(id, name, slug, space_images(url, is_cover))
     `)
     .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
     .order('created_at', { ascending: false })

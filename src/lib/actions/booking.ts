@@ -366,7 +366,8 @@ export async function acceptBooking(bookingId: string) {
   if (!updated || updated.length === 0) return { error: 'La reserva ya fue procesada o no existe' }
 
   // Crear schedule de cuotas al aceptar
-  await createInstallments(bookingId, bk.event_date, Number(bk.total_amount))
+  const instResult = await createInstallments(bookingId, bk.event_date, Number(bk.total_amount))
+  if (!instResult.success) console.error('[acceptBooking] installments failed:', instResult.error)
 
   const guest = bk.profiles as any
 
