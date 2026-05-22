@@ -273,32 +273,31 @@ export function SpaceCard({
             <span>{catLabel}</span>
           </div>
 
-          {/* Precio + badges — 2 filas para evitar colisión */}
-          <div className="flex flex-col gap-1 pt-2.5 mt-auto"
+          {/* Precio + badge + capacidad */}
+          <div className="flex items-center justify-between gap-2 pt-2.5 mt-auto"
             style={{ borderTop: '1px solid #F0F2F5' }}>
 
-            {/* Fila 1: precio prominente */}
-            {priceInfo?.amount ? (
-              <div className="flex items-baseline gap-1">
-                <span className="font-bold leading-none" style={{ color: '#0F1623', fontSize: 15 }}>
-                  {priceInfo.amount}
-                </span>
-                {priceInfo.unit && (
-                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{priceInfo.unit}</span>
-                )}
-              </div>
-            ) : (
-              <span className="text-sm font-semibold" style={{ color: 'var(--text-muted)' }}>Cotizar precio</span>
-            )}
+            {/* Izquierda: precio + badge con separación cómoda */}
+            <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
+              {priceInfo?.amount ? (
+                <div className="flex items-baseline gap-1 shrink-0">
+                  <span className="font-bold leading-none" style={{ color: '#0F1623', fontSize: 15 }}>
+                    {priceInfo.amount}
+                  </span>
+                  {priceInfo.unit && (
+                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{priceInfo.unit}</span>
+                  )}
+                </div>
+              ) : (
+                <span className="text-sm font-semibold shrink-0" style={{ color: 'var(--text-muted)' }}>Cotizar precio</span>
+              )}
 
-            {/* Fila 2: badge tipo + fines semana + capacidad */}
-            <div className="flex items-center gap-1.5 flex-wrap">
               {pricingDef?.value && (
-                <div className="relative">
+                <div className="relative shrink-0">
                   <button
                     type="button"
                     onClick={e => { e.preventDefault(); e.stopPropagation(); setShowPriceInfo(o => !o) }}
-                    className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap"
+                    className="text-[11px] font-semibold px-2 py-1 rounded-lg whitespace-nowrap"
                     style={{ background: pricingDef.bg, color: pricingDef.text, border: `1px solid ${pricingDef.border}` }}>
                     {pricingDef.value === 'minimum_consumption' ? 'Consumibles' : pricingDef.label}
                   </button>
@@ -316,6 +315,7 @@ export function SpaceCard({
                   )}
                 </div>
               )}
+
               {(() => {
                 const p   = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
                 const wm  = Number(p?.weekend_multiplier ?? 1)
@@ -324,7 +324,7 @@ export function SpaceCard({
                 if (pct === 0) return null
                 const isDiscount = wm < 1
                 return (
-                  <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap"
+                  <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap shrink-0"
                     style={{
                       background: isDiscount ? 'rgba(34,197,94,0.1)' : 'rgba(245,158,11,0.1)',
                       color:      isDiscount ? '#16A34A' : '#D97706',
@@ -334,13 +334,15 @@ export function SpaceCard({
                   </span>
                 )
               })()}
-              <span className="flex items-center gap-1 text-xs font-medium ml-auto shrink-0" style={{ color: 'var(--text-muted)' }}>
-                <Users size={11} style={{ color: '#35C493', flexShrink: 0 }} />
-                {space.capacity_min && space.capacity_min !== space.capacity_max
-                  ? `${space.capacity_min}–${space.capacity_max}`
-                  : space.capacity_max ?? '—'}
-              </span>
             </div>
+
+            {/* Derecha: capacidad */}
+            <span className="flex items-center gap-1 text-xs font-medium shrink-0" style={{ color: 'var(--text-muted)' }}>
+              <Users size={11} style={{ color: '#35C493', flexShrink: 0 }} />
+              {space.capacity_min && space.capacity_min !== space.capacity_max
+                ? `${space.capacity_min}–${space.capacity_max}`
+                : space.capacity_max ?? '—'}
+            </span>
           </div>
 
         </div>
