@@ -212,17 +212,16 @@ export default function HostReservasPage() {
       </div>
 
       {/* Filtros + búsqueda */}
-      <div className="mb-5 flex flex-col md:flex-row md:items-center gap-2">
-        {/* Pills — scroll horizontal en móvil, distribución simétrica en desktop */}
-        <div className="overflow-x-auto scrollbar-hide flex-1">
-          <div className="flex gap-1 p-1 rounded-2xl w-max md:w-full"
-            style={{ background: '#03313C' }}>
+      <div className="mb-5 space-y-2">
+        {/* Pills — grid 3×2 en móvil (sin scroll), fila completa en desktop */}
+        <div className="p-1 rounded-2xl" style={{ background: '#03313C' }}>
+          <div className="grid grid-cols-3 md:flex gap-1">
             {FILTERS.map(f => {
               const badge = f.key === 'pending' ? pending : f.key === 'accepted' ? accepted : 0
               const active = filter === f.key
               return (
                 <button key={f.key} onClick={() => setFilter(f.key)}
-                  className="md:flex-1 flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all whitespace-nowrap min-h-[44px]"
+                  className="md:flex-1 flex items-center justify-center gap-1 py-2.5 px-1 md:px-3.5 rounded-xl text-xs md:text-sm font-medium transition-all min-h-[40px]"
                   style={active
                     ? { background: '#fff', color: '#03313C', boxShadow: '0 1px 6px rgba(0,0,0,0.2)' }
                     : { color: 'rgba(255,255,255,0.65)', background: 'transparent' }}>
@@ -238,8 +237,8 @@ export default function HostReservasPage() {
             })}
           </div>
         </div>
-        {/* Buscador — fila completa en móvil, ancho fijo en desktop */}
-        <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl w-full md:w-44 md:shrink-0"
+        {/* Buscador — ancho completo siempre */}
+        <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl"
           style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <Search size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar reserva..."
