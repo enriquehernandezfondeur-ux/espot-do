@@ -3,10 +3,22 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { CalendarDays, Clock, Users, CheckCircle, XCircle, Eye, Search, Loader2, Download } from 'lucide-react'
+import { CalendarDays, Clock, Users, Check, X, ExternalLink, Search, Loader2, Download, ChevronRight } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getHostBookings, acceptBooking, rejectBooking, completeBooking } from '@/lib/actions/host'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
+
+// Labels cortos para la tabla desktop (sin espacio para textos largos)
+const STATUS_SHORT: Record<string, string> = {
+  pending:           'Pendiente',
+  quote_requested:   'Cotización',
+  accepted:          'Pend. pago',
+  confirmed:         'Confirmada',
+  completed:         'Completada',
+  rejected:          'Rechazada',
+  cancelled_guest:   'Cancelada',
+  cancelled_host:    'Cancelada',
+}
 
 function HostInstallmentStatus({ bookingId, totalAmount }: { bookingId: string; totalAmount: number }) {
   const [insts, setInsts] = useState<any[]>([])
@@ -251,13 +263,12 @@ export default function HostReservasPage() {
         {/* Header tabla — solo desktop */}
         {filtered.length > 0 && (
           <div className="hidden md:grid px-5 py-3 text-xs font-semibold uppercase tracking-wide"
-            style={{ gridTemplateColumns: '1fr 1fr 1.2fr 80px 100px 110px 120px', borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
+            style={{ gridTemplateColumns: '1.4fr 1fr 1.3fr 55px 105px 110px', borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
             <span>Cliente</span>
             <span>Evento</span>
             <span>Fecha y horario</span>
-            <span className="text-center">Personas</span>
+            <span className="text-center">Pax</span>
             <span className="text-right">Monto</span>
-            <span className="text-center">Estado</span>
             <span className="text-center">Acciones</span>
           </div>
         )}
@@ -280,18 +291,23 @@ export default function HostReservasPage() {
                 <div key={bk.id}>
                   {/* ── DESKTOP: fila tabla ── */}
                   <div className="hidden md:grid items-center px-5 py-3.5 hover:bg-[var(--bg-elevated)] transition-colors cursor-pointer"
-                    style={{ gridTemplateColumns: '1fr 1fr 1.2fr 80px 100px 110px 120px', background: isSelected ? 'var(--bg-elevated)' : 'transparent' }}
+                    style={{ gridTemplateColumns: '1.4fr 1fr 1.3fr 55px 105px 110px', background: isSelected ? 'var(--bg-elevated)' : 'transparent' }}
                     onClick={() => setSelected(isSelected ? null : bk)}>
 
                     {/* Cliente */}
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
-                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
+                        style={{ background: sc.bg, color: sc.color }}>
                         {g?.full_name?.charAt(0) ?? '?'}
                       </div>
-                      <span className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
-                        {g?.full_name ?? 'Cliente'}
-                      </span>
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                          {g?.full_name ?? 'Cliente'}
+                        </div>
+                        <div className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                          {STATUS_SHORT[bk.status] ?? sl}
+                        </div>
+                      </div>
                     </div>
 
                     {/* Evento */}
@@ -317,47 +333,43 @@ export default function HostReservasPage() {
                       {formatCurrency(Number(bk.total_amount))}
                     </div>
 
-                    {/* Estado */}
-                    <div className="flex justify-center">
-                      <span className="text-xs font-semibold px-2 py-1 rounded-full"
-                        style={{ background: sc.bg, color: sc.color }}>{sl}</span>
-                    </div>
-
-                    {/* Acciones */}
+                    {/* Acciones — botones visuales */}
                     <div className="flex items-center justify-center gap-1.5" onClick={e => e.stopPropagation()}>
                       {bk.status === 'pending' && (
-                        <button onClick={() => doAccept(bk.id)} disabled={!!actionId}
-                          className="text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-colors"
-                          style={{ background: 'var(--bg-elevated)', color: 'var(--brand)', border: '1px solid var(--border-subtle)' }}>
-                          {actionId === bk.id + 'a' ? '...' : 'Aceptar'}
-                        </button>
+                        <>
+                          <button onClick={() => doAccept(bk.id)} disabled={!!actionId}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all hover:scale-105 disabled:opacity-50"
+                            style={{ background: 'rgba(53,196,147,0.12)', color: '#35C493', border: '1.5px solid rgba(53,196,147,0.3)' }}
+                            title="Aceptar reserva">
+                            {actionId === bk.id + 'a' ? <Loader2 size={13} className="animate-spin" /> : <Check size={14} strokeWidth={2.5} />}
+                          </button>
+                          <button onClick={() => { setSelected(bk); setRejectReason(''); setShowRejectForm(true) }} disabled={!!actionId}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg transition-all hover:scale-105 disabled:opacity-50"
+                            style={{ background: 'rgba(220,38,38,0.08)', color: '#DC2626', border: '1.5px solid rgba(220,38,38,0.2)' }}
+                            title="Rechazar reserva">
+                            <X size={13} strokeWidth={2.5} />
+                          </button>
+                        </>
                       )}
                       {bk.status === 'quote_requested' && (
                         <button onClick={() => router.push('/dashboard/host/cotizaciones')}
-                          className="text-xs font-semibold px-2 py-1.5 rounded-lg"
-                          style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+                          className="text-xs font-semibold px-2.5 py-1.5 rounded-lg whitespace-nowrap"
+                          style={{ background: 'rgba(53,196,147,0.12)', color: '#35C493', border: '1.5px solid rgba(53,196,147,0.3)' }}>
                           Cotizar →
-                        </button>
-                      )}
-                      {(bk.status === 'pending' || bk.status === 'quote_requested') && (
-                        <button onClick={() => { setSelected(bk); setRejectReason(''); setShowRejectForm(true) }} disabled={!!actionId}
-                          className="text-xs font-semibold px-2.5 py-1.5 rounded-lg"
-                          style={{ background: 'var(--bg-elevated)', color: '#DC2626', border: '1px solid var(--border-subtle)' }}>
-                          ✕
                         </button>
                       )}
                       {bk.status === 'confirmed' && (
                         <button onClick={() => doComplete(bk.id)} disabled={!!actionId}
-                          className="text-xs font-semibold px-2 py-1.5 rounded-lg"
+                          className="text-xs font-semibold px-2.5 py-1.5 rounded-lg whitespace-nowrap disabled:opacity-50"
                           style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
                           {actionId === bk.id + 'c' ? '...' : 'Completar'}
                         </button>
                       )}
                       <Link href={`/dashboard/host/reservas/${bk.id}`} onClick={e => e.stopPropagation()}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg text-xs"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg"
                         style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
-                        title="Ver detalle">
-                        ↗
+                        title="Ver detalle completo">
+                        <ExternalLink size={12} />
                       </Link>
                     </div>
                   </div>
@@ -519,12 +531,12 @@ export default function HostReservasPage() {
                   <button onClick={() => doAccept(selected.id)} disabled={!!actionId}
                     className="flex-1 flex items-center justify-center gap-1 text-xs font-semibold py-2.5 rounded-xl"
                     style={{ background: 'var(--brand)', color: '#fff' }}>
-                    <CheckCircle size={13} /> Aceptar
+                    <Check size={13} /> Aceptar
                   </button>
                   <button onClick={() => setShowRejectForm(true)}
                     className="flex-1 flex items-center justify-center gap-1 text-xs font-semibold py-2.5 rounded-xl"
                     style={{ background: 'rgba(220,38,38,0.1)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.2)' }}>
-                    <XCircle size={13} /> Rechazar
+                    <X size={13} /> Rechazar
                   </button>
                 </div>
               )}
