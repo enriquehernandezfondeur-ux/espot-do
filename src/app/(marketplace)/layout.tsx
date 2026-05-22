@@ -19,6 +19,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
   const [dropdownPos,    setDropdownPos]    = useState({ top: 0, right: 0 })
   const [imgError,       setImgError]       = useState(false)
   const [accountSheet,   setAccountSheet]   = useState(false)
+  const [notifCount,     setNotifCount]     = useState(0)
   const searchRef    = useRef<HTMLInputElement>(null)
   const dropdownRef  = useRef<HTMLDivElement>(null)
 
@@ -68,13 +69,24 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
       if (event === 'TOKEN_REFRESHED') return
       if (session?.user) {
         loadProfile(session.user.id, session.user.email ?? '')
+        fetchNotifCount(session.user.id)
       } else {
-        if (isMounted) { setUser(null); setAuthReady(true) }
+        if (isMounted) { setUser(null); setAuthReady(true); setNotifCount(0) }
       }
     })
 
     return () => { isMounted = false; subscription.unsubscribe() }
   }, [])
+
+  async function fetchNotifCount(uid: string) {
+    const supabase = createClient()
+    const { count } = await supabase
+      .from('messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('receiver_id', uid)
+      .is('read_at', null)
+    setNotifCount(count ?? 0)
+  }
 
   async function handleSignOut() {
     const supabase = createClient()
@@ -161,21 +173,27 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                     background: dropdownOpen ? 'var(--bg-elevated)' : 'transparent',
                     color: 'var(--text-secondary)',
                   }}>
-                  {showAvatar ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={user.avatarUrl}
-                      alt={displayName}
-                      className="w-8 h-8 rounded-full object-cover shrink-0"
-                      style={{ border: '2px solid var(--brand)' }}
-                      onError={() => setImgError(true)}
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
-                      style={{ background: 'var(--brand)' }}>
-                      {avatarLetter}
-                    </div>
-                  )}
+                  <div className="relative shrink-0">
+                    {showAvatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={user.avatarUrl}
+                        alt={displayName}
+                        className="w-8 h-8 rounded-full object-cover"
+                        style={{ border: '2px solid var(--brand)' }}
+                        onError={() => setImgError(true)}
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white"
+                        style={{ background: 'var(--brand)' }}>
+                        {avatarLetter}
+                      </div>
+                    )}
+                    {notifCount > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white"
+                        style={{ background: '#EF4444' }} />
+                    )}
+                  </div>
                   <span className="hidden lg:block text-sm font-medium">{displayName}</span>
                   <ChevronDown size={14} className="hidden lg:block" style={{ opacity: 0.6 }} />
                 </button>
@@ -349,18 +367,24 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                   {/* Info usuario */}
                   <div className="flex items-center gap-3 px-3 py-3 rounded-2xl mb-2"
                     style={{ background: 'var(--bg-elevated)' }}>
-                    {showAvatar ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={user.avatarUrl} alt={displayName}
-                        className="w-10 h-10 rounded-xl object-cover shrink-0"
-                        style={{ border: '2px solid var(--brand)' }}
-                        onError={() => setImgError(true)} />
-                    ) : (
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold text-white shrink-0"
-                        style={{ background: 'var(--brand)' }}>
-                        {avatarLetter}
-                      </div>
-                    )}
+                    <div className="relative shrink-0">
+                      {showAvatar ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={user.avatarUrl} alt={displayName}
+                          className="w-10 h-10 rounded-xl object-cover"
+                          style={{ border: '2px solid var(--brand)' }}
+                          onError={() => setImgError(true)} />
+                      ) : (
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold text-white"
+                          style={{ background: 'var(--brand)' }}>
+                          {avatarLetter}
+                        </div>
+                      )}
+                      {notifCount > 0 && (
+                        <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white"
+                          style={{ background: '#EF4444' }} />
+                      )}
+                    </div>
                     <div className="min-w-0">
                       <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
                         {user.fullName ?? displayName}

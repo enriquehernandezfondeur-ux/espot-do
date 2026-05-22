@@ -288,7 +288,7 @@ export default function AppSidebar({
                 {/* Panel */}
                 <div className="fixed right-3 z-[55] w-72 rounded-2xl overflow-hidden"
                   style={{
-                    top: 64,
+                    top: 60,
                     background: '#fff',
                     border: '1px solid var(--border-subtle)',
                     boxShadow: '0 8px 32px rgba(0,0,0,0.14)',
