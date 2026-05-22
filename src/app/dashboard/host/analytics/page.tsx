@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { formatCurrency } from '@/lib/utils'
 import { getHostStats, getHostBookings, getHostSpaces, getSpaceViews } from '@/lib/actions/host'
 import { Loader2, TrendingUp, CalendarDays, Users, Building2, Eye } from 'lucide-react'
@@ -131,15 +131,25 @@ export default function AnalyticsPage() {
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
           <h2 className="font-bold text-sm mb-5" style={{ color: 'var(--text-primary)' }}>Tipos de evento</h2>
           {eventTypeData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={180}>
-              <PieChart>
-                <Pie data={eventTypeData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} dataKey="value" paddingAngle={3}>
-                  {eventTypeData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
-                </Pie>
-                <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: 10 }} />
-                <Legend formatter={v => <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>{v}</span>} />
-              </PieChart>
-            </ResponsiveContainer>
+            <>
+              <ResponsiveContainer width="100%" height={160}>
+                <PieChart>
+                  <Pie data={eventTypeData} cx="50%" cy="50%" innerRadius={50} outerRadius={72} dataKey="value" paddingAngle={3}>
+                    {eventTypeData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
+                  </Pie>
+                  <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: 10 }} />
+                </PieChart>
+              </ResponsiveContainer>
+              {/* Leyenda HTML — sin colisión con el donut */}
+              <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-3">
+                {eventTypeData.map((entry, i) => (
+                  <div key={entry.name} className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
+                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{entry.name}</span>
+                  </div>
+                ))}
+              </div>
+            </>
           ) : (
             <div className="flex items-center justify-center h-44 text-sm" style={{ color: 'var(--text-muted)' }}>
               Sin datos de tipos de evento
