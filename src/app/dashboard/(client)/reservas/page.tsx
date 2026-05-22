@@ -385,18 +385,18 @@ export default function MisReservasPage() {
                         )
                       })()}
                       {/* Meta: fecha + hora + monto en fila */}
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
-                            <CalendarDays size={10} /> {formatDate(bk.event_date)}
+                      <div className="flex items-center justify-between gap-2 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap min-w-0">
+                          <span className="flex items-center gap-1 text-xs min-w-0" style={{ color: 'var(--text-secondary)' }}>
+                            <CalendarDays size={10} className="shrink-0" /> {formatDate(bk.event_date)}
                           </span>
                           {bk.start_time && bk.end_time && (
-                            <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
-                              <Clock size={10} /> {formatTime(bk.start_time)} – {formatTime(bk.end_time)}
+                            <span className="flex items-center gap-1 text-xs min-w-0" style={{ color: 'var(--text-secondary)' }}>
+                              <Clock size={10} className="shrink-0" /> {formatTime(bk.start_time)} – {formatTime(bk.end_time)}
                             </span>
                           )}
-                          <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
-                            <Users size={10} /> {bk.guest_count}
+                          <span className="flex items-center gap-1 text-xs min-w-0" style={{ color: 'var(--text-secondary)' }}>
+                            <Users size={10} className="shrink-0" /> {bk.guest_count}
                           </span>
                         </div>
                         <span className="font-bold text-sm shrink-0" style={{ color: 'var(--text-primary)' }}>

@@ -237,7 +237,7 @@ export default function HostReservasPage() {
           })}
         </div>
         {/* Buscador compacto */}
-        <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl shrink-0 w-44"
+        <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl shrink-0 w-32 md:w-44"
           style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <Search size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar reserva..."

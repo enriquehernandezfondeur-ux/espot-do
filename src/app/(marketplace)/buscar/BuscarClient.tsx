@@ -1184,18 +1184,26 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
         </button>
       </div>
 
-      {/* ── PANEL DE FILTROS (drawer lateral) ── */}
+      {/* ── PANEL DE FILTROS (bottom sheet en móvil, drawer en desktop) ── */}
       {moreOpen && (
         <>
-          <div className="fixed inset-0 z-[49] bg-black/40 backdrop-blur-sm" onClick={() => { setMoreOpen(false); setActQ('') }} />
-          <div className="fixed right-0 top-0 h-full w-full max-w-md z-50 flex flex-col overflow-hidden pt-safe"
-            style={{ background: '#fff', boxShadow: '-8px 0 40px rgba(0,0,0,0.12)' }}>
+          <div className="fixed inset-0 z-[49] bg-black/50 backdrop-blur-sm" onClick={() => { setMoreOpen(false); setActQ('') }} />
+          {/* Bottom sheet en móvil / drawer lateral en desktop */}
+          <div className="fixed z-50 flex flex-col overflow-hidden
+            bottom-0 left-0 right-0 rounded-t-3xl max-h-[88dvh]
+            md:bottom-auto md:right-0 md:top-0 md:left-auto md:h-full md:w-full md:max-w-md md:rounded-none"
+            style={{ background: '#fff', boxShadow: '0 -8px 40px rgba(0,0,0,0.15)' }}>
+
+            {/* Drag handle — solo móvil */}
+            <div className="md:hidden flex justify-center pt-3 pb-1 shrink-0">
+              <div className="w-10 h-1 rounded-full" style={{ background: 'var(--border-medium)' }} />
+            </div>
 
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4"
+            <div className="flex items-center justify-between px-5 py-3.5 shrink-0"
               style={{ borderBottom: '1px solid var(--border-subtle)' }}>
               <div>
-                <h2 className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>Filtros</h2>
+                <h2 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>Filtros</h2>
                 {activeFiltersCount > 0 && (
                   <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
                     {activeFiltersCount} activo{activeFiltersCount !== 1 ? 's' : ''}
@@ -1203,14 +1211,14 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                 )}
               </div>
               <button onClick={() => { setMoreOpen(false); setActQ('') }}
-                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                className="w-9 h-9 rounded-xl flex items-center justify-center"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
-                <X size={18} />
+                <X size={16} />
               </button>
             </div>
 
             {/* Contenido scrolleable */}
-            <div ref={drawerContentRef} className="flex-1 overflow-y-auto px-5 py-5 space-y-7" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div ref={drawerContentRef} className="flex-1 overflow-y-auto px-5 py-5 space-y-7 min-h-0" style={{ WebkitOverflowScrolling: 'touch' }}>
 
               {/* ── SECTOR / CIUDAD ── */}
               <div data-section="sector" />

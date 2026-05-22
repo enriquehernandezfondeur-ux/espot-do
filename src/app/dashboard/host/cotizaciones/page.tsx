@@ -218,7 +218,7 @@ export default function CotizacionesPage() {
           </p>
         </div>
       ) : (
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-5" style={{ height: 'calc(100dvh - 14rem)' }}>
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-5 min-h-0 lg:h-[calc(100dvh-14rem)]">
 
           {/* ── Lista ── */}
           <div className="w-full lg:w-72 shrink-0 space-y-2 overflow-y-auto">
@@ -418,7 +418,7 @@ export default function CotizacionesPage() {
                 </div>
 
                 {/* Input */}
-                <div className="shrink-0 p-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                <div className="shrink-0 p-3" style={{ borderTop: '1px solid var(--border-subtle)', paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
                   {attachment && (
                     <div className="flex items-center gap-2 mb-2 px-3 py-2 rounded-xl"
                       style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
