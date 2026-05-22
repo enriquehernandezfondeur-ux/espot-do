@@ -974,12 +974,12 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
           </div>
         </div>
 
-        {/* ── DESKTOP: Lista (60%) + Mapa (40%) ── */}
+        {/* ── DESKTOP: Lista (70%) + Mapa (30%) ── */}
         <div
           className="hidden md:flex gap-5"
           style={{ height: 'calc(100dvh - 174px)' }}
         >
-          <div className="overflow-y-auto pr-2" style={{ flex: '0 0 60%' }}>
+          <div className="overflow-y-auto pr-2" style={{ flex: '0 0 70%' }}>
             {filtered.length === 0
               ? <EmptyState onClear={clearAll} recentSpaces={recentIds.map(id => spaces.find(s => s.id === id)).filter(Boolean)} hasDateFilter={!!dateFrom} />
               : (
@@ -991,7 +991,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                         style={{ borderColor: 'var(--brand)', borderTopColor: 'transparent' }} />
                     </div>
                   )}
-                  <div className={`grid grid-cols-2 xl:grid-cols-3 gap-4 pb-6 transition-opacity${availLoading ? ' opacity-50' : ''}`}>
+                  <div className={`grid grid-cols-2 xl:grid-cols-3 gap-5 pb-6 transition-opacity${availLoading ? ' opacity-50' : ''}`}>
                     {filtered.map(space => (
                       <SpaceCard key={space.id} space={space} isHovered={hoveredId === space.id}
                         onHover={handleCardHover} dateFilter={dateFrom || undefined} timeFilter={timeFrom || undefined}
@@ -1024,7 +1024,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
           </div>
           {/* El wrapper solo aplica border-radius + sombra, sin overflow:hidden
               para que los popups de Leaflet no queden recortados */}
-          <div style={{ flex: '0 0 40%', position: 'sticky', top: 0, height: 'calc(100dvh - 226px)', borderRadius: 20, boxShadow: '0 4px 24px rgba(0,0,0,0.08)', border: '1px solid var(--border-subtle)' }}>
+          <div style={{ flex: '0 0 30%', position: 'sticky', top: 0, height: 'calc(100dvh - 226px)', borderRadius: 20, boxShadow: '0 4px 24px rgba(0,0,0,0.08)', border: '1px solid var(--border-subtle)' }}>
             {/* Capa interna que sí tiene overflow:hidden para recortar el tile del mapa */}
             <div style={{ width: '100%', height: '100%', borderRadius: 20, overflow: 'hidden' }}>
               <SpacesMap spaces={filtered} hoveredId={hoveredId} cityFilter={sector} onSpaceHover={handleCardHover} />
