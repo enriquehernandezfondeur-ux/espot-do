@@ -1,9 +1,8 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { importLibrary, setOptions } from '@googlemaps/js-api-loader'
 import { getSpaceCoords } from '@/components/map/SpacesMap'
-
-import 'leaflet/dist/leaflet.css'
 
 interface Props {
   space: any
@@ -18,52 +17,47 @@ export default function SpaceLocationMap({ space }: Props) {
     const coords = getSpaceCoords(space)
     if (!coords) return
 
-    import('leaflet').then(({ default: L }) => {
+    setOptions({ key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '', v: 'weekly' })
+
+    importLibrary('maps').then(() => {
       if (!containerRef.current || mapRef.current) return
+      const g = window.google
 
-      const map = L.map(containerRef.current, {
-        center:             coords,
-        zoom:               15,
-        zoomControl:        false,
-        scrollWheelZoom:    false,
-        dragging:           false,
-        doubleClickZoom:    false,
-        touchZoom:          false,
-        attributionControl: false,
+      const map = new g.maps.Map(containerRef.current, {
+        center:            { lat: coords[0], lng: coords[1] },
+        zoom:              15,
+        disableDefaultUI:  true,
+        gestureHandling:   'none',
+        zoomControl:       false,
+        styles: [
+          { elementType: 'geometry',    stylers: [{ color: '#f5f5f5' }] },
+          { elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+          { elementType: 'labels.text.fill',   stylers: [{ color: '#616161' }] },
+          { elementType: 'labels.text.stroke', stylers: [{ color: '#f5f5f5' }] },
+          { featureType: 'poi',  elementType: 'geometry', stylers: [{ color: '#eeeeee' }] },
+          { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
+          { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#dadada' }] },
+          { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#c9c9c9' }] },
+        ],
       })
-
-      L.tileLayer(
-        'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-        { subdomains: 'abcd', maxZoom: 19 },
-      ).addTo(map)
 
       // Pin verde de la marca
-      const icon = L.divIcon({
-        html: `
-          <div style="
-            position:relative;width:28px;height:36px;
-            filter:drop-shadow(0 2px 6px rgba(53,196,147,0.5));">
-            <svg width="28" height="36" viewBox="0 0 28 36" fill="none"
-                 xmlns="http://www.w3.org/2000/svg"
-                 style="pointer-events:none;">
-              <path d="M14 0C6.3 0 0 6.3 0 14c0 5.2 2.8 9.7 7 12.2L14 36l7-9.8C25.2 23.7 28 19.2 28 14 28 6.3 21.7 0 14 0z"
-                    fill="#35C493"/>
-              <circle cx="14" cy="13" r="6" fill="white"/>
-            </svg>
-          </div>`,
-        className:  '',
-        iconSize:   [28, 36],
-        iconAnchor: [14, 36],
+      const svg = `<svg width="28" height="36" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 0C6.3 0 0 6.3 0 14c0 5.2 2.8 9.7 7 12.2L14 36l7-9.8C25.2 23.7 28 19.2 28 14 28 6.3 21.7 0 14 0z" fill="#35C493"/><circle cx="14" cy="13" r="6" fill="white"/></svg>`
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      new (g.maps as any).Marker({
+        position: { lat: coords[0], lng: coords[1] },
+        map,
+        icon: {
+          url:        `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
+          scaledSize: new g.maps.Size(28, 36),
+          anchor:     new g.maps.Point(14, 36),
+        },
       })
 
-      L.marker(coords, { icon }).addTo(map)
       mapRef.current = map
-
-      requestAnimationFrame(() => map.invalidateSize())
     })
 
     return () => {
-      mapRef.current?.remove()
       mapRef.current = null
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -72,7 +66,6 @@ export default function SpaceLocationMap({ space }: Props) {
   const coords = getSpaceCoords(space)
   if (!coords) return null
 
-  // Link a Google Maps con la dirección o sector
   const gmQuery = encodeURIComponent(
     space.address
       ? `${space.address}, ${space.city}, República Dominicana`
@@ -86,11 +79,9 @@ export default function SpaceLocationMap({ space }: Props) {
         Ubicación
       </h3>
 
-      {/* Mapa */}
       <div className="relative rounded-2xl overflow-hidden" style={{ height: 240 }}>
         <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
 
-        {/* Gradiente inferior + botón Ver en Maps */}
         <div className="absolute bottom-0 left-0 right-0 px-4 pb-3 pt-6 flex items-end justify-between pointer-events-none"
           style={{ background: 'linear-gradient(to top, rgba(255,255,255,0.92) 0%, transparent 100%)' }}>
           <div className="pointer-events-none">

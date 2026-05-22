@@ -1,8 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-
-import 'leaflet/dist/leaflet.css'
+import { importLibrary, setOptions } from '@googlemaps/js-api-loader'
 
 // ── Coordenadas de sectores de Santo Domingo y otras ciudades ──
 export const SECTOR_COORDS: Record<string, [number, number]> = {
@@ -84,13 +83,12 @@ function stableJitter(id: string, range: number, seed: number): number {
 }
 
 export function getSpaceCoords(space: any): [number, number] | null {
-  // Solo usar lat/lng si son coordenadas válidas dentro de República Dominicana
   const lat = parseFloat(space.latitude ?? space.lat)
   const lng = parseFloat(space.longitude ?? space.lng)
   if (
     (space.latitude || space.lat) && (space.longitude || space.lng) &&
     !isNaN(lat) && !isNaN(lng) &&
-    lat >= 17.5 && lat <= 20.0 &&   // bounds approx. RD
+    lat >= 17.5 && lat <= 20.0 &&
     lng >= -72.0 && lng <= -68.0
   ) {
     return [lat, lng]
@@ -117,7 +115,7 @@ export function getSpaceCoords(space: any): [number, number] | null {
   return null
 }
 
-function getPricePin(space: any): string {
+export function getPricePin(space: any): string {
   const p = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
   if (!p) return 'Ver'
   if (p.pricing_type === 'hourly') {
@@ -126,7 +124,6 @@ function getPricePin(space: any): string {
   }
   if (p.pricing_type === 'minimum_consumption') {
     const n = Number(p.minimum_consumption)
-    // "Desde" deja claro que es un consumo mínimo, no un precio fijo
     return n >= 1000 ? `Desde RD$${Math.round(n / 1000)}k` : `Desde RD$${n}`
   }
   if (p.pricing_type === 'fixed_package') {
@@ -136,6 +133,35 @@ function getPricePin(space: any): string {
   return 'Cotizar'
 }
 
+// ── Estilo Silver — mapa limpio similar a CartoDB Light ──────
+const MAP_STYLES: google.maps.MapTypeStyle[] = [
+  { elementType: 'geometry',                              stylers: [{ color: '#f5f5f5' }] },
+  { elementType: 'labels.icon',                          stylers: [{ visibility: 'off' }] },
+  { elementType: 'labels.text.fill',                     stylers: [{ color: '#616161' }] },
+  { elementType: 'labels.text.stroke',                   stylers: [{ color: '#f5f5f5' }] },
+  { featureType: 'poi',     elementType: 'geometry',     stylers: [{ color: '#eeeeee' }] },
+  { featureType: 'poi',     elementType: 'labels.text.fill', stylers: [{ color: '#757575' }] },
+  { featureType: 'poi.park',elementType: 'geometry',     stylers: [{ color: '#e5e5e5' }] },
+  { featureType: 'road',    elementType: 'geometry',     stylers: [{ color: '#ffffff' }] },
+  { featureType: 'road.arterial', elementType: 'labels.text.fill', stylers: [{ color: '#757575' }] },
+  { featureType: 'road.highway',  elementType: 'geometry',         stylers: [{ color: '#dadada' }] },
+  { featureType: 'road.highway',  elementType: 'labels.text.fill', stylers: [{ color: '#616161' }] },
+  { featureType: 'road.local',    elementType: 'labels.text.fill', stylers: [{ color: '#9e9e9e' }] },
+  { featureType: 'transit.line',  elementType: 'geometry',         stylers: [{ color: '#e5e5e5' }] },
+  { featureType: 'transit.station', elementType: 'geometry',       stylers: [{ color: '#eeeeee' }] },
+  { featureType: 'water',   elementType: 'geometry',     stylers: [{ color: '#c9c9c9' }] },
+  { featureType: 'water',   elementType: 'labels.text.fill', stylers: [{ color: '#9e9e9e' }] },
+]
+
+function buildSvgIcon(g: typeof google, active: boolean): google.maps.Icon {
+  const color = active ? '#0F1623' : '#35C493'
+  const svg = `<svg width="28" height="36" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 0C6.3 0 0 6.3 0 14c0 5.2 2.8 9.7 7 12.2L14 36l7-9.8C25.2 23.7 28 19.2 28 14 28 6.3 21.7 0 14 0z" fill="${color}"/><circle cx="14" cy="13" r="6" fill="white"/></svg>`
+  return {
+    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
+    scaledSize: new g.maps.Size(28, 36),
+    anchor:     new g.maps.Point(14, 36),
+  }
+}
 
 interface Props {
   spaces:        any[]
@@ -146,228 +172,123 @@ interface Props {
 
 export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover }: Props) {
   const containerRef  = useRef<HTMLDivElement>(null)
-  const mapRef        = useRef<any>(null)
-  const lRef          = useRef<any>(null)
-  const markersRef    = useRef<Map<string, any>>(new Map())
-  const coordsRef     = useRef<Map<string, [number, number]>>(new Map())
+  const mapRef        = useRef<google.maps.Map | null>(null)
+  const markersRef    = useRef<Map<string, google.maps.Marker>>(new Map())
+  const googleRef     = useRef<typeof google | null>(null)
   const spacesRef     = useRef(spaces)
   const onHoverRef    = useRef(onSpaceHover)
   const hoveredIdRef  = useRef(hoveredId)
-  const firstLoadRef  = useRef(true)   // solo fitBounds en la primera carga
+  const firstLoadRef  = useRef(true)
 
-  // Keep refs in sync
   useEffect(() => { spacesRef.current    = spaces },       [spaces])
   useEffect(() => { onHoverRef.current   = onSpaceHover }, [onSpaceHover])
   useEffect(() => { hoveredIdRef.current = hoveredId },    [hoveredId])
 
-  // ── Inicializar el mapa UNA sola vez ─────────────────────
+  // ── Inicializar mapa una sola vez ────────────────────────
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return
     let cancelled = false
 
-    import('leaflet').then((LModule) => {
+    setOptions({ key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '', v: 'weekly' })
+
+    importLibrary('maps').then(() => {
       if (cancelled || !containerRef.current || mapRef.current) return
-      const L = LModule.default
-      lRef.current = L
+      const g = window.google
+      googleRef.current = g
 
-      // Siempre inicia centrado en Distrito Nacional
       const view = CITY_VIEW['default']
-
-      const map  = L.map(containerRef.current, {
-        center:             view.center,
-        zoom:               view.zoom,
-        minZoom:            10,
-        maxZoom:            18,
-        zoomControl:        false,
-        attributionControl: true,
+      const map  = new g.maps.Map(containerRef.current, {
+        center:              { lat: view.center[0], lng: view.center[1] },
+        zoom:                view.zoom,
+        minZoom:             10,
+        maxZoom:             18,
+        mapTypeControl:      false,
+        streetViewControl:   false,
+        fullscreenControl:   false,
+        zoomControl:         true,
+        zoomControlOptions:  { position: (g as any).maps.ControlPosition.BOTTOM_RIGHT },
+        styles:              MAP_STYLES,
       })
 
-      L.tileLayer(
-        'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-        {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-          subdomains:  'abcd',
-          maxZoom:     19,
-        },
-      ).addTo(map)
-
-      L.control.zoom({ position: 'bottomright' }).addTo(map)
       mapRef.current = map
-
-      requestAnimationFrame(() => { map.invalidateSize() })
-
-      // Poblar marcadores con los espacios actuales
-      addMarkers(L, map, spacesRef.current)
+      addMarkers(g as any, map, spacesRef.current)
     })
 
     return () => {
       cancelled = true
-      mapRef.current?.remove()
-      mapRef.current = null
-      lRef.current   = null
+      markersRef.current.forEach(m => (m as any).setMap(null))
       markersRef.current.clear()
-      coordsRef.current.clear()
+      mapRef.current   = null
+      googleRef.current = null
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // ── Función para añadir/actualizar todos los marcadores ──
-  function addMarkers(L: any, map: any, spaceList: any[]) {
-    // Limpiar marcadores anteriores
-    markersRef.current.forEach(m => m.remove())
+  function addMarkers(g: any, map: any, spaceList: any[]) {
+    markersRef.current.forEach(m => m.setMap(null))
     markersRef.current.clear()
-    coordsRef.current.clear()
 
     spaceList.forEach(space => {
       const coords = getSpaceCoords(space)
       if (!coords) return
-      coordsRef.current.set(space.id, coords)
 
-      const label  = getPricePin(space)
-      const marker = L.marker(coords, { icon: buildIcon(L, label, false) })
-
-      // Solo sincronizar el card highlight — NO cambiar el ícono durante hover
-      // porque setIcon() destruye el elemento DOM y el evento click se pierde
-      marker.on('mouseover', () => {
-        onHoverRef.current?.(space.id)
-        marker.setZIndexOffset(1000)
+      const marker = new g.maps.Marker({
+        position: { lat: coords[0], lng: coords[1] },
+        map,
+        icon:  buildSvgIcon(g, false),
+        title: space.name ?? '',
       })
-      marker.on('mouseout', () => {
+
+      marker.addListener('mouseover', () => {
+        onHoverRef.current?.(space.id)
+        marker.setIcon(buildSvgIcon(g, true))
+        marker.setZIndex(1000)
+      })
+      marker.addListener('mouseout', () => {
         if (hoveredIdRef.current !== space.id) {
           onHoverRef.current?.(null)
-          marker.setZIndexOffset(0)
+          marker.setIcon(buildSvgIcon(g, false))
+          marker.setZIndex(0)
         }
       })
+      marker.addListener('click', () => {
+        if (space.slug) window.open('/espacios/' + space.slug, '_blank', 'noopener,noreferrer')
+      })
 
-      const nav = () => { if (space.slug) window.open('/espacios/' + space.slug, '_blank', 'noopener,noreferrer') }
-      marker.on('click', nav)
-
-      marker.addTo(map)
       markersRef.current.set(space.id, marker)
     })
 
-    // El mapa siempre inicia centrado en Distrito Nacional (zoom 13).
-    // Solo se mueve cuando el usuario aplica un filtro de ciudad (efecto cityFilter).
-    if (firstLoadRef.current) {
-      firstLoadRef.current = false
-    }
+    if (firstLoadRef.current) firstLoadRef.current = false
   }
 
-  // ── Actualizar marcadores cuando cambian los espacios ─────
+  // ── Actualizar marcadores cuando cambian los espacios ────
   useEffect(() => {
-    const L   = lRef.current
+    const g   = googleRef.current
     const map = mapRef.current
-    if (!L || !map) return
-    addMarkers(L, map, spaces)
+    if (!g || !map) return
+    addMarkers(g, map, spaces)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spaces])
 
-  // ── Actualizar highlight cuando cambia hoveredId ──────────
-  // Usa CSS class en lugar de setIcon() — setIcon() destruye el DOM y rompe el click
+  // ── Actualizar highlight cuando cambia hoveredId ─────────
   useEffect(() => {
+    const g = googleRef.current
+    if (!g) return
     markersRef.current.forEach((marker, id) => {
-      const el = marker.getElement()
-      if (!el) return
-      const inner = el.querySelector('div') as HTMLElement | null
-      if (!inner) return
-      if (id === hoveredId) {
-        inner.style.transform = 'scale(1.25) translateZ(0)'
-        inner.style.filter    = 'drop-shadow(0 3px 8px rgba(15,22,35,0.5))'
-        const path = inner.querySelector('path') as SVGPathElement | null
-        if (path) path.setAttribute('fill', '#0F1623')
-        marker.setZIndexOffset(1000)
-      } else {
-        inner.style.transform = 'scale(1) translateZ(0)'
-        inner.style.filter    = 'drop-shadow(0 2px 6px rgba(53,196,147,0.45))'
-        const path = inner.querySelector('path') as SVGPathElement | null
-        if (path) path.setAttribute('fill', '#35C493')
-        marker.setZIndexOffset(0)
-      }
+      marker.setIcon(buildSvgIcon(g, id === hoveredId))
+      marker.setZIndex(id === hoveredId ? 1000 : 0)
     })
   }, [hoveredId])
 
-  // ── Re-centrar cuando cambia la ciudad ────────────────────
+  // ── Re-centrar cuando cambia la ciudad ───────────────────
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
     const key  = Object.keys(CITY_VIEW).find(k => k !== 'default' && (cityFilter ?? '').toLowerCase().includes(k))
     const view = CITY_VIEW[key ?? 'default']
-    map.flyTo(view.center, view.zoom, { duration: 0.8 })
+    ;(map as any).panTo({ lat: view.center[0], lng: view.center[1] })
+    ;(map as any).setZoom(view.zoom)
   }, [cityFilter])
 
-  return (
-    <>
-      <style>{`
-        .espot-pin { cursor: pointer !important; }
-        .espot-pin svg { overflow: visible; pointer-events: none; }
-        .leaflet-marker-icon.espot-pin { pointer-events: auto !important; }
-        .espot-pin:hover > div {
-          transform: scale(1.25) translateZ(0) !important;
-          filter: drop-shadow(0 3px 8px rgba(15,22,35,0.5)) !important;
-        }
-        .leaflet-popup-content-wrapper {
-          border-radius:16px !important;
-          padding:0 !important;
-          overflow:hidden;
-          box-shadow:0 8px 32px rgba(0,0,0,0.15) !important;
-          border:none !important;
-        }
-        .leaflet-popup-content { margin:0 !important; }
-        .leaflet-popup-close-button {
-          color:#6B7280 !important;
-          top:10px !important;
-          right:10px !important;
-          font-size:20px !important;
-          width:28px !important;
-          height:28px !important;
-          line-height:28px !important;
-          text-align:center !important;
-          background:rgba(255,255,255,0.9) !important;
-          border-radius:50% !important;
-          z-index:10;
-        }
-        .leaflet-popup-tip { background:#fff !important; }
-        .leaflet-container { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; }
-        .leaflet-attribution-flag { display:none !important; }
-        .leaflet-control-attribution { font-size:9px !important; }
-        @media (max-width:767px) {
-          .leaflet-control-zoom { margin-bottom:70px !important; }
-        }
-      `}</style>
-      <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
-    </>
-  )
+  return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
 }
-
-// ── Helpers de Leaflet ────────────────────────────────────
-
-function buildIcon(L: any, _label: string, active: boolean) {
-  const color  = active ? '#0F1623' : '#35C493'
-  const shadow = active
-    ? 'drop-shadow(0 3px 8px rgba(15,22,35,0.5))'
-    : 'drop-shadow(0 2px 6px rgba(53,196,147,0.45))'
-  const scale  = active ? 'scale(1.25) translateZ(0)' : 'scale(1) translateZ(0)'
-
-  return L.divIcon({
-    html: `
-      <div style="
-        position:relative;width:28px;height:36px;
-        will-change:transform;
-        transition:transform 0.15s ease, filter 0.15s ease;
-        transform:${scale};
-        filter:${shadow}">
-        <svg width="28" height="36" viewBox="0 0 28 36" fill="none"
-             xmlns="http://www.w3.org/2000/svg"
-             shape-rendering="geometricPrecision"
-             style="pointer-events:none;">
-          <path d="M14 0C6.3 0 0 6.3 0 14c0 5.2 2.8 9.7 7 12.2L14 36l7-9.8C25.2 23.7 28 19.2 28 14 28 6.3 21.7 0 14 0z"
-                fill="${color}"/>
-          <circle cx="14" cy="13" r="6" fill="white"/>
-        </svg>
-      </div>`,
-    className:  'espot-pin',
-    iconSize:   [28, 36],
-    iconAnchor: [14, 36],
-  })
-}
-

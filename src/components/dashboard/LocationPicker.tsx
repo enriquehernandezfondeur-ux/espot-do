@@ -2,23 +2,14 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { MapPin, Loader2, CheckCircle, X } from 'lucide-react'
+import { importLibrary, setOptions } from '@googlemaps/js-api-loader'
 
-const LEAFLET_CSS    = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
 const DEFAULT_CENTER: [number, number] = [18.4719, -69.9312]
 const DEFAULT_ZOOM   = 13
 const PIN_ZOOM       = 16
 
-function buildPinHTML() {
-  return `
-    <div style="position:relative;width:28px;height:36px;">
-      <svg width="28" height="36" viewBox="0 0 28 36" fill="none"
-           xmlns="http://www.w3.org/2000/svg"
-           style="pointer-events:none;filter:drop-shadow(0 3px 10px rgba(53,196,147,0.5))">
-        <path d="M14 0C6.3 0 0 6.3 0 14c0 5.2 2.8 9.7 7 12.2L14 36l7-9.8C25.2 23.7 28 19.2 28 14 28 6.3 21.7 0 14 0z"
-              fill="#35C493"/>
-        <circle cx="14" cy="13" r="6" fill="white"/>
-      </svg>
-    </div>`
+function buildPinSvg() {
+  return `<svg width="28" height="36" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none;filter:drop-shadow(0 3px 10px rgba(53,196,147,0.5))"><path d="M14 0C6.3 0 0 6.3 0 14c0 5.2 2.8 9.7 7 12.2L14 36l7-9.8C25.2 23.7 28 19.2 28 14 28 6.3 21.7 0 14 0z" fill="#35C493"/><circle cx="14" cy="13" r="6" fill="white"/></svg>`
 }
 
 interface Props {
@@ -31,66 +22,55 @@ interface Props {
   onCoords:  (lat: string, lng: string) => void
 }
 
-interface NominatimResult {
-  lat:          string
-  lon:          string
-  display_name: string
-  address: {
-    road?:            string
-    house_number?:    string
-    suburb?:          string
-    neighbourhood?:   string
-    district?:        string
-    town?:            string
-    city?:            string
-    village?:         string
-    county?:          string
-    state?:           string
-  }
-}
-
-function formatResult(r: NominatimResult): { label: string; sector: string } {
-  const a = r.address
-  // Calle + número
-  const street = [a.road, a.house_number ? `#${a.house_number}` : null]
-    .filter(Boolean).join(' ')
-  // Sector/barrio
-  const sector = a.suburb || a.neighbourhood || a.district || ''
-  // Ciudad
-  const city = a.city || a.town || a.village || a.county || ''
-  // Label completo para mostrar
-  const parts = [street || a.road, sector, city].filter(Boolean)
-  return { label: parts.join(', '), sector }
+interface Prediction {
+  placeId:     string
+  description: string
+  mainText:    string
+  secondaryText: string
 }
 
 export default function LocationPicker({ address, sector, lat, lng, onAddress, onSector, onCoords }: Props) {
-  const mapDivRef   = useRef<HTMLDivElement>(null)
-  const mapRef      = useRef<any>(null)
-  const markerRef   = useRef<any>(null)
-  const lRef        = useRef<any>(null)           // referencia a Leaflet
-  const onCoordsRef = useRef(onCoords)
+  const mapDivRef    = useRef<HTMLDivElement>(null)
+  const mapRef       = useRef<any>(null)
+  const markerRef    = useRef<any>(null)
+  const googleRef    = useRef<any>(null)
+  const onCoordsRef  = useRef(onCoords)
   onCoordsRef.current = onCoords
 
-  const [hasPin,      setHasPin]      = useState(!!(lat && lng))
-  const [results,     setResults]     = useState<NominatimResult[]>([])
-  const [showDrop,    setShowDrop]    = useState(false)
-  const [loading,     setLoading]     = useState(false)
-  const [noResults,   setNoResults]   = useState(false)
-  const debounceRef   = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const blurTimerRef  = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const inputRef      = useRef<HTMLInputElement>(null)
+  const [hasPin,       setHasPin]       = useState(!!(lat && lng))
+  const [predictions,  setPredictions]  = useState<Prediction[]>([])
+  const [showDrop,     setShowDrop]     = useState(false)
+  const [loading,      setLoading]      = useState(false)
+  const [noResults,    setNoResults]    = useState(false)
+  const debounceRef    = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const blurTimerRef   = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const inputRef       = useRef<HTMLInputElement>(null)
+  const autoSvcRef     = useRef<any>(null)
 
   // ── Colocar / mover el pin ────────────────────────────────
-  const placeMarker = useCallback((L: any, latN: number, lngN: number) => {
-    if (!mapRef.current) return
-    const icon = L.divIcon({ html: buildPinHTML(), className: '', iconSize: [28, 36], iconAnchor: [14, 36] })
+  const placeMarker = useCallback((latN: number, lngN: number) => {
+    const g   = googleRef.current
+    const map = mapRef.current
+    if (!g || !map) return
+
+    const icon = {
+      url:        `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(buildPinSvg())}`,
+      scaledSize: new g.maps.Size(28, 36),
+      anchor:     new g.maps.Point(14, 36),
+    }
+
     if (markerRef.current) {
-      markerRef.current.setLatLng([latN, lngN])
+      markerRef.current.setPosition({ lat: latN, lng: lngN })
     } else {
-      const m = L.marker([latN, lngN], { icon, draggable: true }).addTo(mapRef.current)
-      m.on('dragend', (e: any) => {
-        const p = e.target.getLatLng()
-        onCoordsRef.current(p.lat.toFixed(6), p.lng.toFixed(6))
+      const m = new g.maps.Marker({
+        position:  { lat: latN, lng: lngN },
+        map,
+        icon,
+        draggable: true,
+      })
+      m.addListener('dragend', (e: any) => {
+        const p = e.latLng
+        onCoordsRef.current(p.lat().toFixed(6), p.lng().toFixed(6))
       })
       markerRef.current = m
     }
@@ -101,125 +81,115 @@ export default function LocationPicker({ address, sector, lat, lng, onAddress, o
   useEffect(() => {
     if (!mapDivRef.current || mapRef.current) return
 
-    if (!document.querySelector(`link[href="${LEAFLET_CSS}"]`)) {
-      const l = document.createElement('link')
-      l.rel = 'stylesheet'; l.href = LEAFLET_CSS
-      document.head.appendChild(l)
-    }
-
     const initLat  = lat ? parseFloat(lat) : DEFAULT_CENTER[0]
     const initLng  = lng ? parseFloat(lng) : DEFAULT_CENTER[1]
     const initZoom = lat ? PIN_ZOOM : DEFAULT_ZOOM
 
-    import('leaflet').then(({ default: L }) => {
+    setOptions({ key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '', v: 'weekly' })
+
+    Promise.all([importLibrary('maps'), importLibrary('places')]).then(() => {
       if (!mapDivRef.current || mapRef.current) return
-      lRef.current = L
+      const g = window.google
+      googleRef.current = g
 
-      const map = L.map(mapDivRef.current, {
-        center: [initLat, initLng],
-        zoom:   initZoom,
-        zoomControl: true,
+      const map = new g.maps.Map(mapDivRef.current, {
+        center:          { lat: initLat, lng: initLng },
+        zoom:            initZoom,
+        mapTypeControl:  false,
+        streetViewControl: false,
+        fullscreenControl: false,
+        styles: [
+          { elementType: 'geometry',    stylers: [{ color: '#f5f5f5' }] },
+          { elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+          { elementType: 'labels.text.fill',   stylers: [{ color: '#616161' }] },
+          { elementType: 'labels.text.stroke', stylers: [{ color: '#f5f5f5' }] },
+          { featureType: 'poi',  elementType: 'geometry', stylers: [{ color: '#eeeeee' }] },
+          { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
+          { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#dadada' }] },
+          { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#c9c9c9' }] },
+        ],
       })
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 19,
-      }).addTo(map)
 
-      if (lat && lng) placeMarker(L, parseFloat(lat), parseFloat(lng))
-
-      map.on('click', (e: any) => {
-        placeMarker(L, e.latlng.lat, e.latlng.lng)
-        onCoordsRef.current(e.latlng.lat.toFixed(6), e.latlng.lng.toFixed(6))
-        setHasPin(true)
+      map.addListener('click', (e: any) => {
+        const latN = e.latLng.lat()
+        const lngN = e.latLng.lng()
+        placeMarker(latN, lngN)
+        onCoordsRef.current(latN.toFixed(6), lngN.toFixed(6))
       })
 
       mapRef.current = map
-      requestAnimationFrame(() => map.invalidateSize())
+      autoSvcRef.current = new g.maps.places.AutocompleteService()
+
+      if (lat && lng) placeMarker(parseFloat(lat), parseFloat(lng))
     })
 
     return () => {
-      if (mapRef.current) { mapRef.current.remove(); mapRef.current = null }
-      markerRef.current = null
-      lRef.current      = null
+      if (markerRef.current) { markerRef.current.setMap(null); markerRef.current = null }
+      mapRef.current    = null
+      googleRef.current = null
+      autoSvcRef.current = null
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // ── Restaurar pin cuando llegan coords de un espacio existente ──
   useEffect(() => {
-    if (!lat || !lng || !lRef.current || !mapRef.current) return
+    if (!lat || !lng || !googleRef.current || !mapRef.current) return
     const latN = parseFloat(lat)
     const lngN = parseFloat(lng)
     if (isNaN(latN) || isNaN(lngN)) return
-    // Solo actuar si el marker aún no existe (carga inicial de edición)
     if (!markerRef.current) {
-      placeMarker(lRef.current, latN, lngN)
-      mapRef.current.setView([latN, lngN], PIN_ZOOM)
+      placeMarker(latN, lngN)
+      mapRef.current.setCenter({ lat: latN, lng: lngN })
+      mapRef.current.setZoom(PIN_ZOOM)
     }
   }, [lat, lng, placeMarker])
 
-  // ── Buscar en Nominatim (OpenStreetMap) — solo RD ────────
+  // ── Buscar con Google Places ──────────────────────────────
   const doSearch = useCallback(async (query: string) => {
+    const svc = autoSvcRef.current
+    if (!svc) return
     setLoading(true)
     setNoResults(false)
 
-    const nominatimFetch = async (q: string) => {
-      const url = `https://nominatim.openstreetmap.org/search?` +
-                  `format=json&q=${encodeURIComponent(q.trim())}&countrycodes=do&limit=6&addressdetails=1` +
-                  `&viewbox=-72.0,19.9,-68.3,17.5&bounded=0&accept-language=es`
-      const res = await fetch(url, { headers: { 'User-Agent': 'espot.do/1.0 (contacto@espot.do)' } })
-      return res.json() as Promise<NominatimResult[]>
-    }
-
-    try {
-      let data = await nominatimFetch(query)
-
-      // Nominatim no tiene números de casa en RD — si falla, reintentar
-      // quitando el número al final (ej: "Av. Bolívar 1012" → "Av. Bolívar")
-      if (data.length === 0) {
-        const sinNumero = query.trim().replace(/\s+#?\d+[\w-]*$/, '').trim()
-        if (sinNumero.length >= 3 && sinNumero !== query.trim()) {
-          data = await nominatimFetch(sinNumero)
+    svc.getPlacePredictions(
+      {
+        input:                 query,
+        componentRestrictions: { country: 'do' },
+        types:                 ['geocode', 'establishment'],
+        language:              'es',
+      },
+      (preds: any[], status: string) => {
+        setLoading(false)
+        if (status === 'OK' && preds?.length) {
+          setPredictions(preds.map((p: any) => ({
+            placeId:       p.place_id,
+            description:   p.description,
+            mainText:      p.structured_formatting?.main_text ?? p.description,
+            secondaryText: p.structured_formatting?.secondary_text ?? '',
+          })))
+          setShowDrop(true)
+          setNoResults(false)
+        } else {
+          setPredictions([])
+          setNoResults(true)
+          setShowDrop(true)
         }
       }
-
-      // Si sigue sin resultados, intentar agregando contexto de ciudad
-      if (data.length === 0) {
-        const conCiudad = `${query.trim()}, Santo Domingo, República Dominicana`
-        data = await nominatimFetch(conCiudad)
-      }
-
-      if (data.length === 0) {
-        setResults([])
-        setNoResults(true)
-      } else {
-        setResults(data)
-        setNoResults(false)
-      }
-      setShowDrop(true)
-    } catch {
-      setResults([])
-      setNoResults(false)
-    } finally {
-      setLoading(false)
-    }
+    )
   }, [])
 
   function handleAddressChange(val: string) {
     onAddress(val)
     setNoResults(false)
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    if (val.trim().length < 3) {
-      setResults([])
-      setShowDrop(false)
-      return
-    }
-    // Debounce de 400ms — Nominatim pide max 1 req/seg
-    debounceRef.current = setTimeout(() => doSearch(val), 400)
+    if (val.trim().length < 3) { setPredictions([]); setShowDrop(false); return }
+    debounceRef.current = setTimeout(() => doSearch(val), 350)
   }
 
   function handleFocus() {
     if (blurTimerRef.current) clearTimeout(blurTimerRef.current)
-    if (results.length > 0) setShowDrop(true)
+    if (predictions.length > 0) setShowDrop(true)
     else if (address.trim().length >= 3 && !loading) doSearch(address)
   }
 
@@ -227,43 +197,59 @@ export default function LocationPicker({ address, sector, lat, lng, onAddress, o
     blurTimerRef.current = setTimeout(() => setShowDrop(false), 200)
   }
 
-  function pickResult(r: NominatimResult) {
-    const { label, sector: autoSector } = formatResult(r)
-    const a = r.address
-    // Calle como dirección
-    const street = [a.road, a.house_number ? `#${a.house_number}` : null].filter(Boolean).join(' ')
-    onAddress(street || label.split(',')[0].trim())
-    // Auto-llenar sector si no tiene uno
-    if (!sector && autoSector) onSector(autoSector)
+  function pickPrediction(pred: Prediction) {
+    const g   = googleRef.current
+    const map = mapRef.current
+    if (!g || !map) return
 
-    setResults([])
-    setShowDrop(false)
-    setNoResults(false)
+    const svc = new g.maps.places.PlacesService(map)
+    svc.getDetails(
+      { placeId: pred.placeId, fields: ['geometry', 'address_components', 'formatted_address'] },
+      (place: any, status: string) => {
+        if (status !== 'OK' || !place?.geometry?.location) return
 
-    const latN = parseFloat(r.lat)
-    const lngN = parseFloat(r.lon)
-    onCoordsRef.current(latN.toFixed(6), lngN.toFixed(6))
+        const latN = place.geometry.location.lat()
+        const lngN = place.geometry.location.lng()
 
-    if (lRef.current) {
-      placeMarker(lRef.current, latN, lngN)
-      mapRef.current?.setView([latN, lngN], PIN_ZOOM)
-    }
+        // Extraer componentes de dirección
+        const components: any[] = place.address_components ?? []
+        const route      = components.find((c: any) => c.types.includes('route'))?.long_name ?? ''
+        const number     = components.find((c: any) => c.types.includes('street_number'))?.long_name ?? ''
+        const sublocality = components.find((c: any) =>
+          c.types.includes('sublocality_level_1') || c.types.includes('neighborhood') || c.types.includes('sublocality')
+        )?.long_name ?? ''
+
+        const street = [route, number ? `#${number}` : ''].filter(Boolean).join(' ')
+        onAddress(street || pred.mainText)
+        if (!sector && sublocality) onSector(sublocality)
+
+        onCoordsRef.current(latN.toFixed(6), lngN.toFixed(6))
+        placeMarker(latN, lngN)
+        map.setCenter({ lat: latN, lng: lngN })
+        map.setZoom(PIN_ZOOM)
+
+        setPredictions([])
+        setShowDrop(false)
+        setNoResults(false)
+      }
+    )
   }
 
   function clearPin() {
     if (markerRef.current && mapRef.current) {
-      markerRef.current.remove()
+      markerRef.current.setMap(null)
       markerRef.current = null
     }
     setHasPin(false)
     onCoords('', '')
-    mapRef.current?.setView(DEFAULT_CENTER, DEFAULT_ZOOM)
+    mapRef.current?.setCenter({ lat: DEFAULT_CENTER[0], lng: DEFAULT_CENTER[1] })
+    mapRef.current?.setZoom(DEFAULT_ZOOM)
   }
 
   return (
     <div className="space-y-3">
 
-      {/* Dirección + Sector — 1 col en mobile, 2 en desktop */}
+      {/* Dirección + Sector */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
         {/* Dirección con autocomplete */}
@@ -279,7 +265,7 @@ export default function LocationPicker({ address, sector, lat, lng, onAddress, o
               onFocus={handleFocus}
               onBlur={handleBlur}
               onKeyDown={e => {
-                if (e.key === 'Escape') { setShowDrop(false); setResults([]) }
+                if (e.key === 'Escape') { setShowDrop(false); setPredictions([]) }
                 if (e.key === 'Enter')  { e.preventDefault(); if (address.trim().length >= 3) doSearch(address) }
               }}
               placeholder="Av. Winston Churchill #123"
@@ -290,37 +276,43 @@ export default function LocationPicker({ address, sector, lat, lng, onAddress, o
             />
             {loading
               ? <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin" style={{ color: 'var(--brand)' }} />
-              : address && <button type="button" onClick={() => { onAddress(''); setResults([]); setShowDrop(false) }}
+              : address && (
+                <button type="button" onClick={() => { onAddress(''); setPredictions([]); setShowDrop(false) }}
                   className="absolute right-3 top-1/2 -translate-y-1/2"
                   style={{ color: 'var(--text-muted)' }}>
                   <X size={13} />
                 </button>
+              )
             }
 
-            {/* Dropdown resultados */}
-            {showDrop && results.length > 0 && (
+            {/* Dropdown de resultados */}
+            {showDrop && predictions.length > 0 && (
               <ul className="absolute left-0 right-0 top-full mt-1 rounded-xl overflow-hidden"
                 style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 24px rgba(0,0,0,0.14)', zIndex: 9999, maxHeight: 260, overflowY: 'auto' }}>
-                {results.map((r, i) => {
-                  const { label } = formatResult(r)
-                  if (!label) return null
-                  return (
-                    <li key={i}>
-                      <button
-                        type="button"
-                        onMouseDown={e => { e.preventDefault(); pickResult(r) }}
-                        className="w-full text-left px-4 py-2.5 text-sm flex items-start gap-2.5 transition-colors hover:bg-[var(--bg-elevated)]"
-                        style={{ borderBottom: i < results.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
-                        <MapPin size={13} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: 2 }} />
-                        <span className="leading-snug" style={{ color: 'var(--text-primary)' }}>{label}</span>
-                      </button>
-                    </li>
-                  )
-                })}
+                {predictions.map((pred, i) => (
+                  <li key={pred.placeId}>
+                    <button
+                      type="button"
+                      onMouseDown={e => { e.preventDefault(); pickPrediction(pred) }}
+                      className="w-full text-left px-4 py-2.5 text-sm flex items-start gap-2.5 transition-colors hover:bg-[var(--bg-elevated)]"
+                      style={{ borderBottom: i < predictions.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
+                      <MapPin size={13} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: 2 }} />
+                      <div className="min-w-0">
+                        <div className="font-medium leading-snug truncate" style={{ color: 'var(--text-primary)' }}>
+                          {pred.mainText}
+                        </div>
+                        {pred.secondaryText && (
+                          <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
+                            {pred.secondaryText}
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  </li>
+                ))}
               </ul>
             )}
 
-            {/* Sin resultados */}
             {showDrop && noResults && !loading && (
               <div className="absolute left-0 right-0 top-full mt-1 rounded-xl px-4 py-3 text-sm"
                 style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 24px rgba(0,0,0,0.1)', color: 'var(--text-muted)', zIndex: 9999 }}>

@@ -3,7 +3,6 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "installCommand": "npm install",
-  "nodeVersion": "22",
   "crons": [
     {
       "path": "/api/cron/payment-reminders",
