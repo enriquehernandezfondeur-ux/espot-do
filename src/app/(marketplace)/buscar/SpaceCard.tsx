@@ -252,14 +252,11 @@ export function SpaceCard({
             )}
           </div>
 
-          {/* Ubicación + categoría + rating — todo en una línea */}
-          <div className="flex items-center justify-between gap-2">
+          {/* Ubicación + rating */}
+          <div className="flex items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-1 text-xs min-w-0" style={{ color: 'var(--text-muted)' }}>
               <MapPin size={10} className="shrink-0" />
               <span className="truncate">{[space.sector, space.city].filter(Boolean).join(', ') || 'Santo Domingo'}</span>
-              <span className="shrink-0" style={{ color: '#D1D5DB' }}>·</span>
-              <CatIcon size={10} className="shrink-0" />
-              <span className="shrink-0 whitespace-nowrap">{catLabel}</span>
             </div>
             {rating && (
               <div className="flex items-center gap-0.5 shrink-0">
@@ -268,6 +265,12 @@ export function SpaceCard({
                 <span className="text-xs" style={{ color: 'var(--text-muted)' }}>({rating.count})</span>
               </div>
             )}
+          </div>
+
+          {/* Tipo de espacio — fila propia */}
+          <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+            <CatIcon size={10} className="shrink-0" />
+            <span>{catLabel}</span>
           </div>
 
           {/* Precio + badges — 2 filas para evitar colisión */}
