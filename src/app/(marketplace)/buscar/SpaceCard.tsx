@@ -238,25 +238,28 @@ export function SpaceCard({
         <div className="p-4 flex flex-col gap-2 flex-1">
 
           {/* Nombre */}
-          <div className="flex items-start gap-1.5 min-w-0">
-            <h3 className="font-semibold text-sm leading-snug line-clamp-2 min-w-0"
+          <div className="flex items-center gap-1.5 min-w-0">
+            <h3 className="font-semibold text-sm leading-snug truncate min-w-0"
               title={space.name}
               style={{ color: '#0F1623', letterSpacing: '-0.01em' }}>
               {space.name}
             </h3>
             {space.is_verified && (
-              <span className="flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center mt-0.5"
+              <span className="flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center"
                 style={{ background: '#35C493' }}>
                 <Check size={9} style={{ color: '#fff', strokeWidth: 3 }} />
               </span>
             )}
           </div>
 
-          {/* Ubicación + rating */}
-          <div className="flex items-center justify-between gap-2 min-w-0">
+          {/* Ubicación + categoría + rating — todo en una línea */}
+          <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1 text-xs min-w-0" style={{ color: 'var(--text-muted)' }}>
               <MapPin size={10} className="shrink-0" />
               <span className="truncate">{[space.sector, space.city].filter(Boolean).join(', ') || 'Santo Domingo'}</span>
+              <span className="shrink-0" style={{ color: '#D1D5DB' }}>·</span>
+              <CatIcon size={10} className="shrink-0" />
+              <span className="shrink-0 whitespace-nowrap">{catLabel}</span>
             </div>
             {rating && (
               <div className="flex items-center gap-0.5 shrink-0">
@@ -267,39 +270,31 @@ export function SpaceCard({
             )}
           </div>
 
-
-          {/* Precio + badge + capacidad */}
-          <div className="flex items-center justify-between gap-2 pt-2.5 mt-auto"
+          {/* Precio · badge tipo · capacidad */}
+          <div className="flex items-center gap-2 pt-2.5 mt-auto"
             style={{ borderTop: '1px solid #F0F2F5' }}>
 
-            {/* Izquierda: precio + badge con separación cómoda */}
-            <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
+            {/* Grupo izquierdo: precio + badge + tooltip (#4) */}
+            <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-hidden">
               {priceInfo?.amount ? (
-                <div className="flex items-baseline gap-1 shrink-0">
-                  <span className="font-bold leading-none" style={{ color: '#0F1623', fontSize: 15 }}>
-                    {priceInfo.amount}
-                  </span>
-                  {/* Solo mostrar unidad para hourly ("/ hora"), no para paquete */}
-                  {priceInfo.unit && priceInfo.unit !== 'paquete' && (
-                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{priceInfo.unit}</span>
-                  )}
-                </div>
+                <span className="font-bold text-sm shrink-0" style={{ color: '#0F1623' }}>
+                  {priceInfo.amount}
+                </span>
               ) : (
-                <span className="text-sm font-semibold shrink-0" style={{ color: 'var(--text-muted)' }}>Cotizar precio</span>
+                <span className="text-sm font-semibold shrink-0" style={{ color: 'var(--text-muted)' }}>Cotizar</span>
               )}
-
-              {/* Badge solo para consumibles — hora y paquete ya tienen texto junto al precio */}
-              {pricingDef?.value === 'minimum_consumption' && (
+              {pricingDef?.value && (
                 <div className="relative shrink-0">
                   <button
                     type="button"
                     onClick={e => { e.preventDefault(); e.stopPropagation(); setShowPriceInfo(o => !o) }}
-                    className="text-[11px] font-semibold px-2 py-1 rounded-lg whitespace-nowrap"
+                    className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap"
                     style={{ background: pricingDef.bg, color: pricingDef.text, border: `1px solid ${pricingDef.border}` }}>
-                    Consumibles
+                    {pricingDef.value === 'minimum_consumption' ? 'Consumibles' : pricingDef.label}
                   </button>
                   {showPriceInfo && pricingTip && (
                     <>
+                      {/* Backdrop para cerrar en móvil */}
                       <div className="fixed inset-0 z-40" onClick={e => { e.preventDefault(); e.stopPropagation(); setShowPriceInfo(false) }} />
                       <div className="absolute bottom-full mb-1.5 left-0 z-50 w-52 rounded-xl px-3 py-2.5 shadow-xl text-xs leading-relaxed"
                         style={{ background: '#0F1623', color: '#E2E8F0' }}
@@ -312,7 +307,6 @@ export function SpaceCard({
                   )}
                 </div>
               )}
-
               {(() => {
                 const p   = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
                 const wm  = Number(p?.weekend_multiplier ?? 1)
@@ -333,7 +327,7 @@ export function SpaceCard({
               })()}
             </div>
 
-            {/* Derecha: capacidad */}
+            {/* Capacidad */}
             <span className="flex items-center gap-1 text-xs font-medium shrink-0" style={{ color: 'var(--text-muted)' }}>
               <Users size={11} style={{ color: '#35C493', flexShrink: 0 }} />
               {space.capacity_min && space.capacity_min !== space.capacity_max
