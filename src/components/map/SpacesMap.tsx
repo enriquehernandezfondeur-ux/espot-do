@@ -133,38 +133,24 @@ export function getPricePin(space: any): string {
   return 'Cotizar'
 }
 
-// ── Estilo Espot — colores de marca, fresco y tropical ───────
+// ── Estilo neutro limpio — fondo claro, agua azul, sin verdes ─
 const MAP_STYLES: google.maps.MapTypeStyle[] = [
-  // Base del terreno: blanco cálido
-  { elementType: 'geometry',            stylers: [{ color: '#f8faf9' }] },
-  // Sin iconos de POI
+  { elementType: 'geometry',            stylers: [{ color: '#f5f5f5' }] },
   { elementType: 'labels.icon',         stylers: [{ visibility: 'off' }] },
-  // Labels: navy de la marca
-  { elementType: 'labels.text.fill',    stylers: [{ color: '#03313C' }] },
-  { elementType: 'labels.text.stroke',  stylers: [{ color: '#f8faf9' }] },
-  // POI: verde muy suave
-  { featureType: 'poi',    elementType: 'geometry',          stylers: [{ color: '#e8f5f0' }] },
-  { featureType: 'poi',    elementType: 'labels.text.fill',  stylers: [{ color: '#5a8a7a' }] },
-  // Parques: verde marca suave
-  { featureType: 'poi.park', elementType: 'geometry',        stylers: [{ color: '#d4ede6' }] },
-  { featureType: 'poi.park', elementType: 'labels.text.fill',stylers: [{ color: '#35C493' }] },
-  // Calles locales: blanco puro
-  { featureType: 'road',          elementType: 'geometry',          stylers: [{ color: '#ffffff' }] },
-  { featureType: 'road',          elementType: 'geometry.stroke',   stylers: [{ color: '#e0ece8' }] },
-  { featureType: 'road.arterial', elementType: 'labels.text.fill',  stylers: [{ color: '#2a5a50' }] },
-  // Carreteras: gris muy suave con toque verdoso
-  { featureType: 'road.highway',  elementType: 'geometry',          stylers: [{ color: '#c8e6de' }] },
-  { featureType: 'road.highway',  elementType: 'geometry.stroke',   stylers: [{ color: '#a8d4c9' }] },
-  { featureType: 'road.highway',  elementType: 'labels.text.fill',  stylers: [{ color: '#03313C' }] },
-  { featureType: 'road.local',    elementType: 'labels.text.fill',  stylers: [{ color: '#4a7a70' }] },
-  // Tránsito
-  { featureType: 'transit.line',    elementType: 'geometry',        stylers: [{ color: '#d4ede6' }] },
-  { featureType: 'transit.station', elementType: 'geometry',        stylers: [{ color: '#e8f5f0' }] },
-  // Agua: verde turquesa marca
-  { featureType: 'water', elementType: 'geometry',          stylers: [{ color: '#b2ddd6' }] },
-  { featureType: 'water', elementType: 'labels.text.fill',  stylers: [{ color: '#35C493' }] },
-  // Paisaje natural
-  { featureType: 'landscape.natural', elementType: 'geometry', stylers: [{ color: '#e4f2ec' }] },
+  { elementType: 'labels.text.fill',    stylers: [{ color: '#616161' }] },
+  { elementType: 'labels.text.stroke',  stylers: [{ color: '#f5f5f5' }] },
+  { featureType: 'poi',     elementType: 'geometry',          stylers: [{ color: '#eeeeee' }] },
+  { featureType: 'poi',     elementType: 'labels.text.fill',  stylers: [{ color: '#757575' }] },
+  { featureType: 'poi.park',elementType: 'geometry',          stylers: [{ color: '#e5e5e5' }] },
+  { featureType: 'road',    elementType: 'geometry',          stylers: [{ color: '#ffffff' }] },
+  { featureType: 'road.arterial', elementType: 'labels.text.fill', stylers: [{ color: '#757575' }] },
+  { featureType: 'road.highway',  elementType: 'geometry',         stylers: [{ color: '#dadada' }] },
+  { featureType: 'road.highway',  elementType: 'labels.text.fill', stylers: [{ color: '#616161' }] },
+  { featureType: 'road.local',    elementType: 'labels.text.fill', stylers: [{ color: '#9e9e9e' }] },
+  { featureType: 'transit.line',    elementType: 'geometry', stylers: [{ color: '#e5e5e5' }] },
+  { featureType: 'transit.station', elementType: 'geometry', stylers: [{ color: '#eeeeee' }] },
+  { featureType: 'water', elementType: 'geometry',          stylers: [{ color: '#a8c8e8' }] },
+  { featureType: 'water', elementType: 'labels.text.fill',  stylers: [{ color: '#7aabcc' }] },
 ]
 
 function buildSvgIcon(g: typeof google, active: boolean): google.maps.Icon {
