@@ -561,7 +561,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                 // Propietario: su panel + acceso al panel cliente
                 { href: '/dashboard/host',          label: 'Mi panel propietario', icon: LayoutDashboard, desc: 'Reservas, ingresos, espacios' },
                 { href: '/dashboard/host/mensajes', label: 'Mensajes',             icon: MessageCircle,   desc: 'Chats con clientes' },
-                { href: '/dashboard/host/reservas', label: 'Reservas recibidas',   icon: CalendarDays,    desc: 'Solicitudes de mis espacios' },
+                { href: '/dashboard/host/agenda', label: 'Reservas recibidas',   icon: CalendarDays,    desc: 'Solicitudes de mis espacios' },
                 { href: '/dashboard/overview',      label: 'Panel de cliente',     icon: Home,            desc: 'Mis reservas y pagos' },
               ] : [
                 // Cliente: panel cliente + acceso al panel propietario

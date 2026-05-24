@@ -494,7 +494,7 @@ export async function respondToQuote(bookingId: string, quotedPrice: number, mes
   const space = bk.spaces as any
 
   revalidatePath('/dashboard/host/cotizaciones')
-  revalidatePath('/dashboard/host/reservas')
+  revalidatePath('/dashboard/host/agenda')
   revalidatePath('/dashboard/reservas')
 
   if (guest?.email) {
@@ -614,7 +614,7 @@ export async function completeBooking(bookingId: string) {
     }
   }
 
-  revalidatePath('/dashboard/host/reservas')
+  revalidatePath('/dashboard/host/agenda')
   revalidatePath('/dashboard/host/finanzas')
   return { success: true }
 }

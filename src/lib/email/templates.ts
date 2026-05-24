@@ -271,7 +271,7 @@ export function tplSolicitudHost(rawD: BookingData & { isQuote?: boolean }) {
     body: `
       <p style="color:#374151;margin:0 0 16px;">${d.isQuote ? 'Un cliente quiere conocer el precio para su evento. Responde con una propuesta desde tu panel.' : 'Alguien quiere celebrar en tu espacio. Confirma disponibilidad desde tu panel.'}</p>
       ${infoBox(rows)}`,
-    cta: { text: 'Ver solicitud en mi panel', url: `${SITE}/dashboard/host/reservas` },
+    cta: { text: 'Ver solicitud en mi panel', url: `${SITE}/dashboard/host/agenda` },
   })
 }
 
@@ -344,7 +344,7 @@ export function tplConfirmadaHost(rawD: BookingData) {
     body: `
       <p style="color:#374151;margin:0 0 16px;">Hola <strong>${d.hostName}</strong>, la reserva fue confirmada y el pago procesado correctamente.</p>
       ${infoBox(rows)}`,
-    cta: { text: 'Ver en mi panel', url: `${SITE}/dashboard/host/reservas` },
+    cta: { text: 'Ver en mi panel', url: `${SITE}/dashboard/host/agenda` },
   })
 }
 
@@ -383,7 +383,7 @@ export function tplCancelada(rawData: {
       <p style="color:#374151;margin:0;">${data.isGuest ? 'Si tienes preguntas sobre reembolsos, cont&aacute;ctanos en contacto@espot.do.' : 'El cliente ser&aacute; notificado.'}</p>`,
     cta: data.isGuest
       ? { text: 'Explorar otros espacios', url: `${SITE}/buscar` }
-      : { text: 'Ver mis reservas', url: `${SITE}/dashboard/host/reservas` },
+      : { text: 'Ver mis reservas', url: `${SITE}/dashboard/host/agenda` },
   })
 }
 

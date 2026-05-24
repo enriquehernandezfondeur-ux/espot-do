@@ -182,7 +182,7 @@ export default function DashboardPage() {
         </Link>
 
         {/* Reservas pendientes */}
-        <Link href="/dashboard/host/reservas"
+        <Link href="/dashboard/host/agenda"
           className="rounded-2xl p-4 block transition-all hover:shadow-md"
           style={{ background: '#fff', border: `1px solid ${(stats?.pendingCount ?? 0) > 0 ? 'rgba(217,119,6,0.25)' : 'var(--border-subtle)'}` }}>
           <div className="flex items-center justify-between mb-3">

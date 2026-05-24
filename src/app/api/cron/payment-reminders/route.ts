@@ -131,7 +131,7 @@ export async function GET(req: Request) {
                   { label: 'Motivo',       value: 'Pago no recibido en 72 horas' },
                 ])}
                 <p style="color:#374151;margin:0;">La fecha <strong>${formatDate(bk.event_date)}</strong> volvió a estar disponible para nuevas reservas.</p>`,
-              cta: { text: 'Ver mis reservas', url: `${SITE}/dashboard/host/reservas` },
+              cta: { text: 'Ver mis reservas', url: `${SITE}/dashboard/host/agenda` },
             }),
           })
           sent++
@@ -374,7 +374,7 @@ export async function GET(req: Request) {
                 </table>
                 <p style="color:#92400E;font-size:13px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:12px 16px;margin:0 0 24px;">Si no respondes en las próximas 24 horas, la solicitud podría cancelarse automáticamente y el cliente buscará otra opción.</p>
                 <div style="text-align:center;">
-                  <a href="${SITE}/dashboard/host/reservas" style="display:inline-block;background:#35C493;color:#060D09;font-weight:700;font-size:14px;padding:14px 32px;border-radius:14px;text-decoration:none;">Responder solicitud &rarr;</a>
+                  <a href="${SITE}/dashboard/host/agenda" style="display:inline-block;background:#35C493;color:#060D09;font-weight:700;font-size:14px;padding:14px 32px;border-radius:14px;text-decoration:none;">Responder solicitud &rarr;</a>
                 </div>
               </div>
             </div>

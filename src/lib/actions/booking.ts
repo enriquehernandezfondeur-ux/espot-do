@@ -370,7 +370,7 @@ export async function acceptBooking(bookingId: string) {
 
   const guest = bk.profiles as any
 
-  revalidatePath('/dashboard/host/reservas')
+  revalidatePath('/dashboard/host/agenda')
   revalidatePath('/dashboard/reservas')
 
   // Calcular la primera cuota real para mostrar en el email
@@ -490,7 +490,7 @@ export async function rejectBooking(bookingId: string, reason?: string) {
     })
   }
 
-  revalidatePath('/dashboard/host/reservas')
+  revalidatePath('/dashboard/host/agenda')
   revalidatePath('/dashboard/reservas')
   return { success: true }
 }
@@ -780,7 +780,7 @@ export async function cancelBooking(bookingId: string, reason?: string, refundBa
     }
   }
 
-  revalidatePath('/dashboard/host/reservas')
+  revalidatePath('/dashboard/host/agenda')
   revalidatePath('/dashboard/reservas')
   return { success: true }
 }
@@ -848,7 +848,7 @@ export async function rejectQuotation(bookingId: string) {
     })
   }
 
-  revalidatePath('/dashboard/host/reservas')
+  revalidatePath('/dashboard/host/agenda')
   revalidatePath('/dashboard/reservas')
   return { success: true }
 }

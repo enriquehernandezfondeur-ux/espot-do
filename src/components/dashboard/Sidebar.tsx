@@ -94,7 +94,7 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return
       setUnread(await fetchUnread(supabase, user.id))
-      if (pathname?.includes('/reservas'))     setReservasCount(0)
+      if (pathname?.includes('/agenda'))       setReservasCount(0)
       if (pathname?.includes('/cotizaciones')) setCotizCount(0)
     })
   }, [pathname])
@@ -183,7 +183,7 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
       totalBadge={unread + reservasCount + cotizCount}
       notifications={[
         { label: 'Mensajes sin leer',     count: unread,        href: '/dashboard/host/mensajes' },
-        { label: 'Reservas por aceptar',  count: reservasCount, href: '/dashboard/host/reservas' },
+        { label: 'Reservas por aceptar',  count: reservasCount, href: '/dashboard/host/agenda' },
         { label: 'Cotizaciones nuevas',   count: cotizCount,    href: '/dashboard/host/cotizaciones' },
       ]}
     />

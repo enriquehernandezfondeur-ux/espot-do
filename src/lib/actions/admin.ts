@@ -295,7 +295,7 @@ export async function updateBookingStatus(bookingId: string, status: string) {
   const { error } = await supabase.from('bookings').update({ status, ...extra }).eq('id', bookingId)
   if (error) return { error: error.message }
   revalidatePath('/admin/reservas')
-  revalidatePath('/dashboard/host/reservas')
+  revalidatePath('/dashboard/host/agenda')
   revalidatePath('/dashboard/reservas')
   return { success: true }
 }
