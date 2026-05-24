@@ -109,7 +109,18 @@ export default function AgendaPage() {
         ...bookings.map(b => ({ source: 'espot'   as const, data: b })),
         ...events.map(e  => ({ source: 'direct'   as const, data: e })),
       ]
-      all.sort((a, b) => itemDate(a).localeCompare(itemDate(b)))
+      const statusPriority = (item: AgendaItem): number => {
+        const s = simpleStatus(item)
+        if (s === 'pendiente')  return 0
+        if (s === 'confirmado') return 1
+        if (s === 'completado') return 2
+        return 3  // cancelado al final
+      }
+      all.sort((a, b) => {
+        const pd = statusPriority(a) - statusPriority(b)
+        if (pd !== 0) return pd
+        return itemDate(a).localeCompare(itemDate(b))
+      })
       setItems(all)
       setLoading(false)
     })
