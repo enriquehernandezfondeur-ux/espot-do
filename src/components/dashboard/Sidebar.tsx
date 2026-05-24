@@ -13,6 +13,7 @@ import { usePathname } from 'next/navigation'
 
 const BASE_NAV = [
   { href: '/dashboard/host',              label: 'Overview',     icon: LayoutDashboard },
+  { href: '/dashboard/host/espacio',      label: 'Mi espacio',   icon: Building2 },
   // Operaciones
   { href: '/dashboard/host/eventos',      label: 'Eventos',      icon: CalendarCheck },
   { href: '/dashboard/host/calendario',   label: 'Calendario',   icon: CalendarDays },
@@ -27,7 +28,6 @@ const BASE_NAV = [
   { href: '/dashboard/host/finanzas',     label: 'Finanzas',     icon: BarChart3 },
   { href: '/dashboard/host/analytics',   label: 'Analytics',    icon: TrendingUp },
   // Config
-  { href: '/dashboard/host/espacio',      label: 'Mi espacio',   icon: Building2 },
   { href: '/dashboard/host/ajustes',      label: 'Ajustes',      icon: Settings },
 ]
 
