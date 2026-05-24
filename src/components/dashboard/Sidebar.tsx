@@ -16,7 +16,6 @@ const BASE_NAV = [
   { href: '/dashboard/host/espacio',      label: 'Mi espacio',   icon: Building2 },
   // Operaciones
   { href: '/dashboard/host/agenda',       label: 'Agenda',       icon: CalendarRange },
-  { href: '/dashboard/host/eventos',      label: 'Eventos',      icon: CalendarCheck },
   { href: '/dashboard/host/calendario',   label: 'Calendario',   icon: CalendarDays },
   { href: '/dashboard/host/clientes',     label: 'Clientes',     icon: Users },
   // Ventas

@@ -214,18 +214,39 @@ export default function AgendaPage() {
         </Link>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col gap-2 mb-5">
-        <div className="flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide"
-          style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
-          {ORIGIN_OPTIONS.map(o => (
-            <button key={o.value} onClick={() => setOrigin(o.value as OriginFilter)}
-              className="px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shrink-0"
-              style={origin === o.value ? { background: '#0F1623', color: '#fff' } : { color: '#6B7280' }}>
-              {o.label}
+      {/* Origin cards */}
+      <div className="grid grid-cols-3 gap-3 mb-3">
+        {([
+          { value: 'all',     label: 'Todos',    count: items.length,                                    dot: null,      color: '#0F1623', activeBg: '#0F1623',              activeText: '#fff'    },
+          { value: 'espot',   label: 'Espot',    count: items.filter(i => i.source === 'espot').length,  dot: '#35C493', color: '#16A34A', activeBg: 'rgba(53,196,147,0.1)', activeText: '#16A34A' },
+          { value: 'directo', label: 'Directo',  count: items.filter(i => i.source === 'direct').length, dot: '#2563EB', color: '#2563EB', activeBg: 'rgba(37,99,235,0.08)', activeText: '#2563EB' },
+        ] as const).map(o => {
+          const active = origin === o.value
+          return (
+            <button key={o.value} onClick={() => setOrigin(o.value)}
+              className="flex flex-col items-start p-3 md:p-4 rounded-2xl transition-all text-left"
+              style={{
+                background: active ? o.activeBg : '#fff',
+                border: `2px solid ${active ? (o.dot ?? '#0F1623') + '40' : '#E8ECF0'}`,
+              }}>
+              <div className="flex items-center gap-1.5 mb-2">
+                {o.dot && <div className="w-2 h-2 rounded-full shrink-0" style={{ background: o.dot }} />}
+                <span className="text-xs font-semibold"
+                  style={{ color: active ? o.activeText : '#9CA3AF' }}>
+                  {o.label}
+                </span>
+              </div>
+              <span className="text-2xl font-bold leading-none"
+                style={{ color: active ? (o.value === 'all' ? '#fff' : o.color) : '#0F1623' }}>
+                {o.count}
+              </span>
             </button>
-          ))}
-        </div>
+          )
+        })}
+      </div>
+
+      {/* Status + search */}
+      <div className="flex flex-col gap-2 mb-5">
         <div className="flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide"
           style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
           {STATUS_OPTIONS.map(o => (
