@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { ChevronLeft, ChevronRight, Building2, Lock, Loader2, Plus, X, Clock, Users, CheckCircle, Calendar, Link2, Link2Off, Printer } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
 import { getHostCalendarBookings, getHostSpaces, getSpaceAvailability, createAvailabilityBlock, deleteAvailabilityBlock, getOrCreateIcalToken, getGoogleCalendarStatus, disconnectGoogleCalendar } from '@/lib/actions/host'
@@ -59,6 +59,7 @@ export default function CalendarioPage() {
   const [blockedSlots,   setBlockedSlots]   = useState<Record<string, BlockedSlot[]>>({})
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<string | null>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
 
   // Sync de calendarios
   const [icalToken,      setIcalToken]      = useState<string | null>(null)
@@ -158,13 +159,10 @@ export default function CalendarioPage() {
   const selectedExternal = selected ? (externalByDate[selected]  ?? []) : []
   const selectedBlocks   = selected ? (blockedSlots[selected]    ?? []) : []
 
-  const monthRevenue = bookings
-    .filter(b => b.event_date.startsWith(`${current.year}-${String(current.month+1).padStart(2,'0')}`) && ['confirmed', 'completed'].includes(b.status))
-    .reduce((s, b) => s + Number(b.total_amount), 0)
-
-  const monthEvents = bookings.filter(b =>
-    b.event_date.startsWith(`${current.year}-${String(current.month+1).padStart(2,'0')}`)
-  ).length
+  const monthPrefix = `${current.year}-${String(current.month+1).padStart(2,'0')}`
+  const monthEvents =
+    bookings.filter(b => b.event_date.startsWith(monthPrefix)).length +
+    externalEvents.filter(ev => ev.event_date.startsWith(monthPrefix) && ev.status !== 'cancelado').length
 
   async function handleBlockTime() {
     if (!selected || !spaceId) return
@@ -207,6 +205,14 @@ export default function CalendarioPage() {
       setBlockEnd('23:00')
     }
     setBlockSaving(false)
+  }
+
+  function selectDate(dateStr: string) {
+    const d = new Date(dateStr + 'T12:00')
+    setCurrent({ year: d.getFullYear(), month: d.getMonth() })
+    setSelected(dateStr)
+    setBlocking(false)
+    setTimeout(() => panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80)
   }
 
   async function handleRemoveBlock(dateStr: string, blockId: string) {
@@ -397,16 +403,15 @@ export default function CalendarioPage() {
             </button>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
-            <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-              <div className="text-lg font-bold" style={{ color: 'var(--brand)' }}>{formatCurrency(monthRevenue)}</div>
-              <div className="text-xs" style={{ color: 'var(--text-muted)' }}>ingresos confirmados</div>
-            </div>
-            <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-              <div className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{monthEvents}</div>
-              <div className="text-xs" style={{ color: 'var(--text-muted)' }}>eventos este mes</div>
-            </div>
+          {/* Contador del mes */}
+          <div className="rounded-xl px-4 py-3 mb-5 flex items-center justify-between"
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+            <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
+              Eventos en {MONTHS[current.month]}
+            </span>
+            <span className="text-lg font-bold" style={{ color: monthEvents > 0 ? 'var(--brand)' : 'var(--text-primary)' }}>
+              {monthEvents}
+            </span>
           </div>
 
           {/* Day headers */}
@@ -472,7 +477,7 @@ export default function CalendarioPage() {
         </div>
 
         {/* ── PANEL LATERAL ──────────────────────────────── */}
-        <div className="w-full lg:w-80 lg:shrink-0">
+        <div className="w-full lg:w-80 lg:shrink-0" ref={panelRef}>
           {selected ? (
             <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
 
@@ -692,47 +697,41 @@ export default function CalendarioPage() {
                 {upcoming.length === 0 ? (
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Sin eventos próximos</p>
                 ) : (
-                  <div className="space-y-2">
-                    {upcoming.map(item => item.kind === 'espot' ? (
-                      <div key={item.b.id} className="flex items-center gap-3">
-                        <div className={cn('w-1.5 h-8 rounded-full shrink-0', item.b.status === 'confirmed' ? 'bg-green-400' : 'bg-amber-400')} />
-                        <div className="min-w-0 flex-1">
-                          <div className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>
-                            {(item.b as any).profiles?.full_name ?? 'Cliente'}
+                  <div className="space-y-1">
+                    {upcoming.map(item => {
+                      const isEspot = item.kind === 'espot'
+                      const barColor = isEspot
+                        ? item.b.status === 'confirmed' ? '#22C55E' : '#F59E0B'
+                        : 'var(--brand)'
+                      const title   = isEspot
+                        ? ((item.b as any).profiles?.full_name ?? 'Cliente')
+                        : item.ev.title
+                      const sub     = isEspot
+                        ? `${(item.b as any).spaces?.name ? (item.b as any).spaces.name + ' · ' : ''}${new Date(item.b.event_date + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}${item.b.start_time ? ' · ' + item.b.start_time.slice(0,5) : ''}`
+                        : `${item.ev.client?.full_name ?? (item.ev as any).client_name ?? item.ev.event_type ?? 'Directo'} · ${new Date(item.ev.event_date + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}${item.ev.start_time ? ' · ' + item.ev.start_time.slice(0,5) : ''}`
+                      const amount  = isEspot
+                        ? formatCurrency(Number(item.b.total_amount))
+                        : item.ev.total_amount ? formatCurrency(Number(item.ev.total_amount)) : null
+                      const dateStr = isEspot ? item.b.event_date : item.ev.event_date
+
+                      return (
+                        <button
+                          key={isEspot ? item.b.id : item.ev.id}
+                          type="button"
+                          onClick={() => selectDate(dateStr)}
+                          className="w-full flex items-center gap-3 px-2 py-2 rounded-xl text-left transition-colors hover:bg-slate-50"
+                        >
+                          <div className="w-1 h-8 rounded-full shrink-0" style={{ background: barColor }} />
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{title}</div>
+                            <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{sub}</div>
                           </div>
-                          <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
-                            {(item.b as any).spaces?.name && spaceList.length > 1 && (
-                              <span className="font-medium" style={{ color: 'var(--brand)' }}>{(item.b as any).spaces.name} · </span>
-                            )}
-                            {new Date(item.b.event_date + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
-                            {item.b.start_time && ` · ${item.b.start_time.slice(0,5)}`}
-                          </div>
-                        </div>
-                        <div className="text-xs font-semibold shrink-0" style={{ color: 'var(--brand)' }}>
-                          {formatCurrency(Number(item.b.total_amount))}
-                        </div>
-                      </div>
-                    ) : (
-                      <div key={item.ev.id} className="flex items-center gap-3">
-                        <div className="w-1.5 h-8 rounded-full shrink-0" style={{ background: 'var(--brand)' }} />
-                        <div className="min-w-0 flex-1">
-                          <div className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>
-                            {item.ev.title}
-                          </div>
-                          <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
-                            {item.ev.client?.full_name ?? (item.ev as any).client_name ?? item.ev.event_type ?? 'Directo'}
-                            {' · '}
-                            {new Date(item.ev.event_date + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
-                            {item.ev.start_time && ` · ${item.ev.start_time.slice(0,5)}`}
-                          </div>
-                        </div>
-                        {item.ev.total_amount && (
-                          <div className="text-xs font-semibold shrink-0" style={{ color: 'var(--brand)' }}>
-                            {formatCurrency(Number(item.ev.total_amount))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                          {amount && (
+                            <div className="text-xs font-semibold shrink-0" style={{ color: 'var(--brand)' }}>{amount}</div>
+                          )}
+                        </button>
+                      )
+                    })}
                   </div>
                 )}
               </div>
