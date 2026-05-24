@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import {
   Search, Plus, Users, Phone, Mail, Building2, Tag, Loader2,
   CalendarDays, DollarSign, ChevronRight, X, Check, Trash2, Pencil,
+  Download, Copy, MessageCircle,
 } from 'lucide-react'
 import type { HostClient, ClientSource } from '@/types'
 
@@ -56,6 +57,7 @@ export default function ClientesPage() {
   const [saving,   setSaving]   = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [toast,    setToast]    = useState<{ msg: string; ok: boolean } | null>(null)
+  const [copied,   setCopied]   = useState(false)
 
   // Form state
   const [form, setForm] = useState({
@@ -148,6 +150,36 @@ export default function ClientesPage() {
     (c.company ?? '').toLowerCase().includes(search.toLowerCase())
   )
 
+  const withPhone = filtered.filter(c => c.phone).length
+  const withEmail = filtered.filter(c => c.email).length
+
+  function exportCSV() {
+    const headers = ['Nombre', 'Teléfono', 'Email', 'Empresa', 'Origen', 'Etiquetas']
+    const rows = filtered.map(c => [
+      c.full_name,
+      c.phone ?? '',
+      c.email ?? '',
+      c.company ?? '',
+      SOURCE_LABELS[c.source],
+      c.tags?.join('; ') ?? '',
+    ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+    const csv  = [headers.join(','), ...rows].join('\n')
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })
+    const a    = document.createElement('a')
+    a.href     = URL.createObjectURL(blob)
+    a.download = `clientes-espot-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(a.href)
+  }
+
+  async function copyPhones() {
+    const phones = filtered.filter(c => c.phone).map(c => c.phone!).join('\n')
+    if (!phones) return
+    await navigator.clipboard.writeText(phones)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2500)
+  }
+
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {/* Toast */}
@@ -159,31 +191,58 @@ export default function ClientesPage() {
       )}
 
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-5 flex items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Clientes</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{clients.length} clientes registrados</p>
+          <p className="text-sm text-gray-500 mt-0.5">{clients.length} registrados</p>
         </div>
         <button onClick={openCreateForm}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all active:scale-95"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all active:scale-95 shrink-0"
           style={{ background: 'var(--brand)' }}>
           <Plus size={15} /> Nuevo cliente
         </button>
       </div>
 
-      {/* Search */}
-      <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl mb-5"
-        style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
-        <Search size={15} className="text-gray-400 shrink-0" />
-        <input value={search} onChange={e => setSearch(e.target.value)}
-          placeholder="Buscar por nombre, email, teléfono o empresa..."
-          className="bg-transparent text-sm flex-1 focus:outline-none text-gray-700 placeholder-gray-400"
-          style={{ fontSize: 16 }} />
-        {search && (
-          <button onClick={() => setSearch('')} className="text-gray-400 hover:text-gray-600">
-            <X size={14} />
+      {/* Cobertura de datos */}
+      {clients.length > 0 && (
+        <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl mb-3 text-xs"
+          style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.15)' }}>
+          <span style={{ color: '#16A34A' }} className="font-semibold">Listos para campaña:</span>
+          <span className="flex items-center gap-1 text-gray-600"><Phone size={11} /> {withPhone} con teléfono</span>
+          <span className="flex items-center gap-1 text-gray-600"><Mail size={11} /> {withEmail} con email</span>
+        </div>
+      )}
+
+      {/* Search + acciones */}
+      <div className="flex flex-col sm:flex-row gap-2 mb-5">
+        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl flex-1"
+          style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
+          <Search size={15} className="text-gray-400 shrink-0" />
+          <input value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="Buscar por nombre, email, teléfono o empresa..."
+            className="bg-transparent text-sm flex-1 focus:outline-none text-gray-700 placeholder-gray-400"
+            style={{ fontSize: 16 }} />
+          {search && (
+            <button onClick={() => setSearch('')} className="text-gray-400 hover:text-gray-600">
+              <X size={14} />
+            </button>
+          )}
+        </div>
+        <div className="flex gap-2 shrink-0">
+          <button onClick={copyPhones} disabled={withPhone === 0}
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all disabled:opacity-40"
+            style={{ background: copied ? '#16A34A' : '#fff', color: copied ? '#fff' : '#6B7280', border: '1px solid #E8ECF0' }}
+            title="Copiar todos los teléfonos">
+            {copied ? <Check size={13} /> : <Copy size={13} />}
+            {copied ? 'Copiados' : `${withPhone} tel.`}
           </button>
-        )}
+          <button onClick={exportCSV} disabled={filtered.length === 0}
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all disabled:opacity-40"
+            style={{ background: '#fff', color: '#6B7280', border: '1px solid #E8ECF0' }}
+            title="Exportar lista a CSV">
+            <Download size={13} /> CSV
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-col lg:grid lg:grid-cols-[1fr_380px] gap-5 items-start">
@@ -235,6 +294,16 @@ export default function ClientesPage() {
                       style={{ background: sc.bg, color: sc.color }}>
                       {SOURCE_LABELS[c.source]}
                     </span>
+                    {c.phone && (
+                      <a href={`https://wa.me/${c.phone.replace(/[^0-9]/g, '')}`}
+                        target="_blank" rel="noopener noreferrer"
+                        onClick={e => e.stopPropagation()}
+                        className="p-1.5 rounded-lg transition-colors hover:bg-green-50 shrink-0"
+                        title="Abrir WhatsApp"
+                        style={{ color: '#25D366' }}>
+                        <MessageCircle size={14} />
+                      </a>
+                    )}
                     <ChevronRight size={14} className="text-gray-300 shrink-0" />
                   </button>
                 )
@@ -277,9 +346,17 @@ export default function ClientesPage() {
                   </div>
                 )}
                 {selected.phone && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Phone size={13} className="text-gray-400 shrink-0" />
-                    <span>{selected.phone}</span>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Phone size={13} className="text-gray-400 shrink-0" />
+                      <span>{selected.phone}</span>
+                    </div>
+                    <a href={`https://wa.me/${selected.phone.replace(/[^0-9]/g, '')}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors hover:bg-green-50"
+                      style={{ color: '#25D366', border: '1px solid rgba(37,211,102,0.2)' }}>
+                      <MessageCircle size={11} /> WhatsApp
+                    </a>
                   </div>
                 )}
                 {selected.company && (
