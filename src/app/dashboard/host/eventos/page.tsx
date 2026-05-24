@@ -1,15 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getExternalEvents } from '@/lib/actions/external-events'
-import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
-import { cn } from '@/lib/utils'
-import {
-  CalendarDays, Plus, Search, Loader2, MapPin, Users, Clock,
-  DollarSign, Check, X, ChevronRight, CalendarCheck, Filter,
-} from 'lucide-react'
+import { getExternalEvents, updateExternalEvent, addEventPayment, deleteExternalEvent, deleteEventPayment } from '@/lib/actions/external-events'
+import { formatCurrency, formatDate, formatTime, cn } from '@/lib/utils'
+import { CalendarDays, Plus, Search, Loader2, Check, X, CalendarCheck } from 'lucide-react'
 import Link from 'next/link'
-import type { ExternalEvent, ExternalEventStatus } from '@/types'
+import type { ExternalEvent, ExternalEventStatus, ExternalPaymentMethod } from '@/types'
 
 const STATUS_OPTIONS: { value: 'all' | ExternalEventStatus; label: string }[] = [
   { value: 'all',        label: 'Todos' },
@@ -29,12 +25,12 @@ const statusConfig: Record<ExternalEventStatus, { label: string; color: string; 
 }
 
 export default function EventosPage() {
-  const [events,  setEvents]  = useState<ExternalEvent[]>([])
-  const [loading, setLoading] = useState(true)
-  const [filter,  setFilter]  = useState<'all' | ExternalEventStatus>('all')
-  const [search,  setSearch]  = useState('')
+  const [events,   setEvents]   = useState<ExternalEvent[]>([])
+  const [loading,  setLoading]  = useState(true)
+  const [filter,   setFilter]   = useState<'all' | ExternalEventStatus>('all')
+  const [search,   setSearch]   = useState('')
   const [selected, setSelected] = useState<ExternalEvent | null>(null)
-  const [toast,    setToast]  = useState<{ msg: string; ok: boolean } | null>(null)
+  const [toast,    setToast]    = useState<{ msg: string; ok: boolean } | null>(null)
 
   function showToast(msg: string, ok: boolean) {
     setToast({ msg, ok })
@@ -50,19 +46,13 @@ export default function EventosPage() {
 
   const filtered = events.filter(ev =>
     ev.title.toLowerCase().includes(search.toLowerCase()) ||
-    (ev.client?.full_name ?? '').toLowerCase().includes(search.toLowerCase()) ||
+    (clientLabel(ev)).toLowerCase().includes(search.toLowerCase()) ||
     (ev.space?.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
     (ev.event_type ?? '').toLowerCase().includes(search.toLowerCase())
   )
 
-  function getPendingBalance(ev: ExternalEvent) {
-    if (!ev.total_amount) return null
-    return ev.total_amount - (ev.paid_amount ?? 0)
-  }
-
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
-      {/* Toast */}
       {toast && (
         <div className="fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
           style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
@@ -70,7 +60,6 @@ export default function EventosPage() {
         </div>
       )}
 
-      {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Eventos</h1>
@@ -83,7 +72,6 @@ export default function EventosPage() {
         </Link>
       </div>
 
-      {/* Filtros */}
       <div className="flex flex-col gap-3 mb-5">
         <div className="flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide"
           style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
@@ -107,7 +95,6 @@ export default function EventosPage() {
       </div>
 
       <div className="flex flex-col lg:grid lg:grid-cols-[1fr_360px] gap-5 items-start">
-        {/* Tabla */}
         <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <div className="overflow-x-auto scrollbar-hide">
             <div className="grid grid-cols-[2fr_1fr_1fr_auto] gap-3 px-5 py-3 text-xs font-semibold min-w-[500px] uppercase tracking-widest text-gray-400"
@@ -136,7 +123,7 @@ export default function EventosPage() {
               <div className="divide-y divide-[#F0F2F5]">
                 {filtered.map(ev => {
                   const st = statusConfig[ev.status]
-                  const balance = getPendingBalance(ev)
+                  const balance = ev.total_amount ? ev.total_amount - (ev.paid_amount ?? 0) : null
                   return (
                     <button key={ev.id}
                       onClick={() => setSelected(selected?.id === ev.id ? null : ev)}
@@ -148,7 +135,7 @@ export default function EventosPage() {
                           {ev.title}
                         </div>
                         <div className="text-xs text-gray-400 truncate">
-                          {ev.client?.full_name ?? '—'} · {ev.event_type ?? '—'}
+                          {clientLabel(ev) || '—'} · {ev.event_type ?? '—'}
                         </div>
                       </div>
                       <div className="text-sm text-gray-600">{formatDate(ev.event_date)}</div>
@@ -157,7 +144,7 @@ export default function EventosPage() {
                           {ev.total_amount ? formatCurrency(ev.total_amount) : '—'}
                         </div>
                         {balance !== null && balance > 0 && (
-                          <div className="text-xs text-orange-500">Pendiente: {formatCurrency(balance)}</div>
+                          <div className="text-xs text-orange-500">Pend: {formatCurrency(balance)}</div>
                         )}
                       </div>
                       <span className="text-xs font-semibold px-2.5 py-1 rounded-full shrink-0"
@@ -172,12 +159,11 @@ export default function EventosPage() {
           </div>
         </div>
 
-        {/* Panel detalle */}
         {selected ? (
           <EventDetailPanel
             event={selected}
             onClose={() => setSelected(null)}
-            onUpdated={(updated) => {
+            onUpdated={updated => {
               setEvents(prev => prev.map(e => e.id === updated.id ? updated : e))
               setSelected(updated)
             }}
@@ -198,22 +184,24 @@ export default function EventosPage() {
   )
 }
 
-// ── Panel de detalle del evento ─────────────────────────────
-import { updateExternalEvent, addEventPayment, deleteExternalEvent, deleteEventPayment } from '@/lib/actions/external-events'
-import type { ExternalPaymentMethod } from '@/types'
+function clientLabel(ev: ExternalEvent) {
+  return ev.client?.full_name ?? (ev as any).client_name ?? ''
+}
 
-function EventDetailPanel({
-  event, onClose, onUpdated, onDeleted,
-}: {
+// ── Panel de detalle ───────────────────────────────────────────
+function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
   event: ExternalEvent
   onClose: () => void
   onUpdated: (ev: ExternalEvent) => void
   onDeleted: () => void
 }) {
-  const [saving,    setSaving]    = useState(false)
-  const [showPay,   setShowPay]   = useState(false)
-  const [payForm,   setPayForm]   = useState({ amount: '', method: 'efectivo' as ExternalPaymentMethod, date: new Date().toISOString().slice(0, 10), notes: '', is_deposit: false })
-  const [deleting,  setDeleting]  = useState(false)
+  const [saving,   setSaving]   = useState(false)
+  const [showPay,  setShowPay]  = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [payForm,  setPayForm]  = useState({
+    amount: '', method: 'efectivo' as ExternalPaymentMethod,
+    date: new Date().toISOString().slice(0, 10), notes: '', is_deposit: false,
+  })
 
   async function handleStatusChange(status: ExternalEventStatus) {
     setSaving(true)
@@ -236,8 +224,7 @@ function EventDetailPanel({
     })
     if (!('error' in r)) {
       const newPaid = (event.paid_amount ?? 0) + Number(payForm.amount)
-      const newPayments = [...(event.payments ?? []), r.data]
-      onUpdated({ ...event, paid_amount: newPaid, payments: newPayments as any })
+      onUpdated({ ...event, paid_amount: newPaid, payments: [...(event.payments ?? []), r.data as any] })
       setShowPay(false)
       setPayForm({ amount: '', method: 'efectivo', date: new Date().toISOString().slice(0, 10), notes: '', is_deposit: false })
     }
@@ -248,13 +235,16 @@ function EventDetailPanel({
     if (!confirm('¿Eliminar este pago?')) return
     const r = await deleteEventPayment(paymentId)
     if (!('error' in r)) {
-      const newPaid = Math.max(0, (event.paid_amount ?? 0) - amount)
-      onUpdated({ ...event, paid_amount: newPaid, payments: (event.payments ?? []).filter(p => p.id !== paymentId) })
+      onUpdated({
+        ...event,
+        paid_amount: Math.max(0, (event.paid_amount ?? 0) - amount),
+        payments: (event.payments ?? []).filter(p => p.id !== paymentId),
+      })
     }
   }
 
   async function handleDelete() {
-    if (!confirm('¿Eliminar este evento? Esta acción no se puede deshacer.')) return
+    if (!confirm('¿Eliminar este evento? No se puede deshacer.')) return
     setDeleting(true)
     const r = await deleteExternalEvent(event.id)
     if (!('error' in r)) onDeleted()
@@ -262,6 +252,7 @@ function EventDetailPanel({
   }
 
   const balance = (event.total_amount ?? 0) - (event.paid_amount ?? 0)
+  const client = clientLabel(event)
 
   return (
     <div className="rounded-2xl overflow-hidden sticky top-8"
@@ -281,7 +272,6 @@ function EventDetailPanel({
       </div>
 
       <div className="p-5 space-y-4">
-        {/* Info del evento */}
         <div>
           <div className="font-semibold text-sm mb-3" style={{ color: '#0F1623' }}>{event.title}</div>
           <div className="rounded-xl p-4 space-y-2" style={{ background: '#F8FAFB', border: '1px solid #E8ECF0' }}>
@@ -300,17 +290,15 @@ function EventDetailPanel({
           </div>
         </div>
 
-        {/* Cliente */}
-        {event.client && (
+        {client && (
           <div>
-            <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Cliente</div>
-            <div className="font-semibold text-sm" style={{ color: '#0F1623' }}>{event.client.full_name}</div>
-            {event.client.email && <div className="text-xs text-gray-500">{event.client.email}</div>}
-            {event.client.phone && <div className="text-xs text-gray-500">{event.client.phone}</div>}
+            <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1">Cliente</div>
+            <div className="font-semibold text-sm" style={{ color: '#0F1623' }}>{client}</div>
+            {event.client?.email && <div className="text-xs text-gray-500">{event.client.email}</div>}
+            {event.client?.phone && <div className="text-xs text-gray-500">{event.client.phone}</div>}
           </div>
         )}
 
-        {/* Financiero */}
         <div className="rounded-xl p-4 space-y-2" style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid rgba(53,196,147,0.15)' }}>
           <div className="flex justify-between text-sm text-gray-500">
             <span>Total evento</span>
@@ -327,7 +315,6 @@ function EventDetailPanel({
           )}
         </div>
 
-        {/* Historial de pagos */}
         {(event.payments?.length ?? 0) > 0 && (
           <div>
             <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Pagos registrados</div>
@@ -350,21 +337,21 @@ function EventDetailPanel({
           </div>
         )}
 
-        {/* Registrar pago */}
         {showPay ? (
           <form onSubmit={handleAddPayment} className="rounded-xl p-4 space-y-3" style={{ background: '#F8FAFB', border: '1px solid #E8ECF0' }}>
             <div className="text-xs font-semibold text-gray-600">Registrar pago</div>
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="text-xs text-gray-500 mb-1 block">Monto (RD$)</label>
-                <input type="number" required min="1" value={payForm.amount} onChange={e => setPayForm(f => ({ ...f, amount: e.target.value }))}
-                  placeholder="0"
-                  className="w-full px-3 py-2 rounded-lg text-sm border focus:outline-none"
+                <input type="number" required min="1" value={payForm.amount}
+                  onChange={e => setPayForm(f => ({ ...f, amount: e.target.value }))}
+                  placeholder="0" className="w-full px-3 py-2 rounded-lg text-sm border focus:outline-none"
                   style={{ border: '1px solid #E8ECF0', fontSize: 16 }} />
               </div>
               <div>
                 <label className="text-xs text-gray-500 mb-1 block">Método</label>
-                <select value={payForm.method} onChange={e => setPayForm(f => ({ ...f, method: e.target.value as ExternalPaymentMethod }))}
+                <select value={payForm.method}
+                  onChange={e => setPayForm(f => ({ ...f, method: e.target.value as ExternalPaymentMethod }))}
                   className="w-full px-3 py-2 rounded-lg text-sm border focus:outline-none"
                   style={{ border: '1px solid #E8ECF0', fontSize: 16 }}>
                   <option value="efectivo">Efectivo</option>
@@ -376,25 +363,26 @@ function EventDetailPanel({
             </div>
             <div>
               <label className="text-xs text-gray-500 mb-1 block">Fecha del pago</label>
-              <input type="date" required value={payForm.date} onChange={e => setPayForm(f => ({ ...f, date: e.target.value }))}
+              <input type="date" required value={payForm.date}
+                onChange={e => setPayForm(f => ({ ...f, date: e.target.value }))}
                 className="w-full px-3 py-2 rounded-lg text-sm border focus:outline-none"
                 style={{ border: '1px solid #E8ECF0', fontSize: 16 }} />
             </div>
             <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
-              <input type="checkbox" checked={payForm.is_deposit} onChange={e => setPayForm(f => ({ ...f, is_deposit: e.target.checked }))}
-                className="rounded" />
+              <input type="checkbox" checked={payForm.is_deposit}
+                onChange={e => setPayForm(f => ({ ...f, is_deposit: e.target.checked }))} className="rounded" />
               Marcar como depósito/anticipo
             </label>
             <div className="flex gap-2">
               <button type="button" onClick={() => setShowPay(false)}
-                className="flex-1 py-2 rounded-lg text-xs font-semibold text-gray-500 transition-colors hover:bg-slate-100"
+                className="flex-1 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:bg-slate-100"
                 style={{ border: '1px solid #E8ECF0' }}>
                 Cancelar
               </button>
               <button type="submit" disabled={saving}
-                className="flex-1 py-2 rounded-lg text-xs font-semibold text-white transition-all disabled:opacity-50"
+                className="flex-1 py-2 rounded-lg text-xs font-semibold text-white disabled:opacity-50"
                 style={{ background: 'var(--brand)' }}>
-                {saving ? <Loader2 size={12} className="animate-spin mx-auto" /> : 'Guardar pago'}
+                {saving ? <Loader2 size={12} className="animate-spin mx-auto" /> : 'Guardar'}
               </button>
             </div>
           </form>
@@ -406,15 +394,13 @@ function EventDetailPanel({
           </button>
         )}
 
-        {/* Cambiar estado */}
         <div>
           <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Cambiar estado</div>
           <div className="grid grid-cols-2 gap-2">
             {(['tentativo', 'confirmado', 'completado', 'cancelado'] as ExternalEventStatus[]).map(status => {
               const s = statusConfig[status]
               return (
-                <button key={status}
-                  onClick={() => handleStatusChange(status)}
+                <button key={status} onClick={() => handleStatusChange(status)}
                   disabled={saving || event.status === status}
                   className="text-xs font-semibold px-3 py-2 rounded-lg transition-all disabled:opacity-40"
                   style={event.status === status
@@ -427,14 +413,12 @@ function EventDetailPanel({
           </div>
         </div>
 
-        {/* Notas */}
         {event.notes && (
           <div className="rounded-xl p-3 text-xs text-gray-500" style={{ background: '#F8FAFB', border: '1px solid #E8ECF0' }}>
             {event.notes}
           </div>
         )}
 
-        {/* Eliminar */}
         <button onClick={handleDelete} disabled={deleting}
           className="w-full py-2 rounded-xl text-xs font-semibold text-red-400 transition-colors hover:bg-red-50 disabled:opacity-40">
           {deleting ? <Loader2 size={13} className="animate-spin mx-auto" /> : 'Eliminar evento'}

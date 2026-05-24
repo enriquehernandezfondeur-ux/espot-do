@@ -17,6 +17,7 @@ export interface CreateExternalEventPayload {
   source?: ExternalEventSource
   space_id?: string
   client_id?: string
+  client_name?: string   // texto libre — no requiere registro en host_clients
   quote_id?: string
 }
 
@@ -109,6 +110,7 @@ export async function createExternalEvent(payload: CreateExternalEventPayload) {
       source:      payload.source ?? 'directo',
       space_id:    payload.space_id || null,
       client_id:   payload.client_id || null,
+      client_name: payload.client_name?.trim() || null,
       quote_id:    payload.quote_id || null,
     })
     .select(`
@@ -146,6 +148,7 @@ export async function updateExternalEvent(payload: UpdateExternalEventPayload) {
   if (fields.source      !== undefined) update.source       = fields.source
   if (fields.space_id    !== undefined) update.space_id     = fields.space_id || null
   if (fields.client_id   !== undefined) update.client_id    = fields.client_id || null
+  if (fields.client_name !== undefined) update.client_name  = fields.client_name?.trim() || null
 
   const { data, error } = await supabase
     .from('external_events')

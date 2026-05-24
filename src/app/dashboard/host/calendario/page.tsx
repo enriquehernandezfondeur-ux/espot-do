@@ -4,6 +4,8 @@ import { useState, useEffect, useMemo } from 'react'
 import { ChevronLeft, ChevronRight, Building2, Lock, Loader2, Plus, X, Clock, Users, CheckCircle, Calendar, Link2, Link2Off, Printer } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
 import { getHostCalendarBookings, getHostSpaces, getSpaceAvailability, createAvailabilityBlock, deleteAvailabilityBlock, getOrCreateIcalToken, getGoogleCalendarStatus, disconnectGoogleCalendar } from '@/lib/actions/host'
+import { getExternalEvents } from '@/lib/actions/external-events'
+import type { ExternalEvent } from '@/types'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 
@@ -52,8 +54,9 @@ interface BlockedSlot {
 export default function CalendarioPage() {
   const today = new Date()
   const [current, setCurrent] = useState({ year: today.getFullYear(), month: today.getMonth() })
-  const [bookings, setBookings] = useState<CalBooking[]>([])
-  const [blockedSlots, setBlockedSlots] = useState<Record<string, BlockedSlot[]>>({})
+  const [bookings,       setBookings]       = useState<CalBooking[]>([])
+  const [externalEvents, setExternalEvents] = useState<ExternalEvent[]>([])
+  const [blockedSlots,   setBlockedSlots]   = useState<Record<string, BlockedSlot[]>>({})
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<string | null>(null)
 
@@ -79,12 +82,14 @@ export default function CalendarioPage() {
     async function load() {
       // Cargamos calendario y sync por separado para que un fallo en sync
       // no deje la página en loading infinito
-      const [bk, spaces] = await Promise.all([
+      const [bk, spaces, extEvs] = await Promise.all([
         getHostCalendarBookings(),
         getHostSpaces(),
+        getExternalEvents().catch(() => []),
       ])
       setBookings(bk)
       setSpaceList(spaces)
+      setExternalEvents(extEvs)
 
       // Sync de calendarios — opcional, falla silenciosamente si la
       // migración 014/015 aún no se corrió en Supabase
@@ -141,8 +146,17 @@ export default function CalendarioPage() {
     }, {}),
   [bookings])
 
+  const externalByDate = useMemo(() =>
+    externalEvents.reduce<Record<string, ExternalEvent[]>>((acc, ev) => {
+      if (!acc[ev.event_date]) acc[ev.event_date] = []
+      acc[ev.event_date].push(ev)
+      return acc
+    }, {}),
+  [externalEvents])
+
   const selectedBookings = selected ? (bookingsByDate[selected] ?? []) : []
-  const selectedBlocks   = selected ? (blockedSlots[selected] ?? []) : []
+  const selectedExternal = selected ? (externalByDate[selected]  ?? []) : []
+  const selectedBlocks   = selected ? (blockedSlots[selected]    ?? []) : []
 
   const monthRevenue = bookings
     .filter(b => b.event_date.startsWith(`${current.year}-${String(current.month+1).padStart(2,'0')}`) && ['confirmed', 'completed'].includes(b.status))
@@ -209,7 +223,6 @@ export default function CalendarioPage() {
     const dayBookings = bookingsByDate[date] ?? []
     for (const b of dayBookings) {
       if (!b.start_time || !b.end_time) {
-        // Sin horario específico (consumo mínimo / paquete) → todo el día ocupado
         return { type: 'booked' as const, booking: b }
       }
       if (isHourInRange(hour, b.start_time, b.end_time)) {
@@ -223,6 +236,16 @@ export default function CalendarioPage() {
       if (isFullDay) return { type: 'blocked' as const, block: bl }
       if (isHourInRange(hour, bl.start_time!, bl.end_time!)) {
         return { type: 'blocked' as const, block: bl }
+      }
+    }
+    // Check external/manual events
+    const dayExternal = externalByDate[date] ?? []
+    for (const ev of dayExternal) {
+      if (!ev.start_time || !ev.end_time) {
+        return { type: 'external' as const, event: ev }
+      }
+      if (isHourInRange(hour, ev.start_time, ev.end_time)) {
+        return { type: 'external' as const, event: ev }
       }
     }
     return { type: 'available' as const }
@@ -399,13 +422,15 @@ export default function CalendarioPage() {
             {Array(daysInMonth).fill(null).map((_,i) => {
               const day   = i + 1
               const dk    = dateKey(day)
-              const dayBk = bookingsByDate[dk] ?? []
-              const dayBl = blockedSlots[dk] ?? []
-              const isToday  = dk === today.toISOString().split('T')[0]
-              const isSel    = selected === dk
-              const isPast   = new Date(dk + 'T12:00') < new Date(today.toISOString().split('T')[0] + 'T12:00')
+              const dayBk  = bookingsByDate[dk] ?? []
+              const dayExt = externalByDate[dk]  ?? []
+              const dayBl  = blockedSlots[dk]    ?? []
+              const isToday      = dk === today.toISOString().split('T')[0]
+              const isSel        = selected === dk
+              const isPast       = new Date(dk + 'T12:00') < new Date(today.toISOString().split('T')[0] + 'T12:00')
               const hasConfirmed = dayBk.some(b => b.status === 'confirmed')
               const hasPending   = dayBk.some(b => b.status === 'pending')
+              const hasExternal  = dayExt.length > 0
               const hasBlocked   = dayBl.length > 0
 
               return (
@@ -429,6 +454,7 @@ export default function CalendarioPage() {
                   <div className="flex gap-0.5 mt-0.5">
                     {hasConfirmed && <span className="w-1.5 h-1.5 rounded-full bg-green-400" />}
                     {hasPending   && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                    {hasExternal  && <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--brand)' }} />}
                     {hasBlocked   && <span className="w-1.5 h-1.5 rounded-full bg-red-400" />}
                   </div>
                 </button>
@@ -437,11 +463,11 @@ export default function CalendarioPage() {
           </div>
 
           {/* Leyenda */}
-          <div className="flex items-center gap-4 mt-5 text-xs" style={{ color: 'var(--text-muted)' }}>
+          <div className="flex flex-wrap items-center gap-3 mt-5 text-xs" style={{ color: 'var(--text-muted)' }}>
             <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-green-400" />Confirmada</span>
             <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-400" />Pendiente</span>
+            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--brand)' }} />Evento directo</span>
             <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-red-400" />Bloqueado</span>
-            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--brand)' }} />Hoy</span>
           </div>
         </div>
 
@@ -458,9 +484,9 @@ export default function CalendarioPage() {
                       {new Date(selected + 'T12:00').toLocaleDateString('es-DO', { weekday: 'long', day: 'numeric', month: 'long' })}
                     </div>
                     <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                      {selectedBookings.length > 0
-                        ? `${selectedBookings.length} reserva${selectedBookings.length > 1 ? 's' : ''} · ${selectedBlocks.length} bloqueo${selectedBlocks.length !== 1 ? 's' : ''}`
-                        : 'Sin reservas'}
+                      {selectedBookings.length + selectedExternal.length > 0
+                        ? `${selectedBookings.length + selectedExternal.length} evento${selectedBookings.length + selectedExternal.length > 1 ? 's' : ''} · ${selectedBlocks.length} bloqueo${selectedBlocks.length !== 1 ? 's' : ''}`
+                        : 'Sin eventos'}
                     </div>
                   </div>
                   {!blocking && (
@@ -612,6 +638,21 @@ export default function CalendarioPage() {
                           )}
                         </div>
                       )}
+
+                      {status.type === 'external' && (
+                        <div className="flex-1 flex items-center gap-2 rounded-lg px-2.5 py-1"
+                          style={{ background: 'rgba(53,196,147,0.08)' }}>
+                          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: 'var(--brand)' }} />
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                              {status.event.title}
+                            </div>
+                            <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
+                              {status.event.client?.full_name ?? (status.event as any).client_name ?? status.event.event_type ?? 'Evento directo'}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )
                 })}
@@ -630,42 +671,73 @@ export default function CalendarioPage() {
           )}
 
           {/* Próximos eventos */}
-          <div className="mt-4 rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-            <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Próximos eventos</h3>
-            {bookings
-              .filter(b => b.event_date >= today.toISOString().split('T')[0])
-              .sort((a, b) => a.event_date.localeCompare(b.event_date))
-              .slice(0, 5)
-              .length === 0 ? (
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Sin eventos próximos</p>
-            ) : (
-              <div className="space-y-2">
-                {bookings
-                  .filter(b => b.event_date >= today.toISOString().split('T')[0])
-                  .sort((a, b) => a.event_date.localeCompare(b.event_date))
-                  .slice(0, 5)
-                  .map((b: any) => (
-                    <div key={b.id} className="flex items-center gap-3">
-                      <div className={cn('w-1.5 h-8 rounded-full shrink-0', b.status === 'confirmed' ? 'bg-green-400' : 'bg-amber-400')} />
-                      <div className="min-w-0 flex-1">
-                        <div className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>
-                          {b.profiles?.full_name ?? 'Cliente'}
+          {(() => {
+            const todayStr = today.toISOString().split('T')[0]
+            type UpcomingItem =
+              | { kind: 'espot';   date: string; b: CalBooking }
+              | { kind: 'manual';  date: string; ev: ExternalEvent }
+
+            const upcoming: UpcomingItem[] = [
+              ...bookings
+                .filter(b => b.event_date >= todayStr)
+                .map(b => ({ kind: 'espot' as const, date: b.event_date, b })),
+              ...externalEvents
+                .filter(ev => ev.event_date >= todayStr && ev.status !== 'cancelado')
+                .map(ev => ({ kind: 'manual' as const, date: ev.event_date, ev })),
+            ].sort((a, z) => a.date.localeCompare(z.date)).slice(0, 5)
+
+            return (
+              <div className="mt-4 rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+                <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Próximos eventos</h3>
+                {upcoming.length === 0 ? (
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Sin eventos próximos</p>
+                ) : (
+                  <div className="space-y-2">
+                    {upcoming.map(item => item.kind === 'espot' ? (
+                      <div key={item.b.id} className="flex items-center gap-3">
+                        <div className={cn('w-1.5 h-8 rounded-full shrink-0', item.b.status === 'confirmed' ? 'bg-green-400' : 'bg-amber-400')} />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                            {(item.b as any).profiles?.full_name ?? 'Cliente'}
+                          </div>
+                          <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
+                            {(item.b as any).spaces?.name && spaceList.length > 1 && (
+                              <span className="font-medium" style={{ color: 'var(--brand)' }}>{(item.b as any).spaces.name} · </span>
+                            )}
+                            {new Date(item.b.event_date + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
+                            {item.b.start_time && ` · ${item.b.start_time.slice(0,5)}`}
+                          </div>
                         </div>
-                        <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
-                          {(b as any).spaces?.name && spaceList.length > 1 && (
-                            <span className="font-medium" style={{ color: 'var(--brand)' }}>{(b as any).spaces.name} · </span>
-                          )}
-                          {new Date(b.event_date + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })} · {b.start_time?.slice(0,5)}
+                        <div className="text-xs font-semibold shrink-0" style={{ color: 'var(--brand)' }}>
+                          {formatCurrency(Number(item.b.total_amount))}
                         </div>
                       </div>
-                      <div className="text-xs font-semibold shrink-0" style={{ color: 'var(--brand)' }}>
-                        {formatCurrency(Number(b.total_amount))}
+                    ) : (
+                      <div key={item.ev.id} className="flex items-center gap-3">
+                        <div className="w-1.5 h-8 rounded-full shrink-0" style={{ background: 'var(--brand)' }} />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                            {item.ev.title}
+                          </div>
+                          <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
+                            {item.ev.client?.full_name ?? (item.ev as any).client_name ?? item.ev.event_type ?? 'Directo'}
+                            {' · '}
+                            {new Date(item.ev.event_date + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
+                            {item.ev.start_time && ` · ${item.ev.start_time.slice(0,5)}`}
+                          </div>
+                        </div>
+                        {item.ev.total_amount && (
+                          <div className="text-xs font-semibold shrink-0" style={{ color: 'var(--brand)' }}>
+                            {formatCurrency(Number(item.ev.total_amount))}
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            )
+          })()}
         </div>
       </div>
     </div>
