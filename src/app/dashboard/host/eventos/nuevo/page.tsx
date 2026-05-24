@@ -21,7 +21,7 @@ const EVENT_TYPES = [
 ]
 
 const STATUS_OPTIONS: { value: ExternalEventStatus; label: string; color: string; bg: string }[] = [
-  { value: 'tentativo',  label: 'Tentativo',  color: '#D97706', bg: 'rgba(217,119,6,0.1)'  },
+  { value: 'tentativo',  label: 'Pendiente',  color: '#D97706', bg: 'rgba(217,119,6,0.1)'  },
   { value: 'confirmado', label: 'Confirmado', color: '#16A34A', bg: 'rgba(22,163,74,0.1)'  },
 ]
 

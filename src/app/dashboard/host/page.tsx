@@ -3,22 +3,16 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import {
-  TrendingUp, TrendingDown, Clock, CheckCircle,
-  CalendarDays, MessageSquareQuote, ArrowRight,
-  Users, Loader2, DollarSign, Building2,
+  Clock, CheckCircle, CalendarDays, MessageSquareQuote,
+  ArrowRight, Users, Loader2, DollarSign, CalendarCheck,
+  Plus, Building2, User,
 } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import Link from 'next/link'
-import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { getHostStats, getHostBookings, acceptBooking, rejectBooking } from '@/lib/actions/host'
+import { getExternalEvents } from '@/lib/actions/external-events'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
-
-// ── Sistema de colores de estado unificado ────────────────
-// Verde = confirmado / completado
-// Naranja = pendiente / por pagar
-// Azul = aceptado / cotización
-// Rojo = cancelado / rechazado
-// Gris = neutral
+import type { ExternalEvent } from '@/types'
 
 export function StatusBadge({ status }: { status: string }) {
   const sc    = STATUS_COLORS[status as keyof typeof STATUS_COLORS]
@@ -28,50 +22,9 @@ export function StatusBadge({ status }: { status: string }) {
   return (
     <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full"
       style={{ background: bg, color }}>
-      <span data-testid="status-dot" className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color }} />
+      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color }} />
       {label}
     </span>
-  )
-}
-
-// ── Card base — todos los stats siguen este patrón ────────
-function StatCard({
-  label, value, sub, icon: Icon, iconColor, trend,
-}: {
-  label:       string
-  value:       string | number
-  sub?:        string
-  icon:        React.ElementType
-  iconColor:   string
-  trend?:      { value: string; positive: boolean } | null
-}) {
-  return (
-    <div className="rounded-2xl p-5 flex flex-col gap-3"
-      style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>{label}</span>
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-          style={{ background: `${iconColor}12` }}>
-          <Icon size={15} style={{ color: iconColor }} />
-        </div>
-      </div>
-      <div className="font-bold text-lg md:text-2xl" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em', wordBreak: 'break-word' }}>
-        {value}
-      </div>
-      <div className="flex items-center justify-between">
-        {sub && <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{sub}</span>}
-        {trend && (
-          <div className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
-            style={{
-              background: trend.positive ? 'var(--bg-elevated)' : 'rgba(220,38,38,0.08)',
-              color:      trend.positive ? 'var(--brand)' : '#DC2626',
-            }}>
-            {trend.positive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
-            {trend.value}
-          </div>
-        )}
-      </div>
-    </div>
   )
 }
 
@@ -88,18 +41,35 @@ function PublishedToast() {
   )
 }
 
+const EXT_STATUS: Record<string, { label: string; color: string; bg: string }> = {
+  tentativo:  { label: 'Pendiente',  color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
+  confirmado: { label: 'Confirmado', color: '#16A34A', bg: 'rgba(22,163,74,0.1)'   },
+  en_curso:   { label: 'En curso',   color: '#2563EB', bg: 'rgba(37,99,235,0.1)'   },
+  completado: { label: 'Completado', color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },
+  cancelado:  { label: 'Cancelado',  color: '#EF4444', bg: 'rgba(239,68,68,0.08)'  },
+}
+
+type CalBooking = Awaited<ReturnType<typeof getHostBookings>>[0]
+
 export default function DashboardPage() {
-  const [stats,    setStats]    = useState<Awaited<ReturnType<typeof getHostStats>>>(null)
-  const [bookings, setBookings] = useState<Awaited<ReturnType<typeof getHostBookings>>>([])
-  const [loading,  setLoading]  = useState(true)
+  const [stats,          setStats]          = useState<Awaited<ReturnType<typeof getHostStats>>>(null)
+  const [bookings,       setBookings]       = useState<CalBooking[]>([])
+  const [externalEvents, setExternalEvents] = useState<ExternalEvent[]>([])
+  const [loading,        setLoading]        = useState(true)
+  const [actionError,    setActionError]    = useState('')
 
   useEffect(() => {
-    Promise.all([getHostStats(), getHostBookings()]).then(([s, b]) => {
-      setStats(s); setBookings(b); setLoading(false)
+    Promise.all([
+      getHostStats(),
+      getHostBookings(),
+      getExternalEvents().catch(() => [] as ExternalEvent[]),
+    ]).then(([s, b, ev]) => {
+      setStats(s)
+      setBookings(b)
+      setExternalEvents(ev)
+      setLoading(false)
     }).catch(() => setLoading(false))
   }, [])
-
-  const [actionError, setActionError] = useState('')
 
   async function handleConfirm(id: string) {
     const r = await acceptBooking(id)
@@ -111,8 +81,9 @@ export default function DashboardPage() {
       setStats(prev => prev ? { ...prev, pendingCount: Math.max(0, prev.pendingCount - 1), confirmedCount: prev.confirmedCount + 1 } : prev)
     }
   }
+
   async function handleReject(id: string) {
-    if (!window.confirm('¿Estás seguro de que quieres rechazar esta solicitud? Esta acción no se puede deshacer.')) return
+    if (!window.confirm('¿Rechazar esta solicitud? No se puede deshacer.')) return
     const r = await rejectBooking(id)
     if ('error' in r) {
       setActionError(r.error ?? 'Error al rechazar')
@@ -123,35 +94,47 @@ export default function DashboardPage() {
     }
   }
 
-  const growth = stats && stats.revenuePrevMonth > 0
-    ? ((stats.revenueThisMonth - stats.revenuePrevMonth) / stats.revenuePrevMonth * 100).toFixed(1)
-    : null
-  const isPositive = (stats?.revenueThisMonth ?? 0) >= (stats?.revenuePrevMonth ?? 0)
+  const todayStr = new Date().toISOString().split('T')[0]
 
-  const upcomingBookings = bookings
-    .filter(b => b.event_date >= new Date().toISOString().split('T')[0]
-      && !['cancelled_guest', 'cancelled_host', 'rejected'].includes(b.status))
-    .slice(0, 6)
+  type Item =
+    | { kind: 'espot';  date: string; b:  CalBooking     }
+    | { kind: 'manual'; date: string; ev: ExternalEvent  }
+
+  const upcomingItems: Item[] = [
+    ...bookings
+      .filter(b => b.event_date >= todayStr && !['cancelled_guest','cancelled_host','rejected'].includes(b.status))
+      .map(b  => ({ kind: 'espot'  as const, date: b.event_date,  b  })),
+    ...externalEvents
+      .filter(ev => ev.event_date >= todayStr && ev.status !== 'cancelado')
+      .map(ev => ({ kind: 'manual' as const, date: ev.event_date, ev })),
+  ].sort((a, z) => a.date.localeCompare(z.date))
+
+  const upcomingShown = upcomingItems.slice(0, 8)
+
+  // Etiqueta de fecha relativa
+  function dateLabel(dateStr: string) {
+    const d    = new Date(dateStr + 'T12:00')
+    const diff = Math.round((d.getTime() - new Date(todayStr + 'T12:00').getTime()) / 86400000)
+    if (diff === 0) return 'Hoy'
+    if (diff === 1) return 'Mañana'
+    if (diff <= 6)  return d.toLocaleDateString('es-DO', { weekday: 'long' }).replace(/^\w/, c => c.toUpperCase())
+    return d.toLocaleDateString('es-DO', { day: 'numeric', month: 'short' }).replace('.', '')
+  }
 
   if (loading) return (
-    <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-4 animate-pulse">
-      <div className="h-7 w-56 rounded-xl" style={{ background: 'var(--bg-elevated)' }} />
+    <div className="p-4 md:p-6 max-w-5xl mx-auto space-y-4 animate-pulse">
+      <div className="h-7 w-48 rounded-xl" style={{ background: 'var(--bg-elevated)' }} />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-24 rounded-2xl" style={{ background: 'var(--bg-elevated)' }} />
-        ))}
+        {[...Array(4)].map((_, i) => <div key={i} className="h-20 rounded-2xl" style={{ background: 'var(--bg-elevated)' }} />)}
       </div>
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="h-48 rounded-2xl" style={{ background: 'var(--bg-elevated)' }} />
-        <div className="h-48 rounded-2xl" style={{ background: 'var(--bg-elevated)' }} />
-      </div>
-      <div className="h-36 rounded-2xl" style={{ background: 'var(--bg-elevated)' }} />
+      <div className="h-96 rounded-2xl" style={{ background: 'var(--bg-elevated)' }} />
     </div>
   )
 
   return (
-    <div className="p-4 md:p-6 max-w-6xl mx-auto">
+    <div className="p-4 md:p-6 max-w-5xl mx-auto">
       <Suspense fallback={null}><PublishedToast /></Suspense>
+
       {actionError && (
         <div className="fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
           style={{ background: '#DC2626', color: '#fff' }}>
@@ -160,155 +143,104 @@ export default function DashboardPage() {
       )}
 
       {/* ── Encabezado ── */}
-      <div className="mb-6 md:mb-8">
-        <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-          Panel de control
-        </h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-          Resumen de tu actividad en espot.do
-        </p>
+      <div className="flex items-start justify-between mb-5 md:mb-6">
+        <div>
+          <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            Panel de control
+          </h1>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
+            {new Date().toLocaleDateString('es-DO', { weekday: 'long', day: 'numeric', month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
+          </p>
+        </div>
+        <Link href="/dashboard/host/eventos/nuevo"
+          className="flex items-center gap-1.5 text-sm font-semibold px-4 py-2.5 rounded-xl transition-all shrink-0"
+          style={{ background: 'var(--brand)', color: '#fff' }}>
+          <Plus size={15} /> Nuevo evento
+        </Link>
       </div>
 
-      {/* ── Métricas principales ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
-        <StatCard
-          label="Ingresos del mes"
-          value={formatCurrency(stats?.revenueThisMonth ?? 0)}
-          sub={stats?.revenuePrevMonth ? `vs ${formatCurrency(stats.revenuePrevMonth)} anterior` : 'Sin eventos aún'}
-          icon={DollarSign}
-          iconColor="var(--text-secondary)"
-          trend={growth ? { value: `${growth}%`, positive: isPositive } : null}
-        />
-        <StatCard
-          label="Reservas pendientes"
-          value={stats?.pendingCount ?? 0}
-          sub={stats?.pendingCount ? 'Requieren respuesta' : 'Sin pendientes'}
-          icon={Clock}
-          iconColor="var(--text-secondary)"
-        />
-        <StatCard
-          label="Confirmadas este mes"
-          value={stats?.confirmedCount ?? 0}
-          sub="eventos confirmados"
-          icon={CheckCircle}
-          iconColor="var(--text-secondary)"
-        />
-        <StatCard
-          label="Cotizaciones abiertas"
-          value={stats?.pendingQuotes ?? 0}
-          sub="sin responder"
-          icon={MessageSquareQuote}
-          iconColor="var(--text-secondary)"
-        />
-      </div>
-
-      {/* ── Gráfica + Próximo evento ── */}
-      <div className="grid lg:grid-cols-3 gap-4 md:gap-5 mb-6 md:mb-8">
-
-        {/* Gráfica */}
-        <div className="lg:col-span-2 rounded-2xl p-4 md:p-6"
-          style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between sm:gap-3 mb-6 gap-0.5">
-            <div>
-              <h2 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>Ingresos por mes</h2>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Últimos 6 meses</p>
-            </div>
-            <div className="font-bold text-xl sm:text-2xl" style={{ color: 'var(--brand)', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
-              {formatCurrency(stats?.revenueThisMonth ?? 0)}
+      {/* ── Stats ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+        {/* Próximos eventos */}
+        <div className="rounded-2xl p-4"
+          style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>Próximos eventos</span>
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+              style={{ background: 'rgba(53,196,147,0.1)' }}>
+              <CalendarCheck size={13} style={{ color: 'var(--brand)' }} />
             </div>
           </div>
-          {stats?.monthlyRevenue?.some(m => m.ingresos > 0) ? (
-            <ResponsiveContainer width="100%" height={160}>
-              <AreaChart data={stats.monthlyRevenue}>
-                <defs>
-                  <linearGradient id="gradIngresos" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="#35C493" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="#35C493" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="mes" stroke="#E5E7EB" tick={{ fill: '#9CA3AF', fontSize: 11 }}
-                  axisLine={false} tickLine={false} />
-                <Tooltip
-                  contentStyle={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 10, color: '#111827', fontSize: 12 }}
-                  formatter={(v) => [formatCurrency(Number(v)), 'Ingresos']}
-                />
-                <Area type="monotone" dataKey="ingresos"
-                  stroke="#35C493" strokeWidth={2} fill="url(#gradIngresos)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex items-center justify-center h-40 text-sm rounded-xl"
-              style={{ color: 'var(--text-muted)', background: 'var(--bg-elevated)', border: '1px dashed var(--border-medium)' }}>
-              Aquí aparecerá la gráfica cuando tengas reservas confirmadas
-            </div>
-          )}
+          <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            {upcomingItems.length}
+          </div>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>confirmados + tentativo</p>
         </div>
 
-        {/* Próximo evento */}
-        <div className="rounded-2xl p-4 md:p-6"
-          style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <h2 className="font-semibold text-sm mb-4" style={{ color: 'var(--text-primary)' }}>Próximo evento</h2>
-          {stats?.nextBooking ? (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <StatusBadge status={stats.nextBooking.status} />
-              </div>
-              <div>
-                <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
-                  {(stats.nextBooking as any).profiles?.full_name ?? 'Cliente'}
-                </p>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                  {stats.nextBooking.event_type}
-                </p>
-              </div>
-              <div className="space-y-2">
-                {[
-                  { icon: CalendarDays, text: formatDate(stats.nextBooking.event_date) },
-                  { icon: Clock, text: `${formatTime(stats.nextBooking.start_time)} – ${formatTime(stats.nextBooking.end_time)}` },
-                  { icon: Users, text: `${stats.nextBooking.guest_count} personas` },
-                ].map(({ icon: Icon, text }) => (
-                  <div key={text} className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
-                    <Icon size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-                    {text}
-                  </div>
-                ))}
-              </div>
-              <div className="flex items-center justify-between pt-3"
-                style={{ borderTop: '1px solid var(--border-subtle)' }}>
-                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Total del evento</span>
-                <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
-                  {formatCurrency(Number(stats.nextBooking.total_amount))}
-                </span>
-              </div>
+        {/* Pendientes */}
+        <div className="rounded-2xl p-4"
+          style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>Pendientes</span>
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+              style={{ background: (stats?.pendingCount ?? 0) > 0 ? 'rgba(217,119,6,0.1)' : 'var(--bg-elevated)' }}>
+              <Clock size={13} style={{ color: (stats?.pendingCount ?? 0) > 0 ? '#D97706' : 'var(--text-muted)' }} />
             </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-44 text-center gap-3">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                style={{ background: 'var(--bg-elevated)' }}>
-                <CalendarDays size={20} style={{ color: 'var(--text-muted)' }} />
-              </div>
-              <div>
-                <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Sin eventos próximos</p>
-                <Link href="/" className="text-xs mt-1 inline-block" style={{ color: 'var(--brand)' }}>
-                  Ver marketplace
-                </Link>
-              </div>
+          </div>
+          <div className="text-2xl font-bold" style={{ color: (stats?.pendingCount ?? 0) > 0 ? '#D97706' : 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            {stats?.pendingCount ?? 0}
+          </div>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>por aceptar de Espot</p>
+        </div>
+
+        {/* Cotizaciones */}
+        <div className="rounded-2xl p-4"
+          style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>Cotizaciones</span>
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+              style={{ background: 'var(--bg-elevated)' }}>
+              <MessageSquareQuote size={13} style={{ color: 'var(--text-muted)' }} />
             </div>
-          )}
+          </div>
+          <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            {stats?.pendingQuotes ?? 0}
+          </div>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>sin responder</p>
+        </div>
+
+        {/* Ingresos del mes */}
+        <div className="rounded-2xl p-4"
+          style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>Ingresos del mes</span>
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+              style={{ background: 'var(--bg-elevated)' }}>
+              <DollarSign size={13} style={{ color: 'var(--text-muted)' }} />
+            </div>
+          </div>
+          <div className="text-lg font-bold truncate" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            {formatCurrency(stats?.revenueThisMonth ?? 0)}
+          </div>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>vía Espot este mes</p>
         </div>
       </div>
 
-      {/* ── Tabla de reservas ── */}
-      <div className="rounded-2xl overflow-hidden"
-        style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+      {/* ── Próximos eventos (unificados) ── */}
+      <div className="rounded-2xl overflow-hidden mb-5"
+        style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4"
+        <div className="flex items-center justify-between px-5 py-4"
           style={{ borderBottom: '1px solid var(--border-subtle)' }}>
           <div className="flex items-center gap-3">
-            <h2 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
-              Reservas próximas
-            </h2>
+            <h2 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>Próximos eventos</h2>
+            {upcomingItems.length > 0 && (
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                style={{ background: 'rgba(53,196,147,0.1)', color: 'var(--brand)' }}>
+                {upcomingItems.length}
+              </span>
+            )}
             {(stats?.pendingCount ?? 0) > 0 && (
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
                 style={{ background: 'rgba(217,119,6,0.1)', color: '#D97706' }}>
@@ -316,99 +248,187 @@ export default function DashboardPage() {
               </span>
             )}
           </div>
-          <Link href="/dashboard/host/reservas"
-            className="flex items-center gap-1 text-xs font-medium transition-colors"
+          <Link href="/dashboard/host/eventos"
+            className="flex items-center gap-1 text-xs font-medium"
             style={{ color: 'var(--brand)' }}>
-            Ver todas <ArrowRight size={13} />
+            Ver todos <ArrowRight size={13} />
           </Link>
         </div>
 
-        {/* Filas */}
-        {upcomingBookings.length === 0 ? (
+        {upcomingShown.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-14 gap-3 text-center px-6">
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
               style={{ background: 'var(--bg-elevated)' }}>
               <CalendarDays size={20} style={{ color: 'var(--text-muted)' }} />
             </div>
-            <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>No hay reservas próximas</p>
+            <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Sin eventos próximos</p>
             <p className="text-xs max-w-xs" style={{ color: 'var(--text-muted)' }}>
-              Cuando alguien solicite tu espacio, aparecerá aquí. Comparte tu espacio para recibir más solicitudes.
+              Crea un evento directo o espera solicitudes de reserva desde el marketplace.
             </p>
-            <Link href="/dashboard/host/espacio"
-              className="mt-1 text-xs font-medium px-4 py-2 rounded-xl transition-colors"
-              style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
-              Ver mi espacio →
+            <Link href="/dashboard/host/eventos/nuevo"
+              className="mt-1 text-xs font-semibold px-4 py-2 rounded-xl"
+              style={{ background: 'var(--brand)', color: '#fff' }}>
+              + Nuevo evento
             </Link>
           </div>
         ) : (
           <div>
-            {upcomingBookings.map((booking: any, i) => (
-              <div key={booking.id}
-                className="px-4 md:px-6 py-4 transition-colors"
-                style={{ borderTop: i > 0 ? '1px solid var(--border-subtle)' : undefined }}>
+            {upcomingShown.map((item, i) => {
+              const isEspot  = item.kind === 'espot'
+              const isPending = isEspot && item.b.status === 'pending'
+              const dl = dateLabel(item.date)
 
-                {/* ── Layout móvil: card compacta ── */}
-                <div className="flex items-start gap-3">
-                  {/* Avatar */}
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-xs font-bold mt-0.5"
-                    style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
-                    {booking.profiles?.full_name?.charAt(0)?.toUpperCase() ?? '?'}
-                  </div>
+              // Color del indicador lateral
+              const barColor = isEspot
+                ? item.b.status === 'confirmed' ? '#22C55E'
+                : item.b.status === 'pending'   ? '#F59E0B'
+                : '#9CA3AF'
+                : item.ev.status === 'confirmado' ? 'var(--brand)'
+                : item.ev.status === 'en_curso'   ? '#2563EB'
+                : '#D97706'
 
-                  {/* Info + acciones */}
-                  <div className="flex-1 min-w-0">
-                    {/* Fila superior: nombre + monto */}
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
-                        {booking.profiles?.full_name ?? 'Cliente'}
-                      </span>
-                      <span className="text-sm font-bold shrink-0" style={{ color: 'var(--text-primary)' }}>
-                        {formatCurrency(Number(booking.total_amount))}
-                      </span>
-                    </div>
+              return (
+                <div key={isEspot ? item.b.id : item.ev.id}
+                  className="px-5 py-4 transition-colors hover:bg-slate-50"
+                  style={{ borderTop: i > 0 ? '1px solid var(--border-subtle)' : undefined }}>
 
-                    {/* Fila media: evento + status */}
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <span className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
-                        {booking.event_type}
-                      </span>
-                      <StatusBadge status={booking.status} />
-                    </div>
-
-                    {/* Meta: fecha + hora + personas */}
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
-                        <CalendarDays size={10} /> {formatDate(booking.event_date)}
-                      </span>
-                      <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
-                        <Clock size={10} /> {formatTime(booking.start_time)} – {formatTime(booking.end_time)}
-                      </span>
-                      <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
-                        <Users size={10} /> {booking.guest_count}
-                      </span>
-                    </div>
-
-                    {/* Acciones para pendientes */}
-                    {booking.status === 'pending' && (
-                      <div className="flex gap-2 mt-3">
-                        <button onClick={() => handleConfirm(booking.id)}
-                          className="flex-1 text-xs font-semibold py-2 rounded-xl transition-all"
-                          style={{ background: 'var(--bg-elevated)', color: 'var(--brand)', border: '1px solid var(--bg-elevated)' }}>
-                          Aceptar
-                        </button>
-                        <button onClick={() => handleReject(booking.id)}
-                          className="flex-1 text-xs font-semibold py-2 rounded-xl transition-all"
-                          style={{ background: 'rgba(220,38,38,0.06)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }}>
-                          Rechazar
-                        </button>
+                  <div className="flex items-start gap-3">
+                    {/* Barra de color + avatar */}
+                    <div className="flex items-start gap-2.5 shrink-0 mt-0.5">
+                      <div className="w-1 h-10 rounded-full" style={{ background: barColor }} />
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold"
+                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+                        {isEspot
+                          ? (item.b as any).profiles?.full_name?.charAt(0)?.toUpperCase() ?? '?'
+                          : (item.ev.client?.full_name ?? (item.ev as any).client_name ?? item.ev.title)?.charAt(0)?.toUpperCase() ?? 'E'
+                        }
                       </div>
-                    )}
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <div className="min-w-0">
+                          <span className="text-sm font-semibold truncate block" style={{ color: 'var(--text-primary)' }}>
+                            {isEspot
+                              ? ((item.b as any).profiles?.full_name ?? 'Cliente')
+                              : item.ev.title
+                            }
+                          </span>
+                          <span className="text-xs truncate block" style={{ color: 'var(--text-muted)' }}>
+                            {isEspot
+                              ? item.b.event_type
+                              : (item.ev.client?.full_name ?? (item.ev as any).client_name ?? item.ev.event_type ?? 'Evento directo')
+                            }
+                          </span>
+                        </div>
+                        <div className="flex flex-col items-end gap-1 shrink-0">
+                          <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                            {formatCurrency(Number(isEspot ? item.b.total_amount : item.ev.total_amount ?? 0))}
+                          </span>
+                          {/* Badge fuente */}
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+                            style={isEspot
+                              ? { background: 'rgba(37,99,235,0.08)', color: '#2563EB' }
+                              : { background: 'rgba(53,196,147,0.1)',  color: 'var(--brand)' }
+                            }>
+                            {isEspot ? 'Espot' : 'Directo'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Meta: fecha + hora + personas */}
+                      <div className="flex items-center gap-3 flex-wrap mb-2">
+                        <span className="flex items-center gap-1 text-xs font-medium"
+                          style={{ color: dl === 'Hoy' || dl === 'Mañana' ? 'var(--brand)' : 'var(--text-muted)' }}>
+                          <CalendarDays size={10} /> {dl}
+                          {item.date !== todayStr && (
+                            <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>
+                              {' · '}{new Date(item.date + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
+                            </span>
+                          )}
+                        </span>
+                        {(isEspot ? item.b.start_time : item.ev.start_time) && (
+                          <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+                            <Clock size={10} />
+                            {isEspot
+                              ? `${formatTime(item.b.start_time)} – ${formatTime(item.b.end_time)}`
+                              : item.ev.start_time!.slice(0,5)
+                            }
+                          </span>
+                        )}
+                        {(isEspot ? item.b.guest_count : item.ev.guest_count) && (
+                          <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+                            <Users size={10} />
+                            {isEspot ? item.b.guest_count : item.ev.guest_count} personas
+                          </span>
+                        )}
+                        {/* Status badge */}
+                        {isEspot
+                          ? <StatusBadge status={item.b.status} />
+                          : (() => {
+                              const st = EXT_STATUS[item.ev.status]
+                              return st ? (
+                                <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
+                                  style={{ background: st.bg, color: st.color }}>
+                                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: st.color }} />
+                                  {st.label}
+                                </span>
+                              ) : null
+                            })()
+                        }
+                      </div>
+
+                      {/* Botones para pendientes de Espot */}
+                      {isPending && (
+                        <div className="flex gap-2">
+                          <button onClick={() => handleConfirm(item.b.id)}
+                            className="flex-1 text-xs font-semibold py-1.5 rounded-lg transition-all"
+                            style={{ background: 'var(--bg-elevated)', color: 'var(--brand)', border: '1px solid var(--border-subtle)' }}>
+                            Aceptar
+                          </button>
+                          <button onClick={() => handleReject(item.b.id)}
+                            className="flex-1 text-xs font-semibold py-1.5 rounded-lg"
+                            style={{ background: 'rgba(220,38,38,0.06)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }}>
+                            Rechazar
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
+              )
+            })}
+
+            {upcomingItems.length > 8 && (
+              <div className="px-5 py-3 text-center" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                <Link href="/dashboard/host/eventos"
+                  className="text-xs font-medium" style={{ color: 'var(--brand)' }}>
+                  Ver {upcomingItems.length - 8} eventos más →
+                </Link>
               </div>
-            ))}
+            )}
           </div>
         )}
+      </div>
+
+      {/* ── Acciones rápidas ── */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { href: '/dashboard/host/eventos/nuevo', icon: Plus,         label: 'Nuevo evento',  color: 'var(--brand)', bg: 'rgba(53,196,147,0.1)' },
+          { href: '/dashboard/host/calendario',    icon: CalendarDays, label: 'Calendario',    color: '#2563EB',       bg: 'rgba(37,99,235,0.08)' },
+          { href: '/dashboard/host/clientes',      icon: Users,        label: 'Clientes',      color: '#7C3AED',       bg: 'rgba(124,58,237,0.08)' },
+        ].map(({ href, icon: Icon, label, color, bg }) => (
+          <Link key={href} href={href}
+            className="rounded-2xl p-4 flex flex-col items-center gap-2 text-center transition-all hover:scale-[1.02]"
+            style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+              style={{ background: bg }}>
+              <Icon size={16} style={{ color }} />
+            </div>
+            <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>{label}</span>
+          </Link>
+        ))}
       </div>
     </div>
   )

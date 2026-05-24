@@ -9,7 +9,7 @@ import type { ExternalEvent, ExternalEventStatus, ExternalPaymentMethod } from '
 
 const STATUS_OPTIONS: { value: 'all' | ExternalEventStatus; label: string }[] = [
   { value: 'all',        label: 'Todos' },
-  { value: 'tentativo',  label: 'Tentativos' },
+  { value: 'tentativo',  label: 'Pendientes' },
   { value: 'confirmado', label: 'Confirmados' },
   { value: 'en_curso',   label: 'En curso' },
   { value: 'completado', label: 'Completados' },
@@ -17,7 +17,7 @@ const STATUS_OPTIONS: { value: 'all' | ExternalEventStatus; label: string }[] = 
 ]
 
 const statusConfig: Record<ExternalEventStatus, { label: string; color: string; bg: string }> = {
-  tentativo:  { label: 'Tentativo',  color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
+  tentativo:  { label: 'Pendiente',  color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
   confirmado: { label: 'Confirmado', color: '#16A34A', bg: 'rgba(22,163,74,0.1)'   },
   en_curso:   { label: 'En curso',   color: '#2563EB', bg: 'rgba(37,99,235,0.1)'   },
   completado: { label: 'Completado', color: '#35C493', bg: 'rgba(53,196,147,0.1)'  },
