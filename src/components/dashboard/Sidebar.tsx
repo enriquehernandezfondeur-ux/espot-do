@@ -15,7 +15,7 @@ const BASE_NAV = [
   { href: '/dashboard/host',              label: 'Overview',     icon: LayoutDashboard },
   { href: '/dashboard/host/espacio',      label: 'Mi espacio',   icon: Building2 },
   // Operaciones
-  { href: '/dashboard/host/agenda',       label: 'Agenda',       icon: CalendarRange },
+  { href: '/dashboard/host/agenda',       label: 'Reservas',     icon: CalendarRange },
   { href: '/dashboard/host/calendario',   label: 'Calendario',   icon: CalendarDays },
   { href: '/dashboard/host/clientes',     label: 'Clientes',     icon: Users },
   // Ventas
@@ -32,7 +32,7 @@ const BASE_NAV = [
 
 const MOBILE_NAV = [
   { href: '/dashboard/host',          label: 'Overview', icon: LayoutDashboard },
-  { href: '/dashboard/host/agenda',   label: 'Agenda',   icon: CalendarRange },
+  { href: '/dashboard/host/agenda',   label: 'Reservas', icon: CalendarRange },
   { href: '/dashboard/host/clientes', label: 'Clientes', icon: Users },
   { href: '/dashboard/host/mensajes', label: 'Mensajes', icon: MessageCircle },
 ]
