@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { getExternalEvents, updateExternalEvent, addEventPayment, deleteExternalEvent, deleteEventPayment } from '@/lib/actions/external-events'
 import { formatCurrency, formatDate, formatTime, cn } from '@/lib/utils'
-import { CalendarDays, Plus, Search, Loader2, Check, X, CalendarCheck } from 'lucide-react'
+import { CalendarDays, Plus, Search, Loader2, Check, X, CalendarCheck, Paperclip } from 'lucide-react'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 import type { ExternalEvent, ExternalEventStatus, ExternalPaymentMethod } from '@/types'
 
 const STATUS_OPTIONS: { value: 'all' | ExternalEventStatus; label: string }[] = [
@@ -195,13 +196,15 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
   onUpdated: (ev: ExternalEvent) => void
   onDeleted: () => void
 }) {
-  const [saving,   setSaving]   = useState(false)
-  const [showPay,  setShowPay]  = useState(false)
-  const [deleting, setDeleting] = useState(false)
-  const [payForm,  setPayForm]  = useState({
+  const [saving,      setSaving]      = useState(false)
+  const [showPay,     setShowPay]     = useState(false)
+  const [deleting,    setDeleting]    = useState(false)
+  const [receiptFile, setReceiptFile] = useState<File | null>(null)
+  const [payForm,     setPayForm]     = useState({
     amount: '', method: 'efectivo' as ExternalPaymentMethod,
     date: new Date().toISOString().slice(0, 10), notes: '', is_deposit: false,
   })
+  const supabaseRef = useRef(createClient())
 
   async function handleStatusChange(status: ExternalEventStatus) {
     setSaving(true)
@@ -214,6 +217,24 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
     e.preventDefault()
     if (!payForm.amount || Number(payForm.amount) <= 0) return
     setSaving(true)
+
+    let receipt_url: string | undefined
+    if (receiptFile) {
+      const supabase = supabaseRef.current
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const ext  = receiptFile.name.split('.').pop()
+        const path = `${user.id}/receipts/${event.id}/${Date.now()}.${ext}`
+        const { data: uploaded } = await supabase.storage
+          .from('host-documents')
+          .upload(path, receiptFile, { upsert: true })
+        if (uploaded) {
+          const { data: { publicUrl } } = supabase.storage.from('host-documents').getPublicUrl(path)
+          receipt_url = publicUrl
+        }
+      }
+    }
+
     const r = await addEventPayment({
       event_id: event.id,
       amount: Number(payForm.amount),
@@ -221,11 +242,13 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
       payment_date: payForm.date,
       notes: payForm.notes,
       is_deposit: payForm.is_deposit,
+      receipt_url,
     })
     if (!('error' in r)) {
       const newPaid = (event.paid_amount ?? 0) + Number(payForm.amount)
       onUpdated({ ...event, paid_amount: newPaid, payments: [...(event.payments ?? []), r.data as any] })
       setShowPay(false)
+      setReceiptFile(null)
       setPayForm({ amount: '', method: 'efectivo', date: new Date().toISOString().slice(0, 10), notes: '', is_deposit: false })
     }
     setSaving(false)
@@ -322,13 +345,20 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
               {event.payments!.map(p => (
                 <div key={p.id} className="flex items-center justify-between text-xs py-1.5 px-3 rounded-lg group"
                   style={{ background: '#F8FAFB', border: '1px solid #F0F2F5' }}>
-                  <div>
+                  <div className="min-w-0">
                     <span className="font-semibold text-gray-700">{formatCurrency(p.amount)}</span>
                     <span className="text-gray-400 ml-2">{formatDate(p.payment_date)} · {p.payment_method}</span>
                     {p.is_deposit && <span className="ml-1 text-[#7C3AED]">· Depósito</span>}
+                    {(p as any).receipt_url && (
+                      <a href={(p as any).receipt_url} target="_blank" rel="noopener noreferrer"
+                        className="ml-2 inline-flex items-center gap-0.5 text-[10px] font-semibold"
+                        style={{ color: 'var(--brand)' }}>
+                        <Paperclip size={9} /> Ver
+                      </a>
+                    )}
                   </div>
                   <button onClick={() => handleDeletePayment(p.id, p.amount)}
-                    className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all">
+                    className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all shrink-0">
                     <X size={11} />
                   </button>
                 </div>
@@ -368,13 +398,31 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
                 className="w-full px-3 py-2 rounded-lg text-sm border focus:outline-none"
                 style={{ border: '1px solid #E8ECF0', fontSize: 16 }} />
             </div>
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Comprobante (foto/PDF)</label>
+              <label className="flex items-center gap-2 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-slate-50"
+                style={{ border: '1px dashed #D0D7DE' }}>
+                <Paperclip size={14} className="text-gray-400 shrink-0" />
+                <span className="text-xs text-gray-500 truncate">
+                  {receiptFile ? receiptFile.name : 'Adjuntar comprobante...'}
+                </span>
+                <input type="file" accept="image/*,.pdf" className="hidden"
+                  onChange={e => setReceiptFile(e.target.files?.[0] ?? null)} />
+              </label>
+              {receiptFile && (
+                <button type="button" onClick={() => setReceiptFile(null)}
+                  className="text-[11px] text-gray-400 hover:text-red-400 mt-1 flex items-center gap-1">
+                  <X size={10} /> Quitar
+                </button>
+              )}
+            </div>
             <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
               <input type="checkbox" checked={payForm.is_deposit}
                 onChange={e => setPayForm(f => ({ ...f, is_deposit: e.target.checked }))} className="rounded" />
               Marcar como depósito/anticipo
             </label>
             <div className="flex gap-2">
-              <button type="button" onClick={() => setShowPay(false)}
+              <button type="button" onClick={() => { setShowPay(false); setReceiptFile(null) }}
                 className="flex-1 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:bg-slate-100"
                 style={{ border: '1px solid #E8ECF0' }}>
                 Cancelar

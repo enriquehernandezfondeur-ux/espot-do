@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Building2, CalendarDays, ClipboardList,
   MessageSquareQuote, MessageCircle, BarChart3, Settings,
   LogOut, User, Banknote, Shield, Star, Search, TrendingUp,
-  CalendarCheck, Users,
+  CalendarCheck, Users, CalendarRange,
 } from 'lucide-react'
 import AppSidebar from '@/components/shared/AppSidebar'
 import { createClient } from '@/lib/supabase/client'
@@ -15,11 +15,11 @@ const BASE_NAV = [
   { href: '/dashboard/host',              label: 'Overview',     icon: LayoutDashboard },
   { href: '/dashboard/host/espacio',      label: 'Mi espacio',   icon: Building2 },
   // Operaciones
+  { href: '/dashboard/host/agenda',       label: 'Agenda',       icon: CalendarRange },
   { href: '/dashboard/host/eventos',      label: 'Eventos',      icon: CalendarCheck },
   { href: '/dashboard/host/calendario',   label: 'Calendario',   icon: CalendarDays },
   { href: '/dashboard/host/clientes',     label: 'Clientes',     icon: Users },
   // Ventas
-  { href: '/dashboard/host/reservas',     label: 'Reservas',     icon: ClipboardList },
   { href: '/dashboard/host/cotizaciones', label: 'Cotizaciones', icon: MessageSquareQuote },
   { href: '/dashboard/host/mensajes',     label: 'Mensajes',     icon: MessageCircle },
   { href: '/dashboard/host/resenas',      label: 'Reseñas',      icon: Star },
@@ -32,10 +32,10 @@ const BASE_NAV = [
 ]
 
 const MOBILE_NAV = [
-  { href: '/dashboard/host',            label: 'Overview',   icon: LayoutDashboard },
-  { href: '/dashboard/host/calendario', label: 'Calendario', icon: CalendarDays },
-  { href: '/dashboard/host/reservas',   label: 'Reservas',   icon: ClipboardList },
-  { href: '/dashboard/host/mensajes',   label: 'Mensajes',   icon: MessageCircle },
+  { href: '/dashboard/host',          label: 'Overview', icon: LayoutDashboard },
+  { href: '/dashboard/host/agenda',   label: 'Agenda',   icon: CalendarRange },
+  { href: '/dashboard/host/clientes', label: 'Clientes', icon: Users },
+  { href: '/dashboard/host/mensajes', label: 'Mensajes', icon: MessageCircle },
 ]
 
 export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: string; avatarUrl?: string; isAdmin?: boolean }) {
@@ -150,13 +150,13 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
 
   const navItems = BASE_NAV.map(item => {
     if (item.href === '/dashboard/host/mensajes')     return { ...item, badge: unread }
-    if (item.href === '/dashboard/host/reservas')     return { ...item, badge: reservasCount }
+    if (item.href === '/dashboard/host/agenda')       return { ...item, badge: reservasCount }
     if (item.href === '/dashboard/host/cotizaciones') return { ...item, badge: cotizCount }
     return item
   })
   const mobileBottomNav = MOBILE_NAV.map(item => {
     if (item.href === '/dashboard/host/mensajes') return { ...item, badge: unread }
-    if (item.href === '/dashboard/host/reservas') return { ...item, badge: reservasCount }
+    if (item.href === '/dashboard/host/agenda')   return { ...item, badge: reservasCount }
     return item
   })
 

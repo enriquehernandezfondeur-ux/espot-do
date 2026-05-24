@@ -32,6 +32,7 @@ export interface AddEventPaymentPayload {
   payment_date: string
   notes?: string
   is_deposit?: boolean
+  receipt_url?: string
 }
 
 // ── Obtener eventos manuales del host ─────────────────────────
@@ -209,6 +210,7 @@ export async function addEventPayment(payload: AddEventPaymentPayload) {
       payment_date:   payload.payment_date,
       notes:          payload.notes?.trim() || null,
       is_deposit:     payload.is_deposit ?? false,
+      receipt_url:    payload.receipt_url || null,
     })
     .select()
     .single()
