@@ -217,25 +217,31 @@ export default function AgendaPage() {
       {/* Origin cards */}
       <div className="grid grid-cols-3 gap-3 mb-3">
         {([
-          { value: 'all',     label: 'Todos',   count: items.length,                                    dot: null      },
-          { value: 'espot',   label: 'Espot',   count: items.filter(i => i.source === 'espot').length,  dot: '#35C493' },
-          { value: 'directo', label: 'Directo', count: items.filter(i => i.source === 'direct').length, dot: '#2563EB' },
+          { value: 'all',     label: 'Todos',   count: items.length,
+            dot: '#94A3B8', activeBg: '#0F1623', activeBorder: '#0F1623',       activeNum: '#fff',    activeLabel: 'rgba(255,255,255,0.7)' },
+          { value: 'espot',   label: 'Espot',   count: items.filter(i => i.source === 'espot').length,
+            dot: '#35C493', activeBg: 'rgba(53,196,147,0.1)', activeBorder: '#35C493', activeNum: '#0D7A56', activeLabel: '#35C493' },
+          { value: 'directo', label: 'Directo', count: items.filter(i => i.source === 'direct').length,
+            dot: '#818CF8', activeBg: 'rgba(99,102,241,0.08)', activeBorder: '#818CF8', activeNum: '#4338CA', activeLabel: '#818CF8' },
         ] as const).map(o => {
           const active = origin === o.value
           return (
             <button key={o.value} onClick={() => setOrigin(o.value)}
               className="flex flex-col items-start p-3 md:p-4 rounded-2xl transition-all text-left"
               style={{
-                background: active ? 'var(--brand)' : '#fff',
-                border: `2px solid ${active ? 'var(--brand)' : '#E8ECF0'}`,
+                background: active ? o.activeBg : '#fff',
+                border: `2px solid ${active ? o.activeBorder : '#E8ECF0'}`,
               }}>
               <div className="flex items-center gap-1.5 mb-2">
-                {o.dot && <div className="w-2 h-2 rounded-full shrink-0" style={{ background: active ? 'rgba(255,255,255,0.7)' : o.dot }} />}
-                <span className="text-xs font-semibold" style={{ color: active ? 'rgba(255,255,255,0.85)' : '#9CA3AF' }}>
+                <div className="w-2 h-2 rounded-full shrink-0"
+                  style={{ background: active ? o.dot : '#D1D5DB' }} />
+                <span className="text-xs font-semibold"
+                  style={{ color: active ? o.activeLabel : '#9CA3AF' }}>
                   {o.label}
                 </span>
               </div>
-              <span className="text-2xl font-bold leading-none" style={{ color: active ? '#fff' : '#0F1623' }}>
+              <span className="text-2xl font-bold leading-none"
+                style={{ color: active ? o.activeNum : '#0F1623' }}>
                 {o.count}
               </span>
             </button>
