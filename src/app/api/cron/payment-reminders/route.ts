@@ -23,7 +23,7 @@ export async function GET(req: Request) {
   let sent = 0
   let errors = 0
 
-  // ── 0. Marcar cuotas vencidas como overdue ──────────────────────────────
+  // ── 0. Marcar cuotas vencidas como overdue ──
   try {
     const today = new Date().toISOString().split('T')[0]
     const { data: overdueData, error: overdueError } = await sb

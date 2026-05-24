@@ -1113,7 +1113,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               </div>
             )}
 
-            {/* ── Plan de cuotas en resumen final ── */}
+            {/* ── Plan de pagos en resumen final ── */}
             {!isQuote && eventDate && subtotal > 0 && (() => {
               const sched = buildSchedule(eventDate, subtotal)
               if (sched.installments.length === 1) return null

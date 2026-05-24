@@ -157,3 +157,82 @@ export interface DashboardStats {
   quotes_pending: number
   next_booking?: Booking
 }
+
+// ─── Host SaaS — CRM & Eventos Manuales ───────────────────────
+
+export type ClientSource = 'espot' | 'manual' | 'referido' | 'redes' | 'otro'
+export type ExternalEventStatus = 'tentativo' | 'confirmado' | 'en_curso' | 'completado' | 'cancelado'
+export type ExternalEventSource = 'directo' | 'referido' | 'redes' | 'otro'
+export type ExternalPaymentMethod = 'efectivo' | 'transferencia' | 'tarjeta' | 'otro'
+
+export interface HostClient {
+  id: string
+  host_id: string
+  profile_id?: string
+  full_name: string
+  email?: string
+  phone?: string
+  company?: string
+  notes?: string
+  tags: string[]
+  source: ClientSource
+  created_at: string
+  updated_at: string
+  // joins opcionales
+  total_events?: number
+  total_revenue?: number
+}
+
+export interface ExternalEvent {
+  id: string
+  host_id: string
+  space_id?: string
+  client_id?: string
+  quote_id?: string
+  title: string
+  event_type?: string
+  event_date: string
+  start_time?: string
+  end_time?: string
+  guest_count?: number
+  status: ExternalEventStatus
+  total_amount?: number
+  paid_amount: number
+  notes?: string
+  source: ExternalEventSource
+  created_at: string
+  updated_at: string
+  // joins opcionales
+  client?: HostClient
+  space?: Pick<Space, 'id' | 'name' | 'city'>
+  payments?: ExternalEventPayment[]
+}
+
+export interface ExternalEventPayment {
+  id: string
+  event_id: string
+  host_id: string
+  amount: number
+  payment_method: ExternalPaymentMethod
+  payment_date: string
+  notes?: string
+  is_deposit: boolean
+  created_at: string
+}
+
+// Tipo unificado para mostrar en la lista de eventos (Espot + manuales)
+export interface UnifiedEvent {
+  id: string
+  source: 'espot' | 'manual'
+  title: string
+  client_name?: string
+  space_name?: string
+  event_date: string
+  status: string
+  total_amount?: number
+  paid_amount?: number
+  event_type?: string
+  // referencia al objeto original
+  booking?: Booking
+  external_event?: ExternalEvent
+}

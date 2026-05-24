@@ -196,8 +196,7 @@ export async function createBooking(payload: CreateBookingPayload) {
     }
   }
 
-  // Determinar si es cotización y si el espacio tiene reserva instantánea
-  // Reutiliza pricingCheck si ya fue cargado arriba para evitar query redundante
+  // Determinar si es cotización o reserva instantánea
   let isQuote = false
   if (payload.pricingId) {
     const { data: pricingRow } = await supabase
@@ -238,8 +237,8 @@ export async function createBooking(payload: CreateBookingPayload) {
       addons_total: payload.addonsTotal,
       platform_fee: payload.platformFee,
       total_amount: payload.totalAmount,
-      status:       isQuote ? 'quote_requested' : isInstant ? 'accepted' : 'pending',
-      accepted_at:  isInstant ? new Date().toISOString() : null,
+      status:         isQuote ? 'quote_requested' : isInstant ? 'accepted' : 'pending',
+      accepted_at:    isInstant ? new Date().toISOString() : null,
       payment_status: 'unpaid',
     })
     .select('id')

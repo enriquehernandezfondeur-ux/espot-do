@@ -260,7 +260,10 @@ export async function deleteSpace(spaceId: string) {
 }
 
 // ── RESERVAS ──────────────────────────────────────────────
-export async function getAdminBookings(filter?: { status?: string; search?: string }) {
+export async function getAdminBookings(filter?: {
+  status?: string
+  search?: string
+}) {
   const supabase = await requireAdmin()
   if (!supabase) return []
 

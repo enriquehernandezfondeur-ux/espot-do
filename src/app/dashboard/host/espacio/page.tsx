@@ -478,8 +478,7 @@ export default function EspacioPage() {
     }
     // Payment terms
     const pt = space.space_payment_terms?.[0]
-    if (pt) setPaymentTerm(pt.term_type ?? '')
-    else    setPaymentTerm('')
+    setPaymentTerm(pt?.term_type ?? '')
     // Time blocks
     setTimeBlocks(
       (space.space_time_blocks ?? []).map((b: any) => ({

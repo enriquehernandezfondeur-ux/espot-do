@@ -20,7 +20,10 @@ const STATUS_SHORT: Record<string, string> = {
   cancelled_host:    'Cancelada',
 }
 
-function HostInstallmentStatus({ bookingId, totalAmount }: { bookingId: string; totalAmount: number }) {
+function HostInstallmentStatus({ bookingId, totalAmount }: {
+  bookingId:   string
+  totalAmount: number
+}) {
   const [insts, setInsts] = useState<any[]>([])
   useEffect(() => {
     import('@/lib/actions/installments').then(m => m.getInstallments(bookingId)).then(setInsts).catch(() => {})
@@ -28,23 +31,21 @@ function HostInstallmentStatus({ bookingId, totalAmount }: { bookingId: string; 
 
   if (!insts.length) return null
 
-  const paid    = insts.filter((i: any) => i.status === 'paid').reduce((s: number, i: any) => s + Number(i.amount), 0)
-
   return (
     <div className="rounded-xl overflow-hidden mt-3" style={{ border: '1px solid var(--border-subtle)' }}>
       <div className="px-4 py-2.5 flex items-center justify-between"
         style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
-        <span className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Cobros</span>
+        <span className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Cuotas</span>
         <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>
-          {insts.filter((i: any) => i.status === 'paid').length}/{insts.length} pagados
+          {insts.filter((i: any) => i.status === 'paid').length}/{insts.length} pagadas
         </span>
       </div>
       {insts.map((inst: any) => (
         <div key={inst.id} className="flex items-center justify-between px-4 py-2.5"
-          style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+          style={{ borderBottom: '1px solid var(--border-subtle)', background: '#fff' }}>
           <div>
             <div className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
-              Cuota {inst.installment_number} — {inst.label ?? ''}
+              Cuota {inst.installment_number}{inst.label ? ` · ${inst.label}` : ''}
             </div>
             <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
               Vence: {inst.due_date}
@@ -66,10 +67,6 @@ function HostInstallmentStatus({ bookingId, totalAmount }: { bookingId: string; 
           </div>
         </div>
       ))}
-      <div className="flex items-center justify-between px-4 py-3">
-        <span className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Cobrado hasta ahora</span>
-        <span className="text-sm font-bold" style={{ color: 'var(--brand)' }}>{formatCurrency(paid)}</span>
-      </div>
     </div>
   )
 }

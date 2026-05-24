@@ -34,9 +34,9 @@ export default function AdminReservasPage() {
   const [loading, setLoading]   = useState(true)
   const [filter, setFilter]     = useState('all')
   const [search, setSearch]     = useState('')
-  const [selected, setSelected] = useState<any | null>(null)
-  const [updating, setUpdating] = useState<string | null>(null)
-  const [toast, setToast]       = useState<{ msg: string; ok: boolean } | null>(null)
+  const [selected, setSelected]       = useState<any | null>(null)
+  const [updating, setUpdating]       = useState<string | null>(null)
+  const [toast, setToast]             = useState<{ msg: string; ok: boolean } | null>(null)
 
   function showToast(msg: string, ok: boolean) {
     setToast({ msg, ok })
@@ -44,6 +44,7 @@ export default function AdminReservasPage() {
   }
 
   useEffect(() => {
+    setLoading(true)
     getAdminBookings({ status: filter === 'all' ? undefined : filter })
       .then(d => { setBookings(d ?? []); setLoading(false) })
       .catch(() => { setBookings([]); setLoading(false) })
@@ -82,24 +83,29 @@ export default function AdminReservasPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 mb-6">
-        <div className="flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide shrink-0"
+      <div className="flex flex-col gap-3 mb-6">
+        {/* Status pills */}
+        <div className="flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide"
           style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
           {STATUS_OPTIONS.map(o => (
-            <button key={o.value} onClick={() => { setFilter(o.value); setLoading(true) }}
+            <button key={o.value} onClick={() => setFilter(o.value)}
               className="px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shrink-0"
               style={filter === o.value ? { background: '#0F1623', color: '#fff' } : { color: '#6B7280' }}>
               {o.label}
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-2 flex-1 px-4 py-2.5 rounded-xl"
-          style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
-          <Search size={15} className="text-gray-400 shrink-0" />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Buscar espacio, cliente o evento..."
-            className="bg-transparent text-sm flex-1 focus:outline-none text-gray-700 placeholder-gray-400"
-            style={{ fontSize: 16 }} />
+
+        {/* Search */}
+        <div className="flex flex-col md:flex-row gap-3">
+          <div className="flex items-center gap-2 flex-1 px-4 py-2.5 rounded-xl"
+            style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
+            <Search size={15} className="text-gray-400 shrink-0" />
+            <input value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="Buscar espacio, cliente o evento..."
+              className="bg-transparent text-sm flex-1 focus:outline-none text-gray-700 placeholder-gray-400"
+              style={{ fontSize: 16 }} />
+          </div>
         </div>
       </div>
 

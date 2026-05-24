@@ -5,6 +5,7 @@ import {
   LayoutDashboard, Building2, CalendarDays, ClipboardList,
   MessageSquareQuote, MessageCircle, BarChart3, Settings,
   LogOut, User, Banknote, Shield, Star, Search, TrendingUp,
+  CalendarCheck, Users,
 } from 'lucide-react'
 import AppSidebar from '@/components/shared/AppSidebar'
 import { createClient } from '@/lib/supabase/client'
@@ -12,15 +13,21 @@ import { usePathname } from 'next/navigation'
 
 const BASE_NAV = [
   { href: '/dashboard/host',              label: 'Overview',     icon: LayoutDashboard },
-  { href: '/dashboard/host/espacio',      label: 'Mi espacio',   icon: Building2 },
+  // Operaciones
+  { href: '/dashboard/host/eventos',      label: 'Eventos',      icon: CalendarCheck },
   { href: '/dashboard/host/calendario',   label: 'Calendario',   icon: CalendarDays },
+  { href: '/dashboard/host/clientes',     label: 'Clientes',     icon: Users },
+  // Ventas
   { href: '/dashboard/host/reservas',     label: 'Reservas',     icon: ClipboardList },
   { href: '/dashboard/host/cotizaciones', label: 'Cotizaciones', icon: MessageSquareQuote },
   { href: '/dashboard/host/mensajes',     label: 'Mensajes',     icon: MessageCircle },
   { href: '/dashboard/host/resenas',      label: 'Reseñas',      icon: Star },
+  // Dinero
   { href: '/dashboard/host/pagos',        label: 'Pagos',        icon: Banknote },
   { href: '/dashboard/host/finanzas',     label: 'Finanzas',     icon: BarChart3 },
   { href: '/dashboard/host/analytics',   label: 'Analytics',    icon: TrendingUp },
+  // Config
+  { href: '/dashboard/host/espacio',      label: 'Mi espacio',   icon: Building2 },
   { href: '/dashboard/host/ajustes',      label: 'Ajustes',      icon: Settings },
 ]
 

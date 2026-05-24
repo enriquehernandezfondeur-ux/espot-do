@@ -72,11 +72,11 @@ export async function POST(req: NextRequest) {
   const guest  = booking.profiles as any
 
   // paidAmount = lo que Azul cobró en esta transacción (centavos → pesos)
-  const paidAmount    = Math.round(Number(azulParams.Amount)) / 100
-  const totalAmount   = Number(booking.total_amount)
-  // Comisión fija 10% sobre el total de la reserva (no sobre el depósito parcial)
-  const commissionAmt = Math.round(totalAmount * 0.10)
+  const paidAmount  = Math.round(Number(azulParams.Amount)) / 100
+  const totalAmount = Number(booking.total_amount)
+
   const commissionPct = 10
+  const commissionAmt = Math.round(totalAmount * 0.10)
   const netToHost     = Math.round(totalAmount * 0.90)
 
   // Si es pago de cuota específica, marcarla como pagada
@@ -97,9 +97,12 @@ export async function POST(req: NextRequest) {
     const { data: allInsts } = await supabase
       .from('booking_installments').select('status').eq('booking_id', bookingId)
     if (allInsts && allInsts.length > 0) {
-      const paidCount = allInsts.filter(i => i.status === 'paid').length
-      if (paidCount >= allInsts.length)    newPaymentStatus = 'paid'
-      else if (paidCount > 1)              newPaymentStatus = 'partial'
+      const paidCount = allInsts.filter((i: any) => i.status === 'paid').length
+      if (paidCount >= allInsts.length) {
+        newPaymentStatus = 'paid'
+      } else if (paidCount > 1) {
+        newPaymentStatus = 'partial'
+      }
     }
   } else {
     // Pago único sin cuotas → siempre pagado completo

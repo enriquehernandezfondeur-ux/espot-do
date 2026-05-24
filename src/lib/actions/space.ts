@@ -256,11 +256,11 @@ export async function saveSpace(payload: SaveSpacePayload) {
     }),
     payload.paymentTerm
       ? supabase.from('space_payment_terms').insert({
-          space_id: spaceId,
-          term_type: payload.paymentTerm,
+          space_id:         spaceId,
+          term_type:        payload.paymentTerm,
           platform_fee_pct: await getPlatformFeePct(),
-          venue_pct: VENUE_PCT_BY_TERM[payload.paymentTerm] ?? 90,
-          advance_pct: payload.paymentTerm === 'split_advance' ? 40 : null,
+          venue_pct:        VENUE_PCT_BY_TERM[payload.paymentTerm] ?? 90,
+          advance_pct:      payload.paymentTerm === 'split_advance' ? 40 : null,
           day_of_event_pct: payload.paymentTerm === 'split_advance' ? 50 : null,
           advance_days_before: 3,
         })
@@ -598,7 +598,11 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
 
   // Actualizar términos de pago
   if (payload.paymentTerm) {
-    const ptData = { space_id: spaceId, term_type: payload.paymentTerm }
+    const ptData = {
+      space_id:    spaceId,
+      term_type:   payload.paymentTerm,
+      advance_pct: payload.paymentTerm === 'split_advance' ? 40 : 50,
+    }
     const existingPt = await supabase.from('space_payment_terms').select('id').eq('space_id', spaceId).limit(1)
     if (existingPt.data?.length) {
       await supabase.from('space_payment_terms').update(ptData).eq('space_id', spaceId)

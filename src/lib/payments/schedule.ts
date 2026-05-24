@@ -10,12 +10,12 @@ export interface Installment {
 }
 
 export interface PaymentSchedule {
-  model:        '100' | '50_50' | '30_70' | '25_50_25'
-  installments: Installment[]
+  model:          '100' | '50_50' | '30_70' | '25_50_25'
+  installments:   Installment[]
   daysUntilEvent: number
-  totalAmount:  number
-  paidAmount:   number
-  nextDue:      Installment | null
+  totalAmount:    number
+  paidAmount:     number
+  nextDue:        Installment | null
 }
 
 /** Calcula la fecha limite de cada cuota */
@@ -44,7 +44,7 @@ export function daysUntilDate(dateStr: string): number {
   return Math.floor((due.getTime() - today.getTime()) / 86400000)
 }
 
-/** Genera el schedule de cuotas según los días al evento */
+/** Genera el schedule de cuotas según los días al evento (último pago 48h antes) */
 export function buildSchedule(
   eventDate: string,
   totalAmount: number,
@@ -66,24 +66,24 @@ export function buildSchedule(
     model = '50_50'
     defs  = [
       { pct: 50, daysOffset: 0,                   label: 'Al confirmar la reserva' },
-      { pct: 50, daysOffset: Math.max(1, days - 2), label: '48 horas antes del evento' },
+      { pct: 50, daysOffset: Math.max(1, days - 2), label: '48h antes del evento' },
     ]
   } else if (days <= 60) {
     model = '30_70'
     defs  = [
       { pct: 30, daysOffset: 0,                   label: 'Al confirmar la reserva' },
-      { pct: 70, daysOffset: Math.max(1, days - 2), label: '48 horas antes del evento' },
+      { pct: 70, daysOffset: Math.max(1, days - 2), label: '48h antes del evento' },
     ]
   } else {
     model = '25_50_25'
     defs  = [
-      { pct: 25, daysOffset: 0,                        label: 'Al confirmar la reserva' },
-      { pct: 50, daysOffset: Math.max(1, days - 60),   label: '60 días antes del evento' },
-      { pct: 25, daysOffset: Math.max(2, days - 2),    label: '48 horas antes del evento' },
+      { pct: 25, daysOffset: 0,                          label: 'Al confirmar la reserva' },
+      { pct: 50, daysOffset: Math.max(1, Math.floor(days / 2)), label: 'A mitad del camino' },
+      { pct: 25, daysOffset: Math.max(2, days - 2),      label: '48h antes del evento' },
     ]
   }
 
-  // Redondear al peso
+  // Redondear al peso; el último absorbe el residuo
   const amounts = defs.map((d, i) => {
     if (i === defs.length - 1) {
       const prev = defs.slice(0, i).reduce((s, x) => s + Math.round(totalAmount * x.pct / 100), 0)
@@ -93,9 +93,9 @@ export function buildSchedule(
   })
 
   const installments: Installment[] = defs.map((d, i) => {
-    const existing = existingInstallments?.find(e => e.number === i + 1)
-    const dueDate  = addDays(today, d.daysOffset)
-    const isPaid   = existing?.status === 'paid'
+    const existing  = existingInstallments?.find(e => e.number === i + 1)
+    const dueDate   = addDays(today, d.daysOffset)
+    const isPaid    = existing?.status === 'paid'
     const isOverdue = !isPaid && dueDate < today
 
     return {
@@ -120,11 +120,11 @@ export function buildSchedule(
 /** Descripción del modelo para mostrar al usuario */
 export function scheduleModelLabel(model: PaymentSchedule['model']): string {
   return {
-    '100':       'Pago único',
-    '50_50':     'Pago en 2 cuotas (50/50)',
-    '30_70':     'Pago en 2 cuotas (30/70)',
-    '25_50_25':  'Pago en 3 cuotas (25/50/25)',
-  }[model]
+    '100':      'Pago único',
+    '50_50':    'Pago en 2 cuotas (50/50)',
+    '30_70':    'Pago en 2 cuotas (30/70)',
+    '25_50_25': 'Pago en 3 cuotas (25/50/25)',
+  }[model] ?? 'Plan de pagos'
 }
 
 /** Formato de countdown tipo "faltan X días" */
