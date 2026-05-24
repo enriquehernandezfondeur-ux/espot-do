@@ -8,10 +8,10 @@ import { getClientStats } from '@/lib/actions/client'
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   pending:         { label: 'Pendiente',    color: '#D97706', bg: 'rgba(217,119,6,0.08)',    dot: 'bg-amber-400' },
-  accepted:        { label: 'Por pagar',    color: 'var(--brand)', bg: 'var(--bg-elevated)',    dot: 'bg-blue-400' },
-  confirmed:       { label: 'Confirmada',   color: 'var(--brand)', bg: 'var(--bg-elevated)',    dot: 'bg-green-500' },
-  completed:       { label: 'Completada',   color: 'var(--brand)', bg: 'var(--bg-elevated)',  dot: 'bg-emerald-400' },
-  quote_requested: { label: 'Cotización',   color: 'var(--text-secondary)', bg: 'var(--bg-elevated)', dot: 'bg-gray-400' },
+  accepted:        { label: 'Por pagar',    color: '#2563EB', bg: 'rgba(37,99,235,0.08)',    dot: 'bg-blue-400' },
+  confirmed:       { label: 'Confirmada',   color: '#16A34A', bg: 'rgba(22,163,74,0.08)',    dot: 'bg-green-500' },
+  completed:       { label: 'Completada',   color: '#35C493', bg: 'rgba(53,196,147,0.08)',   dot: 'bg-emerald-400' },
+  quote_requested: { label: 'Cotización',   color: '#7C3AED', bg: 'rgba(124,58,237,0.08)',   dot: 'bg-purple-400' },
   rejected:        { label: 'Rechazada',    color: '#DC2626', bg: 'rgba(220,38,38,0.08)',    dot: 'bg-red-500' },
   cancelled_guest: { label: 'Cancelada',    color: '#6B7280', bg: 'rgba(107,114,128,0.08)', dot: 'bg-gray-400' },
   cancelled_host:  { label: 'Cancelada',    color: '#6B7280', bg: 'rgba(107,114,128,0.08)', dot: 'bg-gray-400' },
@@ -95,7 +95,7 @@ export default function ClientDashboard() {
       <div className="grid grid-cols-2 gap-3">
         {[
           { href: '/buscar', label: 'Buscar espacios', sub: 'Explora ahora', icon: MapPin, color: 'var(--brand)' },
-          { href: '/para-clientes', label: 'Cómo reservar', sub: 'Aprende más', icon: CalendarDays, color: 'var(--brand)' },
+          { href: '/para-clientes', label: 'Cómo reservar', sub: 'Aprende más', icon: CalendarDays, color: '#2563EB' },
         ].map(({ href, label, sub, icon: Icon, color }) => (
           <Link key={href} href={href}
             className="flex items-center gap-3 p-4 rounded-2xl transition-all card-hover"
@@ -153,11 +153,11 @@ export default function ClientDashboard() {
 
       {(stats?.pendingPayment ?? 0) > 0 && (stats?.overdueInstallments?.length ?? 0) === 0 && (
         <div className="mb-4 rounded-2xl overflow-hidden"
-          style={{ border: '1.5px solid var(--border-subtle)' }}>
+          style={{ border: '1.5px solid rgba(37,99,235,0.2)' }}>
           <div className="px-4 py-3 flex items-center gap-2.5"
-            style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
-            <Bell size={15} style={{ color: 'var(--brand)', flexShrink: 0 }} />
-            <span className="text-sm font-semibold flex-1" style={{ color: 'var(--text-primary)' }}>
+            style={{ background: 'rgba(37,99,235,0.06)', borderBottom: '1px solid rgba(37,99,235,0.12)' }}>
+            <Bell size={15} style={{ color: '#2563EB', flexShrink: 0 }} />
+            <span className="text-sm font-semibold flex-1" style={{ color: '#1D4ED8' }}>
               {stats!.pendingPayment === 1
                 ? 'Reserva aceptada — pendiente de pago'
                 : `${stats!.pendingPayment} reservas pendientes de pago`}
@@ -168,12 +168,12 @@ export default function ClientDashboard() {
             const cover = sp?.space_images?.find((i: any) => i.is_cover)?.url ?? sp?.space_images?.[0]?.url
             return (
             <div key={bk.id} className="flex items-center gap-3 justify-between px-4 py-3"
-              style={{ borderBottom: '1px solid var(--bg-elevated)', background: '#fff' }}>
+              style={{ borderBottom: '1px solid rgba(37,99,235,0.08)', background: '#fff' }}>
               <Link href={`/dashboard/reservas/${bk.id}`} className="min-w-0 flex-1 flex items-center gap-3">
                 {cover
                   ? <img src={cover} alt={sp?.name} className="w-10 h-10 rounded-xl object-cover shrink-0" />
                   : <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shrink-0 text-sm"
-                      style={{ background: 'linear-gradient(135deg, var(--brand), var(--text-primary))' }}>
+                      style={{ background: 'linear-gradient(135deg, #2563EB, #1D4ED8)' }}>
                       {sp?.name?.charAt(0)}
                     </div>
                 }
@@ -197,7 +197,7 @@ export default function ClientDashboard() {
               </Link>
               <Link href={`/pago/${bk.id}`}
                 className="text-xs font-bold px-3 py-2 rounded-xl shrink-0"
-                style={{ background: 'var(--brand)', color: '#fff', whiteSpace: 'nowrap' }}>
+                style={{ background: '#2563EB', color: '#fff', whiteSpace: 'nowrap' }}>
                 Pagar →
               </Link>
             </div>
@@ -209,11 +209,11 @@ export default function ClientDashboard() {
       {/* ── Recién confirmadas — aparecen 48h después de pagar ── */}
       {(stats?.recentlyConfirmed?.length ?? 0) > 0 && (
         <div className="mb-4 rounded-2xl overflow-hidden"
-          style={{ border: '1.5px solid var(--border-subtle)', background: 'var(--bg-elevated)' }}>
+          style={{ border: '1.5px solid rgba(22,163,74,0.25)', background: 'rgba(22,163,74,0.04)' }}>
           <div className="flex items-center gap-2.5 px-4 py-3"
-            style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-            <CheckCircle size={14} style={{ color: 'var(--brand)' }} />
-            <span className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>
+            style={{ borderBottom: '1px solid rgba(22,163,74,0.15)' }}>
+            <CheckCircle size={14} style={{ color: '#16A34A' }} />
+            <span className="text-sm font-semibold" style={{ color: '#16A34A' }}>
               {stats!.recentlyConfirmed!.length === 1 ? 'Reserva confirmada' : `${stats!.recentlyConfirmed!.length} reservas confirmadas`} recientemente
             </span>
           </div>
@@ -222,13 +222,13 @@ export default function ClientDashboard() {
             const cover = sp?.space_images?.find((i: any) => i.is_cover)?.url ?? sp?.space_images?.[0]?.url
             return (
               <Link key={bk.id} href={`/dashboard/reservas/${bk.id}`}
-                className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-[var(--bg-elevated)]"
-                style={{ borderBottom: '1px solid var(--bg-elevated)' }}>
+                className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-[rgba(22,163,74,0.06)]"
+                style={{ borderBottom: '1px solid rgba(22,163,74,0.08)' }}>
                 <div className="flex items-center gap-3 min-w-0">
                   {cover
                     ? <img src={cover} alt={sp?.name} className="w-9 h-9 rounded-xl object-cover shrink-0" />
                     : <div className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold text-white shrink-0"
-                        style={{ background: 'var(--brand)' }}>
+                        style={{ background: 'linear-gradient(135deg, #35C493, #16A34A)' }}>
                         {sp?.name?.charAt(0)}
                       </div>
                   }
@@ -258,9 +258,9 @@ export default function ClientDashboard() {
         const today = new Date(); today.setHours(0, 0, 0, 0)
         const daysLeft = Math.ceil((new Date(inst.due_date + 'T12:00').getTime() - today.getTime()) / 86400000)
         const isUrgent = daysLeft <= 7
-        const color = isUrgent ? '#D97706' : 'var(--brand)'
-        const bg    = isUrgent ? 'rgba(217,119,6,0.06)' : 'var(--bg-elevated)'
-        const bdr   = isUrgent ? 'rgba(217,119,6,0.2)'  : 'var(--border-subtle)'
+        const color = isUrgent ? '#D97706' : '#2563EB'
+        const bg    = isUrgent ? 'rgba(217,119,6,0.06)' : 'rgba(37,99,235,0.05)'
+        const bdr   = isUrgent ? 'rgba(217,119,6,0.2)'  : 'rgba(37,99,235,0.2)'
         return (
           <div className="mb-4 rounded-2xl px-4 py-3.5 flex items-center gap-3"
             style={{ background: bg, border: `1.5px solid ${bdr}` }}>
@@ -268,11 +268,11 @@ export default function ClientDashboard() {
             <div className="flex-1 min-w-0">
               <div className="text-sm font-semibold" style={{ color }}>
                 {formatCurrency(Number(inst.amount))}
-                <span className="font-normal ml-1.5 text-xs" style={{ color: isUrgent ? '#92400E' : 'var(--text-primary)' }}>
+                <span className="font-normal ml-1.5 text-xs" style={{ color: isUrgent ? '#92400E' : '#1D4ED8' }}>
                   · {daysLeft === 0 ? 'vence hoy' : daysLeft === 1 ? 'vence mañana' : `vence en ${daysLeft} días`}
                 </span>
               </div>
-              <div className="text-xs mt-0.5" style={{ color: isUrgent ? '#B45309' : 'var(--text-secondary)' }}>
+              <div className="text-xs mt-0.5" style={{ color: isUrgent ? '#B45309' : '#3B82F6' }}>
                 Próxima cuota · {formatDate(inst.due_date)}
               </div>
             </div>
@@ -296,11 +296,15 @@ export default function ClientDashboard() {
             style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}>
 
             {/* Foto + overlay */}
-            <div className="relative h-48 md:h-56" style={{ background: '#03313C' }}>
+            <div className="relative h-48 md:h-56" style={{ background: '#0F2A22' }}>
               {cover && (
                 <img src={cover} alt={sp?.name}
                   className="w-full h-full object-cover" />
               )}
+              {/* Gradiente sobre la foto */}
+              <div className="absolute inset-0"
+                style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.1) 50%, transparent 100%)' }} />
+
               {/* Badge días */}
               <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full"
                 style={{ background: 'rgba(53,196,147,0.9)', backdropFilter: 'blur(8px)' }}>
@@ -309,21 +313,24 @@ export default function ClientDashboard() {
                   {daysUntilNext === 0 ? '¡Hoy!' : daysUntilNext === 1 ? 'Mañana' : `En ${daysUntilNext} días`}
                 </span>
               </div>
+
+              {/* Nombre sobre la foto */}
+              <div className="absolute bottom-0 left-0 right-0 px-5 pb-4">
+                <p className="text-xs font-semibold mb-0.5" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                  TU PRÓXIMO EVENTO
+                </p>
+                <h2 className="font-bold text-white leading-tight" style={{ fontSize: 'clamp(1.15rem,4vw,1.4rem)' }}>
+                  {sp?.name}
+                </h2>
+                {sp?.sector && (
+                  <p className="text-xs mt-0.5 flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                    <MapPin size={11} /> {sp.sector}, {sp.city}
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Info — blanco */}
-            <div className="px-5 pt-4 pb-3" style={{ background: '#fff', borderBottom: '1px solid var(--border-subtle)' }}>
-              <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'var(--text-muted)' }}>Tu próximo evento</p>
-              <h2 className="font-bold leading-tight mb-0.5" style={{ fontSize: 'clamp(1.05rem,3vw,1.25rem)', color: 'var(--text-primary)' }}>
-                {sp?.name}
-              </h2>
-              {sp?.sector && (
-                <p className="text-xs flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
-                  <MapPin size={10} /> {sp.sector}, {sp.city}
-                </p>
-              )}
-            </div>
-
             <div className="px-5 py-4 flex items-center justify-between gap-4"
               style={{ background: '#fff' }}>
               <div className="flex items-center gap-4 flex-wrap">
@@ -376,26 +383,27 @@ export default function ClientDashboard() {
       {/* Stats — 2 cols en móvil, 4 en desktop */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
         {[
-          { label: 'Total reservas', value: stats?.total ?? 0,            icon: CalendarDays, color: 'var(--text-secondary)' },
-          { label: 'Por pagar',      value: stats?.pendingPayment ?? 0,   icon: Clock,        color: 'var(--text-secondary)',
+          { label: 'Total reservas', value: stats?.total ?? 0,            icon: CalendarDays, color: 'var(--brand)',  featured: true },
+          { label: 'Por pagar',      value: stats?.pendingPayment ?? 0,   icon: Clock,        color: '#2563EB',
             urgent: (stats?.pendingPayment ?? 0) > 0 },
-          { label: 'Confirmadas',    value: stats?.confirmed ?? 0,        icon: CheckCircle,  color: 'var(--text-secondary)' },
-          { label: 'Total gastado',  value: formatCurrency(stats?.totalSpent ?? 0), icon: CreditCard, color: 'var(--text-secondary)' },
-        ].map(({ label, value, icon: Icon, color, urgent }: any) => (
-          <div key={label} className="rounded-2xl p-4 md:p-5"
+          { label: 'Confirmadas',    value: stats?.confirmed ?? 0,        icon: CheckCircle,  color: '#16A34A' },
+          { label: 'Total gastado',  value: formatCurrency(stats?.totalSpent ?? 0), icon: CreditCard, color: '#7C3AED' },
+        ].map(({ label, value, icon: Icon, color, urgent, featured }: any) => (
+          <div key={label} className="rounded-2xl p-4 md:p-5 transition-all hover:-translate-y-0.5"
             style={{
-              background: '#fff',
-              border: '1px solid var(--border-subtle)',
-              boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+              background: urgent ? 'rgba(37,99,235,0.04)' : '#fff',
+              border: urgent ? '1.5px solid rgba(37,99,235,0.25)' : featured ? '1px solid var(--brand-border)' : '1px solid var(--border-subtle)',
+              boxShadow: featured ? '0 4px 16px rgba(53,196,147,0.12)' : '0 2px 8px rgba(0,0,0,0.06)',
+              borderTop: featured ? '3px solid var(--brand)' : undefined,
             }}>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs md:text-sm" style={{ color: 'var(--text-secondary)' }}>{label}</span>
               <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center"
-                style={{ background: 'var(--bg-elevated)' }}>
-                <Icon size={14} style={{ color: urgent ? '#D97706' : 'var(--text-secondary)' }} />
+                style={{ background: `${color}18` }}>
+                <Icon size={14} style={{ color }} />
               </div>
             </div>
-            <div className="text-xl md:text-2xl font-bold" style={{ color: urgent ? '#D97706' : 'var(--text-primary)' }}>{value}</div>
+            <div className="text-xl md:text-2xl font-bold" style={{ color: urgent ? color : featured ? 'var(--brand)' : 'var(--text-primary)' }}>{value}</div>
           </div>
         ))}
       </div>
@@ -459,10 +467,10 @@ export default function ClientDashboard() {
                           const p = (bk as any).space_pricing as any
                           if (!p) return null
                           const map: Record<string, { label: string; color: string }> = {
-                            hourly:              { label: 'Por hora',      color: 'var(--text-secondary)' },
-                            minimum_consumption: { label: 'Consumibles',  color: 'var(--text-secondary)' },
-                            fixed_package:       { label: p.package_name ?? 'Paquete', color: 'var(--text-secondary)' },
-                            custom_quote:        { label: 'Cotización',    color: 'var(--text-secondary)' },
+                            hourly:              { label: 'Por hora',      color: '#2563EB' },
+                            minimum_consumption: { label: 'Consumibles',  color: '#D97706' },
+                            fixed_package:       { label: p.package_name ?? 'Paquete', color: '#7C3AED' },
+                            custom_quote:        { label: 'Cotización',    color: '#0891B2' },
                           }
                           const cfg = map[p.pricing_type]
                           if (!cfg) return null
@@ -493,19 +501,22 @@ export default function ClientDashboard() {
           { href: '/dashboard/mensajes',  label: 'Mensajes',     sub: 'Hablar con el host',     icon: MessageCircle, primary: false },
           { href: '/dashboard/favoritos', label: 'Favoritos',    sub: 'Espacios guardados',     icon: Heart,         primary: false },
           { href: '/dashboard/pagos',     label: 'Mis pagos',    sub: 'Historial y cuotas',     icon: CreditCard,    primary: false },
-        ].map(({ href, label, sub, icon: Icon }) => (
+        ].map(({ href, label, sub, icon: Icon, primary }) => (
           <Link key={href} href={href}
             className="flex items-center gap-4 p-4 md:p-5 rounded-2xl transition-all card-hover"
-            style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+            style={{
+              background: primary ? 'var(--brand-dim)' : '#fff',
+              border: primary ? '1px solid var(--brand-border)' : '1px solid var(--border-subtle)',
+            }}>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: 'var(--bg-elevated)' }}>
-              <Icon size={18} style={{ color: 'var(--text-secondary)' }} />
+              style={{ background: primary ? 'rgba(53,196,147,0.15)' : 'var(--bg-elevated)' }}>
+              <Icon size={18} style={{ color: primary ? 'var(--brand)' : 'var(--text-secondary)' }} />
             </div>
             <div className="flex-1 min-w-0">
               <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{label}</div>
               <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{sub}</div>
             </div>
-            <ArrowRight size={15} className="shrink-0" style={{ color: 'var(--text-muted)' }} />
+            <ArrowRight size={15} className="shrink-0" style={{ color: primary ? 'var(--brand)' : 'var(--text-muted)' }} />
           </Link>
         ))}
       </div>
