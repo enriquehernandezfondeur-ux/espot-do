@@ -10,7 +10,7 @@ import DatePicker from '@/components/ui/DatePicker'
 import TimePicker from '@/components/ui/TimePicker'
 import {
   ChevronLeft, Loader2, Users, DollarSign,
-  Building2, Check, User, FileText, Phone, Mail,
+  Building2, Check, User, FileText, Phone, Mail, Clock,
 } from 'lucide-react'
 import Link from 'next/link'
 import type { HostClient, ExternalEventStatus } from '@/types'
@@ -25,14 +25,13 @@ const STATUS_OPTIONS: { value: ExternalEventStatus; label: string; color: string
   { value: 'confirmado', label: 'Confirmado', color: '#16A34A', bg: 'rgba(22,163,74,0.1)'  },
 ]
 
-// ── Helpers numéricos ─────────────────────────────────────────
+interface SpaceBlock { block_name: string; start_time: string; end_time: string }
 
 function fmtInt(raw: string) {
   if (!raw) return ''
   const n = parseInt(raw.replace(/\D/g, ''), 10)
   return isNaN(n) ? '' : n.toLocaleString('en-US')
 }
-
 function fmtAmount(raw: string) {
   if (!raw) return ''
   const [intPart, decPart] = raw.split('.')
@@ -45,24 +44,22 @@ export default function NuevoEventoPage() {
   const router = useRouter()
 
   const [spaces,       setSpaces]       = useState<{ id: string; name: string }[]>([])
+  const [spaceBlocks,  setSpaceBlocks]  = useState<SpaceBlock[]>([])
   const [clientSuggs,  setClientSuggs]  = useState<HostClient[]>([])
   const [showSuggs,    setShowSuggs]    = useState(false)
   const [linkedClient, setLinkedClient] = useState<HostClient | null>(null)
   const [saving,       setSaving]       = useState(false)
   const [error,        setError]        = useState('')
 
-  // Autocomplete tipo de evento
   const [typeSuggs,    setTypeSuggs]    = useState<string[]>([])
   const [showTypeSugg, setShowTypeSugg] = useState(false)
-
-  // Focus para formateo numérico
   const [guestFocus,   setGuestFocus]   = useState(false)
   const [amountFocus,  setAmountFocus]  = useState(false)
 
   const clientTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const supabaseRef = useRef(createClient())
 
   const [form, setForm] = useState({
-    title:         '',
     event_type:    '',
     event_date:    '',
     start_time:    '',
@@ -80,18 +77,48 @@ export default function NuevoEventoPage() {
   const f = (field: keyof typeof form, value: string) =>
     setForm(prev => ({ ...prev, [field]: value }))
 
+  // Cargar espacios activos del host
   useEffect(() => {
-    const supabase = createClient()
+    const supabase = supabaseRef.current
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return
       const { data } = await supabase
         .from('spaces').select('id, name')
         .eq('host_id', user.id).eq('is_active', true).order('name')
-      setSpaces(data ?? [])
+      const list = data ?? []
+      setSpaces(list)
+      // Preselect first space and load its blocks
+      if (list.length === 1) {
+        setForm(prev => ({ ...prev, space_id: list[0].id }))
+        loadSpaceBlocks(list[0].id)
+      }
     })
   }, [])
 
-  // ── Autocomplete nombre de cliente ───────────────────────────
+  async function loadSpaceBlocks(spaceId: string) {
+    if (!spaceId) { setSpaceBlocks([]); return }
+    const supabase = supabaseRef.current
+    const { data } = await supabase
+      .from('space_time_blocks')
+      .select('block_name, start_time, end_time')
+      .eq('space_id', spaceId)
+      .order('start_time')
+    setSpaceBlocks(data ?? [])
+    // Reset times when space changes
+    setForm(prev => ({ ...prev, start_time: '', end_time: '' }))
+  }
+
+  function onSpaceChange(spaceId: string) {
+    f('space_id', spaceId)
+    loadSpaceBlocks(spaceId)
+  }
+
+  // Allowed range for TimePicker: union of all blocks
+  const timeAllowedRange = spaceBlocks.length > 0
+    ? { start: spaceBlocks[0].start_time, end: spaceBlocks[spaceBlocks.length - 1].end_time }
+    : undefined
+
+  // ── Autocomplete cliente ──────────────────────────────────
   function onClientNameChange(val: string) {
     f('client_name', val)
     setLinkedClient(null)
@@ -113,7 +140,7 @@ export default function NuevoEventoPage() {
     setShowSuggs(false)
   }
 
-  // ── Autocomplete tipo de evento ──────────────────────────────
+  // ── Autocomplete tipo de evento ──────────────────────────
   function onTypeChange(val: string) {
     f('event_type', val)
     if (!val.trim()) { setTypeSuggs([]); setShowTypeSugg(false); return }
@@ -122,22 +149,19 @@ export default function NuevoEventoPage() {
     setShowTypeSugg(matches.length > 0)
   }
 
-  function selectType(t: string) {
-    f('event_type', t)
-    setTypeSuggs([])
-    setShowTypeSugg(false)
-  }
-
-  // ── Submit ───────────────────────────────────────────────────
+  // ── Submit ───────────────────────────────────────────────
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-    if (!form.title.trim()) { setError('El nombre del evento es obligatorio'); return }
-    if (!form.event_date)   { setError('La fecha del evento es obligatoria');  return }
+    if (!form.event_date) { setError('La fecha del evento es obligatoria'); return }
 
     setSaving(true)
 
-    // Auto-crear cliente en CRM si se escribió un nombre nuevo
+    // Título auto-generado
+    const autoTitle = [form.event_type.trim(), form.client_name.trim()]
+      .filter(Boolean).join(' – ') || 'Nuevo evento'
+
+    // Auto-crear cliente en CRM si es nombre nuevo
     let finalClientId = linkedClient?.id
     if (!linkedClient && form.client_name.trim()) {
       const payload: CreateClientPayload = {
@@ -146,15 +170,12 @@ export default function NuevoEventoPage() {
       }
       if (form.client_phone.trim()) payload.phone = form.client_phone.trim()
       if (form.client_email.trim()) payload.email = form.client_email.trim()
-
       const result = await createClient_(payload)
-      if ('data' in result && result.data) {
-        finalClientId = (result.data as any).id
-      }
+      if ('data' in result && result.data) finalClientId = (result.data as any).id
     }
 
     const r = await createExternalEvent({
-      title:        form.title.trim(),
+      title:        autoTitle,
       event_type:   form.event_type.trim() || undefined,
       event_date:   form.event_date,
       start_time:   form.start_time || undefined,
@@ -173,7 +194,7 @@ export default function NuevoEventoPage() {
     router.push('/dashboard/host/eventos')
   }
 
-  const canSubmit = !!form.title.trim() && !!form.event_date && !saving
+  const canSubmit = !!form.event_date && !saving
 
   const inputStyle = {
     border: '1.5px solid var(--border-medium)',
@@ -204,24 +225,37 @@ export default function NuevoEventoPage() {
 
       <form onSubmit={handleSubmit} className="space-y-3">
 
-        {/* ── Nombre del evento ── */}
+        {/* ── 1. Espacio (primero) ── */}
         <div className="rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-          <label className="text-xs font-semibold uppercase tracking-widest mb-3 block" style={{ color: 'var(--text-muted)' }}>
-            Nombre del evento *
+          <label className="text-xs font-semibold uppercase tracking-widest mb-3 flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
+            <Building2 size={11} /> Espacio
           </label>
-          <input
-            value={form.title}
-            onChange={e => f('title', e.target.value)}
-            placeholder="Ej. Boda García – Martínez"
-            className="w-full px-4 py-3.5 rounded-xl text-sm font-medium focus:outline-none transition-all"
-            style={{
-              ...inputStyle,
-              border: `1.5px solid ${form.title ? 'var(--brand)' : 'var(--border-medium)'}`,
-            }}
-          />
+          {spaces.length === 0 ? (
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No tienes espacios activos.</p>
+          ) : (
+            <select
+              value={form.space_id} onChange={e => onSpaceChange(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none"
+              style={{ ...inputStyle, border: `1.5px solid ${form.space_id ? 'var(--brand)' : 'var(--border-medium)'}` }}>
+              <option value="">— Sin espacio asignado —</option>
+              {spaces.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          )}
+          {/* Horarios del espacio */}
+          {spaceBlocks.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-3">
+              {spaceBlocks.map(b => (
+                <span key={b.block_name} className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium"
+                  style={{ background: 'rgba(53,196,147,0.1)', color: 'var(--brand)' }}>
+                  <Clock size={10} />
+                  {b.block_name}: {b.start_time.slice(0,5)} – {b.end_time.slice(0,5)}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* ── Tipo de evento (autocomplete libre) ── */}
+        {/* ── 2. Tipo de evento ── */}
         <div className="rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
           <label className="text-xs font-semibold uppercase tracking-widest mb-3 block" style={{ color: 'var(--text-muted)' }}>
             Tipo de evento
@@ -231,12 +265,8 @@ export default function NuevoEventoPage() {
               value={form.event_type}
               onChange={e => onTypeChange(e.target.value)}
               onFocus={() => {
-                if (!form.event_type.trim()) {
-                  setTypeSuggs(EVENT_TYPES)
-                  setShowTypeSugg(true)
-                } else if (typeSuggs.length > 0) {
-                  setShowTypeSugg(true)
-                }
+                setTypeSuggs(form.event_type.trim() ? typeSuggs : EVENT_TYPES)
+                setShowTypeSugg(true)
               }}
               onBlur={() => setTimeout(() => setShowTypeSugg(false), 150)}
               placeholder="Boda, Corporativo, Cumpleaños…"
@@ -248,15 +278,10 @@ export default function NuevoEventoPage() {
                 style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
                 {typeSuggs.map(t => (
                   <button key={t} type="button"
-                    onMouseDown={() => selectType(t)}
-                    className="w-full px-4 py-3 text-left text-sm hover:bg-slate-50 transition-colors flex items-center gap-2"
+                    onMouseDown={() => { f('event_type', t); setShowTypeSugg(false) }}
+                    className="w-full px-4 py-3 text-left text-sm hover:bg-slate-50 transition-colors"
                     style={{ color: 'var(--text-primary)' }}>
-                    {form.event_type && t.toLowerCase().startsWith(form.event_type.toLowerCase()) ? (
-                      <>
-                        <span className="font-semibold">{t.slice(0, form.event_type.length)}</span>
-                        <span style={{ color: 'var(--text-muted)' }}>{t.slice(form.event_type.length)}</span>
-                      </>
-                    ) : t}
+                    {t}
                   </button>
                 ))}
               </div>
@@ -264,11 +289,9 @@ export default function NuevoEventoPage() {
           </div>
         </div>
 
-        {/* ── Estado ── */}
+        {/* ── 3. Estado ── */}
         <div className="rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-          <div className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
-            Estado
-          </div>
+          <div className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Estado</div>
           <div className="flex gap-2">
             {STATUS_OPTIONS.map(s => (
               <button key={s.value} type="button"
@@ -285,7 +308,7 @@ export default function NuevoEventoPage() {
           </div>
         </div>
 
-        {/* ── Fecha ── */}
+        {/* ── 4. Fecha ── */}
         <div className="rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
           <div className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
             Fecha *
@@ -297,16 +320,17 @@ export default function NuevoEventoPage() {
           />
         </div>
 
-        {/* ── Horario ── */}
+        {/* ── 5. Horario (usa horarios reales del espacio) ── */}
         <div className="rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
           <div className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
-            Horario
+            Horario {spaceBlocks.length > 0 && <span className="normal-case font-normal" style={{ color: 'var(--brand)' }}>· según horario del espacio</span>}
           </div>
           <div className="grid grid-cols-2 gap-3">
             <TimePicker
               value={form.start_time}
               onChange={v => f('start_time', v)}
               placeholder="Hora inicio"
+              allowedRange={timeAllowedRange}
             />
             <TimePicker
               value={form.end_time}
@@ -314,21 +338,23 @@ export default function NuevoEventoPage() {
               placeholder="Hora fin"
               afterValue={form.start_time || undefined}
               minMinutesAfter={30}
+              allowedRange={timeAllowedRange}
             />
           </div>
+          {spaceBlocks.length === 0 && form.space_id && (
+            <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
+              Este espacio no tiene horarios configurados. Se mostrarán todos los horarios disponibles.
+            </p>
+          )}
         </div>
 
-        {/* ── Detalles: personas y monto ── */}
+        {/* ── 6. Detalles ── */}
         <div className="rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-          <div className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
-            Detalles
-          </div>
+          <div className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>Detalles</div>
           <div className="grid grid-cols-2 gap-3">
-
-            {/* Personas */}
             <div>
               <label className="text-xs font-medium mb-1.5 flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
-                <Users size={11} /> Número de personas
+                <Users size={11} /> Personas
               </label>
               <input
                 inputMode="numeric"
@@ -341,8 +367,6 @@ export default function NuevoEventoPage() {
                 style={inputStyle}
               />
             </div>
-
-            {/* Monto */}
             <div>
               <label className="text-xs font-medium mb-1.5 flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
                 <DollarSign size={11} /> Monto total (RD$)
@@ -368,33 +392,16 @@ export default function NuevoEventoPage() {
               )}
             </div>
           </div>
-
-          {spaces.length > 0 && (
-            <div className="mt-3">
-              <label className="text-xs font-medium mb-1.5 flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}>
-                <Building2 size={11} /> Espacio
-              </label>
-              <select
-                value={form.space_id} onChange={e => f('space_id', e.target.value)}
-                className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none"
-                style={inputStyle}>
-                <option value="">— Sin espacio asignado —</option>
-                {spaces.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
-            </div>
-          )}
         </div>
 
-        {/* ── Cliente ── */}
+        {/* ── 7. Cliente ── */}
         <div className="rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
           <div className="flex items-center justify-between mb-3">
-            <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
-              Cliente
-            </div>
-            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Opcional · se guarda en CRM automáticamente</span>
+            <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Cliente</div>
+            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Opcional · se guarda en CRM</span>
           </div>
 
-          {/* Nombre con autocomplete */}
+          {/* Nombre */}
           <div className="relative mb-2">
             <div className="flex items-center gap-2 px-4 py-3 rounded-xl transition-all"
               style={{
@@ -418,15 +425,13 @@ export default function NuevoEventoPage() {
                 </span>
               )}
             </div>
-
-            {/* Dropdown autocomplete */}
             {showSuggs && clientSuggs.length > 0 && (
               <div className="absolute z-20 left-0 right-0 mt-1 rounded-xl overflow-hidden shadow-xl"
                 style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
                 {clientSuggs.map(c => (
                   <button key={c.id} type="button"
                     onMouseDown={() => selectClientSugg(c)}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 transition-colors">
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50">
                     <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
                       style={{ background: 'var(--brand)' }}>
                       {c.full_name.charAt(0)}
@@ -441,35 +446,25 @@ export default function NuevoEventoPage() {
             )}
           </div>
 
-          {/* Teléfono y email — solo si hay nombre */}
+          {/* Teléfono + email (aparecen al escribir nombre) */}
           {form.client_name.trim() && (
-            <div className="grid grid-cols-2 gap-2 mt-2">
+            <div className="grid grid-cols-2 gap-2">
               <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl"
                 style={{ border: '1.5px solid var(--border-medium)', background: 'var(--bg-surface)' }}>
                 <Phone size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-                <input
-                  value={form.client_phone}
-                  onChange={e => f('client_phone', e.target.value)}
-                  placeholder="Teléfono"
-                  className="flex-1 bg-transparent text-sm focus:outline-none min-w-0"
-                  style={{ color: 'var(--text-primary)', fontSize: 15 }}
-                />
+                <input value={form.client_phone} onChange={e => f('client_phone', e.target.value)}
+                  placeholder="Teléfono" className="flex-1 bg-transparent text-sm focus:outline-none min-w-0"
+                  style={{ color: 'var(--text-primary)', fontSize: 15 }} />
               </div>
               <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl"
                 style={{ border: '1.5px solid var(--border-medium)', background: 'var(--bg-surface)' }}>
                 <Mail size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-                <input
-                  value={form.client_email}
-                  onChange={e => f('client_email', e.target.value)}
-                  placeholder="Email"
-                  type="email"
-                  className="flex-1 bg-transparent text-sm focus:outline-none min-w-0"
-                  style={{ color: 'var(--text-primary)', fontSize: 15 }}
-                />
+                <input value={form.client_email} onChange={e => f('client_email', e.target.value)}
+                  placeholder="Email" type="email" className="flex-1 bg-transparent text-sm focus:outline-none min-w-0"
+                  style={{ color: 'var(--text-primary)', fontSize: 15 }} />
               </div>
             </div>
           )}
-
           {!linkedClient && form.client_name.trim() && (
             <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
               Se creará como nuevo cliente en tu CRM al guardar.
@@ -477,21 +472,17 @@ export default function NuevoEventoPage() {
           )}
         </div>
 
-        {/* ── Notas ── */}
+        {/* ── 8. Notas ── */}
         <div className="rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
           <label className="text-xs font-semibold uppercase tracking-widest mb-3 flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
             <FileText size={11} /> Notas internas
           </label>
-          <textarea
-            value={form.notes} onChange={e => f('notes', e.target.value)}
+          <textarea value={form.notes} onChange={e => f('notes', e.target.value)}
             placeholder="Detalles adicionales, requerimientos, observaciones..."
-            rows={3}
-            className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none resize-none"
-            style={inputStyle}
-          />
+            rows={3} className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none resize-none"
+            style={inputStyle} />
         </div>
 
-        {/* Error */}
         {error && (
           <div className="px-4 py-3 rounded-xl text-sm font-medium"
             style={{ background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.2)', color: '#DC2626' }}>
@@ -499,22 +490,16 @@ export default function NuevoEventoPage() {
           </div>
         )}
 
-        {/* Botones */}
         <div className="flex gap-3 pt-1">
           <Link href="/dashboard/host/eventos"
             className="flex-1 py-3.5 rounded-xl text-sm font-semibold text-center transition-colors hover:bg-slate-50"
             style={{ border: '1.5px solid var(--border-medium)', color: 'var(--text-secondary)' }}>
             Cancelar
           </Link>
-          <button
-            type="submit"
-            disabled={!canSubmit}
+          <button type="submit" disabled={!canSubmit}
             className="flex-1 py-3.5 rounded-xl text-sm font-semibold text-white disabled:opacity-40 flex items-center justify-center gap-2"
             style={{ background: 'var(--brand)' }}>
-            {saving
-              ? <Loader2 size={15} className="animate-spin" />
-              : <><Check size={15} /> Crear evento</>
-            }
+            {saving ? <Loader2 size={15} className="animate-spin" /> : <><Check size={15} /> Crear evento</>}
           </button>
         </div>
 
