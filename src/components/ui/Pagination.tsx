@@ -25,7 +25,7 @@ export default function Pagination({ page, total, pageSize, onChange, className 
   }
 
   const btn = (active: boolean): React.CSSProperties => ({
-    minWidth: 32, height: 32, borderRadius: 8, fontSize: 13, fontWeight: active ? 700 : 500,
+    minWidth: 40, height: 40, borderRadius: 10, fontSize: 13, fontWeight: active ? 700 : 500,
     display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
     border: active ? '1.5px solid var(--brand)' : '1px solid var(--border-subtle)',
     background: active ? 'var(--brand)' : 'var(--bg-card)',
@@ -34,7 +34,7 @@ export default function Pagination({ page, total, pageSize, onChange, className 
   })
 
   const arrow = (disabled: boolean): React.CSSProperties => ({
-    width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
+    width: 40, height: 40, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
     border: '1px solid var(--border-subtle)', background: 'var(--bg-card)',
     color: disabled ? 'var(--text-muted)' : 'var(--text-secondary)',
     cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.4 : 1,

@@ -302,8 +302,9 @@ export default function HostReservasPage() {
                 <div className="text-sm font-bold truncate" style={{ color: 'var(--text-primary)' }}>
                   {(nextBooking as any).profiles?.full_name ?? 'Cliente'}{nextBooking.event_type ? ` · ${nextBooking.event_type}` : ''}
                 </div>
-                <div className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>
-                  {formatDate(nextBooking.event_date)} · {formatTime(nextBooking.start_time)} – {formatTime(nextBooking.end_time)} · {nextBooking.guest_count} personas
+                <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  <span className="truncate block">{formatDate(nextBooking.event_date)} · {formatTime(nextBooking.start_time)} – {formatTime(nextBooking.end_time)}</span>
+                  <span className="truncate block">{nextBooking.guest_count} personas</span>
                 </div>
               </div>
             </div>
@@ -347,15 +348,15 @@ export default function HostReservasPage() {
           </div>
         </div>
 
-        {/* Pills de fecha */}
-        <div className="flex gap-2 flex-wrap items-center">
-          <div className="flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide"
+        {/* Pills de fecha + sort */}
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-1 gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide"
             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
             {DATE_FILTERS.map(f => {
               const active = dateFilter === f.key
               return (
                 <button key={f.key} onClick={() => setDateFilter(f.key)}
-                  className="flex items-center gap-1 py-1.5 px-2.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap shrink-0"
+                  className="flex-1 flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap min-h-[36px]"
                   style={active
                     ? { background: 'var(--text-primary)', color: '#fff' }
                     : { color: 'var(--text-secondary)' }}>
@@ -365,11 +366,9 @@ export default function HostReservasPage() {
               )
             })}
           </div>
-
-          {/* Sort toggle */}
           <button
             onClick={() => setSortOrder(s => s === 'date_asc' ? 'date_desc' : s === 'date_desc' ? 'recent' : 'date_asc')}
-            className="flex items-center gap-1.5 py-1.5 px-3 rounded-xl text-xs font-medium transition-all shrink-0"
+            className="flex items-center justify-center gap-1.5 px-3 rounded-xl text-xs font-medium transition-all min-h-[36px]"
             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
             title="Cambiar orden">
             <ArrowUpDown size={12} />
@@ -379,20 +378,24 @@ export default function HostReservasPage() {
 
         {/* Rango personalizado */}
         {dateFilter === 'custom' && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-medium shrink-0" style={{ color: 'var(--text-muted)' }}>Desde</span>
-            <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
-              className="rounded-xl px-3 py-2 text-sm focus:outline-none"
-              style={{ background: 'var(--bg-elevated)', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)', fontSize: 15 }} />
-            <span className="text-xs font-medium shrink-0" style={{ color: 'var(--text-muted)' }}>Hasta</span>
-            <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
-              className="rounded-xl px-3 py-2 text-sm focus:outline-none"
-              style={{ background: 'var(--bg-elevated)', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)', fontSize: 15 }} />
+          <div className="grid grid-cols-2 gap-2">
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-medium px-1" style={{ color: 'var(--text-muted)' }}>Desde</span>
+              <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+                className="w-full rounded-xl px-3 py-2.5 focus:outline-none"
+                style={{ background: 'var(--bg-elevated)', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)', fontSize: 16 }} />
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-medium px-1" style={{ color: 'var(--text-muted)' }}>Hasta</span>
+              <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
+                className="w-full rounded-xl px-3 py-2.5 focus:outline-none"
+                style={{ background: 'var(--bg-elevated)', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)', fontSize: 16 }} />
+            </div>
             {(dateFrom || dateTo) && (
               <button onClick={() => { setDateFrom(''); setDateTo('') }}
-                className="text-xs px-2.5 py-2 rounded-xl"
+                className="col-span-2 text-xs px-3 py-2 rounded-xl"
                 style={{ color: '#DC2626', background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)' }}>
-                Limpiar
+                Limpiar rango
               </button>
             )}
           </div>
