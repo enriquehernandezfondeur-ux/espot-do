@@ -743,6 +743,78 @@ export function tplDisputaAbierta(rawData: {
   })
 }
 
+// ── FORMULARIO PÚBLICO / CAPTACIÓN DIRECTA ──────────────────
+
+/** Email al host cuando un cliente envía el formulario público */
+export function tplNuevaSolicitudDirectaHost(rawData: {
+  hostName: string
+  clientName: string
+  clientEmail?: string
+  clientPhone?: string
+  eventDate: string
+  eventType?: string
+  guestCount?: number
+  message?: string
+  formUrl: string
+}) {
+  const d = {
+    ...rawData,
+    hostName:    esc(rawData.hostName),
+    clientName:  esc(rawData.clientName),
+    clientEmail: esc(rawData.clientEmail),
+    clientPhone: esc(rawData.clientPhone),
+    eventType:   esc(rawData.eventType),
+    message:     esc(rawData.message),
+  }
+  const rows = [
+    { label: 'Cliente',             value: d.clientName },
+    ...(d.clientEmail ? [{ label: 'Email',    value: d.clientEmail }] : []),
+    ...(d.clientPhone ? [{ label: 'Tel&eacute;fono', value: d.clientPhone }] : []),
+    { label: 'Fecha solicitada',    value: formatDate(d.eventDate) },
+    ...(d.eventType  ? [{ label: 'Tipo de evento', value: d.eventType }] : []),
+    ...(d.guestCount ? [{ label: 'Personas',       value: `${d.guestCount}` }] : []),
+    ...(d.message    ? [{ label: 'Mensaje',         value: d.message }] : []),
+  ]
+  return emailBase({
+    title: 'Nueva solicitud directa',
+    subtitle: `${d.clientName} quiere reservar a trav&eacute;s de tu formulario.`,
+    accentColor: '#8B5CF6',
+    body: `
+      <p style="color:#374151;margin:0 0 16px;">Hola <strong>${d.hostName}</strong>, recibiste una nueva solicitud directa. Confi&eacute;rmala o cont&aacute;ctate con el cliente para coordinar.</p>
+      ${infoBox(rows)}`,
+    cta: { text: 'Ver en mi panel', url: `${SITE}/dashboard/host/eventos` },
+  })
+}
+
+/** Email al cliente confirmando que su solicitud fue recibida */
+export function tplSolicitudDirectaCliente(rawData: {
+  clientName: string
+  hostName: string
+  eventDate: string
+  eventType?: string
+}) {
+  const d = {
+    ...rawData,
+    clientName: esc(rawData.clientName),
+    hostName:   esc(rawData.hostName),
+    eventType:  esc(rawData.eventType),
+  }
+  return emailBase({
+    title: 'Solicitud recibida',
+    subtitle: `Hola ${d.clientName}, tu solicitud fue enviada a ${d.hostName}.`,
+    accentColor: '#8B5CF6',
+    body: `
+      <p style="color:#374151;margin:0 0 16px;">Hola <strong>${d.clientName}</strong>, recibimos tu solicitud correctamente.</p>
+      ${infoBox([
+        { label: 'Organizador',     value: d.hostName },
+        { label: 'Fecha solicitada', value: formatDate(d.eventDate) },
+        ...(d.eventType ? [{ label: 'Tipo de evento', value: d.eventType }] : []),
+        { label: 'Estado',           value: 'Pendiente de confirmaci&oacute;n' },
+      ])}
+      <p style="color:#6B7280;font-size:13px;margin:0;">${d.hostName} revisar&aacute; tu solicitud y se pondr&aacute; en contacto contigo pronto.</p>`,
+  })
+}
+
 // ── EVENTOS DIRECTOS ────────────────────────────────────────
 
 /** Confirmación al cliente de un evento directo (gestionado por el host fuera del marketplace) */

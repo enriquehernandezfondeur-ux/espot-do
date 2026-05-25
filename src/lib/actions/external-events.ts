@@ -3,7 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/email/send'
-import { tplEventoDirectoConfirmado, tplEventoDirectoCancelado } from '@/lib/email/templates'
+import { tplEventoDirectoConfirmado, tplEventoDirectoCancelado, tplNuevaSolicitudDirectaHost, tplSolicitudDirectaCliente } from '@/lib/email/templates'
+import { createServiceClient } from '@/lib/supabase/service'
 import { createBookingEvent, deleteBookingEvent, isGoogleCalendarConfigured } from '@/lib/google-calendar'
 import { formatDate } from '@/lib/utils'
 import type { ExternalEvent, ExternalEventStatus, ExternalEventSource, ExternalPaymentMethod } from '@/types'
@@ -360,6 +361,140 @@ export async function deleteEventPayment(paymentId: string) {
   return { success: true }
 }
 
+// ── Obtener perfil público del host por slug ─────────────────
+export async function getHostPublicProfile(slug: string) {
+  const sb = createServiceClient()
+  const { data } = await sb
+    .from('profiles')
+    .select('id, full_name, avatar_url, slug')
+    .eq('slug', slug)
+    .eq('role', 'host' as any)
+    .single()
+  if (!data) return null
+
+  // Obtener espacios activos del host
+  const { data: spaces } = await sb
+    .from('spaces')
+    .select('id, name, category, city, sector')
+    .eq('host_id', (data as any).id)
+    .eq('is_published', true)
+    .eq('is_active', true)
+    .order('name')
+
+  return { ...data, spaces: spaces ?? [] }
+}
+
+// ── Crear evento desde formulario público ────────────────────
+export interface PublicFormPayload {
+  hostId:      string
+  clientName:  string
+  clientEmail: string
+  clientPhone?: string
+  eventDate:   string
+  eventType?:  string
+  guestCount?: number
+  message?:    string
+  spaceId?:    string
+}
+
+export async function createFromPublicForm(payload: PublicFormPayload) {
+  const sb = createServiceClient()
+
+  // Validar que el host existe
+  const { data: host } = await sb
+    .from('profiles')
+    .select('id, full_name, email')
+    .eq('id', payload.hostId)
+    .eq('role', 'host' as any)
+    .single()
+  if (!host) return { error: 'Organizador no encontrado' }
+
+  // Si el cliente ya existe en el CRM del host, vincular
+  const { data: existingClient } = await sb
+    .from('host_clients')
+    .select('id')
+    .eq('host_id', payload.hostId)
+    .eq('email', payload.clientEmail)
+    .single()
+
+  let clientId: string | null = existingClient?.id ?? null
+
+  // Si no existe, crear en el CRM del host
+  if (!clientId && payload.clientEmail) {
+    const { data: newClient } = await sb
+      .from('host_clients')
+      .insert({
+        host_id:   payload.hostId,
+        full_name: payload.clientName.trim(),
+        email:     payload.clientEmail.trim(),
+        phone:     payload.clientPhone?.trim() || null,
+        source:    'directo',
+      })
+      .select('id')
+      .single()
+    clientId = newClient?.id ?? null
+  }
+
+  // Crear el evento manual
+  const { data: event, error } = await sb
+    .from('external_events')
+    .insert({
+      host_id:    payload.hostId,
+      title:      `Solicitud de ${payload.clientName.trim()}`,
+      event_type: payload.eventType?.trim() || null,
+      event_date: payload.eventDate,
+      guest_count:payload.guestCount || null,
+      status:     'tentativo',
+      source:     'directo',
+      notes:      payload.message?.trim() || null,
+      client_id:  clientId,
+      client_name:payload.clientName.trim(),
+      space_id:   payload.spaceId || null,
+    })
+    .select('id')
+    .single()
+
+  if (error) return { error: 'No se pudo registrar la solicitud' }
+
+  const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
+
+  // Email al host
+  if (host.email) {
+    await sendEmail({
+      to:      host.email,
+      subject: `Nueva solicitud directa — ${payload.clientName}`,
+      html:    tplNuevaSolicitudDirectaHost({
+        hostName:    host.full_name ?? 'Organizador',
+        clientName:  payload.clientName,
+        clientEmail: payload.clientEmail || undefined,
+        clientPhone: payload.clientPhone || undefined,
+        eventDate:   payload.eventDate,
+        eventType:   payload.eventType || undefined,
+        guestCount:  payload.guestCount || undefined,
+        message:     payload.message || undefined,
+        formUrl:     SITE,
+      }),
+    }).catch(() => {})
+  }
+
+  // Email al cliente
+  if (payload.clientEmail) {
+    await sendEmail({
+      to:      payload.clientEmail,
+      subject: `Tu solicitud fue recibida — ${host.full_name}`,
+      html:    tplSolicitudDirectaCliente({
+        clientName: payload.clientName,
+        hostName:   host.full_name ?? 'El organizador',
+        eventDate:  payload.eventDate,
+        eventType:  payload.eventType || undefined,
+      }),
+    }).catch(() => {})
+  }
+
+  revalidatePath('/dashboard/host/eventos')
+  return { success: true, eventId: event.id }
+}
+
 // ── Convertir cotización a evento manual ──────────────────────
 export async function convertQuoteToEvent(quoteId: string, eventData: CreateExternalEventPayload) {
   const supabase = await createClient()
@@ -378,4 +513,61 @@ export async function convertQuoteToEvent(quoteId: string, eventData: CreateExte
 
   revalidatePath('/dashboard/host/cotizaciones')
   return result
+}
+
+// ── Datos públicos de evento para link de pago ────────────────
+export async function getExternalEventForPayment(eventId: string) {
+  const sb = createServiceClient()
+  const { data } = await sb
+    .from('external_events')
+    .select(`
+      id, title, event_date, event_type, guest_count,
+      total_amount, paid_amount, status,
+      client_name,
+      host:profiles!host_id(id, full_name, avatar_url),
+      space:spaces(name, city),
+      bank:host_bank_accounts!inner(account_holder, bank_name, account_type, account_number, cedula_or_rnc)
+    `)
+    .eq('id', eventId)
+    .single()
+  return data ?? null
+}
+
+// ── Cliente notifica que realizó transferencia ────────────────
+export async function notifyPaymentMade(eventId: string, clientNote?: string) {
+  const sb = createServiceClient()
+
+  const { data: event } = await sb
+    .from('external_events')
+    .select('id, title, event_date, client_name, host_id, host:profiles!host_id(email, full_name)')
+    .eq('id', eventId)
+    .single()
+
+  if (!event) return { error: 'Evento no encontrado' }
+
+  const host = (event as any).host
+  if (host?.email) {
+    const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
+    await sendEmail({
+      to:      host.email,
+      subject: `Pago notificado — ${(event as any).client_name ?? (event as any).title}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px">
+          <h2 style="color:#0F1623;margin-bottom:8px">Notificación de pago recibida</h2>
+          <p style="color:#374151">
+            <strong>${(event as any).client_name ?? 'Tu cliente'}</strong>
+            indica que realizó una transferencia para el evento
+            <strong>${(event as any).title}</strong>
+            (${(event as any).event_date}).
+          </p>
+          ${clientNote ? `<p style="background:#F3F4F6;padding:12px 16px;border-radius:8px;color:#374151">"${clientNote}"</p>` : ''}
+          <a href="${SITE}/dashboard/host/eventos/${eventId}"
+            style="display:inline-block;margin-top:16px;background:#35C493;color:#fff;padding:12px 24px;border-radius:50px;text-decoration:none;font-weight:700">
+            Ver evento →
+          </a>
+        </div>`,
+    }).catch(() => {})
+  }
+
+  return { success: true }
 }

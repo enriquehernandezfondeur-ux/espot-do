@@ -27,6 +27,8 @@ function AjustesInner() {
   const [whatsapp,  setWhatsapp]  = useState('')
   const [email,     setEmail]     = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
+  const [slug,      setSlug]      = useState<string | null>(null)
+  const [linkCopied, setLinkCopied] = useState(false)
 
   // Cuenta bancaria
   const [bankName,       setBankName]       = useState('')
@@ -66,6 +68,7 @@ function AjustesInner() {
           setPhone(p.phone ?? '')
           setWhatsapp(p.whatsapp ?? '')
           setEmail(p.email ?? '')
+          setSlug((p as any).slug ?? null)
 
           if (p.avatar_url) {
             setAvatarUrl(p.avatar_url)
@@ -663,6 +666,55 @@ function AjustesInner() {
           </div>
         )}
       </div>
+
+      {/* ── Link de captación directa ── */}
+      {slug && (
+        <div className="rounded-2xl p-6 mb-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: 'rgba(53,196,147,0.1)' }}>
+              <ExternalLink size={16} style={{ color: 'var(--brand)' }} />
+            </div>
+            <div>
+              <h2 className="font-bold" style={{ color: 'var(--text-primary)' }}>Tu link de captación</h2>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                Compártelo con clientes o incrústalo en tu web para recibir solicitudes directas
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 p-3 rounded-xl mb-3"
+            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+            <span className="flex-1 text-xs font-mono truncate" style={{ color: 'var(--text-primary)' }}>
+              {BASE_URL}/h/{slug}
+            </span>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(`${BASE_URL}/h/${slug}`)
+                setLinkCopied(true)
+                setTimeout(() => setLinkCopied(false), 2000)
+              }}
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg shrink-0 transition-colors"
+              style={{ background: linkCopied ? 'rgba(53,196,147,0.15)' : 'var(--bg-card)', color: linkCopied ? 'var(--brand)' : 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+              {linkCopied ? <><CheckCircle size={12} /> Copiado</> : <><Copy size={12} /> Copiar</>}
+            </button>
+            <a
+              href={`${BASE_URL}/h/${slug}`}
+              target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg shrink-0"
+              style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)', textDecoration: 'none' }}>
+              <ExternalLink size={12} /> Ver
+            </a>
+          </div>
+
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            Las solicitudes recibidas aparecerán en{' '}
+            <a href="/dashboard/host/eventos" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>
+              Eventos → Directos
+            </a>{' '}con estado <em>Tentativo</em>.
+          </p>
+        </div>
+      )}
 
       {/* ── Notificaciones ── */}
       <div className="rounded-2xl p-6" style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
