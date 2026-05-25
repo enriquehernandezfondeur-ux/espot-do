@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { formatCurrency } from '@/lib/utils'
 import { getHostStats, getHostBookings, getHostSpaces, getSpaceViews } from '@/lib/actions/host'
-import { Loader2, TrendingUp, CalendarDays, Users, Building2, Eye } from 'lucide-react'
+import { getExternalEvents } from '@/lib/actions/external-events'
+import { Loader2, TrendingUp, CalendarDays, Users, Building2, Eye, Handshake } from 'lucide-react'
 
 const CATEGORY_LABELS: Record<string, string> = {
   salon: 'Salones', restaurante: 'Restaurantes', rooftop: 'Rooftops',
@@ -15,16 +16,18 @@ const CATEGORY_LABELS: Record<string, string> = {
 const PIE_COLORS = ['#35C493', '#3B82F6', '#F59E0B', '#EC4899', '#8B5CF6', '#EF4444']
 
 export default function AnalyticsPage() {
-  const [stats, setStats]             = useState<any>(null)
-  const [bookings, setBookings]       = useState<any[]>([])
-  const [loading, setLoading]         = useState(true)
-  const [spaceViews, setSpaceViews]   = useState<{ week: string; views: number }[]>([])
+  const [stats, setStats]               = useState<any>(null)
+  const [bookings, setBookings]         = useState<any[]>([])
+  const [directEvents, setDirectEvents] = useState<any[]>([])
+  const [loading, setLoading]           = useState(true)
+  const [spaceViews, setSpaceViews]     = useState<{ week: string; views: number }[]>([])
   const [viewsLoading, setViewsLoading] = useState(true)
 
   useEffect(() => {
-    Promise.all([getHostStats(), getHostBookings()]).then(([s, b]) => {
+    Promise.all([getHostStats(), getHostBookings(), getExternalEvents()]).then(([s, b, ev]) => {
       setStats(s)
       setBookings(b)
+      setDirectEvents(ev.filter((e: any) => ['confirmado','en_curso','completado'].includes(e.status)))
       setLoading(false)
     }).catch(() => setLoading(false))
 
@@ -44,9 +47,12 @@ export default function AnalyticsPage() {
   )
 
   // ── Calcular métricas reales ────────────────────────────
-  const confirmed = bookings.filter(b => b.status === 'confirmed' || b.status === 'completed')
-  const totalRevenue = confirmed.reduce((s, b) => s + Number(b.total_amount), 0)
-  const avgTicket = confirmed.length > 0 ? Math.round(totalRevenue / confirmed.length) : 0
+  const confirmed      = bookings.filter(b => b.status === 'confirmed' || b.status === 'completed')
+  const totalRevenue   = confirmed.reduce((s, b) => s + Number(b.total_amount), 0)
+  const totalDirecto   = directEvents.reduce((s, e) => s + Number(e.paid_amount ?? 0), 0)
+  const totalEventos   = confirmed.length + directEvents.length
+  const totalCombinado = totalRevenue * 0.9 + totalDirecto
+  const avgTicket      = totalEventos > 0 ? Math.round((totalRevenue + directEvents.reduce((s, e) => s + Number(e.total_amount ?? 0), 0)) / totalEventos) : 0
 
   // Tipos de evento
   const eventTypeMap: Record<string, number> = {}
@@ -84,10 +90,10 @@ export default function AnalyticsPage() {
       {/* Stats cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
         {[
-          { label: 'Ingresos confirmados',  value: formatCurrency(totalRevenue),       color: 'var(--brand)', icon: TrendingUp },
-          { label: 'Total de eventos',       value: confirmed.length,                  color: '#3B82F6',       icon: CalendarDays },
-          { label: 'Ticket promedio',        value: formatCurrency(avgTicket),          color: '#F59E0B',       icon: Building2 },
-          { label: 'Tasa de confirmación',   value: (() => { const real = bookings.filter(b => !['quote_requested','cancelled_guest','cancelled_host','rejected'].includes(b.status)); return real.length > 0 ? `${Math.round(confirmed.length / real.length * 100)}%` : '0%' })(), color: '#8B5CF6', icon: Users },
+          { label: 'Ingresos totales',       value: formatCurrency(totalCombinado),     color: 'var(--brand)', icon: TrendingUp },
+          { label: 'Eventos totales',        value: totalEventos,                        color: '#3B82F6',      icon: CalendarDays },
+          { label: 'Ticket promedio',        value: formatCurrency(avgTicket),           color: '#F59E0B',      icon: Building2 },
+          { label: 'Directos / Espot',       value: `${directEvents.length} / ${confirmed.length}`, color: '#8B5CF6', icon: Handshake },
         ].map(({ label, value, color, icon: Icon }) => (
           <div key={label} className="rounded-2xl p-5"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
@@ -210,6 +216,40 @@ export default function AnalyticsPage() {
           </div>
         )}
       </div>
+
+      {/* Canal breakdown */}
+      {totalEventos > 0 && (
+      <div className="rounded-2xl p-6 mb-5 md:mb-6"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+        <div className="flex items-center gap-2 mb-5">
+          <Handshake size={16} style={{ color: 'var(--brand)' }} />
+          <h2 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Canales de ingreso</h2>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          {[
+            { label: 'Espot (marketplace)', amount: totalRevenue * 0.9, count: confirmed.length, color: '#35C493', pct: totalCombinado > 0 ? Math.round((totalRevenue * 0.9 / totalCombinado) * 100) : 0 },
+            { label: 'Directo',             amount: totalDirecto,        count: directEvents.length, color: '#8B5CF6', pct: totalCombinado > 0 ? Math.round((totalDirecto / totalCombinado) * 100) : 0 },
+          ].map(ch => (
+            <div key={ch.label} className="rounded-xl p-4"
+              style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ background: ch.color }} />
+                <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>{ch.label}</span>
+              </div>
+              <div className="text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+                {formatCurrency(ch.amount)}
+              </div>
+              <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                {ch.count} eventos · {ch.pct}% del total
+              </div>
+              <div className="mt-3 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border-subtle)' }}>
+                <div className="h-full rounded-full" style={{ width: `${ch.pct}%`, background: ch.color }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      )}
 
       {/* Días populares */}
       <div className="rounded-2xl p-6"

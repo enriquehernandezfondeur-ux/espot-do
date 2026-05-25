@@ -2,6 +2,10 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { sendEmail } from '@/lib/email/send'
+import { tplEventoDirectoConfirmado, tplEventoDirectoCancelado } from '@/lib/email/templates'
+import { createBookingEvent, deleteBookingEvent, isGoogleCalendarConfigured } from '@/lib/google-calendar'
+import { formatDate } from '@/lib/utils'
 import type { ExternalEvent, ExternalEventStatus, ExternalEventSource, ExternalPaymentMethod } from '@/types'
 
 export interface CreateExternalEventPayload {
@@ -135,6 +139,23 @@ export async function updateExternalEvent(payload: UpdateExternalEventPayload) {
   if (!user) return { error: 'No autenticado' }
 
   const { id, ...fields } = payload
+
+  // Leer el evento actual antes de actualizar para detectar cambios de estado
+  const { data: current } = await supabase
+    .from('external_events')
+    .select(`
+      status, google_calendar_event_id,
+      title, event_date, start_time, end_time, event_type, guest_count, total_amount,
+      client_name,
+      client:host_clients(full_name, email),
+      space:spaces(id, name, address, sector, city)
+    `)
+    .eq('id', id)
+    .eq('host_id', user.id)
+    .single()
+
+  if (!current) return { error: 'Evento no encontrado' }
+
   const update: Record<string, any> = { updated_at: new Date().toISOString() }
 
   if (fields.title       !== undefined) update.title        = fields.title.trim()
@@ -160,6 +181,105 @@ export async function updateExternalEvent(payload: UpdateExternalEventPayload) {
     .single()
 
   if (error) return { error: error.message }
+
+  // Detectar cambio de estado para triggers de email + calendario
+  const prevStatus = current.status
+  const newStatus  = fields.status
+
+  if (newStatus && newStatus !== prevStatus) {
+    const client      = (current as any).client as { full_name: string; email: string } | null
+    const space       = (current as any).space  as { id: string; name: string; address?: string; sector?: string; city?: string } | null
+    const clientName  = client?.full_name || current.client_name || 'Cliente'
+    const clientEmail = client?.email ?? null
+
+    // Obtener nombre del host y token de Google Calendar
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name, google_calendar_refresh_token, google_calendar_connected')
+      .eq('id', user.id)
+      .single()
+
+    const hostName = profile?.full_name ?? 'El organizador'
+
+    // ── Confirmado ────────────────────────────────────────────
+    if (newStatus === 'confirmado') {
+      // Email al cliente
+      if (clientEmail) {
+        await sendEmail({
+          to:      clientEmail,
+          subject: `Tu evento está confirmado — ${formatDate(current.event_date)}`,
+          html:    tplEventoDirectoConfirmado({
+            clientName:  clientName,
+            hostName,
+            spaceName:   space?.name ?? '',
+            eventTitle:  current.title,
+            eventDate:   current.event_date,
+            startTime:   current.start_time ?? undefined,
+            endTime:     current.end_time   ?? undefined,
+            guestCount:  current.guest_count  ?? undefined,
+            totalAmount: current.total_amount ?? undefined,
+          }),
+        }).catch(() => {}) // No bloquear si el email falla
+      }
+
+      // Google Calendar sync
+      if (isGoogleCalendarConfigured() && profile?.google_calendar_connected && profile?.google_calendar_refresh_token) {
+        const gcalId = await createBookingEvent(
+          profile.google_calendar_refresh_token,
+          {
+            id:                        id,
+            event_date:                current.event_date,
+            start_time:                current.start_time ?? '12:00:00',
+            end_time:                  current.end_time   ?? '23:00:00',
+            event_type:                current.event_type,
+            guest_count:               current.guest_count ?? 0,
+            google_calendar_event_id:  null,
+          },
+          {
+            name:    space?.name    ?? current.title,
+            address: space?.address ?? null,
+            sector:  space?.sector  ?? null,
+            city:    space?.city    ?? null,
+          },
+          clientName,
+        ).catch(() => null)
+
+        if (gcalId) {
+          await supabase
+            .from('external_events')
+            .update({ google_calendar_event_id: gcalId })
+            .eq('id', id)
+        }
+      }
+    }
+
+    // ── Cancelado ─────────────────────────────────────────────
+    if (newStatus === 'cancelado') {
+      // Email al cliente
+      if (clientEmail) {
+        await sendEmail({
+          to:      clientEmail,
+          subject: `Evento cancelado — ${current.title}`,
+          html:    tplEventoDirectoCancelado({
+            clientName: clientName,
+            hostName,
+            eventTitle: current.title,
+            eventDate:  current.event_date,
+          }),
+        }).catch(() => {})
+      }
+
+      // Eliminar de Google Calendar
+      const gcalId = (data as any)?.google_calendar_event_id ?? current.google_calendar_event_id
+      if (isGoogleCalendarConfigured() && profile?.google_calendar_refresh_token && gcalId) {
+        await deleteBookingEvent(profile.google_calendar_refresh_token, gcalId).catch(() => {})
+        await supabase
+          .from('external_events')
+          .update({ google_calendar_event_id: null })
+          .eq('id', id)
+      }
+    }
+  }
 
   revalidatePath('/dashboard/host/eventos')
   revalidatePath('/dashboard/host/calendario')

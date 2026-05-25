@@ -743,6 +743,73 @@ export function tplDisputaAbierta(rawData: {
   })
 }
 
+// ── EVENTOS DIRECTOS ────────────────────────────────────────
+
+/** Confirmación al cliente de un evento directo (gestionado por el host fuera del marketplace) */
+export function tplEventoDirectoConfirmado(rawData: {
+  clientName: string
+  hostName: string
+  spaceName: string
+  eventTitle: string
+  eventDate: string
+  startTime?: string
+  endTime?: string
+  guestCount?: number
+  totalAmount?: number
+}) {
+  const d = {
+    ...rawData,
+    clientName: esc(rawData.clientName),
+    hostName:   esc(rawData.hostName),
+    spaceName:  esc(rawData.spaceName),
+    eventTitle: esc(rawData.eventTitle),
+  }
+  const rows = [
+    { label: 'Evento',              value: d.eventTitle },
+    ...(d.spaceName ? [{ label: 'Lugar', value: d.spaceName }] : []),
+    { label: 'Fecha',               value: formatDate(d.eventDate) },
+    ...(d.startTime && d.endTime ? [{ label: 'Horario', value: `${formatTime(d.startTime)} &ndash; ${formatTime(d.endTime)}` }] : []),
+    ...(d.guestCount ? [{ label: 'Personas', value: `${d.guestCount}` }] : []),
+    ...(d.totalAmount ? [{ label: 'Valor del evento', value: formatCurrency(d.totalAmount) }] : []),
+    { label: 'Coordinado por',      value: d.hostName },
+  ]
+  return emailBase({
+    title: '&iexcl;Tu evento est&aacute; confirmado!',
+    subtitle: `Hola ${d.clientName}, tu evento fue confirmado por ${d.hostName}.`,
+    accentColor: '#35C493',
+    body: `
+      <p style="color:#374151;margin:0 0 16px;">Hola <strong>${d.clientName}</strong>, confirmamos los detalles de tu evento.</p>
+      ${infoBox(rows)}
+      <p style="color:#6B7280;font-size:13px;margin:0;">Si tienes preguntas, cont&aacute;ctanos directamente. Estamos para ayudarte a que tu evento sea un &eacute;xito.</p>`,
+  })
+}
+
+/** Notificación al cliente de cancelación de un evento directo */
+export function tplEventoDirectoCancelado(rawData: {
+  clientName: string
+  hostName: string
+  eventTitle: string
+  eventDate: string
+  reason?: string
+}) {
+  const d = {
+    ...rawData,
+    clientName: esc(rawData.clientName),
+    hostName:   esc(rawData.hostName),
+    eventTitle: esc(rawData.eventTitle),
+    reason:     esc(rawData.reason),
+  }
+  return emailBase({
+    title: 'Evento cancelado',
+    subtitle: `${d.eventTitle} &mdash; ${formatDate(d.eventDate)}`,
+    accentColor: '#6B7280',
+    body: `
+      <p style="color:#374151;margin:0 0 16px;">Hola <strong>${d.clientName}</strong>, lamentamos informarte que el evento <strong>${d.eventTitle}</strong> programado para el ${formatDate(d.eventDate)} fue cancelado.</p>
+      ${d.reason ? `<p style="color:#6B7280;font-size:13px;background:#F9FAFB;border:1px solid #E8ECF0;border-radius:10px;padding:12px 16px;margin:0 0 16px;">Motivo: ${d.reason}</p>` : ''}
+      <p style="color:#374151;margin:0;">Si tienes preguntas sobre pagos o pr&oacute;ximas fechas, cont&aacute;ctanos.</p>`,
+  })
+}
+
 // ── 16. SOLICITUD DE RESEÑA (post-evento) ─────────────────
 
 export function tplSolicitudResena(rawData: {

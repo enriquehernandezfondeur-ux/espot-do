@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { getHostBookings, getHostStats } from '@/lib/actions/host'
-import { Loader2, TrendingUp, CreditCard, DollarSign, Download, ArrowUpRight, Clock, CheckCircle, Building2, Banknote } from 'lucide-react'
+import { getExternalEvents } from '@/lib/actions/external-events'
+import { Loader2, TrendingUp, CreditCard, DollarSign, Download, ArrowUpRight, Clock, Building2, Banknote, Handshake } from 'lucide-react'
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 // ── Estados de pago unificados ─────────────────────────────
@@ -27,49 +28,69 @@ function getPayoutStatus(booking: any): { label: string; color: string; bg: stri
 }
 
 export default function FinanzasPage() {
-  const [bookings, setBookings] = useState<any[]>([])
-  const [stats,    setStats]    = useState<any>(null)
-  const [loading,  setLoading]  = useState(true)
-  const [filter,   setFilter]   = useState<'all' | 'confirmed' | 'completed' | 'pending'>('all')
+  const [bookings,        setBookings]       = useState<any[]>([])
+  const [directEvents,    setDirectEvents]   = useState<any[]>([])
+  const [stats,           setStats]          = useState<any>(null)
+  const [loading,         setLoading]        = useState(true)
+  const [filter,          setFilter]         = useState<'all' | 'confirmed' | 'completed' | 'pending'>('all')
+  const [channel,         setChannel]        = useState<'espot' | 'directo' | 'all'>('all')
 
   useEffect(() => {
-    Promise.all([getHostBookings(), getHostStats()]).then(([b, s]) => {
-      setBookings(b); setStats(s); setLoading(false)
+    Promise.all([getHostBookings(), getHostStats(), getExternalEvents()]).then(([b, s, ev]) => {
+      setBookings(b); setStats(s)
+      setDirectEvents(ev.filter((e: any) => ['confirmado','en_curso','completado'].includes(e.status)))
+      setLoading(false)
     }).catch(() => setLoading(false))
   }, [])
 
-  // Solo reservas con pago real para los totales financieros
+  // Espot: solo reservas con pago real
   const paidBookings = bookings.filter(b =>
     ['accepted', 'confirmed', 'completed'].includes(b.status) &&
     ['advance', 'partial', 'paid'].includes(b.payment_status)
   )
-  const filtered = bookings.filter(b => {
+  const filteredEspot = bookings.filter(b => {
     if (filter === 'confirmed')  return b.status === 'confirmed'
     if (filter === 'completed')  return b.status === 'completed'
     if (filter === 'pending')    return ['pending', 'accepted'].includes(b.status)
     return !['cancelled_guest', 'cancelled_host', 'rejected'].includes(b.status)
   })
 
+  // Directo: eventos manuales con cobros registrados
+  const totalDirecto   = directEvents.reduce((s, e) => s + Number(e.paid_amount ?? 0), 0)
   const totalBruto     = paidBookings.reduce((s, b) => s + Number(b.total_amount), 0)
   const totalComision  = paidBookings.reduce((s, b) => s + Number(b.total_amount) * 0.10, 0)
   const totalNeto      = totalBruto - totalComision
+  const totalCombinado = totalNeto + totalDirecto
   const pendingPayout  = paidBookings
     .filter(b => b.status === 'confirmed')
     .reduce((s, b) => s + Number(b.total_amount) * 0.90, 0)
   const thisMonth = stats?.revenueThisMonth ?? 0
 
   function exportCSV() {
+    const espotRows = filteredEspot.map(b => [
+      formatDate(b.event_date),
+      (b.profiles as any)?.full_name ?? 'Cliente',
+      b.event_type ?? '',
+      Number(b.total_amount).toFixed(2),
+      (Number(b.total_amount) * 0.10).toFixed(2),
+      (Number(b.total_amount) * 0.90).toFixed(2),
+      b.status,
+      'Espot',
+    ])
+    const directRows = directEvents.map(e => [
+      formatDate(e.event_date),
+      (e.client as any)?.full_name || e.client_name || 'Cliente',
+      e.event_type ?? e.title ?? '',
+      Number(e.total_amount ?? 0).toFixed(2),
+      '0.00',
+      Number(e.paid_amount ?? 0).toFixed(2),
+      e.status,
+      'Directo',
+    ])
     const rows = [
-      ['Fecha', 'Cliente', 'Evento', 'Total', 'Comisión Espot (10%)', 'Neto', 'Estado'],
-      ...filtered.map(b => [
-        formatDate(b.event_date),
-        (b.profiles as any)?.full_name ?? 'Cliente',
-        b.event_type ?? '',
-        Number(b.total_amount).toFixed(2),
-        (Number(b.total_amount) * 0.10).toFixed(2),
-        (Number(b.total_amount) * 0.90).toFixed(2),
-        b.status,
-      ])
+      ['Fecha', 'Cliente', 'Evento', 'Total', 'Comisión (10%)', 'Cobrado', 'Estado', 'Canal'],
+      ...espotRows,
+      ...directRows,
     ]
     const csv  = rows.map(r => r.join(',')).join('\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
@@ -97,7 +118,7 @@ export default function FinanzasPage() {
             Finanzas
           </h1>
           <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-            Ingresos de reservas Espot · Comisiones y liquidaciones
+            Ingresos Espot + Directos · Comisiones y liquidaciones
           </p>
         </div>
         <button onClick={exportCSV}
@@ -141,10 +162,10 @@ export default function FinanzasPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-5 md:mb-8">
         {[
-          { label: 'Ingresos brutos',   value: formatCurrency(totalBruto),    icon: TrendingUp,   sub: 'cobrado a clientes' },
-          { label: 'Comisión Espot',    value: formatCurrency(totalComision),  icon: Building2,    sub: '10% por transacción' },
-          { label: 'Neto a recibir',    value: formatCurrency(totalNeto),      icon: DollarSign,   sub: 'descontada comisión' },
-          { label: 'Este mes',          value: formatCurrency(thisMonth),      icon: ArrowUpRight,  sub: 'ingresos del mes' },
+          { label: 'Total combinado',   value: formatCurrency(totalCombinado), icon: TrendingUp,   sub: 'Espot neto + Directo cobrado' },
+          { label: 'Espot (neto)',       value: formatCurrency(totalNeto),      icon: Building2,    sub: `Bruto ${formatCurrency(totalBruto)} − 10%` },
+          { label: 'Directo cobrado',   value: formatCurrency(totalDirecto),   icon: Handshake,    sub: `${directEvents.length} eventos directos` },
+          { label: 'Este mes',          value: formatCurrency(thisMonth),      icon: ArrowUpRight, sub: 'ingresos Espot del mes' },
         ].map(({ label, value, icon: Icon, sub }) => (
           <div key={label} className="rounded-2xl p-5"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
@@ -227,7 +248,25 @@ export default function FinanzasPage() {
         </div>
       </div>
 
-      {/* Filtros */}
+      {/* Filtros de canal */}
+      <div className="flex gap-2 mb-3 overflow-x-auto scrollbar-hide">
+        {[
+          { key: 'all',     label: 'Todos los canales' },
+          { key: 'espot',   label: 'Espot' },
+          { key: 'directo', label: 'Directo' },
+        ].map(f => (
+          <button key={f.key} onClick={() => setChannel(f.key as any)}
+            className="px-4 py-2.5 rounded-xl text-sm font-medium transition-all shrink-0"
+            style={channel === f.key
+              ? { background: 'var(--brand)', color: '#fff' }
+              : { background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Filtros de estado (Espot) */}
+      {channel !== 'directo' && (
       <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
         {[
           { key: 'all',       label: 'Todas' },
@@ -236,47 +275,39 @@ export default function FinanzasPage() {
           { key: 'pending',   label: 'Pendientes' },
         ].map(f => (
           <button key={f.key} onClick={() => setFilter(f.key as any)}
-            className="px-4 py-2.5 rounded-xl text-sm font-medium transition-all shrink-0"
+            className="px-3 py-2 rounded-lg text-xs font-medium transition-all shrink-0"
             style={filter === f.key
-              ? { background: 'var(--brand)', color: '#fff' }
-              : { background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+              ? { background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border-medium)' }
+              : { background: 'transparent', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
             {f.label}
           </button>
         ))}
       </div>
+      )}
 
-      {/* Tabla de reservas */}
-      <div className="rounded-2xl overflow-hidden"
+      {/* Tabla — Espot */}
+      {channel !== 'directo' && (
+      <div className="rounded-2xl overflow-hidden mb-4"
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
         <div className="overflow-x-auto">
         <div style={{ minWidth: 580 }}>
-        {/* Header de tabla */}
         <div className="grid gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-wide"
-          style={{
-            gridTemplateColumns: '1fr auto auto auto auto',
-            borderBottom: '1px solid var(--border-subtle)',
-            color: 'var(--text-muted)',
-            background: 'var(--bg-elevated)',
-          }}>
-          <span>Reserva</span>
-          <span>Fecha evento</span>
-          <span className="text-right">Total cliente</span>
-          <span className="text-right">Neto a recibir</span>
+          style={{ gridTemplateColumns: '1fr auto auto auto auto', borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-muted)', background: 'var(--bg-elevated)' }}>
+          <span>Reserva Espot</span>
+          <span>Fecha</span>
+          <span className="text-right">Total</span>
+          <span className="text-right">Neto (90%)</span>
           <span>Payout</span>
         </div>
-
-        {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
-              style={{ background: 'var(--bg-elevated)' }}>
-              <DollarSign size={20} style={{ color: 'var(--text-muted)' }} />
-            </div>
-            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Sin transacciones registradas</p>
+        {filteredEspot.length === 0 ? (
+          <div className="flex items-center justify-center py-12 gap-2">
+            <DollarSign size={18} style={{ color: 'var(--text-muted)' }} />
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Sin transacciones Espot</p>
           </div>
         ) : (
           <>
             <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
-              {filtered.map(b => {
+              {filteredEspot.map(b => {
                 const guest  = (b as any).profiles as any
                 const neto   = Number(b.total_amount) * 0.90
                 const payout = getPayoutStatus(b)
@@ -291,50 +322,91 @@ export default function FinanzasPage() {
                         {b.event_type} · {(b as any).spaces?.name}
                       </div>
                     </div>
-                    <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      {formatDate(b.event_date)}
-                    </div>
-                    <div className="font-semibold text-sm text-right" style={{ color: 'var(--text-primary)' }}>
-                      {formatCurrency(Number(b.total_amount))}
-                    </div>
-                    <div className="font-bold text-sm text-right" style={{ color: 'var(--brand)' }}>
-                      {formatCurrency(neto)}
-                    </div>
+                    <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{formatDate(b.event_date)}</div>
+                    <div className="font-semibold text-sm text-right" style={{ color: 'var(--text-primary)' }}>{formatCurrency(Number(b.total_amount))}</div>
+                    <div className="font-bold text-sm text-right" style={{ color: 'var(--brand)' }}>{formatCurrency(neto)}</div>
                     <div>
                       <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
-                        style={{ background: payout.bg, color: payout.color }}>
-                        {payout.label}
-                      </span>
+                        style={{ background: payout.bg, color: payout.color }}>{payout.label}</span>
                     </div>
                   </div>
                 )
               })}
             </div>
-
-            {/* Totales */}
             <div className="grid gap-4 items-center px-5 py-4 font-bold"
-              style={{
-                gridTemplateColumns: '1fr auto auto auto auto',
-                borderTop: '2px solid var(--border-medium)',
-                background: 'var(--bg-elevated)',
-              }}>
-              <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                Total ({filtered.length} reservas)
-              </span>
+              style={{ gridTemplateColumns: '1fr auto auto auto auto', borderTop: '2px solid var(--border-medium)', background: 'var(--bg-elevated)' }}>
+              <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Total ({filteredEspot.length} reservas)</span>
               <span></span>
-              <span className="text-sm text-right" style={{ color: 'var(--text-primary)' }}>
-                {formatCurrency(filtered.reduce((s, b) => s + Number(b.total_amount), 0))}
-              </span>
-              <span className="text-sm text-right" style={{ color: 'var(--brand)' }}>
-                {formatCurrency(filtered.reduce((s, b) => s + Number(b.total_amount) * 0.90, 0))}
-              </span>
+              <span className="text-sm text-right" style={{ color: 'var(--text-primary)' }}>{formatCurrency(filteredEspot.reduce((s, b) => s + Number(b.total_amount), 0))}</span>
+              <span className="text-sm text-right" style={{ color: 'var(--brand)' }}>{formatCurrency(filteredEspot.reduce((s, b) => s + Number(b.total_amount) * 0.90, 0))}</span>
               <span></span>
             </div>
           </>
         )}
-        </div>{/* minWidth wrapper */}
-        </div>{/* overflow-x-auto */}
+        </div></div>
       </div>
+      )}
+
+      {/* Tabla — Directo */}
+      {channel !== 'espot' && (
+      <div className="rounded-2xl overflow-hidden mb-4"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+        <div className="overflow-x-auto">
+        <div style={{ minWidth: 520 }}>
+        <div className="grid gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-wide"
+          style={{ gridTemplateColumns: '1fr auto auto auto', borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-muted)', background: 'var(--bg-elevated)' }}>
+          <span>Evento Directo</span>
+          <span>Fecha</span>
+          <span className="text-right">Valor total</span>
+          <span className="text-right">Cobrado</span>
+        </div>
+        {directEvents.length === 0 ? (
+          <div className="flex items-center justify-center py-12 gap-2">
+            <Handshake size={18} style={{ color: 'var(--text-muted)' }} />
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Sin eventos directos registrados</p>
+          </div>
+        ) : (
+          <>
+            <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
+              {directEvents.map(e => {
+                const clientName = (e.client as any)?.full_name || e.client_name || 'Cliente'
+                const cobrado    = Number(e.paid_amount ?? 0)
+                const pending    = Math.max(0, Number(e.total_amount ?? 0) - cobrado)
+                return (
+                  <div key={e.id} className="grid gap-4 items-center px-5 py-4"
+                    style={{ gridTemplateColumns: '1fr auto auto auto' }}>
+                    <div>
+                      <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{clientName}</div>
+                      <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{e.event_type ?? e.title}</div>
+                    </div>
+                    <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{formatDate(e.event_date)}</div>
+                    <div className="font-semibold text-sm text-right" style={{ color: 'var(--text-primary)' }}>
+                      {e.total_amount ? formatCurrency(Number(e.total_amount)) : '—'}
+                    </div>
+                    <div className="text-right">
+                      <div className="font-bold text-sm" style={{ color: cobrado > 0 ? 'var(--brand)' : 'var(--text-muted)' }}>
+                        {formatCurrency(cobrado)}
+                      </div>
+                      {pending > 0 && (
+                        <div className="text-xs" style={{ color: '#D97706' }}>Pendiente: {formatCurrency(pending)}</div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            <div className="grid gap-4 items-center px-5 py-4 font-bold"
+              style={{ gridTemplateColumns: '1fr auto auto auto', borderTop: '2px solid var(--border-medium)', background: 'var(--bg-elevated)' }}>
+              <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Total ({directEvents.length} eventos)</span>
+              <span></span>
+              <span className="text-sm text-right" style={{ color: 'var(--text-primary)' }}>{formatCurrency(directEvents.reduce((s, e) => s + Number(e.total_amount ?? 0), 0))}</span>
+              <span className="text-sm text-right" style={{ color: 'var(--brand)' }}>{formatCurrency(totalDirecto)}</span>
+            </div>
+          </>
+        )}
+        </div></div>
+      </div>
+      )}
 
       {/* Nota de cuenta bancaria */}
       <div className="mt-6 rounded-2xl p-5 flex items-center justify-between gap-4"

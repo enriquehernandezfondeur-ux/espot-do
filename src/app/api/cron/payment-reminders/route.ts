@@ -388,5 +388,100 @@ export async function GET(req: Request) {
     errors++
   }
 
+  // ── 5. Recordatorio pre-evento (48h) — eventos directos ───────────────────
+
+  try {
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    const tomorrowStr = tomorrow.toISOString().split('T')[0]
+
+    const { data: directTomorrow } = await sb
+      .from('external_events')
+      .select(`
+        id, title, event_date, start_time, end_time, guest_count, total_amount,
+        client_name,
+        client:host_clients(full_name, email),
+        space:spaces(name, address, sector, city)
+      `)
+      .eq('event_date', tomorrowStr)
+      .eq('status', 'confirmado')
+
+    for (const ev of directTomorrow ?? []) {
+      const client      = (ev as any).client as { full_name: string; email: string } | null
+      const clientEmail = client?.email ?? null
+      const clientName  = client?.full_name || (ev as any).client_name || 'Cliente'
+      const space       = (ev as any).space as { name: string; address?: string; sector?: string; city?: string } | null
+      if (!clientEmail) continue
+
+      const spaceAddress = space?.address
+        ? `${space.address}, ${space.sector ?? ''}, ${space.city ?? ''}`.replace(/^, |, $/g, '')
+        : (space?.city ?? '')
+
+      try {
+        await sendEmail({
+          to:      clientEmail,
+          subject: `Tu evento es mañana — ${ev.title}`,
+          html:    tplRecordatorioEvento({
+            guestName:    clientName,
+            spaceName:    space?.name ?? ev.title,
+            spaceAddress,
+            eventDate:    ev.event_date,
+            startTime:    (ev as any).start_time ?? '',
+            endTime:      (ev as any).end_time   ?? '',
+            guestCount:   (ev as any).guest_count ?? 0,
+            bookingId:    ev.id,
+          }),
+        })
+        sent++
+      } catch { errors++ }
+    }
+  } catch (err: any) {
+    console.error('[cron] direct event pre-event reminders failed:', err.message)
+    errors++
+  }
+
+  // ── 6. Solicitud de reseña — eventos directos (24-48h después) ────────────
+
+  try {
+    const yesterday = new Date()
+    yesterday.setDate(yesterday.getDate() - 1)
+    const yesterdayStr = yesterday.toISOString().split('T')[0]
+
+    const { data: directPast } = await sb
+      .from('external_events')
+      .select(`
+        id, title, event_date,
+        client_name,
+        client:host_clients(full_name, email)
+      `)
+      .eq('event_date', yesterdayStr)
+      .in('status', ['confirmado', 'completado'])
+
+    for (const ev of directPast ?? []) {
+      const client      = (ev as any).client as { full_name: string; email: string } | null
+      const clientEmail = client?.email ?? null
+      const clientName  = client?.full_name || (ev as any).client_name || 'Cliente'
+      if (!clientEmail) continue
+
+      try {
+        await sendEmail({
+          to:      clientEmail,
+          subject: `¿Cómo estuvo tu evento? — ${ev.title}`,
+          html:    tplSolicitudResena({
+            guestName:  clientName,
+            spaceName:  ev.title,
+            eventDate:  ev.event_date,
+            bookingId:  ev.id,
+            spaceSlug:  '',
+          }),
+        })
+        sent++
+      } catch { errors++ }
+    }
+  } catch (err: any) {
+    console.error('[cron] direct event review requests failed:', err.message)
+    errors++
+  }
+
   return NextResponse.json({ ok: true, sent, errors, autoCancelled, ts: new Date().toISOString() })
 }
