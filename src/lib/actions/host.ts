@@ -327,17 +327,19 @@ export async function getHostStats() {
   const confirmedDateOf = (b: { confirmed_at?: string | null }) =>
     b.confirmed_at ? b.confirmed_at.split('T')[0] : null
 
+  const paidStatuses = ['confirmed', 'completed']
+
   const revenueThisMonth = bookings
     .filter(b => {
       const d = confirmedDateOf(b)
-      return b.status === 'confirmed' && d && d >= thisMonthStart && d <= thisMonthEnd
+      return paidStatuses.includes(b.status) && d && d >= thisMonthStart && d <= thisMonthEnd
     })
     .reduce((s, b) => s + Number(b.total_amount), 0)
 
   const revenuePrevMonth = bookings
     .filter(b => {
       const d = confirmedDateOf(b)
-      return b.status === 'confirmed' && d && d >= prevMonthStart && d <= prevMonthEnd
+      return paidStatuses.includes(b.status) && d && d >= prevMonthStart && d <= prevMonthEnd
     })
     .reduce((s, b) => s + Number(b.total_amount), 0)
 
@@ -354,7 +356,7 @@ export async function getHostStats() {
     const ingresos = bookings
       .filter(b => {
         const cd = confirmedDateOf(b)
-        return b.status === 'confirmed' && cd && cd >= start && cd <= end
+        return paidStatuses.includes(b.status) && cd && cd >= start && cd <= end
       })
       .reduce((s, b) => s + Number(b.total_amount), 0)
     return { mes: mes.charAt(0).toUpperCase() + mes.slice(1), ingresos }

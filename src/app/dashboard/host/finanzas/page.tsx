@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { getHostBookings, getHostStats } from '@/lib/actions/host'
 import { getExternalEvents } from '@/lib/actions/external-events'
-import { Loader2, TrendingUp, CreditCard, DollarSign, Download, ArrowUpRight, Clock, Building2, Banknote, Handshake } from 'lucide-react'
-import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { Loader2, TrendingUp, CreditCard, DollarSign, Download, ArrowUpRight, Clock, Building2, Banknote, Handshake, LayoutGrid, ListFilter, CalendarCheck, CheckCheck } from 'lucide-react'
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 
 // ── Estados de pago unificados ─────────────────────────────
 const paymentLabel: Record<string, { label: string; color: string; bg: string }> = {
@@ -64,7 +64,29 @@ export default function FinanzasPage() {
   const pendingPayout  = paidBookings
     .filter(b => b.status === 'confirmed')
     .reduce((s, b) => s + Number(b.total_amount) * 0.90, 0)
-  const thisMonth = stats?.revenueThisMonth ?? 0
+  const thisMonth    = stats?.revenueThisMonth ?? 0
+  const prevMonth    = stats?.revenuePrevMonth ?? 0
+  const monthChange  = prevMonth > 0 ? Math.round((thisMonth - prevMonth) / prevMonth * 100) : null
+
+  const monthlyChartData = (stats?.monthlyRevenue ?? []).map((m: any, i: number) => {
+    const now   = new Date()
+    const d     = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1)
+    const start = d.toISOString().split('T')[0]
+    const end   = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split('T')[0]
+    const directo = directEvents.reduce((s: number, e: any) => {
+      const date = e.event_date
+      if (date >= start && date <= end) return s + Number(e.paid_amount ?? 0)
+      return s
+    }, 0)
+    return { ...m, directo }
+  })
+
+  const espotCounts = {
+    all:       bookings.filter(b => !['cancelled_guest','cancelled_host','rejected'].includes(b.status)).length,
+    confirmed: bookings.filter(b => b.status === 'confirmed').length,
+    completed: bookings.filter(b => b.status === 'completed').length,
+    pending:   bookings.filter(b => ['pending','accepted'].includes(b.status)).length,
+  }
 
   function exportCSV() {
     const espotRows = filteredEspot.map(b => [
@@ -182,44 +204,85 @@ export default function FinanzasPage() {
       </div>
 
       {/* ── Gráfica de ingresos mensuales ── */}
-      <div className="rounded-2xl p-6 mb-6"
+      <div className="rounded-2xl p-5 md:p-6 mb-6"
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between sm:gap-3 mb-6 gap-0.5">
+
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-5">
           <div>
             <h2 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Ingresos por mes</h2>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Últimos 6 meses · Ingresos brutos confirmados</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Últimos 6 meses · Espot + Directo</p>
           </div>
-          <div>
-            <div className="font-bold text-xl sm:text-2xl" style={{ color: 'var(--brand)', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
-              {formatCurrency(thisMonth)}
+          <div className="flex items-end gap-3">
+            <div className="text-right">
+              <div className="font-bold text-xl sm:text-2xl" style={{ color: 'var(--brand)', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
+                {formatCurrency(thisMonth)}
+              </div>
+              <div className="text-xs" style={{ color: 'var(--text-muted)' }}>este mes</div>
             </div>
-            <div className="text-xs" style={{ color: 'var(--text-muted)' }}>este mes</div>
+            {monthChange !== null && (
+              <span className="text-xs font-bold px-2 py-1 rounded-lg mb-0.5 shrink-0"
+                style={{
+                  background: monthChange >= 0 ? 'rgba(53,196,147,0.1)' : 'rgba(220,38,38,0.08)',
+                  color: monthChange >= 0 ? '#0A7A50' : '#DC2626',
+                }}>
+                {monthChange >= 0 ? '+' : ''}{monthChange}%
+              </span>
+            )}
           </div>
         </div>
 
-        {stats?.monthlyRevenue?.some((m: any) => m.ingresos > 0) ? (
-          <ResponsiveContainer width="100%" height={180}>
-            <AreaChart data={stats.monthlyRevenue}>
+        {/* Leyenda */}
+        <div className="flex items-center gap-4 mb-4">
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-2 rounded-full" style={{ background: '#35C493' }} />
+            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Espot</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-2 rounded-full" style={{ background: '#D97706' }} />
+            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Directo</span>
+          </div>
+        </div>
+
+        {monthlyChartData.some((m: any) => m.ingresos > 0 || m.directo > 0) ? (
+          <ResponsiveContainer width="100%" height={200}>
+            <AreaChart data={monthlyChartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               <defs>
-                <linearGradient id="gradFinanzas" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="#35C493" stopOpacity={0.15} />
+                <linearGradient id="gradEspot" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%"  stopColor="#35C493" stopOpacity={0.18} />
                   <stop offset="95%" stopColor="#35C493" stopOpacity={0} />
                 </linearGradient>
+                <linearGradient id="gradDirecto" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%"  stopColor="#D97706" stopOpacity={0.14} />
+                  <stop offset="95%" stopColor="#D97706" stopOpacity={0} />
+                </linearGradient>
               </defs>
-              <XAxis dataKey="mes" stroke="#F3F4F6"
+              <CartesianGrid stroke="var(--border-subtle)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="mes"
                 tick={{ fill: 'var(--text-muted)', fontSize: 11 }}
                 axisLine={false} tickLine={false} />
+              <YAxis
+                tick={{ fill: 'var(--text-muted)', fontSize: 10 }}
+                axisLine={false} tickLine={false} width={52}
+                tickFormatter={(v: number) => v >= 1000 ? `${(v/1000).toFixed(0)}k` : `${v}`} />
               <Tooltip
                 contentStyle={{
                   background: 'var(--bg-card)', border: '1px solid var(--border-subtle)',
                   borderRadius: 12, color: 'var(--text-primary)', fontSize: 12,
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.1)', padding: '10px 14px',
                 }}
-                formatter={(v: any) => [formatCurrency(Number(v)), 'Ingresos']}
+                formatter={(v: any, name: any) => [
+                  formatCurrency(Number(v)),
+                  name === 'ingresos' ? 'Espot' : 'Directo',
+                ]}
+                labelStyle={{ fontWeight: 600, marginBottom: 4, color: 'var(--text-primary)' }}
               />
               <Area type="monotone" dataKey="ingresos"
                 stroke="#35C493" strokeWidth={2.5}
-                fill="url(#gradFinanzas)" dot={false} />
+                fill="url(#gradEspot)" dot={false} activeDot={{ r: 4, fill: '#35C493' }} />
+              <Area type="monotone" dataKey="directo"
+                stroke="#D97706" strokeWidth={2}
+                fill="url(#gradDirecto)" dot={false} activeDot={{ r: 4, fill: '#D97706' }} />
             </AreaChart>
           </ResponsiveContainer>
         ) : (
@@ -248,42 +311,57 @@ export default function FinanzasPage() {
         </div>
       </div>
 
-      {/* Filtros de canal */}
-      <div className="flex gap-2 mb-3 overflow-x-auto scrollbar-hide">
-        {[
-          { key: 'all',     label: 'Todos los canales' },
-          { key: 'espot',   label: 'Espot' },
-          { key: 'directo', label: 'Directo' },
-        ].map(f => (
-          <button key={f.key} onClick={() => setChannel(f.key as any)}
-            className="px-4 py-2.5 rounded-xl text-sm font-medium transition-all shrink-0"
-            style={channel === f.key
-              ? { background: 'var(--brand)', color: '#fff' }
-              : { background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
-            {f.label}
-          </button>
-        ))}
-      </div>
+      {/* Filtros de canal + estado */}
+      <div className="flex flex-col gap-2 mb-5">
+        {/* Canal */}
+        <div className="flex gap-1 p-1 rounded-2xl"
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+          {([
+            { key: 'all',     label: 'Todos los canales', Icon: LayoutGrid },
+            { key: 'espot',   label: 'Espot',             Icon: Building2  },
+            { key: 'directo', label: 'Directo',           Icon: Handshake  },
+          ] as const).map(({ key, label, Icon }) => (
+            <button key={key} onClick={() => setChannel(key)}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-semibold transition-all whitespace-nowrap min-h-[40px]"
+              style={channel === key
+                ? { background: 'var(--text-primary)', color: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }
+                : { color: 'var(--text-muted)' }}>
+              <Icon size={12} />
+              {label}
+            </button>
+          ))}
+        </div>
 
-      {/* Filtros de estado (Espot) */}
-      {channel !== 'directo' && (
-      <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
-        {[
-          { key: 'all',       label: 'Todas' },
-          { key: 'confirmed', label: 'Confirmadas' },
-          { key: 'completed', label: 'Completadas' },
-          { key: 'pending',   label: 'Pendientes' },
-        ].map(f => (
-          <button key={f.key} onClick={() => setFilter(f.key as any)}
-            className="px-3 py-2 rounded-lg text-xs font-medium transition-all shrink-0"
-            style={filter === f.key
-              ? { background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border-medium)' }
-              : { background: 'transparent', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
-            {f.label}
-          </button>
-        ))}
+        {/* Estado — solo Espot o Todos */}
+        {channel !== 'directo' && (
+          <div className="flex gap-1 p-1 rounded-2xl"
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+            {([
+              { key: 'all',       label: 'Todas',       Icon: ListFilter,   count: espotCounts.all       },
+              { key: 'confirmed', label: 'Confirmadas', Icon: CalendarCheck, count: espotCounts.confirmed },
+              { key: 'completed', label: 'Completadas', Icon: CheckCheck,   count: espotCounts.completed },
+              { key: 'pending',   label: 'Pendientes',  Icon: Clock,        count: espotCounts.pending   },
+            ] as const).map(({ key, label, Icon, count }) => (
+              <button key={key} onClick={() => setFilter(key)}
+                className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 px-1 rounded-xl text-xs font-semibold transition-all whitespace-nowrap min-h-[44px]"
+                style={filter === key
+                  ? { background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border-medium)' }
+                  : { color: 'var(--text-muted)' }}>
+                <div className="flex items-center gap-1">
+                  <Icon size={11} />
+                  <span>{label}</span>
+                </div>
+                {count > 0 && (
+                  <span className="text-[10px] font-bold tabular-nums"
+                    style={{ color: filter === key ? 'var(--brand)' : 'var(--text-muted)', opacity: filter === key ? 1 : 0.7 }}>
+                    {count}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
-      )}
 
       {/* Tabla — Espot */}
       {channel !== 'directo' && (
