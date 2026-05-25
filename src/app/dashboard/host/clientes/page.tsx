@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { getClients, createClient_, updateClient, deleteClient } from '@/lib/actions/clients'
-import { getClientWithHistory } from '@/lib/actions/clients'
+import { getUnifiedClients, createClient_, updateClient, deleteClient, getClientWithHistory, getEspotGuestHistory } from '@/lib/actions/clients'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 import {
@@ -72,13 +71,16 @@ export default function ClientesPage() {
 
   useEffect(() => {
     setLoading(true)
-    getClients().then(d => { setClients(d); setLoading(false) })
+    getUnifiedClients().then(d => { setClients(d); setLoading(false) })
   }, [])
 
   useEffect(() => {
     if (!selected) { setHistory(null); return }
     setHistLoading(true)
-    getClientWithHistory(selected.id).then(d => { setHistory(d); setHistLoading(false) })
+    const loader = (selected as any)._is_espot_guest
+      ? getEspotGuestHistory(selected.id)
+      : getClientWithHistory(selected.id)
+    loader.then(d => { setHistory(d); setHistLoading(false) })
   }, [selected])
 
   function openCreateForm() {
@@ -321,14 +323,16 @@ export default function ClientesPage() {
             <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
               <div className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{selected.full_name}</div>
               <div className="flex items-center gap-1">
-                <button onClick={() => openEditForm(selected)}
-                  className="p-1.5 rounded-lg transition-colors hover:bg-slate-100 text-gray-400 hover:text-gray-700">
-                  <Pencil size={13} />
-                </button>
-                <button onClick={() => handleDelete(selected.id)} disabled={deleting === selected.id}
-                  className="p-1.5 rounded-lg transition-colors hover:bg-red-50 text-gray-400 hover:text-red-500">
-                  {deleting === selected.id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
-                </button>
+                {!(selected as any)._is_espot_guest && <>
+                  <button onClick={() => openEditForm(selected)}
+                    className="p-1.5 rounded-lg transition-colors hover:bg-slate-100 text-gray-400 hover:text-gray-700">
+                    <Pencil size={13} />
+                  </button>
+                  <button onClick={() => handleDelete(selected.id)} disabled={deleting === selected.id}
+                    className="p-1.5 rounded-lg transition-colors hover:bg-red-50 text-gray-400 hover:text-red-500">
+                    {deleting === selected.id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+                  </button>
+                </>}
                 <button onClick={() => setSelected(null)}
                   className="p-1.5 rounded-lg transition-colors hover:bg-slate-100 text-gray-400">
                   <X size={13} />

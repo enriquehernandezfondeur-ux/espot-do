@@ -526,7 +526,7 @@ export async function getExternalEventForPayment(eventId: string) {
       client_name,
       host:profiles!host_id(id, full_name, avatar_url),
       space:spaces(name, city),
-      bank:host_bank_accounts!inner(account_holder, bank_name, account_type, account_number, cedula_or_rnc)
+      bank:host_bank_accounts(account_holder, bank_name, account_type, account_number, cedula_or_rnc)
     `)
     .eq('id', eventId)
     .single()

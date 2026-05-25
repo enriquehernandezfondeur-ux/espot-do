@@ -3,7 +3,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { getExternalEvents, updateExternalEvent, addEventPayment, deleteExternalEvent, deleteEventPayment } from '@/lib/actions/external-events'
 import { formatCurrency, formatDate, formatTime, cn } from '@/lib/utils'
-import { CalendarDays, Plus, Search, Loader2, Check, X, CalendarCheck, Paperclip } from 'lucide-react'
+import { CalendarDays, Plus, Search, Loader2, Check, X, CalendarCheck, Paperclip, Copy, Link2 } from 'lucide-react'
+
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import type { ExternalEvent, ExternalEventStatus, ExternalPaymentMethod } from '@/types'
@@ -199,6 +201,7 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
   const [saving,      setSaving]      = useState(false)
   const [showPay,     setShowPay]     = useState(false)
   const [deleting,    setDeleting]    = useState(false)
+  const [linkCopied,  setLinkCopied]  = useState(false)
   const [receiptFile, setReceiptFile] = useState<File | null>(null)
   const [payForm,     setPayForm]     = useState({
     amount: '', method: 'efectivo' as ExternalPaymentMethod,
@@ -337,6 +340,20 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
             </div>
           )}
         </div>
+
+        {(event.total_amount ?? 0) > 0 && (event.paid_amount ?? 0) < (event.total_amount ?? 0) && (
+          <button
+            onClick={() => {
+              const url = `${SITE}/pago/evento/${event.id}`
+              navigator.clipboard.writeText(url)
+              setLinkCopied(true)
+              setTimeout(() => setLinkCopied(false), 2500)
+            }}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold transition-all"
+            style={{ background: linkCopied ? 'rgba(53,196,147,0.1)' : '#F8FAFB', color: linkCopied ? 'var(--brand)' : '#6B7280', border: `1px solid ${linkCopied ? 'rgba(53,196,147,0.3)' : '#E8ECF0'}` }}>
+            {linkCopied ? <><Check size={13} /> Link copiado</> : <><Link2 size={13} /> Copiar link de pago</>}
+          </button>
+        )}
 
         {(event.payments?.length ?? 0) > 0 && (
           <div>

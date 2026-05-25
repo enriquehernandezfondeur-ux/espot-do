@@ -618,3 +618,35 @@ export async function completeBooking(bookingId: string) {
   revalidatePath('/dashboard/host/finanzas')
   return { success: true }
 }
+
+// ── Generar slug para el host a partir de su nombre ───────────
+export async function generateHostSlug() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+
+  const { data: profile } = await supabase
+    .from('profiles').select('full_name, slug').eq('id', user.id).single()
+  if (!profile) return { error: 'Perfil no encontrado' }
+  if ((profile as any).slug) return { slug: (profile as any).slug }
+
+  const base = (profile.full_name ?? 'host')
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 40)
+
+  let candidate = base
+  let suffix    = 1
+  while (true) {
+    const { data: existing } = await supabase
+      .from('profiles').select('id').eq('slug', candidate).neq('id', user.id).single()
+    if (!existing) break
+    candidate = `${base}-${suffix++}`
+  }
+
+  await supabase.from('profiles').update({ slug: candidate }).eq('id', user.id)
+  revalidatePath('/dashboard/host/ajustes')
+  return { slug: candidate }
+}
