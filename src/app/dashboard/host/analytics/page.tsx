@@ -20,8 +20,10 @@ export default function AnalyticsPage() {
   const [bookings, setBookings]         = useState<any[]>([])
   const [directEvents, setDirectEvents] = useState<any[]>([])
   const [loading, setLoading]           = useState(true)
-  const [spaceViews, setSpaceViews]     = useState<{ week: string; views: number }[]>([])
-  const [viewsLoading, setViewsLoading] = useState(true)
+  const [spaceViews, setSpaceViews]         = useState<{ week: string; views: number }[]>([])
+  const [viewsLoading, setViewsLoading]     = useState(true)
+  const [spaces, setSpaces]                 = useState<any[]>([])
+  const [selectedSpaceId, setSelectedSpaceId] = useState<string>('')
 
   useEffect(() => {
     Promise.all([getHostStats(), getHostBookings(), getExternalEvents()]).then(([s, b, ev]) => {
@@ -31,14 +33,24 @@ export default function AnalyticsPage() {
       setLoading(false)
     }).catch(() => setLoading(false))
 
-    // Cargar vistas del primer espacio activo del host
-    getHostSpaces().then(async spaces => {
-      if (!spaces.length) { setViewsLoading(false); return }
-      const views = await getSpaceViews(spaces[0].id)
+    getHostSpaces().then(async sp => {
+      if (!sp.length) { setViewsLoading(false); return }
+      setSpaces(sp)
+      const firstId = sp[0].id
+      setSelectedSpaceId(firstId)
+      const views = await getSpaceViews(firstId)
       setSpaceViews(views)
       setViewsLoading(false)
     }).catch(() => setViewsLoading(false))
   }, [])
+
+  async function handleSpaceChange(spaceId: string) {
+    setSelectedSpaceId(spaceId)
+    setViewsLoading(true)
+    const views = await getSpaceViews(spaceId)
+    setSpaceViews(views)
+    setViewsLoading(false)
+  }
 
   if (loading) return (
     <div className="flex items-center justify-center h-dvh" style={{ background: 'var(--bg-base)' }}>
@@ -52,12 +64,17 @@ export default function AnalyticsPage() {
   const totalDirecto   = directEvents.reduce((s, e) => s + Number(e.paid_amount ?? 0), 0)
   const totalEventos   = confirmed.length + directEvents.length
   const totalCombinado = totalRevenue * 0.9 + totalDirecto
-  const avgTicket      = totalEventos > 0 ? Math.round((totalRevenue + directEvents.reduce((s, e) => s + Number(e.total_amount ?? 0), 0)) / totalEventos) : 0
+  // Ticket promedio: usar paid_amount para directos (lo cobrado, no lo cotizado)
+  const avgTicket      = totalEventos > 0 ? Math.round((totalRevenue * 0.9 + totalDirecto) / totalEventos) : 0
 
-  // Tipos de evento
+  // Tipos de evento — Espot + Directo combinados
   const eventTypeMap: Record<string, number> = {}
   bookings.forEach(b => {
     if (b.event_type) eventTypeMap[b.event_type] = (eventTypeMap[b.event_type] ?? 0) + 1
+  })
+  directEvents.forEach(e => {
+    const t = e.event_type ?? e.title
+    if (t) eventTypeMap[t] = (eventTypeMap[t] ?? 0) + 1
   })
   const eventTypeData = Object.entries(eventTypeMap)
     .sort((a, b) => b[1] - a[1])
@@ -167,12 +184,21 @@ export default function AnalyticsPage() {
       {/* Visitas a tu espacio */}
       <div className="rounded-2xl p-6 mb-5 md:mb-6"
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-        <div className="flex items-center gap-2 mb-5">
+        <div className="flex items-center gap-2 mb-5 flex-wrap">
           <Eye size={16} style={{ color: 'var(--brand)' }} />
           <h2 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
             Visitas a tu espacio
           </h2>
-          <span className="ml-auto text-xs" style={{ color: 'var(--text-muted)' }}>Último mes</span>
+          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Último mes</span>
+          {spaces.length > 1 && (
+            <select value={selectedSpaceId} onChange={e => handleSpaceChange(e.target.value)}
+              className="ml-auto text-xs px-2.5 py-1.5 rounded-lg focus:outline-none"
+              style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', fontSize: 12 }}>
+              {spaces.map((s: any) => (
+                <option key={s.id} value={s.id}>{s.name}</option>
+              ))}
+            </select>
+          )}
         </div>
 
         {viewsLoading ? (

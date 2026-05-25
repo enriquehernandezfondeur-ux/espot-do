@@ -583,7 +583,7 @@ export async function confirmPayment(bookingId: string) {
     guest?.email && sendEmail({
       to: guest.email,
       subject: `Reserva confirmada — ${space?.name}`,
-      html: tplConfirmadaCliente({ ...confirmData, remainingAmount: Math.max(0, Number(bk.total_amount) - Number(bk.paid_amount ?? bk.platform_fee)) }),
+      html: tplConfirmadaCliente({ ...confirmData, remainingAmount: Math.max(0, Number(bk.total_amount) - Number(bk.paid_amount ?? 0)) }),
     }),
     host?.email && sendEmail({
       to: host.email,

@@ -68,17 +68,22 @@ export default function FinanzasPage() {
   const prevMonth    = stats?.revenuePrevMonth ?? 0
   const monthChange  = prevMonth > 0 ? Math.round((thisMonth - prevMonth) / prevMonth * 100) : null
 
-  const monthlyChartData = (stats?.monthlyRevenue ?? []).map((m: any, i: number) => {
+  // Ambos canales agrupados por event_date para consistencia en la gráfica
+  const monthlyChartData = Array.from({ length: 6 }, (_, i) => {
     const now   = new Date()
     const d     = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1)
     const start = d.toISOString().split('T')[0]
     const end   = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split('T')[0]
-    const directo = directEvents.reduce((s: number, e: any) => {
-      const date = e.event_date
-      if (date >= start && date <= end) return s + Number(e.paid_amount ?? 0)
+    const mes   = d.toLocaleDateString('es-DO', { month: 'short' })
+    const ingresos = paidBookings.reduce((s: number, b: any) => {
+      if (b.event_date >= start && b.event_date <= end) return s + Number(b.total_amount)
       return s
     }, 0)
-    return { ...m, directo }
+    const directo = directEvents.reduce((s: number, e: any) => {
+      if (e.event_date >= start && e.event_date <= end) return s + Number(e.paid_amount ?? 0)
+      return s
+    }, 0)
+    return { mes: mes.charAt(0).toUpperCase() + mes.slice(1), ingresos, directo }
   })
 
   const espotCounts = {

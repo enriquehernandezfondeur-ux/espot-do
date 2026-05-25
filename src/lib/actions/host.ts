@@ -367,9 +367,10 @@ export async function getHostStats() {
     revenuePrevMonth,
     pendingCount:  bookings.filter(b => b.status === 'pending').length,
     acceptedCount: bookings.filter(b => b.status === 'accepted').length,
-    confirmedCount: bookings.filter(b =>
-      b.event_date >= thisMonthStart && b.status === 'confirmed'
-    ).length,
+    confirmedCount: bookings.filter(b => {
+      const cd = confirmedDateOf(b)
+      return paidStatuses.includes(b.status) && cd && cd >= thisMonthStart
+    }).length,
     pendingQuotes: quotes.data?.length ?? 0,
     nextBooking,
     monthlyRevenue: monthly,
