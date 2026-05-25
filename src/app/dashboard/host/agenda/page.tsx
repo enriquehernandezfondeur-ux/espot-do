@@ -382,7 +382,7 @@ export default function AgendaPage() {
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
           {STATUS_OPTIONS.map(o => (
             <button key={o.value} onClick={() => setStatus(o.value)}
-              className="px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shrink-0"
+              className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap text-center"
               style={status === o.value ? { background: 'var(--brand)', color: '#fff' } : { color: '#6B7280' }}>
               {o.label}
             </button>
@@ -391,13 +391,13 @@ export default function AgendaPage() {
 
         {/* Date filter pills + sort */}
         <div className="flex gap-2 flex-wrap items-center">
-          <div className="flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide"
+          <div className="flex flex-1 gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
             {DATE_FILTERS.map(f => {
               const active = dateFilter === f.key
               return (
                 <button key={f.key} onClick={() => setDateFilter(f.key)}
-                  className="flex items-center gap-1 py-1.5 px-2.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap shrink-0"
+                  className="flex-1 flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap text-center"
                   style={active ? { background: 'var(--text-primary)', color: '#fff' } : { color: '#6B7280' }}>
                   {f.key === 'custom' && <CalendarRange size={11} />}
                   {f.label}
@@ -452,7 +452,7 @@ export default function AgendaPage() {
       </div>
 
       {/* Content */}
-      <div className="flex flex-col lg:grid lg:grid-cols-[1fr_380px] gap-5 items-start">
+      <div className={cn('flex flex-col gap-5 items-start', selected && 'lg:grid lg:grid-cols-[1fr_380px]')}>
         {/* List */}
         <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <div className="overflow-x-auto scrollbar-hide">
