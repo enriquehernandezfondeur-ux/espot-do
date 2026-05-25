@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { getAdminUsers, updateUserRole } from '@/lib/actions/admin'
-import { Search, Shield, Building2, User, Loader2, Download, Copy, Check, Users, ExternalLink, Mail } from 'lucide-react'
+import { Search, Shield, Building2, User, Loader2, Download, Copy, Check, Users, ExternalLink, Mail, Eye } from 'lucide-react'
+import Link from 'next/link'
 import Pagination from '@/components/ui/Pagination'
 
 const PAGE_SIZE = 25
@@ -195,9 +196,9 @@ export default function AdminUsersPage() {
       {/* Tabla */}
       <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
         <div className="overflow-x-auto scrollbar-hide">
-          <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-gray-400 min-w-[700px]"
+          <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-gray-400 min-w-[780px]"
             style={{ borderBottom: '1px solid #F0F2F5', background: '#FAFBFC' }}>
-            <span>Usuario</span><span>Rol</span><span>Teléfono</span><span>Registro</span><span>Cambiar rol</span>
+            <span>Usuario</span><span>Rol</span><span>Teléfono</span><span>Registro</span><span>Cambiar rol</span><span>Perfil</span>
           </div>
 
           {loading ? (
@@ -212,7 +213,7 @@ export default function AdminUsersPage() {
                 const rc = roleConfig[user.role] ?? roleConfig.guest
                 const Icon = rc.icon
                 return (
-                  <div key={user.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-4 items-center px-5 py-4 hover:bg-slate-50 transition-colors min-w-[700px]">
+                  <div key={user.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] gap-4 items-center px-5 py-4 hover:bg-slate-50 transition-colors min-w-[780px]">
 
                     {/* Usuario */}
                     <div className="flex items-center gap-3">
@@ -259,6 +260,20 @@ export default function AdminUsersPage() {
                           {updating === user.id ? '...' : cfg.label}
                         </button>
                       ))}
+                    </div>
+
+                    {/* Ver perfil (solo hosts) */}
+                    <div>
+                      {user.role === 'host' ? (
+                        <Link href={`/admin/usuarios/${user.id}`}
+                          className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-all whitespace-nowrap"
+                          style={{ background: 'rgba(37,99,235,0.07)', color: '#2563EB' }}
+                          title="Ver perfil completo del propietario">
+                          <Eye size={12} /> Ver
+                        </Link>
+                      ) : (
+                        <span className="text-gray-200">—</span>
+                      )}
                     </div>
                   </div>
                 )

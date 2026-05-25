@@ -555,6 +555,45 @@ export async function getHostBankAccount(hostId: string) {
   return data ?? null
 }
 
+// ── PERFIL COMPLETO DE UN PROPIETARIO (admin) ────────────
+export async function getAdminHostDetail(hostId: string) {
+  const supabase = await requireAdmin()
+  if (!supabase) return null
+
+  const [profileRes, spacesRes, bookingsRes, externalRes, bankRes, externalPaymentsRes] = await Promise.all([
+    supabase.from('profiles').select('*').eq('id', hostId).single(),
+    supabase.from('spaces').select(`
+      id, name, category, is_published, is_active, is_verified, is_featured, created_at,
+      space_images(url, is_cover),
+      space_pricing(pricing_type, hourly_price, minimum_consumption, fixed_price, is_active),
+      bookings(id)
+    `).eq('host_id', hostId).order('created_at', { ascending: false }),
+    supabase.from('bookings').select(`
+      id, status, payment_status, payout_status, total_amount, platform_fee,
+      paid_amount, event_date, event_type, guest_count, created_at, confirmed_at,
+      profiles!guest_id(full_name, email),
+      spaces!space_id(name)
+    `).in('space_id',
+      await supabase.from('spaces').select('id').eq('host_id', hostId).then(r => (r.data ?? []).map((s: any) => s.id))
+    ).order('event_date', { ascending: false }),
+    supabase.from('external_events').select(`
+      id, title, event_type, event_date, status, total_amount, paid_amount, client_name,
+      host_clients(full_name, email)
+    `).eq('host_id', hostId).order('event_date', { ascending: false }),
+    supabase.from('host_bank_accounts').select('*').eq('host_id', hostId).single(),
+    supabase.from('external_event_payments').select('*').eq('host_id', hostId).order('paid_at', { ascending: false }),
+  ])
+
+  return {
+    profile:         profileRes.data,
+    spaces:          spacesRes.data   ?? [],
+    bookings:        bookingsRes.data ?? [],
+    externalEvents:  externalRes.data ?? [],
+    bankAccount:     bankRes.data     ?? null,
+    externalPayments: externalPaymentsRes.data ?? [],
+  }
+}
+
 // ── ACTIVIDAD RECIENTE ───────────────────────────────────
 export async function getAdminActivity() {
   const supabase = await requireAdmin()
