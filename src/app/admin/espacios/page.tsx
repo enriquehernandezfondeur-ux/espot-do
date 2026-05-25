@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react'
 import { getAdminSpaces, updateSpaceStatus } from '@/lib/actions/admin'
 import { formatCurrency } from '@/lib/utils'
 import { Search, Eye, EyeOff, Shield, Star, Trash2, CheckCircle, Loader2, MapPin, Users, Pencil, Building2 } from 'lucide-react'
+import Pagination from '@/components/ui/Pagination'
+
+const PAGE_SIZE = 25
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
@@ -21,6 +24,7 @@ export default function AdminSpacesPage() {
   const [search, setSearch]     = useState('')
   const [actionId, setActionId] = useState<string | null>(null)
   const [toast, setToast]       = useState<{ msg: string; ok: boolean } | null>(null)
+  const [page,  setPage]        = useState(1)
 
   function showToast(msg: string, ok = true) {
     setToast({ msg, ok })
@@ -32,6 +36,9 @@ export default function AdminSpacesPage() {
       .then(d => { setSpaces(d); setLoading(false) })
       .catch(() => { setSpaces([]); setLoading(false) })
   }, [filter, search])
+
+  useEffect(() => { setPage(1) }, [filter, search])
+  const paginated = spaces.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   async function toggle(spaceId: string, field: string, current: boolean) {
     setActionId(spaceId + field)
@@ -142,7 +149,7 @@ export default function AdminSpacesPage() {
             <div className="text-center py-16 text-gray-400">No hay espacios</div>
           ) : (
             <div className="divide-y divide-[#F0F2F5]">
-              {spaces.map((space: any) => {
+              {paginated.map((space: any) => {
                 const cover = space.space_images?.find((i: any) => i.is_cover)?.url ?? space.space_images?.[0]?.url
                 const host  = space.profiles
                 const bookingsCount = space.bookings?.length ?? 0
@@ -278,6 +285,7 @@ export default function AdminSpacesPage() {
               })}
             </div>
           )}
+          <Pagination page={page} total={spaces.length} pageSize={PAGE_SIZE} onChange={setPage} className="px-5 pb-4" />
           </div>{/* end overflow-x-auto */}
         </div>
       )}

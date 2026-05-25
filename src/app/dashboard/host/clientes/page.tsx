@@ -10,6 +10,9 @@ import {
   Download, Copy, MessageCircle,
 } from 'lucide-react'
 import type { HostClient, ClientSource } from '@/types'
+import Pagination from '@/components/ui/Pagination'
+
+const PAGE_SIZE = 25
 
 const SOURCE_LABELS: Record<ClientSource, string> = {
   espot:    'Espot',
@@ -57,6 +60,7 @@ export default function ClientesPage() {
   const [deleting, setDeleting] = useState<string | null>(null)
   const [toast,    setToast]    = useState<{ msg: string; ok: boolean } | null>(null)
   const [copied,   setCopied]   = useState(false)
+  const [page,     setPage]     = useState(1)
 
   // Form state
   const [form, setForm] = useState({
@@ -151,6 +155,10 @@ export default function ClientesPage() {
     (c.phone ?? '').includes(search) ||
     (c.company ?? '').toLowerCase().includes(search.toLowerCase())
   )
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { setPage(1) }, [search])
 
   const withPhone = filtered.filter(c => c.phone).length
   const withEmail = filtered.filter(c => c.email).length
@@ -269,7 +277,7 @@ export default function ClientesPage() {
             </div>
           ) : (
             <div className="divide-y divide-[var(--border-subtle)]">
-              {filtered.map(c => {
+              {paginated.map(c => {
                 const sc = SOURCE_COLORS[c.source] ?? SOURCE_COLORS.manual
                 return (
                   <button key={c.id}
@@ -312,6 +320,7 @@ export default function ClientesPage() {
               })}
             </div>
           )}
+          <Pagination page={page} total={filtered.length} pageSize={PAGE_SIZE} onChange={p => { setPage(p); setSelected(null) }} className="px-5 pb-4" />
         </div>
 
         {/* Panel detalle */}

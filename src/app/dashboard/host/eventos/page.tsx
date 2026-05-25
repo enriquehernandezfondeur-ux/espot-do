@@ -4,11 +4,13 @@ import { useState, useEffect, useRef } from 'react'
 import { getExternalEvents, updateExternalEvent, addEventPayment, deleteExternalEvent, deleteEventPayment } from '@/lib/actions/external-events'
 import { formatCurrency, formatDate, formatTime, cn } from '@/lib/utils'
 import { CalendarDays, Plus, Search, Loader2, Check, X, CalendarCheck, Paperclip, Copy, Link2 } from 'lucide-react'
-
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import type { ExternalEvent, ExternalEventStatus, ExternalPaymentMethod } from '@/types'
+import Pagination from '@/components/ui/Pagination'
+
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
+const PAGE_SIZE = 20
 
 const STATUS_OPTIONS: { value: 'all' | ExternalEventStatus; label: string }[] = [
   { value: 'all',        label: 'Todos' },
@@ -32,6 +34,7 @@ export default function EventosPage() {
   const [loading,  setLoading]  = useState(true)
   const [filter,   setFilter]   = useState<'all' | ExternalEventStatus>('all')
   const [search,   setSearch]   = useState('')
+  const [page,     setPage]     = useState(1)
   const [selected, setSelected] = useState<ExternalEvent | null>(null)
   const [toast,    setToast]    = useState<{ msg: string; ok: boolean } | null>(null)
 
@@ -47,12 +50,15 @@ export default function EventosPage() {
       .catch(() => { setEvents([]); setLoading(false) })
   }, [filter])
 
+  useEffect(() => { setPage(1) }, [filter, search])
+
   const filtered = events.filter(ev =>
     ev.title.toLowerCase().includes(search.toLowerCase()) ||
     (clientLabel(ev)).toLowerCase().includes(search.toLowerCase()) ||
     (ev.space?.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
     (ev.event_type ?? '').toLowerCase().includes(search.toLowerCase())
   )
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
@@ -124,7 +130,7 @@ export default function EventosPage() {
               </div>
             ) : (
               <div className="divide-y divide-[#F0F2F5]">
-                {filtered.map(ev => {
+                {paginated.map(ev => {
                   const st = statusConfig[ev.status]
                   const balance = ev.total_amount ? ev.total_amount - (ev.paid_amount ?? 0) : null
                   return (
@@ -160,6 +166,7 @@ export default function EventosPage() {
               </div>
             )}
           </div>
+          <Pagination page={page} total={filtered.length} pageSize={PAGE_SIZE} onChange={p => { setPage(p); setSelected(null) }} className="px-5 pb-4" />
         </div>
 
         {selected ? (

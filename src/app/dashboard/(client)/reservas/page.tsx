@@ -13,6 +13,9 @@ import { cancelBooking, rejectQuotation, type RefundBankInfo } from '@/lib/actio
 import { getInstallments, type BookingInstallment } from '@/lib/actions/installments'
 import { countdownLabel } from '@/lib/payments/schedule'
 import { notifications } from '@/lib/notifications'
+import Pagination from '@/components/ui/Pagination'
+
+const PAGE_SIZE = 15
 
 type Booking = Awaited<ReturnType<typeof getClientBookings>>[0]
 
@@ -57,6 +60,7 @@ export default function MisReservasPage() {
   const [rejectingId, setRejectingId] = useState<string | null>(null)
   const [refundBank, setRefundBank]   = useState<RefundBankInfo>({ holderName: '', bank: '', accountNumber: '', accountType: 'ahorro' })
   const [installments, setInstallments] = useState<BookingInstallment[]>([])
+  const [page,         setPage]         = useState(1)
   const router = useRouter()
 
   const cancelHasPaid = cancelModal ? isPaid((cancelModal as any).payment_status) : false
@@ -178,6 +182,10 @@ export default function MisReservasPage() {
       return b.event_date.localeCompare(a.event_date)
     })
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { setPage(1) }, [filter, search])
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
   // Primera reserva activa y futura (la "próxima")
   const nextActiveId = filtered.find(b =>
     b.event_date >= today && ['pending', 'quote_requested', 'accepted', 'confirmed'].includes(b.status)
@@ -289,7 +297,7 @@ export default function MisReservasPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {filtered.map((bk: any) => {
+          {paginated.map((bk: any) => {
             const sc    = STATUS_COLORS[bk.status as keyof typeof STATUS_COLORS] ?? { color: '#6B7280', bg: '#F4F6F8' }
             const sl    = STATUS_LABELS[bk.status as keyof typeof STATUS_LABELS] ?? bk.status
             const space = bk.spaces
@@ -909,6 +917,7 @@ export default function MisReservasPage() {
               </div>
             )
           })}
+        <Pagination page={page} total={filtered.length} pageSize={PAGE_SIZE} onChange={p => { setPage(p); setSelected(null) }} className="pt-2 pb-4" />
         </div>
       )}
 

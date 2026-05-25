@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react'
 import { getAdminBookings, updateBookingStatus } from '@/lib/actions/admin'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { Search, ChevronDown, Loader2, CalendarDays, Clock, Users, MapPin } from 'lucide-react'
+import Pagination from '@/components/ui/Pagination'
+
+const PAGE_SIZE = 25
 import { cn } from '@/lib/utils'
 
 const STATUS_OPTIONS = [
@@ -37,6 +40,7 @@ export default function AdminReservasPage() {
   const [selected, setSelected]       = useState<any | null>(null)
   const [updating, setUpdating]       = useState<string | null>(null)
   const [toast, setToast]             = useState<{ msg: string; ok: boolean } | null>(null)
+  const [page,  setPage]              = useState(1)
 
   function showToast(msg: string, ok: boolean) {
     setToast({ msg, ok })
@@ -50,11 +54,14 @@ export default function AdminReservasPage() {
       .catch(() => { setBookings([]); setLoading(false) })
   }, [filter])
 
+  useEffect(() => { setPage(1) }, [filter, search])
+
   const filtered = bookings.filter(b =>
     (b.spaces?.name ?? '').toLowerCase().includes(search.toLowerCase()) ||
     (b.profiles?.full_name ?? '').toLowerCase().includes(search.toLowerCase()) ||
     (b.event_type ?? '').toLowerCase().includes(search.toLowerCase())
   )
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   async function handleStatusChange(bookingId: string, status: string) {
     setUpdating(bookingId)
@@ -126,7 +133,7 @@ export default function AdminReservasPage() {
             <div className="text-center py-16 text-gray-400 text-sm">Sin reservas</div>
           ) : (
             <div className="divide-y divide-[#F0F2F5]">
-              {filtered.map(bk => {
+              {paginated.map(bk => {
                 const st = statusConfig[bk.status] ?? statusConfig.pending
                 return (
                   <button key={bk.id} onClick={() => setSelected(selected?.id === bk.id ? null : bk)}
@@ -152,6 +159,7 @@ export default function AdminReservasPage() {
               })}
             </div>
           )}
+          <Pagination page={page} total={filtered.length} pageSize={PAGE_SIZE} onChange={p => { setPage(p); setSelected(null) }} className="px-5 pb-4" />
           </div>{/* end overflow-x-auto */}
         </div>
 

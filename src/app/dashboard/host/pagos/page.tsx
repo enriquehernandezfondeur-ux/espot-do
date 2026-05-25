@@ -7,6 +7,9 @@ import {
   Banknote, TrendingUp, Clock, CheckCircle, CreditCard,
   Save, Loader2, AlertCircle, Info, ChevronDown,
 } from 'lucide-react'
+import Pagination from '@/components/ui/Pagination'
+
+const PAGE_SIZE = 20
 
 const BANKS = [
   'Banco Popular Dominicano','BanReservas','Scotiabank RD','Banco BHD',
@@ -40,6 +43,7 @@ export default function HostPagosPage() {
   const [holder,      setHolder]     = useState('')
   const [cedula,      setCedula]     = useState('')
   const [bankStatus,  setBankStatus] = useState<string>('pending')
+  const [page,        setPage]       = useState(1)
 
   useEffect(() => {
     Promise.all([getHostBookings(), getBankAccount()]).then(([bks, bank]) => {
@@ -57,7 +61,8 @@ export default function HostPagosPage() {
     }).catch(() => setLoading(false))
   }, [])
 
-  const paid    = bookings.filter(b => ['advance','partial','paid'].includes(b.payment_status) && ['accepted','confirmed','completed'].includes(b.status))
+  const paid       = bookings.filter(b => ['advance','partial','paid'].includes(b.payment_status) && ['accepted','confirmed','completed'].includes(b.status))
+  const paginated  = paid.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const totalGross    = paid.reduce((s, b) => s + Number(b.total_amount), 0)
   const totalFee      = paid.reduce((s, b) => s + Number(b.total_amount) * 0.10, 0)
   const totalNet      = totalGross - totalFee
@@ -158,7 +163,7 @@ export default function HostPagosPage() {
                 <span>Cliente · Evento</span><span>Fecha</span><span>Total pagado</span><span>Comisión</span><span>Tu neto</span><span>Liquidación</span>
               </div>
               <div className="divide-y divide-[var(--border-subtle)]">
-                {paid.map((bk: any) => {
+                {paginated.map((bk: any) => {
                   const net = Number(bk.total_amount) * 0.90
                   const ps  = PAYOUT_STATUS[bk.payout_status ?? 'pending']
                   const guest = bk.profiles as any
@@ -181,6 +186,7 @@ export default function HostPagosPage() {
                   )
                 })}
               </div>
+              <Pagination page={page} total={paid.length} pageSize={PAGE_SIZE} onChange={setPage} className="px-6 pb-4" />
             </div>
           </div>
         )}

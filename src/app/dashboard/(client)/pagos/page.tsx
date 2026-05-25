@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react'
 import { CreditCard, CheckCircle, Clock, Loader2, Receipt } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { getClientBookings } from '@/lib/actions/client'
+import Pagination from '@/components/ui/Pagination'
 
+const PAGE_SIZE = 15
 const PAID_PS = ['advance', 'partial', 'paid']
 
 const paymentStatusConfig: Record<string, { label: string; sub: string; color: string; bg: string; icon: any }> = {
@@ -17,6 +19,7 @@ const paymentStatusConfig: Record<string, { label: string; sub: string; color: s
 export default function PagosPage() {
   const [bookings, setBookings] = useState<any[]>([])
   const [loading, setLoading]   = useState(true)
+  const [page, setPage]         = useState(1)
 
   useEffect(() => {
     getClientBookings()
@@ -26,6 +29,7 @@ export default function PagosPage() {
 
   const totalPaid    = bookings.filter(b => PAID_PS.includes(b.payment_status) && ['confirmed','completed','accepted'].includes(b.status)).reduce((s, b) => s + Number(b.paid_amount ?? 0), 0)
   const totalPending = bookings.filter(b => b.status === 'accepted' && !PAID_PS.includes(b.payment_status)).reduce((s, b) => s + Number(b.total_amount), 0)
+  const paginated    = bookings.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   if (loading) return (
     <div className="flex items-center justify-center h-dvh">
@@ -66,7 +70,7 @@ export default function PagosPage() {
       ) : (
         <div className="rounded-2xl md:rounded-3xl overflow-hidden"
           style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-          {bookings.map((bk: any, i) => {
+          {paginated.map((bk: any, i) => {
             const ps = paymentStatusConfig[bk.payment_status] ?? paymentStatusConfig.unpaid
             const Icon = ps.icon
             return (
@@ -119,6 +123,7 @@ export default function PagosPage() {
               </div>
             )
           })}
+          <Pagination page={page} total={bookings.length} pageSize={PAGE_SIZE} onChange={setPage} className="px-4 md:px-6 pb-4" />
         </div>
       )}
     </div>

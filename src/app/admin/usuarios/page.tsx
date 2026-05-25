@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react'
 import { getAdminUsers, updateUserRole } from '@/lib/actions/admin'
 import { Search, Shield, Building2, User, Loader2, Download, Copy, Check, Users, ExternalLink, Mail } from 'lucide-react'
+import Pagination from '@/components/ui/Pagination'
+
+const PAGE_SIZE = 25
 
 const roleConfig: Record<string, { label: string; color: string; bg: string; icon: any }> = {
   guest: { label: 'Cliente',      color: '#2563EB', bg: 'rgba(37,99,235,0.08)', icon: User },
@@ -23,6 +26,7 @@ export default function AdminUsersPage() {
   const [updating, setUpdating] = useState<string | null>(null)
   const [toast,    setToast]    = useState<{ msg: string; ok: boolean } | null>(null)
   const [copied,   setCopied]   = useState(false)
+  const [page,     setPage]     = useState(1)
 
   function showToast(msg: string, ok: boolean) {
     setToast({ msg, ok })
@@ -35,10 +39,13 @@ export default function AdminUsersPage() {
       .catch(() => { setUsers([]); setLoading(false) })
   }, [filter])
 
+  useEffect(() => { setPage(1) }, [filter, search])
+
   const filtered = users.filter(u =>
     (u.full_name ?? '').toLowerCase().includes(search.toLowerCase()) ||
     (u.email ?? '').toLowerCase().includes(search.toLowerCase())
   )
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   // ── Estadísticas rápidas ─────────────────────────────
   const stats = {
@@ -201,7 +208,7 @@ export default function AdminUsersPage() {
             <div className="text-center py-16 text-gray-400 text-sm">Sin usuarios</div>
           ) : (
             <div className="divide-y divide-[#F0F2F5]">
-              {filtered.map(user => {
+              {paginated.map(user => {
                 const rc = roleConfig[user.role] ?? roleConfig.guest
                 const Icon = rc.icon
                 return (
@@ -261,13 +268,7 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      {/* Footer con conteo */}
-      {!loading && filtered.length > 0 && (
-        <p className="text-xs text-center mt-3" style={{ color: '#94A3B8' }}>
-          Mostrando {filtered.length} de {users.length} usuario{users.length !== 1 ? 's' : ''}
-          {search && ` · búsqueda: "${search}"`}
-        </p>
-      )}
+      <Pagination page={page} total={filtered.length} pageSize={PAGE_SIZE} onChange={setPage} className="mt-3" />
     </div>
   )
 }

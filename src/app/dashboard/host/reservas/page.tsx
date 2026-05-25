@@ -7,6 +7,9 @@ import { CalendarDays, Clock, Users, Check, X, ExternalLink, Search, Loader2, Do
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getHostBookings, acceptBooking, rejectBooking, completeBooking } from '@/lib/actions/host'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
+import Pagination from '@/components/ui/Pagination'
+
+const PAGE_SIZE = 20
 
 // Labels cortos para la tabla desktop (sin espacio para textos largos)
 const STATUS_SHORT: Record<string, string> = {
@@ -93,6 +96,7 @@ export default function HostReservasPage() {
   const [rejectReason, setRejectReason] = useState('')
   const [showRejectForm, setShowRejectForm] = useState(false)
   const [actionError, setActionError]   = useState('')
+  const [page, setPage]                 = useState(1)
 
   useEffect(() => {
     setLoading(true)
@@ -101,11 +105,14 @@ export default function HostReservasPage() {
       .catch(() => setLoading(false))
   }, [filter])
 
+  useEffect(() => { setPage(1) }, [filter, search])
+
   const filtered = bookings.filter(b => {
     const g = (b as any).profiles
     return (g?.full_name ?? '').toLowerCase().includes(search.toLowerCase()) ||
            (b.event_type ?? '').toLowerCase().includes(search.toLowerCase())
   })
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   const pending  = bookings.filter(b => b.status === 'pending' || b.status === 'quote_requested').length
   const accepted = bookings.filter(b => b.status === 'accepted').length
@@ -279,7 +286,7 @@ export default function HostReservasPage() {
           </div>
         ) : (
           <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
-            {filtered.map((bk: any) => {
+            {paginated.map((bk: any) => {
               const sc  = STATUS_COLORS[bk.status as keyof typeof STATUS_COLORS] ?? { color: '#6B7280', bg: '#F4F6F8' }
               const sl  = STATUS_LABELS[bk.status as keyof typeof STATUS_LABELS] ?? bk.status
               const g   = bk.profiles
@@ -556,9 +563,10 @@ export default function HostReservasPage() {
               </div>
             )
           })}
+          <Pagination page={page} total={filtered.length} pageSize={PAGE_SIZE} onChange={p => { setPage(p); setSelected(null) }} className="px-5 pb-4" />
         </div>
       )}
-      </div>
     </div>
+  </div>
   )
 }
