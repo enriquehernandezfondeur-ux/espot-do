@@ -79,8 +79,7 @@ class NotificationManager {
       action: {
         label: 'Ver detalles',
         onClick: () => {
-          // TODO: Navigate to booking details
-          // TODO: Navigate to booking details
+          window.location.href = '/dashboard/reservas'
         },
       },
     })
@@ -114,7 +113,7 @@ class NotificationManager {
       action: {
         label: 'Iniciar sesión',
         onClick: () => {
-          // TODO: Navigate to login
+          window.location.href = '/auth'
         },
       },
     })

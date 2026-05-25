@@ -13,6 +13,7 @@ import {
 import { getHostBookings, acceptBooking, rejectBooking, completeBooking } from '@/lib/actions/host'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
 import { createClient } from '@/lib/supabase/client'
+import DatePicker from '@/components/ui/DatePicker'
 import type { ExternalEvent, ExternalEventStatus, ExternalPaymentMethod } from '@/types'
 
 type Booking      = Awaited<ReturnType<typeof getHostBookings>>[0]
@@ -74,7 +75,7 @@ function itemSubtitle(item: AgendaItem): string {
 
 function itemStatusChip(item: AgendaItem): { label: string; color: string; bg: string } {
   if (item.source === 'espot') {
-    const sc = STATUS_COLORS[item.data.status as keyof typeof STATUS_COLORS] ?? { color: '#6B7280', bg: '#F4F6F8' }
+    const sc = STATUS_COLORS[item.data.status as keyof typeof STATUS_COLORS] ?? { color: '#6B7280', bg: 'var(--bg-elevated)' }
     const sl = STATUS_LABELS[item.data.status as keyof typeof STATUS_LABELS] ?? item.data.status
     return { label: sl, color: sc.color, bg: sc.bg }
   }
@@ -212,7 +213,7 @@ export default function AgendaPage() {
       {/* Header */}
       <div className="mb-6 flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Reservas</h1>
+          <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Reservas</h1>
           <p className="text-sm text-gray-500 mt-0.5">
             {items.length} eventos en total
             {pendingEspot > 0 && <span className="ml-2 font-semibold" style={{ color: '#D97706' }}>· {pendingEspot} por aceptar</span>}
@@ -229,7 +230,7 @@ export default function AgendaPage() {
       <div className="grid grid-cols-3 gap-3 mb-3">
         {([
           { value: 'all',     label: 'Todos',   count: items.length,
-            dot: '#94A3B8', activeBg: '#0F1623', activeBorder: '#0F1623',       activeNum: '#fff',    activeLabel: 'rgba(255,255,255,0.7)' },
+            dot: '#94A3B8', activeBg: '#EEF2F7', activeBorder: '#94A3B8', activeNum: 'var(--text-primary)', activeLabel: '#64748B' },
           { value: 'espot',   label: 'Espot',   count: items.filter(i => i.source === 'espot').length,
             dot: '#35C493', activeBg: 'rgba(53,196,147,0.1)', activeBorder: '#35C493', activeNum: '#0D7A56', activeLabel: '#35C493' },
           { value: 'directo', label: 'Directo', count: items.filter(i => i.source === 'direct').length,
@@ -240,19 +241,19 @@ export default function AgendaPage() {
             <button key={o.value} onClick={() => setOrigin(o.value)}
               className="flex flex-col items-start p-3 md:p-4 rounded-2xl transition-all text-left"
               style={{
-                background: active ? o.activeBg : '#fff',
-                border: `2px solid ${active ? o.activeBorder : '#E8ECF0'}`,
+                background: active ? o.activeBg : 'var(--bg-card)',
+                border: `2px solid ${active ? o.activeBorder : 'var(--border-subtle)'}`,
               }}>
               <div className="flex items-center gap-1.5 mb-2">
                 <div className="w-2 h-2 rounded-full shrink-0"
                   style={{ background: active ? o.dot : '#D1D5DB' }} />
                 <span className="text-xs font-semibold"
-                  style={{ color: active ? o.activeLabel : '#9CA3AF' }}>
+                  style={{ color: active ? o.activeLabel : 'var(--text-muted)' }}>
                   {o.label}
                 </span>
               </div>
               <span className="text-2xl font-bold leading-none"
-                style={{ color: active ? o.activeNum : '#0F1623' }}>
+                style={{ color: active ? o.activeNum : 'var(--text-primary)' }}>
                 {o.count}
               </span>
             </button>
@@ -263,7 +264,7 @@ export default function AgendaPage() {
       {/* Status + search */}
       <div className="flex flex-col gap-2 mb-5">
         <div className="flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide"
-          style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
           {STATUS_OPTIONS.map(o => (
             <button key={o.value} onClick={() => setStatus(o.value)}
               className="px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shrink-0"
@@ -273,7 +274,7 @@ export default function AgendaPage() {
           ))}
         </div>
         <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl"
-          style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
           <Search size={15} className="text-gray-400 shrink-0" />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Buscar cliente, tipo de evento..."
@@ -286,10 +287,10 @@ export default function AgendaPage() {
       {/* Content */}
       <div className="flex flex-col lg:grid lg:grid-cols-[1fr_380px] gap-5 items-start">
         {/* List */}
-        <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+        <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <div className="overflow-x-auto scrollbar-hide">
             <div className="grid gap-3 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-gray-400 min-w-[520px]"
-              style={{ gridTemplateColumns: '2fr 1fr 1fr auto', borderBottom: '1px solid #F0F2F5', background: '#FAFBFC' }}>
+              style={{ gridTemplateColumns: '2fr 1fr 1fr auto', borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)' }}>
               <span>Evento</span><span>Fecha</span><span>Total</span><span>Estado</span>
             </div>
 
@@ -311,7 +312,7 @@ export default function AgendaPage() {
                 )}
               </div>
             ) : (
-              <div className="divide-y divide-[#F0F2F5]">
+              <div className="divide-y divide-[var(--border-subtle)]">
                 {filtered.map(item => {
                   const k         = itemKey(item)
                   const chip      = itemStatusChip(item)
@@ -338,14 +339,14 @@ export default function AgendaPage() {
                             {isEspot ? 'Espot' : 'Directo'}
                           </span>
                         </div>
-                        <div className="font-semibold text-sm truncate" style={{ color: '#0F1623' }}>
+                        <div className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>
                           {itemTitle(item)}
                         </div>
                         <div className="text-xs text-gray-400 truncate">{itemSubtitle(item)}</div>
                       </div>
                       <div className="text-sm text-gray-600">{formatDate(itemDate(item))}</div>
                       <div className="text-sm">
-                        <div className="font-bold" style={{ color: '#0F1623' }}>
+                        <div className="font-bold" style={{ color: 'var(--text-primary)' }}>
                           {amt > 0 ? formatCurrency(amt) : '—'}
                         </div>
                         {balance !== null && balance > 0 && (
@@ -389,7 +390,7 @@ export default function AgendaPage() {
             />
           )
         ) : (
-          <div className="rounded-2xl p-8 text-center" style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
+          <div className="rounded-2xl p-8 text-center" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
             <LayoutList size={24} className="mx-auto mb-3 text-gray-300" />
             <p className="text-sm text-gray-400">Selecciona un evento para ver el detalle</p>
           </div>
@@ -417,19 +418,19 @@ function EspotPanel({ booking, actionId, rejectReason, showRejectForm, onClose, 
     import('@/lib/actions/installments').then(m => m.getInstallments(booking.id)).then(setInsts).catch(() => {})
   }, [booking.id])
 
-  const sc = STATUS_COLORS[booking.status as keyof typeof STATUS_COLORS] ?? { color: '#6B7280', bg: '#F4F6F8' }
+  const sc = STATUS_COLORS[booking.status as keyof typeof STATUS_COLORS] ?? { color: '#6B7280', bg: 'var(--bg-elevated)' }
   const sl = STATUS_LABELS[booking.status as keyof typeof STATUS_LABELS] ?? booking.status
   const g  = booking.profiles
 
   return (
     <div className="rounded-2xl overflow-hidden sticky top-8"
-      style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-      <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid #F0F2F5' }}>
+      style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+      <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         <div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-bold px-2 py-0.5 rounded"
               style={{ background: 'rgba(53,196,147,0.12)', color: '#16A34A' }}>Espot</span>
-            <span className="font-bold text-sm" style={{ color: '#0F1623' }}>Detalle de reserva</span>
+            <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Detalle de reserva</span>
           </div>
           <div className="text-xs text-gray-400 mt-0.5">ID: {booking.id.slice(0, 8).toUpperCase()}</div>
         </div>
@@ -443,12 +444,12 @@ function EspotPanel({ booking, actionId, rejectReason, showRejectForm, onClose, 
       </div>
 
       {showRejectForm && (
-        <div className="px-5 py-4" style={{ borderBottom: '1px solid #F0F2F5', background: 'rgba(220,38,38,0.02)' }}>
+        <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--border-subtle)', background: 'rgba(220,38,38,0.02)' }}>
           <p className="text-xs font-semibold mb-2" style={{ color: '#DC2626' }}>Motivo de rechazo (opcional)</p>
           <textarea value={rejectReason} onChange={e => setRejectReason(e.target.value)}
             placeholder="Ej: Sin disponibilidad para esa fecha" rows={2}
             className="w-full text-xs px-3 py-2 rounded-xl resize-none focus:outline-none"
-            style={{ background: '#F8FAFB', border: '1.5px solid #E8ECF0', color: '#0F1623' }} />
+            style={{ background: 'var(--bg-elevated)', border: '1.5px solid #E8ECF0', color: 'var(--text-primary)' }} />
           <div className="flex gap-2 mt-2">
             <button onClick={onReject} disabled={!!actionId}
               className="flex-1 text-xs font-semibold py-2 rounded-xl disabled:opacity-50"
@@ -457,7 +458,7 @@ function EspotPanel({ booking, actionId, rejectReason, showRejectForm, onClose, 
             </button>
             <button onClick={() => { setShowRejectForm(false); setRejectReason('') }}
               className="px-3 py-2 text-xs rounded-xl"
-              style={{ background: '#F8FAFB', color: '#6B7280' }}>Cancelar</button>
+              style={{ background: 'var(--bg-elevated)', color: '#6B7280' }}>Cancelar</button>
           </div>
         </div>
       )}
@@ -468,12 +469,12 @@ function EspotPanel({ booking, actionId, rejectReason, showRejectForm, onClose, 
 
         <div>
           <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1">Cliente</div>
-          <div className="font-semibold text-sm" style={{ color: '#0F1623' }}>{g?.full_name ?? '—'}</div>
+          <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{g?.full_name ?? '—'}</div>
           {g?.email && <div className="text-xs text-gray-500">{g.email}</div>}
           {g?.phone && <a href={`tel:${g.phone}`} className="text-xs" style={{ color: 'var(--brand)' }}>{g.phone}</a>}
         </div>
 
-        <div className="rounded-xl p-4 space-y-2" style={{ background: '#F8FAFB', border: '1px solid #E8ECF0' }}>
+        <div className="rounded-xl p-4 space-y-2" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
           {([
             { label: 'Tipo',     value: booking.event_type ?? '—' },
             { label: 'Fecha',    value: formatDate(booking.event_date) },
@@ -483,7 +484,7 @@ function EspotPanel({ booking, actionId, rejectReason, showRejectForm, onClose, 
           ] as { label: string; value: string }[]).map(({ label, value }) => (
             <div key={label} className="flex justify-between text-sm">
               <span className="text-gray-500">{label}</span>
-              <span className="font-medium" style={{ color: '#0F1623' }}>{value}</span>
+              <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{value}</span>
             </div>
           ))}
         </div>
@@ -500,17 +501,17 @@ function EspotPanel({ booking, actionId, rejectReason, showRejectForm, onClose, 
           </div>
         )}
 
-        <div className="rounded-xl p-4 space-y-2" style={{ background: '#F8FAFB', border: '1px solid #E8ECF0' }}>
+        <div className="rounded-xl p-4 space-y-2" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">Total evento</span>
-            <span className="font-bold" style={{ color: '#0F1623' }}>{formatCurrency(Number(booking.total_amount))}</span>
+            <span className="font-bold" style={{ color: 'var(--text-primary)' }}>{formatCurrency(Number(booking.total_amount))}</span>
           </div>
           <div className="flex justify-between text-sm text-gray-500">
             <span>Comisión Espot (10%)</span>
             <span>{formatCurrency(Number(booking.platform_fee))}</span>
           </div>
           <div className="flex justify-between text-sm font-bold pt-1"
-            style={{ borderTop: '1px solid #E8ECF0', color: '#0F1623' }}>
+            style={{ borderTop: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}>
             <span>Tu neto</span>
             <span style={{ color: 'var(--brand)' }}>{formatCurrency(Math.round(Number(booking.total_amount) * 0.90))}</span>
           </div>
@@ -524,13 +525,13 @@ function EspotPanel({ booking, actionId, rejectReason, showRejectForm, onClose, 
             <div className="space-y-1.5">
               {insts.map((inst: any) => (
                 <div key={inst.id} className="flex items-center justify-between text-xs py-2 px-3 rounded-lg"
-                  style={{ background: '#F8FAFB', border: '1px solid #F0F2F5' }}>
+                  style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                   <div>
                     <span className="font-semibold text-gray-700">Cuota {inst.installment_number}</span>
                     <span className="text-gray-400 ml-2">{inst.due_date}</span>
                   </div>
                   <div className="text-right">
-                    <div className="font-bold text-xs" style={{ color: '#0F1623' }}>{formatCurrency(Number(inst.amount))}</div>
+                    <div className="font-bold text-xs" style={{ color: 'var(--text-primary)' }}>{formatCurrency(Number(inst.amount))}</div>
                     <div className="text-[11px] font-semibold"
                       style={{ color: inst.status === 'paid' ? 'var(--brand)' : inst.status === 'overdue' ? '#DC2626' : '#6B7280' }}>
                       {inst.status === 'paid' ? 'Recibido' : inst.status === 'overdue' ? 'Vencido' : 'Pendiente'}
@@ -565,14 +566,14 @@ function EspotPanel({ booking, actionId, rejectReason, showRejectForm, onClose, 
         )}
         {booking.status === 'accepted' && (
           <div className="rounded-xl px-3 py-2.5 text-xs text-center"
-            style={{ background: '#F8FAFB', border: '1px solid #E8ECF0', color: '#6B7280' }}>
+            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: '#6B7280' }}>
             Esperando pago del cliente
           </div>
         )}
         {booking.status === 'confirmed' && (
           <button onClick={onComplete} disabled={!!actionId}
             className="w-full text-xs font-semibold py-2.5 rounded-xl disabled:opacity-50"
-            style={{ background: '#F8FAFB', color: '#6B7280', border: '1px solid #E8ECF0' }}>
+            style={{ background: 'var(--bg-elevated)', color: '#6B7280', border: '1px solid var(--border-subtle)' }}>
             {actionId ? 'Procesando...' : 'Marcar como completado'}
           </button>
         )}
@@ -671,13 +672,13 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
 
   return (
     <div className="rounded-2xl overflow-hidden sticky top-8"
-      style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-      <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid #F0F2F5' }}>
+      style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+      <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         <div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-bold px-2 py-0.5 rounded"
               style={{ background: 'rgba(37,99,235,0.08)', color: '#2563EB' }}>Directo</span>
-            <span className="font-bold text-sm" style={{ color: '#0F1623' }}>Detalle del evento</span>
+            <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Detalle del evento</span>
           </div>
           <div className="text-xs text-gray-400 mt-0.5">ID: {event.id.slice(0, 8).toUpperCase()}</div>
         </div>
@@ -692,8 +693,8 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
 
       <div className="p-5 space-y-4">
         <div>
-          <div className="font-semibold text-sm mb-3" style={{ color: '#0F1623' }}>{event.title}</div>
-          <div className="rounded-xl p-4 space-y-2" style={{ background: '#F8FAFB', border: '1px solid #E8ECF0' }}>
+          <div className="font-semibold text-sm mb-3" style={{ color: 'var(--text-primary)' }}>{event.title}</div>
+          <div className="rounded-xl p-4 space-y-2" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
             {([
               { label: 'Tipo',     value: event.event_type ?? '—' },
               { label: 'Fecha',    value: formatDate(event.event_date) },
@@ -703,7 +704,7 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
             ] as { label: string; value: string }[]).map(({ label, value }) => (
               <div key={label} className="flex justify-between text-sm">
                 <span className="text-gray-500">{label}</span>
-                <span className="font-medium" style={{ color: '#0F1623' }}>{value}</span>
+                <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{value}</span>
               </div>
             ))}
           </div>
@@ -712,7 +713,7 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
         {client && (
           <div>
             <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1">Cliente</div>
-            <div className="font-semibold text-sm" style={{ color: '#0F1623' }}>{client}</div>
+            <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{client}</div>
             {event.client?.email && <div className="text-xs text-gray-500">{event.client.email}</div>}
             {event.client?.phone && <div className="text-xs text-gray-500">{event.client.phone}</div>}
           </div>
@@ -722,7 +723,7 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
           style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid rgba(53,196,147,0.15)' }}>
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">Total evento</span>
-            <span className="font-medium" style={{ color: '#0F1623' }}>{event.total_amount ? formatCurrency(event.total_amount) : '—'}</span>
+            <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{event.total_amount ? formatCurrency(event.total_amount) : '—'}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">Cobrado</span>
@@ -742,7 +743,7 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
             <div className="space-y-1.5">
               {event.payments!.map(p => (
                 <div key={p.id} className="flex items-center justify-between text-xs py-1.5 px-3 rounded-lg group"
-                  style={{ background: '#F8FAFB', border: '1px solid #F0F2F5' }}>
+                  style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                   <div className="min-w-0">
                     <span className="font-semibold text-gray-700">{formatCurrency(p.amount)}</span>
                     <span className="text-gray-400 ml-2">{formatDate(p.payment_date)} · {p.payment_method}</span>
@@ -767,7 +768,7 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
 
         {showPay ? (
           <form onSubmit={handleAddPayment} className="rounded-xl p-4 space-y-3"
-            style={{ background: '#F8FAFB', border: '1px solid #E8ECF0' }}>
+            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
             <div className="text-xs font-semibold text-gray-600">Registrar pago</div>
             <div className="grid grid-cols-2 gap-2">
               <div>
@@ -775,14 +776,14 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
                 <input type="number" required min="1" value={payForm.amount}
                   onChange={e => setPayForm(f => ({ ...f, amount: e.target.value }))}
                   placeholder="0" className="w-full px-3 py-2 rounded-lg text-sm border focus:outline-none"
-                  style={{ border: '1px solid #E8ECF0', fontSize: 16 }} />
+                  style={{ border: '1px solid var(--border-subtle)', fontSize: 16 }} />
               </div>
               <div>
                 <label className="text-xs text-gray-500 mb-1 block">Método</label>
                 <select value={payForm.method}
                   onChange={e => setPayForm(f => ({ ...f, method: e.target.value as ExternalPaymentMethod }))}
                   className="w-full px-3 py-2 rounded-lg text-sm border focus:outline-none"
-                  style={{ border: '1px solid #E8ECF0', fontSize: 16 }}>
+                  style={{ border: '1px solid var(--border-subtle)', fontSize: 16 }}>
                   <option value="efectivo">Efectivo</option>
                   <option value="transferencia">Transferencia</option>
                   <option value="tarjeta">Tarjeta</option>
@@ -792,10 +793,7 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
             </div>
             <div>
               <label className="text-xs text-gray-500 mb-1 block">Fecha del pago</label>
-              <input type="date" required value={payForm.date}
-                onChange={e => setPayForm(f => ({ ...f, date: e.target.value }))}
-                className="w-full px-3 py-2 rounded-lg text-sm border focus:outline-none"
-                style={{ border: '1px solid #E8ECF0', fontSize: 16 }} />
+              <DatePicker value={payForm.date} onChange={date => setPayForm(f => ({ ...f, date }))} />
             </div>
             <div>
               <label className="text-xs text-gray-500 mb-1 block">Comprobante (foto/PDF)</label>
@@ -823,7 +821,7 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
             <div className="flex gap-2">
               <button type="button" onClick={() => { setShowPay(false); setReceiptFile(null) }}
                 className="flex-1 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:bg-slate-100"
-                style={{ border: '1px solid #E8ECF0' }}>
+                style={{ border: '1px solid var(--border-subtle)' }}>
                 Cancelar
               </button>
               <button type="submit" disabled={saving}
@@ -852,7 +850,7 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
                   className="text-xs font-semibold px-3 py-2 rounded-lg transition-all disabled:opacity-40"
                   style={event.status === st
                     ? { background: s.bg, color: s.color, border: `1px solid ${s.color}30` }
-                    : { background: '#F4F6F8', color: '#6B7280', border: '1px solid #E8ECF0' }}>
+                    : { background: 'var(--bg-elevated)', color: '#6B7280', border: '1px solid var(--border-subtle)' }}>
                   {s.label}
                 </button>
               )
@@ -861,7 +859,7 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
         </div>
 
         {event.notes && (
-          <div className="rounded-xl p-3 text-xs text-gray-500" style={{ background: '#F8FAFB', border: '1px solid #E8ECF0' }}>
+          <div className="rounded-xl p-3 text-xs text-gray-500" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
             {event.notes}
           </div>
         )}

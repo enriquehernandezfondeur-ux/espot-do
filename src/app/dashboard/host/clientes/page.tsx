@@ -193,7 +193,7 @@ export default function ClientesPage() {
       {/* Header */}
       <div className="mb-5 flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Clientes</h1>
+          <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Clientes</h1>
           <p className="text-sm text-gray-500 mt-0.5">{clients.length} registrados</p>
         </div>
         <button onClick={openCreateForm}
@@ -216,7 +216,7 @@ export default function ClientesPage() {
       {/* Search + acciones */}
       <div className="flex flex-col sm:flex-row gap-2 mb-5">
         <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl flex-1"
-          style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
           <Search size={15} className="text-gray-400 shrink-0" />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Buscar por nombre, email, teléfono o empresa..."
@@ -231,14 +231,14 @@ export default function ClientesPage() {
         <div className="flex gap-2 shrink-0">
           <button onClick={copyPhones} disabled={withPhone === 0}
             className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all disabled:opacity-40"
-            style={{ background: copied ? '#16A34A' : '#fff', color: copied ? '#fff' : '#6B7280', border: '1px solid #E8ECF0' }}
+            style={{ background: copied ? '#16A34A' : 'var(--bg-card)', color: copied ? '#fff' : 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
             title="Copiar todos los teléfonos">
             {copied ? <Check size={13} /> : <Copy size={13} />}
             {copied ? 'Copiados' : `${withPhone} tel.`}
           </button>
           <button onClick={exportCSV} disabled={filtered.length === 0}
             className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all disabled:opacity-40"
-            style={{ background: '#fff', color: '#6B7280', border: '1px solid #E8ECF0' }}
+            style={{ background: 'var(--bg-card)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
             title="Exportar lista a CSV">
             <Download size={13} /> CSV
           </button>
@@ -247,7 +247,7 @@ export default function ClientesPage() {
 
       <div className="flex flex-col lg:grid lg:grid-cols-[1fr_380px] gap-5 items-start">
         {/* Lista */}
-        <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+        <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           {loading ? (
             <div className="flex items-center justify-center py-16">
               <Loader2 className="w-6 h-6 animate-spin" style={{ color: 'var(--brand)' }} />
@@ -266,7 +266,7 @@ export default function ClientesPage() {
               )}
             </div>
           ) : (
-            <div className="divide-y divide-[#F0F2F5]">
+            <div className="divide-y divide-[var(--border-subtle)]">
               {filtered.map(c => {
                 const sc = SOURCE_COLORS[c.source] ?? SOURCE_COLORS.manual
                 return (
@@ -282,7 +282,7 @@ export default function ClientesPage() {
                     </div>
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-sm truncate" style={{ color: '#0F1623' }}>
+                      <div className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>
                         {c.full_name}
                       </div>
                       <div className="text-xs text-gray-400 truncate">
@@ -315,11 +315,11 @@ export default function ClientesPage() {
         {/* Panel detalle */}
         {selected ? (
           <div className="rounded-2xl overflow-hidden sticky top-8"
-            style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
 
             {/* Header del panel */}
-            <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid #F0F2F5' }}>
-              <div className="font-bold text-sm" style={{ color: '#0F1623' }}>{selected.full_name}</div>
+            <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+              <div className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{selected.full_name}</div>
               <div className="flex items-center gap-1">
                 <button onClick={() => openEditForm(selected)}
                   className="p-1.5 rounded-lg transition-colors hover:bg-slate-100 text-gray-400 hover:text-gray-700">
@@ -381,7 +381,7 @@ export default function ClientesPage() {
 
               {/* Notas */}
               {selected.notes && (
-                <div className="rounded-xl p-3 text-xs text-gray-500" style={{ background: '#F8FAFB', border: '1px solid #E8ECF0' }}>
+                <div className="rounded-xl p-3 text-xs text-gray-500" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                   {selected.notes}
                 </div>
               )}
@@ -394,8 +394,8 @@ export default function ClientesPage() {
               ) : history && (
                 <>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="rounded-xl p-3 text-center" style={{ background: '#F8FAFB', border: '1px solid #E8ECF0' }}>
-                      <div className="text-xl font-bold" style={{ color: '#0F1623' }}>{history.total_events}</div>
+                    <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                      <div className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{history.total_events}</div>
                       <div className="text-xs text-gray-400 mt-0.5">Eventos</div>
                     </div>
                     <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid rgba(53,196,147,0.15)' }}>
@@ -416,7 +416,7 @@ export default function ClientesPage() {
                           .sort((a, b) => new Date(b.event_date).getTime() - new Date(a.event_date).getTime())
                           .map((ev: any) => (
                             <div key={ev.id} className="flex items-center justify-between text-xs py-1.5 px-3 rounded-lg"
-                              style={{ background: '#F8FAFB', border: '1px solid #F0F2F5' }}>
+                              style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                               <div>
                                 <div className="font-medium text-gray-700 truncate max-w-[160px]">{ev.title}</div>
                                 <div className="text-gray-400 flex items-center gap-1">
@@ -438,7 +438,7 @@ export default function ClientesPage() {
             </div>
           </div>
         ) : (
-          <div className="rounded-2xl p-8 text-center" style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
+          <div className="rounded-2xl p-8 text-center" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
             <Users size={24} className="mx-auto mb-3 text-gray-300" />
             <p className="text-sm text-gray-400">Selecciona un cliente para ver su historial</p>
           </div>
@@ -451,9 +451,9 @@ export default function ClientesPage() {
           style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}
           onClick={e => { if (e.target === e.currentTarget) setShowForm(false) }}>
           <div className="w-full max-w-md rounded-2xl overflow-hidden"
-            style={{ background: '#fff', boxShadow: '0 24px 80px rgba(0,0,0,0.2)' }}>
-            <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid #F0F2F5' }}>
-              <div className="font-bold text-sm" style={{ color: '#0F1623' }}>
+            style={{ background: 'var(--bg-card)', boxShadow: '0 24px 80px rgba(0,0,0,0.2)' }}>
+            <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+              <div className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
                 {editing ? 'Editar cliente' : 'Nuevo cliente'}
               </div>
               <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600">
@@ -467,7 +467,7 @@ export default function ClientesPage() {
                 <input required value={form.full_name} onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))}
                   placeholder="Ej. María García"
                   className="w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2"
-                  style={{ border: '1px solid #E8ECF0', fontSize: 16 }} />
+                  style={{ border: '1px solid var(--border-subtle)', fontSize: 16 }} />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -476,14 +476,14 @@ export default function ClientesPage() {
                   <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                     placeholder="correo@ejemplo.com"
                     className="w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none"
-                    style={{ border: '1px solid #E8ECF0', fontSize: 16 }} />
+                    style={{ border: '1px solid var(--border-subtle)', fontSize: 16 }} />
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-gray-500 mb-1 block">Teléfono</label>
                   <input type="tel" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
                     placeholder="809-000-0000"
                     className="w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none"
-                    style={{ border: '1px solid #E8ECF0', fontSize: 16 }} />
+                    style={{ border: '1px solid var(--border-subtle)', fontSize: 16 }} />
                 </div>
               </div>
 
@@ -492,14 +492,14 @@ export default function ClientesPage() {
                 <input value={form.company} onChange={e => setForm(f => ({ ...f, company: e.target.value }))}
                   placeholder="Nombre de empresa (opcional)"
                   className="w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none"
-                  style={{ border: '1px solid #E8ECF0', fontSize: 16 }} />
+                  style={{ border: '1px solid var(--border-subtle)', fontSize: 16 }} />
               </div>
 
               <div>
                 <label className="text-xs font-semibold text-gray-500 mb-1 block">Origen</label>
                 <select value={form.source} onChange={e => setForm(f => ({ ...f, source: e.target.value as ClientSource }))}
                   className="w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none"
-                  style={{ border: '1px solid #E8ECF0', fontSize: 16 }}>
+                  style={{ border: '1px solid var(--border-subtle)', fontSize: 16 }}>
                   {(Object.entries(SOURCE_LABELS) as [ClientSource, string][]).map(([v, l]) => (
                     <option key={v} value={v}>{l}</option>
                   ))}
@@ -511,7 +511,7 @@ export default function ClientesPage() {
                 <input value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))}
                   placeholder="VIP, corporativo, frecuente"
                   className="w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none"
-                  style={{ border: '1px solid #E8ECF0', fontSize: 16 }} />
+                  style={{ border: '1px solid var(--border-subtle)', fontSize: 16 }} />
               </div>
 
               <div>
@@ -520,13 +520,13 @@ export default function ClientesPage() {
                   placeholder="Preferencias, observaciones, etc."
                   rows={2}
                   className="w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none resize-none"
-                  style={{ border: '1px solid #E8ECF0', fontSize: 16 }} />
+                  style={{ border: '1px solid var(--border-subtle)', fontSize: 16 }} />
               </div>
 
               <div className="flex gap-3 pt-1">
                 <button type="button" onClick={() => setShowForm(false)}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-gray-600 transition-colors hover:bg-slate-50"
-                  style={{ border: '1px solid #E8ECF0' }}>
+                  style={{ border: '1px solid var(--border-subtle)' }}>
                   Cancelar
                 </button>
                 <button type="submit" disabled={saving || !form.full_name.trim()}

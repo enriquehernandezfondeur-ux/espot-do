@@ -12,6 +12,7 @@ import { submitReview, getUserReviewedBookings } from '@/lib/actions/reviews'
 import { cancelBooking, rejectQuotation, type RefundBankInfo } from '@/lib/actions/booking'
 import { getInstallments, type BookingInstallment } from '@/lib/actions/installments'
 import { countdownLabel } from '@/lib/payments/schedule'
+import { notifications } from '@/lib/notifications'
 
 type Booking = Awaited<ReturnType<typeof getClientBookings>>[0]
 
@@ -101,7 +102,7 @@ export default function MisReservasPage() {
     const result = await rejectQuotation(bk.id)
     setRejectingId(null)
     if ('error' in result) {
-      alert(result.error ?? 'No se pudo rechazar la cotización')
+      notifications.error(result.error ?? 'No se pudo rechazar la cotización')
       return
     }
     setBookings(prev => prev.map(b =>

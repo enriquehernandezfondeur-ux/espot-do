@@ -168,7 +168,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
 
         {/* Próximos eventos */}
-        <Link href="/dashboard/host/eventos"
+        <Link href="/dashboard/host/agenda"
           className="rounded-2xl p-4 block transition-all hover:shadow-md"
           style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
           <div className="flex items-center justify-between mb-3">
@@ -199,7 +199,7 @@ export default function DashboardPage() {
         </Link>
 
         {/* Por cobrar */}
-        <Link href="/dashboard/host/eventos"
+        <Link href="/dashboard/host/agenda"
           className="rounded-2xl p-4 block transition-all hover:shadow-md"
           style={{ background: '#fff', border: `1px solid ${porCobrar > 0 ? 'rgba(37,99,235,0.2)' : 'var(--border-subtle)'}` }}>
           <div className="flex items-center justify-between mb-3">
@@ -250,7 +250,7 @@ export default function DashboardPage() {
               </span>
             )}
           </div>
-          <Link href="/dashboard/host/eventos" className="flex items-center gap-1 text-xs font-medium" style={{ color: 'var(--brand)' }}>
+          <Link href="/dashboard/host/agenda" className="flex items-center gap-1 text-xs font-medium" style={{ color: 'var(--brand)' }}>
             Ver todos <ArrowRight size={13} />
           </Link>
         </div>
@@ -439,7 +439,7 @@ export default function DashboardPage() {
               {rows}
               {upcomingItems.length > 10 && (
                 <div className="px-5 py-3 text-center" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-                  <Link href="/dashboard/host/eventos" className="text-xs font-medium" style={{ color: 'var(--brand)' }}>
+                  <Link href="/dashboard/host/agenda" className="text-xs font-medium" style={{ color: 'var(--brand)' }}>
                     Ver {upcomingItems.length - 10} eventos más →
                   </Link>
                 </div>

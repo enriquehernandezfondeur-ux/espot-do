@@ -97,12 +97,12 @@ export default function FinanzasPage() {
             Finanzas
           </h1>
           <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-            Espot gestiona todos los pagos y te transfiere el neto luego de cada evento.
+            Ingresos de reservas Espot · Comisiones y liquidaciones
           </p>
         </div>
         <button onClick={exportCSV}
           className="flex items-center gap-1.5 text-xs md:text-sm font-semibold px-3 md:px-4 py-2 md:py-2.5 rounded-xl shrink-0 transition-all"
-          style={{ background: '#fff', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
           <Download size={13} /> <span className="hidden sm:inline">Exportar</span> CSV
         </button>
       </div>
@@ -147,7 +147,7 @@ export default function FinanzasPage() {
           { label: 'Este mes',          value: formatCurrency(thisMonth),      icon: ArrowUpRight,  sub: 'ingresos del mes' },
         ].map(({ label, value, icon: Icon, sub }) => (
           <div key={label} className="rounded-2xl p-5"
-            style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>{label}</span>
               <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--bg-elevated)' }}>
@@ -166,13 +166,13 @@ export default function FinanzasPage() {
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between sm:gap-3 mb-6 gap-0.5">
           <div>
             <h2 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Ingresos por mes</h2>
-            <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>Últimos 6 meses · Ingresos brutos confirmados</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Últimos 6 meses · Ingresos brutos confirmados</p>
           </div>
           <div>
-            <div className="font-bold text-xl sm:text-2xl" style={{ color: '#35C493', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
+            <div className="font-bold text-xl sm:text-2xl" style={{ color: 'var(--brand)', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
               {formatCurrency(thisMonth)}
             </div>
-            <div className="text-xs" style={{ color: '#9CA3AF' }}>este mes</div>
+            <div className="text-xs" style={{ color: 'var(--text-muted)' }}>este mes</div>
           </div>
         </div>
 
@@ -186,11 +186,11 @@ export default function FinanzasPage() {
                 </linearGradient>
               </defs>
               <XAxis dataKey="mes" stroke="#F3F4F6"
-                tick={{ fill: '#9CA3AF', fontSize: 11 }}
+                tick={{ fill: 'var(--text-muted)', fontSize: 11 }}
                 axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={{
-                  background: '#fff', border: '1px solid var(--border-subtle)',
+                  background: 'var(--bg-card)', border: '1px solid var(--border-subtle)',
                   borderRadius: 12, color: 'var(--text-primary)', fontSize: 12,
                   boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                 }}
@@ -203,7 +203,7 @@ export default function FinanzasPage() {
           </ResponsiveContainer>
         ) : (
           <div className="flex items-center justify-center h-44 rounded-2xl text-sm"
-            style={{ background: '#F9FAFB', border: '1px dashed #E5E7EB', color: '#9CA3AF' }}>
+            style={{ background: 'var(--bg-elevated)', border: '1px dashed var(--border-subtle)', color: 'var(--text-muted)' }}>
             La gráfica aparece cuando tengas reservas confirmadas
           </div>
         )}
@@ -222,7 +222,7 @@ export default function FinanzasPage() {
           </p>
           <p className="text-xs leading-relaxed" style={{ color: '#166534' }}>
             El cliente paga por Espot → Espot retiene el dinero → Después del evento, Espot descuenta el 10% de comisión y transfiere el neto a tu cuenta registrada.
-            <span className="font-semibold"> El propietario nunca cobra directamente al cliente.</span>
+            Los pagos de eventos directos los gestionas tú y se registran en la sección Reservas.
           </p>
         </div>
       </div>
@@ -239,7 +239,7 @@ export default function FinanzasPage() {
             className="px-4 py-2.5 rounded-xl text-sm font-medium transition-all shrink-0"
             style={filter === f.key
               ? { background: 'var(--brand)', color: '#fff' }
-              : { background: '#fff', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+              : { background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
             {f.label}
           </button>
         ))}
@@ -247,7 +247,7 @@ export default function FinanzasPage() {
 
       {/* Tabla de reservas */}
       <div className="rounded-2xl overflow-hidden"
-        style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
         <div className="overflow-x-auto">
         <div style={{ minWidth: 580 }}>
         {/* Header de tabla */}
@@ -338,7 +338,7 @@ export default function FinanzasPage() {
 
       {/* Nota de cuenta bancaria */}
       <div className="mt-6 rounded-2xl p-5 flex items-center justify-between gap-4"
-        style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center"
             style={{ background: 'var(--bg-elevated)' }}>

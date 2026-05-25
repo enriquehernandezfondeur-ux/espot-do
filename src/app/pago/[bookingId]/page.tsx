@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Suspense } from 'react'
+import { notifications } from '@/lib/notifications'
 
 const TEST_MODE = process.env.NEXT_PUBLIC_PAYMENT_TEST_MODE === '1'
 
@@ -27,7 +28,7 @@ function PagoContent({ bookingId }: { bookingId: string }) {
     if (data.success) {
       router.push(`/pago/exitoso?b=${bookingId}${cuotaId ? `&cuota=${cuotaId}` : ''}`)
     } else {
-      alert(data.error ?? 'Error al simular el pago')
+      notifications.error(data.error ?? 'Error al simular el pago')
       setTestLoading(false)
     }
   }

@@ -96,7 +96,7 @@ export default function HostPagosPage() {
           <Banknote size={15} style={{ color: 'var(--brand)' }} />
           <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--brand)' }}>Finanzas</span>
         </div>
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Pagos y liquidaciones</h1>
+        <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Pagos y liquidaciones</h1>
         <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
           Historial de reservas pagadas y estado de tus liquidaciones
         </p>
@@ -111,7 +111,7 @@ export default function HostPagosPage() {
           { label: 'Comisión Espot',    value: totalFee,      icon: CreditCard,  sub: `${paid.length} reservas` },
         ].map(({ label, value, icon: Icon, sub }) => (
           <div key={label} className="rounded-2xl p-5"
-            style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
             <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: 'var(--bg-elevated)' }}>
               <Icon size={16} style={{ color: 'var(--text-secondary)' }} />
             </div>
@@ -126,17 +126,17 @@ export default function HostPagosPage() {
 
       {/* Info */}
       <div className="flex items-start gap-3 px-5 py-4 rounded-2xl"
-        style={{ background: 'var(--bg-elevated)', border: '1px solid var(--bg-elevated)' }}>
+        style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
         <Info size={15} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: 1 }} />
-        <p className="text-sm" style={{ color: '#1E40AF', lineHeight: 1.6 }}>
+        <p className="text-sm" style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
           espot.do cobra el 100% de cada reserva al cliente y te transfiere el neto después de descontar la comisión de la plataforma. Las liquidaciones se procesan manualmente y recibirás una notificación por email cuando se complete la transferencia.
         </p>
       </div>
 
       {/* Historial */}
-      <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-        <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid #F0F2F5' }}>
-          <h2 className="font-bold text-sm" style={{ color: '#0F1623' }}>Historial de reservas</h2>
+      <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+        <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+          <h2 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Historial de reservas</h2>
           <span className="text-xs px-2.5 py-1 rounded-full font-semibold"
             style={{ background: 'rgba(53,196,147,0.1)', color: '#35C493' }}>
             {paid.length} reservas pagadas
@@ -146,18 +146,18 @@ export default function HostPagosPage() {
         {paid.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-14 text-center">
             <Banknote size={28} className="mb-3" style={{ color: '#CBD5E1' }} />
-            <p className="font-semibold text-sm" style={{ color: '#374151' }}>Sin reservas pagadas aún</p>
-            <p className="text-xs mt-1" style={{ color: '#94A3B8' }}>Cuando un cliente pague, aparecerá aquí.</p>
+            <p className="font-semibold text-sm" style={{ color: 'var(--text-secondary)' }}>Sin reservas pagadas aún</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Cuando un cliente pague, aparecerá aquí.</p>
           </div>
         ) : (
           /* overflow-x-auto para que en móvil haga scroll horizontal en lugar de romper */
           <div className="overflow-x-auto">
             <div style={{ minWidth: 680 }}>
               <div className="grid gap-3 px-6 py-3 text-xs font-bold uppercase tracking-wide"
-                style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', background: '#FAFBFC', borderBottom: '1px solid #F0F2F5', color: '#94A3B8' }}>
+                style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}>
                 <span>Cliente · Evento</span><span>Fecha</span><span>Total pagado</span><span>Comisión</span><span>Tu neto</span><span>Liquidación</span>
               </div>
-              <div className="divide-y divide-[#F8FAFC]">
+              <div className="divide-y divide-[var(--border-subtle)]">
                 {paid.map((bk: any) => {
                   const net = Number(bk.total_amount) * 0.90
                   const ps  = PAYOUT_STATUS[bk.payout_status ?? 'pending']
@@ -166,11 +166,11 @@ export default function HostPagosPage() {
                     <div key={bk.id} className="grid gap-3 items-center px-6 py-4 hover:bg-slate-50 transition-colors"
                       style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr' }}>
                       <div>
-                        <div className="text-sm font-semibold" style={{ color: '#0F1623' }}>{guest?.full_name ?? 'Cliente'}</div>
-                        <div className="text-xs" style={{ color: '#94A3B8' }}>{bk.event_type}</div>
+                        <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{guest?.full_name ?? 'Cliente'}</div>
+                        <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{bk.event_type}</div>
                       </div>
-                      <div className="text-sm" style={{ color: '#374151' }}>{formatDate(bk.event_date)}</div>
-                      <div className="text-sm font-bold" style={{ color: '#0F1623' }}>{formatCurrency(Number(bk.total_amount))}</div>
+                      <div className="text-sm" style={{ color: 'var(--text-secondary)' }}>{formatDate(bk.event_date)}</div>
+                      <div className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{formatCurrency(Number(bk.total_amount))}</div>
                       <div className="text-sm" style={{ color: 'var(--text-muted)' }}>−{formatCurrency(Number(bk.total_amount) * 0.10)}</div>
                       <div className="text-sm font-bold" style={{ color: 'var(--brand)' }}>{formatCurrency(net)}</div>
                       <span className="text-xs font-semibold px-2.5 py-1.5 rounded-full w-fit"
@@ -204,11 +204,11 @@ export default function HostPagosPage() {
       </div>
 
       {/* Cuenta bancaria */}
-      <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-        <div className="px-6 py-5 flex items-center justify-between" style={{ borderBottom: '1px solid #F0F2F5' }}>
+      <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+        <div className="px-6 py-5 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
           <div>
-            <h2 className="font-bold text-sm" style={{ color: '#0F1623' }}>Cuenta bancaria</h2>
-            <p className="text-xs mt-0.5" style={{ color: '#94A3B8' }}>Para recibir tus liquidaciones</p>
+            <h2 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Cuenta bancaria</h2>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Para recibir tus liquidaciones</p>
           </div>
           <span className="text-xs font-semibold px-3 py-1.5 rounded-full" style={{ background: ver.bg, color: ver.color }}>
             {ver.label}
@@ -219,7 +219,7 @@ export default function HostPagosPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
             <div className="md:col-span-2">
-              <label className="block text-xs font-semibold mb-1.5" style={{ color: '#6B7280' }}>
+              <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-muted)' }}>
                 Banco <span style={{ color: '#DC2626' }}>*</span>
               </label>
               <div className="relative">
@@ -228,12 +228,12 @@ export default function HostPagosPage() {
                   <option value="">Seleccionar banco...</option>
                   {BANKS.map(b => <option key={b} value={b}>{b}</option>)}
                 </select>
-                <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: '#94A3B8' }} />
+                <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold mb-1.5" style={{ color: '#6B7280' }}>Tipo de cuenta</label>
+              <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-muted)' }}>Tipo de cuenta</label>
               <div className="flex gap-2">
                 {(['ahorro','corriente'] as const).map(t => (
                   <button key={t} type="button" onClick={() => setAccountType(t)}
@@ -246,7 +246,7 @@ export default function HostPagosPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold mb-1.5" style={{ color: '#6B7280' }}>Moneda</label>
+              <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-muted)' }}>Moneda</label>
               <div className="flex gap-2">
                 {(['DOP','USD'] as const).map(c => (
                   <button key={c} type="button" onClick={() => setCurrency(c)}
@@ -259,7 +259,7 @@ export default function HostPagosPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold mb-1.5" style={{ color: '#6B7280' }}>
+              <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-muted)' }}>
                 Número de cuenta <span style={{ color: '#DC2626' }}>*</span>
               </label>
               <input value={accountNum} onChange={e => setAccountNum(e.target.value)} placeholder="012345678901"
@@ -267,7 +267,7 @@ export default function HostPagosPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold mb-1.5" style={{ color: '#6B7280' }}>
+              <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-muted)' }}>
                 Nombre del titular <span style={{ color: '#DC2626' }}>*</span>
               </label>
               <input value={holder} onChange={e => setHolder(e.target.value)} placeholder="Nombre completo"
@@ -275,7 +275,7 @@ export default function HostPagosPage() {
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-xs font-semibold mb-1.5" style={{ color: '#6B7280' }}>
+              <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-muted)' }}>
                 Cédula o RNC <span style={{ color: '#DC2626' }}>*</span>
               </label>
               <input value={cedula} onChange={e => setCedula(e.target.value)} placeholder="000-0000000-0"
