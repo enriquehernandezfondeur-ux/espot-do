@@ -4,7 +4,9 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import {
   Check, X, Search, Loader2, Plus, LayoutList, Paperclip,
+  CalendarDays, ArrowUpDown, CalendarRange,
 } from 'lucide-react'
+import Pagination from '@/components/ui/Pagination'
 import { formatCurrency, formatDate, formatTime, cn } from '@/lib/utils'
 import {
   getExternalEvents, updateExternalEvent, addEventPayment,
@@ -62,6 +64,27 @@ function itemKey(item: AgendaItem)    { return `${item.source}-${item.data.id}` 
 function itemDate(item: AgendaItem)   { return item.data.event_date }
 function itemAmount(item: AgendaItem) { return Number(item.source === 'espot' ? item.data.total_amount : (item.data.total_amount ?? 0)) }
 
+const PAGE_SIZE = 20
+
+const DATE_FILTERS = [
+  { key: 'all',     label: 'Todas las fechas' },
+  { key: 'upcoming', label: 'Próximas' },
+  { key: 'today',   label: 'Hoy' },
+  { key: 'week',    label: 'Esta semana' },
+  { key: 'month',   label: 'Este mes' },
+  { key: 'custom',  label: 'Rango' },
+]
+
+function daysFromNow(dateStr: string): { label: string; urgent: boolean; isPast: boolean } {
+  const d = new Date(dateStr + 'T12:00')
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  const diff = Math.round((d.getTime() - today.getTime()) / 86400000)
+  if (diff === 0) return { label: 'Hoy',                           urgent: true,  isPast: false }
+  if (diff === 1) return { label: 'Mañana',                        urgent: true,  isPast: false }
+  if (diff > 0)   return { label: `En ${diff} día${diff>1?'s':''}`, urgent: diff <= 7, isPast: false }
+  return            { label: `Hace ${Math.abs(diff)}d`,            urgent: false, isPast: true  }
+}
+
 function itemTitle(item: AgendaItem): string {
   if (item.source === 'espot') return (item.data as any).profiles?.full_name ?? 'Cliente'
   return item.data.title
@@ -88,12 +111,17 @@ export default function AgendaPage() {
   const [loading,  setLoading]  = useState(true)
   const [origin,   setOrigin]   = useState<OriginFilter>('all')
   const [status,   setStatus]   = useState<SimpleStatus>('all')
+  const [dateFilter, setDateFilter] = useState('all')
+  const [dateFrom,   setDateFrom]   = useState('')
+  const [dateTo,     setDateTo]     = useState('')
+  const [sortOrder,  setSortOrder]  = useState<'priority'|'date_asc'|'date_desc'|'recent'>('priority')
   const [search,   setSearch]   = useState('')
   const [selected, setSelected] = useState<AgendaItem | null>(null)
   const [toast,    setToast]    = useState<{ msg: string; ok: boolean } | null>(null)
   const [actionId,       setActionId]       = useState<string | null>(null)
   const [rejectReason,   setRejectReason]   = useState('')
   const [showRejectForm, setShowRejectForm] = useState(false)
+  const [page,           setPage]           = useState(1)
 
   function showToast(msg: string, ok: boolean) {
     setToast({ msg, ok })
@@ -110,37 +138,72 @@ export default function AgendaPage() {
         ...bookings.map(b => ({ source: 'espot'   as const, data: b })),
         ...events.map(e  => ({ source: 'direct'   as const, data: e })),
       ]
-      const statusPriority = (item: AgendaItem): number => {
-        const s = simpleStatus(item)
-        if (s === 'pendiente')  return 0
-        if (s === 'confirmado') return 1
-        if (s === 'completado') return 2
-        return 3  // cancelado al final
-      }
-      all.sort((a, b) => {
-        const pd = statusPriority(a) - statusPriority(b)
-        if (pd !== 0) return pd
-        return itemDate(a).localeCompare(itemDate(b))
-      })
       setItems(all)
       setLoading(false)
     })
   }, [])
 
-  const filtered = items.filter(item => {
-    if (origin !== 'all') {
-      if (origin === 'espot'   && item.source !== 'espot')  return false
-      if (origin === 'directo' && item.source !== 'direct') return false
-    }
-    if (status !== 'all' && simpleStatus(item) !== status) return false
-    const q = search.toLowerCase()
-    if (!q) return true
-    return (
-      itemTitle(item).toLowerCase().includes(q) ||
-      itemSubtitle(item).toLowerCase().includes(q) ||
-      itemDate(item).includes(q)
-    )
-  })
+  // Reset page when filters change
+  useEffect(() => { setPage(1) }, [origin, status, dateFilter, dateFrom, dateTo, sortOrder, search])
+
+  const todayStr = new Date().toISOString().split('T')[0]
+
+  const statusPriority = (item: AgendaItem): number => {
+    const s = simpleStatus(item)
+    if (s === 'pendiente')  return 0
+    if (s === 'confirmado') return 1
+    if (s === 'completado') return 2
+    return 3
+  }
+
+  const filtered = items
+    .filter(item => {
+      if (origin !== 'all') {
+        if (origin === 'espot'   && item.source !== 'espot')  return false
+        if (origin === 'directo' && item.source !== 'direct') return false
+      }
+      if (status !== 'all' && simpleStatus(item) !== status) return false
+      // Date filter
+      const bDate = itemDate(item)
+      if (dateFilter === 'upcoming') { if (bDate < todayStr) return false }
+      else if (dateFilter === 'today') { if (bDate !== todayStr) return false }
+      else if (dateFilter === 'week') {
+        const cutoff = new Date(); cutoff.setDate(cutoff.getDate() + 7)
+        const cutoffStr = cutoff.toISOString().split('T')[0]
+        if (bDate < todayStr || bDate > cutoffStr) return false
+      } else if (dateFilter === 'month') {
+        const end = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0]
+        if (bDate < todayStr || bDate > end) return false
+      } else if (dateFilter === 'custom') {
+        if (dateFrom && bDate < dateFrom) return false
+        if (dateTo   && bDate > dateTo)   return false
+      }
+      // Text search
+      const q = search.toLowerCase()
+      if (!q) return true
+      return (
+        itemTitle(item).toLowerCase().includes(q) ||
+        itemSubtitle(item).toLowerCase().includes(q) ||
+        itemDate(item).includes(q)
+      )
+    })
+    .sort((a, b_) => {
+      if (sortOrder === 'date_asc')  return itemDate(a).localeCompare(itemDate(b_))
+      if (sortOrder === 'date_desc') return itemDate(b_).localeCompare(itemDate(a))
+      if (sortOrder === 'recent') {
+        return new Date((b_.data as any).created_at ?? 0).getTime() - new Date((a.data as any).created_at ?? 0).getTime()
+      }
+      // priority: status priority then date
+      const pd = statusPriority(a) - statusPriority(b_)
+      return pd !== 0 ? pd : itemDate(a).localeCompare(itemDate(b_))
+    })
+
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  // Próxima reserva/evento activo
+  const nextItem = items
+    .filter(item => simpleStatus(item) === 'confirmado' && itemDate(item) >= todayStr)
+    .sort((a, b_) => itemDate(a).localeCompare(itemDate(b_)))[0] ?? null
 
   const pendingEspot = items.filter(i =>
     i.source === 'espot' && (i.data.status === 'pending' || i.data.status === 'quote_requested')
@@ -226,6 +289,57 @@ export default function AgendaPage() {
         </Link>
       </div>
 
+      {/* Banner: próximo evento confirmado */}
+      {nextItem && (() => {
+        const dfl = daysFromNow(itemDate(nextItem))
+        const isEspot = nextItem.source === 'espot'
+        const chip = itemStatusChip(nextItem)
+        return (
+          <div className="rounded-2xl p-4 mb-5 flex items-center justify-between gap-3"
+            style={{ background: 'rgba(53,196,147,0.06)', border: '1.5px solid rgba(53,196,147,0.25)' }}>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: 'rgba(53,196,147,0.14)' }}>
+                <CalendarDays size={18} style={{ color: 'var(--brand)' }} />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--brand)' }}>Próximo evento</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
+                    style={isEspot
+                      ? { background: 'rgba(53,196,147,0.15)', color: '#16A34A' }
+                      : { background: 'rgba(37,99,235,0.1)', color: '#2563EB' }}>
+                    {isEspot ? 'Espot' : 'Directo'}
+                  </span>
+                </div>
+                <div className="text-sm font-bold truncate" style={{ color: 'var(--text-primary)' }}>
+                  {itemTitle(nextItem)}{itemSubtitle(nextItem) !== '—' ? ` · ${itemSubtitle(nextItem)}` : ''}
+                </div>
+                <div className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>
+                  {formatDate(itemDate(nextItem))}
+                  {nextItem.source === 'espot' && (nextItem.data as any).start_time
+                    ? ` · ${(nextItem.data as any).start_time?.slice(0,5)} – ${(nextItem.data as any).end_time?.slice(0,5)}`
+                    : ''}
+                  {(nextItem.source === 'espot' ? (nextItem.data as any).guest_count : (nextItem.data as any).guest_count)
+                    ? ` · ${(nextItem.data as any).guest_count} personas` : ''}
+                </div>
+              </div>
+            </div>
+            <div className="text-right shrink-0">
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full block mb-1"
+                style={{ background: dfl.urgent ? 'rgba(53,196,147,0.18)' : 'var(--bg-elevated)', color: dfl.urgent ? 'var(--brand)' : 'var(--text-secondary)' }}>
+                {dfl.label}
+              </span>
+              {itemAmount(nextItem) > 0 && (
+                <div className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                  {formatCurrency(itemAmount(nextItem))}
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Origin cards */}
       <div className="grid grid-cols-3 gap-3 mb-3">
         {([
@@ -261,8 +375,9 @@ export default function AgendaPage() {
         })}
       </div>
 
-      {/* Status + search */}
+      {/* Status + fecha + búsqueda */}
       <div className="flex flex-col gap-2 mb-5">
+        {/* Status pills */}
         <div className="flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide"
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
           {STATUS_OPTIONS.map(o => (
@@ -273,6 +388,55 @@ export default function AgendaPage() {
             </button>
           ))}
         </div>
+
+        {/* Date filter pills + sort */}
+        <div className="flex gap-2 flex-wrap items-center">
+          <div className="flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide"
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+            {DATE_FILTERS.map(f => {
+              const active = dateFilter === f.key
+              return (
+                <button key={f.key} onClick={() => setDateFilter(f.key)}
+                  className="flex items-center gap-1 py-1.5 px-2.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap shrink-0"
+                  style={active ? { background: 'var(--text-primary)', color: '#fff' } : { color: '#6B7280' }}>
+                  {f.key === 'custom' && <CalendarRange size={11} />}
+                  {f.label}
+                </button>
+              )
+            })}
+          </div>
+          <button
+            onClick={() => setSortOrder(s => s === 'priority' ? 'date_asc' : s === 'date_asc' ? 'date_desc' : s === 'date_desc' ? 'recent' : 'priority')}
+            className="flex items-center gap-1.5 py-1.5 px-3 rounded-xl text-xs font-medium transition-all shrink-0"
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: '#6B7280' }}
+            title="Cambiar orden">
+            <ArrowUpDown size={12} />
+            {sortOrder === 'priority' ? 'Por estado' : sortOrder === 'date_asc' ? 'Fecha ↑' : sortOrder === 'date_desc' ? 'Fecha ↓' : 'Recientes'}
+          </button>
+        </div>
+
+        {/* Rango personalizado */}
+        {dateFilter === 'custom' && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-medium shrink-0" style={{ color: '#6B7280' }}>Desde</span>
+            <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+              className="rounded-xl px-3 py-2 text-sm focus:outline-none"
+              style={{ background: 'var(--bg-card)', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)', fontSize: 15 }} />
+            <span className="text-xs font-medium shrink-0" style={{ color: '#6B7280' }}>Hasta</span>
+            <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
+              className="rounded-xl px-3 py-2 text-sm focus:outline-none"
+              style={{ background: 'var(--bg-card)', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)', fontSize: 15 }} />
+            {(dateFrom || dateTo) && (
+              <button onClick={() => { setDateFrom(''); setDateTo('') }}
+                className="text-xs px-2.5 py-2 rounded-xl"
+                style={{ color: '#DC2626', background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)' }}>
+                Limpiar
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Búsqueda */}
         <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl"
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
           <Search size={15} className="text-gray-400 shrink-0" />
@@ -281,6 +445,9 @@ export default function AgendaPage() {
             className="bg-transparent text-sm flex-1 focus:outline-none text-gray-700 placeholder-gray-400"
             style={{ fontSize: 16 }} />
           {search && <button onClick={() => setSearch('')} className="text-gray-400"><X size={14} /></button>}
+          {(status !== 'all' || dateFilter !== 'all' || origin !== 'all' || search) && (
+            <span className="text-xs text-gray-400 shrink-0">{filtered.length} resultado{filtered.length !== 1 ? 's' : ''}</span>
+          )}
         </div>
       </div>
 
@@ -313,7 +480,7 @@ export default function AgendaPage() {
               </div>
             ) : (
               <div className="divide-y divide-[var(--border-subtle)]">
-                {filtered.map(item => {
+                {paginated.map(item => {
                   const k         = itemKey(item)
                   const chip      = itemStatusChip(item)
                   const amt       = itemAmount(item)
@@ -322,6 +489,7 @@ export default function AgendaPage() {
                   const balance   = !isEspot && (item.data as ExternalEvent).total_amount
                     ? (item.data as ExternalEvent).total_amount! - ((item.data as ExternalEvent).paid_amount ?? 0)
                     : null
+                  const dfl = daysFromNow(itemDate(item))
                   return (
                     <button key={k}
                       onClick={() => { setSelected(isSelected ? null : item); setShowRejectForm(false); setRejectReason('') }}
@@ -344,7 +512,17 @@ export default function AgendaPage() {
                         </div>
                         <div className="text-xs text-gray-400 truncate">{itemSubtitle(item)}</div>
                       </div>
-                      <div className="text-sm text-gray-600">{formatDate(itemDate(item))}</div>
+                      <div className="min-w-0">
+                        <div className="text-sm text-gray-600">{formatDate(itemDate(item))}</div>
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                          style={dfl.isPast
+                            ? { background: 'rgba(107,114,128,0.1)', color: '#6B7280' }
+                            : dfl.urgent
+                            ? { background: 'rgba(53,196,147,0.12)', color: 'var(--brand)' }
+                            : { background: 'var(--bg-elevated)', color: '#9CA3AF' }}>
+                          {dfl.label}
+                        </span>
+                      </div>
                       <div className="text-sm">
                         <div className="font-bold" style={{ color: 'var(--text-primary)' }}>
                           {amt > 0 ? formatCurrency(amt) : '—'}
@@ -362,6 +540,7 @@ export default function AgendaPage() {
                 })}
               </div>
             )}
+            <Pagination page={page} total={filtered.length} pageSize={PAGE_SIZE} onChange={p => { setPage(p); setSelected(null) }} className="px-5 pb-4" />
           </div>
         </div>
 
