@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { CalendarDays, Clock, Users, Check, X, ExternalLink, Search, Loader2, Download, ChevronRight } from 'lucide-react'
+import { CalendarDays, Clock, Users, Check, X, ExternalLink, Search, Loader2, Download, ChevronRight, ArrowUpDown, CalendarRange } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getHostBookings, acceptBooking, rejectBooking, completeBooking } from '@/lib/actions/host'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
@@ -77,19 +77,43 @@ function HostInstallmentStatus({ bookingId, totalAmount }: {
 type Booking = Awaited<ReturnType<typeof getHostBookings>>[0]
 
 const FILTERS = [
-  { key: 'all', label: 'Todas' },
-  { key: 'pending', label: 'Pendientes' },
-  { key: 'accepted', label: 'Aceptadas' },
+  { key: 'all',       label: 'Todas' },
+  { key: 'pending',   label: 'Pendientes' },
+  { key: 'accepted',  label: 'Por pagar' },
   { key: 'confirmed', label: 'Confirmadas' },
   { key: 'completed', label: 'Completadas' },
-  { key: 'rejected', label: 'Rechazadas' },
+  { key: 'cancelled', label: 'Canceladas' },
+  { key: 'rejected',  label: 'Rechazadas' },
 ]
+
+const DATE_FILTERS = [
+  { key: 'all',       label: 'Todas las fechas' },
+  { key: 'upcoming',  label: 'Próximas' },
+  { key: 'today',     label: 'Hoy' },
+  { key: 'week',      label: 'Esta semana' },
+  { key: 'month',     label: 'Este mes' },
+  { key: 'custom',    label: 'Rango' },
+]
+
+function daysFromNow(dateStr: string): { label: string; urgent: boolean; isPast: boolean } {
+  const d = new Date(dateStr + 'T12:00')
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  const diff = Math.round((d.getTime() - today.getTime()) / 86400000)
+  if (diff === 0) return { label: 'Hoy',                          urgent: true,  isPast: false }
+  if (diff === 1) return { label: 'Mañana',                       urgent: true,  isPast: false }
+  if (diff > 0)   return { label: `En ${diff} día${diff>1?'s':''}`, urgent: diff <= 7, isPast: false }
+  return            { label: `Hace ${Math.abs(diff)}d`,           urgent: false, isPast: true  }
+}
 
 export default function HostReservasPage() {
   const router = useRouter()
   const [bookings, setBookings]         = useState<Booking[]>([])
   const [loading, setLoading]           = useState(true)
   const [filter, setFilter]             = useState('all')
+  const [dateFilter, setDateFilter]     = useState('all')
+  const [dateFrom, setDateFrom]         = useState('')
+  const [dateTo, setDateTo]             = useState('')
+  const [sortOrder, setSortOrder]       = useState<'date_asc'|'date_desc'|'recent'>('date_asc')
   const [search, setSearch]             = useState('')
   const [selected, setSelected]         = useState<Booking | null>(null)
   const [actionId, setActionId]         = useState<string | null>(null)
@@ -100,22 +124,57 @@ export default function HostReservasPage() {
 
   useEffect(() => {
     setLoading(true)
-    getHostBookings(filter === 'all' ? undefined : filter)
+    getHostBookings()
       .then(d => { setBookings(d); setLoading(false) })
       .catch(() => setLoading(false))
-  }, [filter])
+  }, [])
 
-  useEffect(() => { setPage(1) }, [filter, search])
+  useEffect(() => { setPage(1) }, [filter, dateFilter, dateFrom, dateTo, sortOrder, search])
 
-  const filtered = bookings.filter(b => {
-    const g = (b as any).profiles
-    return (g?.full_name ?? '').toLowerCase().includes(search.toLowerCase()) ||
-           (b.event_type ?? '').toLowerCase().includes(search.toLowerCase())
-  })
+  const todayStr = new Date().toISOString().split('T')[0]
+
+  const filtered = bookings
+    .filter(b => {
+      // Status filter
+      if (filter !== 'all') {
+        if (filter === 'cancelled') { if (b.status !== 'cancelled_guest' && b.status !== 'cancelled_host') return false }
+        else if (b.status !== filter) return false
+      }
+      // Date filter
+      const bDate = b.event_date
+      if (dateFilter === 'upcoming') { if (bDate < todayStr) return false }
+      else if (dateFilter === 'today') { if (bDate !== todayStr) return false }
+      else if (dateFilter === 'week') {
+        const cutoff = new Date(); cutoff.setDate(cutoff.getDate() + 7)
+        const cutoffStr = cutoff.toISOString().split('T')[0]
+        if (bDate < todayStr || bDate > cutoffStr) return false
+      } else if (dateFilter === 'month') {
+        const end = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0]
+        if (bDate < todayStr || bDate > end) return false
+      } else if (dateFilter === 'custom') {
+        if (dateFrom && bDate < dateFrom) return false
+        if (dateTo   && bDate > dateTo)   return false
+      }
+      // Text search
+      const g = (b as any).profiles
+      const q = search.toLowerCase()
+      return !q || (g?.full_name ?? '').toLowerCase().includes(q) || (b.event_type ?? '').toLowerCase().includes(q)
+    })
+    .sort((a, b_) => {
+      if (sortOrder === 'date_asc')  return a.event_date.localeCompare(b_.event_date)
+      if (sortOrder === 'date_desc') return b_.event_date.localeCompare(a.event_date)
+      return new Date((b_ as any).created_at ?? 0).getTime() - new Date((a as any).created_at ?? 0).getTime()
+    })
+
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   const pending  = bookings.filter(b => b.status === 'pending' || b.status === 'quote_requested').length
   const accepted = bookings.filter(b => b.status === 'accepted').length
+
+  // Próxima reserva confirmada o aceptada
+  const nextBooking = bookings
+    .filter(b => ['confirmed', 'accepted'].includes(b.status) && b.event_date >= todayStr)
+    .sort((a, b_) => a.event_date.localeCompare(b_.event_date))[0] ?? null
 
   // Notificación en el título de la pestaña
   useEffect(() => {
@@ -227,17 +286,51 @@ export default function HostReservasPage() {
         )}
       </div>
 
-      {/* Filtros + búsqueda */}
+      {/* Banner: próxima reserva */}
+      {nextBooking && (() => {
+        const dfl = daysFromNow(nextBooking.event_date)
+        return (
+          <div className="rounded-2xl p-4 mb-5 flex items-center justify-between gap-3"
+            style={{ background: 'rgba(53,196,147,0.06)', border: '1.5px solid rgba(53,196,147,0.25)' }}>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: 'rgba(53,196,147,0.14)' }}>
+                <CalendarDays size={18} style={{ color: 'var(--brand)' }} />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[11px] font-bold uppercase tracking-wide mb-0.5" style={{ color: 'var(--brand)' }}>Próxima reserva</div>
+                <div className="text-sm font-bold truncate" style={{ color: 'var(--text-primary)' }}>
+                  {(nextBooking as any).profiles?.full_name ?? 'Cliente'}{nextBooking.event_type ? ` · ${nextBooking.event_type}` : ''}
+                </div>
+                <div className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>
+                  {formatDate(nextBooking.event_date)} · {formatTime(nextBooking.start_time)} – {formatTime(nextBooking.end_time)} · {nextBooking.guest_count} personas
+                </div>
+              </div>
+            </div>
+            <div className="text-right shrink-0">
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full block mb-1"
+                style={{ background: dfl.urgent ? 'rgba(53,196,147,0.18)' : 'var(--bg-elevated)', color: dfl.urgent ? 'var(--brand)' : 'var(--text-secondary)' }}>
+                {dfl.label}
+              </span>
+              <div className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
+                {formatCurrency(Number(nextBooking.total_amount))}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
+      {/* Filtros */}
       <div className="mb-5 space-y-2">
-        {/* Pills — grid 3×2 en móvil (sin scroll), fila completa en desktop */}
-        <div className="p-1 rounded-2xl" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-          <div className="grid grid-cols-3 md:flex gap-1">
+        {/* Pills de estado */}
+        <div className="p-1 rounded-2xl overflow-x-auto scrollbar-hide" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+          <div className="flex gap-1 min-w-max md:min-w-0">
             {FILTERS.map(f => {
               const badge = f.key === 'pending' ? pending : f.key === 'accepted' ? accepted : 0
               const active = filter === f.key
               return (
                 <button key={f.key} onClick={() => setFilter(f.key)}
-                  className="md:flex-1 flex items-center justify-center gap-1 py-2.5 px-1 md:px-3.5 rounded-xl text-xs md:text-sm font-medium transition-all min-h-[40px]"
+                  className="flex items-center justify-center gap-1 py-2 px-3 md:px-3.5 rounded-xl text-xs md:text-sm font-medium transition-all whitespace-nowrap shrink-0"
                   style={active
                     ? { background: '#35C493', color: '#fff', boxShadow: '0 2px 8px rgba(53,196,147,0.3)' }
                     : { color: 'var(--text-secondary)', background: 'transparent' }}>
@@ -253,12 +346,67 @@ export default function HostReservasPage() {
             })}
           </div>
         </div>
-        {/* Buscador — ancho completo siempre */}
+
+        {/* Pills de fecha */}
+        <div className="flex gap-2 flex-wrap items-center">
+          <div className="flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide"
+            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+            {DATE_FILTERS.map(f => {
+              const active = dateFilter === f.key
+              return (
+                <button key={f.key} onClick={() => setDateFilter(f.key)}
+                  className="flex items-center gap-1 py-1.5 px-2.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap shrink-0"
+                  style={active
+                    ? { background: 'var(--text-primary)', color: '#fff' }
+                    : { color: 'var(--text-secondary)' }}>
+                  {f.key === 'custom' && <CalendarRange size={11} />}
+                  {f.label}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Sort toggle */}
+          <button
+            onClick={() => setSortOrder(s => s === 'date_asc' ? 'date_desc' : s === 'date_desc' ? 'recent' : 'date_asc')}
+            className="flex items-center gap-1.5 py-1.5 px-3 rounded-xl text-xs font-medium transition-all shrink-0"
+            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
+            title="Cambiar orden">
+            <ArrowUpDown size={12} />
+            {sortOrder === 'date_asc' ? 'Fecha ↑' : sortOrder === 'date_desc' ? 'Fecha ↓' : 'Recientes'}
+          </button>
+        </div>
+
+        {/* Rango personalizado */}
+        {dateFilter === 'custom' && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-medium shrink-0" style={{ color: 'var(--text-muted)' }}>Desde</span>
+            <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+              className="rounded-xl px-3 py-2 text-sm focus:outline-none"
+              style={{ background: 'var(--bg-elevated)', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)', fontSize: 15 }} />
+            <span className="text-xs font-medium shrink-0" style={{ color: 'var(--text-muted)' }}>Hasta</span>
+            <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
+              className="rounded-xl px-3 py-2 text-sm focus:outline-none"
+              style={{ background: 'var(--bg-elevated)', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)', fontSize: 15 }} />
+            {(dateFrom || dateTo) && (
+              <button onClick={() => { setDateFrom(''); setDateTo('') }}
+                className="text-xs px-2.5 py-2 rounded-xl"
+                style={{ color: '#DC2626', background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)' }}>
+                Limpiar
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Buscador + resultados */}
         <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl"
           style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <Search size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar reserva..."
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar por cliente o tipo de evento..."
             className="bg-transparent text-sm flex-1 focus:outline-none min-w-0" style={{ color: 'var(--text-primary)', fontSize: 16 }} />
+          {(filter !== 'all' || dateFilter !== 'all' || search) && filtered.length !== bookings.length && (
+            <span className="text-xs shrink-0" style={{ color: 'var(--text-muted)' }}>{filtered.length} resultado{filtered.length !== 1 ? 's' : ''}</span>
+          )}
         </div>
       </div>
 
@@ -321,7 +469,19 @@ export default function HostReservasPage() {
 
                     {/* Fecha y horario */}
                     <div className="min-w-0">
-                      <div className="text-sm" style={{ color: 'var(--text-primary)' }}>{formatDate(bk.event_date)}</div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{formatDate(bk.event_date)}</span>
+                        {(() => { const dfl = daysFromNow(bk.event_date); return (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0"
+                            style={dfl.isPast
+                              ? { background: 'rgba(107,114,128,0.1)', color: '#6B7280' }
+                              : dfl.urgent
+                              ? { background: 'rgba(53,196,147,0.14)', color: 'var(--brand)' }
+                              : { background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
+                            {dfl.label}
+                          </span>
+                        )})()}
+                      </div>
                       <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
                         {bk.start_time ? `${formatTime(bk.start_time)} – ${formatTime(bk.end_time)}` : '—'}
                       </div>
@@ -400,6 +560,16 @@ export default function HostReservasPage() {
                           <span className="flex items-center gap-1"><CalendarDays size={10} />{formatDate(bk.event_date)}</span>
                           <span className="flex items-center gap-1"><Clock size={10} />{formatTime(bk.start_time)}–{formatTime(bk.end_time)}</span>
                           <span className="flex items-center gap-1"><Users size={10} />{bk.guest_count}</span>
+                          {(() => { const dfl = daysFromNow(bk.event_date); return (
+                            <span className="font-semibold px-1.5 py-0.5 rounded-full"
+                              style={dfl.isPast
+                                ? { background: 'rgba(107,114,128,0.1)', color: '#6B7280' }
+                                : dfl.urgent
+                                ? { background: 'rgba(53,196,147,0.12)', color: 'var(--brand)' }
+                                : { background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
+                              {dfl.label}
+                            </span>
+                          )})()}
                         </div>
                         {(bk.status === 'pending' || bk.status === 'quote_requested') && (
                           <div className="flex gap-2 mt-3" onClick={e => e.stopPropagation()}>
