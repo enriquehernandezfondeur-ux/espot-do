@@ -14,7 +14,6 @@ const PAGE_SIZE = 20
 
 const STATUS_OPTIONS: { value: 'all' | ExternalEventStatus; label: string }[] = [
   { value: 'all',        label: 'Todos' },
-  { value: 'tentativo',  label: 'Pendientes' },
   { value: 'confirmado', label: 'Confirmados' },
   { value: 'en_curso',   label: 'En curso' },
   { value: 'completado', label: 'Completados' },
@@ -22,11 +21,11 @@ const STATUS_OPTIONS: { value: 'all' | ExternalEventStatus; label: string }[] = 
 ]
 
 const statusConfig: Record<ExternalEventStatus, { label: string; color: string; bg: string }> = {
-  tentativo:  { label: 'Pendiente',  color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
-  confirmado: { label: 'Confirmado', color: '#16A34A', bg: 'rgba(22,163,74,0.1)'   },
-  en_curso:   { label: 'En curso',   color: '#2563EB', bg: 'rgba(37,99,235,0.1)'   },
-  completado: { label: 'Completado', color: '#35C493', bg: 'rgba(53,196,147,0.1)'  },
-  cancelado:  { label: 'Cancelado',  color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },
+  pendiente:  { label: 'En pipeline', color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
+  confirmado: { label: 'Confirmado',  color: '#16A34A', bg: 'rgba(22,163,74,0.1)'   },
+  en_curso:   { label: 'En curso',    color: '#2563EB', bg: 'rgba(37,99,235,0.1)'   },
+  completado: { label: 'Completado',  color: '#35C493', bg: 'rgba(53,196,147,0.1)'  },
+  cancelado:  { label: 'Cancelado',   color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },
 }
 
 export default function EventosPage() {
@@ -45,8 +44,15 @@ export default function EventosPage() {
 
   useEffect(() => {
     setLoading(true)
+    // Eventos page muestra solo eventos activos (excluye leads del pipeline)
     getExternalEvents(filter !== 'all' ? { status: filter } : undefined)
-      .then(d => { setEvents(d); setLoading(false) })
+      .then(d => {
+        const active = filter === 'all'
+          ? d.filter(ev => ev.status !== 'pendiente')
+          : d
+        setEvents(active)
+        setLoading(false)
+      })
       .catch(() => { setEvents([]); setLoading(false) })
   }, [filter])
 
@@ -469,7 +475,7 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
         <div>
           <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Cambiar estado</div>
           <div className="grid grid-cols-2 gap-2">
-            {(['tentativo', 'confirmado', 'completado', 'cancelado'] as ExternalEventStatus[]).map(status => {
+            {(['confirmado', 'en_curso', 'completado', 'cancelado'] as ExternalEventStatus[]).map(status => {
               const s = statusConfig[status]
               return (
                 <button key={status} onClick={() => handleStatusChange(status)}

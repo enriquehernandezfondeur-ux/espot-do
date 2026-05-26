@@ -161,9 +161,12 @@ export interface DashboardStats {
 // ─── Host SaaS — CRM & Eventos Manuales ───────────────────────
 
 export type ClientSource = 'espot' | 'manual' | 'referido' | 'redes' | 'otro'
-export type ExternalEventStatus = 'tentativo' | 'confirmado' | 'en_curso' | 'completado' | 'cancelado'
+export type ExternalEventStatus = 'pendiente' | 'confirmado' | 'en_curso' | 'completado' | 'cancelado'
 export type ExternalEventSource = 'directo' | 'referido' | 'redes' | 'otro'
 export type ExternalPaymentMethod = 'efectivo' | 'transferencia' | 'tarjeta' | 'otro'
+export type PipelineStage = 'pendiente' | 'cotizacion' | 'negociando' | 'cerrado' | 'perdido'
+export type TeamRole = 'admin' | 'coordinador' | 'viewer'
+export type TeamMemberStatus = 'pending' | 'active' | 'inactive'
 
 export interface HostClient {
   id: string
@@ -196,6 +199,10 @@ export interface ExternalEvent {
   end_time?: string
   guest_count?: number
   status: ExternalEventStatus
+  pipeline_stage?: PipelineStage
+  pipeline_notes?: string
+  next_follow_up?: string
+  probability_pct?: number
   total_amount?: number
   paid_amount: number
   notes?: string
@@ -206,6 +213,20 @@ export interface ExternalEvent {
   client?: HostClient
   space?: Pick<Space, 'id' | 'name' | 'city'>
   payments?: ExternalEventPayment[]
+}
+
+export interface HostTeamMember {
+  id: string
+  host_id: string
+  member_user_id?: string
+  role: TeamRole
+  status: TeamMemberStatus
+  invite_email: string
+  invite_token?: string
+  invited_at: string
+  accepted_at?: string
+  // joins opcionales
+  member?: Pick<Profile, 'id' | 'full_name' | 'avatar_url' | 'email'>
 }
 
 export interface ExternalEventPayment {

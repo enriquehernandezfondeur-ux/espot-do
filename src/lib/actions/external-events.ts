@@ -7,7 +7,8 @@ import { tplEventoDirectoConfirmado, tplEventoDirectoCancelado, tplNuevaSolicitu
 import { createServiceClient } from '@/lib/supabase/service'
 import { createBookingEvent, deleteBookingEvent, isGoogleCalendarConfigured } from '@/lib/google-calendar'
 import { formatDate } from '@/lib/utils'
-import type { ExternalEvent, ExternalEventStatus, ExternalEventSource, ExternalPaymentMethod } from '@/types'
+import type { ExternalEvent, ExternalEventStatus, ExternalEventSource, ExternalPaymentMethod, PipelineStage } from '@/types'
+import { resolveHostId } from './_resolveHost'
 
 export interface CreateExternalEventPayload {
   title: string
@@ -51,6 +52,8 @@ export async function getExternalEvents(filters?: {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
 
+  const { hostId } = await resolveHostId(supabase, user.id)
+
   let q = supabase
     .from('external_events')
     .select(`
@@ -59,7 +62,7 @@ export async function getExternalEvents(filters?: {
       space:spaces(id, name, city),
       payments:external_event_payments(*)
     `)
-    .eq('host_id', user.id)
+    .eq('host_id', hostId)
     .order('event_date', { ascending: false })
 
   if (filters?.status)   q = q.eq('status', filters.status)
@@ -78,6 +81,8 @@ export async function getExternalEvent(eventId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
+  const { hostId } = await resolveHostId(supabase, user.id)
+
   const { data, error } = await supabase
     .from('external_events')
     .select(`
@@ -87,7 +92,7 @@ export async function getExternalEvent(eventId: string) {
       payments:external_event_payments(*)
     `)
     .eq('id', eventId)
-    .eq('host_id', user.id)
+    .eq('host_id', hostId)
     .single()
 
   if (error) return null
@@ -100,17 +105,19 @@ export async function createExternalEvent(payload: CreateExternalEventPayload) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
+  const { hostId } = await resolveHostId(supabase, user.id)
+
   const { data, error } = await supabase
     .from('external_events')
     .insert({
-      host_id:     user.id,
+      host_id:     hostId,
       title:       payload.title.trim(),
       event_type:  payload.event_type?.trim() || null,
       event_date:  payload.event_date,
       start_time:  payload.start_time || null,
       end_time:    payload.end_time || null,
       guest_count: payload.guest_count || null,
-      status:      payload.status ?? 'tentativo',
+      status:      payload.status ?? 'pendiente',
       total_amount:payload.total_amount || null,
       notes:       payload.notes?.trim() || null,
       source:      payload.source ?? 'directo',
@@ -139,6 +146,7 @@ export async function updateExternalEvent(payload: UpdateExternalEventPayload) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
+  const { hostId } = await resolveHostId(supabase, user.id)
   const { id, ...fields } = payload
 
   // Leer el evento actual antes de actualizar para detectar cambios de estado
@@ -152,7 +160,7 @@ export async function updateExternalEvent(payload: UpdateExternalEventPayload) {
       space:spaces(id, name, address, sector, city)
     `)
     .eq('id', id)
-    .eq('host_id', user.id)
+    .eq('host_id', hostId)
     .single()
 
   if (!current) return { error: 'Evento no encontrado' }
@@ -177,7 +185,7 @@ export async function updateExternalEvent(payload: UpdateExternalEventPayload) {
     .from('external_events')
     .update(update)
     .eq('id', id)
-    .eq('host_id', user.id)
+    .eq('host_id', hostId)
     .select()
     .single()
 
@@ -197,7 +205,7 @@ export async function updateExternalEvent(payload: UpdateExternalEventPayload) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('full_name, google_calendar_refresh_token, google_calendar_connected')
-      .eq('id', user.id)
+      .eq('id', hostId)
       .single()
 
     const hostName = profile?.full_name ?? 'El organizador'
@@ -293,11 +301,13 @@ export async function deleteExternalEvent(eventId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
+  const { hostId } = await resolveHostId(supabase, user.id)
+
   const { error } = await supabase
     .from('external_events')
     .delete()
     .eq('id', eventId)
-    .eq('host_id', user.id)
+    .eq('host_id', hostId)
 
   if (error) return { error: error.message }
 
@@ -312,12 +322,14 @@ export async function addEventPayment(payload: AddEventPaymentPayload) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
+  const { hostId } = await resolveHostId(supabase, user.id)
+
   // Verificar que el evento pertenece al host
   const { data: ev } = await supabase
     .from('external_events')
     .select('id')
     .eq('id', payload.event_id)
-    .eq('host_id', user.id)
+    .eq('host_id', hostId)
     .single()
   if (!ev) return { error: 'Evento no encontrado' }
 
@@ -325,7 +337,7 @@ export async function addEventPayment(payload: AddEventPaymentPayload) {
     .from('external_event_payments')
     .insert({
       event_id:       payload.event_id,
-      host_id:        user.id,
+      host_id:        hostId,
       amount:         payload.amount,
       payment_method: payload.payment_method ?? 'efectivo',
       payment_date:   payload.payment_date,
@@ -349,11 +361,13 @@ export async function deleteEventPayment(paymentId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
+  const { hostId } = await resolveHostId(supabase, user.id)
+
   const { error } = await supabase
     .from('external_event_payments')
     .delete()
     .eq('id', paymentId)
-    .eq('host_id', user.id)
+    .eq('host_id', hostId)
 
   if (error) return { error: error.message }
 
@@ -444,7 +458,8 @@ export async function createFromPublicForm(payload: PublicFormPayload) {
       event_type: payload.eventType?.trim() || null,
       event_date: payload.eventDate,
       guest_count:payload.guestCount || null,
-      status:     'tentativo',
+      status:     'pendiente',
+      pipeline_stage: 'pendiente',
       source:     'directo',
       notes:      payload.message?.trim() || null,
       client_id:  clientId,
@@ -570,4 +585,85 @@ export async function notifyPaymentMade(eventId: string, clientNote?: string) {
   }
 
   return { success: true }
+}
+
+// ── Pipeline: obtener leads agrupados por etapa ──────────────
+export async function getPipelineEvents(): Promise<ExternalEvent[]> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { hostId } = await resolveHostId(supabase, user.id)
+
+  const { data, error } = await supabase
+    .from('external_events')
+    .select(`
+      *,
+      client:host_clients(id, full_name, email, phone),
+      space:spaces(id, name, city)
+    `)
+    .eq('host_id', hostId)
+    .eq('status', 'pendiente')
+    .order('created_at', { ascending: false })
+
+  if (error) return []
+  return data ?? []
+}
+
+// ── Pipeline: mover lead a otra etapa ───────────────────────
+export async function updatePipelineStage(eventId: string, stage: PipelineStage, notes?: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+
+  const { hostId } = await resolveHostId(supabase, user.id)
+
+  const update: Record<string, any> = {
+    pipeline_stage: stage,
+    updated_at: new Date().toISOString(),
+  }
+
+  if (stage === 'cerrado') update.status = 'confirmado'
+  if (stage === 'perdido') update.status = 'cancelado'
+  if (notes !== undefined) update.pipeline_notes = notes
+
+  const { data, error } = await supabase
+    .from('external_events')
+    .update(update)
+    .eq('id', eventId)
+    .eq('host_id', hostId)
+    .select()
+    .single()
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/dashboard/host/pipeline')
+  revalidatePath('/dashboard/host/eventos')
+  return { data }
+}
+
+// ── Pipeline: actualizar follow-up y probabilidad ───────────
+export async function updatePipelineMeta(eventId: string, meta: {
+  next_follow_up?: string | null
+  probability_pct?: number | null
+  pipeline_notes?: string | null
+}) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+
+  const { hostId } = await resolveHostId(supabase, user.id)
+
+  const { data, error } = await supabase
+    .from('external_events')
+    .update({ ...meta, updated_at: new Date().toISOString() })
+    .eq('id', eventId)
+    .eq('host_id', hostId)
+    .select()
+    .single()
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/dashboard/host/pipeline')
+  return { data }
 }

@@ -7,6 +7,7 @@ import { sendEmail } from '@/lib/email/send'
 import { emailBase, infoBox } from '@/lib/email/templates'
 import { formatCurrency, formatDate, escapeHtml } from '@/lib/utils'
 import { userLogger, logError } from '@/lib/logger'
+import { resolveHostId } from './_resolveHost'
 
 export { acceptBooking, rejectBooking, confirmPayment as confirmBooking, cancelBooking }
 
@@ -16,12 +17,14 @@ export async function getSpaceViews(spaceId: string): Promise<{ week: string; vi
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
 
+  const { hostId } = await resolveHostId(supabase, user.id)
+
   // Verificar que el espacio pertenece al host
   const { data: space } = await supabase
     .from('spaces')
     .select('id')
     .eq('id', spaceId)
-    .eq('host_id', user.id)
+    .eq('host_id', hostId)
     .single()
   if (!space) return []
 
@@ -114,10 +117,11 @@ export async function getHostSpaces() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
+  const { hostId } = await resolveHostId(supabase, user.id)
   const { data } = await supabase
     .from('spaces')
     .select('id, name')
-    .eq('host_id', user.id)
+    .eq('host_id', hostId)
     .eq('is_active', true)
     .order('created_at')
   return data ?? []
@@ -136,12 +140,14 @@ export async function createAvailabilityBlock(payload: {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
+  const { hostId } = await resolveHostId(supabase, user.id)
+
   // Verificar que el espacio pertenece al propietario
   const { data: space } = await supabase
     .from('spaces')
     .select('id')
     .eq('id', payload.spaceId)
-    .eq('host_id', user.id)
+    .eq('host_id', hostId)
     .single()
   if (!space) return { error: 'No autorizado' }
 
@@ -175,7 +181,8 @@ export async function deleteAvailabilityBlock(blockId: string) {
     .eq('id', blockId)
     .single()
 
-  if (!block || (block.spaces as any)?.host_id !== user.id) return { error: 'No autorizado' }
+  const { hostId: hId } = await resolveHostId(supabase, user.id)
+  if (!block || (block.spaces as any)?.host_id !== hId) return { error: 'No autorizado' }
 
   const { error } = await supabase.from('space_availability').delete().eq('id', blockId)
   return error ? { error: error.message } : { success: true }
@@ -187,8 +194,9 @@ export async function getSpaceAvailability(spaceId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
 
+  const { hostId: hId2 } = await resolveHostId(supabase, user.id)
   const { data: space } = await supabase
-    .from('spaces').select('id').eq('id', spaceId).eq('host_id', user.id).single()
+    .from('spaces').select('id').eq('id', spaceId).eq('host_id', hId2).single()
   if (!space) return []
 
   const { data } = await supabase
@@ -203,10 +211,11 @@ export async function getBankAccount() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
+  const { hostId } = await resolveHostId(supabase, user.id)
   const { data } = await supabase
     .from('host_bank_accounts')
     .select('*')
-    .eq('host_id', user.id)
+    .eq('host_id', hostId)
     .single()
   return data ?? null
 }
@@ -223,9 +232,11 @@ export async function saveBankAccount(payload: {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
+  const { hostId } = await resolveHostId(supabase, user.id)
+
   const { error } = await supabase
     .from('host_bank_accounts')
-    .upsert({ host_id: user.id, ...payload, status: 'pending', updated_at: new Date().toISOString() },
+    .upsert({ host_id: hostId, ...payload, status: 'pending', updated_at: new Date().toISOString() },
              { onConflict: 'host_id' })
 
   return error ? { error: error.message } : { success: true }
@@ -237,10 +248,12 @@ export async function getGoogleCalendarStatus(): Promise<{ connected: boolean }>
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { connected: false }
 
+  const { hostId } = await resolveHostId(supabase, user.id)
+
   const { data } = await supabase
     .from('profiles')
     .select('google_calendar_connected')
-    .eq('id', user.id)
+    .eq('id', hostId)
     .single()
 
   return { connected: data?.google_calendar_connected ?? false }
@@ -252,10 +265,12 @@ export async function disconnectGoogleCalendar(): Promise<{ success: boolean }> 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false }
 
+  const { hostId } = await resolveHostId(supabase, user.id)
+
   const { error } = await supabase
     .from('profiles')
     .update({ google_calendar_connected: false, google_refresh_token: null })
-    .eq('id', user.id)
+    .eq('id', hostId)
 
   return { success: !error }
 }
@@ -266,8 +281,10 @@ export async function getHostBookings(statusFilter?: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
 
+  const { hostId } = await resolveHostId(supabase, user.id)
+
   const { data: spaces } = await supabase
-    .from('spaces').select('id').eq('host_id', user.id)
+    .from('spaces').select('id').eq('host_id', hostId)
   if (!spaces?.length) return []
 
   let q = supabase
@@ -296,8 +313,10 @@ export async function getHostStats() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
+  const { hostId } = await resolveHostId(supabase, user.id)
+
   const { data: spaces } = await supabase
-    .from('spaces').select('id').eq('host_id', user.id)
+    .from('spaces').select('id').eq('host_id', hostId)
   if (!spaces?.length) return {
     revenueThisMonth: 0, revenuePrevMonth: 0,
     pendingCount: 0, confirmedCount: 0, acceptedCount: 0,
@@ -384,8 +403,10 @@ export async function getHostCalendarBookings() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
 
+  const { hostId } = await resolveHostId(supabase, user.id)
+
   const { data: spaces } = await supabase
-    .from('spaces').select('id').eq('host_id', user.id)
+    .from('spaces').select('id').eq('host_id', hostId)
   if (!spaces?.length) return []
 
   const { data } = await supabase
@@ -404,11 +425,13 @@ export async function getHostQuotes() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
 
+  const { hostId } = await resolveHostId(supabase, user.id)
+
   // Paso 1: obtener IDs de espacios del host
   const { data: spaces, error: spacesErr } = await supabase
     .from('spaces')
     .select('id')
-    .eq('host_id', user.id)
+    .eq('host_id', hostId)
 
   if (spacesErr) {
     console.error('[getHostQuotes] spaces query failed:', spacesErr.message)
@@ -457,7 +480,8 @@ export async function respondToQuote(bookingId: string, quotedPrice: number, mes
     .select('space_id, event_date, event_type, profiles!guest_id(full_name, email), spaces!space_id(host_id, name, address, city)')
     .eq('id', bookingId)
     .single()
-  if (!bk || (bk.spaces as any)?.host_id !== user.id) return { error: 'No autorizado' }
+  const { hostId: rqHostId } = await resolveHostId(supabase, user.id)
+  if (!bk || (bk.spaces as any)?.host_id !== rqHostId) return { error: 'No autorizado' }
 
   const platformFee = Math.round(quotedPrice * 0.10)
 
@@ -559,8 +583,9 @@ export async function getHostBookingDetail(bookingId: string) {
   if (error || !bk) return null
 
   // Verificar ownership: el usuario debe ser el host del espacio
+  const { hostId: detailHostId } = await resolveHostId(supabase, user.id)
   const space = (bk as any).spaces as any
-  if (space?.host_id !== user.id) return null
+  if (space?.host_id !== detailHostId) return null
 
   // Ordenar cuotas por número
   const installments = ((bk as any).booking_installments ?? [])
@@ -580,7 +605,8 @@ export async function completeBooking(bookingId: string) {
     .select('space_id, spaces!space_id(host_id)')
     .eq('id', bookingId)
     .single()
-  if (!bk || (bk.spaces as any)?.host_id !== user.id) return { error: 'No autorizado' }
+  const { hostId: completeHostId } = await resolveHostId(supabase, user.id)
+  if (!bk || (bk.spaces as any)?.host_id !== completeHostId) return { error: 'No autorizado' }
 
   const { data: updated, error } = await supabase
     .from('bookings')
@@ -628,8 +654,10 @@ export async function generateHostSlug() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
+  const { hostId } = await resolveHostId(supabase, user.id)
+
   const { data: profile } = await supabase
-    .from('profiles').select('full_name, slug').eq('id', user.id).single()
+    .from('profiles').select('full_name, slug').eq('id', hostId).single()
   if (!profile) return { error: 'Perfil no encontrado' }
   if ((profile as any).slug) return { slug: (profile as any).slug }
 
@@ -644,12 +672,138 @@ export async function generateHostSlug() {
   let suffix    = 1
   while (true) {
     const { data: existing } = await supabase
-      .from('profiles').select('id').eq('slug', candidate).neq('id', user.id).single()
+      .from('profiles').select('id').eq('slug', candidate).neq('id', hostId).single()
     if (!existing) break
     candidate = `${base}-${suffix++}`
   }
 
-  await supabase.from('profiles').update({ slug: candidate }).eq('id', user.id)
+  await supabase.from('profiles').update({ slug: candidate }).eq('id', hostId)
   revalidatePath('/dashboard/host/ajustes')
   return { slug: candidate }
+}
+
+// ── Equipo: obtener miembros ──────────────────────────────
+export async function getTeamMembers() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { hostId, isOwner } = await resolveHostId(supabase, user.id)
+  if (!isOwner) return [] // solo el owner puede gestionar el equipo
+
+  const { data } = await supabase
+    .from('host_team_members')
+    .select('*, member:profiles!member_user_id(id, full_name, avatar_url, email)')
+    .eq('host_id', hostId)
+    .order('invited_at', { ascending: false })
+
+  return data ?? []
+}
+
+// ── Equipo: invitar miembro ───────────────────────────────
+export async function inviteTeamMember(email: string, role: 'admin' | 'coordinador' | 'viewer') {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+
+  const { hostId, isOwner } = await resolveHostId(supabase, user.id)
+  if (!isOwner) return { error: 'Solo el propietario puede invitar miembros' }
+
+  const token = crypto.randomUUID().replace(/-/g, '')
+
+  const { data: existing } = await supabase
+    .from('host_team_members')
+    .select('id, status')
+    .eq('host_id', hostId)
+    .eq('invite_email', email.toLowerCase())
+    .maybeSingle()
+
+  if (existing && existing.status === 'active') {
+    return { error: 'Este email ya es miembro activo del equipo' }
+  }
+
+  const { data, error } = await supabase
+    .from('host_team_members')
+    .upsert({
+      host_id:      hostId,
+      invite_email: email.toLowerCase(),
+      role,
+      status:       'pending',
+      invite_token: token,
+      invited_at:   new Date().toISOString(),
+    }, { onConflict: 'host_id,invite_email' })
+    .select()
+    .single()
+
+  if (error) return { error: error.message }
+
+  // Obtener nombre del host para el email
+  const { data: hostProfile } = await supabase
+    .from('profiles').select('full_name').eq('id', hostId).single()
+
+  const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
+  const { tplInvitacionEquipo } = await import('@/lib/email/templates')
+  await sendEmail({
+    to:      email,
+    subject: `Te invitaron a unirte al equipo en Espot`,
+    html:    tplInvitacionEquipo({
+      hostName:   hostProfile?.full_name ?? 'Un organizador',
+      role,
+      acceptUrl:  `${SITE}/auth/invitacion?token=${token}`,
+    }),
+  }).catch(() => {})
+
+  revalidatePath('/dashboard/host/equipo')
+  return { data }
+}
+
+// ── Equipo: revocar / desactivar miembro ──────────────────
+export async function revokeTeamMember(memberId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+
+  const { hostId, isOwner } = await resolveHostId(supabase, user.id)
+  if (!isOwner) return { error: 'Solo el propietario puede revocar miembros' }
+
+  const { error } = await supabase
+    .from('host_team_members')
+    .update({ status: 'inactive', updated_at: new Date().toISOString() } as any)
+    .eq('id', memberId)
+    .eq('host_id', hostId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/dashboard/host/equipo')
+  return { success: true }
+}
+
+// ── Equipo: aceptar invitación (llamado desde /auth/invitacion) ─
+export async function acceptTeamInvite(token: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Debes iniciar sesión primero' }
+
+  const { data: invite } = await supabase
+    .from('host_team_members')
+    .select('id, host_id, role, status, invite_email')
+    .eq('invite_token', token)
+    .eq('status', 'pending')
+    .maybeSingle()
+
+  if (!invite) return { error: 'Invitación no válida o ya utilizada' }
+
+  const { error } = await supabase
+    .from('host_team_members')
+    .update({
+      member_user_id: user.id,
+      status:         'active',
+      accepted_at:    new Date().toISOString(),
+      invite_token:   null,
+    } as any)
+    .eq('id', invite.id)
+
+  if (error) return { error: error.message }
+
+  return { success: true, hostId: invite.host_id, role: invite.role }
 }

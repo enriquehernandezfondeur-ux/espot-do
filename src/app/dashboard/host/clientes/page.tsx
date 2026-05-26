@@ -31,7 +31,7 @@ const SOURCE_COLORS: Record<ClientSource, { bg: string; color: string }> = {
 }
 
 const EVENT_STATUS_LABELS: Record<string, string> = {
-  tentativo:  'Pendiente',
+  pendiente:  'En pipeline',
   confirmado: 'Confirmado',
   en_curso:   'En curso',
   completado: 'Completado',

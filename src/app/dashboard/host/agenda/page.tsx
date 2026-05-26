@@ -24,11 +24,11 @@ type SimpleStatus = 'all' | 'pendiente' | 'confirmado' | 'completado' | 'cancela
 type OriginFilter = 'all' | 'espot' | 'directo'
 
 const EXT_STATUS: Record<ExternalEventStatus, { label: string; color: string; bg: string }> = {
-  tentativo:  { label: 'Pendiente',  color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
-  confirmado: { label: 'Confirmado', color: '#16A34A', bg: 'rgba(22,163,74,0.1)'   },
-  en_curso:   { label: 'En curso',   color: '#2563EB', bg: 'rgba(37,99,235,0.1)'   },
-  completado: { label: 'Completado', color: '#35C493', bg: 'rgba(53,196,147,0.1)'  },
-  cancelado:  { label: 'Cancelado',  color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },
+  pendiente:  { label: 'En pipeline', color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
+  confirmado: { label: 'Confirmado',  color: '#16A34A', bg: 'rgba(22,163,74,0.1)'   },
+  en_curso:   { label: 'En curso',    color: '#2563EB', bg: 'rgba(37,99,235,0.1)'   },
+  completado: { label: 'Completado',  color: '#35C493', bg: 'rgba(53,196,147,0.1)'  },
+  cancelado:  { label: 'Cancelado',   color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },
 }
 
 const ORIGIN_OPTIONS = [
@@ -54,7 +54,7 @@ function simpleStatus(item: AgendaItem): Exclude<SimpleStatus, 'all'> {
     return 'cancelado'
   }
   const s = item.data.status
-  if (s === 'tentativo')                      return 'pendiente'
+  if (s === 'pendiente')                       return 'pendiente'
   if (s === 'confirmado' || s === 'en_curso') return 'confirmado'
   if (s === 'completado')                     return 'completado'
   return 'cancelado'
@@ -1025,7 +1025,7 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
         <div>
           <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Cambiar estado</div>
           <div className="grid grid-cols-2 gap-2">
-            {(['tentativo', 'confirmado', 'completado', 'cancelado'] as ExternalEventStatus[]).map(st => {
+            {(['confirmado', 'en_curso', 'completado', 'cancelado'] as ExternalEventStatus[]).map(st => {
               const s = EXT_STATUS[st]
               return (
                 <button key={st} onClick={() => handleStatusChange(st)}

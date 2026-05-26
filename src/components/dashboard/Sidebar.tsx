@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Building2, CalendarDays, ClipboardList,
   MessageSquareQuote, MessageCircle, BarChart3, Settings,
   LogOut, User, Banknote, Shield, Star, Search, TrendingUp,
-  CalendarCheck, Users, CalendarRange,
+  CalendarCheck, Users, CalendarRange, KanbanSquare, UserPlus,
 } from 'lucide-react'
 import AppSidebar from '@/components/shared/AppSidebar'
 import { createClient } from '@/lib/supabase/client'
@@ -19,6 +19,7 @@ const BASE_NAV = [
   { href: '/dashboard/host/calendario',   label: 'Calendario',   icon: CalendarDays },
   { href: '/dashboard/host/clientes',     label: 'Clientes',     icon: Users },
   // Ventas
+  { href: '/dashboard/host/pipeline',     label: 'Pipeline',     icon: KanbanSquare },
   { href: '/dashboard/host/cotizaciones', label: 'Cotizaciones', icon: MessageSquareQuote },
   { href: '/dashboard/host/mensajes',     label: 'Mensajes',     icon: MessageCircle },
   { href: '/dashboard/host/resenas',      label: 'Reseñas',      icon: Star },
@@ -27,6 +28,7 @@ const BASE_NAV = [
   { href: '/dashboard/host/finanzas',     label: 'Finanzas',     icon: BarChart3 },
   { href: '/dashboard/host/analytics',   label: 'Analytics',    icon: TrendingUp },
   // Config
+  { href: '/dashboard/host/equipo',       label: 'Equipo',       icon: UserPlus },
   { href: '/dashboard/host/ajustes',      label: 'Ajustes',      icon: Settings },
 ]
 
@@ -37,7 +39,13 @@ const MOBILE_NAV = [
   { href: '/dashboard/host/mensajes', label: 'Mensajes', icon: MessageCircle },
 ]
 
-export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: string; avatarUrl?: string; isAdmin?: boolean }) {
+export default function Sidebar({ userName, avatarUrl, isAdmin, isOwner = true, teamRole }: {
+  userName?: string
+  avatarUrl?: string
+  isAdmin?: boolean
+  isOwner?: boolean
+  teamRole?: string
+}) {
   const [unread,           setUnread]           = useState(0)
   const [reservasCount,    setReservasCount]    = useState(0)
   const [cotizCount,       setCotizCount]       = useState(0)
@@ -147,7 +155,10 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
     return () => cleanup?.()
   }, [])
 
-  const navItems = BASE_NAV.map(item => {
+  // Filtrar Equipo solo para owners (no para team members)
+  const filteredNav = isOwner ? BASE_NAV : BASE_NAV.filter(i => i.href !== '/dashboard/host/equipo')
+
+  const navItems = filteredNav.map(item => {
     if (item.href === '/dashboard/host/mensajes')     return { ...item, badge: unread }
     if (item.href === '/dashboard/host/agenda')       return { ...item, badge: reservasCount }
     if (item.href === '/dashboard/host/cotizaciones') return { ...item, badge: cotizCount }
@@ -166,7 +177,7 @@ export default function Sidebar({ userName, avatarUrl, isAdmin }: { userName?: s
       isAdmin={isAdmin}
       navItems={navItems}
       mobileBottomNav={mobileBottomNav}
-      roleLabel="Propietario"
+      roleLabel={isOwner ? 'Propietario' : teamRole === 'admin' ? 'Admin' : teamRole === 'coordinador' ? 'Coordinador' : 'Equipo'}
       userNameFallback="Propietario"
       avatarFallback={<Building2 size={14} />}
       mobileAvatarBg="#03313C"

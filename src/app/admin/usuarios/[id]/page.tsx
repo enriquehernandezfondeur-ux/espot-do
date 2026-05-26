@@ -39,7 +39,7 @@ const payoutCfg: Record<string, { label: string; color: string; bg: string }> = 
   paid:    { label: 'Liquidado',    color: '#16A34A', bg: 'rgba(22,163,74,0.10)' },
 }
 const externalStatusCfg: Record<string, { label: string; color: string; bg: string }> = {
-  tentativo:   { label: 'Tentativo',   color: '#D97706', bg: 'rgba(217,119,6,0.10)' },
+  pendiente:   { label: 'En pipeline', color: '#D97706', bg: 'rgba(217,119,6,0.10)' },
   confirmado:  { label: 'Confirmado',  color: '#2563EB', bg: 'rgba(37,99,235,0.10)' },
   en_curso:    { label: 'En curso',    color: '#7C3AED', bg: 'rgba(124,58,237,0.10)' },
   completado:  { label: 'Completado',  color: '#16A34A', bg: 'rgba(22,163,74,0.10)' },

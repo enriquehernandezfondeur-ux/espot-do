@@ -905,3 +905,32 @@ export function tplSolicitudResena(rawData: {
     note: 'Tu rese&ntilde;a es 100% voluntaria. S&oacute;lo se publica en el perfil del espacio.',
   })
 }
+
+// ── 17. INVITACIÓN A EQUIPO ────────────────────────────────
+
+export function tplInvitacionEquipo(rawData: {
+  hostName: string
+  role: string
+  acceptUrl: string
+}) {
+  const hostName = esc(rawData.hostName)
+  const roleLabel = rawData.role === 'admin' ? 'Administrador'
+    : rawData.role === 'coordinador' ? 'Coordinador'
+    : 'Visualizador'
+
+  return emailBase({
+    title: `Invitaci&oacute;n al equipo de ${hostName}`,
+    subtitle: 'Accede al panel de gesti&oacute;n de espacios en Espot',
+    accentColor: 'var(--brand, #35C493)',
+    body: `
+      <p style="color:#374151;margin:0 0 16px;"><strong>${hostName}</strong> te invit&oacute; a unirte a su equipo en Espot como <strong>${roleLabel}</strong>.</p>
+      <p style="color:#374151;margin:0 0 20px;">Con este acceso podr&aacute;s gestionar reservas, ver el calendario y colaborar en la administraci&oacute;n del espacio.</p>
+      ${infoBox([
+        { label: 'Propietario', value: hostName },
+        { label: 'Tu rol',      value: roleLabel },
+      ])}
+      <p style="color:#6B7280;font-size:13px;margin:16px 0 0;">Este link es de un solo uso y expira en 7 d&iacute;as.</p>`,
+    cta: { text: 'Aceptar invitaci&oacute;n &rarr;', url: rawData.acceptUrl },
+    note: 'Si no esperabas esta invitaci&oacute;n, puedes ignorar este correo.',
+  })
+}

@@ -21,8 +21,8 @@ const EVENT_TYPES = [
 ]
 
 const STATUS_OPTIONS: { value: ExternalEventStatus; label: string; color: string; bg: string }[] = [
-  { value: 'tentativo',  label: 'Pendiente',  color: '#D97706', bg: 'rgba(217,119,6,0.1)'  },
-  { value: 'confirmado', label: 'Confirmado', color: '#16A34A', bg: 'rgba(22,163,74,0.1)'  },
+  { value: 'pendiente',  label: 'En pipeline', color: '#D97706', bg: 'rgba(217,119,6,0.1)'  },
+  { value: 'confirmado', label: 'Confirmado',  color: '#16A34A', bg: 'rgba(22,163,74,0.1)'  },
 ]
 
 interface SpaceBlock { block_name: string; start_time: string; end_time: string }
@@ -67,7 +67,7 @@ export default function NuevoEventoPage() {
     guest_count:   '',
     total_amount:  '',
     notes:         '',
-    status:        'tentativo' as ExternalEventStatus,
+    status:        'pendiente' as ExternalEventStatus,
     space_id:      '',
     client_name:   '',
     client_phone:  '',
