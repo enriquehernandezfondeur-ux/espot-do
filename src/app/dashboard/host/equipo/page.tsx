@@ -108,19 +108,21 @@ export default function EquipoPage() {
 
           <div>
             <label className="text-xs font-semibold text-gray-500 mb-1.5 block">Rol</label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {(Object.entries(ROLE_CONFIG) as [TeamRole, typeof ROLE_CONFIG[TeamRole]][]).map(([role, cfg]) => {
                 const Icon = cfg.icon
                 return (
                   <button key={role} type="button"
                     onClick={() => setForm(f => ({ ...f, role }))}
-                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl text-center transition-all"
+                    className="flex sm:flex-col items-center gap-2 sm:gap-1.5 p-3 rounded-xl text-left sm:text-center transition-all"
                     style={form.role === role
                       ? { background: cfg.bg, border: `1.5px solid ${cfg.color}40`, color: cfg.color }
                       : { background: '#F8FAFB', border: '1.5px solid #E8ECF0', color: '#6B7280' }}>
-                    <Icon size={14} />
-                    <span className="text-xs font-semibold">{cfg.label}</span>
-                    <span className="text-[10px] leading-tight" style={{ color: form.role === role ? cfg.color : '#9CA3AF' }}>{cfg.desc}</span>
+                    <Icon size={14} className="shrink-0" />
+                    <div className="flex-1 sm:flex-none">
+                      <div className="text-xs font-semibold">{cfg.label}</div>
+                      <div className="text-[10px] leading-tight mt-0.5" style={{ color: form.role === role ? cfg.color : '#9CA3AF' }}>{cfg.desc}</div>
+                    </div>
                   </button>
                 )
               })}

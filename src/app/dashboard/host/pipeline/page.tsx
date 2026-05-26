@@ -70,7 +70,7 @@ export default function PipelinePage() {
           <Loader2 className="w-6 h-6 animate-spin" style={{ color: 'var(--brand)' }} />
         </div>
       ) : (
-        <div className="flex gap-4 overflow-x-auto pb-4 items-start">
+        <div className="flex gap-4 overflow-x-auto pb-4 items-start scrollbar-hide" style={{ overscrollBehaviorX: 'contain' }}>
           {STAGES.map(stage => {
             const cards = byStage(stage.id)
             const stageValue = cards.reduce((s, l) => s + (l.total_amount ?? 0), 0)
@@ -199,7 +199,7 @@ function LeadDetailPanel({ lead, stages, moving, onClose, onMove }: {
     <div className="fixed inset-0 z-40 flex items-end md:items-center justify-center p-4 md:p-0"
       style={{ background: 'rgba(0,0,0,0.3)' }}
       onClick={onClose}>
-      <div className="w-full max-w-md rounded-3xl overflow-hidden"
+      <div className="w-full max-w-md rounded-3xl overflow-hidden max-h-[90dvh] overflow-y-auto"
         style={{ background: '#fff', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}
         onClick={e => e.stopPropagation()}>
         <div className="px-5 py-4 flex items-center justify-between"
