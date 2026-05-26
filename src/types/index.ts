@@ -164,7 +164,6 @@ export type ClientSource = 'espot' | 'manual' | 'referido' | 'redes' | 'otro'
 export type ExternalEventStatus = 'pendiente' | 'confirmado' | 'en_curso' | 'completado' | 'cancelado'
 export type ExternalEventSource = 'directo' | 'referido' | 'redes' | 'otro'
 export type ExternalPaymentMethod = 'efectivo' | 'transferencia' | 'tarjeta' | 'otro'
-export type PipelineStage = 'pendiente' | 'cotizacion' | 'negociando' | 'cerrado' | 'perdido'
 export type TeamRole = 'admin' | 'coordinador' | 'viewer'
 export type TeamMemberStatus = 'pending' | 'active' | 'inactive'
 
@@ -199,10 +198,6 @@ export interface ExternalEvent {
   end_time?: string
   guest_count?: number
   status: ExternalEventStatus
-  pipeline_stage?: PipelineStage
-  pipeline_notes?: string
-  next_follow_up?: string
-  probability_pct?: number
   total_amount?: number
   paid_amount: number
   notes?: string

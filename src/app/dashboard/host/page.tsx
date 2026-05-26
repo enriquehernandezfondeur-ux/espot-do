@@ -42,7 +42,7 @@ function PublishedToast() {
 }
 
 const EXT_STATUS: Record<string, { label: string; color: string; bg: string }> = {
-  pendiente:  { label: 'En pipeline', color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
+  pendiente:  { label: 'Pendiente', color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
   confirmado: { label: 'Confirmado', color: '#16A34A', bg: 'rgba(22,163,74,0.1)'   },
   en_curso:   { label: 'En curso',   color: '#2563EB', bg: 'rgba(37,99,235,0.1)'   },
   completado: { label: 'Completado', color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },

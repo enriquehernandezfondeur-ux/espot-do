@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Building2, CalendarDays, ClipboardList,
   MessageSquareQuote, MessageCircle, BarChart3, Settings,
   LogOut, User, Banknote, Shield, Star, Search, TrendingUp,
-  CalendarCheck, Users, CalendarRange, KanbanSquare, UserPlus,
+  CalendarCheck, Users, CalendarRange, UserPlus,
 } from 'lucide-react'
 import AppSidebar from '@/components/shared/AppSidebar'
 import { createClient } from '@/lib/supabase/client'
@@ -19,7 +19,6 @@ const BASE_NAV = [
   { href: '/dashboard/host/calendario',   label: 'Calendario',   icon: CalendarDays },
   { href: '/dashboard/host/clientes',     label: 'Clientes',     icon: Users },
   // Ventas
-  { href: '/dashboard/host/pipeline',     label: 'Pipeline',     icon: KanbanSquare },
   { href: '/dashboard/host/cotizaciones', label: 'Cotizaciones', icon: MessageSquareQuote },
   { href: '/dashboard/host/mensajes',     label: 'Mensajes',     icon: MessageCircle },
   { href: '/dashboard/host/resenas',      label: 'Reseñas',      icon: Star },

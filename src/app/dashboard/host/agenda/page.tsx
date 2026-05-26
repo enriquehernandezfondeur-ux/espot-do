@@ -24,7 +24,7 @@ type SimpleStatus = 'all' | 'pendiente' | 'confirmado' | 'completado' | 'cancela
 type OriginFilter = 'all' | 'espot' | 'directo'
 
 const EXT_STATUS: Record<ExternalEventStatus, { label: string; color: string; bg: string }> = {
-  pendiente:  { label: 'En pipeline', color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
+  pendiente:  { label: 'Pendiente', color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
   confirmado: { label: 'Confirmado',  color: '#16A34A', bg: 'rgba(22,163,74,0.1)'   },
   en_curso:   { label: 'En curso',    color: '#2563EB', bg: 'rgba(37,99,235,0.1)'   },
   completado: { label: 'Completado',  color: '#35C493', bg: 'rgba(53,196,147,0.1)'  },

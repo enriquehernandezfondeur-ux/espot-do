@@ -7,7 +7,7 @@ import { tplEventoDirectoConfirmado, tplEventoDirectoCancelado, tplNuevaSolicitu
 import { createServiceClient } from '@/lib/supabase/service'
 import { createBookingEvent, deleteBookingEvent, isGoogleCalendarConfigured } from '@/lib/google-calendar'
 import { formatDate } from '@/lib/utils'
-import type { ExternalEvent, ExternalEventStatus, ExternalEventSource, ExternalPaymentMethod, PipelineStage } from '@/types'
+import type { ExternalEvent, ExternalEventStatus, ExternalEventSource, ExternalPaymentMethod } from '@/types'
 import { resolveHostId } from './_resolveHost'
 
 export interface CreateExternalEventPayload {
@@ -459,7 +459,6 @@ export async function createFromPublicForm(payload: PublicFormPayload) {
       event_date: payload.eventDate,
       guest_count:payload.guestCount || null,
       status:     'pendiente',
-      pipeline_stage: 'pendiente',
       source:     'directo',
       notes:      payload.message?.trim() || null,
       client_id:  clientId,
@@ -587,83 +586,3 @@ export async function notifyPaymentMade(eventId: string, clientNote?: string) {
   return { success: true }
 }
 
-// ── Pipeline: obtener leads agrupados por etapa ──────────────
-export async function getPipelineEvents(): Promise<ExternalEvent[]> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return []
-
-  const { hostId } = await resolveHostId(supabase, user.id)
-
-  const { data, error } = await supabase
-    .from('external_events')
-    .select(`
-      *,
-      client:host_clients(id, full_name, email, phone),
-      space:spaces(id, name, city)
-    `)
-    .eq('host_id', hostId)
-    .eq('status', 'pendiente')
-    .order('created_at', { ascending: false })
-
-  if (error) return []
-  return data ?? []
-}
-
-// ── Pipeline: mover lead a otra etapa ───────────────────────
-export async function updatePipelineStage(eventId: string, stage: PipelineStage, notes?: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'No autenticado' }
-
-  const { hostId } = await resolveHostId(supabase, user.id)
-
-  const update: Record<string, any> = {
-    pipeline_stage: stage,
-    updated_at: new Date().toISOString(),
-  }
-
-  if (stage === 'cerrado') update.status = 'confirmado'
-  if (stage === 'perdido') update.status = 'cancelado'
-  if (notes !== undefined) update.pipeline_notes = notes
-
-  const { data, error } = await supabase
-    .from('external_events')
-    .update(update)
-    .eq('id', eventId)
-    .eq('host_id', hostId)
-    .select()
-    .single()
-
-  if (error) return { error: error.message }
-
-  revalidatePath('/dashboard/host/pipeline')
-  revalidatePath('/dashboard/host/eventos')
-  return { data }
-}
-
-// ── Pipeline: actualizar follow-up y probabilidad ───────────
-export async function updatePipelineMeta(eventId: string, meta: {
-  next_follow_up?: string | null
-  probability_pct?: number | null
-  pipeline_notes?: string | null
-}) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'No autenticado' }
-
-  const { hostId } = await resolveHostId(supabase, user.id)
-
-  const { data, error } = await supabase
-    .from('external_events')
-    .update({ ...meta, updated_at: new Date().toISOString() })
-    .eq('id', eventId)
-    .eq('host_id', hostId)
-    .select()
-    .single()
-
-  if (error) return { error: error.message }
-
-  revalidatePath('/dashboard/host/pipeline')
-  return { data }
-}
