@@ -616,8 +616,13 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         <PriceHeader />
       </div>
 
-      {/* Progreso */}
-      <div className="px-5 pt-3 pb-2.5" style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-base)' }}>
+      {/* Progreso — sticky en mobile para que siempre sea visible mientras scrolleas */}
+      <div className="px-5 pt-3 pb-2.5 lg:static sticky z-20"
+        style={{
+          borderBottom: '1px solid var(--border-subtle)',
+          background: 'var(--bg-base)',
+          top: 'var(--navbar-h, 60px)',
+        }}>
         <div className="flex gap-1.5">
           {steps.map(s => (
             <button key={s.id}
@@ -635,9 +640,14 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             </button>
           ))}
         </div>
-        <p className="text-[11px] mt-0.5 font-medium" style={{ color: 'var(--text-muted)' }}>
-          {steps.find(s => s.id === step)?.label}
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-[11px] mt-0.5 font-medium" style={{ color: 'var(--text-muted)' }}>
+            {steps.find(s => s.id === step)?.label}
+          </p>
+          <p className="text-[11px] mt-0.5 font-medium" style={{ color: 'var(--text-muted)' }}>
+            {steps.findIndex(s => s.id === step) + 1} / {steps.length}
+          </p>
+        </div>
       </div>
 
       {/* Contenido */}

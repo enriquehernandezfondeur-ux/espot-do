@@ -164,6 +164,120 @@ export default function DashboardPage() {
         </Link>
       </div>
 
+      {/* ── Zona de acción urgente: solicitudes pendientes ── */}
+      {(() => {
+        const pending = bookings.filter(b => b.status === 'pending')
+        if (pending.length === 0) return null
+
+        // Calcular cuántas llevan más de 24h (urgentes)
+        const urgentCount = pending.filter(b => {
+          const created = (b as any).created_at
+          if (!created) return false
+          return Date.now() - new Date(created).getTime() > 24 * 60 * 60 * 1000
+        }).length
+
+        return (
+          <div className="rounded-2xl overflow-hidden mb-5"
+            style={{ border: '1px solid rgba(217,119,6,0.3)', background: 'rgba(254,243,199,0.6)' }}>
+
+            {/* Header de la zona */}
+            <div className="flex items-center justify-between px-5 py-3"
+              style={{ borderBottom: '1px solid rgba(217,119,6,0.15)' }}>
+              <div className="flex items-center gap-2.5">
+                <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#D97706' }} />
+                <span className="text-sm font-bold" style={{ color: '#92400E' }}>
+                  {pending.length} solicitud{pending.length !== 1 ? 'es' : ''} esperando tu respuesta
+                </span>
+              </div>
+              {urgentCount > 0 && (
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                  style={{ background: 'rgba(217,119,6,0.15)', color: '#B45309' }}>
+                  {urgentCount} urgente{urgentCount !== 1 ? 's' : ''} +24h
+                </span>
+              )}
+            </div>
+
+            {/* Lista de pendientes (máx 3) */}
+            {pending.slice(0, 3).map((b, idx) => {
+              const guest     = (b as any).profiles
+              const spaceName = (b as any).spaces?.name ?? ''
+              const daysLeft  = Math.max(0, Math.ceil(
+                (new Date((b.event_date ?? '') + 'T12:00').getTime() - Date.now()) / 86400000
+              ))
+              const isUrgent  = (b as any).created_at
+                ? Date.now() - new Date((b as any).created_at).getTime() > 24 * 60 * 60 * 1000
+                : false
+
+              return (
+                <div key={b.id}
+                  className="flex items-center gap-3 px-5 py-3"
+                  style={{ borderTop: idx > 0 ? '1px solid rgba(217,119,6,0.12)' : undefined }}>
+
+                  {/* Avatar */}
+                  <div className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center text-xs font-bold"
+                    style={{ background: 'rgba(217,119,6,0.15)', color: '#B45309' }}>
+                    {guest?.full_name?.charAt(0)?.toUpperCase() ?? '?'}
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold truncate" style={{ color: '#78350F' }}>
+                      {guest?.full_name ?? 'Cliente'} · {b.event_type ?? 'Evento'}
+                    </p>
+                    <p className="text-xs truncate" style={{ color: '#92400E' }}>
+                      {spaceName && `${spaceName} · `}
+                      {new Date((b.event_date ?? '') + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
+                      {b.guest_count ? ` · ${b.guest_count} personas` : ''}
+                      {daysLeft <= 14 && (
+                        <span className="ml-1.5 font-semibold" style={{ color: daysLeft <= 7 ? '#DC2626' : '#D97706' }}>
+                          · en {daysLeft}d
+                        </span>
+                      )}
+                    </p>
+                  </div>
+
+                  {/* Acciones */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {isUrgent && (
+                      <span className="hidden sm:block text-[10px] font-bold px-1.5 py-0.5 rounded"
+                        style={{ background: 'rgba(220,38,38,0.1)', color: '#DC2626' }}>
+                        URGENTE
+                      </span>
+                    )}
+                    <button
+                      onClick={() => handleConfirm(b.id)}
+                      className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
+                      style={{ background: 'var(--brand)', color: '#fff' }}>
+                      Aceptar
+                    </button>
+                    <Link href={`/dashboard/host/reservas/${b.id}`}
+                      className="text-xs font-semibold px-3 py-1.5 rounded-lg"
+                      style={{ background: 'rgba(217,119,6,0.12)', color: '#92400E' }}>
+                      Ver
+                    </Link>
+                  </div>
+                </div>
+              )
+            })}
+
+            {/* Footer con warning y link a todas */}
+            <div className="flex items-center justify-between px-5 py-2.5"
+              style={{ borderTop: '1px solid rgba(217,119,6,0.15)', background: 'rgba(217,119,6,0.05)' }}>
+              <p className="text-xs" style={{ color: '#92400E' }}>
+                ⏱ Las solicitudes se auto-rechazan a las 72h si no respondes
+              </p>
+              {pending.length > 3 && (
+                <Link href="/dashboard/host/agenda"
+                  className="text-xs font-semibold"
+                  style={{ color: '#B45309' }}>
+                  Ver {pending.length - 3} más →
+                </Link>
+              )}
+            </div>
+          </div>
+        )
+      })()}
+
       {/* ── Stats (4 tarjetas) ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
 

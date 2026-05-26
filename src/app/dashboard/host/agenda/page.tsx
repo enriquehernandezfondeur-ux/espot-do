@@ -282,11 +282,25 @@ export default function AgendaPage() {
             {pendingEspot > 0 && <span className="ml-2 font-semibold" style={{ color: '#D97706' }}>· {pendingEspot} por aceptar</span>}
           </p>
         </div>
-        <Link href="/dashboard/host/eventos/nuevo"
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all active:scale-95"
-          style={{ background: 'var(--brand)' }}>
-          <Plus size={15} /> Nuevo evento
-        </Link>
+        <div className="flex items-center gap-2">
+          {/* View toggle */}
+          <div className="flex rounded-xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
+            <span className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold"
+              style={{ background: 'var(--brand)', color: '#fff' }}>
+              <LayoutList size={13} /> Lista
+            </span>
+            <Link href="/dashboard/host/calendario"
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors"
+              style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+              <CalendarDays size={13} /> Calendario
+            </Link>
+          </div>
+          <Link href="/dashboard/host/eventos/nuevo"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all active:scale-95"
+            style={{ background: 'var(--brand)' }}>
+            <Plus size={15} /> Nuevo evento
+          </Link>
+        </div>
       </div>
 
       {/* Banner: próximo evento confirmado */}

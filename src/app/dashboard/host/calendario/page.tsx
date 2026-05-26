@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect, useMemo, useRef } from 'react'
-import { ChevronLeft, ChevronRight, Building2, Lock, Loader2, Plus, X, Clock, Users, CheckCircle, Calendar, Link2, Link2Off, Printer } from 'lucide-react'
+import Link from 'next/link'
+import { ChevronLeft, ChevronRight, Building2, Lock, Loader2, Plus, X, Clock, Users, CheckCircle, Calendar, Link2, Link2Off, Printer, LayoutList, CalendarDays } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
 import { getHostCalendarBookings, getHostSpaces, getSpaceAvailability, createAvailabilityBlock, deleteAvailabilityBlock, getOrCreateIcalToken, getGoogleCalendarStatus, disconnectGoogleCalendar } from '@/lib/actions/host'
 import { getExternalEvents } from '@/lib/actions/external-events'
@@ -278,6 +279,18 @@ export default function CalendarioPage() {
 
         {/* Sync de calendarios + Exportar */}
         <div className="flex items-center gap-2 flex-wrap">
+          {/* View toggle */}
+          <div className="flex rounded-xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
+            <Link href="/dashboard/host/agenda"
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors"
+              style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+              <LayoutList size={13} /> Lista
+            </Link>
+            <span className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold"
+              style={{ background: 'var(--brand)', color: '#fff' }}>
+              <CalendarDays size={13} /> Calendario
+            </span>
+          </div>
           <button
             onClick={() => window.print()}
             className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl transition-all print:hidden"
