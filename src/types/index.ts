@@ -1,4 +1,44 @@
 export type PricingType = 'hourly' | 'minimum_consumption' | 'fixed_package' | 'custom_quote'
+export type HostStatus = 'none' | 'applied' | 'approved' | 'rejected' | 'suspended'
+export type ApplicationStatus = 'draft' | 'submitted' | 'analyzing' | 'pending_admin' | 'approved' | 'rejected' | 'info_requested'
+
+export interface HostApplicationAI {
+  photo_score:       number
+  description_score: number
+  overall_score:     number
+  overall_summary:   string
+  photo_notes:       string
+  description_notes: string
+  flags:             string[]
+}
+
+export interface HostApplication {
+  id:                string
+  user_id:           string
+  business_name:     string
+  space_type:        string
+  city:              string
+  sector?:           string
+  phone:             string
+  whatsapp?:         string
+  instagram?:        string
+  description:       string
+  capacity_estimate?: number
+  event_types:       string[]
+  photos:            string[]
+  status:            ApplicationStatus
+  ai_score?:         number
+  ai_analysis?:      HostApplicationAI
+  admin_notes?:      string
+  rejection_reason?: string
+  info_request_msg?: string
+  reviewed_by?:      string
+  reviewed_at?:      string
+  created_at:        string
+  updated_at:        string
+  // join
+  user?: Pick<Profile, 'id' | 'full_name' | 'email' | 'phone' | 'avatar_url'>
+}
 export type BookingStatus = 'pending' | 'accepted' | 'rejected' | 'confirmed' | 'cancelled_guest' | 'cancelled_host' | 'completed' | 'quote_requested'
 export type PaymentStatus = 'unpaid' | 'partial' | 'advance' | 'paid'
 export type PaymentTermType = 'platform_guarantee' | 'split_advance' | 'full_prepaid' | 'quote_only'

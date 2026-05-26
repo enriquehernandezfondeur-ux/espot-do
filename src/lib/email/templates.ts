@@ -934,3 +934,104 @@ export function tplInvitacionEquipo(rawData: {
     note: 'Si no esperabas esta invitaci&oacute;n, puedes ignorar este correo.',
   })
 }
+
+// ── Host Application Templates ────────────────────────────────────────────────
+
+export function tplSolicitudRecibida({ name, businessName }: { name: string; businessName: string }) {
+  return emailBase({
+    title:    '¡Recibimos tu solicitud!',
+    subtitle: 'La estamos revisando con cuidado',
+    body: `
+      <p style="color:#374151;font-size:15px;line-height:1.7;margin:0 0 18px;">
+        Hola <strong>${esc(name)}</strong>, recibimos tu solicitud para publicar
+        <strong>${esc(businessName)}</strong> en Espot.
+      </p>
+      ${infoBox([
+        { label: 'Estado',           value: '🔍 En revisión' },
+        { label: 'Tiempo estimado',  value: '24-48 horas hábiles' },
+      ])}
+      <p style="color:#6B7280;font-size:13px;margin:16px 0 0;">
+        Nuestro equipo revisará tu solicitud y te notificaremos por este correo cuando tengamos una respuesta.
+        No necesitas hacer nada más por ahora.
+      </p>`,
+    note: 'Si tienes preguntas puedes escribirnos a contacto@espot.do',
+  })
+}
+
+export function tplSolicitudAprobada({
+  name, businessName, dashboardUrl,
+}: { name: string; businessName: string; dashboardUrl: string }) {
+  return emailBase({
+    title:       '¡Tu espacio fue aprobado!',
+    subtitle:    `${esc(businessName)} ya está en Espot`,
+    accentColor: '#35C493',
+    body: `
+      <p style="color:#374151;font-size:15px;line-height:1.7;margin:0 0 18px;">
+        ¡Felicidades, <strong>${esc(name)}</strong>! Tu solicitud fue aprobada.
+        Ya puedes acceder a tu panel de propietario y empezar a recibir reservas.
+      </p>
+      ${infoBox([
+        { label: 'Negocio',  value: esc(businessName) },
+        { label: 'Estado',   value: '✅ Aprobado' },
+      ])}
+      <p style="color:#6B7280;font-size:13px;margin:16px 0 0;">
+        Completa la información de tu espacio (fotos, precios, disponibilidad) para que aparezca en el marketplace.
+      </p>`,
+    cta: { text: 'Ir a mi panel →', url: dashboardUrl },
+  })
+}
+
+export function tplSolicitudRechazada({
+  name, businessName, reason, reapplyUrl,
+}: { name: string; businessName: string; reason: string; reapplyUrl: string }) {
+  return emailBase({
+    title:       'Actualización sobre tu solicitud',
+    subtitle:    'Tu solicitud no fue aprobada en esta ocasión',
+    accentColor: '#6B7280',
+    body: `
+      <p style="color:#374151;font-size:15px;line-height:1.7;margin:0 0 18px;">
+        Hola <strong>${esc(name)}</strong>, revisamos tu solicitud para
+        <strong>${esc(businessName)}</strong> y en esta ocasión no pudimos aprobarla.
+      </p>
+      ${infoBox([
+        { label: 'Razón', value: esc(reason) },
+      ])}
+      <p style="color:#374151;font-size:14px;line-height:1.7;margin:16px 0 8px;">
+        Puedes corregir los puntos indicados y enviar una nueva solicitud cuando estés listo.
+      </p>`,
+    cta:  { text: 'Volver a aplicar →', url: reapplyUrl },
+    note: 'Si tienes preguntas escríbenos a contacto@espot.do',
+  })
+}
+
+export function tplNuevaSolicitudAdmin({
+  applicantName, applicantEmail, businessName, spaceType, city, aiScore, flags, reviewUrl,
+}: {
+  applicantName:  string
+  applicantEmail: string
+  businessName:   string
+  spaceType:      string
+  city:           string
+  aiScore:        number
+  flags:          string[]
+  reviewUrl:      string
+}) {
+  const scoreColor = aiScore >= 70 ? '#16A34A' : aiScore >= 45 ? '#D97706' : '#DC2626'
+  const flagsHtml  = flags.length > 0
+    ? `<p style="color:#DC2626;font-size:12px;margin:8px 0 0;">⚠️ Flags: ${flags.map(esc).join(', ')}</p>`
+    : ''
+  return emailBase({
+    title:    'Nueva solicitud de propietario',
+    subtitle: 'Pendiente de revisión en el admin',
+    body: `
+      ${infoBox([
+        { label: 'Negocio',    value: esc(businessName) },
+        { label: 'Tipo',       value: esc(spaceType) },
+        { label: 'Ciudad',     value: esc(city) },
+        { label: 'Solicitante', value: `${esc(applicantName)} &lt;${esc(applicantEmail)}&gt;` },
+        { label: 'Score IA',   value: `<span style="color:${scoreColor};font-weight:700;">${aiScore}/100</span>` },
+      ])}
+      ${flagsHtml}`,
+    cta: { text: 'Revisar solicitud →', url: reviewUrl },
+  })
+}
