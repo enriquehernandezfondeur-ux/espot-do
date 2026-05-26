@@ -8,6 +8,7 @@ import { emailBase, infoBox } from '@/lib/email/templates'
 import { formatCurrency, formatDate, escapeHtml } from '@/lib/utils'
 import { userLogger, logError } from '@/lib/logger'
 import { resolveHostId } from './_resolveHost'
+import { createServiceClient } from '@/lib/supabase/service'
 
 export { acceptBooking, rejectBooking, confirmPayment as confirmBooking, cancelBooking }
 
@@ -778,13 +779,33 @@ export async function revokeTeamMember(memberId: string) {
   return { success: true }
 }
 
+// ── Equipo: validar token de invitación (público, sin sesión) ─
+export async function validateInviteToken(token: string) {
+  if (!token) return null
+  const sb = createServiceClient()
+  const { data } = await sb
+    .from('host_team_members')
+    .select('host_id, role, invite_email, status, host:profiles!host_id(full_name)')
+    .eq('invite_token', token)
+    .eq('status', 'pending')
+    .maybeSingle()
+  if (!data) return null
+  return {
+    hostName:    (data.host as any)?.full_name ?? 'El propietario',
+    role:        data.role as string,
+    inviteEmail: data.invite_email as string,
+  }
+}
+
 // ── Equipo: aceptar invitación (llamado desde /auth/invitacion) ─
 export async function acceptTeamInvite(token: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Debes iniciar sesión primero' }
 
-  const { data: invite } = await supabase
+  // Usar service client para leer la invitación sin restricciones de RLS
+  const sb = createServiceClient()
+  const { data: invite } = await sb
     .from('host_team_members')
     .select('id, host_id, role, status, invite_email')
     .eq('invite_token', token)
@@ -793,14 +814,14 @@ export async function acceptTeamInvite(token: string) {
 
   if (!invite) return { error: 'Invitación no válida o ya utilizada' }
 
-  const { error } = await supabase
+  const { error } = await sb
     .from('host_team_members')
     .update({
       member_user_id: user.id,
       status:         'active',
       accepted_at:    new Date().toISOString(),
       invite_token:   null,
-    } as any)
+    })
     .eq('id', invite.id)
 
   if (error) return { error: error.message }

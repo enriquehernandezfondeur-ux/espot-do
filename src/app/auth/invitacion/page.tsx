@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { acceptTeamInvite } from '@/lib/actions/host'
-import { Users, Loader2, Check, AlertTriangle, ArrowRight } from 'lucide-react'
-import Image from 'next/image'
+import { validateInviteToken, acceptTeamInvite } from '@/lib/actions/host'
+import { Users, Loader2, Check, AlertTriangle } from 'lucide-react'
 
 const ROLE_LABELS: Record<string, string> = {
   admin:       'Administrador',
@@ -18,7 +17,7 @@ function InviteContent() {
   const router = useRouter()
   const token = searchParams.get('token') ?? ''
 
-  const supabase = createClient()
+  const supabaseRef = useRef(createClient())
 
   const [step,      setStep]      = useState<'loading' | 'login' | 'accept' | 'done' | 'error'>('loading')
   const [hostName,  setHostName]  = useState('')
@@ -32,27 +31,18 @@ function InviteContent() {
   useEffect(() => {
     if (!token) { setStep('error'); return }
 
-    // Check if invite exists
-    supabase.from('host_team_members')
-      .select('host_id, role, invite_email, status, host:profiles!host_id(full_name)')
-      .eq('invite_token', token)
-      .eq('status', 'pending')
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!data) { setStep('error'); return }
-        setRole(data.role ?? '')
-        setEmail(data.invite_email ?? '')
-        setHostName((data.host as any)?.full_name ?? 'El propietario')
+    // Validate token via server action (service client, no RLS issues)
+    validateInviteToken(token).then(data => {
+      if (!data) { setStep('error'); return }
+      setRole(data.role)
+      setEmail(data.inviteEmail)
+      setHostName(data.hostName)
 
-        // Check if user is already logged in
-        supabase.auth.getUser().then(({ data: { user } }) => {
-          if (user) {
-            setStep('accept')
-          } else {
-            setStep('login')
-          }
-        })
+      // Check if user is already logged in
+      supabaseRef.current.auth.getUser().then(({ data: { user } }) => {
+        setStep(user ? 'accept' : 'login')
       })
+    })
   }, [token])
 
   async function handleAuth(e: React.FormEvent) {
@@ -60,12 +50,10 @@ function InviteContent() {
     setAuthError('')
     setSaving(true)
 
-    let authResult
-    if (isSignup) {
-      authResult = await supabase.auth.signUp({ email, password })
-    } else {
-      authResult = await supabase.auth.signInWithPassword({ email, password })
-    }
+    const supabase = supabaseRef.current
+    const authResult = isSignup
+      ? await supabase.auth.signUp({ email, password })
+      : await supabase.auth.signInWithPassword({ email, password })
 
     if (authResult.error) {
       setAuthError(authResult.error.message)
@@ -86,7 +74,7 @@ function InviteContent() {
       return
     }
     setStep('done')
-    setTimeout(() => router.push('/dashboard/host'), 2000)
+    setTimeout(() => router.push('/dashboard/host'), 1800)
     setSaving(false)
   }
 
@@ -104,7 +92,7 @@ function InviteContent() {
         <div className="max-w-sm w-full text-center">
           <AlertTriangle size={32} className="mx-auto mb-4 text-red-400" />
           <h1 className="text-xl font-bold mb-2">Invitación no válida</h1>
-          <p className="text-sm text-gray-500 mb-6">Este link de invitación ya fue usado, expiró, o no existe.</p>
+          <p className="text-sm text-gray-500 mb-6">Este link ya fue usado, expiró, o no existe.</p>
           <a href="/dashboard/host" className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>
             Ir al panel →
           </a>
@@ -122,7 +110,7 @@ function InviteContent() {
             <Check size={24} style={{ color: 'var(--brand)' }} />
           </div>
           <h1 className="text-xl font-bold mb-2">¡Bienvenido al equipo!</h1>
-          <p className="text-sm text-gray-500">Te estamos redirigiendo al panel...</p>
+          <p className="text-sm text-gray-500">Redirigiendo al panel...</p>
         </div>
       </div>
     )
@@ -131,7 +119,6 @@ function InviteContent() {
   return (
     <div className="min-h-dvh flex items-center justify-center p-6" style={{ background: '#F7F8FA' }}>
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="text-center mb-8">
           <img src="/logo-dark.svg" alt="Espot" className="h-7 mx-auto mb-6" />
           <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3"
@@ -180,13 +167,13 @@ function InviteContent() {
                     className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none"
                     style={{ border: '1.5px solid #E8ECF0', fontSize: 16 }} />
                 </div>
-                {authError && (
-                  <p className="text-xs text-red-500 text-center">{authError}</p>
-                )}
+                {authError && <p className="text-xs text-red-500 text-center">{authError}</p>}
                 <button type="submit" disabled={saving}
                   className="w-full py-3 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-50"
                   style={{ background: 'var(--brand)' }}>
-                  {saving ? <Loader2 size={14} className="animate-spin mx-auto" /> : isSignup ? 'Crear cuenta y continuar' : 'Continuar →'}
+                  {saving
+                    ? <Loader2 size={14} className="animate-spin mx-auto" />
+                    : isSignup ? 'Crear cuenta y continuar' : 'Continuar →'}
                 </button>
               </form>
             </div>

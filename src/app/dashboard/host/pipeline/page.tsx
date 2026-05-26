@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getPipelineEvents, updatePipelineStage, createExternalEvent } from '@/lib/actions/external-events'
+import { getPipelineEvents, updatePipelineStage } from '@/lib/actions/external-events'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import type { ExternalEvent, PipelineStage } from '@/types'
-import { KanbanSquare, Plus, Loader2, X, ChevronRight, CalendarDays, Users, DollarSign, ArrowRight } from 'lucide-react'
+import { KanbanSquare, Plus, Loader2, X, CalendarDays, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
 const STAGES: { id: PipelineStage; label: string; color: string; bg: string; desc: string }[] = [
@@ -20,7 +20,6 @@ export default function PipelinePage() {
   const [loading,  setLoading]  = useState(true)
   const [moving,   setMoving]   = useState<string | null>(null)
   const [selected, setSelected] = useState<ExternalEvent | null>(null)
-  const [showNew,  setShowNew]  = useState(false)
 
   useEffect(() => {
     getPipelineEvents().then(d => { setLeads(d); setLoading(false) })
