@@ -6,6 +6,7 @@ import { tplPagoCompletado, tplCuotaPagada } from '@/lib/email/templates'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { markInstallmentPaid, getInstallments } from '@/lib/actions/installments'
 import { createBookingEvent } from '@/lib/google-calendar'
+import { sendWhatsAppToUser, wa } from '@/lib/whatsapp/send'
 
 // POST /api/payments/confirm
 // Body: los query params que Azul envió al ApprovedUrl
@@ -40,8 +41,8 @@ export async function POST(req: NextRequest) {
     .from('bookings')
     .select(`
       *,
-      spaces!space_id(id, name, address, city, sector, profiles!host_id(id, full_name, email)),
-      profiles!guest_id(full_name, email)
+      spaces!space_id(id, name, address, city, sector, profiles!host_id(id, full_name, email, phone, whatsapp)),
+      profiles!guest_id(full_name, email, phone, whatsapp)
     `)
     .eq('id', bookingId)
     .eq('guest_id', user.id)
@@ -198,6 +199,21 @@ export async function POST(req: NextRequest) {
         html:    tplPagoCompletado({ ...paymentData, recipientName: 'Admin', isAdmin: true }),
       }),
     ])
+
+    // WhatsApp al guest y al host cuando el primer pago confirma la reserva
+    const startFmt = booking.start_time ? formatTime(booking.start_time) : ''
+    Promise.allSettled([
+      sendWhatsAppToUser(
+        (guest as any)?.whatsapp,
+        (guest as any)?.phone,
+        wa.pagoConfirmadoGuest(guestName, spaceName, formatDate(booking.event_date), startFmt, bookingId)
+      ),
+      sendWhatsAppToUser(
+        (host as any)?.whatsapp,
+        (host as any)?.phone,
+        wa.pagoConfirmadoHost(host?.full_name ?? 'Propietario', spaceName, guestName, formatDate(booking.event_date), netToHost, bookingId)
+      ),
+    ]).catch(() => {})
 
     // Sync Google Calendar — fire and forget, no bloquea la confirmación
     const hostProfileResult = await supabase

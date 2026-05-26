@@ -11,6 +11,7 @@ import {
 } from '@/lib/email/templates'
 import { createBookingEvent, deleteBookingEvent } from '@/lib/google-calendar'
 import { createInstallments } from '@/lib/actions/installments'
+import { sendWhatsAppToUser, wa } from '@/lib/whatsapp/send'
 export type { BookingStatus } from '@/lib/bookingConfig'
 
 const SITE        = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
@@ -42,7 +43,7 @@ export async function createBooking(payload: CreateBookingPayload) {
   // Obtener info del espacio y host para los emails
   const { data: space } = await supabase
     .from('spaces')
-    .select('id, name, address, city, sector, host_id, capacity_min, capacity_max, profiles!host_id(id, full_name, email, phone)')
+    .select('id, name, address, city, sector, host_id, capacity_min, capacity_max, profiles!host_id(id, full_name, email, phone, whatsapp)')
     .eq('id', payload.spaceId)
     .single()
 
@@ -334,6 +335,22 @@ export async function createBooking(payload: CreateBookingPayload) {
     if (!instResult.success) console.error('[createBooking] installments failed:', instResult.error)
   }
 
+  // WhatsApp al host: nueva solicitud recibida (fire and forget)
+  if (!isQuote) {
+    sendWhatsAppToUser(
+      (host as any)?.whatsapp,
+      host?.phone,
+      wa.nuevaSolicitud(
+        host?.full_name ?? 'Propietario',
+        spaceName,
+        guestName,
+        formatDate(payload.eventDate),
+        payload.guestCount,
+        booking.id,
+      )
+    ).catch(() => {})
+  }
+
   return { success: true, bookingId: booking.id, status: isQuote ? 'quote_requested' : isInstant ? 'accepted' : 'pending' }
 }
 
@@ -345,7 +362,7 @@ export async function acceptBooking(bookingId: string) {
 
   const { data: bk } = await supabase
     .from('bookings')
-    .select(`*, spaces!space_id(name, host_id, profiles!host_id(full_name, email)), profiles!guest_id(full_name, email, phone)`)
+    .select(`*, spaces!space_id(name, host_id, profiles!host_id(full_name, email)), profiles!guest_id(full_name, email, phone, whatsapp)`)
     .eq('id', bookingId)
     .single()
 
@@ -393,6 +410,19 @@ export async function acceptBooking(bookingId: string) {
       }),
     }),
   ])
+
+  // WhatsApp al guest: su reserva fue aceptada, con link de pago
+  sendWhatsAppToUser(
+    guest?.whatsapp,
+    guest?.phone,
+    wa.reservaAceptada(
+      guest?.full_name ?? 'Cliente',
+      space?.name ?? '',
+      formatDate(bk.event_date),
+      firstInstallmentAmount,
+      bookingId,
+    )
+  ).catch(() => {})
 
   return { success: true }
 }

@@ -4,6 +4,7 @@ import { tplRecordatorioCuota, tplRecordatorioEvento, tplSolicitudResena, emailB
 import { daysUntilDate } from '@/lib/payments/schedule'
 import { createServiceClient } from '@/lib/supabase/service'
 import { formatDate } from '@/lib/utils'
+import { sendWhatsAppToUser, wa } from '@/lib/whatsapp/send'
 
 const SITE        = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 const CRON_SECRET = process.env.CRON_SECRET ?? ''
@@ -166,7 +167,7 @@ export async function GET(req: Request) {
         bookings!booking_id(
           id, event_date, guest_id,
           spaces!space_id(name),
-          profiles!guest_id(full_name, email)
+          profiles!guest_id(full_name, email, phone, whatsapp)
         )
       `)
       .eq('due_date', targetStr)
@@ -219,6 +220,23 @@ export async function GET(req: Request) {
       booking?.guest_id ?? undefined,
       'payment_reminders',
     )
+
+    // WhatsApp solo en el recordatorio de 1d (más urgente)
+    if (reminderType === '1d') {
+      sendWhatsAppToUser(
+        guest.whatsapp,
+        guest.phone,
+        wa.recordatorioCuota(
+          guest.full_name ?? 'Cliente',
+          booking?.spaces?.name ?? '—',
+          formatDate(booking?.event_date ?? ''),
+          inst.amount,
+          booking?.id ?? '',
+          inst.id,
+        )
+      ).catch(() => {})
+    }
+
     await markSent(inst.id, reminderType)
     sent++
   }
@@ -245,7 +263,7 @@ export async function GET(req: Request) {
       .select(`
         id, event_date, start_time, end_time, guest_count, guest_id,
         spaces!space_id(name, address, city, sector, slug),
-        profiles!guest_id(full_name, email)
+        profiles!guest_id(full_name, email, phone, whatsapp)
       `)
       .eq('event_date', tomorrowStr)
       .in('status', ['confirmed'])
@@ -255,15 +273,17 @@ export async function GET(req: Request) {
       const space = (bk as any).spaces
       if (!guest?.email) continue
       try {
+        const spaceAddress = space?.address
+          ? `${space.address}, ${space?.sector ?? ''}, ${space?.city ?? ''}`.trim().replace(/^, |, $/g, '')
+          : (space?.city ?? '')
+
         await sendEmailIfEnabled(
           guest.email,
           `Tu evento es mañana — ${space?.name}`,
           tplRecordatorioEvento({
             guestName:    guest.full_name ?? 'Cliente',
             spaceName:    space?.name ?? '—',
-            spaceAddress: space?.address
-              ? `${space.address}, ${space?.sector ?? ''}, ${space?.city ?? ''}`.trim().replace(/^, |, $/g, '')
-              : (space?.city ?? ''),
+            spaceAddress,
             eventDate:  bk.event_date,
             startTime:  bk.start_time ?? '',
             endTime:    bk.end_time   ?? '',
@@ -274,6 +294,21 @@ export async function GET(req: Request) {
           'booking_updates',
         )
         sent++
+
+        // WhatsApp: recordatorio pre-evento (día anterior)
+        sendWhatsAppToUser(
+          (guest as any).whatsapp,
+          (guest as any).phone,
+          wa.recordatorioEvento(
+            guest.full_name ?? 'Cliente',
+            space?.name ?? '—',
+            spaceAddress,
+            formatDate(bk.event_date),
+            bk.start_time ?? '',
+            bk.end_time   ?? '',
+            bk.id,
+          )
+        ).catch(() => {})
       } catch { errors++ }
     }
   } catch (err: any) {

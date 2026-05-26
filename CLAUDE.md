@@ -152,6 +152,35 @@ src/app/
 - `host` — propietario de espacios
 - `admin` — solo enriquehernandezfondeur@gmail.com (superadmin)
 
+## WhatsApp (Twilio)
+- Módulo: `src/lib/whatsapp/send.ts`
+- ENV vars requeridas en Vercel:
+  - `TWILIO_ACCOUNT_SID` — Account SID de Twilio
+  - `TWILIO_AUTH_TOKEN` — Auth Token de Twilio
+  - `TWILIO_WHATSAPP_FROM` — Número aprobado (sandbox: `whatsapp:+14155238886`)
+- Para sandbox de pruebas: activar en twilio.com/console/sms/whatsapp/sandbox
+- Para producción: necesitas templates aprobados por Meta vía Twilio
+- Notificaciones enviadas:
+  - Host: nueva solicitud de reserva
+  - Guest: reserva aceptada (con link de pago)
+  - Guest + Host: primer pago confirmado
+  - Guest: cuota vence mañana (cron 1d)
+  - Guest: recordatorio 24h antes del evento (cron)
+- En desarrollo (sin TWILIO_ACCOUNT_SID) los mensajes se simulan en consola
+
+## Cron Jobs
+- Archivo: `src/app/api/cron/payment-reminders/route.ts`
+- Configurado en `vercel.json`: diario a las 9am RD (13:00 UTC)
+- ENV var requerida: `CRON_SECRET` — cadena aleatoria para proteger el endpoint
+- Configurar en Vercel Dashboard → Settings → Environment Variables
+- Tareas del cron:
+  1. Marcar cuotas vencidas como `overdue`
+  2. Auto-cancelar reservas `accepted+unpaid` con más de 72h sin pago
+  3. Recordatorio de cuota: 7d y 1d antes de vencimiento (email + WhatsApp 1d)
+  4. Recordatorio pre-evento: 24h antes (email + WhatsApp)
+  5. Solicitud de reseña: 24-48h después del evento
+  6. SLA: aviso al host si no responde solicitud en 48h
+
 ## Deploy
 - Repositorio: `https://github.com/enriquehernandezfondeur-ux/espot-do.git`
 - Branch principal: `main` → Vercel despliega automáticamente
