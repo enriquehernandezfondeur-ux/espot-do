@@ -17,7 +17,7 @@ export function formatCurrency(amount: number | null | undefined): string {
     .trim()
 }
 
-export function formatDate(date: string | Date | null | undefined): string {
+export function formatDate(date: string | Date | null | undefined, opts?: Intl.DateTimeFormatOptions): string {
   if (!date) return '—'
   try {
     // "2026-06-15" sin hora se parsea como UTC midnight, lo que en UTC-4 retrocede al día anterior.
@@ -31,6 +31,7 @@ export function formatDate(date: string | Date | null | undefined): string {
       month: 'long',
       year: 'numeric',
       timeZone: 'America/Santo_Domingo',
+      ...opts,
     }).format(d)
   } catch {
     return '—'

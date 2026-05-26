@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import {
   LayoutDashboard, CalendarDays, Heart,
-  CreditCard, User, MessageCircle, Building2,
+  CreditCard, User, MessageCircle, Building2, HelpCircle,
 } from 'lucide-react'
 import AppSidebar from '@/components/shared/AppSidebar'
 import { createClient } from '@/lib/supabase/client'
@@ -16,6 +16,7 @@ const BASE_NAV = [
   { href: '/dashboard/pagos',      label: 'Pagos',        icon: CreditCard },
   { href: '/dashboard/mensajes',   label: 'Mensajes',     icon: MessageCircle },
   { href: '/dashboard/perfil',     label: 'Mi perfil',    icon: User },
+  { href: '/dashboard/ayuda',      label: 'Ayuda',        icon: HelpCircle },
 ]
 
 const MOBILE_NAV = [

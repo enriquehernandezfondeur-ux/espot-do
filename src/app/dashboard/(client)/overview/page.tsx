@@ -408,6 +408,54 @@ export default function ClientDashboard() {
         ))}
       </div>
 
+      {/* ── Próximas cuotas ─────────────────────────────── */}
+      {(() => {
+        const items = (stats?.pendingInstallments ?? []).slice(0, 5)
+        if (items.length < 2) return null
+        const byBooking = stats?.installmentsByBooking ?? {}
+        return (
+          <div className="rounded-2xl overflow-hidden mb-6 md:mb-8"
+            style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+            <div className="flex items-center justify-between px-4 md:px-5 py-3.5"
+              style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+              <div className="flex items-center gap-2">
+                <CreditCard size={14} style={{ color: '#2563EB' }} />
+                <h2 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Cuotas pendientes</h2>
+                <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-full"
+                  style={{ background: 'rgba(37,99,235,0.08)', color: '#2563EB' }}>
+                  {items.length}
+                </span>
+              </div>
+              <Link href="/dashboard/pagos" className="text-xs font-semibold" style={{ color: 'var(--brand)' }}>
+                Ver pagos →
+              </Link>
+            </div>
+            <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
+              {items.map((inst: any) => {
+                const today2 = new Date(); today2.setHours(0, 0, 0, 0)
+                const daysLeft = Math.ceil((new Date(inst.due_date + 'T12:00').getTime() - today2.getTime()) / 86400000)
+                const color = daysLeft <= 3 ? '#DC2626' : daysLeft <= 7 ? '#D97706' : '#2563EB'
+                const spaceName = byBooking[inst.booking_id]?.spaceName ?? '—'
+                return (
+                  <div key={inst.id} className="flex items-center gap-3 px-4 md:px-5 py-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{spaceName}</div>
+                      <div className="text-xs mt-0.5" style={{ color }}>
+                        {daysLeft < 0 ? `Vencida hace ${Math.abs(daysLeft)} día${Math.abs(daysLeft) !== 1 ? 's' : ''}` :
+                         daysLeft === 0 ? 'Vence hoy' : daysLeft === 1 ? 'Mañana' : `En ${daysLeft} días · ${formatDate(inst.due_date, { day: 'numeric', month: 'short' })}`}
+                      </div>
+                    </div>
+                    <span className="font-bold text-sm shrink-0 tabular-nums" style={{ color: 'var(--text-primary)' }}>
+                      {formatCurrency(Number(inst.amount))}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Reservas recientes */}
       <div className="rounded-2xl md:rounded-3xl overflow-hidden mb-6 md:mb-8"
         style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>

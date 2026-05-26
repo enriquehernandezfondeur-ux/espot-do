@@ -287,8 +287,41 @@ export async function getClientStats() {
       .filter(i => i.status === 'pending')
       .sort((a, b) => a.due_date.localeCompare(b.due_date))[0] ?? null,
     upcomingInstallments: (installments ?? []).filter(i => i.status === 'pending' && i.due_date <= soonStr),
+    pendingInstallments:  (installments ?? []).filter(i => i.status === 'pending'),
     installmentsByBooking: Object.fromEntries(
       bk.map(b => [b.id, { spaceName: (b.spaces as any)?.name ?? '' }])
     ),
+  }
+}
+
+export async function getClientPagosData() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const [{ data: bk }, { data: profile }] = await Promise.all([
+    supabase
+      .from('bookings')
+      .select('id, event_date, event_type, total_amount, paid_amount, payment_status, status, spaces!space_id(name, space_images(url, is_cover))')
+      .eq('guest_id', user.id)
+      .in('status', ['accepted', 'confirmed', 'completed'])
+      .order('event_date', { ascending: false }),
+    supabase.from('profiles').select('full_name').eq('id', user.id).single(),
+  ])
+
+  const bookingIds = (bk ?? []).map((b: any) => b.id)
+
+  const { data: installments } = bookingIds.length > 0
+    ? await supabase
+        .from('booking_installments')
+        .select('id, booking_id, installment_number, amount, due_date, status, paid_at')
+        .in('booking_id', bookingIds)
+        .order('due_date', { ascending: true })
+    : { data: [] }
+
+  return {
+    installments: installments ?? [],
+    bookingMap:   Object.fromEntries((bk ?? []).map((b: any) => [b.id, b])),
+    userName:     profile?.full_name ?? '',
   }
 }
