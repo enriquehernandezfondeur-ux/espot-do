@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import {
   LayoutDashboard, Building2, CalendarDays, ClipboardList,
   MessageSquareQuote, MessageCircle, BarChart3, Settings,
-  LogOut, User, Banknote, Shield, Star, Search, TrendingUp,
+  LogOut, User, Shield, Star, Search, TrendingUp,
   CalendarCheck, Users, CalendarRange, UserPlus,
 } from 'lucide-react'
 import AppSidebar from '@/components/shared/AppSidebar'
@@ -23,7 +23,6 @@ const BASE_NAV = [
   { href: '/dashboard/host/mensajes',     label: 'Mensajes',     icon: MessageCircle },
   { href: '/dashboard/host/resenas',      label: 'Reseñas',      icon: Star },
   // Dinero
-  { href: '/dashboard/host/pagos',        label: 'Pagos',        icon: Banknote },
   { href: '/dashboard/host/finanzas',     label: 'Finanzas',     icon: BarChart3 },
   { href: '/dashboard/host/analytics',   label: 'Analytics',    icon: TrendingUp },
   // Config
