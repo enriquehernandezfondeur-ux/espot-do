@@ -45,7 +45,7 @@ const EXT_STATUS: Record<string, { label: string; color: string; bg: string }> =
   pendiente:  { label: 'Pendiente', color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
   confirmado: { label: 'Confirmado', color: '#16A34A', bg: 'rgba(22,163,74,0.1)'   },
   en_curso:   { label: 'En curso',   color: '#2563EB', bg: 'rgba(37,99,235,0.1)'   },
-  completado: { label: 'Completado', color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },
+  completado: { label: 'Completado', color: '#35C493', bg: 'rgba(53,196,147,0.1)'  },
   cancelado:  { label: 'Cancelado',  color: '#EF4444', bg: 'rgba(239,68,68,0.08)'  },
 }
 
