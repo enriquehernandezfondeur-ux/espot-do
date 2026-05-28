@@ -351,7 +351,13 @@ export default function EspacioPage() {
     }
 
     // Guardar fotos solo si el usuario las modificó
-    if (photosTouched && pendingPhotos.length > 0) {
+    if (photosTouched) {
+      // Bloquear guardado si dejó el espacio sin ninguna foto
+      if (pendingPhotos.length === 0) {
+        setSaveError('Debes tener al menos una foto del espacio antes de guardar.')
+        setSaving(false)
+        return
+      }
       const imgResult = await saveSpaceImages(spaceId, pendingPhotos)
       if (imgResult && 'error' in imgResult) {
         setSaveError(imgResult.error ?? 'Error al guardar fotos')
@@ -423,12 +429,14 @@ export default function EspacioPage() {
       }
       setMinAdvanceAmount(String(p.min_advance_amount ?? '0'))
     }
-    // Addons
-    if (space.space_addons?.length) {
-      setAddons(space.space_addons.map((a: any) => ({
-        name: a.name, price: a.price, unit: a.unit, category: a.category, icon: Package,
-      })))
-    }
+    // Addons (siempre resetear, no acumular del espacio anterior)
+    setAddons(
+      space.space_addons?.length
+        ? space.space_addons.map((a: any) => ({
+            name: a.name, price: a.price, unit: a.unit, category: a.category, icon: Package,
+          }))
+        : []
+    )
     // Actividades
     setPrimaryActivity(space.primary_activity ?? '')
     setSecondaryActivities(space.secondary_activities ?? [])

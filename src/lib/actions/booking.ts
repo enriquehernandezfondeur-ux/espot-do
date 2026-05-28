@@ -12,6 +12,7 @@ import {
 import { createBookingEvent, deleteBookingEvent } from '@/lib/google-calendar'
 import { createInstallments } from '@/lib/actions/installments'
 import { sendWhatsAppToUser, wa } from '@/lib/whatsapp/send'
+import { resolveHostId } from '@/lib/actions/_resolveHost'
 export type { BookingStatus } from '@/lib/bookingConfig'
 
 const SITE        = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
@@ -360,6 +361,8 @@ export async function acceptBooking(bookingId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
+  const { hostId } = await resolveHostId(supabase, user.id)
+
   const { data: bk } = await supabase
     .from('bookings')
     .select(`*, spaces!space_id(name, host_id, profiles!host_id(full_name, email)), profiles!guest_id(full_name, email, phone, whatsapp)`)
@@ -369,7 +372,7 @@ export async function acceptBooking(bookingId: string) {
   if (!bk) return { error: 'Reserva no encontrada' }
 
   const space = bk.spaces as any
-  if (space?.host_id !== user.id) return { error: 'No autorizado' }
+  if (space?.host_id !== hostId) return { error: 'No autorizado' }
 
   const { error, data: updated } = await supabase
     .from('bookings')
@@ -433,6 +436,8 @@ export async function rejectBooking(bookingId: string, reason?: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
+  const { hostId } = await resolveHostId(supabase, user.id)
+
   const { data: bk } = await supabase
     .from('bookings')
     .select(`*, spaces!space_id(name, host_id, profiles!host_id(google_refresh_token, google_calendar_connected)), profiles!guest_id(full_name, email)`)
@@ -442,7 +447,7 @@ export async function rejectBooking(bookingId: string, reason?: string) {
   if (!bk) return { error: 'Reserva no encontrada' }
 
   const space = bk.spaces as any
-  if (space?.host_id !== user.id) return { error: 'No autorizado' }
+  if (space?.host_id !== hostId) return { error: 'No autorizado' }
 
   // Verificar si hay cuotas ya pagadas
   const { data: paidInstalls } = await supabase

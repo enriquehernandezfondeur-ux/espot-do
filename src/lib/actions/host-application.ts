@@ -12,7 +12,19 @@ import {
 import type { HostApplication, ApplicationStatus } from '@/types'
 
 const ADMIN_EMAIL   = process.env.ADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
+const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
 const SITE          = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
+
+// Verifica que el usuario autenticado sea superadmin o tenga role='admin'.
+// Devuelve el user si es admin, null si no.
+async function assertAdmin() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+  if (user.email === SUPERADMIN_EMAIL) return user
+  const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  return data?.role === 'admin' ? user : null
+}
 
 // ─── Read ─────────────────────────────────────────────────────────────────────
 
@@ -221,9 +233,11 @@ async function runAiAnalysis(
 export async function approveApplication(
   applicationId: string
 ): Promise<{ success: boolean; error?: string }> {
+  const admin = await assertAdmin()
+  if (!admin) return { success: false, error: 'Solo administradores pueden aprobar solicitudes' }
+
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'No autenticado' }
+  const user = admin
 
   const { data: app } = await supabase
     .from('host_applications')
@@ -265,9 +279,11 @@ export async function rejectApplication(
   applicationId: string,
   reason: string
 ): Promise<{ success: boolean; error?: string }> {
+  const admin = await assertAdmin()
+  if (!admin) return { success: false, error: 'Solo administradores pueden rechazar solicitudes' }
+
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'No autenticado' }
+  const user = admin
 
   const { data: app } = await supabase
     .from('host_applications')
@@ -313,9 +329,11 @@ export async function requestMoreInfo(
   applicationId: string,
   message: string
 ): Promise<{ success: boolean; error?: string }> {
+  const admin = await assertAdmin()
+  if (!admin) return { success: false, error: 'Solo administradores pueden solicitar información' }
+
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'No autenticado' }
+  const user = admin
 
   await supabase
     .from('host_applications')
@@ -334,6 +352,8 @@ export async function updateAdminNotes(
   applicationId: string,
   notes: string
 ): Promise<void> {
+  const admin = await assertAdmin()
+  if (!admin) return
   const supabase = await createClient()
   await supabase
     .from('host_applications')

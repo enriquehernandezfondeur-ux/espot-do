@@ -40,6 +40,14 @@ export async function getClientWithHistory(clientId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
+  // Pre-cargar IDs de espacios del host para filtrar bookings por pertenencia
+  // (bookings.host_id no existe, la pertenencia se valida via space.host_id)
+  const { data: spaces } = await supabase
+    .from('spaces')
+    .select('id')
+    .eq('host_id', user.id)
+  const spaceIds = (spaces ?? []).map((s: any) => s.id)
+
   const [{ data: client }, { data: events }, { data: bookings }] = await Promise.all([
     supabase
       .from('host_clients')
@@ -53,11 +61,14 @@ export async function getClientWithHistory(clientId: string) {
       .eq('client_id', clientId)
       .eq('host_id', user.id)
       .order('event_date', { ascending: false }),
-    supabase
-      .from('bookings')
-      .select('id, event_date, event_type, total_amount, status')
-      .eq('client_id', clientId)
-      .order('event_date', { ascending: false }),
+    spaceIds.length === 0
+      ? Promise.resolve({ data: [] })
+      : supabase
+          .from('bookings')
+          .select('id, event_date, event_type, total_amount, status')
+          .eq('client_id', clientId)
+          .in('space_id', spaceIds)
+          .order('event_date', { ascending: false }),
   ])
 
   if (!client) return null
