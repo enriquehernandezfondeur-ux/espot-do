@@ -35,6 +35,18 @@ export const STATUS_LABELS: Record<BookingStatus, string> = {
   quote_requested:  'Cotización',
 }
 
+// Versión corta para tablas, badges en móvil y espacios reducidos
+export const STATUS_SHORT: Record<BookingStatus, string> = {
+  pending:          'Pendiente',
+  accepted:         'Pend. pago',
+  confirmed:        'Confirmada',
+  rejected:         'Rechazada',
+  cancelled_guest:  'Cancelada',
+  cancelled_host:   'Cancelada',
+  completed:        'Completada',
+  quote_requested:  'Cotización',
+}
+
 export const STATUS_COLORS: Record<BookingStatus, { color: string; bg: string }> = {
   pending:          { color: '#D97706', bg: 'rgba(217,119,6,0.08)'   },  // Naranja
   accepted:         { color: '#2563EB', bg: 'rgba(37,99,235,0.08)'   },  // Azul

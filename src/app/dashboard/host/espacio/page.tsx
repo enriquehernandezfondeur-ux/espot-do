@@ -502,6 +502,9 @@ export default function EspacioPage() {
       if (pricingType === 'minimum_consumption' && !minConsumption) return 'Indica el consumo mínimo.'
       if (pricingType === 'fixed_package' && !fixedPrice) return 'Indica el precio del paquete.'
     }
+    if (step === 3) {
+      if (timeBlocks.length === 0) return 'Agrega al menos un bloque de horario disponible para que los clientes puedan reservar.'
+    }
     if (step === 6) {
       if (!paymentTerm) return 'Selecciona el modelo de pago.'
     }
@@ -905,7 +908,11 @@ export default function EspacioPage() {
       {/* Header */}
       <div className="mb-5 md:mb-8 flex items-center gap-3">
         <button
-          onClick={() => setView('list')}
+          onClick={() => {
+            const hasUnsavedChanges = !!(name || description || category || capacityMax || pricingType || timeBlocks.length || addons.length || photosTouched)
+            if (hasUnsavedChanges && !window.confirm('Tienes cambios sin guardar. ¿Descartar y volver a Mis espacios?')) return
+            setView('list')
+          }}
           className="transition-colors text-sm flex items-center gap-1.5"
           style={{ color: 'var(--text-muted)' }}
           onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
@@ -1631,6 +1638,7 @@ export default function EspacioPage() {
                       <label className="block text-xs mb-1.5" style={{ color: 'var(--text-muted)' }}>Precio por hora extra (RD$)</label>
                       <input type="number" inputMode="numeric" value={extraHourPrice} onChange={e => setExtraHourPrice(e.target.value)}
                         placeholder="Ej: 5000"
+                        style={{ fontSize: 16 }}
                         className="input-base w-full rounded-xl px-3 py-2.5 text-sm" />
                     </div>
                   )}

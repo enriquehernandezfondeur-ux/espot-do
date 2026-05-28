@@ -110,19 +110,19 @@ export default function PhotoUploader({ spaceId, onChange, initialPhotos }: Prop
         />
         {uploading ? (
           <div className="flex flex-col items-center gap-2">
-            <Loader2 className="w-7 h-7 animate-spin" style={{ color: '#35C493' }} />
+            <Loader2 className="w-7 h-7 animate-spin" style={{ color: 'var(--brand)' }} />
             <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Subiendo fotos...</p>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2">
             <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: 'rgba(53,196,147,0.12)' }}>
-              <ImagePlus className="w-5 h-5" style={{ color: '#35C493' }} />
+              <ImagePlus className="w-5 h-5" style={{ color: 'var(--brand)' }} />
             </div>
             <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
               Subir fotos del espacio
             </p>
             <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              <span style={{ color: '#35C493' }}>Toca para seleccionar</span> · JPG o PNG
+              <span style={{ color: 'var(--brand)' }}>Toca para seleccionar</span> · JPG o PNG
             </p>
             <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Máx. 10MB · La primera foto es la portada</p>
           </div>
@@ -155,7 +155,7 @@ export default function PhotoUploader({ spaceId, onChange, initialPhotos }: Prop
                 background: 'var(--bg-elevated)',
                 opacity:   dragIdx === i ? 0.4 : 1,
                 transform: overIdx === i && dragIdx !== i ? 'scale(1.03)' : 'scale(1)',
-                outline:   overIdx === i && dragIdx !== i ? '2px solid #35C493' : 'none',
+                outline:   overIdx === i && dragIdx !== i ? '2px solid var(--brand)' : 'none',
                 outlineOffset: '2px',
               }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}

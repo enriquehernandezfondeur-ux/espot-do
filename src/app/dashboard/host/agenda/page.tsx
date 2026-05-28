@@ -27,7 +27,7 @@ const EXT_STATUS: Record<ExternalEventStatus, { label: string; color: string; bg
   pendiente:  { label: 'Pendiente', color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
   confirmado: { label: 'Confirmado',  color: '#16A34A', bg: 'rgba(22,163,74,0.1)'   },
   en_curso:   { label: 'En curso',    color: '#2563EB', bg: 'rgba(37,99,235,0.1)'   },
-  completado: { label: 'Completado',  color: '#35C493', bg: 'rgba(53,196,147,0.1)'  },
+  completado: { label: 'Completado',  color: 'var(--brand)', bg: 'rgba(53,196,147,0.1)'  },
   cancelado:  { label: 'Cancelado',   color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },
 }
 
@@ -287,7 +287,7 @@ export default function AgendaPage() {
           <div className="flex rounded-xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
             <span className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold"
               style={{ background: 'var(--brand)', color: '#fff' }}>
-              <LayoutList size={13} /> Lista
+              <LayoutList size={13} /> Reservas
             </span>
             <Link href="/dashboard/host/calendario"
               className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors"
@@ -360,7 +360,7 @@ export default function AgendaPage() {
           { value: 'all',     label: 'Todos',   count: items.length,
             dot: '#94A3B8', activeBg: '#EEF2F7', activeBorder: '#94A3B8', activeNum: 'var(--text-primary)', activeLabel: '#64748B' },
           { value: 'espot',   label: 'Espot',   count: items.filter(i => i.source === 'espot').length,
-            dot: '#35C493', activeBg: 'rgba(53,196,147,0.1)', activeBorder: '#35C493', activeNum: '#0D7A56', activeLabel: '#35C493' },
+            dot: 'var(--brand)', activeBg: 'rgba(53,196,147,0.1)', activeBorder: 'var(--brand)', activeNum: '#0D7A56', activeLabel: 'var(--brand)' },
           { value: 'directo', label: 'Directo', count: items.filter(i => i.source === 'direct').length,
             dot: '#818CF8', activeBg: 'rgba(99,102,241,0.08)', activeBorder: '#818CF8', activeNum: '#4338CA', activeLabel: '#818CF8' },
         ] as const).map(o => {
@@ -515,7 +515,7 @@ export default function AgendaPage() {
                         'w-full grid gap-3 items-center px-5 py-4 min-w-[520px] text-left transition-colors hover:bg-slate-50',
                         isSelected && 'bg-slate-50'
                       )}
-                      style={{ gridTemplateColumns: '2fr 1fr 1fr auto', borderLeft: `3px solid ${isEspot ? '#35C493' : '#2563EB'}` }}>
+                      style={{ gridTemplateColumns: '2fr 1fr 1fr auto', borderLeft: `3px solid ${isEspot ? 'var(--brand)' : '#2563EB'}` }}>
                       <div className="min-w-0">
                         <div className="mb-0.5">
                           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
@@ -612,7 +612,12 @@ function EspotPanel({ booking, actionId, rejectReason, showRejectForm, onClose, 
 }) {
   const [insts, setInsts] = useState<any[]>([])
   useEffect(() => {
-    import('@/lib/actions/installments').then(m => m.getInstallments(booking.id)).then(setInsts).catch(() => {})
+    let cancelled = false
+    import('@/lib/actions/installments')
+      .then(m => m.getInstallments(booking.id))
+      .then(data => { if (!cancelled) setInsts(data) })
+      .catch(() => {})
+    return () => { cancelled = true }
   }, [booking.id])
 
   const sc = STATUS_COLORS[booking.status as keyof typeof STATUS_COLORS] ?? { color: '#6B7280', bg: 'var(--bg-elevated)' }

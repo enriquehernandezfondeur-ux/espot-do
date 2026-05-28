@@ -11,22 +11,9 @@ import { formatCurrency, formatTime } from '@/lib/utils'
 import Link from 'next/link'
 import { getHostStats, getHostBookings, acceptBooking, rejectBooking } from '@/lib/actions/host'
 import { getExternalEvents } from '@/lib/actions/external-events'
-import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
 import type { ExternalEvent } from '@/types'
-
-export function StatusBadge({ status }: { status: string }) {
-  const sc    = STATUS_COLORS[status as keyof typeof STATUS_COLORS]
-  const label = STATUS_LABELS[status as keyof typeof STATUS_LABELS] ?? status
-  const color = sc?.color ?? '#6B7280'
-  const bg    = sc?.bg    ?? 'rgba(107,114,128,0.08)'
-  return (
-    <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full"
-      style={{ background: bg, color }}>
-      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color }} />
-      {label}
-    </span>
-  )
-}
+import { StatusBadge } from '@/components/StatusBadge'
+export { StatusBadge }
 
 function PublishedToast() {
   const searchParams = useSearchParams()
@@ -35,7 +22,7 @@ function PublishedToast() {
   if (!show) return null
   return (
     <div className="fixed top-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg flex items-center gap-2 text-sm font-medium text-white"
-      style={{ background: '#35C493' }}>
+      style={{ background: 'var(--brand)' }}>
       <CheckCircle size={16} /> Espacio publicado correctamente
     </div>
   )
@@ -45,7 +32,7 @@ const EXT_STATUS: Record<string, { label: string; color: string; bg: string }> =
   pendiente:  { label: 'Pendiente', color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
   confirmado: { label: 'Confirmado', color: '#16A34A', bg: 'rgba(22,163,74,0.1)'   },
   en_curso:   { label: 'En curso',   color: '#2563EB', bg: 'rgba(37,99,235,0.1)'   },
-  completado: { label: 'Completado', color: '#35C493', bg: 'rgba(53,196,147,0.1)'  },
+  completado: { label: 'Completado', color: 'var(--brand)', bg: 'rgba(53,196,147,0.1)'  },
   cancelado:  { label: 'Cancelado',  color: '#EF4444', bg: 'rgba(239,68,68,0.08)'  },
 }
 
@@ -410,7 +397,7 @@ export default function DashboardPage() {
             // Color barra
             const barColor = isEspot
               ? item.b.status === 'confirmed' ? '#22C55E' : item.b.status === 'pending' ? '#F59E0B' : '#9CA3AF'
-              : item.ev.status === 'confirmado' ? '#35C493' : item.ev.status === 'en_curso' ? '#2563EB' : '#D97706'
+              : item.ev.status === 'confirmado' ? 'var(--brand)' : item.ev.status === 'en_curso' ? '#2563EB' : '#D97706'
 
             // Espacio/salon
             const spaceName = isEspot

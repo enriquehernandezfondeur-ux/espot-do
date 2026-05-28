@@ -124,7 +124,7 @@ export async function getMyConversations() {
   const { data } = await supabase
     .from('messages')
     .select(`
-      id, body, created_at, read_at,
+      id, body, attachment_url, created_at, read_at,
       sender_id, receiver_id,
       space_id,
       spaces!space_id(id, name, slug, space_images(url, is_cover))
@@ -153,7 +153,8 @@ export async function getMyConversations() {
     spaceName: (m.spaces as any)?.name ?? 'Espacio',
     spaceSlug: (m.spaces as any)?.slug,
     cover:     (m.spaces as any)?.space_images?.find((i: any) => i.is_cover)?.url ?? (m.spaces as any)?.space_images?.[0]?.url,
-    lastMessage: m.body,
+    lastMessage:   m.body,
+    hasAttachment: !!m.attachment_url,
     lastAt:    m.created_at,
     unread:    !m.read_at && m.receiver_id === user.id,
     userId:    user.id,

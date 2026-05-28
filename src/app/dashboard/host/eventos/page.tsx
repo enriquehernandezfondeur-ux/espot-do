@@ -24,7 +24,7 @@ const statusConfig: Record<ExternalEventStatus, { label: string; color: string; 
   pendiente:  { label: 'Pendiente',   color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
   confirmado: { label: 'Confirmado',  color: '#16A34A', bg: 'rgba(22,163,74,0.1)'   },
   en_curso:   { label: 'En curso',    color: '#2563EB', bg: 'rgba(37,99,235,0.1)'   },
-  completado: { label: 'Completado',  color: '#35C493', bg: 'rgba(53,196,147,0.1)'  },
+  completado: { label: 'Completado',  color: 'var(--brand)', bg: 'rgba(53,196,147,0.1)'  },
   cancelado:  { label: 'Cancelado',   color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },
 }
 
@@ -44,6 +44,7 @@ export default function EventosPage() {
 
   useEffect(() => {
     setLoading(true)
+    setSearch('')
     getExternalEvents(filter !== 'all' ? { status: filter } : undefined)
       .then(d => { setEvents(d); setLoading(false) })
       .catch(() => { setEvents([]); setLoading(false) })

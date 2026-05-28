@@ -6,22 +6,11 @@ import { useRouter } from 'next/navigation'
 import { CalendarDays, Clock, Users, Check, X, ExternalLink, Search, Loader2, Download, ChevronRight, ArrowUpDown, CalendarRange } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getHostBookings, acceptBooking, rejectBooking, completeBooking } from '@/lib/actions/host'
-import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
+import { STATUS_LABELS, STATUS_SHORT, STATUS_COLORS } from '@/lib/bookingConfig'
+import { StatusBadge } from '@/components/StatusBadge'
 import Pagination from '@/components/ui/Pagination'
 
 const PAGE_SIZE = 20
-
-// Labels cortos para la tabla desktop (sin espacio para textos largos)
-const STATUS_SHORT: Record<string, string> = {
-  pending:           'Pendiente',
-  quote_requested:   'Cotización',
-  accepted:          'Pend. pago',
-  confirmed:         'Confirmada',
-  completed:         'Completada',
-  rejected:          'Rechazada',
-  cancelled_guest:   'Cancelada',
-  cancelled_host:    'Cancelada',
-}
 
 function HostInstallmentStatus({ bookingId, totalAmount }: {
   bookingId:   string
@@ -29,7 +18,12 @@ function HostInstallmentStatus({ bookingId, totalAmount }: {
 }) {
   const [insts, setInsts] = useState<any[]>([])
   useEffect(() => {
-    import('@/lib/actions/installments').then(m => m.getInstallments(bookingId)).then(setInsts).catch(() => {})
+    let cancelled = false
+    import('@/lib/actions/installments')
+      .then(m => m.getInstallments(bookingId))
+      .then(data => { if (!cancelled) setInsts(data) })
+      .catch(() => {})
+    return () => { cancelled = true }
   }, [bookingId])
 
   if (!insts.length) return null
@@ -333,7 +327,7 @@ export default function HostReservasPage() {
                 <button key={f.key} onClick={() => setFilter(f.key)}
                   className="flex items-center justify-center gap-1 py-2 px-3 md:px-3.5 rounded-xl text-xs md:text-sm font-medium transition-all whitespace-nowrap shrink-0"
                   style={active
-                    ? { background: '#35C493', color: '#fff', boxShadow: '0 2px 8px rgba(53,196,147,0.3)' }
+                    ? { background: 'var(--brand)', color: '#fff', boxShadow: '0 2px 8px rgba(53,196,147,0.3)' }
                     : { color: 'var(--text-secondary)', background: 'transparent' }}>
                   {f.label}
                   {badge > 0 && (
@@ -460,7 +454,7 @@ export default function HostReservasPage() {
                           {g?.full_name ?? 'Cliente'}
                         </div>
                         <div className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
-                          {STATUS_SHORT[bk.status] ?? sl}
+                          {STATUS_SHORT[bk.status as keyof typeof STATUS_SHORT] ?? sl}
                         </div>
                       </div>
                     </div>
@@ -506,7 +500,7 @@ export default function HostReservasPage() {
                         <>
                           <button onClick={() => doAccept(bk.id)} disabled={!!actionId}
                             className="w-8 h-8 flex items-center justify-center rounded-lg transition-all hover:scale-105 disabled:opacity-50"
-                            style={{ background: 'rgba(53,196,147,0.12)', color: '#35C493', border: '1.5px solid rgba(53,196,147,0.3)' }}
+                            style={{ background: 'rgba(53,196,147,0.12)', color: 'var(--brand)', border: '1.5px solid rgba(53,196,147,0.3)' }}
                             title="Aceptar reserva">
                             {actionId === bk.id + 'a' ? <Loader2 size={13} className="animate-spin" /> : <Check size={14} strokeWidth={2.5} />}
                           </button>
@@ -521,7 +515,7 @@ export default function HostReservasPage() {
                       {bk.status === 'quote_requested' && (
                         <button onClick={() => router.push('/dashboard/host/cotizaciones')}
                           className="text-xs font-semibold px-2.5 py-1.5 rounded-lg whitespace-nowrap"
-                          style={{ background: 'rgba(53,196,147,0.12)', color: '#35C493', border: '1.5px solid rgba(53,196,147,0.3)' }}>
+                          style={{ background: 'rgba(53,196,147,0.12)', color: 'var(--brand)', border: '1.5px solid rgba(53,196,147,0.3)' }}>
                           Cotizar →
                         </button>
                       )}
@@ -557,7 +551,7 @@ export default function HostReservasPage() {
                         </div>
                         <div className="flex items-center justify-between gap-2 mb-1.5">
                           <span className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{bk.event_type}</span>
-                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0" style={{ background: sc.bg, color: sc.color }}>{STATUS_SHORT[bk.status] ?? sl}</span>
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0" style={{ background: sc.bg, color: sc.color }}>{STATUS_SHORT[bk.status as keyof typeof STATUS_SHORT] ?? sl}</span>
                         </div>
                         <div className="flex gap-2 flex-wrap text-xs" style={{ color: 'var(--text-muted)' }}>
                           <span className="flex items-center gap-1"><CalendarDays size={10} />{formatDate(bk.event_date)}</span>

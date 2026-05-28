@@ -154,7 +154,11 @@ export default function ResenasPage() {
                       {review.host_response}
                     </p>
                     <button
-                      onClick={() => { setExpanded(expanded === review.id ? null : review.id); setResponse(review.host_response ?? '') }}
+                      onClick={() => {
+                        const willOpen = expanded !== review.id
+                        setExpanded(willOpen ? review.id : null)
+                        setResponse(willOpen ? (review.host_response ?? '') : '')
+                      }}
                       className="text-xs font-medium mt-2" style={{ color: 'var(--brand)' }}>
                       Editar respuesta
                     </button>
@@ -166,7 +170,11 @@ export default function ResenasPage() {
               {!review.host_response && (
                 <div className="px-5 pb-4 pt-0">
                   <button
-                    onClick={() => { setExpanded(expanded === review.id ? null : review.id); setResponse('') }}
+                    onClick={() => {
+                      const willOpen = expanded !== review.id
+                      setExpanded(willOpen ? review.id : null)
+                      setResponse('')
+                    }}
                     className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl transition-all"
                     style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
                     <MessageSquare size={12} />

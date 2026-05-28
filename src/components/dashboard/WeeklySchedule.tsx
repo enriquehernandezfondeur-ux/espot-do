@@ -292,7 +292,7 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
                 {/* Toggle */}
                 <button onClick={() => toggleDay(key)}
                   className="relative w-11 h-6 rounded-full transition-all shrink-0"
-                  style={{ background: day.enabled ? '#35C493' : 'var(--border-medium)' }}>
+                  style={{ background: day.enabled ? 'var(--brand)' : 'var(--border-medium)' }}>
                   <span className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
                     style={{ left: day.enabled ? 22 : 2 }} />
                 </button>
@@ -310,7 +310,7 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
                   <div className="flex gap-2 flex-wrap flex-1">
                     {day.ranges.filter(r => r.start && r.end && !editing[r.id]).map(r => (
                       <span key={r.id} className="text-xs font-medium px-2.5 py-1 rounded-lg"
-                        style={{ background: 'rgba(53,196,147,0.1)', color: '#35C493', border: '1px solid rgba(53,196,147,0.2)' }}>
+                        style={{ background: 'rgba(53,196,147,0.1)', color: 'var(--brand)', border: '1px solid rgba(53,196,147,0.2)' }}>
                         {fmt(r.start)} – {fmt(r.end)}
                       </span>
                     ))}
@@ -363,7 +363,7 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
                               </div>
                               <button onClick={() => confirmEdit(key, range.id)}
                                 className="w-9 h-9 flex items-center justify-center rounded-xl transition-all shrink-0"
-                                style={{ background: '#35C493', color: '#0B0F0E' }}>
+                                style={{ background: 'var(--brand)', color: '#0B0F0E' }}>
                                 <Check size={15} />
                               </button>
                               <button onClick={() => cancelEdit(range.id)}
@@ -378,7 +378,7 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
                           /* Modo lectura — bloque visual */
                           <div className="flex items-center justify-between group">
                             <div className="flex items-center gap-3">
-                              <div className="w-2 h-2 rounded-full shrink-0" style={{ background: '#35C493' }} />
+                              <div className="w-2 h-2 rounded-full shrink-0" style={{ background: 'var(--brand)' }} />
                               <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                                 {fmt(range.start)} – {fmt(range.end)}
                               </span>
@@ -423,7 +423,7 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
                         </div>
                         <button onClick={() => confirmAdd(key)}
                           className="w-9 h-9 flex items-center justify-center rounded-xl shrink-0"
-                          style={{ background: '#35C493', color: '#0B0F0E' }}>
+                          style={{ background: 'var(--brand)', color: '#0B0F0E' }}>
                           <Check size={15} />
                         </button>
                         <button onClick={() => cancelAdd(key)}
@@ -442,7 +442,7 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
                       <div className="pt-2">
                         <button onClick={() => openAdd(key)}
                           className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl transition-all"
-                          style={{ color: '#35C493', background: 'rgba(53,196,147,0.07)', border: '1px dashed rgba(53,196,147,0.25)' }}>
+                          style={{ color: 'var(--brand)', background: 'rgba(53,196,147,0.07)', border: '1px dashed rgba(53,196,147,0.25)' }}>
                           <Plus size={13} /> Agregar horario
                         </button>
                       </div>

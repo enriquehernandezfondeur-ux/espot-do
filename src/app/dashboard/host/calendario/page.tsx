@@ -284,7 +284,7 @@ export default function CalendarioPage() {
             <Link href="/dashboard/host/agenda"
               className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors"
               style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
-              <LayoutList size={13} /> Lista
+              <LayoutList size={13} /> Reservas
             </Link>
             <span className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold"
               style={{ background: 'var(--brand)', color: '#fff' }}>
@@ -345,7 +345,7 @@ export default function CalendarioPage() {
           {/* Ícono */}
           <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
             style={{ background: 'rgba(53,196,147,0.18)', border: '1px solid rgba(53,196,147,0.25)' }}>
-            <Building2 size={18} style={{ color: '#35C493' }} />
+            <Building2 size={18} style={{ color: 'var(--brand)' }} />
           </div>
 
           {/* Nombre + label */}
@@ -455,7 +455,7 @@ export default function CalendarioPage() {
                 <button
                   key={day}
                   onClick={() => { setSelected(isSel ? null : dk); setBlocking(false) }}
-                  className={cn('relative flex flex-col items-center justify-center rounded-xl py-2 px-1 text-xs md:text-sm font-medium transition-all aspect-square')}
+                  className={cn('relative flex flex-col items-center justify-center rounded-xl py-2 px-1 text-xs md:text-sm font-medium transition-all aspect-square min-h-[44px] min-w-[44px]')}
                   style={{
                     background: isToday ? 'var(--brand)' :
                                 isSel  ? 'var(--brand-dim)' :

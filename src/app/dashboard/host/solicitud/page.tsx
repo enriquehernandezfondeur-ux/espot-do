@@ -60,7 +60,7 @@ export default async function SolicitudPage() {
     approved: {
       icon:        CheckCircle,
       iconBg:      'rgba(53,196,147,0.12)',
-      iconColor:   '#35C493',
+      iconColor:   'var(--brand)',
       title:       '¡Solicitud aprobada!',
       subtitle:    'Ya tienes acceso al panel de propietario.',
       description: 'Tu espacio fue aprobado. Completa la información de tu espacio para aparecer en el marketplace.',
