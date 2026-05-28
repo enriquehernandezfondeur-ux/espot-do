@@ -40,7 +40,7 @@ function SocialSection() {
 
   return (
     <section style={{ background: '#F8FAFC' }}>
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-14 md:py-20">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-16 md:py-24">
 
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-10 md:mb-12">
@@ -55,7 +55,7 @@ function SocialSection() {
               </div>
               <span className="text-sm font-semibold" style={{ color: '#6B7280' }}>@espot.do</span>
             </div>
-            <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
+            <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.8rem, 5vw, 2.5rem)', letterSpacing: '-0.04em' }}>
               Espacios reales,{' '}
               <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 eventos reales
@@ -162,10 +162,10 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
     <div style={{ background: '#fff' }}>
 
       {/* ── CATEGORÍAS ── */}
-      <section className="py-14 md:py-20" style={{ background: '#fff' }}>
+      <section className="py-16 md:py-24" style={{ background: '#fff' }}>
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <Reveal className="mb-10 md:mb-12">
-            <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
+            <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.8rem, 5vw, 2.5rem)', letterSpacing: '-0.04em' }}>
               Explora{' '}
               <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 tu espacio
@@ -173,7 +173,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
             </h2>
           </Reveal>
 
-          <div ref={catSection.ref} className="grid grid-cols-4 md:grid-cols-8 gap-2 md:gap-3">
+          <div ref={catSection.ref} className="grid grid-cols-4 md:grid-cols-8 gap-3 md:gap-4">
             {categories.map((cat, i) => {
               const Icon = cat.icon
               return (
@@ -182,7 +182,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                   style={{
                     border: '1px solid #E8ECF0',
                     background: '#fff',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                    boxShadow: .0 2px 6px rgba(0,0,0,0.04)',
                     opacity: catSection.on ? 1 : 0,
                     transform: catSection.on ? 'translateY(0) scale(1)' : 'translateY(16px) scale(0.95)',
                     // Después del entrance, transición rápida para hover (sin delay)
@@ -234,12 +234,12 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
       </section>
 
       {/* ── TIPOS DE EVENTO ── */}
-      <section className="py-14 md:py-20" style={{ background: '#F8FAFC' }}>
+      <section className="py-16 md:py-24" style={{ background: '#F8FAFC' }}>
         <div className="max-w-7xl mx-auto px-4 md:px-6">
 
           <Reveal className="flex items-end justify-between mb-10 md:mb-12">
             <div>
-              <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
+              <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.8rem, 5vw, 2.5rem)', letterSpacing: '-0.04em' }}>
                 ¿Qué tipo de actividad{' '}
                 <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                   deseas realizar?
@@ -292,12 +292,12 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
       </section>
 
       {/* ── ESPACIOS DESTACADOS ── */}
-      <section className="py-14 md:py-20" style={{ background: '#fff' }}>
+      <section className="py-16 md:py-24" style={{ background: '#fff' }}>
         <div className="max-w-7xl mx-auto px-4 md:px-6">
 
           <Reveal className="flex items-end justify-between mb-10 md:mb-12">
             <div>
-              <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
+              <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.8rem, 5vw, 2.5rem)', letterSpacing: '-0.04em' }}>
                 Espacios{' '}
                 <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                   en República Dominicana
@@ -349,10 +349,10 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
       </section>
 
       {/* ── CÓMO FUNCIONA ── */}
-      <section className="py-14 md:py-20" style={{ background: '#F8FAFC' }}>
+      <section className="py-16 md:py-24" style={{ background: '#F8FAFC' }}>
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <Reveal>
-            <h2 className="font-bold mb-8 md:mb-10" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
+            <h2 className="font-bold mb-8 md:mb-10" style={{ color: '#0F1623', fontSize: 'clamp(1.8rem, 5vw, 2.5rem)', letterSpacing: '-0.04em' }}>
               Reserva en{' '}
               <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 tres pasos
@@ -538,7 +538,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
 
         <div className="relative max-w-7xl mx-auto px-4 md:px-6">
           <Reveal>
-            <h2 className="font-bold mb-8 md:mb-10" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
+            <h2 className="font-bold mb-8 md:mb-10" style={{ color: '#0F1623', fontSize: 'clamp(1.8rem, 5vw, 2.5rem)', letterSpacing: '-0.04em' }}>
               Todo sobre{' '}
               <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 Espot
