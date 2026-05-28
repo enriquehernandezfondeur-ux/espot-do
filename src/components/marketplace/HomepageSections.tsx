@@ -182,7 +182,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                   style={{
                     border: '1px solid #E8ECF0',
                     background: '#fff',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+                    boxShadow: .0 2px 6px rgba(0,0,0,0.04)',
                     opacity: catSection.on ? 1 : 0,
                     transform: catSection.on ? 'translateY(0) scale(1)' : 'translateY(16px) scale(0.95)',
                     // Después del entrance, transición rápida para hover (sin delay)
