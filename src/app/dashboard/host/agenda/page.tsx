@@ -684,9 +684,9 @@ function EspotPanel({ booking, actionId, rejectReason, showRejectForm, onClose, 
             { label: 'Personas', value: String(booking.guest_count) },
             ...(booking.spaces?.name ? [{ label: 'Espacio', value: booking.spaces.name }] : []),
           ] as { label: string; value: string }[]).map(({ label, value }) => (
-            <div key={label} className="flex justify-between text-sm">
-              <span className="text-gray-500">{label}</span>
-              <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{value}</span>
+            <div key={label} className="flex items-baseline justify-between gap-4 text-sm">
+              <span className="text-gray-500 shrink-0">{label}</span>
+              <span className="font-medium text-right truncate" style={{ color: 'var(--text-primary)' }} title={value}>{value}</span>
             </div>
           ))}
         </div>
@@ -808,7 +808,12 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
   async function handleStatusChange(status: ExternalEventStatus) {
     setSaving(true)
     const r = await updateExternalEvent({ id: event.id, status })
-    if (!('error' in r)) { onUpdated({ ...event, status }); showToast('Estado actualizado', true) }
+    if ('error' in r) {
+      showToast(`Error: ${r.error ?? 'no se pudo cambiar el estado'}`, false)
+    } else {
+      onUpdated({ ...event, status })
+      showToast('Estado actualizado', true)
+    }
     setSaving(false)
   }
 
@@ -885,7 +890,7 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
           <div className="text-xs text-gray-400 mt-0.5">ID: {event.id.slice(0, 8).toUpperCase()}</div>
         </div>
         <div className="flex items-center gap-1">
-          <Link href={`/dashboard/host/eventos/${event.id}/editar`}
+          <Link href={`/dashboard/host/eventos/nuevo?id=${event.id}`}
             className="text-xs px-3 py-1.5 rounded-lg font-semibold hover:bg-slate-100 text-gray-500">
             Editar
           </Link>
@@ -904,9 +909,9 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
               ...(event.guest_count ? [{ label: 'Personas', value: String(event.guest_count) }] : []),
               ...(event.space?.name ? [{ label: 'Espacio', value: event.space.name }] : []),
             ] as { label: string; value: string }[]).map(({ label, value }) => (
-              <div key={label} className="flex justify-between text-sm">
-                <span className="text-gray-500">{label}</span>
-                <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{value}</span>
+              <div key={label} className="flex items-baseline justify-between gap-4 text-sm">
+                <span className="text-gray-500 shrink-0">{label}</span>
+                <span className="font-medium text-right truncate" style={{ color: 'var(--text-primary)' }} title={value}>{value}</span>
               </div>
             ))}
           </div>
@@ -1044,7 +1049,7 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
         <div>
           <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Cambiar estado</div>
           <div className="grid grid-cols-2 gap-2">
-            {(['confirmado', 'en_curso', 'completado', 'cancelado'] as ExternalEventStatus[]).map(st => {
+            {(['pendiente', 'confirmado'] as ExternalEventStatus[]).map(st => {
               const s = EXT_STATUS[st]
               return (
                 <button key={st} onClick={() => handleStatusChange(st)}

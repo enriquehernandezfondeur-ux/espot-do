@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
-import { createExternalEvent } from '@/lib/actions/external-events'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { createExternalEvent, updateExternalEvent, getExternalEvent } from '@/lib/actions/external-events'
 import { searchClients, createClient_ } from '@/lib/actions/clients'
 import type { CreateClientPayload } from '@/lib/actions/clients'
 import { createClient } from '@/lib/supabase/client'
@@ -42,6 +42,9 @@ function fmtAmount(raw: string) {
 
 export default function NuevoEventoPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const editingId = searchParams.get('id')
+  const isEditing = !!editingId
 
   const [spaces,       setSpaces]       = useState<{ id: string; name: string }[]>([])
   const [spaceBlocks,  setSpaceBlocks]  = useState<SpaceBlock[]>([])
@@ -49,6 +52,7 @@ export default function NuevoEventoPage() {
   const [showSuggs,    setShowSuggs]    = useState(false)
   const [linkedClient, setLinkedClient] = useState<HostClient | null>(null)
   const [saving,       setSaving]       = useState(false)
+  const [loadingEvent, setLoadingEvent] = useState(isEditing)
   const [error,        setError]        = useState('')
 
   const [typeSuggs,    setTypeSuggs]    = useState<string[]>([])
@@ -87,13 +91,41 @@ export default function NuevoEventoPage() {
         .eq('host_id', user.id).eq('is_active', true).order('name')
       const list = data ?? []
       setSpaces(list)
-      // Preselect first space and load its blocks
-      if (list.length === 1) {
+      // Preselect first space and load its blocks (solo en modo creación)
+      if (!isEditing && list.length === 1) {
         setForm(prev => ({ ...prev, space_id: list[0].id }))
         loadSpaceBlocks(list[0].id)
       }
     })
-  }, [])
+  }, [isEditing])
+
+  // Precargar datos del evento si estamos en modo edición
+  useEffect(() => {
+    if (!editingId) return
+    let cancelled = false
+    getExternalEvent(editingId).then(ev => {
+      if (cancelled || !ev) { setLoadingEvent(false); return }
+      const e = ev as any
+      setForm({
+        event_type:    e.event_type ?? '',
+        event_date:    e.event_date ?? '',
+        start_time:    e.start_time ?? '',
+        end_time:      e.end_time ?? '',
+        guest_count:   e.guest_count ? String(e.guest_count) : '',
+        total_amount:  e.total_amount ? String(e.total_amount) : '',
+        notes:         e.notes ?? '',
+        status:        (e.status ?? 'pendiente') as ExternalEventStatus,
+        space_id:      e.space_id ?? '',
+        client_name:   e.client?.full_name ?? e.client_name ?? '',
+        client_phone:  e.client?.phone ?? '',
+        client_email:  e.client?.email ?? '',
+      })
+      if (e.client) setLinkedClient(e.client as HostClient)
+      if (e.space_id) loadSpaceBlocks(e.space_id)
+      setLoadingEvent(false)
+    }).catch(() => setLoadingEvent(false))
+    return () => { cancelled = true }
+  }, [editingId])
 
   async function loadSpaceBlocks(spaceId: string) {
     if (!spaceId) { setSpaceBlocks([]); return }
@@ -174,7 +206,7 @@ export default function NuevoEventoPage() {
       if ('data' in result && result.data) finalClientId = (result.data as any).id
     }
 
-    const r = await createExternalEvent({
+    const eventPayload = {
       title:        autoTitle,
       event_type:   form.event_type.trim() || undefined,
       event_date:   form.event_date,
@@ -184,13 +216,20 @@ export default function NuevoEventoPage() {
       total_amount: form.total_amount ? Number(form.total_amount.replace(/,/g, ''))  : undefined,
       notes:        form.notes || undefined,
       status:       form.status,
-      source:       'directo',
       space_id:     form.space_id || undefined,
       client_id:    finalClientId || undefined,
       client_name:  (!finalClientId && form.client_name.trim()) ? form.client_name.trim() : undefined,
-    })
+    }
 
-    if ('error' in r) { setError(r.error ?? 'Error al crear el evento'); setSaving(false); return }
+    const r = isEditing && editingId
+      ? await updateExternalEvent({ id: editingId, ...eventPayload })
+      : await createExternalEvent({ ...eventPayload, source: 'directo' })
+
+    if ('error' in r) {
+      setError(r.error ?? `Error al ${isEditing ? 'actualizar' : 'crear'} el evento`)
+      setSaving(false)
+      return
+    }
     router.push('/dashboard/host/eventos')
   }
 
@@ -215,13 +254,19 @@ export default function NuevoEventoPage() {
         </Link>
         <div>
           <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-            Nuevo evento
+            {isEditing ? 'Editar evento' : 'Nuevo evento'}
           </h1>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            Registra un evento directo o externo
+            {isEditing ? 'Actualiza los datos del evento' : 'Registra un evento directo o externo'}
           </p>
         </div>
       </div>
+
+      {loadingEvent && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 size={20} className="animate-spin" style={{ color: 'var(--brand)' }} />
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-3">
 
@@ -499,7 +544,7 @@ export default function NuevoEventoPage() {
           <button type="submit" disabled={!canSubmit}
             className="flex-1 py-3.5 rounded-xl text-sm font-semibold text-white disabled:opacity-40 flex items-center justify-center gap-2"
             style={{ background: 'var(--brand)' }}>
-            {saving ? <Loader2 size={15} className="animate-spin" /> : <><Check size={15} /> Crear evento</>}
+            {saving ? <Loader2 size={15} className="animate-spin" /> : <><Check size={15} /> {isEditing ? 'Guardar cambios' : 'Crear evento'}</>}
           </button>
         </div>
 

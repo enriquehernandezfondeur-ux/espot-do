@@ -219,7 +219,11 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
   async function handleStatusChange(status: ExternalEventStatus) {
     setSaving(true)
     const r = await updateExternalEvent({ id: event.id, status })
-    if (!('error' in r)) onUpdated({ ...event, status })
+    if ('error' in r) {
+      alert(`No se pudo cambiar el estado: ${r.error ?? 'error desconocido'}`)
+    } else {
+      onUpdated({ ...event, status })
+    }
     setSaving(false)
   }
 
@@ -296,7 +300,7 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
           <div className="text-xs text-gray-400 mt-0.5">ID: {event.id.slice(0, 8).toUpperCase()}</div>
         </div>
         <div className="flex items-center gap-1">
-          <Link href={`/dashboard/host/eventos/${event.id}/editar`}
+          <Link href={`/dashboard/host/eventos/nuevo?id=${event.id}`}
             className="text-xs px-3 py-1.5 rounded-lg font-semibold transition-colors hover:bg-slate-100 text-gray-500">
             Editar
           </Link>
@@ -315,9 +319,9 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
               ...(event.guest_count ? [{ label: 'Personas', value: `${event.guest_count}` }] : []),
               ...(event.space ? [{ label: 'Espacio', value: event.space.name }] : []),
             ].map(({ label, value }) => (
-              <div key={label} className="flex justify-between text-sm">
-                <span className="text-gray-500">{label}</span>
-                <span className="font-medium" style={{ color: '#0F1623' }}>{value}</span>
+              <div key={label} className="flex items-baseline justify-between gap-4 text-sm">
+                <span className="text-gray-500 shrink-0">{label}</span>
+                <span className="font-medium text-right truncate" style={{ color: '#0F1623' }} title={String(value)}>{value}</span>
               </div>
             ))}
           </div>
@@ -469,7 +473,7 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
         <div>
           <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Cambiar estado</div>
           <div className="grid grid-cols-2 gap-2">
-            {(['confirmado', 'en_curso', 'completado', 'cancelado'] as ExternalEventStatus[]).map(status => {
+            {(['pendiente', 'confirmado'] as ExternalEventStatus[]).map(status => {
               const s = statusConfig[status]
               return (
                 <button key={status} onClick={() => handleStatusChange(status)}
