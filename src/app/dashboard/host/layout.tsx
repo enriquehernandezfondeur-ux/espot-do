@@ -23,13 +23,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
     if (!hostProfile || hostProfile.role !== 'host') redirect('/auth')
   }
 
-  // Si es propietario, verificar que está aprobado
-  if (isOwner) {
-    const hs = profile?.host_status
-    if (!hs || hs === 'none') redirect('/aplicar')
-    if (hs !== 'approved' && profile?.role !== 'host') redirect('/dashboard/host/solicitud')
-  }
-
   const isAdmin = user.email === (process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com')
 
   const userName  = profile?.full_name ?? user.email?.split('@')[0]
