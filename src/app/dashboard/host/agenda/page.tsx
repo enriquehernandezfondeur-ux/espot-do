@@ -686,7 +686,7 @@ function EspotPanel({ booking, actionId, rejectReason, showRejectForm, onClose, 
           ] as { label: string; value: string }[]).map(({ label, value }) => (
             <div key={label} className="flex items-baseline justify-between gap-4 text-sm">
               <span className="text-gray-500 shrink-0">{label}</span>
-              <span className="font-medium text-right truncate" style={{ color: 'var(--text-primary)' }} title={value}>{value}</span>
+              <span className="font-medium text-right break-words min-w-0" style={{ color: 'var(--text-primary)' }}>{value}</span>
             </div>
           ))}
         </div>
@@ -806,6 +806,9 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
   const balance = (event.total_amount ?? 0) - (event.paid_amount ?? 0)
 
   async function handleStatusChange(status: ExternalEventStatus) {
+    if (status === 'pendiente' && event.status === 'confirmado') {
+      if (!confirm('¿Volver el evento a "Pendiente"? Se quitará del calendario sincronizado.')) return
+    }
     setSaving(true)
     const r = await updateExternalEvent({ id: event.id, status })
     if ('error' in r) {
@@ -911,7 +914,7 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
             ] as { label: string; value: string }[]).map(({ label, value }) => (
               <div key={label} className="flex items-baseline justify-between gap-4 text-sm">
                 <span className="text-gray-500 shrink-0">{label}</span>
-                <span className="font-medium text-right truncate" style={{ color: 'var(--text-primary)' }} title={value}>{value}</span>
+                <span className="font-medium text-right break-words min-w-0" style={{ color: 'var(--text-primary)' }}>{value}</span>
               </div>
             ))}
           </div>

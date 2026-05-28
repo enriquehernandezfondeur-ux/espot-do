@@ -217,6 +217,10 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
   const supabaseRef = useRef(createClient())
 
   async function handleStatusChange(status: ExternalEventStatus) {
+    // Downgrade destructivo: confirmado → pendiente desincroniza calendario
+    if (status === 'pendiente' && event.status === 'confirmado') {
+      if (!confirm('¿Volver el evento a "Pendiente"? Se quitará del calendario sincronizado.')) return
+    }
     setSaving(true)
     const r = await updateExternalEvent({ id: event.id, status })
     if ('error' in r) {
@@ -321,7 +325,7 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
             ].map(({ label, value }) => (
               <div key={label} className="flex items-baseline justify-between gap-4 text-sm">
                 <span className="text-gray-500 shrink-0">{label}</span>
-                <span className="font-medium text-right truncate" style={{ color: '#0F1623' }} title={String(value)}>{value}</span>
+                <span className="font-medium text-right break-words min-w-0" style={{ color: '#0F1623' }}>{value}</span>
               </div>
             ))}
           </div>

@@ -153,7 +153,7 @@ export async function updateExternalEvent(payload: UpdateExternalEventPayload) {
   const { data: current } = await supabase
     .from('external_events')
     .select(`
-      status, google_calendar_event_id,
+      status, google_calendar_event_id, confirmed_at,
       title, event_date, start_time, end_time, event_type, guest_count, total_amount,
       client_name,
       client:host_clients(full_name, email),
@@ -212,8 +212,10 @@ export async function updateExternalEvent(payload: UpdateExternalEventPayload) {
 
     // ── Confirmado ────────────────────────────────────────────
     if (newStatus === 'confirmado') {
-      // Email al cliente
-      if (clientEmail) {
+      const firstConfirmation = !current.confirmed_at
+
+      // Email al cliente — solo en la PRIMERA confirmación (evita spam)
+      if (clientEmail && firstConfirmation) {
         await sendEmail({
           to:      clientEmail,
           subject: `Tu evento está confirmado — ${formatDate(current.event_date)}`,
@@ -231,8 +233,8 @@ export async function updateExternalEvent(payload: UpdateExternalEventPayload) {
         }).catch(() => {}) // No bloquear si el email falla
       }
 
-      // Google Calendar sync
-      if (isGoogleCalendarConfigured() && profile?.google_calendar_connected && profile?.google_calendar_refresh_token) {
+      // Google Calendar sync — crear si no existe ya
+      if (isGoogleCalendarConfigured() && profile?.google_calendar_connected && profile?.google_calendar_refresh_token && !current.google_calendar_event_id) {
         const gcalId = await createBookingEvent(
           profile.google_calendar_refresh_token,
           {
@@ -260,6 +262,26 @@ export async function updateExternalEvent(payload: UpdateExternalEventPayload) {
             .eq('id', id)
         }
       }
+
+      // Marcar la primera confirmación para no reenviar email después
+      if (firstConfirmation) {
+        await supabase
+          .from('external_events')
+          .update({ confirmed_at: new Date().toISOString() })
+          .eq('id', id)
+      }
+    }
+
+    // ── Pendiente (downgrade desde confirmado) ───────────────
+    // Limpiar el evento de Google Calendar para que no quede fantasma
+    if (newStatus === 'pendiente' && current.google_calendar_event_id) {
+      if (isGoogleCalendarConfigured() && profile?.google_calendar_refresh_token) {
+        await deleteBookingEvent(profile.google_calendar_refresh_token, current.google_calendar_event_id).catch(() => {})
+      }
+      await supabase
+        .from('external_events')
+        .update({ google_calendar_event_id: null })
+        .eq('id', id)
     }
 
     // ── Cancelado ─────────────────────────────────────────────
