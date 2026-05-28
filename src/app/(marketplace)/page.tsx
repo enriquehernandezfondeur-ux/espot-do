@@ -1,7 +1,6 @@
 import { type Metadata } from 'next'
 import { getPublishedSpaces } from '@/lib/actions/marketplace'
 import HeroParallax from '@/components/marketplace/HeroParallax'
-import TrustSignals from '@/components/marketplace/TrustSignals'
 import HomepageSections from '@/components/marketplace/HomepageSections'
 
 export const metadata: Metadata = {
@@ -23,7 +22,6 @@ export default async function HomePage() {
   return (
     <div style={{ background: '#fff' }}>
       <HeroParallax />
-      <TrustSignals />
       <HomepageSections spaces={spaces} />
     </div>
   )
