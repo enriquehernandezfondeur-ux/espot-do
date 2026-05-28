@@ -80,9 +80,10 @@
 - **Regla**: siempre usar variables del tema. Nunca hardcodear colores en componentes nuevos.
 
 ## Temas CSS (en globals.css)
-- `.light-theme` — Marketplace público (bg #F4F6F5)
-- `.dark-theme` — Dashboard cliente (bg #0B0F0E)
-- `.host-theme` — Dashboard propietario (bg #F7F8FA)
+- `.light-theme` — Solo homepage `/` (bg #F4F6F5, texto #03313C) — NO tocar
+- `.white-theme` — Buscar, detalle espacio, **dashboard cliente**, pagos (bg #FFFFFF, texto #1A1A1A)
+- `.host-theme` — Dashboard propietario/host (bg #FFFFFF, texto #1A1A1A) — premium white
+- `.dark-theme` — Definida en CSS pero NO usada actualmente
 
 ## Estructura de rutas principales
 ```
