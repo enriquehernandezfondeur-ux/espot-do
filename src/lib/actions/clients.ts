@@ -73,9 +73,14 @@ export async function getClientWithHistory(clientId: string) {
 
   if (!client) return null
 
+  // Solo cuenta como facturado lo concretado (no canceladas/pendientes/rechazadas)
   const totalRevenue =
-    (events ?? []).reduce((sum: number, e: any) => sum + Number(e.total_amount ?? 0), 0) +
-    (bookings ?? []).reduce((sum: number, b: any) => sum + Number(b.total_amount ?? 0), 0)
+    (events ?? [])
+      .filter((e: any) => ['confirmado', 'en_curso', 'completado'].includes(e.status))
+      .reduce((sum: number, e: any) => sum + Number(e.total_amount ?? 0), 0) +
+    (bookings ?? [])
+      .filter((b: any) => ['confirmed', 'completed'].includes(b.status))
+      .reduce((sum: number, b: any) => sum + Number(b.total_amount ?? 0), 0)
 
   return {
     ...client,
@@ -152,7 +157,9 @@ export async function getEspotGuestHistory(profileId: string) {
     .order('event_date', { ascending: false })
 
   const b = bookings ?? []
-  const totalRevenue = b.reduce((s: number, bk: any) => s + Number(bk.total_amount ?? 0), 0)
+  const totalRevenue = b
+    .filter((bk: any) => ['confirmed', 'completed'].includes(bk.status))
+    .reduce((s: number, bk: any) => s + Number(bk.total_amount ?? 0), 0)
 
   return {
     total_events: b.length,

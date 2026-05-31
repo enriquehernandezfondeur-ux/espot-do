@@ -60,7 +60,9 @@ export default function DashboardPage() {
     if ('error' in r) { setActionError(r.error ?? 'Error'); setTimeout(() => setActionError(''), 3000) }
     else {
       setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'accepted' } : b))
-      setStats(prev => prev ? { ...prev, pendingCount: Math.max(0, prev.pendingCount - 1), confirmedCount: prev.confirmedCount + 1 } : prev)
+      // Aceptar pasa a 'accepted' (aún sin pagar) — no incrementar confirmedCount
+      // (que en getHostStats significa "ingresos confirmados del mes")
+      setStats(prev => prev ? { ...prev, pendingCount: Math.max(0, prev.pendingCount - 1), acceptedCount: (prev.acceptedCount ?? 0) + 1 } : prev)
     }
   }
   async function handleReject(id: string) {

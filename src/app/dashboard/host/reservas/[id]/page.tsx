@@ -139,7 +139,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
   const isCancelled = bk.status?.startsWith('cancelled_') || bk.status === 'rejected'
 
   // Razón de cancelación (puede estar en event_notes o en campo propio)
-  const cancelReason = bk.reject_reason ?? bk.cancellation_reason ?? null
+  const cancelReason = bk.rejection_reason ?? bk.cancellation_reason ?? null
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 md:py-8" style={{ background: 'var(--bg-base)' }}>

@@ -14,6 +14,7 @@ const PAGE_SIZE = 20
 
 const STATUS_OPTIONS: { value: 'all' | ExternalEventStatus; label: string }[] = [
   { value: 'all',        label: 'Todos' },
+  { value: 'pendiente',  label: 'Pendientes' },
   { value: 'confirmado', label: 'Confirmados' },
   { value: 'en_curso',   label: 'En curso' },
   { value: 'completado', label: 'Completados' },
@@ -477,7 +478,7 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
         <div>
           <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Cambiar estado</div>
           <div className="grid grid-cols-2 gap-2">
-            {(['pendiente', 'confirmado'] as ExternalEventStatus[]).map(status => {
+            {(['pendiente', 'confirmado', 'en_curso', 'completado', 'cancelado'] as ExternalEventStatus[]).map(status => {
               const s = statusConfig[status]
               return (
                 <button key={status} onClick={() => handleStatusChange(status)}

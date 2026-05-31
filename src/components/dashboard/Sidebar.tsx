@@ -12,7 +12,7 @@ import { createClient } from '@/lib/supabase/client'
 import { usePathname } from 'next/navigation'
 
 const BASE_NAV = [
-  { href: '/dashboard/host',              label: 'Overview',     icon: LayoutDashboard },
+  { href: '/dashboard/host',              label: 'Inicio',       icon: LayoutDashboard },
   { href: '/dashboard/host/espacio',      label: 'Mi espacio',   icon: Building2 },
   // Operaciones
   { href: '/dashboard/host/agenda',       label: 'Reservas',     icon: CalendarRange },
@@ -31,7 +31,7 @@ const BASE_NAV = [
 ]
 
 const MOBILE_NAV = [
-  { href: '/dashboard/host',          label: 'Overview', icon: LayoutDashboard },
+  { href: '/dashboard/host',          label: 'Inicio',   icon: LayoutDashboard },
   { href: '/dashboard/host/agenda',   label: 'Reservas', icon: CalendarRange },
   { href: '/dashboard/host/clientes', label: 'Clientes', icon: Users },
   { href: '/dashboard/host/mensajes', label: 'Mensajes', icon: MessageCircle },

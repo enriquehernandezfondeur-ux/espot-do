@@ -388,7 +388,7 @@ export default function EspacioPage() {
     // Cargar fotos existentes para mostrarlas en el PhotoUploader
     const imgs: { url: string; path: string; isCover: boolean }[] =
       (space.space_images ?? [])
-        .sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+        .sort((a: any, b: any) => (a.position ?? 0) - (b.position ?? 0))
         .map((img: any) => ({ url: img.url, path: img.path, isCover: img.is_cover ?? false }))
     setExistingPhotos(imgs)
     setPendingPhotos(imgs)

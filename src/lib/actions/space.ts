@@ -111,7 +111,16 @@ export interface SaveSpacePayload {
 }
 
 function buildPricingData(spaceId: string, p: SaveSpacePayload) {
-  const base = { space_id: spaceId, pricing_type: p.pricingType, is_active: true }
+  // weekend_multiplier y min_advance_amount aplican a TODOS los tipos:
+  // el marketplace (computeBasePrice, BookingWidget, booking.ts) los lee
+  // para cualquier pricing_type, así que deben persistirse siempre.
+  const base = {
+    space_id: spaceId,
+    pricing_type: p.pricingType,
+    is_active: true,
+    weekend_multiplier: p.weekendMultiplier ?? 1,
+    min_advance_amount: p.minAdvanceAmount ?? 0,
+  }
   if (p.pricingType === 'hourly') return {
     ...base,
     hourly_price: num(p.hourlyPrice),
@@ -132,8 +141,6 @@ function buildPricingData(spaceId: string, p: SaveSpacePayload) {
     package_hours:     int(p.packageHours),
     extra_hour_price:    num(p.pkgExtraHourPrice),
     package_includes:    p.packageIncludes,
-    weekend_multiplier:  p.weekendMultiplier ?? 1,
-    min_advance_amount:  p.minAdvanceAmount  ?? 0,
   }
   return base
 }
