@@ -56,7 +56,7 @@ export interface HostFinance {
   espot:   { gross: number; commission: number; net: number; collected: number; count: number }
   directo: { total: number; collected: number; count: number }
   monthly: { mes: string; espot: number; directo: number }[]
-  bySpace: { name: string; net: number; count: number }[]
+  bySpace: { name: string; espotNet: number; directo: number; total: number; count: number }[]
   payouts: { id: string; guest: string; space: string; event_date: string | null; net: number; status: 'pendiente' | 'pagado' | 'en_curso' }[]
   upcoming: { id: string; due_date: string; amount: number; status: string; guest: string; space: string; overdue: boolean }[]
 }
@@ -87,7 +87,7 @@ export async function getHostFinance(): Promise<HostFinance | null> {
       .select('id, status, payment_status, payout_status, total_amount, paid_amount, platform_fee, event_date, confirmed_at, event_type, guest_id, space_id, profiles!guest_id(full_name), spaces!space_id(name)')
       .in('space_id', spaceIds),
     supabase.from('external_events')
-      .select('id, status, total_amount, paid_amount, event_date')
+      .select('id, status, total_amount, paid_amount, event_date, space_id')
       .eq('host_id', hostId),
     supabase.from('booking_installments')
       .select('id, due_date, amount, status, booking_id, bookings!booking_id(space_id, event_type, profiles!guest_id(full_name), spaces!space_id(name))')
@@ -148,17 +148,22 @@ export async function getHostFinance(): Promise<HostFinance | null> {
     return { mes: mes.charAt(0).toUpperCase() + mes.slice(1), espot, directo }
   })
 
-  // ── Mix por espacio (neto Espot) ──
-  const bySpaceMap: Record<string, { net: number; count: number }> = {}
+  // ── Cuánto genera cada salón (Espot neto + Directo) ──
+  const bySpaceMap: Record<string, { espotNet: number; directo: number; count: number }> = {}
+  const ensure = (k: string) => { if (!bySpaceMap[k]) bySpaceMap[k] = { espotNet: 0, directo: 0, count: 0 } }
   revenue.forEach(b => {
-    const k = b.space_id ?? 'na'
-    if (!bySpaceMap[k]) bySpaceMap[k] = { net: 0, count: 0 }
-    bySpaceMap[k].net += netOf(b)
+    const k = b.space_id ?? 'na'; ensure(k)
+    bySpaceMap[k].espotNet += netOf(b)
+    bySpaceMap[k].count += 1
+  })
+  ext.forEach(e => {
+    const k = (e as any).space_id ?? 'na'; ensure(k)
+    bySpaceMap[k].directo += Math.max(Number((e as any).total_amount ?? 0), Number((e as any).paid_amount ?? 0))
     bySpaceMap[k].count += 1
   })
   const bySpace = Object.entries(bySpaceMap)
-    .map(([id, v]) => ({ name: spaceName[id] ?? 'Espacio', net: v.net, count: v.count }))
-    .sort((a, b) => b.net - a.net)
+    .map(([id, v]) => ({ name: spaceName[id] ?? 'Espacio', espotNet: v.espotNet, directo: v.directo, total: v.espotNet + v.directo, count: v.count }))
+    .sort((a, b) => b.total - a.total)
 
   // ── Liquidaciones (payouts) derivadas de bookings ──
   const payouts = revenue

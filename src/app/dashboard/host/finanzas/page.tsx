@@ -5,7 +5,7 @@ import { formatCurrency, formatDate } from '@/lib/utils'
 import { getBankAccount, saveBankAccount } from '@/lib/actions/host'
 import { getHostFinance, type HostFinance } from '@/lib/actions/host-finance'
 import {
-  Loader2, TrendingUp, TrendingDown, Wallet, Download, Banknote, Clock,
+  Loader2, TrendingUp, TrendingDown, Download, Banknote,
   Building2, Save, AlertCircle, ChevronDown, CheckCircle, CalendarClock,
   ArrowDownToLine, PiggyBank, Hourglass, Info,
 } from 'lucide-react'
@@ -122,8 +122,12 @@ export default function FinanzasPage() {
     rejected: { label: 'Cuenta rechazada',       color: RED,           bg: 'rgba(220,38,38,0.06)' },
   }
   const ver = verConfig[bankStatus] ?? verConfig.pending
-  const maxSpaceNet = Math.max(...f.bySpace.map(s => s.net), 1)
+  const maxSpaceNet = Math.max(...f.bySpace.map(s => s.total), 1)
   const chartHasData = chartData.some(d => d.valor > 0)
+  // Directo no tiene comisión: el host gana el 100%. Usamos el total facturado
+  // (o lo cobrado si el total no está registrado).
+  const directoEarned = Math.max(f.directo.total, f.directo.collected)
+  const totalNet = f.espot.net + directoEarned
 
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
@@ -154,9 +158,9 @@ export default function FinanzasPage() {
             <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.55)' }}>Tu dinero neto</p>
           </div>
           <div>
-            <p className="text-3xl md:text-4xl font-bold mt-3" style={{ color: '#fff', letterSpacing: '-0.03em' }}>{formatCurrency(f.netEarned)}</p>
+            <p className="text-3xl md:text-4xl font-bold mt-3" style={{ color: '#fff', letterSpacing: '-0.03em' }}>{formatCurrency(totalNet)}</p>
             <p className="text-xs mt-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
-              Después de la comisión de Espot (10%) · {f.espot.count} reservas
+              Espot (neto, −10%) + Directo · tu dinero combinado
             </p>
           </div>
         </div>
@@ -182,14 +186,32 @@ export default function FinanzasPage() {
         </div>
       </div>
 
-      {/* Resumen cobrado total */}
-      <div className="rounded-2xl px-5 py-4 mb-5 md:mb-6 flex items-center gap-3 flex-wrap" style={CARD}>
-        <Wallet size={16} style={{ color: 'var(--brand)' }} />
-        <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Cobrado en total (Espot + Directo):</span>
-        <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{formatCurrency(f.collectedTotal)}</span>
-        <span className="text-xs ml-auto" style={{ color: 'var(--text-muted)' }}>
-          Espot {formatCurrency(f.espot.collected)} · Directo {formatCurrency(f.directo.collected)}
-        </span>
+      {/* Ingresos por canal — Espot vs Directo */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-5 md:mb-6">
+        <div className="rounded-2xl p-5" style={CARD}>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--brand)' }} />
+            <span className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Espot (marketplace)</span>
+          </div>
+          <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>{formatCurrency(f.espot.net)}</div>
+          <div className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
+            neto · bruto {formatCurrency(f.espot.gross)} − {formatCurrency(f.espot.commission)} comisión
+          </div>
+          <div className="text-xs mt-2.5 pt-2.5" style={{ borderTop: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}>
+            {f.espot.count} reserva{f.espot.count !== 1 ? 's' : ''} · cobrado {formatCurrency(f.espot.collected)}
+          </div>
+        </div>
+        <div className="rounded-2xl p-5" style={CARD}>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#8B5CF6' }} />
+            <span className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Directo (tus eventos)</span>
+          </div>
+          <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>{formatCurrency(directoEarned)}</div>
+          <div className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>sin comisión · el 100% es tuyo</div>
+          <div className="text-xs mt-2.5 pt-2.5" style={{ borderTop: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}>
+            {f.directo.count} evento{f.directo.count !== 1 ? 's' : ''} · cobrado {formatCurrency(f.directo.collected)}
+          </div>
+        </div>
       </div>
 
       {/* Gráfico interactivo */}
@@ -267,27 +289,37 @@ export default function FinanzasPage() {
           )}
         </div>
 
-        {/* Mix por espacio */}
+        {/* Cuánto genera cada salón */}
         <div className="rounded-2xl p-5 md:p-6" style={CARD}>
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-1">
             <Building2 size={16} style={{ color: 'var(--brand)' }} />
-            <h2 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Neto por espacio</h2>
+            <h2 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Cuánto genera cada salón</h2>
           </div>
+          <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }}>Espot (neto) + Directo por espacio</p>
           {f.bySpace.length === 0 ? (
             <EmptyRow icon={Building2} text="Sin ingresos por espacio aún" />
           ) : (
-            <div className="space-y-3.5">
-              {f.bySpace.slice(0, 6).map(s => (
-                <div key={s.name}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-sm truncate pr-2" style={{ color: 'var(--text-secondary)' }}>{s.name}</span>
-                    <span className="text-sm font-bold shrink-0" style={{ color: 'var(--text-primary)' }}>{formatCurrency(s.net)}</span>
+            <div className="space-y-4">
+              {f.bySpace.slice(0, 6).map(s => {
+                const espotPct   = Math.round((s.espotNet / maxSpaceNet) * 100)
+                const directoPct = Math.round((s.directo  / maxSpaceNet) * 100)
+                return (
+                  <div key={s.name}>
+                    <div className="flex items-center justify-between mb-1.5 gap-2">
+                      <span className="text-sm font-medium truncate pr-2" style={{ color: 'var(--text-primary)' }}>{s.name}</span>
+                      <span className="text-sm font-bold shrink-0" style={{ color: 'var(--text-primary)' }}>{formatCurrency(s.total)}</span>
+                    </div>
+                    <div className="flex h-2 rounded-full overflow-hidden mb-1.5" style={{ background: 'var(--bg-elevated)' }}>
+                      <div className="h-full transition-all duration-500" style={{ width: `${espotPct}%`, background: 'var(--brand)' }} />
+                      <div className="h-full transition-all duration-500" style={{ width: `${directoPct}%`, background: '#8B5CF6' }} />
+                    </div>
+                    <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--text-muted)' }}>
+                      {s.espotNet > 0 && <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ background: 'var(--brand)' }} />Espot {formatCurrency(s.espotNet)}</span>}
+                      {s.directo > 0 && <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ background: '#8B5CF6' }} />Directo {formatCurrency(s.directo)}</span>}
+                    </div>
                   </div>
-                  <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-elevated)' }}>
-                    <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.round((s.net / maxSpaceNet) * 100)}%`, background: 'var(--brand)' }} />
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
