@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { verifyResponseHash, type AzulResponseParams } from '@/lib/azul/client'
 import { sendEmail } from '@/lib/email/send'
 import { tplPagoCompletado, tplCuotaPagada } from '@/lib/email/templates'
@@ -23,6 +24,11 @@ export async function POST(req: NextRequest) {
 
   const { bookingId, cuotaId, ...azulParams } = body
   if (!bookingId) return NextResponse.json({ error: 'bookingId requerido' }, { status: 400 })
+
+  // Escrituras de dinero con service-role (bypassa RLS). La autenticación
+  // sigue siendo la sesión del usuario y la autorización se valida abajo
+  // contra guest_id; el guest nunca escribe directamente payments/bookings.
+  const admin = createServiceClient()
 
   // Verificar que IsoCode sea "00" (aprobado)
   if (azulParams.IsoCode !== '00') {
@@ -80,40 +86,45 @@ export async function POST(req: NextRequest) {
   const commissionAmt = Math.round(totalAmount * 0.10)
   const netToHost     = Math.round(totalAmount * 0.90)
 
-  // Si es pago de cuota específica, marcarla como pagada
+  // Si es pago de cuota específica, marcarla como pagada (valida el monto cobrado)
   if (cuotaId) {
-    const markResult = await markInstallmentPaid(cuotaId, azulParams.AzulOrderId)
+    const markResult = await markInstallmentPaid(cuotaId, azulParams.AzulOrderId, paidAmount)
+    if (markResult.alreadyPaid) {
+      // Otra request ya marcó esta cuota — idempotente
+      return NextResponse.json({ success: true, already: true })
+    }
     if (!markResult.success) {
       console.error('[confirm] markInstallmentPaid failed:', markResult.error, 'cuotaId:', cuotaId)
       // No abortar — el pago ya fue cobrado por Azul; continuar actualizando el booking
     }
   }
 
-  // Calcular paid_amount acumulado (suma de pagos anteriores + este pago)
-  const newPaidTotal = Math.round(Number(booking.paid_amount ?? 0) + paidAmount)
-
-  // Determinar payment_status: advance → partial → paid según cuotas completadas
+  // paid_amount = suma REAL de cuotas pagadas (no acumular el query param de Azul).
+  // Para pago único sin cuotas, lo cobrado en esta transacción.
+  let newPaidTotal: number
   let newPaymentStatus: 'advance' | 'partial' | 'paid' = 'advance'
   if (cuotaId) {
-    const { data: allInsts } = await supabase
-      .from('booking_installments').select('status').eq('booking_id', bookingId)
-    if (allInsts && allInsts.length > 0) {
-      const paidCount = allInsts.filter((i: any) => i.status === 'paid').length
-      if (paidCount >= allInsts.length) {
-        newPaymentStatus = 'paid'
-      } else if (paidCount > 1) {
-        newPaymentStatus = 'partial'
-      }
+    const { data: allInsts } = await admin
+      .from('booking_installments').select('status, amount').eq('booking_id', bookingId)
+    const insts: { status: string; amount: number }[] = allInsts ?? []
+    const paid = insts.filter(i => i.status === 'paid')
+    newPaidTotal = Math.round(paid.reduce((s, i) => s + Number(i.amount), 0))
+    const paidCount = paid.length
+    if (insts.length > 0 && paidCount >= insts.length) {
+      newPaymentStatus = 'paid'
+    } else if (paidCount > 1) {
+      newPaymentStatus = 'partial'
     }
   } else {
-    // Pago único sin cuotas → siempre pagado completo
+    // Pago único sin cuotas → pagado completo
+    newPaidTotal = Math.round(paidAmount)
     newPaymentStatus = 'paid'
   }
 
   // Actualizar booking con lock optimista — solo afecta si no fue ya procesado por otra request
   // Esto previene doble inserción en payments si dos tabs llaman a confirm simultáneamente
   const isFirstConfirmation = booking.status !== 'confirmed'
-  const { error: updateError, data: updateResult } = await supabase.from('bookings').update({
+  const { error: updateError, data: updateResult } = await admin.from('bookings').update({
     status:             'confirmed',
     payment_status:     newPaymentStatus,
     paid_amount:        newPaidTotal,      // acumulado, no solo este pago
@@ -136,7 +147,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Registrar en liquidaciones
-  const { error: liqErr } = await supabase.from('liquidaciones').upsert({
+  const { error: liqErr } = await admin.from('liquidaciones').upsert({
     booking_id:       bookingId,
     host_id:          host?.id ?? space?.host_id,
     space_id:         space?.id,
@@ -148,8 +159,9 @@ export async function POST(req: NextRequest) {
   }, { onConflict: 'booking_id' })
   if (liqErr) console.error('[confirm] liquidaciones upsert failed:', liqErr.message)
 
-  // Registrar en payments
-  const { error: payErr } = await supabase.from('payments').insert({
+  // Registrar en payments — upsert idempotente por azul_order_id:
+  // un reintento del MISMO pago no crea una segunda fila.
+  const { error: payErr } = await admin.from('payments').upsert({
     booking_id:     bookingId,
     amount:         paidAmount,    // monto real cobrado por Azul
     currency:       'DOP',
@@ -157,8 +169,9 @@ export async function POST(req: NextRequest) {
     payment_method: 'azul',
     status:         'completed',
     paid_at:        new Date().toISOString(),
-  })
-  if (payErr) console.error('[confirm] payments insert failed:', payErr.message)
+    azul_order_id:  azulParams.AzulOrderId,
+  }, { onConflict: 'azul_order_id', ignoreDuplicates: true })
+  if (payErr) console.error('[confirm] payments upsert failed:', payErr.message)
 
   const SITE       = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
   const spaceName  = space?.name       ?? 'Espacio'
@@ -243,7 +256,7 @@ export async function POST(req: NextRequest) {
         guest?.full_name ?? 'Cliente',
       ).then(async gcalEventId => {
         if (gcalEventId) {
-          await supabase
+          await admin
             .from('bookings')
             .update({ google_calendar_event_id: gcalEventId })
             .eq('id', bookingId)

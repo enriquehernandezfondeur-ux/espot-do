@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { buildPaymentPageFields } from '@/lib/azul/client'
 
 export const maxDuration = 30 // segundos — evita timeout de Vercel en plan hobby
@@ -53,8 +54,10 @@ export async function POST(req: NextRequest) {
     const orderNumber = `ESP-${bookingId.slice(0, 8).toUpperCase()}-${Date.now()}`
 
     // 5. Update booking — awaited para garantizar que azul_custom_order quede grabado
-    // antes de que Azul devuelva al ApprovedUrl
-    await supabase.from('bookings').update({
+    // antes de que Azul devuelva al ApprovedUrl. payment_status es columna
+    // protegida (RLS/trigger): escritura con service-role.
+    const admin = createServiceClient()
+    await admin.from('bookings').update({
       azul_custom_order: orderNumber,
       payment_status:    'processing',
       payment_attempts:  (booking.payment_attempts ?? 0) + 1,

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { sendEmail } from '@/lib/email/send'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import {
@@ -13,6 +14,7 @@ import { createBookingEvent, deleteBookingEvent } from '@/lib/google-calendar'
 import { createInstallments } from '@/lib/actions/installments'
 import { sendWhatsAppToUser, wa } from '@/lib/whatsapp/send'
 import { resolveHostId } from '@/lib/actions/_resolveHost'
+import { computeBasePrice, computePlatformFee } from '@/lib/pricing'
 export type { BookingStatus } from '@/lib/bookingConfig'
 
 const SITE        = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
@@ -110,25 +112,10 @@ export async function createBooking(payload: CreateBookingPayload) {
       if (effectiveMax > 0 && selectedH > effectiveMax + 0.25)
         return { error: `El máximo para este espacio es ${effectiveMax} hora${effectiveMax !== 1 ? 's' : ''}. Selecciona un horario dentro de ese rango.` }
 
-      // Validar basePrice para evitar manipulación: recalcular precio esperado en servidor
+      // Validar basePrice para evitar manipulación: recalcular precio esperado en
+      // servidor con la MISMA función que usa el widget (evita rechazos por redondeo).
       if (pricingCheck.pricing_type !== 'custom_quote') {
-        let expectedBase = 0
-        if (pricingCheck.pricing_type === 'hourly') {
-          expectedBase = (Number(pricingCheck.hourly_price) || 0) * selectedH
-        } else if (pricingCheck.pricing_type === 'minimum_consumption') {
-          expectedBase = Number(pricingCheck.minimum_consumption) || 0
-        } else if (pricingCheck.pricing_type === 'fixed_package') {
-          const extra = Math.max(0, selectedH - (pricingCheck.package_hours ?? 0))
-          expectedBase = (Number(pricingCheck.fixed_price) || 0) + extra * (Number(pricingCheck.extra_hour_price) || 0)
-        }
-        // Aplicar multiplicador de fin de semana si corresponde
-        const wm = Number(pricingCheck.weekend_multiplier ?? 1)
-        if (wm !== 1 && payload.eventDate) {
-          const dow = new Date(payload.eventDate + 'T12:00').getDay()
-          if (dow === 0 || dow === 5 || dow === 6) {
-            expectedBase = Math.round(expectedBase * wm)
-          }
-        }
+        const expectedBase = computeBasePrice(pricingCheck, selectedH, payload.eventDate)
         // Tolerancia de RD$1 por redondeo
         if (expectedBase > 0 && Math.abs(Number(payload.basePrice) - expectedBase) > 1) {
           return { error: 'El precio del evento no coincide con la tarifa actual del espacio. Por favor recarga la página y vuelve a intentarlo.' }
@@ -137,10 +124,28 @@ export async function createBooking(payload: CreateBookingPayload) {
     }
   }
 
+  // ¿El espacio se reserva en exclusiva por jornada (una reserva bloquea el día)
+  // o admite varios turnos validados por horario?
+  const { data: spaceFlags } = await supabase
+    .from('spaces').select('single_booking_per_day').eq('id', payload.spaceId).single()
+  const exclusivePerDay = spaceFlags?.single_booking_per_day === true
+
   // Validar disponibilidad — solo si hay horario real definido (no vacío ni placeholder)
   const hasRealTime = !!(payload.startTime && payload.endTime &&
     (payload.startTime !== '00:00' || payload.endTime !== '23:59'))
-  if (hasRealTime) {
+  if (exclusivePerDay) {
+    // Espacio exclusivo: cualquier reserva activa en la fecha bloquea el día completo
+    const { data: sameDay } = await supabase
+      .from('bookings')
+      .select('id')
+      .eq('space_id', payload.spaceId)
+      .eq('event_date', payload.eventDate)
+      .not('status', 'in', '("rejected","cancelled_guest","cancelled_host")')
+      .limit(1)
+    if (sameDay && sameDay.length > 0) {
+      return { error: 'Este espacio ya tiene una reserva para esa fecha. Por favor elige otra fecha.' }
+    }
+  } else if (hasRealTime) {
     const { data: availCheck, error: rpcError } = await supabase.rpc('check_space_availability', {
       p_space_id:   payload.spaceId,
       p_event_date: payload.eventDate,
@@ -213,7 +218,7 @@ export async function createBooking(payload: CreateBookingPayload) {
   // La comisión se calcula sobre el subtotal completo (base + addons)
   if (!isQuote && payload.basePrice > 0) {
     const subtotal      = payload.basePrice + payload.addonsTotal
-    const expectedFee   = Math.round(subtotal * 0.10)
+    const expectedFee   = computePlatformFee(subtotal)
     const expectedTotal = subtotal
     if (Math.abs(Number(payload.platformFee) - expectedFee) > 1)
       return { error: 'Error en el cálculo de la comisión. Recarga la página e intenta de nuevo.' }
@@ -549,7 +554,10 @@ export async function confirmPayment(bookingId: string) {
 
   if (bk.status !== 'accepted') return { error: 'La reserva debe estar aceptada para confirmar el pago' }
 
-  const { error } = await supabase
+  // Escrituras financieras con service-role (igual que /api/payments/confirm)
+  const admin = createServiceClient()
+
+  const { error } = await admin
     .from('bookings')
     .update({
       status: 'confirmed',
@@ -557,13 +565,14 @@ export async function confirmPayment(bookingId: string) {
       paid_at: new Date().toISOString(),
       confirmed_at: new Date().toISOString(),
       commission_status: 'collected',
+      payout_status: 'pending',
     })
     .eq('id', bookingId)
 
   if (error) return { error: error.message }
 
   // Registrar el pago (no bloquea si falla — el booking ya está confirmado)
-  const { error: payErr } = await supabase.from('payments').insert({
+  const { error: payErr } = await admin.from('payments').insert({
     booking_id:     bookingId,
     amount:         bk.platform_fee,
     currency:       'DOP',
@@ -573,6 +582,23 @@ export async function confirmPayment(bookingId: string) {
     paid_at:        new Date().toISOString(),
   })
   if (payErr) console.error('[completeBooking] payments insert failed:', payErr.message)
+
+  // Registrar liquidación para el host (consistente con el flujo Azul,
+  // que sí la crea; antes el pago manual no aparecía en liquidaciones)
+  const totalAmount   = Number(bk.total_amount)
+  const commissionAmt = Math.round(totalAmount * 0.10)
+  const netToHost     = Math.round(totalAmount * 0.90)
+  const { error: liqErr } = await admin.from('liquidaciones').upsert({
+    booking_id:       bookingId,
+    host_id:          space?.host_id,
+    space_id:         bk.space_id,
+    total_reserva:    totalAmount,
+    comision_pct:     10,
+    comision_monto:   commissionAmt,
+    neto_propietario: netToHost,
+    estado:           'pendiente',
+  }, { onConflict: 'booking_id' })
+  if (liqErr) console.error('[confirmPayment] liquidaciones upsert failed:', liqErr.message)
 
   const host   = space?.profiles as any
   const guest  = bk.profiles as any
@@ -599,7 +625,7 @@ export async function confirmPayment(bookingId: string) {
       guest?.full_name ?? 'Cliente',
     )
     if (gcalEventId) {
-      await supabase.from('bookings')
+      await admin.from('bookings')
         .update({ google_calendar_event_id: gcalEventId })
         .eq('id', bookingId)
     }

@@ -4,12 +4,29 @@ import { createServiceClient } from '@/lib/supabase/service'
 // POST /api/spaces/view
 // Registra una vista al espacio. Incrementa el contador del día actual.
 // Fire-and-forget desde SpaceDetailClient — no bloquea el render.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export async function POST(req: NextRequest) {
   try {
     const { spaceId } = await req.json()
-    if (!spaceId) return NextResponse.json({ ok: false })
+    // Validar formato — evita consultas con valores arbitrarios
+    if (!spaceId || typeof spaceId !== 'string' || !UUID_RE.test(spaceId)) {
+      return NextResponse.json({ ok: false })
+    }
 
     const supabase = createServiceClient()
+
+    // Solo contar vistas de espacios reales y publicados — evita inflar
+    // analytics de IDs inexistentes o de borradores no públicos.
+    const { data: space } = await supabase
+      .from('spaces')
+      .select('id')
+      .eq('id', spaceId)
+      .eq('is_published', true)
+      .eq('is_active', true)
+      .maybeSingle()
+    if (!space) return NextResponse.json({ ok: false })
+
     const today = new Date().toISOString().split('T')[0]
 
     // Intentar incrementar si ya existe el registro para hoy

@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { buildSchedule } from '@/lib/payments/schedule'
 
 export interface BookingInstallment {
@@ -78,11 +79,20 @@ export async function createInstallments(
   return error ? { success: false, error: error.message } : { success: true }
 }
 
-/** Marcar cuota como pagada (verifica que pertenece al usuario o es llamado desde webhook) */
+/**
+ * Marcar cuota como pagada. Autentica/autoriza con la sesión (anon) pero
+ * escribe con service-role: el marcado de dinero no depende de policies del
+ * guest y queda protegido contra forja de pagos.
+ * - `expectedAmount`: monto realmente cobrado por la pasarela; se valida
+ *   contra el monto de la cuota (tolerancia RD$1) para evitar descuadres.
+ * - El UPDATE es condicional (`status != 'paid'`) para cerrar la ventana de
+ *   carrera entre dos confirmaciones concurrentes de la misma cuota.
+ */
 export async function markInstallmentPaid(
   installmentId: string,
-  azulOrderId?: string
-): Promise<{ success: boolean; error?: string }> {
+  azulOrderId?: string,
+  expectedAmount?: number
+): Promise<{ success: boolean; error?: string; alreadyPaid?: boolean }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: 'No autenticado' }
@@ -90,7 +100,7 @@ export async function markInstallmentPaid(
   // Verificar que la cuota pertenece a una reserva del usuario (guest o host)
   const { data: inst } = await supabase
     .from('booking_installments')
-    .select('booking_id, bookings!booking_id(guest_id, spaces!space_id(host_id))')
+    .select('amount, booking_id, bookings!booking_id(guest_id, spaces!space_id(host_id))')
     .eq('id', installmentId)
     .single()
   if (!inst) return { success: false, error: 'Cuota no encontrada' }
@@ -100,7 +110,17 @@ export async function markInstallmentPaid(
     return { success: false, error: 'No autorizado' }
   }
 
-  const { error } = await supabase
+  // Validar que el monto cobrado coincide con el de la cuota
+  if (expectedAmount != null && Math.abs(expectedAmount - Number(inst.amount)) > 1) {
+    return {
+      success: false,
+      error: `Monto cobrado (${expectedAmount}) no coincide con la cuota (${inst.amount})`,
+    }
+  }
+
+  // Escritura con service-role + lock condicional contra doble marcado
+  const admin = createServiceClient()
+  const { data: updated, error } = await admin
     .from('booking_installments')
     .update({
       status:        'paid',
@@ -108,7 +128,11 @@ export async function markInstallmentPaid(
       azul_order_id: azulOrderId ?? null,
     })
     .eq('id', installmentId)
-  return error ? { success: false, error: error.message } : { success: true }
+    .neq('status', 'paid')
+    .select('id')
+  if (error) return { success: false, error: error.message }
+  if (!updated || updated.length === 0) return { success: true, alreadyPaid: true }
+  return { success: true }
 }
 
 /** Obtener cuotas vencidas pendientes de pago (para cron) */

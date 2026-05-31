@@ -67,6 +67,8 @@ export interface SaveSpacePayload {
   addons: { name: string; price: number; unit: string; category: string }[]
   // Reserva instantánea
   instantBooking: boolean
+  // Exclusivo por jornada (una reserva bloquea toda la fecha) vs. varios turnos
+  singleBookingPerDay?: boolean
   // Step 5 — Facilidades físicas (booleanas)
   hasParkingFac: boolean
   hasValetParking: boolean
@@ -166,6 +168,7 @@ export async function saveSpace(payload: SaveSpacePayload) {
       primary_activity:     payload.primaryActivity || null,
       secondary_activities: payload.secondaryActivities ?? [],
       instant_booking: payload.instantBooking ?? false,
+      single_booking_per_day: payload.singleBookingPerDay ?? false,
       is_published: false,
       is_active: true,
     })

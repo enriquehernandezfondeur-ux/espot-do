@@ -487,8 +487,11 @@ export async function respondToQuote(bookingId: string, quotedPrice: number, mes
   const platformFee = Math.round(quotedPrice * 0.10)
 
   // Actualizar booking: precio real + pasar a 'accepted' directamente
-  // (el host ya aceptó la cotización al responder con precio)
-  const { error } = await supabase
+  // (el host ya aceptó la cotización al responder con precio).
+  // total_amount/platform_fee son columnas financieras protegidas por RLS
+  // (trigger), así que se escriben con service-role.
+  const admin = createServiceClient()
+  const { error } = await admin
     .from('bookings')
     .update({
       total_amount:  quotedPrice,
@@ -813,6 +816,15 @@ export async function acceptTeamInvite(token: string) {
     .maybeSingle()
 
   if (!invite) return { error: 'Invitación no válida o ya utilizada' }
+
+  // El email del usuario logueado debe coincidir con el de la invitación.
+  // Sin esto, cualquiera con el token (que viaja por email en texto plano)
+  // podría unirse al equipo de un host y acceder a sus datos.
+  const inviteEmail = (invite.invite_email as string | null)?.trim().toLowerCase()
+  const userEmail   = user.email?.trim().toLowerCase()
+  if (!inviteEmail || !userEmail || inviteEmail !== userEmail) {
+    return { error: 'Esta invitación fue enviada a otro correo. Inicia sesión con el correo invitado.' }
+  }
 
   const { error } = await sb
     .from('host_team_members')

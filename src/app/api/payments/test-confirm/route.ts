@@ -4,6 +4,7 @@ import { sendEmail } from '@/lib/email/send'
 import { tplPagoCompletado } from '@/lib/email/templates'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { markInstallmentPaid } from '@/lib/actions/installments'
+import { createServiceClient } from '@/lib/supabase/service'
 
 // POST /api/payments/test-confirm
 // Solo activo cuando PAYMENT_TEST_MODE=1
@@ -77,9 +78,11 @@ export async function POST(req: NextRequest) {
     newPaymentStatus = 'paid'
   }
 
-  // Confirmar reserva con valores correctos — lock optimista para evitar doble ejecución
+  // Confirmar reserva con valores correctos — lock optimista para evitar doble ejecución.
+  // Columnas financieras: escritura con service-role (igual que /confirm).
+  const admin = createServiceClient()
   const isFirst = booking.status !== 'confirmed'
-  const { data: updateResult } = await supabase.from('bookings').update({
+  const { data: updateResult } = await admin.from('bookings').update({
     status:             'confirmed',
     payment_status:     newPaymentStatus,
     paid_amount:        newPaidTotal,
@@ -97,7 +100,7 @@ export async function POST(req: NextRequest) {
 
   // Registrar en liquidaciones
   const commissionAmt = Number(booking.total_amount) * 0.10
-  await supabase.from('liquidaciones').upsert({
+  await admin.from('liquidaciones').upsert({
     booking_id:       bookingId,
     host_id:          host?.id ?? space?.host_id,
     space_id:         space?.id,

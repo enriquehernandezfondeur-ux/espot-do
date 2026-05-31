@@ -198,6 +198,8 @@ export default function EspacioPage() {
 
   // Reserva instantánea
   const [instantBooking, setInstantBooking] = useState(false)
+  // Exclusivo por jornada (una reserva bloquea la fecha) vs. varios turnos
+  const [singleBookingPerDay, setSingleBookingPerDay] = useState(false)
 
   // Step 5 — Facilidades físicas
   const [hasParkingFac,    setHasParkingFac]    = useState(false)
@@ -305,6 +307,7 @@ export default function EspacioPage() {
       minAdvanceAmount: Number(minAdvanceAmount) || 0,
       timeBlocks, addons,
       instantBooking,
+      singleBookingPerDay,
       hasParkingFac, hasValetParking, hasWifi, hasAc, hasSoundSystem, hasProjector,
       hasDanceFloor, hasOutdoorArea, hasPool, hasKitchen, hasBar, hasStage,
       hasCyclorama, hasNaturalLight, hasGenerator, hasDressingRoom,
@@ -442,6 +445,7 @@ export default function EspacioPage() {
     setSecondaryActivities(space.secondary_activities ?? [])
     // Reserva instantánea
     setInstantBooking(space.instant_booking ?? false)
+    setSingleBookingPerDay(space.single_booking_per_day ?? false)
 
     // Condiciones
     const c = space.space_conditions?.[0]
@@ -548,6 +552,7 @@ export default function EspacioPage() {
     setWeekendEnabled(false); setWeekendPrice(''); setMinAdvanceAmount('0')
     setTimeBlocks([]); setAddons([])
     setInstantBooking(false)
+    setSingleBookingPerDay(false)
     setHasParkingFac(false); setHasValetParking(false); setHasWifi(false); setHasAc(false)
     setHasSoundSystem(false); setHasProjector(false); setHasDanceFloor(false)
     setHasOutdoorArea(false); setHasPool(false); setHasKitchen(false); setHasBar(false)
@@ -1836,6 +1841,32 @@ export default function EspacioPage() {
                   style={{ background: instantBooking ? 'var(--brand)' : 'var(--border-medium)' }}>
                   <span className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
                     style={{ left: instantBooking ? 22 : 2 }} />
+                </button>
+              </div>
+            </div>
+
+            {/* Exclusivo por jornada vs. varios turnos */}
+            <div className="rounded-2xl p-4"
+              style={{ background: 'var(--bg-elevated)', border: '1.5px solid var(--border-subtle)' }}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>📅 Reserva exclusiva por día</span>
+                    {singleBookingPerDay && (
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)' }}>Activa</span>
+                    )}
+                  </div>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                    Una sola reserva por fecha bloquea todo el día (ideal para villas o fincas en exclusiva).
+                    Desactívalo si admites varios turnos el mismo día (ej. almuerzo y cena).
+                  </p>
+                </div>
+                <button onClick={() => setSingleBookingPerDay(v => !v)}
+                  className="w-11 h-6 rounded-full relative transition-all shrink-0 ml-4"
+                  style={{ background: singleBookingPerDay ? 'var(--brand)' : 'var(--border-medium)' }}>
+                  <span className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
+                    style={{ left: singleBookingPerDay ? 22 : 2 }} />
                 </button>
               </div>
             </div>

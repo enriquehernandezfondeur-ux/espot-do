@@ -14,6 +14,7 @@ import {
 import { formatCurrency, formatTime } from '@/lib/utils'
 import { addonIcon } from '@/lib/icon-map'
 import { createBooking } from '@/lib/actions/booking'
+import { computeBasePrice, computePlatformFee } from '@/lib/pricing'
 import { buildSchedule, scheduleModelLabel } from '@/lib/payments/schedule'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
@@ -84,6 +85,31 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   const [error,            setError]            = useState('')
   const [termsAccepted,    setTermsAccepted]    = useState(false)
   const errorRef = useRef<HTMLDivElement>(null)
+
+  // ── Borrador del wizard (persistido al exigir login) ──
+  const DRAFT_KEY = `espot_booking_draft_${space.id}`
+  const draftRestored = useRef(false)
+  useEffect(() => {
+    if (draftRestored.current) return
+    draftRestored.current = true
+    try {
+      const raw = sessionStorage.getItem(DRAFT_KEY)
+      if (!raw) return
+      sessionStorage.removeItem(DRAFT_KEY)
+      const d = JSON.parse(raw)
+      if (d.eventDate)             setEventDate(d.eventDate)
+      if (d.startTime)             setStartTime(d.startTime)
+      if (d.endTime)               setEndTime(d.endTime)
+      if (typeof d.guestCount === 'number') { setGuestCount(d.guestCount); setCountInput(String(d.guestCount)) }
+      if (d.eventType)             setEventType(d.eventType)
+      if (d.customEventType)       setCustomEventType(d.customEventType)
+      if (Array.isArray(d.selectedAddons)) setSelectedAddons(d.selectedAddons)
+      if (d.guestNote)             { setGuestNote(d.guestNote); setShowNote(true) }
+      if (d.termsAccepted)         setTermsAccepted(true)
+      if (typeof d.step === 'number') setStep(d.step)
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // ── Disponibilidad real de la fecha seleccionada ──────
   const [dateBlocked,  setDateBlocked]  = useState(false)
@@ -284,21 +310,9 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
 
   const basePrice = useMemo(() => {
     if (!effectiveStartTime || !realEndTime || selectedHours === 0) return 0
-
-    let price = 0
-    if (isHourly) {
-      price = (pricing?.hourly_price ?? 0) * selectedHours
-    } else if (isConsumption) {
-      price = pricing?.minimum_consumption ?? 0
-    } else if (isPackage) {
-      const base  = pricing?.fixed_price ?? 0
-      const extra = Math.max(0, selectedHours - packageHours)
-      const extraRate = pricing?.extra_hour_price ?? 0
-      price = base + extra * extraRate
-    }
-    // Aplicar precio de fin de semana si aplica
-    return price > 0 ? Math.round(price * weekendMultiplier) : price
-  }, [pricing, effectiveStartTime, realEndTime, selectedHours, isHourly, isConsumption, isPackage, packageHours, weekendMultiplier])
+    // Misma función que el servidor (src/lib/pricing.ts) — evita rechazos por redondeo
+    return computeBasePrice(pricing, selectedHours, eventDate)
+  }, [pricing, effectiveStartTime, realEndTime, selectedHours, eventDate])
 
   const addonsTotal = useMemo(() =>
     selectedAddonItems.reduce((s: number, a: any) => {
@@ -310,7 +324,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   )
 
   const subtotal    = basePrice + addonsTotal
-  const platformFee = Math.round(subtotal * 0.10)
+  const platformFee = computePlatformFee(subtotal)
 
   // ── Navegación ─────────────────────────────────────────
   function canGoNext(): boolean {
@@ -369,6 +383,13 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
     try {
       const { data: { user } } = await supabaseRef.current.auth.getUser()
       if (!user) {
+        // Guardar el progreso del wizard para rehidratarlo al volver del login
+        try {
+          sessionStorage.setItem(DRAFT_KEY, JSON.stringify({
+            step, eventDate, startTime, endTime, guestCount,
+            eventType, customEventType, selectedAddons, guestNote, termsAccepted,
+          }))
+        } catch {}
         router.push(`/auth?redirect=${encodeURIComponent(window.location.pathname)}`)
         return
       }

@@ -9,7 +9,7 @@ export function StatusBadge({ status, short = false }: { status: string; short?:
   return (
     <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full"
       style={{ background: bg, color }}>
-      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color }} />
+      <span data-testid="status-dot" className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color }} />
       {label}
     </span>
   )

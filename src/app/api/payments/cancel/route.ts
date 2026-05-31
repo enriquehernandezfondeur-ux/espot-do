@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 
 // POST /api/payments/cancel
 // Resetea el payment_status de 'processing' a 'payment_pending'
@@ -17,8 +18,11 @@ export async function POST(req: NextRequest) {
   const { bookingId } = body
   if (!bookingId) return NextResponse.json({ error: 'bookingId requerido' }, { status: 400 })
 
-  // Solo resetear si aún no hay pago completado — no tocar bookings con 'advance'
-  const { error } = await supabase.from('bookings')
+  // Solo resetear si aún no hay pago completado — no tocar bookings con 'advance'.
+  // payment_status es columna protegida (RLS/trigger): escritura con service-role,
+  // pero acotada por guest_id para que solo afecte la reserva del usuario.
+  const admin = createServiceClient()
+  const { error } = await admin.from('bookings')
     .update({ payment_status: 'unpaid' })
     .eq('id', bookingId)
     .eq('guest_id', user.id)

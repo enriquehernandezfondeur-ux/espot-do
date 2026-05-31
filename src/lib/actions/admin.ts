@@ -437,7 +437,7 @@ export async function getAdminPayouts(filter?: 'pending' | 'paid' | 'all') {
 
   let q = supabase.from('bookings')
     .select(`
-      id, total_amount, platform_fee, payment_status, payout_status,
+      id, total_amount, paid_amount, platform_fee, payment_status, payout_status,
       event_date, event_type, status, created_at,
       spaces!space_id(
         id, name, city,
@@ -465,8 +465,18 @@ export async function markPayoutPaid(
 
   // Verificar idempotencia: no procesar si ya está pagado
   const { data: current } = await supabase
-    .from('bookings').select('payout_status').eq('id', bookingId).single()
+    .from('bookings')
+    .select('payout_status, payment_status, paid_amount, total_amount')
+    .eq('id', bookingId).single()
   if (current?.payout_status === 'paid') return { success: true, already: true }
+
+  // No liquidar al host si la plataforma aún no cobró el total de la reserva.
+  // (Antes se pagaba el 90% del total aunque el cliente solo hubiera dado el anticipo.)
+  if (current?.payment_status !== 'paid') {
+    const collected = Math.round(Number(current?.paid_amount ?? 0))
+    const total     = Math.round(Number(current?.total_amount ?? 0))
+    return { error: `No se puede liquidar: el cliente aún no ha pagado el total (cobrado ${formatCurrency(collected)} de ${formatCurrency(total)}).` }
+  }
 
   const { data: updated, error } = await supabase
     .from('bookings')
