@@ -87,7 +87,7 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
       // Realtime mensajes
       const ch1 = supabase.channel(`client-msg:${user.id}`)
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${user.id}` },
-          () => setUnread(prev => prev + 1))
+          async () => setUnread(await fetchUnread(supabase, user.id)))
         .subscribe()
 
       // Realtime bookings (pagos)

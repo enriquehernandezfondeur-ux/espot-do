@@ -131,7 +131,7 @@ export default function Sidebar({ userName, avatarUrl, isAdmin, isOwner = true, 
       // ── Realtime: mensajes + bookings ────────────────────
       const ch1 = supabase.channel(`sidebar-msg:${user.id}`)
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${user.id}` },
-          () => setUnread(prev => prev + 1))
+          async () => setUnread(await fetchUnread(supabase, user.id)))
         .subscribe()
 
       const ch2 = supabase.channel(`sidebar-bk:${user.id}`)

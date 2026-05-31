@@ -65,24 +65,34 @@ function AjustesInner() {
           Promise.resolve(createClient()),
         ])
         if (p) {
-          setFullName(p.full_name ?? '')
           setPhone(p.phone ?? '')
           setWhatsapp(p.whatsapp ?? '')
           setEmail(p.email ?? '')
           setSlug((p as any).slug ?? null)
 
+          // Nombre: si profiles.full_name está vacío (típico en OAuth Google/Apple),
+          // tomar el nombre del user_metadata y persistirlo.
+          let resolvedName = p.full_name ?? ''
+          let oauthAvatar: string | null = null
+          if (!resolvedName || !p.avatar_url) {
+            const { data: { user } } = await supabase.auth.getUser()
+            const meta = user?.user_metadata ?? {}
+            if (!resolvedName) resolvedName = meta.full_name || meta.name || ''
+            oauthAvatar = meta.avatar_url || meta.picture || null
+          }
+          setFullName(resolvedName)
+
           if (p.avatar_url) {
             setAvatarUrl(p.avatar_url)
-          } else {
-            // Auto-sincronizar avatar de Google/Apple OAuth si no tiene uno guardado
-            const { data: { user } } = await supabase.auth.getUser()
-            const oauthAvatar = user?.user_metadata?.avatar_url || user?.user_metadata?.picture || null
-            if (oauthAvatar) {
-              setAvatarUrl(oauthAvatar)
-              // Guardar en profiles para que aparezca en el marketplace
-              await updateClientProfile({ avatar_url: oauthAvatar })
-            }
+          } else if (oauthAvatar) {
+            setAvatarUrl(oauthAvatar)
           }
+
+          // Persistir lo recuperado de OAuth para que aparezca en el marketplace
+          const patch: { full_name?: string; avatar_url?: string } = {}
+          if (resolvedName && !p.full_name) patch.full_name = resolvedName
+          if (oauthAvatar && !p.avatar_url) patch.avatar_url = oauthAvatar
+          if (Object.keys(patch).length > 0) await updateClientProfile(patch)
         }
         setGcalConnected(gcal.connected)
         if (bank) {

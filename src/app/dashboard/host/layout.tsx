@@ -25,7 +25,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const isAdmin = user.email === (process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com')
 
-  const userName  = profile?.full_name ?? user.email?.split('@')[0]
+  // Para usuarios de Google/Apple OAuth el nombre puede estar solo en
+  // user_metadata (no en profiles.full_name) — usarlo como fallback.
+  const meta = (user.user_metadata ?? {}) as { full_name?: string; name?: string }
+  const userName  = profile?.full_name || meta.full_name || meta.name || user.email?.split('@')[0]
   const avatarUrl = profile?.avatar_url ?? undefined
 
   return (
