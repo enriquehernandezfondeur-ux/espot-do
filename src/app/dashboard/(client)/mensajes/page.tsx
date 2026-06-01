@@ -87,11 +87,11 @@ export default function ClientMensajesPage() {
     activeRef.current = conv
     setAttachment(null)
     setSendError('')
-    const data = await getConversation(conv.spaceId)
+    const data = await getConversation(conv.spaceId, conv.otherId)
     setMessages(data?.messages ?? [])
     const space = data?.space as any
-    setHostId(space?.host_id ?? null)
-    markMessagesRead(conv.spaceId).then(() => window.dispatchEvent(new Event('espot:messages-read')))
+    setHostId(conv.otherId ?? space?.host_id ?? null)
+    markMessagesRead(conv.spaceId, conv.otherId).then(() => window.dispatchEvent(new Event('espot:messages-read')))
     setConvs(prev => prev.map(c => c.spaceId === conv.spaceId ? { ...c, unread: false } : c))
 
     channelRef.current?.unsubscribe()

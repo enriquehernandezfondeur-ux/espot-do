@@ -140,21 +140,23 @@ export default function CalendarioPage() {
     return `${current.year}-${String(current.month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`
   }
 
+  // Filtrar por el espacio seleccionado: la grilla y los bloqueos deben
+  // corresponder al mismo espacio (host con varios espacios).
   const bookingsByDate = useMemo(() =>
-    bookings.reduce<Record<string, CalBooking[]>>((acc, b) => {
+    bookings.filter(b => (b as any).space_id === spaceId).reduce<Record<string, CalBooking[]>>((acc, b) => {
       if (!acc[b.event_date]) acc[b.event_date] = []
       acc[b.event_date].push(b)
       return acc
     }, {}),
-  [bookings])
+  [bookings, spaceId])
 
   const externalByDate = useMemo(() =>
-    externalEvents.reduce<Record<string, ExternalEvent[]>>((acc, ev) => {
+    externalEvents.filter(ev => (ev as any).space_id === spaceId).reduce<Record<string, ExternalEvent[]>>((acc, ev) => {
       if (!acc[ev.event_date]) acc[ev.event_date] = []
       acc[ev.event_date].push(ev)
       return acc
     }, {}),
-  [externalEvents])
+  [externalEvents, spaceId])
 
   const selectedBookings = selected ? (bookingsByDate[selected] ?? []) : []
   const selectedExternal = selected ? (externalByDate[selected]  ?? []) : []
@@ -162,8 +164,8 @@ export default function CalendarioPage() {
 
   const monthPrefix = `${current.year}-${String(current.month+1).padStart(2,'0')}`
   const monthEvents =
-    bookings.filter(b => b.event_date.startsWith(monthPrefix)).length +
-    externalEvents.filter(ev => ev.event_date.startsWith(monthPrefix) && ev.status !== 'cancelado').length
+    bookings.filter(b => (b as any).space_id === spaceId && b.event_date.startsWith(monthPrefix)).length +
+    externalEvents.filter(ev => (ev as any).space_id === spaceId && ev.event_date.startsWith(monthPrefix) && ev.status !== 'cancelado').length
 
   async function handleBlockTime() {
     if (!selected || !spaceId) return

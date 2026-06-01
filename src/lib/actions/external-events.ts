@@ -204,7 +204,7 @@ export async function updateExternalEvent(payload: UpdateExternalEventPayload) {
     // Obtener nombre del host y token de Google Calendar
     const { data: profile } = await supabase
       .from('profiles')
-      .select('full_name, google_calendar_refresh_token, google_calendar_connected')
+      .select('full_name, google_refresh_token, google_calendar_connected')
       .eq('id', hostId)
       .single()
 
@@ -234,9 +234,9 @@ export async function updateExternalEvent(payload: UpdateExternalEventPayload) {
       }
 
       // Google Calendar sync — crear si no existe ya
-      if (isGoogleCalendarConfigured() && profile?.google_calendar_connected && profile?.google_calendar_refresh_token && !current.google_calendar_event_id) {
+      if (isGoogleCalendarConfigured() && profile?.google_calendar_connected && profile?.google_refresh_token && !current.google_calendar_event_id) {
         const gcalId = await createBookingEvent(
-          profile.google_calendar_refresh_token,
+          profile.google_refresh_token,
           {
             id:                        id,
             event_date:                current.event_date,
@@ -275,8 +275,8 @@ export async function updateExternalEvent(payload: UpdateExternalEventPayload) {
     // ── Pendiente (downgrade desde confirmado) ───────────────
     // Limpiar el evento de Google Calendar para que no quede fantasma
     if (newStatus === 'pendiente' && current.google_calendar_event_id) {
-      if (isGoogleCalendarConfigured() && profile?.google_calendar_refresh_token) {
-        await deleteBookingEvent(profile.google_calendar_refresh_token, current.google_calendar_event_id).catch(() => {})
+      if (isGoogleCalendarConfigured() && profile?.google_refresh_token) {
+        await deleteBookingEvent(profile.google_refresh_token, current.google_calendar_event_id).catch(() => {})
       }
       await supabase
         .from('external_events')
@@ -302,8 +302,8 @@ export async function updateExternalEvent(payload: UpdateExternalEventPayload) {
 
       // Eliminar de Google Calendar
       const gcalId = (data as any)?.google_calendar_event_id ?? current.google_calendar_event_id
-      if (isGoogleCalendarConfigured() && profile?.google_calendar_refresh_token && gcalId) {
-        await deleteBookingEvent(profile.google_calendar_refresh_token, gcalId).catch(() => {})
+      if (isGoogleCalendarConfigured() && profile?.google_refresh_token && gcalId) {
+        await deleteBookingEvent(profile.google_refresh_token, gcalId).catch(() => {})
         await supabase
           .from('external_events')
           .update({ google_calendar_event_id: null })

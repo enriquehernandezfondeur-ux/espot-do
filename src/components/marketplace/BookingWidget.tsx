@@ -933,7 +933,9 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             <div className="mb-4">
               <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>¿Cuántas personas asistirán?</h3>
               <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                Capacidad: {space.capacity_min ? `${space.capacity_min}–` : 'hasta '}{space.capacity_max} personas
+                {space.capacity_max
+                  ? `Capacidad: ${space.capacity_min ? `${space.capacity_min}–` : 'hasta '}${space.capacity_max} personas`
+                  : space.capacity_min ? `Capacidad: desde ${space.capacity_min} personas` : 'Indica cuántas personas asistirán'}
               </p>
             </div>
             <div className="flex items-stretch gap-0 rounded-2xl overflow-hidden"
@@ -950,10 +952,10 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                   onBlur={() => setCountInput(String(guestCount))}
                   className="text-3xl font-bold text-center bg-transparent focus:outline-none w-24 tabular-nums"
                   style={{ color: 'var(--text-primary)', fontSize: '2rem', minHeight: 48 }}
-                  min={space.capacity_min ?? 1} max={space.capacity_max} />
+                  min={space.capacity_min ?? 1} max={space.capacity_max ?? undefined} />
                 <span className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>personas</span>
               </div>
-              <button onClick={() => adjustCount(+1)} disabled={guestCount >= space.capacity_max}
+              <button onClick={() => adjustCount(+1)} disabled={guestCount >= (space.capacity_max ?? 9999)}
                 className="w-14 flex items-center justify-center transition-colors disabled:opacity-30 shrink-0"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)' }}>
                 <Plus size={18} />
@@ -961,7 +963,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             </div>
             <div className="flex justify-between mt-2 text-xs px-1" style={{ color: 'var(--text-muted)' }}>
               <span>{space.capacity_min ? `Mínimo ${space.capacity_min}` : 'Desde 1'}</span>
-              <span>Máximo {space.capacity_max}</span>
+              {space.capacity_max ? <span>Máximo {space.capacity_max}</span> : <span />}
             </div>
           </div>
         )}

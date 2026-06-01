@@ -87,9 +87,11 @@ export default function HostMensajesPage() {
             event: 'INSERT', schema: 'public', table: 'messages',
             filter: `receiver_id=eq.${uid}`,
           }, payload => {
-            const spaceId = (payload.new as any).space_id
+            const m = payload.new as any
+            const otherId = m.sender_id // receiver soy yo → el otro es el emisor
             setConvs(prev => prev.map(c =>
-              c.spaceId === spaceId && c.spaceId !== (activeRef.current?.spaceId)
+              c.spaceId === m.space_id && c.otherId === otherId &&
+              !(activeRef.current?.spaceId === m.space_id && activeRef.current?.otherId === otherId)
                 ? { ...c, unread: true }
                 : c
             ))
@@ -109,17 +111,21 @@ export default function HostMensajesPage() {
     activeRef.current = conv
     setAttachment(null)
     setSendError('')
-    const data = await getConversation(conv.spaceId)
+    const data = await getConversation(conv.spaceId, conv.otherId)
     setMessages(data?.messages ?? [])
-    const otherMsg = (data?.messages ?? []).find((m: any) => m.sender_id !== userId)
-    setGuestId(otherMsg?.sender_id ?? null)
-    markMessagesRead(conv.spaceId).then(() => window.dispatchEvent(new Event('espot:messages-read')))
-    setConvs(prev => prev.map(c => c.spaceId === conv.spaceId ? { ...c, unread: false } : c))
+    setGuestId(conv.otherId ?? null)
+    markMessagesRead(conv.spaceId, conv.otherId).then(() => window.dispatchEvent(new Event('espot:messages-read')))
+    setConvs(prev => prev.map(c => (c.spaceId === conv.spaceId && c.otherId === conv.otherId) ? { ...c, unread: false } : c))
 
     channelRef.current?.unsubscribe()
-    channelRef.current = supabase.channel(`msg-host-${conv.spaceId}`)
+    channelRef.current = supabase.channel(`msg-host-${conv.spaceId}-${conv.otherId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `space_id=eq.${conv.spaceId}` },
-        payload => { setMessages(prev => prev.find(m => m.id === payload.new.id) ? prev : [...prev, payload.new]) })
+        payload => {
+          // Solo mensajes de ESTE cliente (no de otros clientes del mismo espacio)
+          const m = payload.new as any
+          if (m.sender_id !== conv.otherId && m.receiver_id !== conv.otherId) return
+          setMessages(prev => prev.find(x => x.id === m.id) ? prev : [...prev, m])
+        })
     channelRef.current.subscribe()
   }
 
@@ -178,7 +184,9 @@ export default function HostMensajesPage() {
     setSending(false)
   }
 
-  const filtered = convs.filter(c => c.spaceName.toLowerCase().includes(search.toLowerCase()))
+  const filtered = convs.filter(c =>
+    c.spaceName.toLowerCase().includes(search.toLowerCase()) ||
+    (c.otherName ?? '').toLowerCase().includes(search.toLowerCase()))
   const canSend  = (body.trim() || !!attachment) && !sending && !uploading
 
   function timeLabel(d: string) {
@@ -232,20 +240,21 @@ export default function HostMensajesPage() {
               </p>
             </div>
           ) : filtered.map(conv => (
-            <div key={conv.spaceId} className="group relative"
+            <div key={`${conv.spaceId}:${conv.otherId}`} className="group relative"
               style={{ borderBottom: '1px solid var(--border-subtle)' }}>
               <button onClick={() => openConv(conv)}
                 className="w-full text-left px-5 py-4 transition-colors"
-                style={{ background: active?.spaceId === conv.spaceId ? 'var(--brand-dim)' : 'transparent' }}>
+                style={{ background: (active?.spaceId === conv.spaceId && active?.otherId === conv.otherId) ? 'var(--brand-dim)' : 'transparent' }}>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0" style={{ background: 'var(--bg-elevated)' }}>
                     {conv.cover ? <img src={conv.cover} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Building2 size={18} style={{ color: '#CBD5E1' }} /></div>}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>{conv.spaceName}</span>
+                      <span className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>{conv.otherName ?? 'Cliente'}</span>
                       <span className="text-xs shrink-0" style={{ color: 'var(--text-muted)' }}>{timeLabel(conv.lastAt)}</span>
                     </div>
+                    <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{conv.spaceName}</div>
                     <div className="flex items-center gap-1 mt-0.5">
                       <p className="text-xs truncate flex-1" style={{ color: 'var(--text-secondary)' }}>
                         {conv.lastMessage ?? (conv.hasAttachment ? 'Archivo adjunto' : '')}
@@ -288,7 +297,10 @@ export default function HostMensajesPage() {
             <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0" style={{ background: 'var(--bg-elevated)' }}>
               {active.cover ? <img src={active.cover} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Building2 size={16} style={{ color: '#CBD5E1' }} /></div>}
             </div>
-            <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{active.spaceName}</div>
+            <div className="min-w-0">
+              <div className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>{active.otherName ?? 'Cliente'}</div>
+              <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{active.spaceName}</div>
+            </div>
           </div>
 
           {/* Banner seguridad — fijo dentro del chat */}

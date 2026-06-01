@@ -35,6 +35,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Pago no aprobado', isoCode: azulParams.IsoCode }, { status: 400 })
   }
 
+  // Validar datos mínimos de la transacción: sin AzulOrderId no hay clave de
+  // idempotencia (doble fila en payments) y un Amount no numérico mete NaN en DB.
+  if (!azulParams.AzulOrderId || isNaN(Number(azulParams.Amount))) {
+    console.error('[Azul confirm] Transacción sin AzulOrderId o Amount inválido', bookingId, azulParams)
+    return NextResponse.json({ error: 'Datos de transacción incompletos' }, { status: 400 })
+  }
+
   // Verificar firma HMAC — protege contra manipulación de query params
   const isValid = verifyResponseHash(azulParams)
   if (!isValid) {

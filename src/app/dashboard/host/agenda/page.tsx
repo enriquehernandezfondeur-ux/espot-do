@@ -250,6 +250,7 @@ export default function AgendaPage() {
     setActionId(id + 'c')
     const r = await completeBooking(id)
     if (!('error' in r)) { patchBooking(id, { status: 'completed' as const }); showToast('Evento completado', true) }
+    else showToast((r as any).error ?? 'Error', false)
     setActionId(null)
   }
 

@@ -91,10 +91,11 @@ export default function CotizacionesPage() {
   useEffect(() => {
     if (!selected) { setChatMessages([]); return }
     setChatLoading(true)
-    getConversation(selected.space_id).then(conv => {
+    const guestId = (selected as any).guest_id
+    getConversation(selected.space_id, guestId).then(conv => {
       setChatMessages(conv?.messages ?? [])
       setChatUserId(conv?.userId ?? null)
-      markMessagesRead(selected.space_id).then(() => window.dispatchEvent(new Event('espot:messages-read')))
+      markMessagesRead(selected.space_id, guestId).then(() => window.dispatchEvent(new Event('espot:messages-read')))
       setChatLoading(false)
     }).catch(() => setChatLoading(false))
   }, [selected?.id])
@@ -105,7 +106,13 @@ export default function CotizacionesPage() {
     const channel = supabase
       .channel(`cot:${selected.space_id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `space_id=eq.${selected.space_id}` },
-        payload => setChatMessages(prev => [...prev, payload.new]))
+        payload => {
+          // Solo mensajes con el cliente de esta cotización (no otros del mismo espacio)
+          const m = payload.new as any
+          const guestId = (selected as any).guest_id
+          if (m.sender_id !== guestId && m.receiver_id !== guestId) return
+          setChatMessages(prev => prev.find(x => x.id === m.id) ? prev : [...prev, m])
+        })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [selected?.space_id])

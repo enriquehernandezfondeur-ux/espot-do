@@ -3,19 +3,24 @@
 import { createClient } from '@/lib/supabase/server'
 import { sendEmailIfEnabled } from '@/lib/email/send'
 
-// Obtener o crear conversación entre el usuario actual y el dueño de un espacio
-export async function getConversation(spaceId: string) {
+// Obtener la conversación entre el usuario actual y OTRO participante sobre un
+// espacio. `otherId` evita que se mezclen hilos de distintos clientes del mismo
+// espacio (el host puede tener varias conversaciones por espacio). Si no se pasa
+// (lado cliente, que solo habla con el host) se devuelven los mensajes del usuario.
+export async function getConversation(spaceId: string, otherId?: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
   // Obtener mensajes de esta conversación
-  const { data: messages } = await supabase
+  let mq = supabase
     .from('messages')
     .select('*, profiles!sender_id(full_name, avatar_url)')
     .eq('space_id', spaceId)
-    .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-    .order('created_at', { ascending: true })
+  mq = otherId
+    ? mq.or(`and(sender_id.eq.${user.id},receiver_id.eq.${otherId}),and(sender_id.eq.${otherId},receiver_id.eq.${user.id})`)
+    : mq.or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+  const { data: messages } = await mq.order('created_at', { ascending: true })
 
   // Obtener info del espacio y propietario
   const { data: space, error: spaceErr } = await supabase
@@ -129,7 +134,9 @@ export async function getMyConversations() {
       id, body, attachment_url, created_at, read_at,
       sender_id, receiver_id,
       space_id,
-      spaces!space_id(id, name, slug, space_images(url, is_cover))
+      spaces!space_id(id, name, slug, space_images(url, is_cover)),
+      sender:profiles!sender_id(full_name, avatar_url),
+      receiver:profiles!receiver_id(full_name, avatar_url)
     `)
     .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
     .order('created_at', { ascending: false })
@@ -141,26 +148,36 @@ export async function getMyConversations() {
     .eq('user_id', user.id)
   const hiddenIds = new Set((hidden ?? []).map((h: any) => h.space_id))
 
-  // Agrupar por space_id, excluir ocultas y quedarse con el último mensaje
+  // Agrupar por (space_id + otro participante): así el host ve una conversación
+  // separada por cada cliente, no un hilo mezclado por espacio.
   const seen = new Set<string>()
   const conversations = (data ?? []).filter(m => {
     if (hiddenIds.has(m.space_id)) return false
-    if (seen.has(m.space_id)) return false
-    seen.add(m.space_id)
+    const otherId = m.sender_id === user.id ? m.receiver_id : m.sender_id
+    const key = `${m.space_id}:${otherId}`
+    if (seen.has(key)) return false
+    seen.add(key)
     return true
   })
 
-  return conversations.map(m => ({
-    spaceId:   m.space_id,
-    spaceName: (m.spaces as any)?.name ?? 'Espacio',
-    spaceSlug: (m.spaces as any)?.slug,
-    cover:     (m.spaces as any)?.space_images?.find((i: any) => i.is_cover)?.url ?? (m.spaces as any)?.space_images?.[0]?.url,
-    lastMessage:   m.body,
-    hasAttachment: !!m.attachment_url,
-    lastAt:    m.created_at,
-    unread:    !m.read_at && m.receiver_id === user.id,
-    userId:    user.id,
-  }))
+  return conversations.map(m => {
+    const otherId   = m.sender_id === user.id ? m.receiver_id : m.sender_id
+    const otherProf = (m.sender_id === user.id ? (m as any).receiver : (m as any).sender) as any
+    return {
+      spaceId:   m.space_id,
+      otherId,
+      otherName: otherProf?.full_name ?? null,
+      otherAvatar: otherProf?.avatar_url ?? null,
+      spaceName: (m.spaces as any)?.name ?? 'Espacio',
+      spaceSlug: (m.spaces as any)?.slug,
+      cover:     (m.spaces as any)?.space_images?.find((i: any) => i.is_cover)?.url ?? (m.spaces as any)?.space_images?.[0]?.url,
+      lastMessage:   m.body,
+      hasAttachment: !!m.attachment_url,
+      lastAt:    m.created_at,
+      unread:    !m.read_at && m.receiver_id === user.id,
+      userId:    user.id,
+    }
+  })
 }
 
 // Ocultar conversación para el usuario (soft delete — mensajes siguen en el sistema)
@@ -174,16 +191,19 @@ export async function hideConversation(spaceId: string) {
   return error ? { error: error.message } : { success: true }
 }
 
-// Marcar mensajes como leídos
-export async function markMessagesRead(spaceId: string) {
+// Marcar mensajes como leídos. Si se pasa `otherId`, solo los recibidos de ese
+// participante (evita marcar leídos los de otro cliente del mismo espacio).
+export async function markMessagesRead(spaceId: string, otherId?: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
 
-  await supabase
+  let q = supabase
     .from('messages')
     .update({ read_at: new Date().toISOString() })
     .eq('space_id', spaceId)
     .eq('receiver_id', user.id)
     .is('read_at', null)
+  if (otherId) q = q.eq('sender_id', otherId)
+  await q
 }

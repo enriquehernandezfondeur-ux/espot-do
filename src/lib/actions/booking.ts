@@ -550,7 +550,8 @@ export async function confirmPayment(bookingId: string) {
   if (!bk) return { error: 'Reserva no encontrada' }
 
   const space = bk.spaces as any
-  if (space?.host_id !== user.id) return { error: 'Solo el propietario puede confirmar un pago manual' }
+  const { hostId } = await resolveHostId(supabase, user.id)
+  if (space?.host_id !== hostId) return { error: 'Solo el propietario puede confirmar un pago manual' }
 
   if (bk.status !== 'accepted') return { error: 'La reserva debe estar aceptada para confirmar el pago' }
 
@@ -665,48 +666,21 @@ export interface RefundBankInfo {
 }
 
 // ── CÁLCULO DE REEMBOLSO SEGÚN POLÍTICA DE CANCELACIÓN ──────
-function calculateRefundAmount(paidAmount: number, eventDate: string, policy: string): number {
+// Usa las MISMAS columnas que ve el cliente en el detalle del espacio y en su
+// panel (cancellation_refund_pct / cancellation_hours_before): si cancela con
+// al menos `hoursBefore` horas de antelación, recibe `refundPct`% de lo pagado.
+function calculateRefundAmount(
+  paidAmount: number,
+  eventDate: string,
+  refundPct: number,
+  hoursBefore: number,
+): number {
   if (paidAmount <= 0) return 0
-
   // Parsear eventDate con T12:00 para evitar bug de timezone en RD (UTC-4)
   const event = new Date(eventDate + 'T12:00')
-  const now   = new Date()
-  const diffMs   = event.getTime() - now.getTime()
-  const diffDays = diffMs / (1000 * 60 * 60 * 24) // días fraccionarios hasta el evento
-
-  // Normalizar valores en español (almacenados en DB) a los usados en el switch
-  const normalized = ({
-    'moderada':    'moderate',
-    'estricta':    'strict',
-    'muy_flexible':'very_flexible',
-  } as Record<string, string>)[policy] ?? policy
-
-  switch (normalized) {
-    case 'very_flexible':
-      // 100% si cancela hasta 24h antes; 0% si < 24h
-      return diffDays >= 1 ? paidAmount : 0
-
-    case 'flexible':
-      // 100% si 7+ días; 50% si 2–6 días; 0% si < 48h
-      if (diffDays >= 7)  return paidAmount
-      if (diffDays >= 2)  return Math.round(paidAmount * 0.5)
-      return 0
-
-    case 'moderate':
-      // 100% si 14+ días; 50% si 7–13 días; 0% si < 7 días
-      if (diffDays >= 14) return paidAmount
-      if (diffDays >= 7)  return Math.round(paidAmount * 0.5)
-      return 0
-
-    case 'strict':
-      // 50% si 30+ días; 0% si < 30 días
-      if (diffDays >= 30) return Math.round(paidAmount * 0.5)
-      return 0
-
-    default:
-      // Política desconocida → sin reembolso (comportamiento seguro)
-      return 0
-  }
+  const hoursLeft = (event.getTime() - Date.now()) / (1000 * 60 * 60)
+  if (hoursLeft >= hoursBefore) return Math.round(paidAmount * (refundPct / 100))
+  return 0
 }
 
 export async function cancelBooking(bookingId: string, reason?: string, refundBankInfo?: RefundBankInfo) {
@@ -716,7 +690,7 @@ export async function cancelBooking(bookingId: string, reason?: string, refundBa
 
   const { data: bk } = await supabase
     .from('bookings')
-    .select(`*, spaces!space_id(name, host_id, profiles!host_id(full_name, email, google_refresh_token, google_calendar_connected), space_conditions(cancellation_policy)), profiles!guest_id(full_name, email)`)
+    .select(`*, spaces!space_id(name, host_id, profiles!host_id(full_name, email, google_refresh_token, google_calendar_connected), space_conditions(cancellation_policy, cancellation_refund_pct, cancellation_hours_before)), profiles!guest_id(full_name, email)`)
     .eq('id', bookingId)
     .single()
 
@@ -736,11 +710,14 @@ export async function cancelBooking(bookingId: string, reason?: string, refundBa
     .eq('status', 'paid')
   const paidAmount = paidInstallments?.reduce((sum, i) => sum + Number(i.amount), 0) ?? 0
 
-  // Calcular reembolso según política de cancelación del espacio
+  // Calcular reembolso según política de cancelación del espacio (mismas
+  // columnas que ve el cliente, para que el monto coincida con lo prometido)
   const spaceConditions = (space as any)?.space_conditions as any
   // space_conditions es un array (relación one-to-many) — acceder al primer elemento
-  const cancellationPolicy: string = (Array.isArray(spaceConditions) ? spaceConditions[0] : spaceConditions)?.cancellation_policy ?? 'strict'
-  const refundAmount = calculateRefundAmount(paidAmount, bk.event_date, cancellationPolicy)
+  const cond = (Array.isArray(spaceConditions) ? spaceConditions[0] : spaceConditions) ?? {}
+  const refundPct    = Number(cond.cancellation_refund_pct ?? 50)
+  const hoursBefore  = Number(cond.cancellation_hours_before ?? 72)
+  const refundAmount = calculateRefundAmount(paidAmount, bk.event_date, refundPct, hoursBefore)
 
   const newStatus = isGuest ? 'cancelled_guest' : 'cancelled_host'
 
