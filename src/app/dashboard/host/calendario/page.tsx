@@ -603,7 +603,7 @@ export default function CalendarioPage() {
               )}
 
               {/* Timeline de horas */}
-              <div className="overflow-y-auto" style={{ maxHeight: 'min(480px, 45dvh)' }}>
+              <div className="overflow-y-auto" style={{ maxHeight: 'min(480px, 65dvh)' }}>
                 {HOURS.map(hour => {
                   const status = getHourStatus(hour, selected)
                   return (

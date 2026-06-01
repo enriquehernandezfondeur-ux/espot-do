@@ -110,7 +110,7 @@ export default function AnalyticsPage() {
           {monthlyHasData ? (
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={d.monthly}>
-                <XAxis dataKey="mes" tick={{ fill: 'var(--text-muted)', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <XAxis dataKey="mes" tick={{ fill: 'var(--text-muted)', fontSize: 12 }} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={8} />
                 <YAxis hide />
                 <Tooltip cursor={{ fill: 'var(--bg-elevated)' }}
                   contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: 12, color: 'var(--text-primary)', fontSize: 12 }}

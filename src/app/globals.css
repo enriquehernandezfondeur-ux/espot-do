@@ -16,6 +16,7 @@
    ─────────────────────────────────────────────────── */
 :root {
   --font-display: 'TypoGraphica', var(--font-poppins), sans-serif;
+  --navbar-h:     64px;
   --brand:        #35C493;
   --brand-dark:   #28A87C;
   --brand-light:  #4DD9A7;

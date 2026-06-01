@@ -165,7 +165,7 @@ export default function AdminReservasPage() {
 
         {/* Detail panel */}
         {selected ? (
-          <div className="rounded-2xl overflow-hidden sticky top-8"
+          <div className="rounded-2xl overflow-hidden lg:sticky lg:top-8"
             style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
             <div className="px-5 py-4" style={{ borderBottom: '1px solid #F0F2F5' }}>
               <div className="font-bold text-sm" style={{ color: '#0F1623' }}>Detalle de reserva</div>

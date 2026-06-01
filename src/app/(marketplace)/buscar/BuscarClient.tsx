@@ -245,6 +245,10 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
 
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [mobileView, setMobileView] = useState<'list' | 'map'>('list')
+  // El overlay del mapa móvil se posiciona justo debajo de la barra de filtros.
+  // Medimos su altura real (varía si hay chips de filtros activos) para no taparlo.
+  const filterBarRef = useRef<HTMLDivElement>(null)
+  const [mapTop, setMapTop] = useState(128)
   const [sortBy, setSortBy] = useState<'relevancia' | 'precio_asc' | 'precio_desc' | 'capacidad'>('relevancia')
   const [sortOpen, setSortOpen] = useState(false)
   const [capOpen,   setCapOpen]   = useState(false)
@@ -431,11 +435,23 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
     },
   ].filter(Boolean) as { key: string; label: string; onRemove: () => void }[]
 
+  // Medir la altura real de la barra de filtros para posicionar el mapa móvil debajo
+  useEffect(() => {
+    if (mobileView !== 'map') return
+    const measure = () => {
+      const rect = filterBarRef.current?.getBoundingClientRect()
+      if (rect) setMapTop(Math.round(rect.bottom))
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [mobileView, activeChips.length])
+
   return (
     <div className="white-theme" style={{ background: 'var(--bg-base)', minHeight: '100dvh', width: '100%' }}>
 
       {/* ── Barra de filtros sticky ── */}
-      <div className="sticky top-16 z-40 w-full"
+      <div ref={filterBarRef} className="sticky top-16 z-40 w-full"
         style={{
           background:     '#F4F6F5',
           backdropFilter: 'blur(16px)',
@@ -1076,7 +1092,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
         {mobileView === 'map' && (
           <div className="md:hidden" style={{
             position: 'fixed',
-            top: 128,   /* navbar 64 + filtros ~64 */
+            top: mapTop,   /* medido de la barra de filtros (crece con chips) */
             left: 0, right: 0,
             bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))',
             display: 'flex',

@@ -191,8 +191,8 @@ export default function AdminDisputasPage() {
         </div>
       ) : (
         <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid #E8ECF0', background: '#fff' }}>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto scrollbar-hide">
+            <table className="w-full text-sm min-w-[760px]">
               <thead>
                 <tr style={{ borderBottom: '1px solid #F0F2F5', background: '#FAFBFC' }}>
                   <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 whitespace-nowrap">Reserva</th>

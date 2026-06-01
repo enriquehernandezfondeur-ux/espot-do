@@ -166,8 +166,8 @@ export default function EquipoPage() {
         <div className="px-5 py-3 text-sm font-semibold" style={{ color: 'var(--text-primary)', borderBottom: '1px solid var(--border-subtle)' }}>
           Matriz de permisos
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
+        <div className="overflow-x-auto scrollbar-hide">
+          <table className="w-full text-xs min-w-[480px]">
             <thead>
               <tr style={{ borderBottom: '1px solid #F0F2F5', background: '#FAFBFC' }}>
                 <th className="px-5 py-3 text-left font-semibold text-gray-400">Acción</th>

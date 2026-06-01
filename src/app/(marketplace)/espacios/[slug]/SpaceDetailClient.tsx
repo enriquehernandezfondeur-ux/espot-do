@@ -581,7 +581,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
             onClick={() => setShowLightbox(false)}>
 
             {/* Foto principal */}
-            <div className="relative w-full flex items-center justify-center px-12 md:px-20"
+            <div className="relative w-full flex items-center justify-center px-3 md:px-20"
               style={{ maxHeight: '78vh' }}
               onClick={e => e.stopPropagation()}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
