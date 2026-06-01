@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { resolveHostAccess } from './_resolveHost'
 import type { HostClient, ClientSource } from '@/types'
 
 export interface CreateClientPayload {
@@ -23,11 +24,12 @@ export async function getClients(): Promise<HostClient[]> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
+  const { hostId, db } = await resolveHostAccess(supabase, user.id)
 
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from('host_clients')
     .select('*')
-    .eq('host_id', user.id)
+    .eq('host_id', hostId)
     .order('full_name')
 
   if (error) return []
@@ -39,31 +41,32 @@ export async function getClientWithHistory(clientId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
+  const { hostId, db } = await resolveHostAccess(supabase, user.id)
 
   // Pre-cargar IDs de espacios del host para filtrar bookings por pertenencia
   // (bookings.host_id no existe, la pertenencia se valida via space.host_id)
-  const { data: spaces } = await supabase
+  const { data: spaces } = await db
     .from('spaces')
     .select('id')
-    .eq('host_id', user.id)
+    .eq('host_id', hostId)
   const spaceIds = (spaces ?? []).map((s: any) => s.id)
 
   const [{ data: client }, { data: events }, { data: bookings }] = await Promise.all([
-    supabase
+    db
       .from('host_clients')
       .select('*')
       .eq('id', clientId)
-      .eq('host_id', user.id)
+      .eq('host_id', hostId)
       .single(),
-    supabase
+    db
       .from('external_events')
       .select('id, title, event_date, status, total_amount, paid_amount, event_type')
       .eq('client_id', clientId)
-      .eq('host_id', user.id)
+      .eq('host_id', hostId)
       .order('event_date', { ascending: false }),
     spaceIds.length === 0
       ? Promise.resolve({ data: [] })
-      : supabase
+      : db
           .from('bookings')
           .select('id, event_date, event_type, total_amount, status')
           .eq('client_id', clientId)
@@ -96,10 +99,11 @@ export async function getUnifiedClients() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
+  const { hostId, db } = await resolveHostAccess(supabase, user.id)
 
   const [{ data: directClients }, { data: spaces }] = await Promise.all([
-    supabase.from('host_clients').select('*').eq('host_id', user.id).order('full_name'),
-    supabase.from('spaces').select('id').eq('host_id', user.id),
+    db.from('host_clients').select('*').eq('host_id', hostId).order('full_name'),
+    db.from('spaces').select('id').eq('host_id', hostId),
   ])
 
   const direct = (directClients ?? []) as HostClient[]
@@ -107,7 +111,7 @@ export async function getUnifiedClients() {
 
   if (!spaceIds.length) return direct
 
-  const { data: bookings } = await supabase
+  const { data: bookings } = await db
     .from('bookings')
     .select('guest_id, guest:profiles!guest_id(id, full_name, email, phone)')
     .in('space_id', spaceIds)
@@ -124,7 +128,7 @@ export async function getUnifiedClients() {
     if (g.email && directEmails.has(g.email.toLowerCase())) continue
     espotGuests.push({
       id:        g.id,
-      host_id:   user.id,
+      host_id:   hostId,
       full_name: g.full_name ?? 'Cliente Espot',
       email:     g.email ?? null,
       phone:     g.phone ?? null,
@@ -144,12 +148,13 @@ export async function getEspotGuestHistory(profileId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
+  const { hostId, db } = await resolveHostAccess(supabase, user.id)
 
-  const { data: spaces } = await supabase.from('spaces').select('id').eq('host_id', user.id)
+  const { data: spaces } = await db.from('spaces').select('id').eq('host_id', hostId)
   const spaceIds = (spaces ?? []).map((s: any) => s.id)
   if (!spaceIds.length) return null
 
-  const { data: bookings } = await supabase
+  const { data: bookings } = await db
     .from('bookings')
     .select('id, event_date, event_type, total_amount, status')
     .eq('guest_id', profileId)
@@ -174,14 +179,15 @@ export async function searchClients(query: string): Promise<HostClient[]> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
+  const { hostId, db } = await resolveHostAccess(supabase, user.id)
 
   const q = query.trim().toLowerCase()
   if (!q) return []
 
-  const { data } = await supabase
+  const { data } = await db
     .from('host_clients')
     .select('*')
-    .eq('host_id', user.id)
+    .eq('host_id', hostId)
     .or(`full_name.ilike.%${q}%,email.ilike.%${q}%,phone.ilike.%${q}%`)
     .limit(10)
 
@@ -193,22 +199,24 @@ export async function createClient_(payload: CreateClientPayload) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
+  const { hostId, db, canManageClients } = await resolveHostAccess(supabase, user.id)
+  if (!canManageClients) return { error: 'No tienes permiso para gestionar clientes' }
 
   // Verificar si ya existe un cliente con ese email para este host
   if (payload.email) {
-    const { data: existing } = await supabase
+    const { data: existing } = await db
       .from('host_clients')
       .select('id, full_name')
-      .eq('host_id', user.id)
+      .eq('host_id', hostId)
       .eq('email', payload.email)
       .single()
     if (existing) return { error: `Ya existe un cliente con ese email: ${existing.full_name}` }
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from('host_clients')
     .insert({
-      host_id: user.id,
+      host_id: hostId,
       full_name: payload.full_name.trim(),
       email: payload.email?.trim() || null,
       phone: payload.phone?.trim() || null,
@@ -231,6 +239,8 @@ export async function updateClient(payload: UpdateClientPayload) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
+  const { hostId, db, canManageClients } = await resolveHostAccess(supabase, user.id)
+  if (!canManageClients) return { error: 'No tienes permiso para gestionar clientes' }
 
   const { id, ...fields } = payload
   const update: Record<string, any> = { updated_at: new Date().toISOString() }
@@ -243,11 +253,11 @@ export async function updateClient(payload: UpdateClientPayload) {
   if (fields.tags      !== undefined) update.tags      = fields.tags
   if (fields.source    !== undefined) update.source    = fields.source
 
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from('host_clients')
     .update(update)
     .eq('id', id)
-    .eq('host_id', user.id)
+    .eq('host_id', hostId)
     .select()
     .single()
 
@@ -263,12 +273,14 @@ export async function deleteClient(clientId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
+  const { hostId, db, canManageClients } = await resolveHostAccess(supabase, user.id)
+  if (!canManageClients) return { error: 'No tienes permiso para gestionar clientes' }
 
-  const { error } = await supabase
+  const { error } = await db
     .from('host_clients')
     .delete()
     .eq('id', clientId)
-    .eq('host_id', user.id)
+    .eq('host_id', hostId)
 
   if (error) return { error: error.message }
 

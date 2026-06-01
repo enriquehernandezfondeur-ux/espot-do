@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { resolveHostAccess } from './_resolveHost'
 import { generateSlug, num, int } from '@/lib/utils'
 import { revalidatePath } from 'next/cache'
 import type { PricingType, PaymentTermType } from '@/types'
@@ -150,17 +151,14 @@ export async function saveSpace(payload: SaveSpacePayload) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
-  // Verificar que el usuario tiene rol de host
-  const { data: profile } = await supabase
-    .from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'host' && profile?.role !== 'admin') {
-    return { error: 'Solo los propietarios pueden publicar espacios' }
-  }
+  // Dueño o miembro con permiso de gestionar espacios (admin)
+  const { hostId, db, canManageSpaces } = await resolveHostAccess(supabase, user.id)
+  if (!canManageSpaces) return { error: 'No tienes permiso para gestionar espacios' }
 
-  const { data: space, error: spaceError } = await supabase
+  const { data: space, error: spaceError } = await db
     .from('spaces')
     .insert({
-      host_id: user.id,
+      host_id: hostId,
       name: payload.name,
       slug: generateSlug(payload.name),
       description: payload.description,
@@ -192,14 +190,14 @@ export async function saveSpace(payload: SaveSpacePayload) {
     if (payload.videoUrl     !== undefined) extras.video_url      = payload.videoUrl     || null
     if (payload.menuUrl      !== undefined) extras.menu_url       = payload.menuUrl      || null
     if (payload.menuFileName !== undefined) extras.menu_file_name = payload.menuFileName || null
-    const { error: mediaError } = await supabase.from('spaces').update(extras).eq('id', spaceId)
+    const { error: mediaError } = await db.from('spaces').update(extras).eq('id', spaceId)
     if (mediaError) console.error('[saveSpace] media columns update failed:', mediaError.message)
   }
 
   const inserts = [
-    supabase.from('space_pricing').insert(buildPricingData(spaceId, payload)),
+    db.from('space_pricing').insert(buildPricingData(spaceId, payload)),
     payload.timeBlocks.length > 0
-      ? supabase.from('space_time_blocks').insert(
+      ? db.from('space_time_blocks').insert(
           payload.timeBlocks.map(b => ({
             space_id: spaceId,
             block_name: b.block_name,
@@ -211,7 +209,7 @@ export async function saveSpace(payload: SaveSpacePayload) {
         )
       : null,
     payload.addons.length > 0
-      ? supabase.from('space_addons').insert(
+      ? db.from('space_addons').insert(
           payload.addons.map(a => ({
             space_id: spaceId,
             name: a.name,
@@ -222,7 +220,7 @@ export async function saveSpace(payload: SaveSpacePayload) {
           }))
         )
       : null,
-    supabase.from('space_conditions').insert({
+    db.from('space_conditions').insert({
       space_id: spaceId,
       // Facilidades físicas
       has_parking:       payload.hasParkingFac,
@@ -265,7 +263,7 @@ export async function saveSpace(payload: SaveSpacePayload) {
       custom_rules: payload.customRules || null,
     }),
     payload.paymentTerm
-      ? supabase.from('space_payment_terms').insert({
+      ? db.from('space_payment_terms').insert({
           space_id:         spaceId,
           term_type:        payload.paymentTerm,
           platform_fee_pct: await getPlatformFeePct(),
@@ -281,7 +279,7 @@ export async function saveSpace(payload: SaveSpacePayload) {
   const failed = results.find(r => r && 'error' in r && r.error)
 
   if (failed && 'error' in failed && failed.error) {
-    await supabase.from('spaces').delete().eq('id', spaceId)
+    await db.from('spaces').delete().eq('id', spaceId)
     return { error: failed.error.message }
   }
 
@@ -292,9 +290,11 @@ export async function deactivateSpace(spaceId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
-  const { data: space } = await supabase.from('spaces').select('host_id').eq('id', spaceId).single()
-  if (!space || space.host_id !== user.id) return { error: 'No autorizado' }
-  const { error } = await supabase.from('spaces').update({ is_published: false, is_active: false }).eq('id', spaceId)
+  const { hostId, db, canManageSpaces } = await resolveHostAccess(supabase, user.id)
+  if (!canManageSpaces) return { error: 'No tienes permiso para gestionar espacios' }
+  const { data: space } = await db.from('spaces').select('host_id').eq('id', spaceId).single()
+  if (!space || space.host_id !== hostId) return { error: 'No autorizado' }
+  const { error } = await db.from('spaces').update({ is_published: false, is_active: false }).eq('id', spaceId)
   if (!error) revalidatePath('/buscar')
   return error ? { error: error.message } : { success: true }
 }
@@ -304,12 +304,14 @@ export async function deleteSpaceByHost(spaceId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
-  const { data: space } = await supabase.from('spaces').select('host_id, is_published').eq('id', spaceId).single()
-  if (!space || space.host_id !== user.id) return { error: 'No autorizado' }
+  const { hostId, db, canManageSpaces } = await resolveHostAccess(supabase, user.id)
+  if (!canManageSpaces) return { error: 'No tienes permiso para gestionar espacios' }
+  const { data: space } = await db.from('spaces').select('host_id, is_published').eq('id', spaceId).single()
+  if (!space || space.host_id !== hostId) return { error: 'No autorizado' }
   if (space.is_published) return { error: 'Debes despublicar el espacio antes de eliminarlo.' }
 
   // Bloquear si hay reservas activas (pendientes, aceptadas o confirmadas)
-  const { data: activeBookings } = await supabase
+  const { data: activeBookings } = await db
     .from('bookings').select('id').eq('space_id', spaceId)
     .in('status', ['pending', 'quote_requested', 'accepted', 'confirmed'])
     .limit(1)
@@ -340,16 +342,18 @@ export async function publishSpace(spaceId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
-  const { data: space } = await supabase
+  const { hostId, db, canManageSpaces } = await resolveHostAccess(supabase, user.id)
+  if (!canManageSpaces) return { error: 'No tienes permiso para gestionar espacios' }
+  const { data: space } = await db
     .from('spaces')
     .select('host_id, name, category, sector, profiles!host_id(full_name, email)')
     .eq('id', spaceId)
     .single()
-  if (!space || space.host_id !== user.id) return { error: 'No autorizado' }
+  if (!space || space.host_id !== hostId) return { error: 'No autorizado' }
 
   // El espacio queda en revisión: is_active = true, is_published = false (sin cambiar)
   // El equipo de espot.do aprueba manualmente y activa is_published cuando sea apropiado
-  const { error } = await supabase
+  const { error } = await db
     .from('spaces')
     .update({ is_active: true })
     .eq('id', spaceId)
@@ -388,10 +392,11 @@ export async function getMySpaces() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
 
-  const { data } = await supabase
+  const { hostId, db } = await resolveHostAccess(supabase, user.id)
+  const { data } = await db
     .from('spaces')
     .select('*, space_pricing(*), space_addons(*), space_conditions(*), space_payment_terms(*), space_time_blocks(*), space_images(*)')
-    .eq('host_id', user.id)
+    .eq('host_id', hostId)
     .order('created_at', { ascending: false })
 
   return data ?? []
@@ -406,16 +411,18 @@ export async function saveSpaceImages(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
-  // Verificar que el usuario es el propietario del espacio
-  const { data: space } = await supabase.from('spaces').select('host_id').eq('id', spaceId).single()
-  if (!space || space.host_id !== user.id) return { error: 'No autorizado' }
+  // Verificar que el usuario es el propietario del espacio (o miembro con permiso)
+  const { hostId, db, canManageSpaces } = await resolveHostAccess(supabase, user.id)
+  if (!canManageSpaces) return { error: 'No tienes permiso para gestionar espacios' }
+  const { data: space } = await db.from('spaces').select('host_id').eq('id', spaceId).single()
+  if (!space || space.host_id !== hostId) return { error: 'No autorizado' }
 
   // Eliminar fotos anteriores
-  await supabase.from('space_images').delete().eq('space_id', spaceId)
+  await db.from('space_images').delete().eq('space_id', spaceId)
 
   if (photos.length === 0) return { success: true }
 
-  const { error } = await supabase.from('space_images').insert(
+  const { error } = await db.from('space_images').insert(
     photos.map((p, i) => ({
       space_id: spaceId,
       url:      p.url,
@@ -437,7 +444,8 @@ export async function getSpaceForEdit(spaceId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
-  const { data } = await supabase
+  const { hostId, db } = await resolveHostAccess(supabase, user.id)
+  const { data } = await db
     .from('spaces')
     .select(`
       *,
@@ -449,7 +457,7 @@ export async function getSpaceForEdit(spaceId: string) {
       space_images(*)
     `)
     .eq('id', spaceId)
-    .eq('host_id', user.id)
+    .eq('host_id', hostId)
     .single()
 
   return data
@@ -461,12 +469,14 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
-  // Verificar que el espacio pertenece al usuario
-  const { data: space } = await supabase.from('spaces').select('host_id').eq('id', spaceId).single()
-  if (!space || space.host_id !== user.id) return { error: 'No autorizado' }
+  // Verificar que el espacio pertenece al host (o miembro con permiso)
+  const { hostId, db, canManageSpaces } = await resolveHostAccess(supabase, user.id)
+  if (!canManageSpaces) return { error: 'No tienes permiso para gestionar espacios' }
+  const { data: space } = await db.from('spaces').select('host_id').eq('id', spaceId).single()
+  if (!space || space.host_id !== hostId) return { error: 'No autorizado' }
 
   // Actualizar info básica
-  const { error: spaceError } = await supabase.from('spaces').update({
+  const { error: spaceError } = await db.from('spaces').update({
     name: payload.name,
     description: payload.description,
     category: payload.category,
@@ -490,8 +500,8 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
     if (payload.videoUrl     !== undefined) extras.video_url      = payload.videoUrl     || null
     if (payload.menuUrl      !== undefined) extras.menu_url       = payload.menuUrl      || null
     if (payload.menuFileName !== undefined) extras.menu_file_name = payload.menuFileName || null
-    const { error: mediaError } = await supabase.from('spaces').update(extras).eq('id', spaceId)
-    if (mediaError) console.error('[saveSpace] media columns update failed:', mediaError.message)
+    const { error: mediaError } = await db.from('spaces').update(extras).eq('id', spaceId)
+    if (mediaError) console.error('[updateSpace] media columns update failed:', mediaError.message)
   }
 
   // Actualizar pricing
@@ -521,11 +531,11 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
   if (payload.weekendMultiplier !== undefined) pricingData.weekend_multiplier = payload.weekendMultiplier
   if (payload.minAdvanceAmount  !== undefined) pricingData.min_advance_amount  = payload.minAdvanceAmount
 
-  const existingPricing = await supabase.from('space_pricing').select('id').eq('space_id', spaceId).limit(1)
+  const existingPricing = await db.from('space_pricing').select('id').eq('space_id', spaceId).limit(1)
   if (existingPricing.data?.length) {
-    await supabase.from('space_pricing').update(pricingData).eq('space_id', spaceId)
+    await db.from('space_pricing').update(pricingData).eq('space_id', spaceId)
   } else {
-    await supabase.from('space_pricing').insert({ ...pricingData, space_id: spaceId })
+    await db.from('space_pricing').insert({ ...pricingData, space_id: spaceId })
   }
 
   // Actualizar condiciones
@@ -569,17 +579,17 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
     custom_rules:               payload.customRules || null,
   }
 
-  const existingCond = await supabase.from('space_conditions').select('id').eq('space_id', spaceId).limit(1)
+  const existingCond = await db.from('space_conditions').select('id').eq('space_id', spaceId).limit(1)
   if (existingCond.data?.length) {
-    await supabase.from('space_conditions').update(condData).eq('space_id', spaceId)
+    await db.from('space_conditions').update(condData).eq('space_id', spaceId)
   } else {
-    await supabase.from('space_conditions').insert(condData)
+    await db.from('space_conditions').insert(condData)
   }
 
   // Actualizar horarios — borrar los anteriores e insertar los nuevos
-  await supabase.from('space_time_blocks').delete().eq('space_id', spaceId)
+  await db.from('space_time_blocks').delete().eq('space_id', spaceId)
   if (payload.timeBlocks.length > 0) {
-    await supabase.from('space_time_blocks').insert(
+    await db.from('space_time_blocks').insert(
       payload.timeBlocks.map(b => ({
         space_id:     spaceId,
         block_name:   b.block_name,
@@ -592,9 +602,9 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
   }
 
   // Actualizar addons — borrar los anteriores e insertar los nuevos
-  await supabase.from('space_addons').delete().eq('space_id', spaceId)
+  await db.from('space_addons').delete().eq('space_id', spaceId)
   if (payload.addons.length > 0) {
-    await supabase.from('space_addons').insert(
+    await db.from('space_addons').insert(
       payload.addons.map(a => ({
         space_id:     spaceId,
         name:         a.name,
@@ -606,18 +616,22 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
     )
   }
 
-  // Actualizar términos de pago
+  // Actualizar términos de pago — mismas columnas que al crear (saveSpace)
   if (payload.paymentTerm) {
     const ptData = {
-      space_id:    spaceId,
-      term_type:   payload.paymentTerm,
-      advance_pct: payload.paymentTerm === 'split_advance' ? 40 : 50,
+      space_id:         spaceId,
+      term_type:        payload.paymentTerm,
+      platform_fee_pct: await getPlatformFeePct(),
+      venue_pct:        VENUE_PCT_BY_TERM[payload.paymentTerm] ?? 90,
+      advance_pct:      payload.paymentTerm === 'split_advance' ? 40 : null,
+      day_of_event_pct: payload.paymentTerm === 'split_advance' ? 50 : null,
+      advance_days_before: 3,
     }
-    const existingPt = await supabase.from('space_payment_terms').select('id').eq('space_id', spaceId).limit(1)
+    const existingPt = await db.from('space_payment_terms').select('id').eq('space_id', spaceId).limit(1)
     if (existingPt.data?.length) {
-      await supabase.from('space_payment_terms').update(ptData).eq('space_id', spaceId)
+      await db.from('space_payment_terms').update(ptData).eq('space_id', spaceId)
     } else {
-      await supabase.from('space_payment_terms').insert(ptData)
+      await db.from('space_payment_terms').insert(ptData)
     }
   }
 
@@ -638,11 +652,13 @@ export async function updateCancellationPolicy(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
-  const { data: space } = await supabase
+  const { hostId, db, canManageSpaces } = await resolveHostAccess(supabase, user.id)
+  if (!canManageSpaces) return { error: 'No tienes permiso para gestionar espacios' }
+  const { data: space } = await db
     .from('spaces').select('host_id').eq('id', spaceId).single()
-  if (!space || space.host_id !== user.id) return { error: 'No autorizado' }
+  if (!space || space.host_id !== hostId) return { error: 'No autorizado' }
 
-  const { error } = await supabase.from('space_conditions')
+  const { error } = await db.from('space_conditions')
     .update({
       cancellation_policy:       policy,
       cancellation_refund_pct:   refundPct,

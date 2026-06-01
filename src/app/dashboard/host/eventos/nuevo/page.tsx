@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createExternalEvent, updateExternalEvent, getExternalEvent } from '@/lib/actions/external-events'
 import { searchClients, createClient_ } from '@/lib/actions/clients'
+import { getHostSpaces } from '@/lib/actions/host'
 import type { CreateClientPayload } from '@/lib/actions/clients'
 import { createClient } from '@/lib/supabase/client'
 import DatePicker from '@/components/ui/DatePicker'
@@ -81,22 +82,16 @@ export default function NuevoEventoPage() {
   const f = (field: keyof typeof form, value: string) =>
     setForm(prev => ({ ...prev, [field]: value }))
 
-  // Cargar espacios activos del host
+  // Cargar espacios activos del host (server action: resuelve dueño o equipo)
   useEffect(() => {
-    const supabase = supabaseRef.current
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) return
-      const { data } = await supabase
-        .from('spaces').select('id, name')
-        .eq('host_id', user.id).eq('is_active', true).order('name')
-      const list = data ?? []
+    getHostSpaces().then((list) => {
       setSpaces(list)
       // Preselect first space and load its blocks (solo en modo creación)
       if (!isEditing && list.length === 1) {
         setForm(prev => ({ ...prev, space_id: list[0].id }))
         loadSpaceBlocks(list[0].id)
       }
-    })
+    }).catch(() => {})
   }, [isEditing])
 
   // Precargar datos del evento si estamos en modo edición

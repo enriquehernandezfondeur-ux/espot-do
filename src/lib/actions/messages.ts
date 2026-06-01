@@ -68,7 +68,7 @@ export async function sendMessage(
     const [{ data: receiverProfile }, { data: senderProfile }, { data: space }] = await Promise.all([
       supabase.from('profiles').select('full_name, email').eq('id', receiverId).single(),
       supabase.from('profiles').select('full_name').eq('id', user.id).single(),
-      supabase.from('spaces').select('name').eq('id', spaceId).single(),
+      supabase.from('spaces').select('name, host_id').eq('id', spaceId).single(),
     ])
 
     if (receiverProfile?.email) {
@@ -76,8 +76,10 @@ export async function sendMessage(
       const spaceName   = space?.name ?? 'un espacio'
       const preview     = body?.length ? (body.length > 200 ? body.slice(0, 200) + '…' : body) : 'Adjunto recibido'
       const SITE        = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
-      const isHost      = receiverProfile.email !== user.email // simplificación; el host recibe en su panel
-      const chatHref    = `${SITE}/dashboard/mensajes`
+      // Si el receptor es el dueño del espacio, enlaza a su panel de host;
+      // si es el cliente, al panel de cliente.
+      const receiverIsHost = (space as any)?.host_id === receiverId
+      const chatHref    = receiverIsHost ? `${SITE}/dashboard/host/mensajes` : `${SITE}/dashboard/mensajes`
 
       await sendEmailIfEnabled(
         receiverProfile.email,

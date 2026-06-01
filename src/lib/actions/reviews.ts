@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { resolveHostAccess } from './_resolveHost'
 import { revalidatePath } from 'next/cache'
 import { sendEmail } from '@/lib/email/send'
 import { emailBase, infoBox } from '@/lib/email/templates'
@@ -59,17 +60,18 @@ export async function getHostReviews(): Promise<Review[]> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
+  const { hostId, db } = await resolveHostAccess(supabase, user.id)
 
   // Obtener los IDs de sus espacios
-  const { data: spaces } = await supabase
+  const { data: spaces } = await db
     .from('spaces')
     .select('id, name, slug')
-    .eq('host_id', user.id)
+    .eq('host_id', hostId)
 
   if (!spaces?.length) return []
   const spaceIds = spaces.map(s => s.id)
 
-  const { data } = await supabase
+  const { data } = await db
     .from('reviews')
     .select('id, rating, comment, host_response, host_response_at, created_at, space_id, profiles!guest_id(full_name)')
     .in('space_id', spaceIds)
@@ -98,18 +100,20 @@ export async function respondToReview(
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
+  const { hostId, db, canRespondReviews } = await resolveHostAccess(supabase, user.id)
+  if (!canRespondReviews) return { error: 'No tienes permiso para responder reseñas' }
 
   // Verificar que la reseña pertenece a un espacio del host
-  const { data: review } = await supabase
+  const { data: review } = await db
     .from('reviews')
     .select('space_id, spaces!space_id(host_id)')
     .eq('id', reviewId)
     .single()
 
   if (!review) return { error: 'Reseña no encontrada' }
-  if ((review.spaces as any)?.host_id !== user.id) return { error: 'No autorizado' }
+  if ((review.spaces as any)?.host_id !== hostId) return { error: 'No autorizado' }
 
-  const { error } = await supabase
+  const { error } = await db
     .from('reviews')
     .update({
       host_response:    response.trim() || null,
