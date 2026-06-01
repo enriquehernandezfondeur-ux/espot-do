@@ -53,6 +53,12 @@ export default function ClientesPage() {
   const [search,   setSearch]   = useState('')
   const [selected, setSelected] = useState<HostClient | null>(null)
   const [history,  setHistory]  = useState<ClientHistory>(null)
+  // En móvil el panel queda debajo de la lista: al seleccionar, llévalo a la vista
+  const detailRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (selected && typeof window !== 'undefined' && window.innerWidth < 1024)
+      detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [selected])
   const [histLoading, setHistLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [editing,  setEditing]  = useState<HostClient | null>(null)
@@ -194,7 +200,7 @@ export default function ClientesPage() {
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {/* Toast */}
       {toast && (
-        <div className="fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
+        <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
           style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
           {toast.ok ? <Check size={14} /> : <X size={14} />} {toast.msg}
         </div>
@@ -324,8 +330,9 @@ export default function ClientesPage() {
         </div>
 
         {/* Panel detalle */}
+        <div ref={detailRef}>
         {selected ? (
-          <div className="rounded-2xl overflow-hidden sticky top-8"
+          <div className="rounded-2xl overflow-hidden lg:sticky lg:top-8"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
 
             {/* Header del panel */}
@@ -456,6 +463,7 @@ export default function ClientesPage() {
             <p className="text-sm text-gray-400">Selecciona un cliente para ver su historial</p>
           </div>
         )}
+        </div>
       </div>
 
       {/* Modal Form */}

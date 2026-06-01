@@ -65,7 +65,7 @@ export default function EquipoPage() {
   return (
     <div className="p-4 md:p-6 max-w-2xl mx-auto">
       {toast && (
-        <div className="fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
+        <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
           style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
           {toast.ok ? <Check size={14} /> : <X size={14} />} {toast.msg}
         </div>

@@ -454,8 +454,10 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
         {children}
       </div>
 
-      {/* ── BARRA INFERIOR MÓVIL — inteligente según el rol ── */}
-      {authReady && user && (() => {
+      {/* ── BARRA INFERIOR MÓVIL — inteligente según el rol ──
+          Oculta en el detalle de espacio (/espacios/[slug]) porque esa página
+          tiene su propio CTA fijo "Reservar" y se solaparían. */}
+      {authReady && user && !pathname.startsWith('/espacios/') && (() => {
         const isHost  = user?.role === 'host' || user?.role === 'admin'
         // Tabs dinámicas según rol
         const tab3 = isHost

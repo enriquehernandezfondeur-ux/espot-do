@@ -36,6 +36,12 @@ export default function EventosPage() {
   const [search,   setSearch]   = useState('')
   const [page,     setPage]     = useState(1)
   const [selected, setSelected] = useState<ExternalEvent | null>(null)
+  // En móvil el panel queda debajo de la lista: al seleccionar, llévalo a la vista
+  const detailRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (selected && typeof window !== 'undefined' && window.innerWidth < 1024)
+      detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [selected])
   const [toast,    setToast]    = useState<{ msg: string; ok: boolean } | null>(null)
 
   function showToast(msg: string, ok: boolean) {
@@ -64,7 +70,7 @@ export default function EventosPage() {
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {toast && (
-        <div className="fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
+        <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
           style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
           {toast.ok ? <Check size={14} /> : <X size={14} />} {toast.msg}
         </div>
@@ -107,7 +113,7 @@ export default function EventosPage() {
       <div className="flex flex-col lg:grid lg:grid-cols-[1fr_360px] gap-5 items-start">
         <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <div className="overflow-x-auto scrollbar-hide">
-            <div className="grid grid-cols-[2fr_1fr_1fr_auto] gap-3 px-5 py-3 text-xs font-semibold min-w-[500px] uppercase tracking-widest text-gray-400"
+            <div className="hidden md:grid grid-cols-[2fr_1fr_1fr_auto] gap-3 px-5 py-3 text-xs font-semibold md:min-w-[500px] uppercase tracking-widest text-gray-400"
               style={{ borderBottom: '1px solid #F0F2F5', background: '#FAFBFC' }}>
               <span>Evento</span><span>Fecha</span><span>Total</span><span>Estado</span>
             </div>
@@ -137,7 +143,7 @@ export default function EventosPage() {
                   return (
                     <button key={ev.id}
                       onClick={() => setSelected(selected?.id === ev.id ? null : ev)}
-                      className={cn('w-full grid grid-cols-[2fr_1fr_1fr_auto] gap-3 items-center px-5 py-4 min-w-[500px] text-left transition-colors hover:bg-slate-50',
+                      className={cn('w-full flex flex-col md:grid md:grid-cols-[2fr_1fr_1fr_auto] gap-2 md:gap-3 md:items-center px-5 py-4 md:min-w-[500px] text-left transition-colors hover:bg-slate-50',
                         selected?.id === ev.id && 'bg-slate-50'
                       )}>
                       <div className="min-w-0">
@@ -170,6 +176,7 @@ export default function EventosPage() {
           <Pagination page={page} total={filtered.length} pageSize={PAGE_SIZE} onChange={p => { setPage(p); setSelected(null) }} className="px-5 pb-4" />
         </div>
 
+        <div ref={detailRef}>
         {selected ? (
           <EventDetailPanel
             event={selected}
@@ -190,6 +197,7 @@ export default function EventosPage() {
             <p className="text-sm text-gray-400">Selecciona un evento para ver el detalle</p>
           </div>
         )}
+        </div>
       </div>
     </div>
   )

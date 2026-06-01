@@ -117,6 +117,12 @@ export default function AgendaPage() {
   const [sortOrder,  setSortOrder]  = useState<'priority'|'date_asc'|'date_desc'|'recent'>('priority')
   const [search,   setSearch]   = useState('')
   const [selected, setSelected] = useState<AgendaItem | null>(null)
+  // En móvil el panel de detalle queda debajo de la lista: al seleccionar, llévalo a la vista
+  const detailRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (selected && typeof window !== 'undefined' && window.innerWidth < 1024)
+      detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [selected])
   const [toast,    setToast]    = useState<{ msg: string; ok: boolean } | null>(null)
   const [actionId,       setActionId]       = useState<string | null>(null)
   const [rejectReason,   setRejectReason]   = useState('')
@@ -267,7 +273,7 @@ export default function AgendaPage() {
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {toast && (
-        <div className="fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
+        <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
           style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
           {toast.ok ? <Check size={14} /> : <X size={14} />} {toast.msg}
         </div>
@@ -474,7 +480,7 @@ export default function AgendaPage() {
         {/* List */}
         <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <div className="overflow-x-auto scrollbar-hide">
-            <div className="grid gap-3 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-gray-400 min-w-[520px]"
+            <div className="hidden md:grid gap-3 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-gray-400 md:min-w-[520px]"
               style={{ gridTemplateColumns: '2fr 1fr 1fr auto', borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)' }}>
               <span>Evento</span><span>Fecha</span><span>Total</span><span>Estado</span>
             </div>
@@ -512,7 +518,7 @@ export default function AgendaPage() {
                     <button key={k}
                       onClick={() => { setSelected(isSelected ? null : item); setShowRejectForm(false); setRejectReason('') }}
                       className={cn(
-                        'w-full grid gap-3 items-center px-5 py-4 min-w-[520px] text-left transition-colors hover:bg-slate-50',
+                        'w-full flex flex-col md:grid gap-2 md:gap-3 md:items-center px-5 py-4 md:min-w-[520px] text-left transition-colors hover:bg-slate-50',
                         isSelected && 'bg-slate-50'
                       )}
                       style={{ gridTemplateColumns: '2fr 1fr 1fr auto', borderLeft: `3px solid ${isEspot ? 'var(--brand)' : '#2563EB'}` }}>
@@ -563,6 +569,7 @@ export default function AgendaPage() {
         </div>
 
         {/* Detail panel */}
+        <div ref={detailRef}>
         {selected ? (
           selected.source === 'espot' ? (
             <EspotPanel
@@ -592,6 +599,7 @@ export default function AgendaPage() {
             <p className="text-sm text-gray-400">Selecciona un evento para ver el detalle</p>
           </div>
         )}
+        </div>
       </div>
     </div>
   )

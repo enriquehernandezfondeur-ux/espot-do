@@ -130,7 +130,7 @@ export default function DashboardPage() {
       <Suspense fallback={null}><PublishedToast /></Suspense>
 
       {actionError && (
-        <div className="fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
+        <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
           style={{ background: '#DC2626', color: '#fff' }}>
           ✕ {actionError}
         </div>

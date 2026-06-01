@@ -252,7 +252,10 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
         }
       })
       marker.addListener('click', () => {
-        if (space.slug) window.open('/espacios/' + space.slug, '_blank', 'noopener,noreferrer')
+        // En touch no hay hover: el tap resalta la card correspondiente
+        onHoverRef.current?.(space.id)
+        // Navegar en la misma pestaña (convención del proyecto, evita pop-up en móvil)
+        if (space.slug) window.location.href = '/espacios/' + space.slug
       })
 
       markersRef.current.set(space.id, marker)

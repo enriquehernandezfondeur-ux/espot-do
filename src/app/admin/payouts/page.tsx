@@ -97,7 +97,7 @@ export default function AdminPayoutsPage() {
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {toast && (
-        <div className="fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
+        <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
           style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
           {toast.ok ? '✓' : '✕'} {toast.msg}
         </div>
@@ -284,10 +284,11 @@ export default function AdminPayoutsPage() {
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl overflow-hidden"
+      <div className="rounded-2xl overflow-x-auto scrollbar-hide"
         style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
         <div className="grid gap-3 px-6 py-3 text-[11px] font-bold uppercase tracking-widest"
           style={{
+            minWidth: 760,
             gridTemplateColumns: '2fr 1.5fr 1fr 1fr 1.8fr 1fr',
             borderBottom: '1px solid #F0F2F5',
             background: '#FAFBFC',
@@ -329,7 +330,7 @@ export default function AdminPayoutsPage() {
               return (
                 <div key={bk.id}
                   className="grid gap-3 px-6 py-4 items-center hover:bg-slate-50 transition-colors"
-                  style={{ gridTemplateColumns: '2fr 1.5fr 1fr 1fr 1.8fr 1fr' }}>
+                  style={{ minWidth: 760, gridTemplateColumns: '2fr 1.5fr 1fr 1fr 1.8fr 1fr' }}>
 
                   {/* Space + host */}
                   <div>
