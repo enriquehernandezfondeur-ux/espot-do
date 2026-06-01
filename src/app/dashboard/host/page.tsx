@@ -7,7 +7,7 @@ import {
   ArrowRight, Users, DollarSign, CalendarCheck,
   Plus, Building2, MessageCircle, Banknote,
 } from 'lucide-react'
-import { formatCurrency, formatTime } from '@/lib/utils'
+import { formatCurrency, formatTime, todayInRD } from '@/lib/utils'
 import Link from 'next/link'
 import { getHostStats, getHostBookings, acceptBooking, rejectBooking } from '@/lib/actions/host'
 import { getExternalEvents } from '@/lib/actions/external-events'
@@ -75,7 +75,7 @@ export default function DashboardPage() {
     }
   }
 
-  const todayStr = new Date().toISOString().split('T')[0]
+  const todayStr = todayInRD()
 
   type Item =
     | { kind: 'espot';  date: string; b:  CalBooking    }

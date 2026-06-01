@@ -38,6 +38,16 @@ export function formatDate(date: string | Date | null | undefined, opts?: Intl.D
   }
 }
 
+/**
+ * Fecha de "hoy" en hora de República Dominicana (UTC-4) como YYYY-MM-DD.
+ * Evita el bug de usar toISOString() (UTC), que de noche en RD adelanta un día
+ * y desajusta los filtros "Hoy"/"Próximas".
+ */
+export function todayInRD(): string {
+  // en-CA produce el formato YYYY-MM-DD
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santo_Domingo' }).format(new Date())
+}
+
 export function formatTime(time: string | null | undefined): string {
   if (!time) return '—'
   const [hours, minutes] = time.slice(0, 5).split(':')

@@ -7,7 +7,7 @@ import {
   CalendarDays, ArrowUpDown, CalendarRange,
 } from 'lucide-react'
 import Pagination from '@/components/ui/Pagination'
-import { formatCurrency, formatDate, formatTime, cn } from '@/lib/utils'
+import { formatCurrency, formatDate, formatTime, cn, todayInRD } from '@/lib/utils'
 import {
   getExternalEvents, updateExternalEvent, addEventPayment,
   deleteExternalEvent, deleteEventPayment,
@@ -146,7 +146,7 @@ export default function AgendaPage() {
   // Reset page when filters change
   useEffect(() => { setPage(1) }, [origin, status, dateFilter, dateFrom, dateTo, sortOrder, search])
 
-  const todayStr = new Date().toISOString().split('T')[0]
+  const todayStr = todayInRD()
 
   const statusPriority = (item: AgendaItem): number => {
     const s = simpleStatus(item)

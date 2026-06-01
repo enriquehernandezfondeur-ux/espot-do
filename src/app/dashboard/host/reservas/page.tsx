@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { CalendarDays, Clock, Users, Check, X, ExternalLink, Search, Loader2, Download, ChevronRight, ArrowUpDown, CalendarRange } from 'lucide-react'
-import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
+import { formatCurrency, formatDate, formatTime, todayInRD } from '@/lib/utils'
 import { getHostBookings, acceptBooking, rejectBooking, completeBooking } from '@/lib/actions/host'
 import { STATUS_LABELS, STATUS_SHORT, STATUS_COLORS } from '@/lib/bookingConfig'
 import { StatusBadge } from '@/components/StatusBadge'
@@ -125,7 +125,7 @@ export default function HostReservasPage() {
 
   useEffect(() => { setPage(1) }, [filter, dateFilter, dateFrom, dateTo, sortOrder, search])
 
-  const todayStr = new Date().toISOString().split('T')[0]
+  const todayStr = todayInRD()
 
   const filtered = bookings
     .filter(b => {

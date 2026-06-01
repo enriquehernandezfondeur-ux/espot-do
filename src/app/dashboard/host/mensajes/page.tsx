@@ -126,6 +126,7 @@ export default function HostMensajesPage() {
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    if (!ACCEPTED.split(',').includes(file.type)) { setSendError('Tipo de archivo no soportado'); return }
     if (file.size > MAX_MB * 1024 * 1024) { setSendError(`Máximo ${MAX_MB}MB`); return }
     setSendError('')
     setAttachment({ file, preview: isImage(file.type) ? URL.createObjectURL(file) : '', type: isImage(file.type) ? 'image' : 'file' })
