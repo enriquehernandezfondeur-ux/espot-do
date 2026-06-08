@@ -11,7 +11,7 @@ sea intencional, cada interacción sea rápida y cada pantalla funcione perfecta
 - **UI:** React 19, Tailwind CSS v4, variables CSS del tema
 - **Tipografía:** Poppins (Google Fonts, variable `--font-poppins`) + TypoGraphica (pendiente)
 - **Iconos:** Lucide React — nunca emojis en UI
-- **Mapas:** Leaflet.js (client-only, dynamic import)
+- **Mapas:** Google Maps (`@googlemaps/js-api-loader`, client-only, dynamic import)
 - **Animaciones:** CSS transitions + `animate-pulse` para skeletons
 - **Imágenes:** `<img>` con `eslint-disable` + `next/image` solo cuando aplica
 
@@ -50,7 +50,7 @@ sea intencional, cada interacción sea rápida y cada pantalla funcione perfecta
 2. **Nunca** `font-size < 16px` en inputs/textareas (iOS zoom)
 3. **Siempre** `autoComplete` correcto en forms (`email`, `current-password`, `tel`, `name`)
 4. **Nunca** `overflow-hidden` en un ancestro de un hijo `sticky`
-5. **Nunca** `setIcon()` en Leaflet durante mouseover/mouseout (destruye DOM y rompe click)
+5. **Nunca** recrear marcadores de Google Maps en hover — reusar las refs y actualizar el icono con `setIcon(buildSvgIcon(...))` (recrear rompe el click)
 6. **Nunca** emojis — usar iconos Lucide equivalentes
 7. **Siempre** `target="_blank" rel="noopener noreferrer"` en links externos
 8. **Nunca** `window.confirm()` en páginas de usuario (solo admin)

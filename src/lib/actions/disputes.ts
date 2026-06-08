@@ -323,6 +323,16 @@ export async function getAdminDisputes(status?: DisputeStatus) {
 
 // ── 5. ACTUALIZAR ESTADO (solo admin) ─────────────────────────
 
+// Transiciones de estado permitidas (espejo de STATUS_TRANSITIONS en la UI admin).
+// El servidor valida estas transiciones; no confía solo en la UI.
+const ALLOWED_TRANSITIONS: Record<DisputeStatus, DisputeStatus[]> = {
+  abierta:          ['en_revision', 'resuelta_cliente', 'resuelta_host', 'cerrada'],
+  en_revision:      ['resuelta_cliente', 'resuelta_host', 'cerrada'],
+  resuelta_cliente: ['cerrada'],
+  resuelta_host:    ['cerrada'],
+  cerrada:          [],
+}
+
 export async function updateDisputeStatus(
   disputeId: string,
   status: DisputeStatus,
@@ -340,6 +350,11 @@ export async function updateDisputeStatus(
     if (profile?.role !== 'admin') return { error: 'No autorizado' }
   }
 
+  // Resolver a favor de alguien requiere una resolución explícita
+  if ((status === 'resuelta_cliente' || status === 'resuelta_host') && !resolution?.trim()) {
+    return { error: 'Debes indicar una resolución al resolver la disputa a favor de una de las partes.' }
+  }
+
   // Usar service role para bypasear RLS en el UPDATE
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!serviceKey) return { error: 'Configuración de servidor incorrecta' }
@@ -347,6 +362,20 @@ export async function updateDisputeStatus(
   const sb = createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   })
+
+  // Validar la transición contra el estado actual
+  const { data: current, error: readErr } = await sb
+    .from('disputes')
+    .select('status')
+    .eq('id', disputeId)
+    .single()
+  if (readErr || !current) return { error: 'Disputa no encontrada' }
+
+  const currentStatus = current.status as DisputeStatus
+  if (currentStatus === status) return { success: true } // idempotente
+  if (!ALLOWED_TRANSITIONS[currentStatus]?.includes(status)) {
+    return { error: `Transición no permitida: ${currentStatus} → ${status}.` }
+  }
 
   const updates: Record<string, unknown> = { status }
   if (resolution !== undefined) updates.resolution = resolution

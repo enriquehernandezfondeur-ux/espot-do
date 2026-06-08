@@ -91,7 +91,7 @@ robots: { index: false, follow: false }
 ### Core Web Vitals
 - LCP: Imágenes con `loading="eager"` en el hero + `priority` en Next/Image
 - CLS: Reservar espacio con `aspect-ratio` en contenedores de imágenes
-- FID/INP: Lazy loading de Leaflet, Recharts y otros bundles pesados
+- FID/INP: Lazy loading del mapa (Google Maps), Recharts y otros bundles pesados
 
 ---
 

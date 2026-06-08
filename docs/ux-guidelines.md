@@ -178,7 +178,7 @@ style={{ WebkitOverflowScrolling: 'touch', overflowY: 'auto' }}
 ### Técnico
 - ❌ `overflow-x: hidden` en el layout root (rompe `position: sticky`)
 - ❌ `100vh` en mobile (usar `100dvh`)
-- ❌ `setIcon()` en Leaflet durante hover (destruye el DOM)
+- ❌ recrear marcadores de Google Maps en hover (rompe el click) — reusar refs y solo `setIcon()`
 - ❌ `createClient()` en el body del componente (usar `useRef`)
 - ❌ `new Date(dateString)` sin `T12:00` (timezone bug en RD)
 

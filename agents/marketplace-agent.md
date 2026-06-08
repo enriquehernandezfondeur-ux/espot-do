@@ -9,7 +9,7 @@ tengan una experiencia fluida, confiable y sin fricción desde el primer click h
 
 ## Stack
 - **Búsqueda:** Client-side filtering sobre datos pre-cargados en Server Component
-- **Mapas:** Leaflet + CartoDB tiles + pins de precio personalizados
+- **Mapas:** Google Maps (`@googlemaps/js-api-loader`) + pins SVG personalizados
 - **Geocoding:** Nominatim (OpenStreetMap) con fallback por número de casa
 - **Scoring de similares:** Algoritmo propio en `src/lib/actions/marketplace.ts`
 - **Reservas:** Multi-step widget (5 pasos) en `BookingWidget.tsx`

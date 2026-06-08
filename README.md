@@ -44,7 +44,7 @@ Una plataforma SaaS moderna para gestión de espacios en República Dominicana, 
 - **Testing**: Jest, React Testing Library
 - **Monitoring**: Sentry, Winston
 - **Payments**: Azul Payment Gateway
-- **Maps**: Leaflet con clustering
+- **Maps**: Google Maps (`@googlemaps/js-api-loader`) con pins SVG personalizados
 - **Email**: Resend
 
 ## 📁 Estructura del Proyecto

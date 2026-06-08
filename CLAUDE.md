@@ -6,12 +6,12 @@
 **espot.do** — plataforma para reservar salones, rooftops, restaurantes, villas y más para eventos en RD. El nombre de la marca es **Espot** (no EspotHub). El dominio es espot.do.
 
 ## Stack técnico
-- **Next.js App Router** (v15+), React 19, TypeScript 5
+- **Next.js App Router** (16.2.6), React 19, TypeScript 5
 - **Tailwind CSS v4** — usar variables CSS del tema, NO clases dark de Tailwind
 - **Supabase** — Auth + PostgreSQL + Storage + Realtime
 - **Azul Payments** — gateway de pagos dominicano (modelo PaymentPage, no API directa)
 - **Resend** — emails transaccionales
-- **Leaflet** — mapas con marcadores de espacios
+- **Google Maps** (`@googlemaps/js-api-loader`) — mapas con marcadores de espacios
 
 ## Logo
 
@@ -89,7 +89,7 @@
 ```
 src/app/
 ├── (marketplace)/          # Público: homepage, buscar, detalle espacio
-├── dashboard/(client)/     # Dashboard del cliente (dark-theme)
+├── dashboard/(client)/     # Dashboard del cliente (white-theme)
 ├── dashboard/host/         # Dashboard del propietario (host-theme)
 ├── admin/                  # Consola de administrador
 ├── pago/                   # Flujo de pagos (exitoso, fallido, cancelado)
@@ -131,7 +131,7 @@ src/app/
 - `src/components/marketplace/BookingWidget.tsx` — widget multi-paso de reserva (1200+ líneas)
 - `src/app/(marketplace)/buscar/BuscarClient.tsx` — página de búsqueda con mapa
 - `src/app/(marketplace)/espacios/[slug]/SpaceDetailClient.tsx` — detalle del espacio
-- `src/components/map/SpacesMap.tsx` — mapa Leaflet (pins: click usa window.location.href, NO setIcon en hover)
+- `src/components/map/SpacesMap.tsx` — mapa Google Maps (pins: click usa window.location.href; reusa refs de marcadores y actualiza el icono con `buildSvgIcon`, sin recrear el marcador en hover)
 - `src/lib/actions/booking.ts` — lógica de reservas
 - `src/lib/payments/schedule.ts` — cálculo de cuotas
 
@@ -142,7 +142,7 @@ src/app/
 | Azul Payments | Pagos | ⚠️ Redirect pendiente de fix |
 | Resend | Emails | ✅ Funcional |
 | Google OAuth | Login social | ✅ Funcional |
-| Leaflet | Mapas | ✅ Funcional |
+| Google Maps | Mapas | ✅ Funcional |
 | Google Calendar | Sync opcional | ✅ Implementado |
 
 ## Categorías de espacios
