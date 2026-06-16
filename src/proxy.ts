@@ -103,7 +103,7 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
     pathname === '/favicon.ico' ||
-    pathname === '/icon.svg' ||
+    pathname.startsWith('/icon-') ||
     pathname.startsWith('/og-') ||
     pathname.includes('.')
   ) {

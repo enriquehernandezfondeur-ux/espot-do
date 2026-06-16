@@ -94,9 +94,19 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // NO usar immutable: si se cachea 1 año, los navegadores no vuelven a
+        // pedir el manifest y se quedan con iconos antiguos. Revalidar siempre.
         source: '/manifest.json',
         headers: [
-          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
+        ],
+      },
+      {
+        // Iconos/favicon: cache corto + revalidación para que un cambio de
+        // favicon se propague sin quedar pegado en la caché del navegador.
+        source: '/:icon(favicon.ico|favicon-16x16.png|favicon-32x32.png|apple-touch-icon.png|icon-192.png|icon-512.png|icon-maskable-512.png)',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=86400, must-revalidate' },
         ],
       },
     ]
