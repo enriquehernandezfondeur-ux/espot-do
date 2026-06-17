@@ -9,7 +9,8 @@ import {
   updateAdminNotes,
 } from '@/lib/actions/host-application'
 import Link from 'next/link'
-import { ArrowLeft, Phone } from 'lucide-react'
+import { ArrowLeft, Phone, Check, X, Info } from 'lucide-react'
+import ConfirmSubmitButton from '@/components/admin/ConfirmSubmitButton'
 
 const SPACE_TYPE_LABELS: Record<string, string> = {
   salon: 'Salón', restaurante: 'Restaurante', villa: 'Villa', rooftop: 'Rooftop',
@@ -127,7 +128,7 @@ export default async function AplicacionDetailPage({
                 style={{ border: '1px solid #E5E7EB' }} />
             ) : (
               <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-lg font-bold text-white shrink-0"
-                style={{ background: '#35C493' }}>
+                style={{ background: 'var(--brand)' }}>
                 {(applicant?.full_name ?? 'A').charAt(0).toUpperCase()}
               </div>
             )}
@@ -294,18 +295,20 @@ export default async function AplicacionDetailPage({
 
               <form action={handleApprove}>
                 <input type="hidden" name="id" value={app.id} />
-                <button type="submit"
+                <ConfirmSubmitButton
+                  confirmMessage="Aprobar esta solicitud creará una cuenta de propietario (host) en producción. ¿Continuar?"
+                  pendingLabel="Aprobando..."
                   className="w-full py-3 rounded-xl text-sm font-bold text-white transition-all active:scale-[0.98]"
                   style={{ background: '#16A34A' }}>
-                  ✓ Aprobar solicitud
-                </button>
+                  <span className="inline-flex items-center justify-center gap-2"><Check size={15} /> Aprobar solicitud</span>
+                </ConfirmSubmitButton>
               </form>
 
               <details>
                 <summary
                   className="cursor-pointer w-full py-3 rounded-xl text-sm font-bold text-center select-none"
                   style={{ background: 'rgba(239,68,68,0.07)', color: '#EF4444', listStyle: 'none' }}>
-                  ✕ Rechazar solicitud
+                  <span className="inline-flex items-center justify-center gap-2"><X size={15} /> Rechazar solicitud</span>
                 </summary>
                 <form action={handleReject} className="mt-3 space-y-2">
                   <input type="hidden" name="id" value={app.id} />
@@ -314,7 +317,7 @@ export default async function AplicacionDetailPage({
                     className="w-full rounded-xl px-3 py-2.5 text-sm resize-none outline-none"
                     style={{
                       background: '#F9FAFB', border: '1px solid #E5E7EB',
-                      color: '#374151', fontSize: 14,
+                      color: '#374151', fontSize: 16,
                     }} />
                   <button type="submit"
                     className="w-full py-2.5 rounded-xl text-sm font-bold text-white"
@@ -328,7 +331,7 @@ export default async function AplicacionDetailPage({
                 <summary
                   className="cursor-pointer w-full py-3 rounded-xl text-sm font-bold text-center select-none"
                   style={{ background: 'rgba(139,92,246,0.07)', color: '#8B5CF6', listStyle: 'none' }}>
-                  ⓘ Pedir más información
+                  <span className="inline-flex items-center justify-center gap-2"><Info size={15} /> Pedir más información</span>
                 </summary>
                 <form action={handleRequestInfo} className="mt-3 space-y-2">
                   <input type="hidden" name="id" value={app.id} />
@@ -337,7 +340,7 @@ export default async function AplicacionDetailPage({
                     className="w-full rounded-xl px-3 py-2.5 text-sm resize-none outline-none"
                     style={{
                       background: '#F9FAFB', border: '1px solid #E5E7EB',
-                      color: '#374151', fontSize: 14,
+                      color: '#374151', fontSize: 16,
                     }} />
                   <button type="submit"
                     className="w-full py-2.5 rounded-xl text-sm font-bold text-white"

@@ -232,7 +232,7 @@ export default function HostReservasPage() {
       {actionError && (
         <div className="fixed top-20 md:top-5 right-4 md:right-5 z-50 flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
           style={{ background: '#DC2626', color: '#fff' }}>
-          ✕ {actionError}
+          <X size={15} /> {actionError}
         </div>
       )}
       <div className="mb-5 md:mb-6 flex items-start justify-between gap-3">
@@ -593,7 +593,7 @@ export default function HostReservasPage() {
                     <div className="border-t" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-elevated)' }}>
                       <div className="px-5 py-3 flex justify-between items-center" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                         <span className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>Detalle de la reserva</span>
-                        <button onClick={() => { setSelected(null); setShowRejectForm(false); setRejectReason('') }} style={{ color: 'var(--text-muted)' }}>✕</button>
+                        <button onClick={() => { setSelected(null); setShowRejectForm(false); setRejectReason('') }} aria-label="Cerrar detalle" style={{ color: 'var(--text-muted)' }}><X size={16} /></button>
                       </div>
 
             {/* Rechazar form */}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { getAdminUsers, updateUserRole } from '@/lib/actions/admin'
-import { Search, Shield, Building2, User, Loader2, Download, Copy, Check, Users, ExternalLink, Mail, Eye } from 'lucide-react'
+import { Search, Shield, Building2, User, Loader2, Download, Copy, Check, Users, ExternalLink, Mail, Eye, X } from 'lucide-react'
 import Link from 'next/link'
 import Pagination from '@/components/ui/Pagination'
 
@@ -107,7 +107,7 @@ export default function AdminUsersPage() {
       {toast && (
         <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
           style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
-          {toast.ok ? '✓' : '✕'} {toast.msg}
+          {toast.ok ? <Check size={15} /> : <X size={15} />} {toast.msg}
         </div>
       )}
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Star, MessageSquare, CheckCircle, Loader2, ChevronDown, ChevronUp } from 'lucide-react'
+import { Star, MessageSquare, CheckCircle, Loader2, ChevronDown, ChevronUp, Check, X } from 'lucide-react'
 import { getHostReviews, respondToReview, type Review } from '@/lib/actions/reviews'
 import { formatDate } from '@/lib/utils'
 
@@ -63,7 +63,7 @@ export default function ResenasPage() {
       {toast && (
         <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
           style={{ background: toast.ok ? 'var(--brand)' : '#DC2626', color: '#fff' }}>
-          {toast.ok ? '✓' : '✕'} {toast.msg}
+          {toast.ok ? <Check size={15} /> : <X size={15} />} {toast.msg}
         </div>
       )}
 
@@ -98,7 +98,7 @@ export default function ResenasPage() {
         </div>
       ) : reviews.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 rounded-3xl text-center"
-          style={{ background: '#fff', border: '2px dashed var(--border-medium)' }}>
+          style={{ background: 'var(--bg-card)', border: '2px dashed var(--border-medium)' }}>
           <Star size={32} className="mb-3" style={{ color: 'var(--text-muted)' }} />
           <p className="font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Sin reseñas aún</p>
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
@@ -109,7 +109,7 @@ export default function ResenasPage() {
         <div className="space-y-3">
           {reviews.map(review => (
             <div key={review.id} className="rounded-2xl overflow-hidden"
-              style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+              style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
 
               {/* Reseña del cliente */}
               <div className="p-5">

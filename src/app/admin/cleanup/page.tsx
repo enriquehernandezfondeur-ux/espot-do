@@ -20,6 +20,8 @@ export default function CleanupPage() {
   }
 
   async function deleteSpaces() {
+    const n = preview?.to_delete ?? 0
+    if (!window.confirm(`Vas a eliminar ${n} espacio(s) de forma permanente. Esta acción no se puede deshacer.\n\n¿Continuar?`)) return
     setLoading(true)
     setError('')
     try {
@@ -78,8 +80,8 @@ export default function CleanupPage() {
               Espacios en la base de datos: {preview.total}
             </span>
             <div className="flex items-center gap-4 text-xs font-medium">
-              <span style={{ color: '#16A34A' }}>✓ Conservar: {preview.keep}</span>
-              <span style={{ color: '#DC2626' }}>✗ Eliminar: {preview.to_delete}</span>
+              <span className="inline-flex items-center gap-1" style={{ color: '#16A34A' }}><CheckCircle size={13} /> Conservar: {preview.keep}</span>
+              <span className="inline-flex items-center gap-1" style={{ color: '#DC2626' }}><Trash2 size={13} /> Eliminar: {preview.to_delete}</span>
             </div>
           </div>
 

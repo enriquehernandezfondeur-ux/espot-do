@@ -74,7 +74,7 @@ export function getPriceInfo(space: any) {
 }
 
 export function SpaceCard({
-  space, isHovered, onHover, dateFilter, timeFilter, isAvailable,
+  space, isHovered, onHover, dateFilter, timeFilter, isAvailable, eager = false,
 }: {
   space: any
   isHovered: boolean
@@ -82,6 +82,8 @@ export function SpaceCard({
   dateFilter?: string
   timeFilter?: string
   isAvailable?: boolean
+  /** Solo las primeras cards above-the-fold deben precargar (priority) para no romper el LCP */
+  eager?: boolean
 }) {
   const images     = getImages(space)
   const priceInfo  = getPriceInfo(space)
@@ -170,7 +172,8 @@ export function SpaceCard({
           ) : images.map((url, i) => (
             <Image key={i} src={url} alt={space.name} fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              priority={i === 0}
+              priority={eager && i === 0}
+              loading={eager && i === 0 ? undefined : 'lazy'}
               className="object-cover transition-opacity duration-[400ms]"
               style={{ opacity: i === photoIdx ? 1 : 0, zIndex: i === photoIdx ? 1 : 0,
                 transform: i === photoIdx && isHovered ? 'scale(1.06)' : 'scale(1)',

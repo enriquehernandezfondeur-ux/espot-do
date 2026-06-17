@@ -8,6 +8,7 @@ import {
   LayoutDashboard, Building2, CalendarDays, Users,
   CreditCard, Settings, BarChart3, LogOut,
   ChevronRight, Shield, Banknote, Globe, Upload, Menu, X, MessageCircle, ShieldAlert, ClipboardList,
+  Wallet, Loader2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -34,7 +35,7 @@ const sections: { label: string; items: NavItem[] }[] = [
       { href: '/admin/usuarios',      label: 'Usuarios',      icon: Users },
       { href: '/admin/pagos',         label: 'Comisiones',    icon: CreditCard },
       { href: '/admin/payouts',       label: 'Payouts',       icon: Banknote },
-      { href: '/admin/liquidaciones', label: 'Liquidaciones', icon: Banknote },
+      { href: '/admin/liquidaciones', label: 'Liquidaciones', icon: Wallet },
       { href: '/admin/mensajes',      label: 'Mensajes',      icon: MessageCircle },
       { href: '/admin/disputas',      label: 'Disputas',      icon: ShieldAlert },
     ],
@@ -54,6 +55,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   const router      = useRouter()
   const supabaseRef = useRef(createClient())
   const [adminName, setAdminName] = useState<string>('Admin')
+  const [loggingOut, setLoggingOut] = useState(false)
 
   useEffect(() => {
     supabaseRef.current.auth.getUser().then(({ data: { user } }) => {
@@ -64,6 +66,8 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   }, [])
 
   async function handleLogout() {
+    if (loggingOut) return
+    setLoggingOut(true)
     await supabaseRef.current.auth.signOut()
     router.push('/')
   }
@@ -89,7 +93,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
           </div>
         </Link>
         {onClose && (
-          <button onClick={onClose} className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg"
+          <button onClick={onClose} aria-label="Cerrar menú" className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg"
             style={{ color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)' }}>
             <X size={16} />
           </button>
@@ -124,11 +128,12 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
                 const isActive = pathname === href || (href !== '/admin' && pathname.startsWith(href))
                 return (
                   <Link key={href} href={href} onClick={onClose}
+                    aria-current={isActive ? 'page' : undefined}
                     className={cn('flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all hover:bg-white/5')}
                     style={isActive ? {
                       background: 'rgba(53,196,147,0.12)',
-                      color: '#35C493',
-                      borderLeft: '2px solid #35C493',
+                      color: 'var(--brand)',
+                      borderLeft: '2px solid var(--brand)',
                     } : { color: 'rgba(255,255,255,0.5)' }}>
                     <Icon size={14} className="shrink-0" />
                     <span className="flex-1">{label}</span>
@@ -169,11 +174,11 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
           <span className="flex-1">Panel cliente</span>
           <ChevronRight size={11} />
         </Link>
-        <button onClick={handleLogout}
-          className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm w-full text-left transition-all"
+        <button onClick={handleLogout} disabled={loggingOut}
+          className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm w-full text-left transition-all disabled:opacity-60"
           style={{ color: 'rgba(255,255,255,0.25)' }}>
-          <LogOut size={14} />
-          Cerrar sesión
+          {loggingOut ? <Loader2 size={14} className="animate-spin" /> : <LogOut size={14} />}
+          {loggingOut ? 'Cerrando...' : 'Cerrar sesión'}
         </button>
       </div>
     </aside>
@@ -202,7 +207,7 @@ export default function AdminSidebar() {
             style={{ background: 'var(--brand)', color: '#0B0F0E' }}>E</div>
           <span className="font-bold text-sm text-white">Admin Console</span>
         </Link>
-        <button onClick={() => setOpen(true)}
+        <button onClick={() => setOpen(true)} aria-label="Abrir menú"
           className="w-9 h-9 flex items-center justify-center rounded-xl"
           style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.7)' }}>
           <Menu size={18} />

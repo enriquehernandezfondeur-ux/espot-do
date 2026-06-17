@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -14,6 +14,14 @@ const poppins = Poppins({
 })
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
+
+// Viewport oficial — habilita safe-areas (notch / home indicator) que ya usan
+// AppSidebar y los pickers vía env(safe-area-inset-*). Nunca deshabilitar zoom.
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),

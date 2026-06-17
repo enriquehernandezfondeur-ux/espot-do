@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import {
   Clock, CheckCircle, CalendarDays, MessageSquareQuote,
   ArrowRight, Users, DollarSign, CalendarCheck,
-  Plus, Building2, MessageCircle, Banknote,
+  Plus, Building2, MessageCircle, Banknote, Loader2, X,
 } from 'lucide-react'
 import { formatCurrency, formatTime, todayInRD } from '@/lib/utils'
 import Link from 'next/link'
@@ -44,6 +44,7 @@ export default function DashboardPage() {
   const [externalEvents, setExternalEvents] = useState<ExternalEvent[]>([])
   const [loading,        setLoading]        = useState(true)
   const [actionError,    setActionError]    = useState('')
+  const [actionId,       setActionId]       = useState<string | null>(null)
 
   useEffect(() => {
     Promise.all([
@@ -56,23 +57,31 @@ export default function DashboardPage() {
   }, [])
 
   async function handleConfirm(id: string) {
-    const r = await acceptBooking(id)
-    if ('error' in r) { setActionError(r.error ?? 'Error'); setTimeout(() => setActionError(''), 3000) }
-    else {
-      setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'accepted' } : b))
-      // Aceptar pasa a 'accepted' (aún sin pagar) — no incrementar confirmedCount
-      // (que en getHostStats significa "ingresos confirmados del mes")
-      setStats(prev => prev ? { ...prev, pendingCount: Math.max(0, prev.pendingCount - 1), acceptedCount: (prev.acceptedCount ?? 0) + 1 } : prev)
-    }
+    if (actionId) return
+    setActionId(id)
+    try {
+      const r = await acceptBooking(id)
+      if ('error' in r) { setActionError(r.error ?? 'Error'); setTimeout(() => setActionError(''), 3000) }
+      else {
+        setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'accepted' } : b))
+        // Aceptar pasa a 'accepted' (aún sin pagar) — no incrementar confirmedCount
+        // (que en getHostStats significa "ingresos confirmados del mes")
+        setStats(prev => prev ? { ...prev, pendingCount: Math.max(0, prev.pendingCount - 1), acceptedCount: (prev.acceptedCount ?? 0) + 1 } : prev)
+      }
+    } finally { setActionId(null) }
   }
   async function handleReject(id: string) {
+    if (actionId) return
     if (!window.confirm('¿Rechazar esta solicitud? No se puede deshacer.')) return
-    const r = await rejectBooking(id)
-    if ('error' in r) { setActionError(r.error ?? 'Error'); setTimeout(() => setActionError(''), 3000) }
-    else {
-      setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'rejected' } : b))
-      setStats(prev => prev ? { ...prev, pendingCount: Math.max(0, prev.pendingCount - 1) } : prev)
-    }
+    setActionId(id)
+    try {
+      const r = await rejectBooking(id)
+      if ('error' in r) { setActionError(r.error ?? 'Error'); setTimeout(() => setActionError(''), 3000) }
+      else {
+        setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'rejected' } : b))
+        setStats(prev => prev ? { ...prev, pendingCount: Math.max(0, prev.pendingCount - 1) } : prev)
+      }
+    } finally { setActionId(null) }
   }
 
   const todayStr = todayInRD()
@@ -132,7 +141,7 @@ export default function DashboardPage() {
       {actionError && (
         <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
           style={{ background: '#DC2626', color: '#fff' }}>
-          ✕ {actionError}
+          <X size={15} /> {actionError}
         </div>
       )}
 
@@ -235,9 +244,10 @@ export default function DashboardPage() {
                     )}
                     <button
                       onClick={() => handleConfirm(b.id)}
-                      className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
+                      disabled={actionId === b.id}
+                      className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all disabled:opacity-60 inline-flex items-center gap-1"
                       style={{ background: 'var(--brand)', color: '#fff' }}>
-                      Aceptar
+                      {actionId === b.id ? <Loader2 size={12} className="animate-spin" /> : null} Aceptar
                     </button>
                     <Link href={`/dashboard/host/reservas/${b.id}`}
                       className="text-xs font-semibold px-3 py-1.5 rounded-lg"
@@ -252,8 +262,8 @@ export default function DashboardPage() {
             {/* Footer con warning y link a todas */}
             <div className="flex items-center justify-between px-5 py-2.5"
               style={{ borderTop: '1px solid rgba(217,119,6,0.15)', background: 'rgba(217,119,6,0.05)' }}>
-              <p className="text-xs" style={{ color: '#92400E' }}>
-                ⏱ Las solicitudes se auto-rechazan a las 72h si no respondes
+              <p className="text-xs inline-flex items-center gap-1.5" style={{ color: '#92400E' }}>
+                <Clock size={13} /> Las solicitudes se auto-rechazan a las 72h si no respondes
               </p>
               {pending.length > 3 && (
                 <Link href="/dashboard/host/agenda"
@@ -520,12 +530,14 @@ export default function DashboardPage() {
                     {isPending && (
                       <div className="flex gap-2 mt-2">
                         <button onClick={() => handleConfirm(item.b.id)}
-                          className="flex-1 text-xs font-semibold py-1.5 rounded-lg"
+                          disabled={actionId === item.b.id}
+                          className="flex-1 text-xs font-semibold py-1.5 rounded-lg disabled:opacity-60 inline-flex items-center justify-center gap-1"
                           style={{ background: 'var(--bg-elevated)', color: 'var(--brand)', border: '1px solid var(--border-subtle)' }}>
-                          Aceptar
+                          {actionId === item.b.id ? <Loader2 size={12} className="animate-spin" /> : null} Aceptar
                         </button>
                         <button onClick={() => handleReject(item.b.id)}
-                          className="flex-1 text-xs font-semibold py-1.5 rounded-lg"
+                          disabled={actionId === item.b.id}
+                          className="flex-1 text-xs font-semibold py-1.5 rounded-lg disabled:opacity-60"
                           style={{ background: 'rgba(220,38,38,0.06)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }}>
                           Rechazar
                         </button>

@@ -53,7 +53,7 @@ export default function AdminMensajesPage() {
 
   if (loading) return (
     <div className="flex items-center justify-center h-[calc(100dvh-56px)] md:h-dvh" style={{ background: '#F4F6F8' }}>
-      <Loader2 size={28} className="animate-spin" style={{ color: '#35C493' }} />
+      <Loader2 size={28} className="animate-spin" style={{ color: 'var(--brand)' }} />
     </div>
   )
 
@@ -100,7 +100,7 @@ export default function AdminMensajesPage() {
                 style={{
                   background: isActive ? 'rgba(53,196,147,0.06)' : 'transparent',
                   borderBottom: '1px solid #F1F5F9',
-                  borderLeft: isActive ? '3px solid #35C493' : '3px solid transparent',
+                  borderLeft: isActive ? '3px solid var(--brand)' : '3px solid transparent',
                 }}>
                 <div className="flex items-center gap-3">
                   {/* Space cover */}
@@ -175,7 +175,7 @@ export default function AdminMensajesPage() {
             style={{ background: '#F8FAFC' }}>
             {msgLoad ? (
               <div className="flex items-center justify-center py-20">
-                <Loader2 size={24} className="animate-spin" style={{ color: '#35C493' }} />
+                <Loader2 size={24} className="animate-spin" style={{ color: 'var(--brand)' }} />
               </div>
             ) : messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -233,7 +233,7 @@ export default function AdminMensajesPage() {
           style={{ background: '#F8FAFC' }}>
           <div className="w-16 h-16 rounded-3xl flex items-center justify-center mb-4"
             style={{ background: 'rgba(53,196,147,0.08)' }}>
-            <MessageCircle size={28} style={{ color: '#35C493' }} />
+            <MessageCircle size={28} style={{ color: 'var(--brand)' }} />
           </div>
           <p className="font-semibold mb-1" style={{ color: '#0F1623' }}>Selecciona una conversación</p>
           <p className="text-sm" style={{ color: '#64748B' }}>

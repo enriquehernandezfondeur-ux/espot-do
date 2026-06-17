@@ -48,6 +48,7 @@ export default function Pagination({ page, total, pageSize, onChange, className 
       </span>
       <div className="flex items-center gap-1">
         <button
+          aria-label="Página anterior"
           style={arrow(page === 1)}
           onClick={() => page > 1 && onChange(page - 1)}
           disabled={page === 1}>
@@ -58,13 +59,15 @@ export default function Pagination({ page, total, pageSize, onChange, className 
           p === '…' ? (
             <span key={`e${i}`} style={{ fontSize: 13, color: 'var(--text-muted)', padding: '0 4px' }}>…</span>
           ) : (
-            <button key={p} style={btn(p === page)} onClick={() => onChange(p as number)}>
+            <button key={p} style={btn(p === page)} onClick={() => onChange(p as number)}
+              aria-label={`Página ${p}`} aria-current={p === page ? 'page' : undefined}>
               {p}
             </button>
           )
         )}
 
         <button
+          aria-label="Página siguiente"
           style={arrow(page === totalPages)}
           onClick={() => page < totalPages && onChange(page + 1)}
           disabled={page === totalPages}>

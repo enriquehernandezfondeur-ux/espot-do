@@ -7,7 +7,7 @@ import {
   CalendarDays, Users, Sparkles, CreditCard,
   ChevronRight, ChevronLeft, Loader2, CheckCircle,
   Minus, Plus, MessageCircle, Clock, ShieldCheck, Info, AlertCircle,
-  Timer, Mail, Camera,
+  Timer, Mail, Camera, Zap,
   UtensilsCrossed, Package, FileText, Lock,
   Cake, Heart, GraduationCap, Baby, Briefcase,
 } from 'lucide-react'
@@ -563,7 +563,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         {space.instant_booking && (
           <div className="flex items-center gap-1.5 mb-3 px-3 py-1.5 rounded-xl w-fit"
             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-            <span style={{ fontSize: 13 }}>⚡</span>
+            <Zap size={13} style={{ color: 'var(--brand)' }} aria-hidden="true" />
             <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>Confirmación instantánea</span>
           </div>
         )}

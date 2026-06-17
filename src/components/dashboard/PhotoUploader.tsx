@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Upload, X, Star, Loader2, ImagePlus } from 'lucide-react'
+import { Upload, X, Star, Loader2, ImagePlus, Pencil } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 
@@ -205,7 +205,7 @@ export default function PhotoUploader({ spaceId, onChange, initialPhotos }: Prop
                 <div className="absolute bottom-1 left-1 md:hidden">
                   <div className="w-4 h-4 rounded-full flex items-center justify-center"
                     style={{ background: 'rgba(0,0,0,0.4)' }}>
-                    <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 9 }}>✎</span>
+                    <Pencil size={9} style={{ color: 'rgba(255,255,255,0.7)' }} />
                   </div>
                 </div>
               )}

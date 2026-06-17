@@ -20,6 +20,8 @@ export default function FixPricingPage() {
   }
 
   async function applyFix() {
+    const n = preview?.need_fix ?? 0
+    if (!window.confirm(`Vas a escribir/corregir el precio de ${n} espacio(s) en producción. ¿Continuar?`)) return
     setLoading(true)
     setError('')
     try {
@@ -134,7 +136,7 @@ export default function FixPricingPage() {
                   onClick={applyFix}
                   disabled={loading}
                   className="flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-sm transition-all disabled:opacity-40"
-                  style={{ background: 'var(--brand)', color: '#03313C' }}>
+                  style={{ background: 'var(--brand)', color: 'var(--brand-navy)' }}>
                   {loading
                     ? <><RefreshCw size={15} className="animate-spin" /> Aplicando...</>
                     : <><Zap size={15} /> Corregir {preview.need_fix} espacio{preview.need_fix !== 1 ? 's' : ''}</>}

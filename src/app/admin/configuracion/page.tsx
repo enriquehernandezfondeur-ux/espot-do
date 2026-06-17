@@ -2,15 +2,24 @@
 
 import { useState, useEffect } from 'react'
 import { getMarketplaceConfig, updateConfig } from '@/lib/actions/admin'
-import { Settings, Save, Loader2, CheckCircle } from 'lucide-react'
+import { Settings, Save, Loader2, CheckCircle, CreditCard, CalendarDays, Building2, ShoppingCart, Scale, Check, X } from 'lucide-react'
 
 const groupLabels: Record<string, string> = {
-  general:    '⚙️ General',
-  pagos:      '💳 Pagos',
-  reservas:   '📅 Reservas',
-  espacios:   '🏛️ Espacios',
-  marketplace:'🛒 Marketplace',
-  legal:      '⚖️ Legal',
+  general:    'General',
+  pagos:      'Pagos',
+  reservas:   'Reservas',
+  espacios:   'Espacios',
+  marketplace:'Marketplace',
+  legal:      'Legal',
+}
+
+const groupIcons: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+  general:     Settings,
+  pagos:       CreditCard,
+  reservas:    CalendarDays,
+  espacios:    Building2,
+  marketplace: ShoppingCart,
+  legal:       Scale,
 }
 
 export default function AdminConfigPage() {
@@ -57,7 +66,7 @@ export default function AdminConfigPage() {
       {toast && (
         <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
           style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
-          {toast.ok ? '✓' : '✕'} {toast.msg}
+          {toast.ok ? <Check size={15} /> : <X size={15} />} {toast.msg}
         </div>
       )}
       <div className="mb-8">
@@ -75,7 +84,8 @@ export default function AdminConfigPage() {
             <div key={group} className="rounded-2xl overflow-hidden"
               style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
               <div className="px-6 py-4" style={{ borderBottom: '1px solid #F0F2F5', background: '#FAFBFC' }}>
-                <h2 className="font-bold text-sm" style={{ color: '#0F1623' }}>
+                <h2 className="font-bold text-sm inline-flex items-center gap-2" style={{ color: '#0F1623' }}>
+                  {(() => { const Icon = groupIcons[group]; return Icon ? <Icon size={15} className="opacity-70" /> : null })()}
                   {groupLabels[group] ?? group}
                 </h2>
               </div>
@@ -90,8 +100,8 @@ export default function AdminConfigPage() {
                       <input
                         value={item.value ?? ''}
                         onChange={e => updateLocal(item.key, e.target.value)}
-                        className="px-3 py-2 rounded-xl text-sm font-medium border focus:outline-none transition-colors"
-                        style={{ border: '1.5px solid #E8ECF0', color: '#0F1623', background: '#F8FAFB', minWidth: 200 }}
+                        className="px-3 py-2 rounded-xl font-medium border focus:outline-none transition-colors"
+                        style={{ border: '1.5px solid #E8ECF0', color: '#0F1623', background: '#F8FAFB', minWidth: 200, fontSize: 16 }}
                         onFocus={e => (e.target.style.borderColor = 'var(--brand)')}
                         onBlur={e => (e.target.style.borderColor = '#E8ECF0')}
                       />

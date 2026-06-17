@@ -270,7 +270,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
             { field: 'is_published', val: isPublished, set: setIsPublished, icon: isPublished ? Eye : EyeOff, label: isPublished ? 'Publicado' : 'Oculto',   active: '#16A34A' },
             { field: 'is_verified',  val: isVerified,  set: setIsVerified,  icon: Shield,  label: 'Verificado',  active: '#2563EB' },
             { field: 'is_featured',  val: isFeatured,  set: setIsFeatured,  icon: Star,    label: 'Destacado',   active: '#CA8A04' },
-            { field: 'is_active',    val: isActive,    set: setIsActive,    icon: isActive ? CheckCircle : Trash2, label: isActive ? 'Activo' : 'Inactivo', active: '#35C493' },
+            { field: 'is_active',    val: isActive,    set: setIsActive,    icon: isActive ? CheckCircle : Trash2, label: isActive ? 'Activo' : 'Inactivo', active: 'var(--brand)' },
           ].map(({ field, val, set, icon: Icon, label, active }) => (
             <button key={field}
               onClick={() => handleToggle(field, val, set)}

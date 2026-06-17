@@ -1,6 +1,6 @@
 import { type Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowLeft, Lock, Shield, CreditCard } from 'lucide-react'
+import { ArrowLeft, Lock, Shield, CreditCard, Mail, Phone } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Política de Seguridad de Datos — Espot',
@@ -136,11 +136,11 @@ export default function SeguridadPage() {
             </p>
             <div className="mt-3 space-y-2">
               <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                <span style={{ color: 'var(--brand)' }}>✉</span>
+                <Mail size={15} style={{ color: 'var(--brand)' }} aria-hidden="true" />
                 <a href="mailto:contacto@espot.do" style={{ color: 'var(--brand)' }}>contacto@espot.do</a>
               </div>
               <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                <span style={{ color: 'var(--brand)' }}>📞</span>
+                <Phone size={15} style={{ color: 'var(--brand)' }} aria-hidden="true" />
                 <a href="tel:+18295481998" style={{ color: 'var(--brand)' }}>+1 (829) 548-1998</a>
               </div>
             </div>

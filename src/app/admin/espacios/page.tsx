@@ -58,6 +58,7 @@ export default function AdminSpacesPage() {
   async function verifyAll() {
     const unverified = spaces.filter(s => !s.is_verified)
     if (unverified.length === 0) return
+    if (!window.confirm(`Vas a verificar ${unverified.length} espacio(s) de una vez. ¿Continuar?`)) return
     setActionId('bulk')
     let ok = 0
     for (const s of unverified) {
@@ -128,7 +129,8 @@ export default function AdminSpacesPage() {
           <Search size={15} className="text-gray-400 shrink-0" />
           <input value={search} onChange={e => { setSearch(e.target.value); setLoading(true) }}
             placeholder="Buscar por nombre..."
-            className="bg-transparent text-sm flex-1 focus:outline-none text-gray-700 placeholder-gray-400" />
+            style={{ fontSize: 16 }}
+            className="bg-transparent flex-1 focus:outline-none text-gray-700 placeholder-gray-400" />
         </div>
       </div>
 

@@ -358,10 +358,10 @@ function AuthContent() {
             </div>
 
             <div>
-              <label style={labelStyle}>
+              <label htmlFor="auth-name" style={labelStyle}>
                 {userType === 'host' ? 'Nombre del negocio' : 'Nombre completo'}
               </label>
-              <input type="text" value={fullName} onChange={e => setFullName(e.target.value)}
+              <input id="auth-name" type="text" value={fullName} onChange={e => setFullName(e.target.value)}
                 placeholder={userType === 'host' ? 'Ej: Rivera Eventos' : 'Ej: María González'}
                 required autoComplete="name" style={inputStyle} {...focusHandlers} />
               {userType === 'host' && (
@@ -371,19 +371,19 @@ function AuthContent() {
               )}
             </div>
             <div>
-              <label style={labelStyle}>Teléfono / WhatsApp</label>
-              <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
+              <label htmlFor="auth-phone" style={labelStyle}>Teléfono / WhatsApp</label>
+              <input id="auth-phone" type="tel" value={phone} onChange={e => setPhone(e.target.value)}
                 placeholder="+1 (809) 000-0000" autoComplete="tel" style={inputStyle} {...focusHandlers} />
             </div>
           </>
         )}
 
         <div>
-          <label style={labelStyle}>Correo electrónico</label>
+          <label htmlFor="auth-email" style={labelStyle}>Correo electrónico</label>
           <div className="relative">
             <Mail size={15} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
               style={{ color: 'rgba(255,255,255,0.3)' }} />
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+            <input id="auth-email" type="email" value={email} onChange={e => setEmail(e.target.value)}
               placeholder="tu@email.com" required autoComplete="email"
               style={{ ...inputStyle, paddingLeft: 40 }} {...focusHandlers} />
           </div>
@@ -391,7 +391,7 @@ function AuthContent() {
 
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label style={labelStyle}>Contraseña</label>
+            <label htmlFor="auth-password" style={labelStyle}>Contraseña</label>
             {screen === 'login' && (
               <button type="button" onClick={() => setScreen('forgot')}
                 className="text-xs font-medium transition-colors"
@@ -402,6 +402,7 @@ function AuthContent() {
           </div>
           <div className="relative">
             <input
+              id="auth-password"
               type={showPwd ? 'text' : 'password'}
               value={password} onChange={e => setPassword(e.target.value)}
               placeholder={screen === 'register' ? 'Mínimo 8 caracteres' : '········'}
@@ -409,6 +410,8 @@ function AuthContent() {
               autoComplete={screen === 'register' ? 'new-password' : 'current-password'}
               style={{ ...inputStyle, paddingRight: 44 }} {...focusHandlers} />
             <button type="button" onClick={() => setShowPwd(v => !v)}
+              aria-label={showPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              aria-pressed={showPwd}
               className="absolute right-4 top-1/2 -translate-y-1/2"
               style={{ color: 'rgba(255,255,255,0.3)' }}>
               {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -548,7 +551,7 @@ function SocialButton({ icon, label, loading, onClick, dark }: {
 // ── Error box ─────────────────────────────────────────────
 function ErrorBox({ msg }: { msg: string }) {
   return (
-    <div className="text-sm px-4 py-3 rounded-xl mb-4"
+    <div role="alert" aria-live="assertive" className="text-sm px-4 py-3 rounded-xl mb-4"
       style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}>
       {msg}
     </div>

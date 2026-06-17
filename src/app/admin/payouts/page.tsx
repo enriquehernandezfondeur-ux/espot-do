@@ -17,7 +17,7 @@ function CopyBtn({ text }: { text: string }) {
       onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1500) }}
       className="ml-1 opacity-50 hover:opacity-100 transition-opacity"
       title="Copiar">
-      {copied ? <Check size={11} style={{ color: '#35C493' }} /> : <Copy size={11} />}
+      {copied ? <Check size={11} style={{ color: 'var(--brand)' }} /> : <Copy size={11} />}
     </button>
   )
 }
@@ -99,7 +99,7 @@ export default function AdminPayoutsPage() {
       {toast && (
         <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
           style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
-          {toast.ok ? '✓' : '✕'} {toast.msg}
+          {toast.ok ? <Check size={15} /> : <X size={15} />} {toast.msg}
         </div>
       )}
 
@@ -154,7 +154,7 @@ export default function AdminPayoutsPage() {
                 {receipt ? (
                   <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl"
                     style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.25)' }}>
-                    <Paperclip size={13} style={{ color: '#35C493', flexShrink: 0 }} />
+                    <Paperclip size={13} style={{ color: 'var(--brand)', flexShrink: 0 }} />
                     <span className="text-sm flex-1 truncate" style={{ color: '#0F1623' }}>{receipt.file.name}</span>
                     <button onClick={() => { setReceipt(null); if (fileRef.current) fileRef.current.value = '' }}
                       style={{ color: '#9CA3AF' }}>
@@ -199,8 +199,8 @@ export default function AdminPayoutsPage() {
       <div className="flex items-start justify-between mb-8">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Banknote size={15} style={{ color: '#35C493' }} />
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#35C493' }}>
+            <Banknote size={15} style={{ color: 'var(--brand)' }} />
+            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--brand)' }}>
               Finanzas
             </span>
           </div>
@@ -250,7 +250,7 @@ export default function AdminPayoutsPage() {
         <div className="rounded-2xl p-5"
           style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <div className="flex items-center gap-2 mb-3">
-            <Banknote size={14} style={{ color: '#35C493' }} />
+            <Banknote size={14} style={{ color: 'var(--brand)' }} />
             <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#94A3B8' }}>
               Total gestionado
             </span>
@@ -304,13 +304,13 @@ export default function AdminPayoutsPage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 size={24} className="animate-spin" style={{ color: '#35C493' }} />
+            <Loader2 size={24} className="animate-spin" style={{ color: 'var(--brand)' }} />
           </div>
         ) : payouts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3"
               style={{ background: 'rgba(53,196,147,0.08)' }}>
-              <CheckCircle size={22} style={{ color: '#35C493' }} />
+              <CheckCircle size={22} style={{ color: 'var(--brand)' }} />
             </div>
             <p className="font-semibold text-sm" style={{ color: '#0F1623' }}>
               {filter === 'pending' ? '¡Todo al día!' : 'Sin payouts'}
@@ -374,7 +374,7 @@ export default function AdminPayoutsPage() {
 
                   {/* Host amount */}
                   <div>
-                    <div className="text-base font-bold" style={{ color: '#35C493' }}>
+                    <div className="text-base font-bold" style={{ color: 'var(--brand)' }}>
                       {formatCurrency(hostAmt)}
                     </div>
                     <div className="text-xs" style={{ color: '#94A3B8' }}>al propietario</div>
@@ -434,7 +434,7 @@ function BankInfo({ hostId }: { hostId?: string }) {
       <div className="text-xs font-semibold" style={{ color: '#0F1623' }}>
         {bank.bank_name}
         <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-          style={{ background: 'rgba(53,196,147,0.1)', color: '#35C493' }}>
+          style={{ background: 'rgba(53,196,147,0.1)', color: 'var(--brand)' }}>
           {bank.account_type} · {bank.currency}
         </span>
       </div>

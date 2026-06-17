@@ -161,8 +161,8 @@ export default function MigracionPage() {
             onChange={e => { setJson(e.target.value); setParseError(''); setResults(null) }}
             rows={8}
             placeholder='[{"name":"Mi Espacio",...}]'
-            className="w-full rounded-xl px-4 py-3 font-mono text-xs focus:outline-none resize-none"
-            style={{ background: 'var(--bg-elevated)', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)' }}
+            className="w-full rounded-xl px-4 py-3 font-mono focus:outline-none resize-none"
+            style={{ background: 'var(--bg-elevated)', border: '1.5px solid var(--border-medium)', color: 'var(--text-primary)', fontSize: 16 }}
           />
         </details>
 

@@ -6,7 +6,7 @@ import { formatCurrency, formatDate } from '@/lib/utils'
 import {
   Banknote, CheckCircle, Clock, Building2, User,
   CalendarDays, Copy, Check, Loader2, Filter,
-  FileText, AlertCircle, StickyNote,
+  FileText, AlertCircle, StickyNote, X,
 } from 'lucide-react'
 
 type FilterType = 'pending' | 'paid' | 'all'
@@ -24,7 +24,7 @@ function CopyBtn({ text }: { text: string }) {
   return (
     <button onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1500) }}
       className="ml-1 opacity-50 hover:opacity-100 transition-opacity" title="Copiar">
-      {copied ? <Check size={11} style={{ color: '#35C493' }} /> : <Copy size={11} />}
+      {copied ? <Check size={11} style={{ color: 'var(--brand)' }} /> : <Copy size={11} />}
     </button>
   )
 }
@@ -51,7 +51,7 @@ function BankInfo({ hostId }: { hostId?: string }) {
       <div className="text-xs font-semibold" style={{ color: '#0F1623' }}>
         {bank.bank_name}
         <span className="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full"
-          style={{ background: 'rgba(53,196,147,0.1)', color: '#35C493' }}>
+          style={{ background: 'rgba(53,196,147,0.1)', color: 'var(--brand)' }}>
           {bank.account_type} · {bank.currency}
         </span>
       </div>
@@ -116,6 +116,9 @@ export default function AdminLiquidacionesPage() {
   useEffect(() => { load() }, [filter])
 
   async function handlePay(bookingId: string) {
+    const bk = payouts.find(b => b.id === bookingId)
+    const amt = bk ? formatCurrency(Number(bk.total_amount) * 0.90) : ''
+    if (!window.confirm(`Marcar esta liquidación como PAGADA${amt ? ` (${amt} al propietario)` : ''}.\n\nEsta acción declara el pago como realizado y no se puede deshacer. ¿Continuar?`)) return
     setPaying(bookingId)
     startTransition(async () => {
       const result = await markPayoutPaid(bookingId)
@@ -137,7 +140,7 @@ export default function AdminLiquidacionesPage() {
       {toast && (
         <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
           style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
-          {toast.ok ? '✓' : '✕'} {toast.msg}
+          {toast.ok ? <Check size={15} /> : <X size={15} />} {toast.msg}
         </div>
       )}
 
@@ -145,8 +148,8 @@ export default function AdminLiquidacionesPage() {
       <div className="flex items-start justify-between mb-8">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Banknote size={15} style={{ color: '#35C493' }} />
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#35C493' }}>Finanzas</span>
+            <Banknote size={15} style={{ color: 'var(--brand)' }} />
+            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--brand)' }}>Finanzas</span>
           </div>
           <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>
             Liquidaciones a propietarios
@@ -178,7 +181,7 @@ export default function AdminLiquidacionesPage() {
         </div>
         <div className="rounded-2xl p-5" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <div className="flex items-center gap-2 mb-3">
-            <Banknote size={13} style={{ color: '#35C493' }} />
+            <Banknote size={13} style={{ color: 'var(--brand)' }} />
             <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#94A3B8' }}>Total gestionado</span>
           </div>
           <div className="text-3xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.03em' }}>{formatCurrency(totalPending + totalPaid)}</div>
@@ -219,7 +222,7 @@ export default function AdminLiquidacionesPage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 size={24} className="animate-spin" style={{ color: '#35C493' }} />
+            <Loader2 size={24} className="animate-spin" style={{ color: 'var(--brand)' }} />
           </div>
         ) : payouts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -271,7 +274,7 @@ export default function AdminLiquidacionesPage() {
 
                     {/* Net + status */}
                     <div>
-                      <div className="text-base font-bold mb-1" style={{ color: '#35C493' }}>{formatCurrency(hostAmt)}</div>
+                      <div className="text-base font-bold mb-1" style={{ color: 'var(--brand)' }}>{formatCurrency(hostAmt)}</div>
                       {(() => {
                         const sc = STATUS_COLORS[bk.payout_status]
                         return sc ? (

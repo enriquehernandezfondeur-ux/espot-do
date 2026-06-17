@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { getAdminBookings, updateBookingStatus } from '@/lib/actions/admin'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
-import { Search, ChevronDown, Loader2, CalendarDays, Clock, Users, MapPin } from 'lucide-react'
+import { Search, ChevronDown, Loader2, CalendarDays, Clock, Users, MapPin, Check, X } from 'lucide-react'
 import Pagination from '@/components/ui/Pagination'
 
 const PAGE_SIZE = 25
@@ -25,7 +25,7 @@ const statusConfig: Record<string, { label: string; color: string; bg: string }>
   pending:         { label: 'Pendiente',    color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
   accepted:        { label: 'Por pagar',    color: '#2563EB', bg: 'rgba(37,99,235,0.1)'   },
   confirmed:       { label: 'Confirmada',   color: '#16A34A', bg: 'rgba(22,163,74,0.1)'   },
-  completed:       { label: 'Completada',   color: '#35C493', bg: 'rgba(53,196,147,0.1)'  },
+  completed:       { label: 'Completada',   color: 'var(--brand)', bg: 'rgba(53,196,147,0.1)'  },
   rejected:        { label: 'Rechazada',    color: '#DC2626', bg: 'rgba(220,38,38,0.1)'   },
   cancelled_guest: { label: 'Cancelada',    color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },
   cancelled_host:  { label: 'Cancelada',    color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },
@@ -81,7 +81,7 @@ export default function AdminReservasPage() {
       {toast && (
         <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
           style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
-          {toast.ok ? '✓' : '✕'} {toast.msg}
+          {toast.ok ? <Check size={15} /> : <X size={15} />} {toast.msg}
         </div>
       )}
       <div className="mb-8">
@@ -262,7 +262,7 @@ export default function AdminReservasPage() {
                         disabled={updating === selected.id || selected.status === status}
                         className="text-xs font-semibold px-3 py-2 rounded-lg transition-all disabled:opacity-40"
                         style={selected.status === status
-                          ? { background: s.bg, color: s.color, border: `1px solid ${s.color}30` }
+                          ? { background: s.bg, color: s.color, border: `1px solid color-mix(in srgb, ${s.color} 19%, transparent)` }
                           : { background: '#F4F6F8', color: '#6B7280', border: '1px solid #E8ECF0' }}>
                         {s.label}
                       </button>

@@ -12,7 +12,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
   pending:          { label: 'Pendiente',   color: '#D97706', bg: 'rgba(217,119,6,0.1)',    dot: '#D97706' },
   accepted:         { label: 'Aceptada',    color: '#2563EB', bg: 'rgba(37,99,235,0.1)',    dot: '#2563EB' },
   confirmed:        { label: 'Confirmada',  color: '#16A34A', bg: 'rgba(22,163,74,0.1)',    dot: '#16A34A' },
-  completed:        { label: 'Completada',  color: '#35C493', bg: 'rgba(53,196,147,0.1)',   dot: '#35C493' },
+  completed:        { label: 'Completada',  color: 'var(--brand)', bg: 'rgba(53,196,147,0.1)',   dot: 'var(--brand)' },
   rejected:         { label: 'Rechazada',   color: '#DC2626', bg: 'rgba(220,38,38,0.08)',   dot: '#DC2626' },
   cancelled_guest:  { label: 'Cancelada',   color: '#6B7280', bg: 'rgba(107,114,128,0.08)', dot: '#6B7280' },
   cancelled_host:   { label: 'Cancelada',   color: '#6B7280', bg: 'rgba(107,114,128,0.08)', dot: '#6B7280' },
@@ -55,7 +55,7 @@ export default async function AdminDashboard() {
   const alerts = [
     stats?.pendingSpaces  && stats.pendingSpaces  > 0 && { label: `${stats.pendingSpaces} espacio${stats.pendingSpaces > 1 ? 's' : ''} por aprobar`,   href: '/admin/espacios?status=pending', color: '#F59E0B', icon: Building2 },
     stats?.pendingBookings && stats.pendingBookings > 0 && { label: `${stats.pendingBookings} reserva${stats.pendingBookings > 1 ? 's' : ''} pendiente${stats.pendingBookings > 1 ? 's' : ''}`, href: '/admin/reservas?status=pending', color: '#3B82F6', icon: CalendarDays },
-    pendingPayouts.length  > 0 && { label: `${pendingPayouts.length} payout${pendingPayouts.length > 1 ? 's' : ''} pendiente${pendingPayouts.length > 1 ? 's' : ''} — ${formatCurrency(pendingPayoutTotal)}`, href: '/admin/payouts', color: '#35C493', icon: Banknote },
+    pendingPayouts.length  > 0 && { label: `${pendingPayouts.length} payout${pendingPayouts.length > 1 ? 's' : ''} pendiente${pendingPayouts.length > 1 ? 's' : ''} — ${formatCurrency(pendingPayoutTotal)}`, href: '/admin/payouts', color: 'var(--brand)', icon: Banknote },
   ].filter(Boolean) as { label: string; href: string; color: string; icon: React.ElementType }[]
 
   return (
@@ -65,8 +65,8 @@ export default async function AdminDashboard() {
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 mb-0.5">
-            <Shield size={14} style={{ color: '#35C493' }} />
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#35C493' }}>
+            <Shield size={14} style={{ color: 'var(--brand)' }} />
+            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--brand)' }}>
               Admin Console
             </span>
           </div>
@@ -83,7 +83,7 @@ export default async function AdminDashboard() {
           </Link>
           <Link href="/admin/payouts"
             className="flex items-center gap-2 text-xs md:text-sm font-semibold px-3 md:px-4 py-2 md:py-2.5 rounded-xl transition-all"
-            style={{ background: '#35C493', color: '#0B0F0E' }}>
+            style={{ background: 'var(--brand)', color: '#0B0F0E' }}>
             <Banknote size={13} /> Payouts
           </Link>
         </div>
@@ -106,7 +106,7 @@ export default async function AdminDashboard() {
                 className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50 transition-colors group">
                 <div className="flex items-center gap-3">
                   <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                    style={{ background: `${color}12` }}>
+                    style={{ background: `color-mix(in srgb, ${color} 7%, transparent)` }}>
                     <Icon size={13} style={{ color }} />
                   </div>
                   <span className="text-sm font-medium" style={{ color: '#0F1623' }}>{label}</span>
@@ -124,7 +124,7 @@ export default async function AdminDashboard() {
           { label: 'Espacios',      value: stats?.totalSpaces ?? 0,    sub: `${stats?.pendingSpaces ?? 0} por aprobar`,    icon: Building2,   color: '#7C3AED', href: '/admin/espacios', format: 'num',      featured: false },
           { label: 'Reservas',      value: stats?.totalBookings ?? 0,  sub: `${stats?.pendingBookings ?? 0} pendientes`,   icon: CalendarDays,color: '#2563EB', href: '/admin/reservas', format: 'num',      featured: false },
           { label: 'Usuarios',      value: stats?.totalUsers ?? 0,     sub: `${stats?.totalHosts ?? 0} propietarios`,     icon: Users,       color: '#16A34A', href: '/admin/usuarios', format: 'num',      featured: false },
-          { label: 'Ingresos mes',  value: stats?.monthlyRevenue ?? 0, sub: 'comisión este mes',                          icon: TrendingUp,  color: '#35C493', href: '/admin/pagos',    format: 'currency', featured: true  },
+          { label: 'Ingresos mes',  value: stats?.monthlyRevenue ?? 0, sub: 'comisión este mes',                          icon: TrendingUp,  color: 'var(--brand)', href: '/admin/pagos',    format: 'currency', featured: true  },
           { label: 'Total comisión',value: stats?.totalRevenue ?? 0,   sub: 'histórico acumulado',                        icon: CreditCard,  color: '#0EA5E9', href: '/admin/pagos',    format: 'currency', featured: false },
           { label: 'Payouts pend.', value: pendingPayoutTotal,         sub: `${pendingPayouts.length} propietarios`,      icon: Banknote,    color: '#F59E0B', href: '/admin/payouts',  format: 'currency', featured: false,
             urgent: pendingPayouts.length > 0 },
@@ -135,13 +135,13 @@ export default async function AdminDashboard() {
               background: urgent ? 'rgba(245,158,11,0.04)' : '#fff',
               border: featured ? '1px solid rgba(53,196,147,0.3)' : urgent ? '1px solid rgba(245,158,11,0.3)' : '1px solid #E8ECF0',
               boxShadow: featured ? '0 4px 16px rgba(53,196,147,0.12)' : '0 2px 8px rgba(0,0,0,0.06)',
-              borderTop: featured ? '3px solid #35C493' : urgent ? '3px solid #F59E0B' : undefined,
+              borderTop: featured ? '3px solid var(--brand)' : urgent ? '3px solid #F59E0B' : undefined,
             }}>
             <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-3"
-              style={{ background: `${color}14` }}>
+              style={{ background: `color-mix(in srgb, ${color} 8%, transparent)` }}>
               <Icon size={15} style={{ color }} />
             </div>
-            <div className="text-xl font-bold mb-0.5" style={{ color: featured ? '#35C493' : '#0F1623', letterSpacing: '-0.02em' }}>
+            <div className="text-xl font-bold mb-0.5" style={{ color: featured ? 'var(--brand)' : '#0F1623', letterSpacing: '-0.02em' }}>
               {format === 'currency' ? formatCurrency(value as number) : value}
             </div>
             <div className="text-xs font-semibold mb-0.5" style={{ color: '#374151' }}>{label}</div>
@@ -159,11 +159,11 @@ export default async function AdminDashboard() {
           <div className="flex items-center justify-between px-6 py-4"
             style={{ borderBottom: '1px solid #F0F2F5' }}>
             <div className="flex items-center gap-2">
-              <Activity size={15} style={{ color: '#35C493' }} />
+              <Activity size={15} style={{ color: 'var(--brand)' }} />
               <h2 className="font-bold text-sm" style={{ color: '#0F1623' }}>Actividad reciente</h2>
             </div>
             <Link href="/admin/reservas"
-              className="text-xs font-semibold" style={{ color: '#35C493' }}>
+              className="text-xs font-semibold" style={{ color: 'var(--brand)' }}>
               Ver todas →
             </Link>
           </div>
@@ -215,7 +215,7 @@ export default async function AdminDashboard() {
           <div className="rounded-2xl p-5"
             style={{ background: 'linear-gradient(135deg, #0A1019 0%, #0F2A22 100%)', boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}>
             <div className="flex items-center gap-2 mb-4">
-              <TrendingUp size={14} style={{ color: '#35C493' }} />
+              <TrendingUp size={14} style={{ color: 'var(--brand)' }} />
               <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>
                 Comisión este mes
               </span>
@@ -231,7 +231,7 @@ export default async function AdminDashboard() {
                 {stats?.totalBookings ?? 0} reservas en total
               </span>
               <Link href="/admin/reportes"
-                className="text-xs font-semibold" style={{ color: '#35C493' }}>
+                className="text-xs font-semibold" style={{ color: 'var(--brand)' }}>
                 Ver reportes →
               </Link>
             </div>
@@ -256,7 +256,7 @@ export default async function AdminDashboard() {
               <Link key={href} href={href}
                 className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 transition-colors group"
                 style={{ borderBottom: '1px solid #F8FAFC' }}>
-                <Icon size={14} style={{ color: '#35C493' }} />
+                <Icon size={14} style={{ color: 'var(--brand)' }} />
                 <span className="text-sm font-medium flex-1" style={{ color: '#374151' }}>{label}</span>
                 {badge > 0 ? (
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center"

@@ -1008,9 +1008,10 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                     </div>
                   )}
                   <div className={`grid grid-cols-2 xl:grid-cols-3 gap-5 pb-6 transition-opacity${availLoading ? ' opacity-50' : ''}`}>
-                    {filtered.map(space => (
+                    {filtered.map((space, i) => (
                       <SpaceCard key={space.id} space={space} isHovered={hoveredId === space.id}
                         onHover={handleCardHover} dateFilter={dateFrom || undefined} timeFilter={timeFrom || undefined}
+                        eager={i < 6}
                         isAvailable={dateFrom ? !blockedIds.has(space.id) : undefined} />
                     ))}
                   </div>
@@ -1056,9 +1057,10 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
               : (
                 <div className="grid grid-cols-1 gap-4 w-full"
                   style={{ paddingBottom: hasMore ? '1rem' : 'calc(6rem + env(safe-area-inset-bottom, 0px))' }}>
-                  {filtered.map(space => (
+                  {filtered.map((space, i) => (
                     <SpaceCard key={space.id} space={space} isHovered={false} onHover={() => {}}
                       dateFilter={dateFrom || undefined} timeFilter={timeFrom || undefined}
+                      eager={i < 3}
                       isAvailable={dateFrom ? !blockedIds.has(space.id) : undefined} />
                   ))}
                   {hasMore && (
@@ -1203,7 +1205,8 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
         <>
           <div className="fixed inset-0 z-[49] bg-black/50 backdrop-blur-sm" onClick={() => { setMoreOpen(false); setActQ('') }} />
           {/* Bottom sheet en móvil / drawer lateral en desktop */}
-          <div className="fixed z-50 flex flex-col overflow-hidden
+          <div role="dialog" aria-modal="true" aria-label="Filtros de búsqueda"
+            className="fixed z-50 flex flex-col overflow-hidden
             bottom-0 left-0 right-0 rounded-t-3xl max-h-[88dvh]
             md:bottom-auto md:right-0 md:top-0 md:left-auto md:h-full md:w-full md:max-w-md md:rounded-none"
             style={{ background: '#fff', boxShadow: '0 -8px 40px rgba(0,0,0,0.15)' }}>

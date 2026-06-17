@@ -3,6 +3,7 @@ import { Metadata } from 'next'
 import { getExternalEventForPayment } from '@/lib/actions/external-events'
 import PaymentClient from './PaymentClient'
 import { formatCurrency, formatDate } from '@/lib/utils'
+import { CheckCircle2 } from 'lucide-react'
 
 interface Props {
   params: Promise<{ eventId: string }>
@@ -89,7 +90,7 @@ export default async function DirectEventPaymentPage({ params }: Props) {
 
             {remaining === 0 && ev.total_amount > 0 && (
               <div style={{ marginTop: 12, background: '#F0FDF4', border: '1.5px solid #86EFAC', borderRadius: 14, padding: '14px 16px', textAlign: 'center' }}>
-                <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#16A34A' }}>✓ Pago completado</p>
+                <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#16A34A', display: 'inline-flex', alignItems: 'center', gap: 6 }}><CheckCircle2 size={15} /> Pago completado</p>
               </div>
             )}
           </div>

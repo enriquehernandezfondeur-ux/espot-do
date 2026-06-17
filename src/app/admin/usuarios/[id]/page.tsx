@@ -63,7 +63,7 @@ function KpiCard({ label, value, sub, color, icon: Icon }: {
   return (
     <div className="rounded-2xl p-4" style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
       <div className="flex items-center gap-2 mb-2">
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${color}18` }}>
+        <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `color-mix(in srgb, ${color} 9%, transparent)` }}>
           <Icon size={13} style={{ color }} />
         </div>
         <span className="text-xs text-gray-400 font-medium">{label}</span>
@@ -107,7 +107,7 @@ export default function AdminHostDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-7 h-7 animate-spin" style={{ color: '#35C493' }} />
+        <Loader2 className="w-7 h-7 animate-spin" style={{ color: 'var(--brand)' }} />
       </div>
     )
   }
@@ -151,7 +151,7 @@ export default function AdminHostDetailPage() {
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           {/* Avatar */}
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-bold shrink-0"
-            style={{ background: 'linear-gradient(135deg, #35C493, #1a9e70)' }}>
+            style={{ background: 'linear-gradient(135deg, var(--brand), #1a9e70)' }}>
             {profile.full_name?.charAt(0)?.toUpperCase() ?? '?'}
           </div>
           <div className="flex-1 min-w-0">
@@ -181,7 +181,7 @@ export default function AdminHostDetailPage() {
 
       {/* ── KPIs ──────────────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <KpiCard label="Ingresos totales"    value={fmtCurrency(totalRevenue)}  sub={`${fmtCurrency(espotRevenue)} Espot + ${fmtCurrency(directRevenue)} Directo`} color="#35C493" icon={TrendingUp} />
+        <KpiCard label="Ingresos totales"    value={fmtCurrency(totalRevenue)}  sub={`${fmtCurrency(espotRevenue)} Espot + ${fmtCurrency(directRevenue)} Directo`} color="var(--brand)" icon={TrendingUp} />
         <KpiCard label="Neto host (Espot)"   value={fmtCurrency(hostNet)}       sub={`Comisión Espot: ${fmtCurrency(espotFees)}`} color="#2563EB" icon={Banknote} />
         <KpiCard label="Por liquidar"        value={fmtCurrency(pendingPayout)} sub="Reservas Espot pendientes" color="#D97706" icon={Clock} />
         <KpiCard label="Total eventos"       value={totalEvents}                sub={`${spaces.length} espacios · ${activeSpaces} activos`} color="#7C3AED" icon={Users} />

@@ -42,7 +42,7 @@ export default function PaymentClient({ eventId, bank, remaining, hostName }: Pr
 
   const inputStyle: React.CSSProperties = {
     width: '100%', background: '#F9FAFB', border: '1.5px solid #E8ECF0',
-    borderRadius: 10, padding: '10px 14px', fontSize: 14,
+    borderRadius: 10, padding: '10px 14px', fontSize: 16,
     color: '#0F1623', outline: 'none', boxSizing: 'border-box',
     fontFamily: 'inherit', resize: 'vertical',
   }

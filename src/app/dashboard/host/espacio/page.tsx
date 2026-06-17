@@ -1587,7 +1587,7 @@ export default function EspacioPage() {
                     }>
                     {(() => { const I = item.icon as any; return <I size={16} style={{ color: item.value ? 'var(--brand)' : 'var(--text-muted)' }} /> })()}
                     <span className="text-xs font-medium leading-tight">{item.label}</span>
-                    {item.value && <span className="ml-auto text-xs font-bold" style={{ color: 'var(--brand)' }}>✓</span>}
+                    {item.value && <CheckCircle size={14} className="ml-auto" style={{ color: 'var(--brand)' }} />}
                   </button>
                 ))}
               </div>
@@ -1826,7 +1826,7 @@ export default function EspacioPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>⚡ Reserva instantánea</span>
+                    <span className="text-sm font-bold inline-flex items-center gap-1.5" style={{ color: 'var(--text-primary)' }}><Zap size={15} style={{ color: 'var(--brand)' }} /> Reserva instantánea</span>
                     {instantBooking && (
                       <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
                         style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)' }}>Activa</span>

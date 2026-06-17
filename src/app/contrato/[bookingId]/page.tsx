@@ -39,9 +39,8 @@ export default async function ContratoPage({ params }: { params: Promise<{ booki
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Poppins', sans-serif; color: #1a1a1a; background: #f4f6f5; font-size: 15px; line-height: 1.6; }
+        body { font-family: var(--font-poppins), 'Poppins', sans-serif; color: #1a1a1a; background: #f4f6f5; font-size: 15px; line-height: 1.6; }
         .page { max-width: 720px; margin: 32px auto; padding: 48px; background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
         h1 { font-size: 20px; text-align: center; margin-bottom: 4px; letter-spacing: -0.02em; font-weight: 700; }
         .subtitle { text-align: center; color: #888; margin-bottom: 28px; font-size: 12px; }

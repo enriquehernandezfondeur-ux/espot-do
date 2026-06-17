@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
-  LogOut, Building2, Menu, X, Search, Shield, User, Bell,
+  LogOut, Building2, Menu, X, Search, Shield, User, Bell, Loader2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { LucideIcon } from 'lucide-react'
@@ -92,6 +92,7 @@ export default function AppSidebar({
   const supabaseRef = useRef(createClient())
   const [mobileOpen, setMobileOpen] = useState(false)
   const [bellOpen,   setBellOpen]   = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
 
   const activeNotifs = (notifications ?? []).filter(n => n.count > 0)
 
@@ -101,6 +102,8 @@ export default function AppSidebar({
   }, [mobileOpen])
 
   async function handleLogout() {
+    if (loggingOut) return
+    setLoggingOut(true)
     await supabaseRef.current.auth.signOut()
     router.push(logoutRedirect)
   }
@@ -124,6 +127,7 @@ export default function AppSidebar({
             className="md:hidden p-2 rounded-lg"
             style={{ color: 'var(--text-muted)' }}
             onClick={() => setMobileOpen(false)}
+            aria-label="Cerrar menú"
           >
             <X size={20} />
           </button>
@@ -225,13 +229,13 @@ export default function AppSidebar({
 
       {/* Logout */}
       <div className="px-3 pb-5">
-        <button onClick={handleLogout}
-          className={`flex items-center gap-3 px-3 py-3 ${logoutRoundedClass} text-sm w-full text-left transition-all`}
+        <button onClick={handleLogout} disabled={loggingOut}
+          className={`flex items-center gap-3 px-3 py-3 ${logoutRoundedClass} text-sm w-full text-left transition-all disabled:opacity-60`}
           style={{ color: 'var(--text-muted)' }}
           onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = '#f87171')}
           onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'var(--text-muted)')}>
-          <LogOut size={15} />
-          Cerrar sesión
+          {loggingOut ? <Loader2 size={15} className="animate-spin" /> : <LogOut size={15} />}
+          {loggingOut ? 'Cerrando...' : 'Cerrar sesión'}
         </button>
       </div>
     </>

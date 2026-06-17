@@ -129,7 +129,7 @@ export default async function AplicacionesPage({
                         style={{ border: '1px solid #E5E7EB' }} />
                     ) : (
                       <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold text-white shrink-0"
-                        style={{ background: '#35C493' }}>
+                        style={{ background: 'var(--brand)' }}>
                         {(user?.full_name ?? 'A').charAt(0).toUpperCase()}
                       </div>
                     )}

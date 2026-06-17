@@ -249,7 +249,8 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
         <>
           <div className="lg:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
             onClick={() => setShowMobileWidget(false)} />
-          <div className="lg:hidden fixed inset-x-0 bottom-0 z-50 rounded-t-3xl overflow-hidden slide-in-bottom"
+          <div role="dialog" aria-modal="true" aria-label="Reservar espacio"
+            className="lg:hidden fixed inset-x-0 bottom-0 z-50 rounded-t-3xl overflow-hidden slide-in-bottom"
             style={{ background: 'var(--bg-base)', maxHeight: '92dvh', overflowY: 'auto' }}>
             <div className="flex items-center justify-between px-5 pt-4 pb-3 sticky top-0"
               style={{ background: 'var(--bg-base)', borderBottom: '1px solid var(--border-subtle)', zIndex: 1 }}>
@@ -576,6 +577,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
         {/* ── Lightbox de fotos ── */}
         {showLightbox && images.length > 0 && (
           <div
+            role="dialog" aria-modal="true" aria-label="Galería de fotos"
             className="fixed inset-0 z-[60] flex flex-col items-center justify-center"
             style={{ background: 'rgba(0,0,0,0.96)', backdropFilter: 'blur(4px)' }}
             onClick={() => setShowLightbox(false)}>

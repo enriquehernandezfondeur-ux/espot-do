@@ -38,7 +38,7 @@ export default function AdminError({ error, reset }: { error: Error & { digest?:
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '12px 24px', borderRadius: 14, fontWeight: 700,
-              fontSize: 14, background: '#35C493', color: '#060D09',
+              fontSize: 14, background: 'var(--brand)', color: '#060D09',
               border: 'none', cursor: 'pointer',
             }}>
             Reintentar
