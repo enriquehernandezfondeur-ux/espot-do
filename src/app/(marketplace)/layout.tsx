@@ -78,6 +78,32 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
     return () => { isMounted = false; subscription.unsubscribe() }
   }, [])
 
+  // Mantener el punto del avatar en sync: realtime de mensajes + evento "leído"
+  // (antes solo se actualizaba en onAuthStateChange, así que quedaba pegado)
+  useEffect(() => {
+    const supabase = createClient()
+    let channel: ReturnType<typeof supabase.channel> | null = null
+    let uid: string | null = null
+    const refresh = () => { if (uid) fetchNotifCount(uid) }
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return
+      uid = user.id
+      channel = supabase
+        .channel(`mkt-notif:${uid}`)
+        .on('postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${uid}` },
+          refresh)
+        .subscribe()
+    })
+
+    window.addEventListener('espot:messages-read', refresh)
+    return () => {
+      window.removeEventListener('espot:messages-read', refresh)
+      if (channel) supabase.removeChannel(channel)
+    }
+  }, [])
+
   async function fetchNotifCount(uid: string) {
     const supabase = createClient()
     const { count } = await supabase

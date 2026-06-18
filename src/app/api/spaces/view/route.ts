@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { todayInRD } from '@/lib/utils'
 
 // POST /api/spaces/view
 // Registra una vista al espacio. Incrementa el contador del día actual.
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
       .maybeSingle()
     if (!space) return NextResponse.json({ ok: false })
 
-    const today = new Date().toISOString().split('T')[0]
+    const today = todayInRD()
 
     // Intentar incrementar si ya existe el registro para hoy
     const { data: existing } = await supabase

@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
 
   const commissionPct = 10
   const commissionAmt = Math.round(totalAmount * 0.10)
-  const netToHost     = Math.round(totalAmount * 0.90)
+  const netToHost     = totalAmount - commissionAmt   // deriva el neto: comisión + neto = total exacto
 
   // Si es pago de cuota específica, marcarla como pagada (valida el monto cobrado)
   if (cuotaId) {

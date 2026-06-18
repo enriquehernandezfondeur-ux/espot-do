@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { resolveHostAccess } from './_resolveHost'
 import { revalidatePath } from 'next/cache'
 import { sendEmail } from '@/lib/email/send'
+import { todayInRD } from '@/lib/utils'
 import { emailBase, infoBox } from '@/lib/email/templates'
 import { escapeHtml, formatDate } from '@/lib/utils'
 
@@ -143,7 +144,7 @@ export async function getUserPendingReview(_userId?: string): Promise<{
     .eq('guest_id', user.id)
     .eq('status', 'confirmed')
     .in('payment_status', ['advance', 'partial', 'paid'])
-    .lt('event_date', new Date().toISOString().split('T')[0])
+    .lt('event_date', todayInRD())
     .order('event_date', { ascending: false })
     .limit(10)
 
@@ -187,7 +188,7 @@ export async function submitReview(data: {
 
   if (data.rating < 1 || data.rating > 5) return { error: 'Rating inválido' }
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = todayInRD()
   const { data: booking } = await supabase
     .from('bookings').select('event_date, guest_id, status, space_id').eq('id', data.bookingId).single()
   if (!booking || booking.guest_id !== user.id) return { error: 'Reserva no encontrada' }

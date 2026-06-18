@@ -809,7 +809,7 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
   const [receiptFile, setReceiptFile] = useState<File | null>(null)
   const [payForm,     setPayForm]     = useState({
     amount: '', method: 'efectivo' as ExternalPaymentMethod,
-    date: new Date().toISOString().slice(0, 10), notes: '', is_deposit: false,
+    date: todayInRD(), notes: '', is_deposit: false,
   })
   const supabaseRef = useRef(createClient())
 
@@ -865,7 +865,7 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
       onUpdated({ ...event, paid_amount: newPaid, payments: [...(event.payments ?? []), (r as any).data] })
       setShowPay(false)
       setReceiptFile(null)
-      setPayForm({ amount: '', method: 'efectivo', date: new Date().toISOString().slice(0, 10), notes: '', is_deposit: false })
+      setPayForm({ amount: '', method: 'efectivo', date: todayInRD(), notes: '', is_deposit: false })
       showToast('Pago registrado', true)
     }
     setSaving(false)

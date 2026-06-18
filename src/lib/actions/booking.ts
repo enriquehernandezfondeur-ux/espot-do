@@ -203,6 +203,30 @@ export async function createBooking(payload: CreateBookingPayload) {
     }
   }
 
+  // Validar bloqueos manuales del host (space_availability) — nunca ignorar un bloqueo.
+  // El BookingWidget ya los respeta en la UI; aquí cerramos el chequeo en el servidor.
+  {
+    const { data: blocks } = await supabase
+      .from('space_availability')
+      .select('start_time, end_time, block_type')
+      .eq('space_id', payload.spaceId)
+      .eq('blocked_date', payload.eventDate)
+    if (blocks && blocks.length > 0) {
+      const fullDayBlocked = blocks.some(b => b.block_type === 'full_day' || !b.start_time || !b.end_time)
+      // Si el día está bloqueado completo, o la reserva no tiene horario real (toma el día), cualquier bloqueo choca.
+      if (fullDayBlocked || !hasRealTime) {
+        return { error: 'El propietario bloqueó esta fecha. Por favor elige otra fecha.' }
+      }
+      // Bloqueo parcial vs horario solicitado: solapamiento estándar [inicio, fin)
+      const s = payload.startTime!, e = payload.endTime!
+      const overlapsBlock = blocks.some(b =>
+        s < b.end_time!.slice(0, 5) && e > b.start_time!.slice(0, 5))
+      if (overlapsBlock) {
+        return { error: 'El propietario bloqueó ese horario. Por favor elige otro horario o fecha.' }
+      }
+    }
+  }
+
   // Determinar si es cotización o reserva instantánea
   let isQuote = false
   if (payload.pricingId) {
@@ -588,7 +612,7 @@ export async function confirmPayment(bookingId: string) {
   // que sí la crea; antes el pago manual no aparecía en liquidaciones)
   const totalAmount   = Number(bk.total_amount)
   const commissionAmt = Math.round(totalAmount * 0.10)
-  const netToHost     = Math.round(totalAmount * 0.90)
+  const netToHost     = totalAmount - commissionAmt   // deriva el neto: comisión + neto = total exacto
   const { error: liqErr } = await admin.from('liquidaciones').upsert({
     booking_id:       bookingId,
     host_id:          space?.host_id,
@@ -697,8 +721,10 @@ export async function cancelBooking(bookingId: string, reason?: string, refundBa
   if (!bk) return { error: 'Reserva no encontrada' }
 
   const space   = bk.spaces as any
+  // Resolver host real (incluye miembros de equipo), igual que accept/reject/confirm
+  const { hostId } = await resolveHostId(supabase, user.id)
   const isGuest = bk.guest_id === user.id
-  const isHost  = space?.host_id === user.id
+  const isHost  = space?.host_id === hostId
 
   if (!isGuest && !isHost) return { error: 'No autorizado' }
 

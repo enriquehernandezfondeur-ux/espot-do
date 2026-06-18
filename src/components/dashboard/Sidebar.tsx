@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import AppSidebar from '@/components/shared/AppSidebar'
 import { createClient } from '@/lib/supabase/client'
+import { todayInRD } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
 
 const BASE_NAV = [
@@ -86,10 +87,10 @@ export default function Sidebar({ userName, avatarUrl, isAdmin, isOwner = true, 
         const spaceIds = spaces?.map((s: any) => s.id) ?? []
         if (spaceIds.length > 0) {
           supabase.from('bookings').select('id', { count: 'exact', head: true })
-            .in('space_id', spaceIds).eq('status', 'pending')
+            .in('space_id', spaceIds).eq('status', 'pending').gte('event_date', todayInRD())
             .then(({ count }) => setReservasCount(count ?? 0))
           supabase.from('bookings').select('id', { count: 'exact', head: true })
-            .in('space_id', spaceIds).eq('status', 'quote_requested')
+            .in('space_id', spaceIds).eq('status', 'quote_requested').gte('event_date', todayInRD())
             .then(({ count }) => setCotizCount(count ?? 0))
         }
       })
@@ -119,12 +120,12 @@ export default function Sidebar({ userName, avatarUrl, isAdmin, isOwner = true, 
       if (spaceIds.length > 0) {
         // Reservas pendientes de respuesta
         supabase.from('bookings').select('id', { count: 'exact', head: true })
-          .in('space_id', spaceIds).eq('status', 'pending')
+          .in('space_id', spaceIds).eq('status', 'pending').gte('event_date', todayInRD())
           .then(({ count }) => setReservasCount(count ?? 0))
 
         // Cotizaciones pendientes
         supabase.from('bookings').select('id', { count: 'exact', head: true })
-          .in('space_id', spaceIds).eq('status', 'quote_requested')
+          .in('space_id', spaceIds).eq('status', 'quote_requested').gte('event_date', todayInRD())
           .then(({ count }) => setCotizCount(count ?? 0))
       }
 
@@ -139,8 +140,8 @@ export default function Sidebar({ userName, avatarUrl, isAdmin, isOwner = true, 
           async () => {
             if (spaceIds.length === 0) return
             const [{ count: r }, { count: q }] = await Promise.all([
-              supabase.from('bookings').select('id', { count: 'exact', head: true }).in('space_id', spaceIds).eq('status', 'pending'),
-              supabase.from('bookings').select('id', { count: 'exact', head: true }).in('space_id', spaceIds).eq('status', 'quote_requested'),
+              supabase.from('bookings').select('id', { count: 'exact', head: true }).in('space_id', spaceIds).eq('status', 'pending').gte('event_date', todayInRD()),
+              supabase.from('bookings').select('id', { count: 'exact', head: true }).in('space_id', spaceIds).eq('status', 'quote_requested').gte('event_date', todayInRD()),
             ])
             setReservasCount(r ?? 0)
             setCotizCount(q ?? 0)

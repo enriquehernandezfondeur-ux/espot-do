@@ -90,8 +90,8 @@ const DATE_FILTERS = [
 ]
 
 function daysFromNow(dateStr: string): { label: string; urgent: boolean; isPast: boolean } {
-  const d = new Date(dateStr + 'T12:00')
-  const today = new Date(); today.setHours(0, 0, 0, 0)
+  const d = new Date(dateStr + 'T12:00:00Z')
+  const today = new Date(todayInRD() + 'T12:00:00Z')
   const diff = Math.round((d.getTime() - today.getTime()) / 86400000)
   if (diff === 0) return { label: 'Hoy',                          urgent: true,  isPast: false }
   if (diff === 1) return { label: 'Mañana',                       urgent: true,  isPast: false }
