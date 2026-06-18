@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { CalendarDays, Clock, Users, MapPin, ChevronRight, Loader2, Search, CreditCard, CheckCircle, X, AlertTriangle, Building2, Star, MessageCircle, ExternalLink, Bell, Check } from 'lucide-react'
-import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
+import { formatCurrency, formatDate, formatTime, todayInRD } from '@/lib/utils'
 import { getClientBookings } from '@/lib/actions/client'
 import { STATUS_LABELS, STATUS_COLORS, isPaid } from '@/lib/bookingConfig'
 import { cn } from '@/lib/utils'
@@ -125,7 +125,7 @@ export default function MisReservasPage() {
       setReviewed(reviewedIds)
       setLoading(false)
       // Auto-expandir la próxima reserva activa al cargar
-      const todayStr = new Date().toISOString().split('T')[0]
+      const todayStr = todayInRD()
       const ACTIVE = ['pending', 'quote_requested', 'accepted', 'confirmed']
       const next = bookingsData
         .filter(b => b.event_date >= todayStr && ACTIVE.includes(b.status))
@@ -147,7 +147,7 @@ export default function MisReservasPage() {
     return () => document.removeEventListener('keydown', onKey)
   }, [cancelModal])
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = todayInRD()
 
   const filterCounts: Record<string, number> = {
     'Pendientes':   bookings.filter(b => b.status === 'pending').length,
@@ -316,8 +316,8 @@ export default function MisReservasPage() {
                     <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: 'var(--brand)', flexShrink: 0 }} />
                     <span className="text-xs font-bold" style={{ color: 'var(--brand)' }}>
                       {(() => {
-                        const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1)
-                        const tomorrowStr = tomorrow.toISOString().split('T')[0]
+                        const t = new Date(today + 'T12:00:00Z'); t.setUTCDate(t.getUTCDate() + 1)
+                        const tomorrowStr = t.toISOString().split('T')[0]
                         if (bk.event_date === today) return 'Tu próxima reserva — ¡Hoy!'
                         if (bk.event_date === tomorrowStr) return 'Tu próxima reserva — Mañana'
                         const days = Math.round((new Date(bk.event_date + 'T12:00').getTime() - new Date(today + 'T12:00').getTime()) / 86400000)

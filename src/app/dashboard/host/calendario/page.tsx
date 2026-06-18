@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight, Building2, Lock, Loader2, Plus, X, Clock, Users, CheckCircle, Calendar, Link2, Link2Off, Printer, LayoutList, CalendarDays } from 'lucide-react'
-import { cn, formatCurrency } from '@/lib/utils'
+import { cn, formatCurrency, todayInRD } from '@/lib/utils'
 import { getHostCalendarBookings, getHostSpaces, getSpaceAvailability, createAvailabilityBlock, deleteAvailabilityBlock, getOrCreateIcalToken, getGoogleCalendarStatus, disconnectGoogleCalendar } from '@/lib/actions/host'
 import { getExternalEvents } from '@/lib/actions/external-events'
 import type { ExternalEvent } from '@/types'
@@ -445,9 +445,9 @@ export default function CalendarioPage() {
               const dayBk  = bookingsByDate[dk] ?? []
               const dayExt = externalByDate[dk]  ?? []
               const dayBl  = blockedSlots[dk]    ?? []
-              const isToday      = dk === today.toISOString().split('T')[0]
+              const isToday      = dk === todayInRD()
               const isSel        = selected === dk
-              const isPast       = new Date(dk + 'T12:00') < new Date(today.toISOString().split('T')[0] + 'T12:00')
+              const isPast       = new Date(dk + 'T12:00') < new Date(todayInRD() + 'T12:00')
               const hasConfirmed = dayBk.some(b => b.status === 'confirmed')
               const hasPending   = dayBk.some(b => b.status === 'pending')
               const hasExternal  = dayExt.length > 0
@@ -692,7 +692,7 @@ export default function CalendarioPage() {
 
           {/* Próximos eventos */}
           {(() => {
-            const todayStr = today.toISOString().split('T')[0]
+            const todayStr = todayInRD()
             type UpcomingItem =
               | { kind: 'espot';   date: string; b: CalBooking }
               | { kind: 'manual';  date: string; ev: ExternalEvent }

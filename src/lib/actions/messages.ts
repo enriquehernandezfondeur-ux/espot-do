@@ -207,3 +207,16 @@ export async function markMessagesRead(spaceId: string, otherId?: string) {
   if (otherId) q = q.eq('sender_id', otherId)
   await q
 }
+
+/** Marca TODOS los mensajes recibidos sin leer como leídos (al abrir la bandeja). */
+export async function markAllMessagesRead() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  await supabase
+    .from('messages')
+    .update({ read_at: new Date().toISOString() })
+    .eq('receiver_id', user.id)
+    .is('read_at', null)
+}

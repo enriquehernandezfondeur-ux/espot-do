@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createFromPublicForm } from '@/lib/actions/external-events'
+import { todayInRD } from '@/lib/utils'
 import { CalendarDays, Users, Phone, Mail, User, MessageSquare, CheckCircle2, Loader2, ChevronDown } from 'lucide-react'
 
 const EVENT_TYPES = [
@@ -34,7 +35,7 @@ export default function FormClient({ hostId, hostName, spaces }: Props) {
   const [success,  setSuccess]  = useState(false)
   const [error,    setError]    = useState('')
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = todayInRD()
 
   function set(k: keyof typeof form) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>

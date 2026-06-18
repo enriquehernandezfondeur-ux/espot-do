@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { type Metadata } from 'next'
 import { getSpaceBySlug, getSimilarSpaces } from '@/lib/actions/marketplace'
+import { todayInRD } from '@/lib/utils'
 import SpaceDetailClient from './SpaceDetailClient'
 
 export const dynamic = 'force-dynamic'
@@ -70,7 +71,7 @@ export default async function SpacePage({ params, searchParams }: Props) {
   const similar = await getSimilarSpaces(space)
 
   // Only pass initialDate if it's a valid future/today date from URL
-  const today = new Date().toISOString().split('T')[0]
+  const today = todayInRD()
   const rawDate = sp.fecha
   const initialDate =
     rawDate && /^\d{4}-\d{2}-\d{2}$/.test(rawDate) && rawDate >= today

@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { buildSchedule } from '@/lib/payments/schedule'
+import { todayInRD } from '@/lib/utils'
 
 export interface BookingInstallment {
   id:                 string
@@ -138,7 +139,7 @@ export async function markInstallmentPaid(
 /** Obtener cuotas vencidas pendientes de pago (para cron) */
 export async function getOverdueInstallments() {
   const supabase = await createClient()
-  const today = new Date().toISOString().split('T')[0]
+  const today = todayInRD()
   const { data } = await supabase
     .from('booking_installments')
     .select(`
@@ -157,9 +158,9 @@ export async function getOverdueInstallments() {
 /** Obtener cuotas que vencen en los próximos días (para recordatorios) */
 export async function getUpcomingInstallments(daysAhead: number) {
   const supabase = await createClient()
-  const today    = new Date().toISOString().split('T')[0]
-  const future   = new Date()
-  future.setDate(future.getDate() + daysAhead)
+  const today    = todayInRD()
+  const future   = new Date(today + 'T12:00:00Z')
+  future.setUTCDate(future.getUTCDate() + daysAhead)
   const futureStr = future.toISOString().split('T')[0]
 
   const { data } = await supabase

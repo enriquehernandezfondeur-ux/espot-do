@@ -11,7 +11,7 @@ import {
   UtensilsCrossed, Package, FileText, Lock,
   Cake, Heart, GraduationCap, Baby, Briefcase,
 } from 'lucide-react'
-import { formatCurrency, formatTime } from '@/lib/utils'
+import { formatCurrency, formatTime, todayInRD } from '@/lib/utils'
 import { addonIcon } from '@/lib/icon-map'
 import { createBooking } from '@/lib/actions/booking'
 import { computeBasePrice, computePlatformFee } from '@/lib/pricing'
@@ -683,15 +683,14 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             <DatePicker
               value={eventDate}
               onChange={v => { setEventDate(v); setShowPaymentPlan(false) }}
-              minDate={new Date().toISOString().split('T')[0]}
+              minDate={todayInRD()}
               placeholder="Elige una fecha"
             />
 
             {/* ── Plan de cuotas desplegable ── */}
             {eventDate && !dateBlocked && allowedTimeRange !== null && allowedTimeRange !== undefined && !isQuote && (() => {
-              const today = new Date(); today.setHours(0,0,0,0)
-              const daysUntil = Math.max(0, Math.ceil((new Date(eventDate + 'T12:00').getTime() - today.getTime()) / 86400000))
               const sched = buildSchedule(eventDate, 100)
+              const daysUntil = Math.max(0, sched.daysUntilEvent)
               const daysLabel = daysUntil === 0 ? 'Hoy' : daysUntil === 1 ? 'Mañana' : `${daysUntil} días`
               return (
                 <div className="rounded-xl overflow-hidden"

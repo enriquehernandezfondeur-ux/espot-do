@@ -433,7 +433,7 @@ export default function ClientesPage() {
                           ...history.events.map((e: any) => ({ ...e, _type: 'manual' })),
                           ...history.bookings.map((b: any) => ({ ...b, title: b.event_type ?? 'Reserva Espot', _type: 'espot' })),
                         ]
-                          .sort((a, b) => new Date(b.event_date).getTime() - new Date(a.event_date).getTime())
+                          .sort((a, b) => (b.event_date ?? '').localeCompare(a.event_date ?? ''))
                           .map((ev: any) => (
                             <div key={ev.id} className="flex items-center justify-between text-xs py-1.5 px-3 rounded-lg"
                               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>

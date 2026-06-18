@@ -3,11 +3,18 @@ import { sendEmail, sendEmailIfEnabled } from '@/lib/email/send'
 import { tplRecordatorioCuota, tplRecordatorioEvento, tplSolicitudResena, emailBase, infoBox } from '@/lib/email/templates'
 import { daysUntilDate } from '@/lib/payments/schedule'
 import { createServiceClient } from '@/lib/supabase/service'
-import { formatDate } from '@/lib/utils'
+import { formatDate, todayInRD } from '@/lib/utils'
 import { sendWhatsAppToUser, wa } from '@/lib/whatsapp/send'
 
 const SITE        = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 const CRON_SECRET = process.env.CRON_SECRET ?? ''
+
+// Fecha YYYY-MM-DD a N días de hoy en hora de RD (no UTC), estable sin importar el TZ del servidor.
+function rdDateOffset(days: number): string {
+  const d = new Date(todayInRD() + 'T12:00:00Z')
+  d.setUTCDate(d.getUTCDate() + days)
+  return d.toISOString().split('T')[0]
+}
 
 // GET /api/cron/payment-reminders
 // Vercel Cron — diariamente a las 9am RD (13:00 UTC)
@@ -26,7 +33,7 @@ export async function GET(req: Request) {
 
   // ── 0. Marcar cuotas vencidas como overdue ──
   try {
-    const today = new Date().toISOString().split('T')[0]
+    const today = todayInRD()
     const { data: overdueData, error: overdueError } = await sb
       .from('booking_installments')
       .update({ status: 'overdue' })
@@ -156,9 +163,7 @@ export async function GET(req: Request) {
   // ── 2. Recordatorios de cuotas (7d y 1d antes de vencimiento) ──────────
 
   async function getUpcoming(daysAhead: number) {
-    const target = new Date()
-    target.setDate(target.getDate() + daysAhead)
-    const targetStr = target.toISOString().split('T')[0]
+    const targetStr = rdDateOffset(daysAhead)
     const { data } = await sb
       .from('booking_installments')
       .select(`
@@ -254,9 +259,8 @@ export async function GET(req: Request) {
 
   try {
     const supabase = sb
-    const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    const tomorrowStr = tomorrow.toISOString().split('T')[0]
+    // "Mañana" en hora RD (no UTC) para que coincida con la agenda del host
+    const tomorrowStr = rdDateOffset(1)
 
     const { data: tomorrowBookings } = await supabase
       .from('bookings')
@@ -320,9 +324,7 @@ export async function GET(req: Request) {
 
   try {
     const supabase = sb
-    const yesterday = new Date()
-    yesterday.setDate(yesterday.getDate() - 1)
-    const yesterdayStr = yesterday.toISOString().split('T')[0]
+    const yesterdayStr = rdDateOffset(-1)
 
     const { data: pastBookings } = await supabase
       .from('bookings')
@@ -426,9 +428,7 @@ export async function GET(req: Request) {
   // ── 5. Recordatorio pre-evento (48h) — eventos directos ───────────────────
 
   try {
-    const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    const tomorrowStr = tomorrow.toISOString().split('T')[0]
+    const tomorrowStr = rdDateOffset(1)
 
     const { data: directTomorrow } = await sb
       .from('external_events')
@@ -478,9 +478,7 @@ export async function GET(req: Request) {
   // ── 6. Solicitud de reseña — eventos directos (24-48h después) ────────────
 
   try {
-    const yesterday = new Date()
-    yesterday.setDate(yesterday.getDate() - 1)
-    const yesterdayStr = yesterday.toISOString().split('T')[0]
+    const yesterdayStr = rdDateOffset(-1)
 
     const { data: directPast } = await sb
       .from('external_events')

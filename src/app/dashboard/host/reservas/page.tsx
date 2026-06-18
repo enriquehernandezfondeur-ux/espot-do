@@ -139,11 +139,12 @@ export default function HostReservasPage() {
       if (dateFilter === 'upcoming') { if (bDate < todayStr) return false }
       else if (dateFilter === 'today') { if (bDate !== todayStr) return false }
       else if (dateFilter === 'week') {
-        const cutoff = new Date(); cutoff.setDate(cutoff.getDate() + 7)
+        const cutoff = new Date(todayStr + 'T12:00:00Z'); cutoff.setUTCDate(cutoff.getUTCDate() + 7)
         const cutoffStr = cutoff.toISOString().split('T')[0]
         if (bDate < todayStr || bDate > cutoffStr) return false
       } else if (dateFilter === 'month') {
-        const end = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0]
+        const [yy, mm] = todayStr.split('-').map(Number)
+        const end = new Date(Date.UTC(yy, mm, 0)).toISOString().split('T')[0]
         if (bDate < todayStr || bDate > end) return false
       } else if (dateFilter === 'custom') {
         if (dateFrom && bDate < dateFrom) return false

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import AppSidebar from '@/components/shared/AppSidebar'
 import { createClient } from '@/lib/supabase/client'
+import { todayInRD } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
 
 const BASE_NAV = [
@@ -79,9 +80,11 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return
 
-      // Reservas aceptadas pendientes de pago
+      // Reservas aceptadas pendientes de pago (solo eventos hoy o futuros — un evento ya
+      // pasado sin pagar quedó abandonado y no debe dejar el punto rojo pegado)
       supabase.from('bookings').select('id', { count: 'exact', head: true })
         .eq('guest_id', user.id).eq('status', 'accepted').eq('payment_status', 'unpaid')
+        .gte('event_date', todayInRD())
         .then(({ count }) => setPendingPay(count ?? 0))
 
       // Realtime mensajes
@@ -95,6 +98,7 @@ export default function ClientSidebar({ userName, avatarUrl }: { userName?: stri
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'bookings', filter: `guest_id=eq.${user.id}` },
           () => supabase.from('bookings').select('id', { count: 'exact', head: true })
             .eq('guest_id', user.id).eq('status', 'accepted').eq('payment_status', 'unpaid')
+            .gte('event_date', todayInRD())
             .then(({ count }) => setPendingPay(count ?? 0)))
         .subscribe()
 

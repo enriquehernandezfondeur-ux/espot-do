@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { todayInRD } from '@/lib/utils'
 
 export async function getClientBookings() {
   const supabase = await createClient()
@@ -236,7 +237,7 @@ export async function getClientStats() {
   ])
 
   const bk = bookings ?? []
-  const today = new Date().toISOString().split('T')[0]
+  const today = todayInRD()
 
   const activeBookingIds = bk
     .filter(b => ['accepted', 'confirmed'].includes(b.status))
@@ -251,8 +252,8 @@ export async function getClientStats() {
         .order('due_date', { ascending: true })
     : { data: [] }
 
-  const soon = new Date()
-  soon.setDate(soon.getDate() + 7)
+  const soon = new Date(today + 'T12:00:00Z')
+  soon.setUTCDate(soon.getUTCDate() + 7)
   const soonStr = soon.toISOString().split('T')[0]
 
   return {

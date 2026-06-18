@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { sendEmail } from '@/lib/email/send'
-import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
+import { formatCurrency, formatDate, formatTime, todayInRD } from '@/lib/utils'
 import {
   tplSolicitudCliente, tplSolicitudCotizacionCliente, tplSolicitudHost,
   tplAceptadaCliente, tplConfirmadaCliente, tplConfirmadaHost,
@@ -52,8 +52,8 @@ export async function createBooking(payload: CreateBookingPayload) {
 
   if (!space) return { error: 'Espacio no encontrado' }
 
-  // Validar que la fecha no sea pasada
-  const today = new Date().toISOString().split('T')[0]
+  // Validar que la fecha no sea pasada (hora de RD, no UTC)
+  const today = todayInRD()
   if (payload.eventDate < today) return { error: 'No puedes reservar para una fecha pasada' }
 
   // Si es hoy, validar que el horario no haya comenzado ya (usando timezone de RD: UTC-4)

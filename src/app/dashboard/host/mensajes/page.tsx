@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Loader2, MessageCircle, Send, Search, Paperclip, FileText, Download, X, ArrowLeft, Building2, Zap, ChevronDown, Trash2 } from 'lucide-react'
-import { getMyConversations, getConversation, sendMessage, markMessagesRead, hideConversation } from '@/lib/actions/messages'
+import { getMyConversations, getConversation, sendMessage, markMessagesRead, markAllMessagesRead, hideConversation } from '@/lib/actions/messages'
 import type { MessageAttachment } from '@/lib/actions/messages'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
@@ -74,6 +74,10 @@ export default function HostMensajesPage() {
         setUserId(uid)
         const data = await getMyConversations()
         setConvs(data)
+        // Abrir la bandeja marca todo como leído y limpia el punto del sidebar
+        markAllMessagesRead()
+          .then(() => window.dispatchEvent(new Event('espot:messages-read')))
+          .catch(() => {})
       } catch {}
       setLoading(false)
 

@@ -1,4 +1,4 @@
-import { formatCurrency } from '@/lib/utils'
+import { formatCurrency, todayInRD } from '@/lib/utils'
 
 export interface Installment {
   number:     number        // 1, 2, 3
@@ -21,27 +21,27 @@ export interface PaymentSchedule {
 /** Calcula la fecha limite de cada cuota */
 function addDays(date: string, days: number): string {
   if (!days || isNaN(days)) return date
-  const d = new Date(date + 'T12:00:00')
-  d.setDate(d.getDate() + days)
+  // UTC-noon + setUTCDate: estable sin importar el timezone del servidor
+  const d = new Date(date + 'T12:00:00Z')
+  d.setUTCDate(d.getUTCDate() + days)
   return d.toISOString().split('T')[0]
 }
 
-/** Días entre hoy y la fecha del evento (positivo = futuro, negativo = pasado) */
+/** Días entre hoy (RD) y la fecha del evento (positivo = futuro, negativo = pasado) */
 export function daysUntilEvent(eventDate: string | null | undefined): number {
   if (!eventDate) return 0
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const event = new Date(eventDate + 'T12:00:00')
+  // Ambas fechas a UTC-noon: diferencia exacta en días, independiente del TZ del servidor
+  const today = new Date(todayInRD() + 'T12:00:00Z')
+  const event = new Date(eventDate + 'T12:00:00Z')
   if (isNaN(event.getTime())) return 0
-  return Math.floor((event.getTime() - today.getTime()) / 86400000)
+  return Math.round((event.getTime() - today.getTime()) / 86400000)
 }
 
 /** Días hasta una fecha de vencimiento (puede ser negativo si ya venció) */
 export function daysUntilDate(dateStr: string): number {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const due = new Date(dateStr + 'T12:00:00')
-  return Math.floor((due.getTime() - today.getTime()) / 86400000)
+  const today = new Date(todayInRD() + 'T12:00:00Z')
+  const due = new Date(dateStr + 'T12:00:00Z')
+  return Math.round((due.getTime() - today.getTime()) / 86400000)
 }
 
 /** Genera el schedule de cuotas según los días al evento (último pago 48h antes) */
@@ -52,7 +52,7 @@ export function buildSchedule(
 ): PaymentSchedule {
   const rawDays = daysUntilEvent(eventDate)
   const days    = isNaN(rawDays) ? 0 : Math.max(0, rawDays)
-  const today = new Date().toISOString().split('T')[0]
+  const today = todayInRD()
 
   type ScheduleDef = { pct: number; daysOffset: number; label: string }[]
 

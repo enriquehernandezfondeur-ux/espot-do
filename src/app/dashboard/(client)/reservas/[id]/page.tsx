@@ -8,7 +8,7 @@ import {
   CreditCard, CheckCircle, Sparkles, ExternalLink,
   Phone, Mail, Loader2, Check, Building2, FileText, Star, Copy, Share2,
 } from 'lucide-react'
-import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
+import { formatCurrency, formatDate, formatTime, todayInRD } from '@/lib/utils'
 import { getClientBookingDetail } from '@/lib/actions/client'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
 import { countdownLabel } from '@/lib/payments/schedule'
@@ -97,7 +97,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
     setAlreadyReviewed(true)
   }
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = todayInRD()
   const eventPassed = data ? booking.event_date < today : false
   const cover   = space?.space_images?.find((i: any) => i.is_cover)?.url ?? space?.space_images?.[0]?.url
   const sc      = STATUS_COLORS[(booking as any).status as keyof typeof STATUS_COLORS] ?? { color: '#6B7280', bg: '#F4F6F8' }
