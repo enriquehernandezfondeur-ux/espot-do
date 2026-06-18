@@ -23,6 +23,12 @@ function fmtDateTime(d: string | null | undefined) {
   if (!d) return '—'
   return new Date(d).toLocaleDateString('es-DO', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
+// Enmascara datos sensibles dejando solo los últimos 4 (gobernanza: no mostrar secretos completos)
+function maskTail(v: string | null | undefined, visible = 4): string {
+  if (!v) return '—'
+  const s = String(v)
+  return s.length <= visible ? s : '•••• ' + s.slice(-visible)
+}
 
 // ── Status badges ────────────────────────────────────────────
 // Config de estado de reserva unificado desde bookingConfig (consistente con el resto del app)
@@ -193,9 +199,9 @@ export default function AdminHostDetailPage() {
               {[
                 { label: 'Banco',           value: bankAccount.bank_name },
                 { label: 'Titular',         value: bankAccount.account_holder },
-                { label: 'Número',          value: bankAccount.account_number },
+                { label: 'Número',          value: maskTail(bankAccount.account_number) },
                 { label: 'Tipo',            value: bankAccount.account_type },
-                { label: 'Cédula / RNC',    value: bankAccount.id_number },
+                { label: 'Cédula / RNC',    value: maskTail(bankAccount.id_number) },
                 { label: 'Actualizado',     value: fmtDate(bankAccount.updated_at) },
               ].map(({ label, value }) => (
                 <div key={label}>

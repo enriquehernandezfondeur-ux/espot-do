@@ -48,6 +48,10 @@ export default function MigracionPage() {
   async function runMigration() {
     const records = validate()
     if (!records) return
+    // Modo producción escribe registros reales — confirmar explícitamente (antes no pedía nada)
+    if (!dryRun && !window.confirm(`⚠️ Vas a IMPORTAR ${records.length} espacio(s) REALES en la base de datos de producción. No es una simulación. ¿Continuar?`)) {
+      return
+    }
     setLoading(true)
     setResults(null)
     setSummary(null)

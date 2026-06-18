@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { getAdminSpaces, updateSpaceStatus } from '@/lib/actions/admin'
 import { formatCurrency } from '@/lib/utils'
-import { Search, Eye, EyeOff, Shield, Star, Trash2, CheckCircle, Loader2, MapPin, Users, Pencil, Building2 } from 'lucide-react'
+import { Search, Eye, EyeOff, Shield, Star, Power, CheckCircle, Loader2, MapPin, Users, Pencil, Building2 } from 'lucide-react'
 import Pagination from '@/components/ui/Pagination'
 
 const PAGE_SIZE = 25
@@ -267,7 +267,7 @@ export default function AdminSpacesPage() {
                         style={{ color: space.is_active ? '#9CA3AF' : '#DC2626' }}>
                         {actionId === space.id + 'is_active'
                           ? <Loader2 size={14} className="animate-spin" />
-                          : space.is_active ? <Trash2 size={14} /> : <CheckCircle size={14} />}
+                          : space.is_active ? <Power size={14} /> : <CheckCircle size={14} />}
                       </button>
 
                       <Link href={`/admin/espacios/${space.id}`}

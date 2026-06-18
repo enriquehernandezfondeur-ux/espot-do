@@ -61,6 +61,11 @@ export default function AdminReservasPage() {
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   async function handleStatusChange(bookingId: string, status: string) {
+    // Confirmar acciones destructivas (cancelar/rechazar afectan pagos en producción)
+    if (['cancelled_host', 'cancelled_guest', 'rejected'].includes(status) &&
+        !window.confirm(`¿Seguro que quieres cambiar el estado a "${statusConfig[status]?.label ?? status}"? Esta acción afecta la reserva y sus pagos.`)) {
+      return
+    }
     setUpdating(bookingId)
     const result = await updateBookingStatus(bookingId, status)
     if ('error' in result) {
