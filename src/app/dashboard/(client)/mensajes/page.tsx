@@ -228,9 +228,9 @@ export default function ClientMensajesPage() {
                 onClick={async e => {
                   e.stopPropagation()
                   if (!window.confirm('¿Eliminar esta conversación de tu lista? Los mensajes quedan guardados en el sistema.')) return
-                  await hideConversation(conv.spaceId)
-                  setConvs(prev => prev.filter(c => c.spaceId !== conv.spaceId))
-                  if (active?.spaceId === conv.spaceId) setActive(null)
+                  await hideConversation(conv.spaceId, conv.otherId)
+                  setConvs(prev => prev.filter(c => !(c.spaceId === conv.spaceId && c.otherId === conv.otherId)))
+                  if (active?.spaceId === conv.spaceId && active?.otherId === conv.otherId) setActive(null)
                 }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
