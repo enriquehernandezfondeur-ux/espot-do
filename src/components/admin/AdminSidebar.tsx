@@ -70,14 +70,18 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   const router      = useRouter()
   const supabaseRef = useRef(createClient())
   const [adminName, setAdminName] = useState<string>('Admin')
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [loggingOut, setLoggingOut] = useState(false)
   const [counts, setCounts] = useState<Record<CountKey, number> | null>(null)
 
   useEffect(() => {
     supabaseRef.current.auth.getUser().then(({ data: { user } }) => {
       if (!user) return
-      supabaseRef.current.from('profiles').select('full_name').eq('id', user.id).single()
-        .then(({ data }) => { if (data?.full_name) setAdminName(data.full_name.split(' ')[0]) })
+      supabaseRef.current.from('profiles').select('full_name, avatar_url').eq('id', user.id).single()
+        .then(({ data }) => {
+          if (data?.full_name) setAdminName(data.full_name.split(' ')[0])
+          if (data?.avatar_url) setAvatarUrl(data.avatar_url)
+        })
     })
     // Conteos para los badges del menú (lo pendiente de un vistazo)
     getAdminNavCounts().then(c => { if (c) setCounts(c) }).catch(() => {})
@@ -94,20 +98,12 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
     <aside className="w-64 md:w-56 min-h-dvh flex flex-col" style={{ background: '#0A1019' }}>
       {/* Logo + close (mobile only) */}
       <div className="px-5 pt-6 pb-5 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-        <Link href="/admin" className="flex items-center gap-2.5" onClick={onClose}>
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-sm"
-            style={{ background: 'var(--brand)', color: '#0B0F0E' }}>
-            E
-          </div>
-          <div>
-            <div className="flex items-baseline gap-0.5">
-              <span className="font-bold text-base leading-none text-white">espot</span>
-              <span className="font-light text-base leading-none" style={{ color: 'var(--brand)' }}>.do</span>
-            </div>
-            <div className="text-[10px] mt-0.5 font-semibold uppercase tracking-widest"
-              style={{ color: 'rgba(255,255,255,0.25)' }}>
-              Admin Console
-            </div>
+        <Link href="/admin" className="flex flex-col gap-1" onClick={onClose}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-green.svg" alt="Espot" style={{ height: 26, width: 'auto', display: 'block' }} />
+          <div className="text-[10px] font-semibold uppercase tracking-widest"
+            style={{ color: 'rgba(255,255,255,0.25)' }}>
+            Admin Console
           </div>
         </Link>
         {onClose && (
@@ -122,10 +118,17 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
       <div className="px-4 py-3">
         <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl"
           style={{ background: 'rgba(53,196,147,0.07)', border: '1px solid rgba(53,196,147,0.12)' }}>
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-            style={{ background: 'rgba(53,196,147,0.15)' }}>
-            <Shield size={13} style={{ color: 'var(--brand)' }} />
-          </div>
+          {avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={avatarUrl} alt={adminName}
+              className="w-7 h-7 rounded-lg object-cover shrink-0"
+              style={{ border: '1px solid rgba(53,196,147,0.3)' }} />
+          ) : (
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+              style={{ background: 'rgba(53,196,147,0.15)' }}>
+              <Shield size={13} style={{ color: 'var(--brand)' }} />
+            </div>
+          )}
           <div className="min-w-0">
             <div className="text-xs font-bold text-white truncate">{adminName}</div>
             <div className="text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>Super Admin</div>
@@ -222,9 +225,9 @@ export default function AdminSidebar() {
       <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 h-14"
         style={{ background: '#0A1019', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
         <Link href="/admin" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs"
-            style={{ background: 'var(--brand)', color: '#0B0F0E' }}>E</div>
-          <span className="font-bold text-sm text-white">Admin Console</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-green.svg" alt="Espot" style={{ height: 20, width: 'auto', display: 'block' }} />
+          <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>Admin</span>
         </Link>
         <button onClick={() => setOpen(true)} aria-label="Abrir menú"
           className="w-9 h-9 flex items-center justify-center rounded-xl"
