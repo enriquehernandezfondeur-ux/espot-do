@@ -44,31 +44,18 @@ export default function SeguridadPage() {
           <p className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: 'var(--text-muted)' }}>
             Pagos protegidos con autenticación 3D Secure
           </p>
-          <div className="flex items-center justify-center gap-8 flex-wrap">
-            {/* Visa + Visa Secure */}
-            <div className="flex flex-col items-center gap-2">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/visa.png" alt="Visa" style={{ height: 28, width: 'auto', objectFit: 'contain' }} />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/visa-secure.png" alt="Visa Secure" style={{ height: 40, width: 'auto', objectFit: 'contain' }} />
-              <span className="text-xs font-semibold" style={{ color: '#1A1F71' }}>Visa Secure</span>
-            </div>
-
-            {/* Mastercard ID Check */}
-            <div className="flex flex-col items-center gap-2">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/mastercard.png" alt="Mastercard" style={{ height: 44, width: 'auto', objectFit: 'contain' }} />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 44, width: 'auto', objectFit: 'contain' }} />
-              <span className="text-xs font-semibold" style={{ color: '#252525' }}>Mastercard ID Check</span>
-            </div>
-
-            {/* Azul */}
-            <div className="flex flex-col items-center gap-2">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/azul.jpg" alt="Azul Payments" style={{ height: 44, width: 'auto', borderRadius: 8, objectFit: 'contain' }} />
-              <span className="text-xs font-semibold" style={{ color: '#0057A8' }}>Azul Payments RD</span>
-            </div>
+          {/* Azul, Visa, Mastercard, Visa Secure, Mastercard ID Check (misma altura) */}
+          <div className="flex items-center justify-center gap-5 md:gap-6 flex-wrap">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/azul.jpg" alt="Azul Payments" style={{ height: 40, width: 'auto', borderRadius: 8, objectFit: 'contain' }} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/visa.png" alt="Visa" style={{ height: 40, width: 'auto', objectFit: 'contain' }} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/mastercard.png" alt="Mastercard" style={{ height: 40, width: 'auto', objectFit: 'contain' }} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/visa-secure.png" alt="Visa Secure" style={{ height: 40, width: 'auto', objectFit: 'contain' }} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 40, width: 'auto', objectFit: 'contain' }} />
           </div>
         </div>
 

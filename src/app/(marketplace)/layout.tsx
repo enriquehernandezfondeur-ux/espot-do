@@ -671,25 +671,27 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-5 pb-2"
             style={{borderTop:'1px solid #E0E7E3'}}>
 
-            {/* Logos de pago */}
-            <div className="flex items-center gap-2.5 flex-wrap justify-center">
-              <span className="text-[10px] font-bold uppercase tracking-widest mr-1" style={{color:'#9CA3AF'}}>Pago seguro</span>
-
-              {/* 1. VISA */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/visa.png" alt="Visa" style={{height:24,width:'auto',display:'block',objectFit:'contain'}} />
-
-              {/* 2. AZUL */}
+            {/* Logos de pago — Azul, Visa, Mastercard, Visa Secure, Mastercard ID Check (misma altura) */}
+            <div className="flex items-center gap-3 flex-wrap justify-center">
+              {/* 1. AZUL */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/azul.jpg" alt="Azul Payments" style={{height:32,width:'auto',borderRadius:6,display:'block',objectFit:'contain'}} />
 
+              {/* 2. VISA */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/visa.png" alt="Visa" style={{height:32,width:'auto',display:'block',objectFit:'contain'}} />
+
               {/* 3. Mastercard */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/mastercard.png" alt="Mastercard" style={{height:36,width:'auto',display:'block',objectFit:'contain'}} />
+              <img src="/mastercard.png" alt="Mastercard" style={{height:32,width:'auto',display:'block',objectFit:'contain'}} />
 
-              {/* 4. Mastercard ID Check */}
+              {/* 4. Visa Secure */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{height:36,width:'auto',display:'block',objectFit:'contain'}} />
+              <img src="/visa-secure.png" alt="Visa Secure" style={{height:32,width:'auto',display:'block',objectFit:'contain'}} />
+
+              {/* 5. Mastercard ID Check */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{height:32,width:'auto',display:'block',objectFit:'contain'}} />
             </div>
 
             <p className="text-xs" style={{color:'#9CA3AF'}}>© 2026 ESPOT, S.R.L. · República Dominicana</p>
