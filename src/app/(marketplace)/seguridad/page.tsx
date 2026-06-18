@@ -47,15 +47,15 @@ export default function SeguridadPage() {
           {/* Azul, Visa, Mastercard, Visa Secure, Mastercard ID Check (misma altura) */}
           <div className="flex items-center justify-center gap-5 md:gap-6 flex-wrap">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/azul.jpg" alt="Azul Payments" style={{ height: 40, width: 'auto', borderRadius: 8, objectFit: 'contain' }} />
+            <img src="/azul.jpg" alt="Azul Payments" style={{ height: 30, width: 'auto', borderRadius: 8, objectFit: 'contain' }} />
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/visa.png" alt="Visa" style={{ height: 40, width: 'auto', objectFit: 'contain' }} />
+            <img src="/visa.png" alt="Visa" style={{ height: 30, width: 'auto', objectFit: 'contain' }} />
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/mastercard.png" alt="Mastercard" style={{ height: 40, width: 'auto', objectFit: 'contain' }} />
+            <img src="/mastercard.png" alt="Mastercard" style={{ height: 30, width: 'auto', objectFit: 'contain' }} />
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/visa-secure.png" alt="Visa Secure" style={{ height: 40, width: 'auto', objectFit: 'contain' }} />
+            <img src="/visa-secure.png" alt="Visa Secure" style={{ height: 30, width: 'auto', objectFit: 'contain' }} />
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 40, width: 'auto', objectFit: 'contain' }} />
+            <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 30, width: 'auto', objectFit: 'contain' }} />
           </div>
         </div>
 
