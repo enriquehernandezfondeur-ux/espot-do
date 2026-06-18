@@ -1208,15 +1208,15 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             {/* Logos de seguridad de pago */}
             <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/visa-logo.jpg" alt="Visa" style={{ height: 20, width: 35, borderRadius: 3, objectFit: 'contain' }} />
+              <img src="/visa.png" alt="Visa" style={{ height: 14, width: 'auto', objectFit: 'contain' }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/mastercard-logo.svg" alt="Mastercard" style={{ height: 20, width: 32 }} />
+              <img src="/mastercard.png" alt="Mastercard" style={{ height: 22, width: 'auto', objectFit: 'contain' }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/verified-by-visa.svg" alt="Verified by Visa" style={{ height: 18, width: 54 }} />
+              <img src="/visa-secure.png" alt="Visa Secure" style={{ height: 22, width: 'auto', objectFit: 'contain' }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 18, width: 18 }} />
+              <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 22, width: 'auto', objectFit: 'contain' }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/azul-logo.jpg" alt="Azul Payments" style={{ height: 18, width: 54, borderRadius: 3, objectFit: 'contain' }} />
+              <img src="/azul.jpg" alt="Azul Payments" style={{ height: 22, width: 'auto', borderRadius: 3, objectFit: 'contain' }} />
             </div>
 
             {error && (

@@ -658,25 +658,11 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
               </div>
 
               {/* Apple App Store badge — próximamente */}
-              <div role="button" aria-disabled="true" aria-label="Próximamente en App Store"
-                className="inline-flex items-center gap-3 transition-opacity hover:opacity-75"
-                style={{
-                  background:'#000',
-                  border:'1.5px solid #333',
-                  borderRadius:10,
-                  padding:'7px 14px',
-                  cursor:'default',
-                  minWidth:130,
-                }}>
-                {/* Apple logo SVG */}
-                <svg width="20" height="24" viewBox="0 0 814 1000" fill="white" style={{flexShrink:0}}>
-                  <path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-57.8-155.5-127.4C46 790.7 0 663 0 541.8c0-207.4 135.4-317 268.1-317 63.6 0 116.6 42 156.4 42 37.8 0 97.9-44.6 168.8-44.6 28.4 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z"/>
-                </svg>
-                <div style={{lineHeight:1}}>
-                  <div style={{color:'#aaa',fontSize:9,letterSpacing:'0.04em',marginBottom:2}}>Download on the</div>
-                  <div style={{color:'#fff',fontSize:17,fontWeight:600,letterSpacing:'-0.02em',lineHeight:1}}>App Store</div>
-                </div>
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/app-store-badge.png" role="button" aria-disabled="true" aria-label="Próximamente en App Store"
+                alt="Próximamente en App Store"
+                className="transition-opacity hover:opacity-75"
+                style={{height:40,width:'auto',display:'block',cursor:'default',objectFit:'contain'}} />
             </div>
 
           </div>
@@ -691,28 +677,19 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
 
               {/* 1. VISA */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/visa-logo.jpg" alt="Visa" style={{height:32,width:'auto',borderRadius:6,display:'block',objectFit:'contain'}} />
+              <img src="/visa.png" alt="Visa" style={{height:24,width:'auto',display:'block',objectFit:'contain'}} />
 
               {/* 2. AZUL */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/azul-logo.jpg" alt="Azul Payments" style={{height:32,width:'auto',borderRadius:6,display:'block',objectFit:'contain'}} />
+              <img src="/azul.jpg" alt="Azul Payments" style={{height:32,width:'auto',borderRadius:6,display:'block',objectFit:'contain'}} />
 
               {/* 3. Mastercard */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/mastercard-logo.svg" alt="Mastercard" style={{height:40,width:'auto',display:'block',objectFit:'contain'}} />
+              <img src="/mastercard.png" alt="Mastercard" style={{height:36,width:'auto',display:'block',objectFit:'contain'}} />
 
               {/* 4. Mastercard ID Check */}
-              <div style={{background:'#fff',border:'1px solid #E2E8F0',borderRadius:6,padding:'4px 8px',display:'flex',alignItems:'center',gap:5,height:32}}>
-                <svg viewBox="0 0 28 18" width="28" height="18" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="10" cy="9" r="7.5" fill="#EB001B"/>
-                  <circle cx="18" cy="9" r="7.5" fill="#F79E1B"/>
-                  <path d="M14 3a7.5 7.5 0 0 1 0 12A7.5 7.5 0 0 1 14 3z" fill="#FF5F00"/>
-                </svg>
-                <div style={{display:'flex',flexDirection:'column',lineHeight:1.2}}>
-                  <span style={{fontSize:8,fontWeight:600,color:'#1A1A1A',fontFamily:'Arial,Helvetica,sans-serif'}}>mastercard</span>
-                  <span style={{fontSize:9,fontWeight:800,color:'#1A1A1A',fontFamily:'Arial,Helvetica,sans-serif'}}>ID Check</span>
-                </div>
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{height:36,width:'auto',display:'block',objectFit:'contain'}} />
             </div>
 
             <p className="text-xs" style={{color:'#9CA3AF'}}>© 2026 ESPOT, S.R.L. · República Dominicana</p>

@@ -45,28 +45,28 @@ export default function SeguridadPage() {
             Pagos protegidos con autenticación 3D Secure
           </p>
           <div className="flex items-center justify-center gap-8 flex-wrap">
-            {/* Visa + Verified by Visa */}
+            {/* Visa + Visa Secure */}
             <div className="flex flex-col items-center gap-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/visa-logo.jpg" alt="Visa" style={{ height: 36, width: 'auto', borderRadius: 8, objectFit: 'contain' }} />
+              <img src="/visa.png" alt="Visa" style={{ height: 28, width: 'auto', objectFit: 'contain' }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/verified-by-visa.svg" alt="Verified by Visa" style={{ height: 28, width: 'auto' }} />
-              <span className="text-xs font-semibold" style={{ color: '#1A1F71' }}>Verified by Visa</span>
+              <img src="/visa-secure.png" alt="Visa Secure" style={{ height: 40, width: 'auto', objectFit: 'contain' }} />
+              <span className="text-xs font-semibold" style={{ color: '#1A1F71' }}>Visa Secure</span>
             </div>
 
             {/* Mastercard ID Check */}
             <div className="flex flex-col items-center gap-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/mastercard-logo.svg" alt="Mastercard" style={{ height: 36, width: 'auto' }} />
+              <img src="/mastercard.png" alt="Mastercard" style={{ height: 44, width: 'auto', objectFit: 'contain' }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 28, width: 'auto' }} />
+              <img src="/mastercard-id-check.png" alt="Mastercard ID Check" style={{ height: 44, width: 'auto', objectFit: 'contain' }} />
               <span className="text-xs font-semibold" style={{ color: '#252525' }}>Mastercard ID Check</span>
             </div>
 
             {/* Azul */}
             <div className="flex flex-col items-center gap-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/azul-logo.jpg" alt="Azul Payments" style={{ height: 36, width: 'auto', borderRadius: 8, objectFit: 'contain' }} />
+              <img src="/azul.jpg" alt="Azul Payments" style={{ height: 44, width: 'auto', borderRadius: 8, objectFit: 'contain' }} />
               <span className="text-xs font-semibold" style={{ color: '#0057A8' }}>Azul Payments RD</span>
             </div>
           </div>
