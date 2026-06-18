@@ -4,48 +4,63 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getAdminNavCounts } from '@/lib/actions/admin'
 import {
   LayoutDashboard, Building2, CalendarDays, Users,
   CreditCard, Settings, BarChart3, LogOut,
   ChevronRight, Shield, Banknote, Globe, Upload, Menu, X, MessageCircle, ShieldAlert, ClipboardList,
-  Wallet, Loader2,
+  Trash2, Wrench, Loader2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+type CountKey = 'espacios' | 'aplicaciones' | 'reservas' | 'disputas' | 'payouts'
+
 interface NavItem {
-  href:    string
-  label:   string
-  icon:    React.ElementType
-  badge?:  number
+  href:      string
+  label:     string
+  icon:      React.ElementType
+  badgeKey?: CountKey
 }
 
-const sections: { label: string; items: NavItem[] }[] = [
+const sections: { label: string; items: NavItem[]; danger?: boolean }[] = [
   {
-    label: 'General',
+    label: 'Inicio',
     items: [
       { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
     ],
   },
   {
-    label: 'Gestión',
+    label: 'Operación',
     items: [
-      { href: '/admin/espacios',      label: 'Espacios',      icon: Building2 },
-      { href: '/admin/aplicaciones',  label: 'Aplicaciones',  icon: ClipboardList },
-      { href: '/admin/reservas',      label: 'Reservas',      icon: CalendarDays },
+      { href: '/admin/reservas',      label: 'Reservas',      icon: CalendarDays,   badgeKey: 'reservas' },
+      { href: '/admin/aplicaciones',  label: 'Aplicaciones',  icon: ClipboardList,  badgeKey: 'aplicaciones' },
+      { href: '/admin/espacios',      label: 'Espacios',      icon: Building2,       badgeKey: 'espacios' },
       { href: '/admin/usuarios',      label: 'Usuarios',      icon: Users },
-      { href: '/admin/pagos',         label: 'Comisiones',    icon: CreditCard },
-      { href: '/admin/payouts',       label: 'Payouts',       icon: Banknote },
-      { href: '/admin/liquidaciones', label: 'Liquidaciones', icon: Wallet },
+      { href: '/admin/disputas',      label: 'Disputas',      icon: ShieldAlert,    badgeKey: 'disputas' },
       { href: '/admin/mensajes',      label: 'Mensajes',      icon: MessageCircle },
-      { href: '/admin/disputas',      label: 'Disputas',      icon: ShieldAlert },
+    ],
+  },
+  {
+    label: 'Finanzas',
+    items: [
+      { href: '/admin/pagos',         label: 'Comisiones Espot',     icon: CreditCard },
+      { href: '/admin/liquidaciones', label: 'Pagos a propietarios', icon: Banknote, badgeKey: 'payouts' },
     ],
   },
   {
     label: 'Plataforma',
     items: [
       { href: '/admin/reportes',      label: 'Reportes',      icon: BarChart3 },
-      { href: '/admin/migracion',     label: 'Migración',     icon: Upload },
       { href: '/admin/configuracion', label: 'Configuración', icon: Settings },
+    ],
+  },
+  {
+    label: 'Avanzado',
+    danger: true,
+    items: [
+      { href: '/admin/migracion',   label: 'Migración',        icon: Upload },
+      { href: '/admin/cleanup',     label: 'Limpieza',         icon: Trash2 },
+      { href: '/admin/fix-pricing', label: 'Corregir precios', icon: Wrench },
     ],
   },
 ]
@@ -56,6 +71,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   const supabaseRef = useRef(createClient())
   const [adminName, setAdminName] = useState<string>('Admin')
   const [loggingOut, setLoggingOut] = useState(false)
+  const [counts, setCounts] = useState<Record<CountKey, number> | null>(null)
 
   useEffect(() => {
     supabaseRef.current.auth.getUser().then(({ data: { user } }) => {
@@ -63,6 +79,8 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
       supabaseRef.current.from('profiles').select('full_name').eq('id', user.id).single()
         .then(({ data }) => { if (data?.full_name) setAdminName(data.full_name.split(' ')[0]) })
     })
+    // Conteos para los badges del menú (lo pendiente de un vistazo)
+    getAdminNavCounts().then(c => { if (c) setCounts(c) }).catch(() => {})
   }, [])
 
   async function handleLogout() {
@@ -120,12 +138,13 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
         {sections.map(section => (
           <div key={section.label}>
             <div className="text-[10px] font-bold uppercase tracking-widest px-3 mb-1.5"
-              style={{ color: 'rgba(255,255,255,0.2)' }}>
+              style={{ color: section.danger ? 'rgba(248,113,113,0.5)' : 'rgba(255,255,255,0.2)' }}>
               {section.label}
             </div>
             <div className="space-y-0.5">
-              {section.items.map(({ href, label, icon: Icon, badge }) => {
+              {section.items.map(({ href, label, icon: Icon, badgeKey }) => {
                 const isActive = pathname === href || (href !== '/admin' && pathname.startsWith(href))
+                const badge = badgeKey && counts ? counts[badgeKey] : 0
                 return (
                   <Link key={href} href={href} onClick={onClose}
                     aria-current={isActive ? 'page' : undefined}
@@ -134,10 +153,10 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
                       background: 'rgba(53,196,147,0.12)',
                       color: 'var(--brand)',
                       borderLeft: '2px solid var(--brand)',
-                    } : { color: 'rgba(255,255,255,0.5)' }}>
+                    } : { color: section.danger ? 'rgba(248,113,113,0.7)' : 'rgba(255,255,255,0.5)' }}>
                     <Icon size={14} className="shrink-0" />
                     <span className="flex-1">{label}</span>
-                    {badge !== undefined && badge > 0 && (
+                    {badge > 0 && (
                       <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center"
                         style={{ background: '#EF4444', color: '#fff' }}>
                         {badge > 99 ? '99+' : badge}

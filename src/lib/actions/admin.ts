@@ -212,6 +212,26 @@ export async function getAdminStats() {
   }
 }
 
+/** Conteos de lo pendiente para los badges del menú lateral del admin. */
+export async function getAdminNavCounts() {
+  const supabase = await requireAdmin()
+  if (!supabase) return null
+  const [espacios, aplicaciones, reservas, disputas, payouts] = await Promise.all([
+    supabase.from('spaces').select('id', { count: 'exact', head: true }).eq('is_published', false).eq('is_active', true),
+    supabase.from('host_applications').select('id', { count: 'exact', head: true }).eq('status', 'pending_admin'),
+    supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+    supabase.from('disputes').select('id', { count: 'exact', head: true }).eq('status', 'abierta'),
+    supabase.from('bookings').select('id', { count: 'exact', head: true }).in('status', ['confirmed', 'completed']).eq('payout_status', 'pending'),
+  ])
+  return {
+    espacios:     espacios.count ?? 0,
+    aplicaciones: aplicaciones.count ?? 0,
+    reservas:     reservas.count ?? 0,
+    disputas:     disputas.count ?? 0,
+    payouts:      payouts.count ?? 0,
+  }
+}
+
 // ── ESPACIOS ─────────────────────────────────────────────
 export async function getAdminSpaces(filter?: { status?: string; search?: string }) {
   const supabase = await requireAdmin()
