@@ -38,6 +38,18 @@ export default function FavoritosPage() {
       .finally(() => setLoading(false))
   }, [])
 
+  // Sincronizar al quitar un favorito desde una tarjeta (sin recargar)
+  useEffect(() => {
+    function onFavChange(e: Event) {
+      const detail = (e as CustomEvent).detail
+      if (detail && detail.saved === false) {
+        setFavorites(prev => prev.filter(f => f.spaces?.id !== detail.spaceId))
+      }
+    }
+    window.addEventListener('espot:favorite-changed', onFavChange)
+    return () => window.removeEventListener('espot:favorite-changed', onFavChange)
+  }, [])
+
   // Cerrar menús al hacer clic fuera
   useEffect(() => {
     function handler(e: MouseEvent) {

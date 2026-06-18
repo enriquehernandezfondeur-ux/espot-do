@@ -365,9 +365,11 @@ export async function createBooking(payload: CreateBookingPayload) {
     if (!instResult.success) console.error('[createBooking] installments failed:', instResult.error)
   }
 
-  // WhatsApp al host: nueva solicitud recibida (fire and forget)
+  // WhatsApp al host: nueva solicitud recibida (after() → corre tras la respuesta,
+  // no se pierde si la función serverless se congela antes de completar)
   if (!isQuote) {
-    sendWhatsAppToUser(
+    const { after } = await import('next/server')
+    after(() => sendWhatsAppToUser(
       (host as any)?.whatsapp,
       host?.phone,
       wa.nuevaSolicitud(
@@ -378,7 +380,7 @@ export async function createBooking(payload: CreateBookingPayload) {
         payload.guestCount,
         booking.id,
       )
-    ).catch(() => {})
+    ).catch(() => {}))
   }
 
   return { success: true, bookingId: booking.id, status: isQuote ? 'quote_requested' : isInstant ? 'accepted' : 'pending' }
@@ -443,8 +445,9 @@ export async function acceptBooking(bookingId: string) {
     }),
   ])
 
-  // WhatsApp al guest: su reserva fue aceptada, con link de pago
-  sendWhatsAppToUser(
+  // WhatsApp al guest: su reserva fue aceptada, con link de pago (after() para no perderlo)
+  const { after } = await import('next/server')
+  after(() => sendWhatsAppToUser(
     guest?.whatsapp,
     guest?.phone,
     wa.reservaAceptada(
@@ -454,7 +457,7 @@ export async function acceptBooking(bookingId: string) {
       firstInstallmentAmount,
       bookingId,
     )
-  ).catch(() => {})
+  ).catch(() => {}))
 
   return { success: true }
 }
@@ -705,8 +708,9 @@ function calculateRefundAmount(
   hoursBefore: number,
 ): number {
   if (paidAmount <= 0) return 0
-  // Parsear eventDate con T12:00 para evitar bug de timezone en RD (UTC-4)
-  const event = new Date(eventDate + 'T12:00')
+  // Anclar el evento a mediodía hora RD (UTC-4) de forma absoluta, estable sin
+  // importar el timezone del servidor (Vercel corre en UTC).
+  const event = new Date(eventDate + 'T12:00:00-04:00')
   const hoursLeft = (event.getTime() - Date.now()) / (1000 * 60 * 60)
   if (hoursLeft >= hoursBefore) return Math.round(paidAmount * (refundPct / 100))
   return 0

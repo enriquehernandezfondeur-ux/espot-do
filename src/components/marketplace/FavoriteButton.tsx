@@ -72,6 +72,8 @@ export default function FavoriteButton({ spaceId, size = 'md', className = '' }:
         await supabase.from('favorites').delete().eq('id', favoriteId).eq('guest_id', user.id)
         setSaved(false)
         setFavoriteId(null)
+        // Notificar a otras vistas (p.ej. /dashboard/favoritos) para sincronizar sin recargar
+        window.dispatchEvent(new CustomEvent('espot:favorite-changed', { detail: { spaceId, saved: false } }))
       } else {
         const { data } = await supabase
           .from('favorites')
@@ -83,6 +85,7 @@ export default function FavoriteButton({ spaceId, size = 'md', className = '' }:
           setFavoriteId(data.id)
           setPulse(true)
           setTimeout(() => setPulse(false), 600)
+          window.dispatchEvent(new CustomEvent('espot:favorite-changed', { detail: { spaceId, saved: true } }))
         }
       }
     } catch {
