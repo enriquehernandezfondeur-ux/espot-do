@@ -580,18 +580,59 @@ export async function confirmPayment(bookingId: string) {
   const { hostId } = await resolveHostId(supabase, user.id)
   if (space?.host_id !== hostId) return { error: 'Solo el propietario puede confirmar un pago manual' }
 
-  if (bk.status !== 'accepted') return { error: 'La reserva debe estar aceptada para confirmar el pago' }
+  // Permite registrar la 1ª cuota (accepted) y las siguientes (confirmed), pero no si ya está pagada por completo.
+  if (!['accepted', 'confirmed'].includes(bk.status) || bk.payment_status === 'paid') {
+    return { error: 'La reserva debe estar aceptada o confirmada y no pagada por completo.' }
+  }
+  const isFirstConfirmation = bk.status === 'accepted'
 
   // Escrituras financieras con service-role (igual que /api/payments/confirm)
   const admin = createServiceClient()
+
+  // Pago manual POR CUOTA: marcar la PRÓXIMA cuota pendiente como pagada y recalcular el estado.
+  const { data: insts } = await admin
+    .from('booking_installments')
+    .select('id, amount, status, installment_number')
+    .eq('booking_id', bookingId)
+    .order('installment_number', { ascending: true })
+  const allInsts = insts ?? []
+  const nextPending = allInsts.find(i => i.status !== 'paid')
+
+  let paidThisTime: number
+  let newPaidTotal: number
+  let newPaymentStatus: 'advance' | 'partial' | 'paid'
+
+  if (nextPending) {
+    const { data: marked } = await admin
+      .from('booking_installments')
+      .update({ status: 'paid', paid_at: new Date().toISOString() })
+      .eq('id', nextPending.id)
+      .neq('status', 'paid')        // lock contra doble marcado
+      .select('id')
+    if (!marked || marked.length === 0) return { error: 'Esa cuota ya estaba pagada.' }
+    paidThisTime = Math.round(Number(nextPending.amount))
+    const { data: refreshed } = await admin
+      .from('booking_installments').select('status, amount').eq('booking_id', bookingId)
+    const list = refreshed ?? []
+    const paidList = list.filter(i => i.status === 'paid')
+    newPaidTotal = Math.round(paidList.reduce((s, i) => s + Number(i.amount), 0))
+    newPaymentStatus = (list.length > 0 && paidList.length >= list.length) ? 'paid'
+                     : paidList.length > 1 ? 'partial' : 'advance'
+  } else {
+    // Reserva sin plan de cuotas → pago único completo
+    paidThisTime = Math.round(Number(bk.total_amount))
+    newPaidTotal = paidThisTime
+    newPaymentStatus = 'paid'
+  }
 
   const { error } = await admin
     .from('bookings')
     .update({
       status: 'confirmed',
-      payment_status: 'advance',
+      payment_status: newPaymentStatus,
+      paid_amount: newPaidTotal,
       paid_at: new Date().toISOString(),
-      confirmed_at: new Date().toISOString(),
+      ...(isFirstConfirmation ? { confirmed_at: new Date().toISOString() } : {}),
       commission_status: 'collected',
       payout_status: 'pending',
     })
@@ -599,17 +640,17 @@ export async function confirmPayment(bookingId: string) {
 
   if (error) return { error: error.message }
 
-  // Registrar el pago (no bloquea si falla — el booking ya está confirmado)
+  // Registrar el pago de la cuota (monto real cobrado, no la comisión)
   const { error: payErr } = await admin.from('payments').insert({
     booking_id:     bookingId,
-    amount:         bk.platform_fee,
+    amount:         paidThisTime,
     currency:       'DOP',
-    payment_type:   'platform_fee',
+    payment_type:   'deposit',
     payment_method: 'manual',
     status:         'completed',
     paid_at:        new Date().toISOString(),
   })
-  if (payErr) console.error('[completeBooking] payments insert failed:', payErr.message)
+  if (payErr) console.error('[confirmPayment] payments insert failed:', payErr.message)
 
   // Registrar liquidación para el host (consistente con el flujo Azul,
   // que sí la crea; antes el pago manual no aparecía en liquidaciones)
@@ -627,6 +668,14 @@ export async function confirmPayment(bookingId: string) {
     estado:           'pendiente',
   }, { onConflict: 'booking_id' })
   if (liqErr) console.error('[confirmPayment] liquidaciones upsert failed:', liqErr.message)
+
+  // Cuotas posteriores: no recrear el evento de calendario ni reenviar el email de "confirmada".
+  if (!isFirstConfirmation) {
+    revalidatePath('/dashboard/host/agenda')
+    revalidatePath('/dashboard/host/finanzas')
+    revalidatePath('/dashboard/reservas')
+    return { success: true }
+  }
 
   const host   = space?.profiles as any
   const guest  = bk.profiles as any
