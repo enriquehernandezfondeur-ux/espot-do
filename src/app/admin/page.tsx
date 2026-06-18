@@ -7,17 +7,14 @@ import {
   Star, UserCheck, BarChart3,
 } from 'lucide-react'
 import Link from 'next/link'
+import { STATUS_SHORT, STATUS_COLORS } from '@/lib/bookingConfig'
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string }> = {
-  pending:          { label: 'Pendiente',   color: '#D97706', bg: 'rgba(217,119,6,0.1)',    dot: '#D97706' },
-  accepted:         { label: 'Aceptada',    color: '#2563EB', bg: 'rgba(37,99,235,0.1)',    dot: '#2563EB' },
-  confirmed:        { label: 'Confirmada',  color: '#16A34A', bg: 'rgba(22,163,74,0.1)',    dot: '#16A34A' },
-  completed:        { label: 'Completada',  color: 'var(--brand)', bg: 'rgba(53,196,147,0.1)',   dot: 'var(--brand)' },
-  rejected:         { label: 'Rechazada',   color: '#DC2626', bg: 'rgba(220,38,38,0.08)',   dot: '#DC2626' },
-  cancelled_guest:  { label: 'Cancelada',   color: '#6B7280', bg: 'rgba(107,114,128,0.08)', dot: '#6B7280' },
-  cancelled_host:   { label: 'Cancelada',   color: '#6B7280', bg: 'rgba(107,114,128,0.08)', dot: '#6B7280' },
-  quote_requested:  { label: 'Cotización',  color: '#7C3AED', bg: 'rgba(124,58,237,0.08)', dot: '#7C3AED' },
-}
+// Config de estado unificado desde bookingConfig (consistente con reservas/usuarios)
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string }> =
+  Object.fromEntries(
+    (Object.keys(STATUS_COLORS) as (keyof typeof STATUS_COLORS)[])
+      .map(k => [k, { label: STATUS_SHORT[k], ...STATUS_COLORS[k], dot: STATUS_COLORS[k].color }]),
+  )
 
 function timeAgo(date: string) {
   const diff = Date.now() - new Date(date).getTime()

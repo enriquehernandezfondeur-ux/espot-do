@@ -5,6 +5,7 @@ import { getAdminBookings, updateBookingStatus } from '@/lib/actions/admin'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { Search, ChevronDown, Loader2, CalendarDays, Clock, Users, MapPin, Check, X } from 'lucide-react'
 import Pagination from '@/components/ui/Pagination'
+import { STATUS_SHORT, STATUS_COLORS } from '@/lib/bookingConfig'
 
 const PAGE_SIZE = 25
 import { cn } from '@/lib/utils'
@@ -21,16 +22,12 @@ const STATUS_OPTIONS = [
   { value: 'rejected',        label: 'Rechazadas' },
 ]
 
-const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
-  pending:         { label: 'Pendiente',    color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
-  accepted:        { label: 'Por pagar',    color: '#2563EB', bg: 'rgba(37,99,235,0.1)'   },
-  confirmed:       { label: 'Confirmada',   color: '#16A34A', bg: 'rgba(22,163,74,0.1)'   },
-  completed:       { label: 'Completada',   color: 'var(--brand)', bg: 'rgba(53,196,147,0.1)'  },
-  rejected:        { label: 'Rechazada',    color: '#DC2626', bg: 'rgba(220,38,38,0.1)'   },
-  cancelled_guest: { label: 'Cancelada',    color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },
-  cancelled_host:  { label: 'Cancelada',    color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },
-  quote_requested: { label: 'Cotización',   color: '#7C3AED', bg: 'rgba(124,58,237,0.1)'  },
-}
+// Config de estado unificado desde bookingConfig (mismo color/etiqueta en todo el app)
+const statusConfig: Record<string, { label: string; color: string; bg: string }> =
+  Object.fromEntries(
+    (Object.keys(STATUS_COLORS) as (keyof typeof STATUS_COLORS)[])
+      .map(k => [k, { label: STATUS_SHORT[k], ...STATUS_COLORS[k] }]),
+  )
 
 export default function AdminReservasPage() {
   const [bookings, setBookings] = useState<any[]>([])

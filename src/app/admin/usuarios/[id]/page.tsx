@@ -9,6 +9,7 @@ import {
   Banknote, ExternalLink, Loader2, Eye, Package, Star,
 } from 'lucide-react'
 import Link from 'next/link'
+import { STATUS_SHORT, STATUS_COLORS } from '@/lib/bookingConfig'
 
 // ── Formatters ──────────────────────────────────────────────
 function fmtCurrency(n: number) {
@@ -24,16 +25,12 @@ function fmtDateTime(d: string | null | undefined) {
 }
 
 // ── Status badges ────────────────────────────────────────────
-const bookingStatusCfg: Record<string, { label: string; color: string; bg: string }> = {
-  pending:          { label: 'Pendiente',   color: '#D97706', bg: 'rgba(217,119,6,0.10)' },
-  accepted:         { label: 'Aceptada',    color: '#2563EB', bg: 'rgba(37,99,235,0.10)' },
-  confirmed:        { label: 'Confirmada',  color: '#059669', bg: 'rgba(5,150,105,0.10)' },
-  completed:        { label: 'Completada',  color: '#16A34A', bg: 'rgba(22,163,74,0.10)' },
-  rejected:         { label: 'Rechazada',   color: '#DC2626', bg: 'rgba(220,38,38,0.10)' },
-  cancelled_guest:  { label: 'Cancelada',   color: '#6B7280', bg: 'rgba(107,114,128,0.10)' },
-  cancelled_host:   { label: 'Cancelada',   color: '#6B7280', bg: 'rgba(107,114,128,0.10)' },
-  quote_requested:  { label: 'Cotización',  color: '#7C3AED', bg: 'rgba(124,58,237,0.10)' },
-}
+// Config de estado de reserva unificado desde bookingConfig (consistente con el resto del app)
+const bookingStatusCfg: Record<string, { label: string; color: string; bg: string }> =
+  Object.fromEntries(
+    (Object.keys(STATUS_COLORS) as (keyof typeof STATUS_COLORS)[])
+      .map(k => [k, { label: STATUS_SHORT[k], ...STATUS_COLORS[k] }]),
+  )
 const payoutCfg: Record<string, { label: string; color: string; bg: string }> = {
   pending: { label: 'Por liquidar', color: '#D97706', bg: 'rgba(217,119,6,0.10)' },
   paid:    { label: 'Liquidado',    color: '#16A34A', bg: 'rgba(22,163,74,0.10)' },
