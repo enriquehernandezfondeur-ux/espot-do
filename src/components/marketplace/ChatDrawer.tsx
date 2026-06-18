@@ -142,17 +142,9 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, hostA
     if ('error' in result) {
       setSendError(result.error ?? 'Error al enviar')
     } else {
-      const optimistic = {
-        id: Date.now().toString(),
-        sender_id:       userId,
-        receiver_id:     hostId,
-        body:            body.trim() || null,
-        attachment_url:  att?.url  ?? null,
-        attachment_type: att?.type ?? null,
-        attachment_name: att?.name ?? null,
-        created_at:      new Date().toISOString(),
-      }
-      setMessages(prev => [...prev, optimistic])
+      // Fila real devuelta (id UUID) → el dedup por id del realtime evita el duplicado.
+      const real = (result as any).message
+      if (real) setMessages(prev => prev.find(m => m.id === real.id) ? prev : [...prev, real])
       setBody('')
       removeAttachment()
       // Resetear altura del textarea

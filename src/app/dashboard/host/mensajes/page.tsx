@@ -174,13 +174,9 @@ export default function HostMensajesPage() {
     if ('error' in result) {
       setSendError(result.error ?? 'Error al enviar')
     } else {
-      const optimistic = {
-        id: Date.now().toString(), sender_id: userId, receiver_id: guestId,
-        body: body.trim() || null, attachment_url: att?.url ?? null,
-        attachment_type: att?.type ?? null, attachment_name: att?.name ?? null,
-        created_at: new Date().toISOString(),
-      }
-      setMessages(prev => [...prev, optimistic])
+      // Usar la fila real devuelta (id UUID) para que el dedup por id del realtime no duplique.
+      const real = (result as any).message
+      if (real) setMessages(prev => prev.find(m => m.id === real.id) ? prev : [...prev, real])
       setBody('')
       removeAttachment()
       if (textareaRef.current) textareaRef.current.style.height = 'auto'

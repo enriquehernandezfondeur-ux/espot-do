@@ -145,13 +145,10 @@ export default function ClientMensajesPage() {
     if ('error' in result) {
       setSendError(result.error ?? 'No se pudo enviar el mensaje')
     } else {
-      const optimistic = {
-        id: Date.now().toString(), sender_id: userId, receiver_id: hostId,
-        body: body.trim() || null, attachment_url: att?.url ?? null,
-        attachment_type: att?.type ?? null, attachment_name: att?.name ?? null,
-        created_at: new Date().toISOString(),
-      }
-      setMessages(prev => [...prev, optimistic])
+      // Usar la fila real devuelta (id UUID) — así el dedup por id del canal realtime
+      // evita que el mensaje aparezca duplicado en pantalla.
+      const real = (result as any).message
+      if (real) setMessages(prev => prev.find(m => m.id === real.id) ? prev : [...prev, real])
       setBody('')
       removeAttachment()
       if (textareaRef.current) textareaRef.current.style.height = 'auto'

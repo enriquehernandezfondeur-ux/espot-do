@@ -166,6 +166,8 @@ export async function createAvailabilityBlock(payload: {
     .single()
 
   if (error) return { error: error.message }
+  revalidatePath('/dashboard/host/calendario')
+  revalidatePath('/dashboard/host/agenda')
   return { success: true, data }
 }
 
@@ -186,7 +188,10 @@ export async function deleteAvailabilityBlock(blockId: string) {
   if (!block || (block.spaces as any)?.host_id !== hId) return { error: 'No autorizado' }
 
   const { error } = await supabase.from('space_availability').delete().eq('id', blockId)
-  return error ? { error: error.message } : { success: true }
+  if (error) return { error: error.message }
+  revalidatePath('/dashboard/host/calendario')
+  revalidatePath('/dashboard/host/agenda')
+  return { success: true }
 }
 
 // ── Obtener bloqueos de un espacio ───────────────────────

@@ -678,6 +678,11 @@ export async function confirmPayment(bookingId: string) {
     }),
   ])
 
+  // Refrescar las vistas server-rendered (antes quedaban stale tras el pago manual)
+  revalidatePath('/dashboard/host/agenda')
+  revalidatePath('/dashboard/host/finanzas')
+  revalidatePath('/dashboard/reservas')
+
   return { success: true }
 }
 
