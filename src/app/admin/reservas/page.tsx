@@ -132,7 +132,13 @@ export default function AdminReservasPage() {
               <Loader2 className="w-6 h-6 animate-spin" style={{ color: 'var(--brand)' }} />
             </div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-16 text-gray-400 text-sm">Sin reservas</div>
+            <div className="py-16 text-center">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: '#F8FAFC' }}>
+                <CalendarDays size={24} style={{ color: '#9CA3AF' }} />
+              </div>
+              <p className="text-base font-semibold mb-1" style={{ color: '#374151' }}>No hay reservas en esta vista</p>
+              <p className="text-sm" style={{ color: '#9CA3AF' }}>Prueba cambiando el filtro o la búsqueda</p>
+            </div>
           ) : (
             <div className="divide-y divide-[#F0F2F5]">
               {paginated.map(bk => {

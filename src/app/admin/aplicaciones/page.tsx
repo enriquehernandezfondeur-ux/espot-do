@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getApplications } from '@/lib/actions/host-application'
 import Link from 'next/link'
-import { ClipboardList, ChevronRight, Clock } from 'lucide-react'
+import { ClipboardList, ChevronRight, Clock, Search } from 'lucide-react'
 import type { ApplicationStatus } from '@/types'
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
@@ -36,7 +36,7 @@ function scoreBg(score: number): string {
 export default async function AplicacionesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string }>
+  searchParams: Promise<{ filter?: string; q?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -48,8 +48,14 @@ export default async function AplicacionesPage({
     if (profile?.role !== 'admin') redirect('/admin')
   }
 
-  const { filter = 'pending_admin' } = await searchParams
-  const apps = await getApplications(filter as ApplicationStatus | 'all')
+  const { filter = 'pending_admin', q = '' } = await searchParams
+  const allApps = await getApplications(filter as ApplicationStatus | 'all')
+  const query = q.trim().toLowerCase()
+  const apps = query
+    ? allApps.filter(a =>
+        `${a.business_name ?? ''} ${a.city ?? ''} ${(a.user as any)?.full_name ?? ''}`
+          .toLowerCase().includes(query))
+    : allApps
 
   const TABS = [
     { key: 'pending_admin', label: 'Pendientes' },
@@ -89,6 +95,19 @@ export default async function AplicacionesPage({
         ))}
       </div>
 
+      {/* Buscador (form GET — busca por negocio, ciudad o propietario) */}
+      <form method="get" className="relative mb-5 max-w-md">
+        <input type="hidden" name="filter" value={filter} />
+        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#9CA3AF' }} />
+        <input
+          name="q"
+          defaultValue={q}
+          placeholder="Buscar por negocio, ciudad o propietario…"
+          className="w-full rounded-xl pl-9 pr-3 py-2.5 text-sm outline-none"
+          style={{ background: '#fff', border: '1px solid #E5E7EB', color: '#0F1623', fontSize: 16 }}
+        />
+      </form>
+
       {/* List */}
       {apps.length === 0 ? (
         <div className="rounded-2xl p-12 text-center"
@@ -98,10 +117,10 @@ export default async function AplicacionesPage({
             <ClipboardList size={24} style={{ color: '#9CA3AF' }} />
           </div>
           <p className="text-base font-semibold mb-1" style={{ color: '#374151' }}>
-            No hay solicitudes {filter !== 'all' ? 'en esta categoría' : ''}
+            {query ? 'Sin resultados para tu búsqueda' : `No hay solicitudes ${filter !== 'all' ? 'en esta categoría' : ''}`}
           </p>
           <p className="text-sm" style={{ color: '#9CA3AF' }}>
-            Las nuevas solicitudes aparecerán aquí
+            {query ? 'Prueba con otro nombre, ciudad o propietario' : 'Las nuevas solicitudes aparecerán aquí'}
           </p>
         </div>
       ) : (
