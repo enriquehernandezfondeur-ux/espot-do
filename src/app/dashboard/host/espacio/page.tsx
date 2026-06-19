@@ -30,36 +30,6 @@ const steps = [
 const categories: { value: SpaceCategory; label: string; icon: React.ElementType }[] =
   SPACE_CATEGORIES.filter(c => c.value !== 'lounge').map(c => ({ value: c.value, label: c.label, icon: c.icon }))
 
-const pricingOptions: { value: PricingType; label: string; desc: string; icon: React.ElementType; ideal: string }[] = [
-  {
-    value: 'hourly',
-    label: 'Precio por hora',
-    desc: 'El cliente elige la cantidad de horas dentro del rango que configuras. Cobro automático por hora completada.',
-    icon: Clock,
-    ideal: 'Salones, terrazas, estudios, coworkings',
-  },
-  {
-    value: 'minimum_consumption',
-    label: 'Consumibles',
-    desc: 'El cliente paga el consumo mínimo por adelantado vía Espot. Ese monto se aplica el día del evento en alimentos y bebidas en tu local.',
-    icon: Wine,
-    ideal: 'Restaurantes, bares, lounges, rooftops',
-  },
-  {
-    value: 'fixed_package',
-    label: 'Paquete fijo',
-    desc: 'Precio cerrado todo incluido: horas, servicios y lo que definas. El cliente ve el total exacto desde el inicio, sin sorpresas.',
-    icon: Package,
-    ideal: 'Salones con todo incluido, hoteles, venues',
-  },
-  {
-    value: 'custom_quote',
-    label: 'Cotización personalizada',
-    desc: 'El cliente describe su evento y solicita precio. Tú respondes con una propuesta personalizada. Si acepta, paga por Espot.',
-    icon: MessageSquare,
-    ideal: 'Bodas, eventos corporativos, eventos grandes',
-  },
-]
 
 const paymentTermOptions: { value: PaymentTermType; label: string; desc: string; ideal: string }[] = [
   {

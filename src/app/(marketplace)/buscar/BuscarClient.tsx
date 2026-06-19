@@ -11,7 +11,7 @@ import {
   Car, Volume2, Music2, Waves, Minus, Plus, Wifi,
   Wind, Projector, Zap, ShowerHead, MonitorPlay,
 } from 'lucide-react'
-import { CATEGORIES, PRICING_TYPES } from './constants'
+import { CATEGORIES } from './constants'
 import { formatCurrency } from '@/lib/utils'
 import { SUB_ACTIVITIES, SUB_TO_BASE } from '@/lib/activities'
 import { SpaceCard } from './SpaceCard'
@@ -132,7 +132,6 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
   const [priceMax,       setPriceMax]       = useState('')
   const [selectedAmenities,   setSelectedAmenities]   = useState<string[]>([])
   const [selectedFacilities,  setSelectedFacilities]  = useState<string[]>([])
-  const [pricingFilter,       setPricingFilter]       = useState('')
   const [moreOpen,       setMoreOpen]       = useState(false)
   const [drawerFocus,    setDrawerFocus]    = useState<string | null>(null)
   const drawerContentRef = useRef<HTMLDivElement>(null)
@@ -206,7 +205,6 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
       setCatOpen(false)
       setCapOpen(false)
       setSecOpen(false)
-      setPriceOpen(false)
       setSortOpen(false)
       setDatePickerOpen(false)
       setActOpen(false)
@@ -254,10 +252,8 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
   const [capOpen,   setCapOpen]   = useState(false)
   const [secOpen,   setSecOpen]   = useState(false)
   const [catOpen,   setCatOpen]   = useState(false)
-  const [priceOpen, setPriceOpen] = useState(false)
   const capRef      = useRef<HTMLDivElement>(null)
   const secRef      = useRef<HTMLDivElement>(null)
-  const priceRef    = useRef<HTMLDivElement>(null)
   const cardStripRef = useRef<HTMLDivElement>(null)
 
   // Sectores filtrados por búsqueda en el drawer
@@ -337,12 +333,6 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
         })
       })
     }
-    if (pricingFilter) {
-      result = result.filter(s => {
-        const p = s.space_pricing?.find((x: any) => x.is_active) ?? s.space_pricing?.[0]
-        return p?.pricing_type === pricingFilter
-      })
-    }
     // Ordenar
     if (sortBy === 'precio_asc' || sortBy === 'precio_desc') {
       result.sort((a, b) => {
@@ -359,7 +349,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
     }
 
     return result
-  }, [spaces, q, activity, categoria, sector, capacidad, priceMin, priceMax, selectedAmenities, selectedFacilities, pricingFilter, sortBy])
+  }, [spaces, q, activity, categoria, sector, capacidad, priceMin, priceMax, selectedAmenities, selectedFacilities, sortBy])
 
   function applyCapacity(val: string) {
     setCapacidad(val); setCapacidadInput(val)
@@ -388,17 +378,17 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
 
   function closeAllDropdowns() {
     setCatOpen(false); setActOpen(false); setCapOpen(false)
-    setSecOpen(false); setPriceOpen(false); setSortOpen(false); setDatePickerOpen(false)
+    setSecOpen(false); setSortOpen(false); setDatePickerOpen(false)
   }
 
   const activeFiltersCount = [
-    activity, categoria, sector, capacidad, dateFrom, pricingFilter, ...selectedAmenities, ...selectedFacilities, priceMin, priceMax,
+    activity, categoria, sector, capacidad, dateFrom, ...selectedAmenities, ...selectedFacilities, priceMin, priceMax,
   ].filter(Boolean).length
 
   function clearAll() {
     closeAllDropdowns()
     setActQ(''); setQ(''); setActivity(''); setSector(''); setSectorQ(''); setCategoria(''); setCapacidad(''); setCapacidadInput('')
-    setSelectedAmenities([]); setSelectedFacilities([]); setPricingFilter(''); setPriceMin(''); setPriceMax(''); setDateFrom(''); setTimeFrom('')
+    setSelectedAmenities([]); setSelectedFacilities([]); setPriceMin(''); setPriceMax(''); setDateFrom(''); setTimeFrom('')
   }
 
   const handleCardHover = useCallback((id: string | null) => setHoveredId(id), [])
@@ -428,11 +418,6 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
       label: FACILITIES.find(f => f.key === k)?.label ?? k,
       onRemove: () => toggleFacility(k),
     })),
-    pricingFilter && {
-      key: 'pricing',
-      label: PRICING_TYPES.find(p => p.value === pricingFilter)?.label ?? pricingFilter,
-      onRemove: () => setPricingFilter(''),
-    },
   ].filter(Boolean) as { key: string; label: string; onRemove: () => void }[]
 
   // Medir la altura real de la barra de filtros para posicionar el mapa móvil debajo
