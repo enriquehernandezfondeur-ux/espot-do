@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
-  LogOut, Building2, Menu, X, Search, Shield, User, Bell, Loader2,
+  LogOut, Building2, Menu, X, Search, Shield, User, Bell, Loader2, Crown,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { LucideIcon } from 'lucide-react'
@@ -15,6 +15,8 @@ export interface NavItem {
   label: string
   icon: LucideIcon
   badge?: number
+  /** Resalta el ítem con un pill "Mejora" e icono de marca (p. ej. Espot Pro para gratuitos) */
+  highlight?: boolean
 }
 
 export interface NotificationItem {
@@ -56,6 +58,8 @@ export interface AppSidebarProps {
   isActiveVariant: 'host' | 'client'
   /** Optional Admin Console link — only rendered when true */
   isAdmin?: boolean
+  /** Muestra el indicador "Espot Pro" en el perfil cuando el plan está activo */
+  proActive?: boolean
   /** Whether nav items have onMouseEnter/Leave hover handlers */
   navHoverHandlers?: boolean
   /** Total pending notifications (messages + reservations + etc.) */
@@ -83,6 +87,7 @@ export default function AppSidebar({
   drawerShadow,
   isActiveVariant,
   isAdmin,
+  proActive = false,
   navHoverHandlers = false,
   totalBadge,
   notifications,
@@ -155,13 +160,21 @@ export default function AppSidebar({
             <div className="text-sm font-bold leading-tight line-clamp-2 break-words" style={{ color: 'var(--text-primary)' }}>{userName ?? userNameFallback}</div>
             <div className="text-[11px] font-semibold truncate mt-0.5" style={{ color: 'var(--brand)' }}>{roleLabel}</div>
           </div>
+          {proActive && (
+            <span title="Espot Pro" aria-label="Espot Pro activo"
+              className="shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-lg"
+              style={{ background: 'var(--brand)', color: '#fff' }}>
+              <Crown size={14} />
+            </span>
+          )}
         </div>
       </div>
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-2 space-y-0.5">
-        {navItems.map(({ href, label, icon: Icon, badge }) => {
+        {navItems.map(({ href, label, icon: Icon, badge, highlight }) => {
           const active = isActive(href)
+          const promote = !!highlight && !active
           return (
             <Link key={href} href={href}
               onClick={() => setMobileOpen(false)}
@@ -176,8 +189,12 @@ export default function AppSidebar({
                 onMouseEnter: (e: React.MouseEvent<HTMLAnchorElement>) => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' } },
                 onMouseLeave: (e: React.MouseEvent<HTMLAnchorElement>) => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'; (e.currentTarget as HTMLElement).style.background = 'transparent' } },
               } : {})}>
-              <Icon size={15} className="shrink-0" style={active ? { color: 'var(--brand)' } : undefined} />
+              <Icon size={15} className="shrink-0" style={active || promote ? { color: 'var(--brand)' } : undefined} />
               <span className="flex-1">{label}</span>
+              {promote && (
+                <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                  style={{ background: 'var(--brand)', color: '#fff' }}>Mejora</span>
+              )}
               {badge != null && badge > 0 && (
                 <span className="flex items-center justify-center text-xs font-bold rounded-full shrink-0"
                   style={{ minWidth: 18, height: 18, padding: '0 4px', background: '#EF4444', color: '#fff', fontSize: 10 }}>

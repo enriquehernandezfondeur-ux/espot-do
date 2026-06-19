@@ -8,6 +8,7 @@ import {
   CalendarCheck, Users, CalendarRange, UserPlus, Crown,
 } from 'lucide-react'
 import AppSidebar from '@/components/shared/AppSidebar'
+import { getMyPlan } from '@/lib/actions/subscription'
 import { createClient } from '@/lib/supabase/client'
 import { todayInRD } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
@@ -49,7 +50,10 @@ export default function Sidebar({ userName, avatarUrl, isAdmin, isOwner = true, 
   const [unread,           setUnread]           = useState(0)
   const [reservasCount,    setReservasCount]    = useState(0)
   const [cotizCount,       setCotizCount]       = useState(0)
+  const [isPro,            setIsPro]            = useState(false)
   const pathname = usePathname()
+
+  useEffect(() => { getMyPlan().then(p => setIsPro(p === 'pro')).catch(() => {}) }, [])
 
   // Helper: cuenta mensajes no leídos excluyendo conversaciones ocultas
   async function fetchUnread(supabase: ReturnType<typeof createClient>, userId: string) {
@@ -162,6 +166,7 @@ export default function Sidebar({ userName, avatarUrl, isAdmin, isOwner = true, 
     if (item.href === '/dashboard/host/mensajes')     return { ...item, badge: unread }
     if (item.href === '/dashboard/host/agenda')       return { ...item, badge: reservasCount }
     if (item.href === '/dashboard/host/cotizaciones') return { ...item, badge: cotizCount }
+    if (item.href === '/dashboard/host/pro')          return { ...item, highlight: !isPro }
     return item
   })
   const mobileBottomNav = MOBILE_NAV.map(item => {
@@ -175,6 +180,7 @@ export default function Sidebar({ userName, avatarUrl, isAdmin, isOwner = true, 
       userName={userName}
       avatarUrl={avatarUrl}
       isAdmin={isAdmin}
+      proActive={isPro}
       navItems={navItems}
       mobileBottomNav={mobileBottomNav}
       roleLabel={isOwner ? 'Negocio' : teamRole === 'admin' ? 'Admin' : teamRole === 'coordinador' ? 'Coordinador' : 'Equipo'}

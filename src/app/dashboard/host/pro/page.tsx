@@ -6,7 +6,10 @@ import { getHostCardSpaces } from '@/lib/actions/host'
 import { PRO_PRICE_DOP, type SubscriptionSummary } from '@/lib/plans'
 import { PlanBadge } from '@/components/PlanBadge'
 import { ShareButton } from '@/components/ShareButton'
-import { Crown, Check, Loader2, Sparkles, QrCode, ExternalLink } from 'lucide-react'
+import {
+  Crown, Check, Loader2, Sparkles, QrCode, ExternalLink,
+  MessageCircle, CalendarRange, Users, BarChart3, Rocket, Bell, Images, Lock,
+} from 'lucide-react'
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 interface CardSpace { id: string; name: string; slug: string; is_published: boolean }
@@ -20,16 +23,16 @@ const NORMAL_FEATURES = [
   'Comisión del 10% solo cuando cobras dentro de Espot',
 ]
 
-const PRO_FEATURES = [
-  'Espot Directo: botón de WhatsApp, teléfono y formulario',
-  'Registro de reservas externas (fuera de Espot)',
-  'Calendario unificado: reservas internas + externas',
-  'Tarjeta digital del espacio con enlace y QR',
-  'Badge "Espot Pro" y mayor visibilidad en resultados',
-  'Estadísticas avanzadas: visitas, clics, solicitudes y reservas',
-  'CRM para gestionar clientes y solicitudes',
-  'Recordatorios automáticos',
-  'Más capacidad para fotos y videos',
+// Beneficios exclusivos de Pro (no disponibles en el plan Normal). Espot Directo primero.
+const PRO_BENEFITS = [
+  { icon: MessageCircle, title: 'Espot Directo', desc: 'Botón de WhatsApp, teléfono y formulario en tu espacio: recibe solicitudes directas, sin intermediarios.' },
+  { icon: CalendarRange, title: 'Reservas externas + calendario unificado', desc: 'Registra eventos de fuera de Espot y míralos junto a los de Espot en un solo calendario.' },
+  { icon: Users, title: 'CRM de clientes', desc: 'Guarda y organiza tus clientes con historial, etiquetas y notas.' },
+  { icon: QrCode, title: 'Tarjeta digital + QR', desc: 'Una página compartible de tu espacio, con enlace y código QR.' },
+  { icon: BarChart3, title: 'Estadísticas avanzadas', desc: 'Visitas, clics de intención, conversión y rendimiento de tus espacios.' },
+  { icon: Rocket, title: 'Mayor visibilidad', desc: 'Tus espacios destacados y con prioridad en los resultados del marketplace.' },
+  { icon: Bell, title: 'Recordatorios automáticos', desc: 'Avisos a tus clientes para reducir cancelaciones y olvidos.' },
+  { icon: Images, title: 'Más fotos y videos', desc: 'Muestra tu espacio con mayor capacidad multimedia.' },
 ]
 
 function fmtDate(iso: string | null): string {
@@ -94,21 +97,31 @@ export default function HostProPage() {
       </div>
 
       {/* Estado de la suscripción */}
-      <div className="rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+      <div className="rounded-2xl p-5" style={isPro
+        ? { background: 'var(--brand-dim)', border: '1px solid var(--brand-border)', boxShadow: 'var(--shadow-card)' }
+        : { background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-card)' }}>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
+          <div className="min-w-0">
             <div className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>Plan actual</div>
-            <div className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{sub?.statusLabel ?? 'Plan Normal (gratis)'}</div>
+            <div className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+              {sub?.statusLabel ?? 'Plan Normal (gratis)'}
+              {isPro && <PlanBadge />}
+            </div>
             {isPro && sub?.nextChargeISO && (
               <div className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
                 Próximo cobro: <strong style={{ color: 'var(--text-primary)' }}>{fmtDate(sub.nextChargeISO)}</strong>
                 {sub.daysLeft != null && ` · ${sub.daysLeft} día${sub.daysLeft === 1 ? '' : 's'} restantes`}
               </div>
             )}
+            {!isPro && !isPending && (
+              <div className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
+                Estás en el plan gratuito. Desbloquea <strong style={{ color: 'var(--brand)' }}>Espot Directo</strong> y mucho más.
+              </div>
+            )}
           </div>
           {!isPro && !isPending && (
             <button onClick={handleStart} disabled={working}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all disabled:opacity-60"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all disabled:opacity-60"
               style={{ background: 'var(--brand)', color: '#fff' }}>
               {working ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
               Activar Espot Pro · RD${PRO_PRICE_DOP}/mes
@@ -161,6 +174,49 @@ export default function HostProPage() {
         </div>
       )}
 
+      {/* Showcase de beneficios Pro (exclusivos del plan, no están en Normal) */}
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          {isPro
+            ? <Check size={16} style={{ color: 'var(--brand)' }} />
+            : <Lock size={15} style={{ color: 'var(--brand)' }} />}
+          <h2 className="text-base md:text-lg font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            {isPro ? 'Tus beneficios Espot Pro' : 'Lo que desbloqueas con Espot Pro'}
+          </h2>
+        </div>
+        <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
+          {isPro ? 'Todo esto está activo en tu cuenta.' : 'Funciones que no incluye el plan Normal.'}
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {PRO_BENEFITS.map(b => {
+            const Icon = b.icon
+            return (
+              <div key={b.title} className="rounded-2xl p-4 flex gap-3"
+                style={{ background: 'var(--bg-card)', border: `1px solid ${isPro ? 'var(--brand-border)' : 'var(--border-subtle)'}` }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'var(--brand-dim)' }}>
+                  <Icon size={18} style={{ color: 'var(--brand)' }} />
+                </div>
+                <div className="min-w-0">
+                  <div className="font-semibold text-sm flex items-center gap-1.5" style={{ color: 'var(--text-primary)' }}>
+                    {b.title}
+                    {isPro && <Check size={13} className="shrink-0" style={{ color: 'var(--brand)' }} />}
+                  </div>
+                  <div className="text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{b.desc}</div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+        {!isPro && !isPending && (
+          <button onClick={handleStart} disabled={working}
+            className="mt-4 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all disabled:opacity-60"
+            style={{ background: 'var(--brand)', color: '#fff' }}>
+            {working ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+            Activar Espot Pro · RD${PRO_PRICE_DOP}/mes
+          </button>
+        )}
+      </div>
+
       {/* Comparativa Normal vs Pro */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Normal */}
@@ -186,9 +242,9 @@ export default function HostProPage() {
           </div>
           <div className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>Todo lo del plan Normal, más:</div>
           <ul className="mt-3 space-y-2.5">
-            {PRO_FEATURES.map(f => (
-              <li key={f} className="flex items-start gap-2 text-sm" style={{ color: 'var(--text-primary)' }}>
-                <Check size={16} style={{ color: 'var(--brand)', marginTop: 1, flexShrink: 0 }} />{f}
+            {PRO_BENEFITS.map(b => (
+              <li key={b.title} className="flex items-start gap-2 text-sm" style={{ color: 'var(--text-primary)' }}>
+                <Check size={16} style={{ color: 'var(--brand)', marginTop: 1, flexShrink: 0 }} />{b.title}
               </li>
             ))}
           </ul>
