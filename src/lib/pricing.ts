@@ -72,6 +72,15 @@ export function computePlatformFee(subtotal: number): number {
 }
 
 /**
+ * Neto del propietario: total − comisión 10%. Fuente única para que el monto
+ * mostrado y el de la liquidación coincidan (evita el descuadre de ±RD$1 que
+ * producía `Math.round(total * 0.90)`).
+ */
+export function computeHostNet(total: number): number {
+  return total - computePlatformFee(total)
+}
+
+/**
  * Texto de la condición de consumo para mostrar al cliente.
  * NO afecta el cálculo — el precio es el mismo, sólo cambia la explicación.
  */
