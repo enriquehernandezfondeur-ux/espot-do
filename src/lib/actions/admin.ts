@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { sendEmail } from '@/lib/email/send'
 import { emailBase, infoBox } from '@/lib/email/templates'
 import { formatCurrency, formatDate, escapeHtml } from '@/lib/utils'
-import { suggestHourlyFromLegacy } from '@/lib/pricing'
+import { suggestHourlyFromLegacy, computePlatformFee } from '@/lib/pricing'
 
 const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
 
@@ -359,7 +359,9 @@ export async function updateBookingStatus(bookingId: string, status: string) {
     extra.confirmed_at   = now
     extra.paid_at        = now
   }
-  if (status === 'completed') extra.payment_status = 'paid'
+  // 'completed' solo cambia el estado. NO se fuerza payment_status='paid':
+  // hacerlo permitía que markPayoutPaid liquidara el 90% al host aunque el
+  // cliente no hubiera pagado el total. El payment_status lo refleja el flujo de pago real.
   const { error } = await supabase.from('bookings').update({ status, ...extra }).eq('id', bookingId)
   if (error) return { error: error.message }
   revalidatePath('/admin/reservas')
@@ -570,7 +572,9 @@ export async function markPayoutPaid(
     const space     = (booking as any).spaces as any
     const host      = space?.profiles as any
     const hostEmail = host?.email as string | undefined
-    const netAmount = Math.round(Number(booking.total_amount) * 0.90)
+    // Neto consistente con la liquidación registrada: total − comisión 10%
+    // (antes total×0.90, que difería en ±RD$1 por redondeo).
+    const netAmount = Number(booking.total_amount) - computePlatformFee(Number(booking.total_amount))
     const SITE      = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 
     if (hostEmail) {
