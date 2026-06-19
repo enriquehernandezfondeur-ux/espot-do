@@ -190,28 +190,22 @@ export default async function AdminDashboard() {
         {/* Right column */}
         <div className="space-y-4">
 
-          {/* Revenue card */}
-          <div className="rounded-2xl p-5"
-            style={{ background: 'linear-gradient(135deg, #1E293B 0%, #0F2A22 100%)', boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}>
-            <div className="flex items-center gap-2 mb-4">
-              <TrendingUp size={14} style={{ color: 'var(--brand)' }} />
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          {/* Comisión del mes — compacta, slate sólido (igual al sidebar) */}
+          <div className="rounded-2xl p-4"
+            style={{ background: '#1E293B', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }}>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>
                 Comisión este mes
               </span>
+              <TrendingUp size={13} style={{ color: 'var(--brand)' }} />
             </div>
-            <div className="text-3xl font-bold text-white mb-0.5" style={{ letterSpacing: '-0.03em' }}>
+            <div className="text-2xl font-bold mb-1" style={{ color: 'var(--brand)', letterSpacing: '-0.02em' }}>
               {formatCurrency(stats?.monthlyRevenue ?? 0)}
             </div>
-            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
-              Total acumulado: {formatCurrency(stats?.totalRevenue ?? 0)}
-            </div>
-            <div className="mt-4 pt-4 flex items-center justify-between" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-              <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                {stats?.totalBookings ?? 0} reservas en total
-              </span>
-              <Link href="/admin/reportes"
-                className="text-xs font-semibold" style={{ color: 'var(--brand)' }}>
-                Ver reportes →
+            <div className="flex items-center justify-between text-[11px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              <span>Acumulado: {formatCurrency(stats?.totalRevenue ?? 0)}</span>
+              <Link href="/admin/reportes" className="font-semibold" style={{ color: 'var(--brand)' }}>
+                Reportes →
               </Link>
             </div>
           </div>
