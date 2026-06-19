@@ -70,7 +70,7 @@ export default function HostProPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="animate-spin" style={{ color: 'var(--brand)' }} />
+        <Loader2 className="animate-spin" style={{ color: 'var(--pro)' }} />
       </div>
     )
   }
@@ -83,8 +83,8 @@ export default function HostProPage() {
       {/* Encabezado */}
       <div className="flex items-center gap-3">
         <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
-          style={{ background: 'rgba(53,196,147,0.14)' }}>
-          <Crown size={22} style={{ color: 'var(--brand)' }} />
+          style={{ background: 'var(--pro-dim)' }}>
+          <Crown size={22} style={{ color: 'var(--pro)' }} />
         </div>
         <div>
           <h1 className="text-xl md:text-2xl font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
@@ -98,7 +98,7 @@ export default function HostProPage() {
 
       {/* Estado de la suscripción */}
       <div className="rounded-2xl p-5" style={isPro
-        ? { background: 'var(--brand-dim)', border: '1px solid var(--brand-border)', boxShadow: 'var(--shadow-card)' }
+        ? { background: 'var(--pro-dim)', border: '1px solid var(--pro-border)', boxShadow: 'var(--shadow-card)' }
         : { background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-card)' }}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
@@ -115,14 +115,14 @@ export default function HostProPage() {
             )}
             {!isPro && !isPending && (
               <div className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
-                Estás en el plan gratuito. Desbloquea <strong style={{ color: 'var(--brand)' }}>Espot Directo</strong> y mucho más.
+                Estás en el plan gratuito. Desbloquea <strong style={{ color: 'var(--pro)' }}>Espot Directo</strong> y mucho más.
               </div>
             )}
           </div>
           {!isPro && !isPending && (
             <button onClick={handleStart} disabled={working}
               className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all disabled:opacity-60"
-              style={{ background: 'var(--brand)', color: '#fff' }}>
+              style={{ background: 'var(--pro)', color: '#fff' }}>
               {working ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
               Activar Espot Pro · RD${PRO_PRICE_DOP}/mes
             </button>
@@ -134,7 +134,7 @@ export default function HostProPage() {
           )}
         </div>
         {msg && (
-          <div className="mt-4 text-sm rounded-xl p-3" style={{ background: 'rgba(53,196,147,0.08)', color: 'var(--text-secondary)', border: '1px solid var(--brand-border)' }}>
+          <div className="mt-4 text-sm rounded-xl p-3" style={{ background: 'var(--pro-dim)', color: 'var(--text-secondary)', border: '1px solid var(--pro-border)' }}>
             {msg}
           </div>
         )}
@@ -144,7 +144,7 @@ export default function HostProPage() {
       {isPro && cardSpaces.filter(s => s.is_published).length > 0 && (
         <div className="rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-card)' }}>
           <div className="flex items-center gap-2 mb-1">
-            <QrCode size={16} style={{ color: 'var(--brand)' }} />
+            <QrCode size={16} style={{ color: 'var(--pro)' }} />
             <div className="font-bold" style={{ color: 'var(--text-primary)' }}>Tu tarjeta digital</div>
           </div>
           <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>Comparte cada espacio con un enlace y código QR.</p>
@@ -165,7 +165,7 @@ export default function HostProPage() {
                     </a>
                     <ShareButton url={url} title={s.name}
                       className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold"
-                      style={{ background: 'var(--brand-dim)', color: 'var(--text-primary)', border: '1px solid var(--brand-border)' }} />
+                      style={{ background: 'var(--pro-dim)', color: 'var(--text-primary)', border: '1px solid var(--pro-border)' }} />
                   </div>
                 </div>
               )
@@ -178,8 +178,8 @@ export default function HostProPage() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           {isPro
-            ? <Check size={16} style={{ color: 'var(--brand)' }} />
-            : <Lock size={15} style={{ color: 'var(--brand)' }} />}
+            ? <Check size={16} style={{ color: 'var(--pro)' }} />
+            : <Lock size={15} style={{ color: 'var(--pro)' }} />}
           <h2 className="text-base md:text-lg font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
             {isPro ? 'Tus beneficios Espot Pro' : 'Lo que desbloqueas con Espot Pro'}
           </h2>
@@ -192,14 +192,14 @@ export default function HostProPage() {
             const Icon = b.icon
             return (
               <div key={b.title} className="rounded-2xl p-4 flex gap-3"
-                style={{ background: 'var(--bg-card)', border: `1px solid ${isPro ? 'var(--brand-border)' : 'var(--border-subtle)'}` }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'var(--brand-dim)' }}>
-                  <Icon size={18} style={{ color: 'var(--brand)' }} />
+                style={{ background: 'var(--bg-card)', border: `1px solid ${isPro ? 'var(--pro-border)' : 'var(--border-subtle)'}` }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'var(--pro-dim)' }}>
+                  <Icon size={18} style={{ color: 'var(--pro)' }} />
                 </div>
                 <div className="min-w-0">
                   <div className="font-semibold text-sm flex items-center gap-1.5" style={{ color: 'var(--text-primary)' }}>
                     {b.title}
-                    {isPro && <Check size={13} className="shrink-0" style={{ color: 'var(--brand)' }} />}
+                    {isPro && <Check size={13} className="shrink-0" style={{ color: 'var(--pro)' }} />}
                   </div>
                   <div className="text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{b.desc}</div>
                 </div>
@@ -210,7 +210,7 @@ export default function HostProPage() {
         {!isPro && !isPending && (
           <button onClick={handleStart} disabled={working}
             className="mt-4 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all disabled:opacity-60"
-            style={{ background: 'var(--brand)', color: '#fff' }}>
+            style={{ background: 'var(--pro)', color: '#fff' }}>
             {working ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
             Activar Espot Pro · RD${PRO_PRICE_DOP}/mes
           </button>
@@ -233,8 +233,8 @@ export default function HostProPage() {
         </div>
 
         {/* Pro */}
-        <div className="rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1.5px solid var(--brand-border)', boxShadow: 'var(--shadow-card)' }}>
-          <div className="font-bold flex items-center gap-2" style={{ color: 'var(--brand)' }}>
+        <div className="rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1.5px solid var(--pro-border)', boxShadow: 'var(--shadow-card)' }}>
+          <div className="font-bold flex items-center gap-2" style={{ color: 'var(--pro)' }}>
             <Crown size={16} /> Espot Pro
           </div>
           <div className="text-2xl font-bold mt-1" style={{ color: 'var(--text-primary)' }}>
@@ -244,7 +244,7 @@ export default function HostProPage() {
           <ul className="mt-3 space-y-2.5">
             {PRO_BENEFITS.map(b => (
               <li key={b.title} className="flex items-start gap-2 text-sm" style={{ color: 'var(--text-primary)' }}>
-                <Check size={16} style={{ color: 'var(--brand)', marginTop: 1, flexShrink: 0 }} />{b.title}
+                <Check size={16} style={{ color: 'var(--pro)', marginTop: 1, flexShrink: 0 }} />{b.title}
               </li>
             ))}
           </ul>

@@ -24,6 +24,11 @@
   --brand-border: rgba(53, 196, 147, 0.25);
   --brand-navy:   #03313C;
   --brand-lime:   #D4FF58;
+  /* Espot Pro — acento dorado/ámbar (premium, distinto del verde de siempre) */
+  --pro:          #B8860B;
+  --pro-strong:   #8C6400;
+  --pro-dim:      rgba(184, 134, 11, 0.12);
+  --pro-border:   rgba(184, 134, 11, 0.32);
 }
 
 /* ── MARKETPLACE — LIGHT GREY THEME ──────────────── */

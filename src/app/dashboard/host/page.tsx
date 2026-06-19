@@ -170,11 +170,11 @@ export default function DashboardPage() {
       <Link href="/dashboard/host/pro"
         className="flex items-center gap-3 rounded-2xl p-4 mb-5 md:mb-6 transition-all"
         style={isPro
-          ? { background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }
+          ? { background: 'var(--pro-dim)', border: '1px solid var(--pro-border)' }
           : { background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-card)' }}>
         <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-          style={{ background: isPro ? 'var(--brand)' : 'var(--brand-dim)' }}>
-          {isPro ? <Crown size={20} style={{ color: '#fff' }} /> : <Sparkles size={20} style={{ color: 'var(--brand)' }} />}
+          style={{ background: isPro ? 'var(--pro)' : 'var(--pro-dim)' }}>
+          {isPro ? <Crown size={20} style={{ color: '#fff' }} /> : <Sparkles size={20} style={{ color: 'var(--pro)' }} />}
         </div>
         <div className="min-w-0 flex-1">
           <div className="font-bold text-sm flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
@@ -189,9 +189,9 @@ export default function DashboardPage() {
         </div>
         {!isPro && (
           <span className="hidden sm:inline-flex shrink-0 text-sm font-semibold px-4 py-2 rounded-xl"
-            style={{ background: 'var(--brand)', color: '#fff' }}>Mejora a Pro</span>
+            style={{ background: 'var(--pro)', color: '#fff' }}>Mejora a Pro</span>
         )}
-        <ArrowRight size={16} className="shrink-0" style={{ color: isPro ? 'var(--brand)' : 'var(--text-muted)' }} />
+        <ArrowRight size={16} className="shrink-0" style={{ color: isPro ? 'var(--pro)' : 'var(--text-muted)' }} />
       </Link>
 
       {/* ── Zona de acción urgente: solicitudes pendientes ── */}

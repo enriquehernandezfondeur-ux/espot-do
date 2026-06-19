@@ -163,7 +163,7 @@ export default function AppSidebar({
           {proActive && (
             <span title="Espot Pro" aria-label="Espot Pro activo"
               className="shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-lg"
-              style={{ background: 'var(--brand)', color: '#fff' }}>
+              style={{ background: 'var(--pro)', color: '#fff' }}>
               <Crown size={14} />
             </span>
           )}
@@ -189,11 +189,11 @@ export default function AppSidebar({
                 onMouseEnter: (e: React.MouseEvent<HTMLAnchorElement>) => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' } },
                 onMouseLeave: (e: React.MouseEvent<HTMLAnchorElement>) => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'; (e.currentTarget as HTMLElement).style.background = 'transparent' } },
               } : {})}>
-              <Icon size={15} className="shrink-0" style={active || promote ? { color: 'var(--brand)' } : undefined} />
+              <Icon size={15} className="shrink-0" style={promote ? { color: 'var(--pro)' } : active ? { color: 'var(--brand)' } : undefined} />
               <span className="flex-1">{label}</span>
               {promote && (
                 <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                  style={{ background: 'var(--brand)', color: '#fff' }}>Mejora</span>
+                  style={{ background: 'var(--pro)', color: '#fff' }}>Mejora</span>
               )}
               {badge != null && badge > 0 && (
                 <span className="flex items-center justify-center text-xs font-bold rounded-full shrink-0"

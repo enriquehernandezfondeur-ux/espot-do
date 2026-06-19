@@ -42,8 +42,8 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
             <img src={cover} alt={space.name} className="w-full h-full object-cover" />
           )}
           <span className="absolute top-3 left-3 inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-full"
-            style={{ background: 'var(--brand-dim)', color: 'var(--text-primary)', border: '1px solid var(--brand-border)' }}>
-            <Crown size={11} style={{ color: 'var(--brand)' }} /> Espot Pro
+            style={{ background: 'var(--pro-dim)', color: 'var(--pro-strong)', border: '1px solid var(--pro-border)' }}>
+            <Crown size={11} style={{ color: 'var(--pro)' }} /> Espot Pro
           </span>
         </div>
 

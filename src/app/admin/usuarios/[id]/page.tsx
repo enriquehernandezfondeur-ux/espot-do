@@ -222,7 +222,7 @@ export default function AdminHostDetailPage() {
                 <button key={o.d} type="button" onClick={() => setPlanDays(o.d)}
                   className="text-xs font-semibold px-3 py-2 rounded-xl transition-all"
                   style={planDays === o.d
-                    ? { background: 'rgba(53,196,147,0.12)', border: '1px solid var(--brand-border)', color: 'var(--brand)' }
+                    ? { background: 'var(--pro-dim)', border: '1px solid var(--pro-border)', color: 'var(--pro-strong)' }
                     : { background: '#fff', border: '1px solid #E8ECF0', color: '#374151' }}>
                   {o.l}
                 </button>
@@ -241,7 +241,7 @@ export default function AdminHostDetailPage() {
           <div className="flex flex-wrap items-center gap-2">
             <button onClick={() => handlePlanAction('activate')} disabled={planWorking}
               className="text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-60"
-              style={{ background: 'var(--brand)', color: '#fff' }}>
+              style={{ background: 'var(--pro)', color: '#fff' }}>
               Activar Pro por {planDays} días
             </button>
             <button onClick={() => handlePlanAction('extend')} disabled={planWorking}
