@@ -115,6 +115,7 @@ export async function startProRequest(): Promise<{ ok: true; status: string } | 
 export async function adminSetHostPlan(
   hostId: string,
   action: 'activate' | 'extend' | 'cancel',
+  days: number = 30,
 ): Promise<{ ok: true } | { error: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -146,10 +147,11 @@ export async function adminSetHostPlan(
     return { ok: true }
   }
 
-  // activate / extend
+  // activate / extend — duración configurable (días)
+  const dur = Math.max(1, Math.round(days || 30))
   const vigenteFin = existing?.current_period_end ? new Date(existing.current_period_end).getTime() : 0
   const baseMs = action === 'extend' && vigenteFin > Date.now() ? vigenteFin : Date.now()
-  const periodEndISO = new Date(baseMs + 30 * DAY_MS).toISOString()
+  const periodEndISO = new Date(baseMs + dur * DAY_MS).toISOString()
 
   if (existing) {
     await svc.from('host_subscriptions').update({

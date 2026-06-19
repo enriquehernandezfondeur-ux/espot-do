@@ -103,6 +103,7 @@ export default function AdminHostDetailPage() {
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [planWorking, setPlanWorking] = useState(false)
+  const [planDays, setPlanDays] = useState(30)
 
   useEffect(() => {
     getAdminHostDetail(hostId)
@@ -113,7 +114,7 @@ export default function AdminHostDetailPage() {
   async function handlePlanAction(action: 'activate' | 'extend' | 'cancel') {
     if (action === 'cancel' && !window.confirm('¿Cancelar el plan Espot Pro de este propietario?')) return
     setPlanWorking(true)
-    await adminSetHostPlan(hostId, action)
+    await adminSetHostPlan(hostId, action, planDays)
     const d = await getAdminHostDetail(hostId)
     setData(d)
     setPlanWorking(false)
@@ -205,23 +206,48 @@ export default function AdminHostDetailPage() {
       {/* ── Plan Espot Pro ────────────────────────────────── */}
       <div>
         <SectionHeader title="Plan Espot Pro" />
-        <div className="rounded-2xl p-5 flex flex-wrap items-center justify-between gap-3" style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
+        <div className="rounded-2xl p-5 space-y-4" style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
           <div className="flex items-center gap-2">
             <span className="text-sm" style={{ color: '#374151' }}>Plan actual:</span>
             {profile.plan_type === 'pro'
               ? <PlanBadge />
               : <span className="text-sm font-semibold" style={{ color: '#6B7280' }}>Normal (gratis)</span>}
           </div>
+
+          {/* Duración */}
+          <div>
+            <div className="text-xs font-medium mb-1.5" style={{ color: '#6B7280' }}>Duración</div>
+            <div className="flex flex-wrap items-center gap-2">
+              {[{ d: 7, l: '7 días' }, { d: 30, l: '1 mes' }, { d: 90, l: '3 meses' }, { d: 180, l: '6 meses' }, { d: 365, l: '1 año' }].map(o => (
+                <button key={o.d} type="button" onClick={() => setPlanDays(o.d)}
+                  className="text-xs font-semibold px-3 py-2 rounded-xl transition-all"
+                  style={planDays === o.d
+                    ? { background: 'rgba(53,196,147,0.12)', border: '1px solid var(--brand-border)', color: 'var(--brand)' }
+                    : { background: '#fff', border: '1px solid #E8ECF0', color: '#374151' }}>
+                  {o.l}
+                </button>
+              ))}
+              <label className="text-xs flex items-center gap-1.5" style={{ color: '#6B7280' }}>
+                o
+                <input type="number" min={1} value={planDays}
+                  onChange={e => setPlanDays(Math.max(1, Number(e.target.value) || 1))}
+                  className="w-20 rounded-xl px-2 py-1.5 text-sm" style={{ border: '1px solid #E8ECF0', fontSize: 16 }} />
+                días
+              </label>
+            </div>
+          </div>
+
+          {/* Acciones */}
           <div className="flex flex-wrap items-center gap-2">
             <button onClick={() => handlePlanAction('activate')} disabled={planWorking}
               className="text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-60"
               style={{ background: 'var(--brand)', color: '#fff' }}>
-              Activar Pro (30 días)
+              Activar Pro por {planDays} días
             </button>
             <button onClick={() => handlePlanAction('extend')} disabled={planWorking}
               className="text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-60"
               style={{ background: '#fff', border: '1px solid #E8ECF0', color: '#374151' }}>
-              +30 días
+              Extender +{planDays} días
             </button>
             <button onClick={() => handlePlanAction('cancel')} disabled={planWorking}
               className="text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-60"
@@ -230,7 +256,7 @@ export default function AdminHostDetailPage() {
             </button>
           </div>
         </div>
-        <p className="text-xs mt-2" style={{ color: '#9CA3AF' }}>Activación manual (puente mientras el cobro por Azul se habilita).</p>
+        <p className="text-xs mt-2" style={{ color: '#9CA3AF' }}>Activación manual por la duración elegida (puente mientras el cobro por Azul se habilita).</p>
       </div>
 
       {/* ── Bank account ──────────────────────────────────── */}
