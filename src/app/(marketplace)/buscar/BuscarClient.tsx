@@ -740,51 +740,6 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                 )}
               </div>
 
-              {/* Tipo de precio */}
-              <div className="relative" ref={priceRef}>
-                {priceOpen && <div className="fixed inset-0 z-40" onClick={() => setPriceOpen(false)} />}
-                <button onClick={() => { const o = priceOpen; closeAllDropdowns(); setPriceOpen(!o) }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap"
-                  style={{
-                    background: pricingFilter ? (PRICING_TYPES.find(p => p.value === pricingFilter)?.bg ?? 'var(--brand-dim)') : '#fff',
-                    border: `1.5px solid ${pricingFilter ? (PRICING_TYPES.find(p => p.value === pricingFilter)?.border ?? 'var(--brand-border)') : 'var(--border-medium)'}`,
-                    color: pricingFilter ? (PRICING_TYPES.find(p => p.value === pricingFilter)?.text ?? 'var(--brand)') : 'var(--text-primary)',
-                  }}>
-                  <Clock size={14} style={{ flexShrink: 0 }} />
-                  <span>{pricingFilter ? PRICING_TYPES.find(p => p.value === pricingFilter)?.label : 'Tipo de reserva'}</span>
-                  {pricingFilter
-                    ? <button onClick={e => { e.stopPropagation(); setPricingFilter('') }}><X size={12} /></button>
-                    : <ChevronDown size={13} style={{ opacity: 0.5 }} />
-                  }
-                </button>
-                {priceOpen && (
-                  <div className="absolute left-0 top-full mt-2 z-50 rounded-2xl overflow-hidden py-1.5"
-                    style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', minWidth: 220 }}>
-                    <p className="px-4 py-2 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
-                      ¿Cómo prefieres pagar?
-                    </p>
-                    {PRICING_TYPES.filter(p => p.value).map(pt => {
-                      const Icon = pt.icon
-                      const isActive = pricingFilter === pt.value
-                      return (
-                        <button key={pt.value} onClick={() => { setPricingFilter(isActive ? '' : pt.value); setPriceOpen(false) }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-all"
-                          style={{ color: isActive ? pt.text : 'var(--text-primary)', fontWeight: isActive ? 600 : 400 }}
-                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' }}
-                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
-                          <span className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0"
-                            style={{ background: pt.bg, border: `1px solid ${pt.border}` }}>
-                            {Icon && <Icon size={12} style={{ color: pt.text }} />}
-                          </span>
-                          {pt.label}
-                          {isActive && <Check size={13} style={{ color: pt.text, marginLeft: 'auto' }} />}
-                        </button>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
-
               {/* Sort + Más filtros — agrupados al final */}
               <div className="flex items-center gap-1.5 ml-auto">
 
@@ -927,14 +882,6 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
               {dateFrom ? <span onClick={e => { e.stopPropagation(); setDateFrom(''); setTimeFrom('') }} className="flex items-center justify-center w-7 h-7 -mr-1"><X size={12} /></span> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
             </button>
 
-            {/* Precio */}
-            <button onClick={() => openDrawer('precio')}
-              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all min-h-[44px]"
-              style={{ background: pricingFilter ? (PRICING_TYPES.find(p=>p.value===pricingFilter)?.bg ?? 'var(--brand-dim)') : '#fff', border: `1.5px solid ${pricingFilter ? (PRICING_TYPES.find(p=>p.value===pricingFilter)?.border ?? 'var(--brand-border)') : 'var(--border-medium)'}`, color: pricingFilter ? (PRICING_TYPES.find(p=>p.value===pricingFilter)?.text ?? 'var(--brand)') : 'var(--text-primary)' }}>
-              <Clock size={13} style={{ flexShrink: 0 }} />
-              <span>{pricingFilter ? PRICING_TYPES.find(p=>p.value===pricingFilter)?.label : 'Tipo de reserva'}</span>
-              {pricingFilter ? <span onClick={e => { e.stopPropagation(); setPricingFilter('') }} className="flex items-center justify-center w-7 h-7 -mr-1"><X size={12} /></span> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
-            </button>
           </div>
 
           {/* Chips activos mobile */}
@@ -1450,38 +1397,6 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                     className="flex items-center gap-1.5 mt-3 text-xs font-medium"
                     style={{ color: '#DC2626' }}>
                     <X size={11} /> Quitar tipo de espacio
-                  </button>
-                )}
-              </div>
-
-              {/* ── TIPO DE PRECIO ── */}
-              <div data-section="precio" />
-              <div>
-                <h3 className="font-bold text-sm mb-1" style={{ color: 'var(--text-primary)' }}>Tipo de reserva</h3>
-                <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>¿Cómo prefieres pagar?</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {PRICING_TYPES.filter(p => p.value).map(pt => {
-                    const isActive = pricingFilter === pt.value
-                    const Icon = pt.icon
-                    return (
-                      <button key={pt.value} onClick={() => setPricingFilter(isActive ? '' : pt.value)}
-                        className="flex items-center gap-2.5 px-3 py-3 rounded-xl text-left transition-all"
-                        style={isActive
-                          ? { background: pt.bg, border: `1.5px solid ${pt.border}`, color: pt.text }
-                          : { background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }
-                        }>
-                        {Icon && <Icon size={14} className="shrink-0" style={{ color: isActive ? pt.text : 'var(--text-muted)' }} />}
-                        <span className="text-xs font-medium leading-tight">{pt.label}</span>
-                        {isActive && <Check size={12} className="ml-auto shrink-0" style={{ color: pt.text }} />}
-                      </button>
-                    )
-                  })}
-                </div>
-                {pricingFilter && (
-                  <button onClick={() => setPricingFilter('')}
-                    className="flex items-center gap-1.5 mt-3 text-xs font-medium"
-                    style={{ color: '#DC2626' }}>
-                    <X size={11} /> Quitar tipo de reserva
                   </button>
                 )}
               </div>
