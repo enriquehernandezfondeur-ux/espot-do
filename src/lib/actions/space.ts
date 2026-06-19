@@ -440,31 +440,6 @@ export async function saveSpaceImages(
   return error ? { error: error.message } : { success: true }
 }
 
-// Obtener un espacio completo para editar
-export async function getSpaceForEdit(spaceId: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
-
-  const { hostId, db } = await resolveHostAccess(supabase, user.id)
-  const { data } = await db
-    .from('spaces')
-    .select(`
-      *,
-      space_pricing(*),
-      space_addons(*),
-      space_conditions(*),
-      space_payment_terms(*),
-      space_time_blocks(*),
-      space_images(*)
-    `)
-    .eq('id', spaceId)
-    .eq('host_id', hostId)
-    .single()
-
-  return data
-}
-
 // Actualizar espacio existente
 export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayload, never>) {
   const supabase = await createClient()

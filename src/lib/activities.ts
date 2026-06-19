@@ -139,8 +139,3 @@ export const SUB_BY_BASE: Record<BaseActivity, SubActivity[]> = {
   produccion:  SUB_ACTIVITIES.filter(s => s.base === 'produccion'),
   reunion:     SUB_ACTIVITIES.filter(s => s.base === 'reunion'),
 }
-
-// Dado una categoría base, devuelve sus sub-actividades
-export function getSubActivities(base: BaseActivity): SubActivity[] {
-  return SUB_BY_BASE[base] ?? []
-}

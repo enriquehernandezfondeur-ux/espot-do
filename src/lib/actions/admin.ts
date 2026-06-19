@@ -139,15 +139,6 @@ export async function adminUpsertPricing(spaceId: string, pricingId: string | nu
   return { success: true, id: data?.id }
 }
 
-export async function adminUpdatePricing(pricingId: string, payload: Record<string, unknown>) {
-  const supabase = await requireAdmin()
-  if (!supabase) return { error: 'No autorizado' }
-  const { error } = await supabase.from('space_pricing').update(payload).eq('id', pricingId)
-  if (error) return { error: error.message }
-  revalidateSpace()
-  return { success: true }
-}
-
 export async function adminUpsertConditions(spaceId: string, conditionsId: string | null, payload: Record<string, unknown>) {
   const supabase = await requireAdmin()
   if (!supabase) return { error: 'No autorizado' }
@@ -165,15 +156,6 @@ export async function adminUpsertConditions(spaceId: string, conditionsId: strin
   return { success: true, id: data?.id }
 }
 
-export async function adminUpdateConditions(conditionsId: string, payload: Record<string, unknown>) {
-  const supabase = await requireAdmin()
-  if (!supabase) return { error: 'No autorizado' }
-  const { error } = await supabase.from('space_conditions').update(payload).eq('id', conditionsId)
-  if (error) return { error: error.message }
-  revalidateSpace()
-  return { success: true }
-}
-
 export async function adminUpsertPaymentTerms(spaceId: string, termId: string | null, payload: Record<string, unknown>) {
   const supabase = await requireAdmin()
   if (!supabase) return { error: 'No autorizado' }
@@ -189,15 +171,6 @@ export async function adminUpsertPaymentTerms(spaceId: string, termId: string | 
   if (error) return { error: error.message }
   revalidateSpace()
   return { success: true, id: data?.id }
-}
-
-export async function adminUpdatePaymentTerms(termId: string, payload: Record<string, unknown>) {
-  const supabase = await requireAdmin()
-  if (!supabase) return { error: 'No autorizado' }
-  const { error } = await supabase.from('space_payment_terms').update(payload).eq('id', termId)
-  if (error) return { error: error.message }
-  revalidateSpace()
-  return { success: true }
 }
 
 export async function adminUpsertAddon(spaceId: string, addon: { id?: string; name: string; price: number; unit: string; category: string }) {
@@ -316,14 +289,6 @@ export async function updateSpaceStatus(spaceId: string, updates: {
     revalidatePath('/espacios', 'layout')
     revalidatePath('/', 'layout')
   }
-  return error ? { error: error.message } : { success: true }
-}
-
-export async function deleteSpace(spaceId: string) {
-  const supabase = await requireAdmin()
-  if (!supabase) return { error: 'No autorizado' }
-  const { error } = await supabase.from('spaces').update({ is_active: false }).eq('id', spaceId)
-  if (!error) revalidatePath('/buscar')
   return error ? { error: error.message } : { success: true }
 }
 
@@ -609,7 +574,6 @@ export async function markPayoutPaid(
     }
   }
 
-  revalidatePath('/admin/payouts')
   revalidatePath('/admin/liquidaciones')
   revalidatePath('/admin')
   return { success: true }

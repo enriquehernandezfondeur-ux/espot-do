@@ -129,41 +129,6 @@ export async function respondToReview(
   return {}
 }
 
-export async function getUserPendingReview(_userId?: string): Promise<{
-  bookingId: string
-  spaceId:   string
-  spaceName: string
-} | null> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
-
-  const { data: bookings } = await supabase
-    .from('bookings')
-    .select('id, space_id, spaces!space_id(name), event_date')
-    .eq('guest_id', user.id)
-    .eq('status', 'confirmed')
-    .in('payment_status', ['advance', 'partial', 'paid'])
-    .lt('event_date', todayInRD())
-    .order('event_date', { ascending: false })
-    .limit(10)
-
-  if (!bookings?.length) return null
-
-  const bookingIds = bookings.map(b => b.id)
-  const { data: existing } = await supabase
-    .from('reviews').select('booking_id').in('booking_id', bookingIds)
-
-  const reviewed = new Set((existing ?? []).map((r: any) => r.booking_id))
-  const pending  = bookings.find(b => !reviewed.has(b.id))
-  if (!pending) return null
-
-  return {
-    bookingId: pending.id,
-    spaceId:   pending.space_id,
-    spaceName: (pending.spaces as any)?.name ?? 'Espacio',
-  }
-}
 
 export async function getUserReviewedBookings(): Promise<Set<string>> {
   const supabase = await createClient()

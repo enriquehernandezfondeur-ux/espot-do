@@ -207,17 +207,6 @@ export async function updateClientProfile(updates: { full_name?: string; phone?:
   return { success: true }
 }
 
-export async function removeFavorite(favoriteId: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'No autenticado' }
-  const { error } = await supabase.from('favorites').delete().eq('id', favoriteId).eq('guest_id', user.id)
-  if (error) return { error: error.message }
-  const { revalidatePath } = await import('next/cache')
-  revalidatePath('/dashboard', 'layout')
-  return { success: true }
-}
-
 export async function getClientStats() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

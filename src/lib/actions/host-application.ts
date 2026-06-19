@@ -74,15 +74,6 @@ export async function getApplications(
   return data ?? []
 }
 
-export async function getPendingCount(): Promise<number> {
-  const supabase = await createClient()
-  const { count } = await supabase
-    .from('host_applications')
-    .select('id', { count: 'exact', head: true })
-    .eq('status', 'pending_admin')
-  return count ?? 0
-}
-
 // ─── Submit ───────────────────────────────────────────────────────────────────
 
 interface SubmitPayload {

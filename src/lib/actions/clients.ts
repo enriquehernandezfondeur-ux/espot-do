@@ -20,23 +20,6 @@ export interface UpdateClientPayload extends Partial<CreateClientPayload> {
   id: string
 }
 
-// ── Obtener todos los clientes del host ───────────────────────
-export async function getClients(): Promise<HostClient[]> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return []
-  const { hostId, db } = await resolveHostAccess(supabase, user.id)
-
-  const { data, error } = await db
-    .from('host_clients')
-    .select('*')
-    .eq('host_id', hostId)
-    .order('full_name')
-
-  if (error) return []
-  return data ?? []
-}
-
 // ── Obtener cliente individual con historial ──────────────────
 export async function getClientWithHistory(clientId: string) {
   const supabase = await createClient()
