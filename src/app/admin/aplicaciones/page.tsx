@@ -69,7 +69,7 @@ export default async function AplicacionesPage({
 
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-xl md:text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>
+        <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>
           Solicitudes de propietarios
         </h1>
         <p className="text-sm mt-0.5" style={{ color: '#6B7280' }}>
@@ -77,19 +77,15 @@ export default async function AplicacionesPage({
         </p>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 mb-6 p-1 rounded-xl w-fit"
-        style={{ background: '#F1F5F9' }}>
+      {/* Tabs — mismo patrón "pills" que Reservas/Usuarios/Espacios */}
+      <div className="flex gap-1 mb-3 p-1 rounded-xl w-fit overflow-x-auto scrollbar-hide"
+        style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
         {TABS.map(tab => (
           <Link
             key={tab.key}
-            href={`/admin/aplicaciones?filter=${tab.key}`}
-            className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-            style={{
-              background: filter === tab.key ? '#fff' : 'transparent',
-              color:      filter === tab.key ? '#0F1623' : '#6B7280',
-              boxShadow:  filter === tab.key ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
-            }}>
+            href={`/admin/aplicaciones?filter=${tab.key}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
+            className="px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shrink-0"
+            style={filter === tab.key ? { background: 'var(--brand)', color: '#fff' } : { color: '#6B7280' }}>
             {tab.label}
           </Link>
         ))}

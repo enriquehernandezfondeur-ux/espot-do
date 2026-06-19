@@ -192,7 +192,7 @@ export default async function AdminDashboard() {
 
           {/* Revenue card */}
           <div className="rounded-2xl p-5"
-            style={{ background: 'linear-gradient(135deg, #0A1019 0%, #0F2A22 100%)', boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}>
+            style={{ background: 'linear-gradient(135deg, #1E293B 0%, #0F2A22 100%)', boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }}>
             <div className="flex items-center gap-2 mb-4">
               <TrendingUp size={14} style={{ color: 'var(--brand)' }} />
               <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>

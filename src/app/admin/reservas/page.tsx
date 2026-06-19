@@ -99,7 +99,7 @@ export default function AdminReservasPage() {
           {STATUS_OPTIONS.map(o => (
             <button key={o.value} onClick={() => setFilter(o.value)}
               className="px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shrink-0"
-              style={filter === o.value ? { background: '#0F1623', color: '#fff' } : { color: '#6B7280' }}>
+              style={filter === o.value ? { background: 'var(--brand)', color: '#fff' } : { color: '#6B7280' }}>
               {o.label}
             </button>
           ))}

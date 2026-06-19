@@ -95,7 +95,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   }
 
   return (
-    <aside className="w-64 md:w-56 min-h-dvh flex flex-col" style={{ background: '#0A1019' }}>
+    <aside className="w-64 md:w-56 min-h-dvh flex flex-col" style={{ background: '#1E293B' }}>
       {/* Logo + close (mobile only) */}
       <div className="px-5 pt-6 pb-5 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         <Link href="/admin" className="flex flex-col gap-1" onClick={onClose}>
@@ -223,7 +223,7 @@ export default function AdminSidebar() {
 
       {/* Mobile: top bar */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 h-14"
-        style={{ background: '#0A1019', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+        style={{ background: '#1E293B', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
         <Link href="/admin" className="flex items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo-green.svg" alt="Espot" style={{ height: 20, width: 'auto', display: 'block' }} />

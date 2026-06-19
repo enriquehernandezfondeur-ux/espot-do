@@ -119,7 +119,7 @@ export default function AdminSpacesPage() {
           {filters.map(f => (
             <button key={f.key} onClick={() => { setFilter(f.key); setLoading(true) }}
               className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
-              style={filter === f.key ? { background: '#0F1623', color: '#fff' } : { color: '#6B7280' }}>
+              style={filter === f.key ? { background: 'var(--brand)', color: '#fff' } : { color: '#6B7280' }}>
               {f.label}
             </button>
           ))}

@@ -175,7 +175,7 @@ export default function AdminUsersPage() {
           {[{ value: 'all', label: 'Todos' }, { value: 'guest', label: 'Clientes' }, { value: 'host', label: 'Propietarios' }, { value: 'admin', label: 'Admins' }].map(f => (
             <button key={f.value} onClick={() => { setFilter(f.value); setLoading(true) }}
               className="px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shrink-0"
-              style={filter === f.value ? { background: '#0F1623', color: '#fff' } : { color: '#6B7280' }}>
+              style={filter === f.value ? { background: 'var(--brand)', color: '#fff' } : { color: '#6B7280' }}>
               {f.label}
             </button>
           ))}
