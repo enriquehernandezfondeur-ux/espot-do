@@ -93,6 +93,8 @@ export default function AppSidebar({
   const [mobileOpen, setMobileOpen] = useState(false)
   const [bellOpen,   setBellOpen]   = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
+  const [imgError,   setImgError]   = useState(false)
+  const showAvatar = !!avatarUrl && !imgError
 
   const activeNotifs = (notifications ?? []).filter(n => n.count > 0)
 
@@ -134,23 +136,24 @@ export default function AppSidebar({
         </div>
       </div>
 
-      {/* Perfil */}
+      {/* Perfil — badge (como el panel de admin): foto/inicial + nombre + rol */}
       <div className="px-4 pt-4 pb-2">
-        <div className="flex items-center gap-3 px-2 py-2">
-          {avatarUrl ? (
+        <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl"
+          style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
+          {showAvatar ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={avatarUrl} alt={userName ?? 'Avatar'}
-              className="w-8 h-8 rounded-full object-cover shrink-0"
-              style={{ border: '1.5px solid var(--border-medium)' }} />
+            <img src={avatarUrl} alt={userName ?? 'Avatar'} onError={() => setImgError(true)}
+              className="w-9 h-9 rounded-full object-cover shrink-0"
+              style={{ border: '1.5px solid var(--brand-border)' }} />
           ) : (
-            <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-semibold"
-              style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+            <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-sm font-bold"
+              style={{ background: 'var(--brand)', color: '#fff' }}>
               {userName?.charAt(0)?.toUpperCase() ?? avatarFallback}
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{userName ?? userNameFallback}</div>
-            <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{roleLabel}</div>
+            <div className="text-sm font-bold truncate" style={{ color: 'var(--text-primary)' }}>{userName ?? userNameFallback}</div>
+            <div className="text-[11px] font-semibold truncate" style={{ color: 'var(--brand)' }}>{roleLabel}</div>
           </div>
         </div>
       </div>
@@ -332,9 +335,9 @@ export default function AppSidebar({
           </div>
         )}
 
-        {avatarUrl ? (
+        {showAvatar ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={avatarUrl} alt={userName ?? 'Avatar'}
+          <img src={avatarUrl} alt={userName ?? 'Avatar'} onError={() => setImgError(true)}
             className="w-8 h-8 rounded-xl object-cover shrink-0"
             style={{ border: '2px solid var(--brand)' }} />
         ) : (
