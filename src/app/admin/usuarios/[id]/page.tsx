@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { getAdminHostDetail } from '@/lib/actions/admin'
+import { adminSetHostPlan } from '@/lib/actions/subscription'
+import { PlanBadge } from '@/components/PlanBadge'
 import {
   ArrowLeft, Building2, Mail, Phone, Calendar, CreditCard,
   TrendingUp, Users, Clock, CheckCircle2, XCircle, AlertCircle,
@@ -100,12 +102,22 @@ export default function AdminHostDetailPage() {
 
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [planWorking, setPlanWorking] = useState(false)
 
   useEffect(() => {
     getAdminHostDetail(hostId)
       .then(d => { setData(d); setLoading(false) })
       .catch(() => { setData(null); setLoading(false) })
   }, [hostId])
+
+  async function handlePlanAction(action: 'activate' | 'extend' | 'cancel') {
+    if (action === 'cancel' && !window.confirm('¿Cancelar el plan Espot Pro de este propietario?')) return
+    setPlanWorking(true)
+    await adminSetHostPlan(hostId, action)
+    const d = await getAdminHostDetail(hostId)
+    setData(d)
+    setPlanWorking(false)
+  }
 
   if (loading) {
     return (
@@ -188,6 +200,37 @@ export default function AdminHostDetailPage() {
         <KpiCard label="Neto host (Espot)"   value={fmtCurrency(hostNet)}       sub={`Comisión Espot: ${fmtCurrency(espotFees)}`} color="#2563EB" icon={Banknote} />
         <KpiCard label="Por liquidar"        value={fmtCurrency(pendingPayout)} sub="Reservas Espot pendientes" color="#D97706" icon={Clock} />
         <KpiCard label="Total eventos"       value={totalEvents}                sub={`${spaces.length} espacios · ${activeSpaces} activos`} color="#7C3AED" icon={Users} />
+      </div>
+
+      {/* ── Plan Espot Pro ────────────────────────────────── */}
+      <div>
+        <SectionHeader title="Plan Espot Pro" />
+        <div className="rounded-2xl p-5 flex flex-wrap items-center justify-between gap-3" style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
+          <div className="flex items-center gap-2">
+            <span className="text-sm" style={{ color: '#374151' }}>Plan actual:</span>
+            {profile.plan_type === 'pro'
+              ? <PlanBadge />
+              : <span className="text-sm font-semibold" style={{ color: '#6B7280' }}>Normal (gratis)</span>}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button onClick={() => handlePlanAction('activate')} disabled={planWorking}
+              className="text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-60"
+              style={{ background: 'var(--brand)', color: '#fff' }}>
+              Activar Pro (30 días)
+            </button>
+            <button onClick={() => handlePlanAction('extend')} disabled={planWorking}
+              className="text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-60"
+              style={{ background: '#fff', border: '1px solid #E8ECF0', color: '#374151' }}>
+              +30 días
+            </button>
+            <button onClick={() => handlePlanAction('cancel')} disabled={planWorking}
+              className="text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-60"
+              style={{ background: '#fff', border: '1px solid #FCA5A5', color: '#DC2626' }}>
+              Cancelar
+            </button>
+          </div>
+        </div>
+        <p className="text-xs mt-2" style={{ color: '#9CA3AF' }}>Activación manual (puente mientras el cobro por Azul se habilita).</p>
       </div>
 
       {/* ── Bank account ──────────────────────────────────── */}

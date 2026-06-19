@@ -18,6 +18,7 @@ export interface PricingInput {
   package_hours?: number | null
   extra_hour_price?: number | null
   weekend_multiplier?: number | null
+  is_consumable?: boolean | null
 }
 
 /** Fin de semana en RD a efectos de tarifa: viernes(5), sábado(6), domingo(0). */
@@ -68,4 +69,71 @@ export function computeBasePrice(
 /** Comisión de la plataforma: 10% del subtotal (base + adicionales), redondeada. */
 export function computePlatformFee(subtotal: number): number {
   return Math.round(subtotal * 0.10)
+}
+
+/**
+ * Texto de la condición de consumo para mostrar al cliente.
+ * NO afecta el cálculo — el precio es el mismo, sólo cambia la explicación.
+ */
+export function consumptionLabel(isConsumable?: boolean | null): string {
+  return isConsumable
+    ? 'Todo el monto se aplica en alimentos y bebidas'
+    : 'Cubre el uso del espacio'
+}
+
+// ── Migración de precios legacy → por hora (F8) ──────────────
+// Genera una SUGERENCIA de conversión a "por hora". Nunca convierte sola:
+// `confident` es siempre false porque el cambio altera cómo se cobra (un humano
+// debe confirmar mínimos/máximos). El módulo es puro para poder testearlo.
+
+export interface LegacyPricingRow {
+  pricing_type?: string | null
+  minimum_consumption?: number | null
+  session_hours?: number | null
+  min_hours?: number | null
+  fixed_price?: number | null
+  package_hours?: number | null
+}
+
+export interface HourlySuggestion {
+  hourlyPrice: number | null
+  minHours: number | null
+  isConsumable: boolean
+  confident: boolean
+  reason: string
+}
+
+export function suggestHourlyFromLegacy(p: LegacyPricingRow): HourlySuggestion {
+  switch (p.pricing_type) {
+    case 'minimum_consumption': {
+      const hrs = Number(p.session_hours) || Number(p.min_hours) || 0
+      if (hrs > 0) {
+        return {
+          hourlyPrice: Math.round((Number(p.minimum_consumption) || 0) / hrs),
+          minHours: hrs,
+          isConsumable: true,
+          confident: false,
+          reason: 'Consumo mínimo ÷ horas de sesión. Por hora escala con las horas; verifica mínimo y máximo.',
+        }
+      }
+      return { hourlyPrice: null, minHours: null, isConsumable: true, confident: false, reason: 'Sin horas de sesión: no se puede derivar el precio por hora.' }
+    }
+    case 'fixed_package': {
+      const hrs = Number(p.package_hours) || 0
+      if (hrs > 0) {
+        return {
+          hourlyPrice: Math.round((Number(p.fixed_price) || 0) / hrs),
+          minHours: hrs,
+          isConsumable: false,
+          confident: false,
+          reason: 'Precio del paquete ÷ horas incluidas. Verifica el cargo por horas extra.',
+        }
+      }
+      return { hourlyPrice: null, minHours: null, isConsumable: false, confident: false, reason: 'Sin horas de paquete: no se puede derivar.' }
+    }
+    case 'custom_quote':
+      return { hourlyPrice: null, minHours: null, isConsumable: false, confident: false, reason: 'Cotización: define el precio por hora manualmente.' }
+    default:
+      return { hourlyPrice: null, minHours: null, isConsumable: false, confident: false, reason: 'Ya es por hora o tipo desconocido.' }
+  }
 }

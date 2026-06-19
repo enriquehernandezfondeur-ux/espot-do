@@ -4,6 +4,7 @@ import { getApplications } from '@/lib/actions/host-application'
 import Link from 'next/link'
 import { ClipboardList, ChevronRight, Clock, Search } from 'lucide-react'
 import type { ApplicationStatus } from '@/types'
+import { getCategoryLabel } from '@/lib/categories'
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
   pending_admin:   { label: 'Pendiente',         color: '#D97706', bg: 'rgba(234,179,8,0.1)' },
@@ -13,12 +14,6 @@ const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }
   rejected:        { label: 'Rechazada',         color: '#EF4444', bg: 'rgba(239,68,68,0.1)' },
   info_requested:  { label: 'Más info pedida',   color: '#8B5CF6', bg: 'rgba(139,92,246,0.1)' },
   draft:           { label: 'Borrador',          color: '#9CA3AF', bg: 'rgba(156,163,175,0.1)' },
-}
-
-const SPACE_TYPE_LABELS: Record<string, string> = {
-  salon: 'Salón', restaurante: 'Restaurante', villa: 'Villa', rooftop: 'Rooftop',
-  terraza: 'Terraza', bar: 'Bar', jardin: 'Jardín', hotel: 'Hotel',
-  coworking: 'Coworking', estudio: 'Estudio', otro: 'Otro',
 }
 
 function scoreColor(score: number): string {
@@ -160,7 +155,7 @@ export default async function AplicacionesPage({
                         </span>
                       </div>
                       <div className="text-xs mt-0.5 space-x-2" style={{ color: '#6B7280' }}>
-                        <span>{SPACE_TYPE_LABELS[app.space_type] ?? app.space_type}</span>
+                        <span>{getCategoryLabel(app.space_type)}</span>
                         <span>·</span>
                         <span>{app.city}</span>
                         <span>·</span>

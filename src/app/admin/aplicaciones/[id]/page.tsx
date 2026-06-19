@@ -11,12 +11,7 @@ import {
 import Link from 'next/link'
 import { ArrowLeft, Phone, Check, X, Info } from 'lucide-react'
 import ConfirmSubmitButton from '@/components/admin/ConfirmSubmitButton'
-
-const SPACE_TYPE_LABELS: Record<string, string> = {
-  salon: 'Salón', restaurante: 'Restaurante', villa: 'Villa', rooftop: 'Rooftop',
-  terraza: 'Terraza', bar: 'Bar', jardin: 'Jardín', hotel: 'Hotel',
-  coworking: 'Coworking', estudio: 'Estudio', otro: 'Otro',
-}
+import { getCategoryLabel } from '@/lib/categories'
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
   pending_admin:  { label: 'Pendiente revisión', color: '#D97706', bg: 'rgba(234,179,8,0.1)' },
@@ -163,7 +158,7 @@ export default async function AplicacionDetailPage({
             </div>
             {([
               { label: 'Negocio',         value: app.business_name },
-              { label: 'Tipo',            value: SPACE_TYPE_LABELS[app.space_type] ?? app.space_type },
+              { label: 'Tipo',            value: getCategoryLabel(app.space_type) },
               { label: 'Ciudad',          value: [app.city, app.sector].filter(Boolean).join(', ') },
               { label: 'Teléfono',        value: app.phone },
               { label: 'WhatsApp',        value: app.whatsapp ?? '—' },

@@ -6,8 +6,11 @@ import { formatCurrency } from '@/lib/utils'
 import { getHostAnalytics, type HostAnalytics } from '@/lib/actions/host-analytics'
 import {
   Loader2, TrendingUp, TrendingDown, Eye, Target, CheckCircle2, Star,
-  CalendarDays, Clock, Building2, Filter,
+  CalendarDays, Clock, Building2, Filter, MousePointerClick,
 } from 'lucide-react'
+import { getMyPlan } from '@/lib/actions/subscription'
+import { ProUpsell } from '@/components/ProUpsell'
+import { clickThroughRate } from '@/lib/analytics'
 
 const PIE_COLORS = ['#35C493', '#3B82F6', '#F59E0B', '#EC4899', '#8B5CF6', '#EF4444']
 const CARD: React.CSSProperties = { background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }
@@ -15,10 +18,12 @@ const CARD: React.CSSProperties = { background: 'var(--bg-card)', border: '1px s
 export default function AnalyticsPage() {
   const [a, setA] = useState<HostAnalytics | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isPro, setIsPro] = useState<boolean | null>(null)
 
   useEffect(() => {
     getHostAnalytics().then(d => { setA(d); setLoading(false) }).catch(() => setLoading(false))
   }, [])
+  useEffect(() => { getMyPlan().then(p => setIsPro(p === 'pro')) }, [])
 
   if (loading) return (
     <div className="flex items-center justify-center h-dvh" style={{ background: 'var(--bg-base)' }}>
@@ -31,6 +36,7 @@ export default function AnalyticsPage() {
     conversionRate: null, acceptanceRate: null, avgTicket: 0, rating: { average: 0, count: 0 },
     totals: { events: 0, espotNet: 0, directo: 0, combined: 0 },
     monthly: [], byDay: [], byHour: [], topSpaces: [], eventTypes: [],
+    clicks: { total: 0, byType: {} },
   } as HostAnalytics
 
   const viewsChange = d.views.prevTotal > 0
@@ -63,6 +69,26 @@ export default function AnalyticsPage() {
         <Kpi icon={Star} color="#F59E0B" label="Rating" value={d.rating.count ? `${d.rating.average} ★` : '—'}
           foot={<span style={{ color: 'var(--text-muted)' }}>{d.rating.count} reseña{d.rating.count !== 1 ? 's' : ''}</span>} />
       </div>
+
+      {/* Avanzado (Pro): clics de intención y CTR */}
+      {isPro === false && (
+        <ProUpsell title="Estadísticas avanzadas con Espot Pro">
+          Mide los clics de intención de reserva y tu tasa de conversión de clic (CTR), por RD$499 al mes.
+        </ProUpsell>
+      )}
+      {isPro === true && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-5 md:mb-6">
+          <Kpi icon={MousePointerClick} color="#EC4899" label="Clics de reserva (28 días)" value={String(d.clicks.total)}
+            foot={<span style={{ color: 'var(--text-muted)' }}>intención de reservar</span>} />
+          {(() => {
+            const ctr = clickThroughRate(d.views.total, d.clicks.total)
+            return (
+              <Kpi icon={Target} color="#0EA5E9" label="CTR (clic → vista)" value={ctr === null ? '—' : `${ctr}%`}
+                foot={<span style={{ color: 'var(--text-muted)' }}>clics ÷ vistas</span>} />
+            )
+          })()}
+        </div>
+      )}
 
       {/* Embudo de conversión */}
       <div className="rounded-2xl p-5 md:p-6 mb-5 md:mb-6" style={CARD}>

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { resolveHostAccess } from './_resolveHost'
+import { requirePro } from './subscription'
 import type { HostClient, ClientSource } from '@/types'
 
 export interface CreateClientPayload {
@@ -196,6 +197,8 @@ export async function searchClients(query: string): Promise<HostClient[]> {
 
 // ── Crear cliente ─────────────────────────────────────────────
 export async function createClient_(payload: CreateClientPayload) {
+  const gate = await requirePro()
+  if (!gate.ok) return { error: gate.error }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
@@ -236,6 +239,8 @@ export async function createClient_(payload: CreateClientPayload) {
 
 // ── Actualizar cliente ────────────────────────────────────────
 export async function updateClient(payload: UpdateClientPayload) {
+  const gate = await requirePro()
+  if (!gate.ok) return { error: gate.error }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
@@ -270,6 +275,8 @@ export async function updateClient(payload: UpdateClientPayload) {
 
 // ── Eliminar cliente ──────────────────────────────────────────
 export async function deleteClient(clientId: string) {
+  const gate = await requirePro()
+  if (!gate.ok) return { error: gate.error }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getMyApplication } from '@/lib/actions/host-application'
 import { Clock, CheckCircle, XCircle, AlertCircle, ArrowRight, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
+import { getCategoryLabel } from '@/lib/categories'
 
 export default async function SolicitudPage() {
   const supabase = await createClient()
@@ -86,13 +87,6 @@ export default async function SolicitudPage() {
   const state = STATE[status as keyof typeof STATE] ?? STATE.pending_admin
   const Icon  = state.icon
 
-  const SPACE_TYPE_LABELS: Record<string, string> = {
-    salon: 'Salón para eventos', restaurante: 'Restaurante', villa: 'Villa',
-    rooftop: 'Rooftop', terraza: 'Terraza', bar: 'Bar / Lounge',
-    jardin: 'Jardín', hotel: 'Hotel / Resort', coworking: 'Coworking',
-    estudio: 'Estudio', otro: 'Otro',
-  }
-
   const submittedAt = new Date(app.created_at).toLocaleDateString('es-DO', {
     year: 'numeric', month: 'long', day: 'numeric',
   })
@@ -129,7 +123,7 @@ export default async function SolicitudPage() {
           </div>
           {[
             { label: 'Negocio',    value: app.business_name },
-            { label: 'Tipo',       value: SPACE_TYPE_LABELS[app.space_type] ?? app.space_type },
+            { label: 'Tipo',       value: getCategoryLabel(app.space_type) },
             { label: 'Ciudad',     value: [app.city, app.sector].filter(Boolean).join(', ') },
             { label: 'Enviada',    value: submittedAt },
             { label: 'Fotos',      value: `${app.photos.length} foto(s)` },

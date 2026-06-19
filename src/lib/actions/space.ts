@@ -51,6 +51,7 @@ export interface SaveSpacePayload {
   // Step 2
   pricingType: PricingType
   hourlyPrice: string
+  isConsumable: boolean
   minHours: string
   maxHours: string
   minConsumption: string
@@ -125,6 +126,7 @@ function buildPricingData(spaceId: string, p: SaveSpacePayload) {
   if (p.pricingType === 'hourly') return {
     ...base,
     hourly_price: num(p.hourlyPrice),
+    is_consumable: p.isConsumable,
     min_hours: int(p.minHours) ?? 1,
     max_hours: int(p.maxHours),
   }
@@ -508,6 +510,8 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
   const pricingData: Record<string, unknown> = {
     pricing_type: payload.pricingType,
     is_active: true,
+    // consumible solo aplica al modelo por hora; al cambiar a otro modelo se resetea
+    is_consumable: payload.pricingType === 'hourly' ? payload.isConsumable : false,
   }
   if (payload.pricingType === 'hourly') {
     pricingData.hourly_price = num(payload.hourlyPrice)

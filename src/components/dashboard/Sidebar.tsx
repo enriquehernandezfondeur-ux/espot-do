@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Building2, CalendarDays, ClipboardList,
   MessageSquareQuote, MessageCircle, BarChart3, Settings,
   LogOut, User, Shield, Star, Search, TrendingUp,
-  CalendarCheck, Users, CalendarRange, UserPlus,
+  CalendarCheck, Users, CalendarRange, UserPlus, Crown,
 } from 'lucide-react'
 import AppSidebar from '@/components/shared/AppSidebar'
 import { createClient } from '@/lib/supabase/client'
@@ -27,6 +27,7 @@ const BASE_NAV = [
   { href: '/dashboard/host/finanzas',     label: 'Finanzas',     icon: BarChart3 },
   { href: '/dashboard/host/analytics',   label: 'Analytics',    icon: TrendingUp },
   // Config
+  { href: '/dashboard/host/pro',          label: 'Espot Pro',    icon: Crown },
   { href: '/dashboard/host/equipo',       label: 'Equipo',       icon: UserPlus },
   { href: '/dashboard/host/ajustes',      label: 'Ajustes',      icon: Settings },
 ]

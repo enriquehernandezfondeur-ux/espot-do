@@ -38,6 +38,8 @@ export default {
       bar: 'Bar',
       estudio: 'Estudio',
       coworking: 'Coworking',
+      wellness: 'Wellness',
+      popup: 'Pop-up',
       hotel: 'Hotel',
       terraza: 'Terraza',
       lounge: 'Lounge',

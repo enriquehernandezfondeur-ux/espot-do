@@ -9,7 +9,7 @@ import {
   LayoutDashboard, Building2, CalendarDays, Users,
   CreditCard, Settings, BarChart3, LogOut,
   ChevronRight, Shield, Banknote, Globe, Upload, Menu, X, MessageCircle, ShieldAlert, ClipboardList,
-  Trash2, Wrench, Loader2,
+  Trash2, Wrench, Loader2, Tag,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -50,8 +50,9 @@ const sections: { label: string; items: NavItem[]; danger?: boolean }[] = [
   {
     label: 'Plataforma',
     items: [
-      { href: '/admin/reportes',      label: 'Reportes',      icon: BarChart3 },
-      { href: '/admin/configuracion', label: 'Configuración', icon: Settings },
+      { href: '/admin/reportes',         label: 'Reportes',            icon: BarChart3 },
+      { href: '/admin/revision-precios',  label: 'Revisión de precios', icon: Tag },
+      { href: '/admin/configuracion',    label: 'Configuración',       icon: Settings },
     ],
   },
   {

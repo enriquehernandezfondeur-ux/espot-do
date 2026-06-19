@@ -1,22 +1,7 @@
-import {
-  LayoutList, Building2, UtensilsCrossed, Sunset, Wine, Hotel,
-  Briefcase, Home, Camera, Trees, Leaf,
-  Timer, Package, MessageSquare,
-} from 'lucide-react'
+import { Timer, Package, MessageSquare, Wine } from 'lucide-react'
+import { FILTER_CATEGORIES } from '@/lib/categories'
 
-export const CATEGORIES = [
-  { value: '',             label: 'Todos',       icon: LayoutList },
-  { value: 'salon',        label: 'Salones',      icon: Building2 },
-  { value: 'restaurante',  label: 'Restaurantes', icon: UtensilsCrossed },
-  { value: 'rooftop',      label: 'Rooftops',     icon: Sunset },
-  { value: 'terraza',      label: 'Terrazas',     icon: Trees },
-  { value: 'jardin',       label: 'Jardines',     icon: Leaf },
-  { value: 'bar',          label: 'Bares',        icon: Wine },
-  { value: 'hotel',        label: 'Hoteles',      icon: Hotel },
-  { value: 'villa',        label: 'Villas',       icon: Home },
-  { value: 'coworking',    label: 'Coworking',    icon: Briefcase },
-  { value: 'estudio',      label: 'Estudios',     icon: Camera },
-]
+export const CATEGORIES = FILTER_CATEGORIES
 
 export const PRICING_TYPES = [
   { value: '',                    label: 'Todos',            icon: null,           bg: '',                         text: '',        border: '' },

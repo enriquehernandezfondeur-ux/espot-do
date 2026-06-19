@@ -14,7 +14,7 @@ import {
 import { formatCurrency, formatTime, todayInRD } from '@/lib/utils'
 import { addonIcon } from '@/lib/icon-map'
 import { createBooking } from '@/lib/actions/booking'
-import { computeBasePrice, computePlatformFee } from '@/lib/pricing'
+import { computeBasePrice, computePlatformFee, consumptionLabel } from '@/lib/pricing'
 import { buildSchedule, scheduleModelLabel } from '@/lib/payments/schedule'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
@@ -1131,6 +1131,11 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                   <div className="flex justify-between px-4 py-3 text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
                     <span>Total</span><span>{formatCurrency(subtotal)}</span>
                   </div>
+                  {isHourly && pricing?.is_consumable && (
+                    <div className="px-4 py-3 text-xs" style={{ color: 'var(--brand)', borderTop: '1px solid var(--border-subtle)' }}>
+                      {consumptionLabel(true)} el día del evento.
+                    </div>
+                  )}
                 </div>
               </div>
             )}

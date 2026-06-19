@@ -12,10 +12,10 @@ import {
   adminUpdateSpace, adminUpsertPricing, adminUpsertConditions,
   adminUpsertPaymentTerms, adminUpsertAddon, adminDeleteAddon, updateSpaceStatus,
 } from '@/lib/actions/admin'
+import { SPACE_CATEGORIES } from '@/lib/categories'
 
-const CATEGORIES = [
-  'salon','restaurante','bar','rooftop','terraza','jardin','estudio','coworking','hotel','villa','otro'
-]
+// Derivado del catálogo central (incluye wellness/popup).
+const CATEGORIES = SPACE_CATEGORIES.map(c => c.value)
 const PRICING_TYPES = [
   { value: 'hourly',              label: 'Precio por hora' },
   { value: 'minimum_consumption', label: 'Consumibles' },

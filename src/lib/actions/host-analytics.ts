@@ -31,6 +31,7 @@ export interface HostAnalytics {
   byHour: { hour: string; eventos: number }[]
   topSpaces: { name: string; net: number; views: number; count: number }[]
   eventTypes: { name: string; value: number }[]
+  clicks: { total: number; byType: Record<string, number> }   // Pro (F6b)
 }
 
 function feeNet(total: number, fee: number | null): number {
@@ -58,6 +59,7 @@ export async function getHostAnalytics(): Promise<HostAnalytics | null> {
     rating: { average: 0, count: 0 },
     totals: { events: 0, espotNet: 0, directo: 0, combined: 0 },
     monthly: [], byDay: [], byHour: [], topSpaces: [], eventTypes: [],
+    clicks: { total: 0, byType: {} },
   }
   if (!spaceIds.length) return empty
 
@@ -67,7 +69,7 @@ export async function getHostAnalytics(): Promise<HostAnalytics | null> {
   const since28 = new Date(now); since28.setDate(since28.getDate() - 27)
   const since28Str = since28.toISOString().split('T')[0]
 
-  const [{ data: bRows }, { data: extRows }, { data: viewRows }, { data: revRows }] = await Promise.all([
+  const [{ data: bRows }, { data: extRows }, { data: viewRows }, { data: revRows }, { data: clickRows }] = await Promise.all([
     supabase.from('bookings')
       .select('id, status, payment_status, total_amount, platform_fee, event_date, confirmed_at, start_time, event_type, space_id')
       .in('space_id', spaceIds),
@@ -81,6 +83,10 @@ export async function getHostAnalytics(): Promise<HostAnalytics | null> {
     supabase.from('reviews')
       .select('rating, space_id')
       .in('space_id', spaceIds),
+    supabase.from('space_clicks')
+      .select('click_type, click_count, click_date')
+      .in('space_id', spaceIds)
+      .gte('click_date', since28Str),
   ])
 
   const bookings = bRows ?? []
@@ -104,6 +110,15 @@ export async function getHostAnalytics(): Promise<HostAnalytics | null> {
   })
   const weekOrder = ['Hace 3 sem', 'Hace 2 sem', 'Semana pasada', 'Esta semana']
   const weekly = weekOrder.filter(k => weekMap[k] !== undefined).map(k => ({ week: k, views: weekMap[k] }))
+
+  // ── Clics de intención (28 días) — Pro (F6b) ──
+  let clicksTotal = 0
+  const clicksByType: Record<string, number> = {}
+  ;(clickRows ?? []).forEach((r: any) => {
+    const c = Number(r.click_count ?? 0)
+    clicksTotal += c
+    clicksByType[r.click_type] = (clicksByType[r.click_type] ?? 0) + c
+  })
 
   // ── Embudo + tasas ──
   const requests = bookings.filter(b => !CANCELLED.includes(b.status)).length
@@ -194,5 +209,6 @@ export async function getHostAnalytics(): Promise<HostAnalytics | null> {
     rating,
     totals: { events: totalEvents, espotNet, directo, combined },
     monthly, byDay, byHour, topSpaces, eventTypes,
+    clicks: { total: clicksTotal, byType: clicksByType },
   }
 }

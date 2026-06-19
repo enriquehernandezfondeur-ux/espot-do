@@ -10,6 +10,8 @@ import {
   Download, Copy, MessageCircle,
 } from 'lucide-react'
 import type { HostClient, ClientSource } from '@/types'
+import { getMyPlan } from '@/lib/actions/subscription'
+import { ProUpsell } from '@/components/ProUpsell'
 import Pagination from '@/components/ui/Pagination'
 
 const PAGE_SIZE = 25
@@ -50,6 +52,7 @@ type ClientHistory = Awaited<ReturnType<typeof getClientWithHistory>>
 export default function ClientesPage() {
   const [clients,  setClients]  = useState<HostClient[]>([])
   const [loading,  setLoading]  = useState(true)
+  const [isPro,    setIsPro]    = useState<boolean | null>(null)
   const [search,   setSearch]   = useState('')
   const [selected, setSelected] = useState<HostClient | null>(null)
   const [history,  setHistory]  = useState<ClientHistory>(null)
@@ -59,6 +62,7 @@ export default function ClientesPage() {
     if (selected && typeof window !== 'undefined' && window.innerWidth < 1024)
       detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [selected])
+  useEffect(() => { getMyPlan().then(p => setIsPro(p === 'pro')) }, [])
   const [histLoading, setHistLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [editing,  setEditing]  = useState<HostClient | null>(null)
@@ -204,6 +208,12 @@ export default function ClientesPage() {
           style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
           {toast.ok ? <Check size={14} /> : <X size={14} />} {toast.msg}
         </div>
+      )}
+
+      {isPro === false && (
+        <ProUpsell title="Tu CRM de clientes es parte de Espot Pro">
+          Guarda y organiza tus clientes, con historial y etiquetas, por RD$499 al mes. Puedes ver esta sección, pero crear o editar requiere Pro.
+        </ProUpsell>
       )}
 
       {/* Header */}

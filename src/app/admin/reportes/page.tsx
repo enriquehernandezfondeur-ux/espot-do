@@ -1,12 +1,7 @@
 import { getAdminReports } from '@/lib/actions/admin'
 import { formatCurrency } from '@/lib/utils'
 import { BarChart3, TrendingUp, Building2, Tag } from 'lucide-react'
-
-const CATEGORY_LABELS: Record<string, string> = {
-  salon: 'Salones', restaurante: 'Restaurantes', rooftop: 'Rooftops',
-  bar: 'Bares', terraza: 'Terrazas', estudio: 'Estudios',
-  hotel: 'Hoteles', villa: 'Villas', coworking: 'Coworking', otro: 'Otros',
-}
+import { getCategoryLabel } from '@/lib/categories'
 
 export default async function AdminReportesPage() {
   const reports = await getAdminReports()
@@ -58,7 +53,7 @@ export default async function AdminReportesPage() {
               .map(([cat, count]) => (
                   <div key={cat} className="flex items-center gap-3">
                     <div className="w-24 text-xs text-gray-500 truncate shrink-0">
-                      {CATEGORY_LABELS[cat] ?? cat}
+                      {getCategoryLabel(cat, { plural: true })}
                     </div>
                     <div className="flex-1 h-5 rounded-lg overflow-hidden" style={{ background: '#F4F6F8' }}>
                       <div className="h-full rounded-lg"
@@ -90,7 +85,7 @@ export default async function AdminReportesPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-sm truncate" style={{ color: '#0F1623' }}>{space.name}</div>
-                  <div className="text-xs text-gray-400 capitalize">{CATEGORY_LABELS[space.category] ?? space.category}</div>
+                  <div className="text-xs text-gray-400 capitalize">{getCategoryLabel(space.category, { plural: true })}</div>
                 </div>
                 <div className="text-right shrink-0">
                   <div className="font-bold text-sm" style={{ color: '#0F1623' }}>{space.count} reservas</div>

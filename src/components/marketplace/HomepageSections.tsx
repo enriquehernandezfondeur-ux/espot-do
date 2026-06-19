@@ -95,6 +95,7 @@ import {
   Wine, Trees, Camera, Briefcase, Home, Leaf,
 } from 'lucide-react'
 import { SpaceCard } from '@/app/(marketplace)/buscar/SpaceCard'
+import { SPACE_CATEGORIES, getFeaturedCategories } from '@/lib/categories'
 
 // ── Hook de animación al entrar en viewport ───────────────
 function useReveal(threshold = 0.12) {
@@ -112,16 +113,14 @@ function useReveal(threshold = 0.12) {
 }
 
 // ── Utilidades ────────────────────────────────────────────
+// Espot 2.0: las 4 categorías estrella encabezan la grilla (destacadas
+// sutilmente), seguidas de 4 populares — se mantienen 8 slots para no
+// alterar el diseño de la home.
+const POPULAR_AFTER_FEATURED = ['salon', 'restaurante', 'rooftop', 'villa']
 const categories = [
-  { value: 'salon',       label: 'Salones',      icon: Building2 },
-  { value: 'restaurante', label: 'Restaurantes', icon: UtensilsCrossed },
-  { value: 'rooftop',    label: 'Rooftops',     icon: Sunset },
-  { value: 'terraza',    label: 'Terrazas',     icon: Trees },
-  { value: 'jardin',     label: 'Jardines',     icon: Leaf },
-  { value: 'bar',        label: 'Bares',        icon: Wine },
-  { value: 'estudio',    label: 'Estudios',     icon: Camera },
-  { value: 'hotel',      label: 'Hotel / Villa', icon: Building2 },
-]
+  ...getFeaturedCategories(),
+  ...SPACE_CATEGORIES.filter(c => POPULAR_AFTER_FEATURED.includes(c.value)),
+].map(c => ({ value: c.value, label: c.labelPlural, icon: c.icon }))
 
 const eventTypes = [
   { label: 'Cumpleaños',   slug: 'cumpleanos',    img: 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=700&q=85&fit=crop' },

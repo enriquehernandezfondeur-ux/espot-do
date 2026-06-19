@@ -3,6 +3,9 @@
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { getSpaceReviews, type ReviewsSummary } from '@/lib/actions/reviews'
+import { getCategoryLabel } from '@/lib/categories'
+import { consumptionLabel } from '@/lib/pricing'
+import { trackSpaceClick } from '@/lib/track'
 import Link from 'next/link'
 import {
   MapPin, Users, Shield, ChevronLeft, ChevronRight,
@@ -326,7 +329,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
               )}
               <span className="hidden sm:inline text-sm px-2.5 py-1 rounded-full capitalize font-medium"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
-                {space.category}
+                {getCategoryLabel(space.category)}
               </span>
             </div>
           </div>
@@ -781,7 +784,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {[
-                      { label: 'Tipo de espacio', value: space.category?.charAt(0).toUpperCase() + space.category?.slice(1), icon: Building2 },
+                      { label: 'Tipo de espacio', value: getCategoryLabel(space.category), icon: Building2 },
                       { label: 'Capacidad', value: space.capacity_max
                         ? (space.capacity_min && space.capacity_min !== space.capacity_max
                           ? `${space.capacity_min}–${space.capacity_max} personas`
@@ -791,6 +794,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                       { label: 'Modalidad', value: pricingTypeLabel[pricing?.pricing_type] ?? '—', icon: CreditCard },
                       ...(pricing?.pricing_type === 'hourly' && pricing.min_hours ? [{ label: 'Mínimo de horas', value: `${pricing.min_hours} hora${pricing.min_hours > 1 ? 's' : ''}`, icon: Clock }] : []),
                       ...(pricing?.pricing_type === 'hourly' && pricing.max_hours ? [{ label: 'Máximo de horas', value: `${pricing.max_hours} horas`, icon: Clock }] : []),
+                      ...(pricing?.pricing_type === 'hourly' ? [{ label: 'Condición del precio', value: consumptionLabel(pricing.is_consumable), icon: CreditCard }] : []),
                       ...(pricing?.pricing_type === 'minimum_consumption' && pricing.session_hours ? [{ label: 'Duración de sesión', value: `${pricing.session_hours} horas`, icon: Clock }] : []),
                     ].map(({ label, value, icon }) => (
                       <div key={label} className="flex items-center gap-3 p-4 rounded-xl"
@@ -1460,7 +1464,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
             </div>
           </div>
           <button
-            onClick={() => setShowMobileWidget(true)}
+            onClick={() => { trackSpaceClick(space.id, 'book_intent'); setShowMobileWidget(true) }}
             className="btn-brand flex items-center gap-2 px-6 py-4 rounded-2xl text-sm font-bold shrink-0"
             style={{ boxShadow: '0 4px 16px rgba(53,196,147,0.35)' }}>
             {pricing?.pricing_type === 'custom_quote' ? 'Solicitar precio' : 'Reservar'}

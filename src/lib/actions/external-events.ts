@@ -9,6 +9,7 @@ import { createBookingEvent, deleteBookingEvent, isGoogleCalendarConfigured } fr
 import { formatDate } from '@/lib/utils'
 import type { ExternalEvent, ExternalEventStatus, ExternalEventSource, ExternalPaymentMethod } from '@/types'
 import { resolveHostId } from './_resolveHost'
+import { requirePro } from './subscription'
 
 export interface CreateExternalEventPayload {
   title: string
@@ -101,6 +102,8 @@ export async function getExternalEvent(eventId: string) {
 
 // ── Crear evento manual ───────────────────────────────────────
 export async function createExternalEvent(payload: CreateExternalEventPayload) {
+  const gate = await requirePro()
+  if (!gate.ok) return { error: gate.error }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
@@ -142,6 +145,8 @@ export async function createExternalEvent(payload: CreateExternalEventPayload) {
 
 // ── Actualizar evento manual ──────────────────────────────────
 export async function updateExternalEvent(payload: UpdateExternalEventPayload) {
+  const gate = await requirePro()
+  if (!gate.ok) return { error: gate.error }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
@@ -319,6 +324,8 @@ export async function updateExternalEvent(payload: UpdateExternalEventPayload) {
 
 // ── Eliminar evento manual ────────────────────────────────────
 export async function deleteExternalEvent(eventId: string) {
+  const gate = await requirePro()
+  if (!gate.ok) return { error: gate.error }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
@@ -340,6 +347,8 @@ export async function deleteExternalEvent(eventId: string) {
 
 // ── Registrar abono/pago en evento manual ─────────────────────
 export async function addEventPayment(payload: AddEventPaymentPayload) {
+  const gate = await requirePro()
+  if (!gate.ok) return { error: gate.error }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
@@ -379,6 +388,8 @@ export async function addEventPayment(payload: AddEventPaymentPayload) {
 
 // ── Eliminar un pago de evento manual ────────────────────────
 export async function deleteEventPayment(paymentId: string) {
+  const gate = await requirePro()
+  if (!gate.ok) return { error: gate.error }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
@@ -533,6 +544,8 @@ export async function createFromPublicForm(payload: PublicFormPayload) {
 
 // ── Convertir cotización a evento manual ──────────────────────
 export async function convertQuoteToEvent(quoteId: string, eventData: CreateExternalEventPayload) {
+  const gate = await requirePro()
+  if (!gate.ok) return { error: gate.error }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }

@@ -128,6 +128,21 @@ export async function getHostSpaces() {
   return data ?? []
 }
 
+/** Espacios del host con slug, para generar el enlace de la tarjeta digital (Pro). */
+export async function getHostCardSpaces() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+  const { hostId } = await resolveHostId(supabase, user.id)
+  const { data } = await supabase
+    .from('spaces')
+    .select('id, name, slug, is_published')
+    .eq('host_id', hostId)
+    .eq('is_active', true)
+    .order('created_at')
+  return data ?? []
+}
+
 // ── Bloquear fecha/horario ────────────────────────────────
 export async function createAvailabilityBlock(payload: {
   spaceId:     string

@@ -4,9 +4,10 @@ import React, { useState, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MapPin, Users, ArrowRight, Check, X, Building2, ChevronLeft, ChevronRight, Zap, Calendar, MessageCircle } from 'lucide-react'
+import { MapPin, Users, ArrowRight, Check, X, ChevronLeft, ChevronRight, Zap, Calendar, MessageCircle } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
-import { CATEGORIES, PRICING_TYPES } from './constants'
+import { PRICING_TYPES } from './constants'
+import { getCategoryLabel, getCategoryIcon } from '@/lib/categories'
 
 const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 
@@ -88,8 +89,8 @@ export function SpaceCard({
   const images     = getImages(space)
   const priceInfo  = getPriceInfo(space)
   const rating     = getSpaceRating(space)
-  const catLabel   = CATEGORIES.find(c => c.value === space.category)?.label ?? (space.category || 'Espacio')
-  const CatIcon    = CATEGORIES.find(c => c.value === space.category)?.icon ?? Building2
+  const catLabel   = getCategoryLabel(space.category, { plural: true })
+  const CatIcon    = getCategoryIcon(space.category)
   const pricingDef = PRICING_TYPES.find(p => {
     const pt = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
     return p.value === pt?.pricing_type

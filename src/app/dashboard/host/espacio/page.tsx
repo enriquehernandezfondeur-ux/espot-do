@@ -13,6 +13,7 @@ const VideoUploader   = dynamic(() => import('@/components/dashboard/VideoUpload
 const MenuUploader    = dynamic(() => import('@/components/dashboard/MenuUploader'),    { ssr: false })
 import type { BaseActivity } from '@/lib/activities'
 import type { SpaceCategory, PricingType, PaymentTermType } from '@/types'
+import { SPACE_CATEGORIES } from '@/lib/categories'
 
 const steps = [
   { id: 1, label: 'Información básica', icon: Building2 },
@@ -24,19 +25,10 @@ const steps = [
   { id: 7, label: 'Publicar',           icon: CheckCircle },
 ]
 
-const categories: { value: SpaceCategory; label: string; icon: React.ElementType }[] = [
-  { value: 'salon',       label: 'Salón de eventos', icon: Building2 },
-  { value: 'restaurante', label: 'Restaurante',       icon: UtensilsCrossed },
-  { value: 'bar',         label: 'Bar / Lounge',      icon: Wine },
-  { value: 'rooftop',    label: 'Rooftop',            icon: Sunset },
-  { value: 'terraza',    label: 'Terraza',            icon: Trees },
-  { value: 'jardin',     label: 'Jardín',             icon: Leaf },
-  { value: 'estudio',    label: 'Estudio',            icon: Camera },
-  { value: 'coworking',  label: 'Coworking',          icon: Briefcase },
-  { value: 'hotel',      label: 'Hotel',              icon: Building2 },
-  { value: 'villa',      label: 'Villa',              icon: Home },
-  { value: 'otro',       label: 'Otro',               icon: MapPin },
-]
+// Catálogo central (incluye wellness/popup). Se excluye 'lounge' porque 'bar' ya
+// se rotula "Bar / Lounge" en el catálogo.
+const categories: { value: SpaceCategory; label: string; icon: React.ElementType }[] =
+  SPACE_CATEGORIES.filter(c => c.value !== 'lounge').map(c => ({ value: c.value, label: c.label, icon: c.icon }))
 
 const pricingOptions: { value: PricingType; label: string; desc: string; icon: React.ElementType; ideal: string }[] = [
   {
@@ -171,8 +163,9 @@ export default function EspacioPage() {
   const [secondaryActivities, setSecondaryActivities] = useState<BaseActivity[]>([])
 
   // Step 2 - Pricing
-  const [pricingType, setPricingType] = useState<PricingType | ''>('')
+  const [pricingType, setPricingType] = useState<PricingType | ''>('hourly')
   const [hourlyPrice, setHourlyPrice] = useState('')
+  const [isConsumable, setIsConsumable] = useState(false)
   const [minHours, setMinHours] = useState('1')
   const [maxHours, setMaxHours] = useState('')
   const [minConsumption, setMinConsumption] = useState('')
@@ -291,7 +284,7 @@ export default function EspacioPage() {
       name, category, description, address, sector, lat, lng, capacityMin, capacityMax, videoUrl, menuUrl, menuFileName,
       primaryActivity, secondaryActivities,
       pricingType: pricingType as PricingType,
-      hourlyPrice, minHours, maxHours, minConsumption, sessionHours,
+      hourlyPrice, isConsumable, minHours, maxHours, minConsumption, sessionHours,
       fixedPrice, packageName, packageHours, pkgExtraHourPrice, packageIncludes,
       weekendMultiplier: (() => {
         if (!weekendEnabled || !weekendPrice) return 1
@@ -411,6 +404,7 @@ export default function EspacioPage() {
     if (p) {
       setPricingType(p.pricing_type ?? '')
       setHourlyPrice(String(p.hourly_price ?? ''))
+      setIsConsumable(Boolean(p.is_consumable))
       setMinHours(String(p.min_hours ?? ''))
       setMaxHours(String(p.max_hours ?? ''))
       setMinConsumption(String(p.minimum_consumption ?? ''))
@@ -546,7 +540,7 @@ export default function EspacioPage() {
     setStepError('')
     setName(''); setCategory(''); setDescription(''); setAddress(''); setSector('')
     setLat(''); setLng(''); setCapacityMin(''); setCapacityMax('')
-    setPricingType(''); setHourlyPrice(''); setMinHours('1'); setMaxHours('')
+    setPricingType('hourly'); setHourlyPrice(''); setIsConsumable(false); setMinHours('1'); setMaxHours('')
     setMinConsumption(''); setSessionHours(''); setFixedPrice(''); setPackageName('')
     setPackageHours(''); setPkgExtraHourPrice(''); setPackageIncludes([])
     setWeekendEnabled(false); setWeekendPrice(''); setMinAdvanceAmount('0')
@@ -1172,35 +1166,13 @@ export default function EspacioPage() {
         {currentStep === 2 && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg md:text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Modalidad de precio</h2>
-              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>¿Cómo quieres vender tu espacio?</p>
+              <h2 className="text-lg md:text-xl font-bold mb-1" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Precio por hora</h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Todos los espacios en Espot se cobran por hora. Define tu tarifa y elige qué incluye el precio.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {pricingOptions.map(option => (
-                <button
-                  key={option.value}
-                  onClick={() => setPricingType(option.value)}
-                  className={cn(
-                    'text-left p-4 rounded-xl border transition-all',
-                    pricingType === option.value
-                      ? 'border-[rgba(53,196,147,0.40)]'
-                      : 'hover:border-[rgba(53,196,147,0.3)]'
-                  )}
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    {(() => { const I = option.icon as any; return <I size={18} style={{ color: pricingType === option.value ? 'var(--brand)' : 'var(--text-muted)' }} /> })()}
-                    <span className="font-semibold text-sm" style={{ color: pricingType === option.value ? 'var(--brand)' : 'var(--text-primary)' }}>
-                      {option.label}
-                    </span>
-                  </div>
-                  <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>{option.desc}</p>
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Ideal: {option.ideal}</p>
-                </button>
-              ))}
-            </div>
-
-            {/* Dynamic fields based on pricing type */}
+            {/* Espot 2.0: "por hora" es el único modo. Los modelos legacy
+                (minimum_consumption, fixed_package, custom_quote) solo se muestran
+                al editar un espacio que aún los usa; se migran en F8. */}
             {pricingType === 'hourly' && (
               <div className="bg-[rgba(53,196,147,0.07)] border border-[rgba(53,196,147,0.20)] rounded-xl p-5 space-y-4">
                 <h3 className="font-semibold text-sm" style={{ color: 'var(--brand)' }}>Configuración de precio por hora</h3>
@@ -1241,6 +1213,30 @@ export default function EspacioPage() {
                     El cliente pagaría mínimo <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(Number(hourlyPrice) * Number(minHours))}</strong> por {minHours} horas
                   </div>
                 )}
+                {/* Espot 2.0: ¿qué incluye el precio? Elección binaria clara
+                    (no cambia el cálculo, solo la presentación al cliente). */}
+                <div className="space-y-2">
+                  <label className="block text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>¿Qué incluye el precio?</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {[
+                      { val: false, title: 'Solo uso del espacio', desc: 'El precio cubre el alquiler del espacio.' },
+                      { val: true,  title: 'Precio consumible',     desc: 'Todo el monto se aplica en alimentos y bebidas el día del evento.' },
+                    ].map(opt => {
+                      const active = isConsumable === opt.val
+                      return (
+                        <button key={String(opt.val)} type="button" onClick={() => setIsConsumable(opt.val)}
+                          className="text-left rounded-xl p-3 transition-all"
+                          style={{
+                            background: active ? 'rgba(53,196,147,0.06)' : 'var(--bg-elevated)',
+                            border: `1.5px solid ${active ? 'var(--brand-border)' : 'var(--border-subtle)'}`,
+                          }}>
+                          <div className="font-medium text-sm" style={{ color: active ? 'var(--brand)' : 'var(--text-primary)' }}>{opt.title}</div>
+                          <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{opt.desc}</div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
               </div>
             )}
 

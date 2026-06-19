@@ -484,7 +484,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                   <div className="absolute left-0 top-full mt-2 z-50 rounded-2xl overflow-hidden py-1.5"
                     style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', minWidth: 200 }}>
                     {CATEGORIES.map(cat => {
-                      const Icon = cat.icon
+                      const Icon = cat.icon ?? LayoutList
                       const isActive = categoria === cat.value
                       return (
                         <button key={cat.value} onClick={() => { setCategoria(isActive ? '' : cat.value); setCatOpen(false) }}

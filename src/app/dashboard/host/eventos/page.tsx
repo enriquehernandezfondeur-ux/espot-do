@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { getExternalEvents, updateExternalEvent, addEventPayment, deleteExternalEvent, deleteEventPayment } from '@/lib/actions/external-events'
+import { getMyPlan } from '@/lib/actions/subscription'
+import { ProUpsell } from '@/components/ProUpsell'
 import { formatCurrency, formatDate, formatTime, cn } from '@/lib/utils'
 import { CalendarDays, Plus, Search, Loader2, Check, X, CalendarCheck, Paperclip, Copy, Link2 } from 'lucide-react'
 import Link from 'next/link'
@@ -43,6 +45,9 @@ export default function EventosPage() {
       detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [selected])
   const [toast,    setToast]    = useState<{ msg: string; ok: boolean } | null>(null)
+  const [isPro,    setIsPro]    = useState<boolean | null>(null)
+
+  useEffect(() => { getMyPlan().then(p => setIsPro(p === 'pro')) }, [])
 
   function showToast(msg: string, ok: boolean) {
     setToast({ msg, ok })
@@ -74,6 +79,12 @@ export default function EventosPage() {
           style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
           {toast.ok ? <Check size={14} /> : <X size={14} />} {toast.msg}
         </div>
+      )}
+
+      {isPro === false && (
+        <ProUpsell title="Registra tus reservas externas con Espot Pro">
+          Administra eventos obtenidos por WhatsApp, Instagram o recomendación en un solo calendario, por RD$499 al mes.
+        </ProUpsell>
       )}
 
       <div className="mb-6 flex items-center justify-between">

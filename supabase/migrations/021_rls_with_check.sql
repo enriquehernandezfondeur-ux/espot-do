@@ -139,6 +139,7 @@ CREATE TRIGGER trg_lock_booking_financials
 DROP POLICY IF EXISTS "payments_insert_guest"  ON payments;
 DROP POLICY IF EXISTS "payments_insert_system" ON payments;
 DROP POLICY IF EXISTS "payments_update_admin"  ON payments;
+DROP POLICY IF EXISTS "payments_update_system" ON payments;
 
 CREATE POLICY "payments_insert_system"
   ON payments FOR INSERT
@@ -166,6 +167,7 @@ CREATE POLICY "liquidaciones_write_admin"
 --     cancelación. markInstallmentPaid() ahora escribe con service.
 DROP POLICY IF EXISTS "installments_update_guest"  ON booking_installments;
 DROP POLICY IF EXISTS "installments_update_system" ON booking_installments;
+DROP POLICY IF EXISTS "installments_update_participant" ON booking_installments;
 
 CREATE POLICY "installments_update_participant"
   ON booking_installments FOR UPDATE

@@ -9,20 +9,13 @@ import {
   Camera, Check, ChevronRight, ChevronLeft, Upload, X, Loader2,
   Star, Clock, Shield,
 } from 'lucide-react'
+import { SPACE_CATEGORIES } from '@/lib/categories'
 
-const SPACE_TYPES = [
-  { value: 'salon',      label: 'Salón para eventos' },
-  { value: 'restaurante', label: 'Restaurante' },
-  { value: 'villa',      label: 'Villa' },
-  { value: 'rooftop',   label: 'Rooftop' },
-  { value: 'terraza',   label: 'Terraza' },
-  { value: 'bar',       label: 'Bar / Lounge' },
-  { value: 'jardin',    label: 'Jardín / Área exterior' },
-  { value: 'hotel',     label: 'Hotel / Resort' },
-  { value: 'coworking', label: 'Coworking / Sala de reuniones' },
-  { value: 'estudio',   label: 'Estudio / Set' },
-  { value: 'otro',      label: 'Otro tipo de espacio' },
-]
+// Derivado del catálogo central (incluye wellness/popup). Se excluye 'lounge'
+// porque 'bar' ya cubre "Bar / Lounge".
+const SPACE_TYPES = SPACE_CATEGORIES
+  .filter(c => c.value !== 'lounge')
+  .map(c => ({ value: c.value, label: c.label }))
 
 const EVENT_TYPES = [
   'Cumpleaños', 'Boda', 'Quinceañera', 'Graduación', 'Baby Shower',
