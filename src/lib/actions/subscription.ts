@@ -29,10 +29,6 @@ export async function getMyPlan(): Promise<PlanType> {
   return resolvePlan(sub, new Date().toISOString())
 }
 
-export async function isProHost(): Promise<boolean> {
-  return (await getMyPlan()) === 'pro'
-}
-
 /** ¿El host (por id) es Pro? Para páginas públicas sin sesión del host (tarjeta digital). */
 export async function isHostProById(hostId: string): Promise<boolean> {
   const svc = createServiceClient()
