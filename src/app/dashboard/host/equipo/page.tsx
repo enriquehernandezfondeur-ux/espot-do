@@ -121,7 +121,7 @@ export default function EquipoPage() {
                     <Icon size={14} className="shrink-0" />
                     <div className="flex-1 sm:flex-none">
                       <div className="text-xs font-semibold">{cfg.label}</div>
-                      <div className="text-[10px] leading-tight mt-0.5" style={{ color: form.role === role ? cfg.color : '#9CA3AF' }}>{cfg.desc}</div>
+                      <div className="text-xs leading-tight mt-0.5" style={{ color: form.role === role ? cfg.color : 'var(--text-muted)' }}>{cfg.desc}</div>
                     </div>
                   </button>
                 )

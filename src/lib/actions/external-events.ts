@@ -542,28 +542,6 @@ export async function createFromPublicForm(payload: PublicFormPayload) {
   return { success: true, eventId: event.id }
 }
 
-// ── Convertir cotización a evento manual ──────────────────────
-export async function convertQuoteToEvent(quoteId: string, eventData: CreateExternalEventPayload) {
-  const gate = await requirePro()
-  if (!gate.ok) return { error: gate.error }
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'No autenticado' }
-
-  // Crear el evento
-  const result = await createExternalEvent({ ...eventData, quote_id: quoteId })
-  if ('error' in result) return result
-
-  // Marcar la cotización como convertida
-  await supabase
-    .from('quotes')
-    .update({ converted_to_event: result.data.id })
-    .eq('id', quoteId)
-
-  revalidatePath('/dashboard/host/cotizaciones')
-  return result
-}
-
 // ── Datos públicos de evento para link de pago ────────────────
 export async function getExternalEventForPayment(eventId: string) {
   const sb = createServiceClient()

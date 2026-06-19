@@ -5,11 +5,13 @@ import { useSearchParams } from 'next/navigation'
 import {
   Clock, CheckCircle, CalendarDays, MessageSquareQuote,
   ArrowRight, Users, DollarSign, CalendarCheck,
-  Plus, Building2, MessageCircle, Banknote, Loader2, X,
+  Plus, Building2, MessageCircle, Banknote, Loader2, X, Crown, Sparkles,
 } from 'lucide-react'
 import { formatCurrency, formatTime, todayInRD } from '@/lib/utils'
 import Link from 'next/link'
 import { getHostStats, getHostBookings, acceptBooking, rejectBooking } from '@/lib/actions/host'
+import { getMyPlan } from '@/lib/actions/subscription'
+import { PlanBadge } from '@/components/PlanBadge'
 import { getExternalEvents } from '@/lib/actions/external-events'
 import type { ExternalEvent } from '@/types'
 import { StatusBadge } from '@/components/StatusBadge'
@@ -45,6 +47,7 @@ export default function DashboardPage() {
   const [loading,        setLoading]        = useState(true)
   const [actionError,    setActionError]    = useState('')
   const [actionId,       setActionId]       = useState<string | null>(null)
+  const [isPro,          setIsPro]          = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -55,6 +58,7 @@ export default function DashboardPage() {
       setStats(s); setBookings(b); setExternalEvents(ev); setLoading(false)
     }).catch(() => setLoading(false))
   }, [])
+  useEffect(() => { getMyPlan().then(p => setIsPro(p === 'pro')).catch(() => {}) }, [])
 
   async function handleConfirm(id: string) {
     if (actionId) return
@@ -161,6 +165,34 @@ export default function DashboardPage() {
           <Plus size={15} /> Nuevo evento
         </Link>
       </div>
+
+      {/* ── Estado del plan (color distinto si es Pro) ── */}
+      <Link href="/dashboard/host/pro"
+        className="flex items-center gap-3 rounded-2xl p-4 mb-5 md:mb-6 transition-all"
+        style={isPro
+          ? { background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }
+          : { background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+          style={{ background: isPro ? 'var(--brand)' : 'var(--brand-dim)' }}>
+          {isPro ? <Crown size={20} style={{ color: '#fff' }} /> : <Sparkles size={20} style={{ color: 'var(--brand)' }} />}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="font-bold text-sm flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+            {isPro ? 'Espot Pro activo' : 'Plan Normal'}
+            {isPro && <PlanBadge />}
+          </div>
+          <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+            {isPro
+              ? 'Tienes todas las herramientas Pro desbloqueadas.'
+              : 'Desbloquea Espot Directo, reservas externas y más por RD$499/mes.'}
+          </div>
+        </div>
+        {!isPro && (
+          <span className="hidden sm:inline-flex shrink-0 text-sm font-semibold px-4 py-2 rounded-xl"
+            style={{ background: 'var(--brand)', color: '#fff' }}>Mejora a Pro</span>
+        )}
+        <ArrowRight size={16} className="shrink-0" style={{ color: isPro ? 'var(--brand)' : 'var(--text-muted)' }} />
+      </Link>
 
       {/* ── Zona de acción urgente: solicitudes pendientes ── */}
       {(() => {
