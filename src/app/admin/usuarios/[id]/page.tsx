@@ -104,6 +104,7 @@ export default function AdminHostDetailPage() {
   const [loading, setLoading] = useState(true)
   const [planWorking, setPlanWorking] = useState(false)
   const [planDays, setPlanDays] = useState(30)
+  const [planMsg, setPlanMsg] = useState<{ ok: boolean; text: string } | null>(null)
 
   useEffect(() => {
     getAdminHostDetail(hostId)
@@ -114,9 +115,21 @@ export default function AdminHostDetailPage() {
   async function handlePlanAction(action: 'activate' | 'extend' | 'cancel') {
     if (action === 'cancel' && !window.confirm('¿Cancelar el plan Espot Pro de este propietario?')) return
     setPlanWorking(true)
-    await adminSetHostPlan(hostId, action, planDays)
+    setPlanMsg(null)
+    const res = await adminSetHostPlan(hostId, action, planDays)
+    if (res && 'error' in res) {
+      setPlanMsg({ ok: false, text: res.error })
+      setPlanWorking(false)
+      return
+    }
     const d = await getAdminHostDetail(hostId)
     setData(d)
+    setPlanMsg({
+      ok: true,
+      text: action === 'cancel' ? 'Plan Pro cancelado.'
+        : action === 'extend' ? `Plan Pro extendido (+${planDays} días).`
+        : `Plan Pro activado por ${planDays} días.`,
+    })
     setPlanWorking(false)
   }
 
@@ -207,12 +220,23 @@ export default function AdminHostDetailPage() {
       <div>
         <SectionHeader title="Plan Espot Pro" />
         <div className="rounded-2xl p-5 space-y-4" style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm" style={{ color: '#374151' }}>Plan actual:</span>
-            {profile.plan_type === 'pro'
+            {data.isPro
               ? <PlanBadge />
               : <span className="text-sm font-semibold" style={{ color: '#6B7280' }}>Normal (gratis)</span>}
+            {data.isPro && data.subscription?.current_period_end && (
+              <span className="text-xs" style={{ color: '#6B7280' }}>
+                · vigente hasta {new Date(data.subscription.current_period_end).toLocaleDateString('es-DO', { day: '2-digit', month: 'short', year: 'numeric' })}
+                {data.subscription.payment_provider === 'manual' && ' (activación manual)'}
+              </span>
+            )}
           </div>
+          {data.isPro !== (profile.plan_type === 'pro') && (
+            <div className="text-xs rounded-xl p-2" style={{ background: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A' }}>
+              ⚠ El caché de plan (<code>{profile.plan_type}</code>) no coincide con la suscripción real. Pulsa {data.isPro ? '«Activar»' : '«Cancelar»'} para re-sincronizar.
+            </div>
+          )}
 
           {/* Duración */}
           <div>
@@ -255,6 +279,14 @@ export default function AdminHostDetailPage() {
               Cancelar
             </button>
           </div>
+
+          {planMsg && (
+            <div className="text-xs rounded-xl p-2.5" style={planMsg.ok
+              ? { background: 'var(--pro-dim)', color: 'var(--pro-strong)', border: '1px solid var(--pro-border)' }
+              : { background: '#FEE2E2', color: '#B91C1C', border: '1px solid #FCA5A5' }}>
+              {planMsg.ok ? '✓ ' : '✕ '}{planMsg.text}
+            </div>
+          )}
         </div>
         <p className="text-xs mt-2" style={{ color: '#9CA3AF' }}>Activación manual por la duración elegida (puente mientras el cobro por Azul se habilita).</p>
       </div>

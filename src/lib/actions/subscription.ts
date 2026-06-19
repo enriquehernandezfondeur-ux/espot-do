@@ -139,11 +139,13 @@ export async function adminSetHostPlan(
 
   if (action === 'cancel') {
     if (existing) {
-      await svc.from('host_subscriptions')
+      const { error: e1 } = await svc.from('host_subscriptions')
         .update({ status: 'cancelled', cancelled_at: nowISO, updated_at: nowISO })
         .eq('id', existing.id)
+      if (e1) return { error: `No se pudo cancelar la suscripción: ${e1.message}` }
     }
-    await svc.from('profiles').update({ plan_type: 'free' }).eq('id', hostId)
+    const { error: e2 } = await svc.from('profiles').update({ plan_type: 'free' }).eq('id', hostId)
+    if (e2) return { error: `No se pudo actualizar el plan: ${e2.message}` }
     return { ok: true }
   }
 
@@ -154,7 +156,7 @@ export async function adminSetHostPlan(
   const periodEndISO = new Date(baseMs + dur * DAY_MS).toISOString()
 
   if (existing) {
-    await svc.from('host_subscriptions').update({
+    const { error } = await svc.from('host_subscriptions').update({
       status: 'active',
       payment_provider: 'manual',
       activated_by: user.id,
@@ -162,8 +164,9 @@ export async function adminSetHostPlan(
       current_period_end: periodEndISO,
       updated_at: nowISO,
     }).eq('id', existing.id)
+    if (error) return { error: `No se pudo actualizar la suscripción: ${error.message}` }
   } else {
-    await svc.from('host_subscriptions').insert({
+    const { error } = await svc.from('host_subscriptions').insert({
       host_id: hostId,
       status: 'active',
       payment_provider: 'manual',
@@ -173,7 +176,10 @@ export async function adminSetHostPlan(
       current_period_start: nowISO,
       current_period_end: periodEndISO,
     })
+    if (error) return { error: `No se pudo crear la suscripción: ${error.message}` }
   }
-  await svc.from('profiles').update({ plan_type: 'pro' }).eq('id', hostId)
+  // Caché de presentación; la fuente de verdad es host_subscriptions.
+  const { error: ep } = await svc.from('profiles').update({ plan_type: 'pro' }).eq('id', hostId)
+  if (ep) return { error: `Suscripción activada, pero no se pudo sincronizar el plan: ${ep.message}` }
   return { ok: true }
 }

@@ -606,7 +606,7 @@ export async function getAdminHostDetail(hostId: string) {
   const supabase = await requireAdmin()
   if (!supabase) return null
 
-  const [profileRes, spacesRes, bookingsRes, externalRes, bankRes, externalPaymentsRes] = await Promise.all([
+  const [profileRes, spacesRes, bookingsRes, externalRes, bankRes, externalPaymentsRes, subRes] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', hostId).single(),
     supabase.from('spaces').select(`
       id, name, category, is_published, is_active, is_verified, is_featured, created_at,
@@ -628,7 +628,19 @@ export async function getAdminHostDetail(hostId: string) {
     `).eq('host_id', hostId).order('event_date', { ascending: false }),
     supabase.from('host_bank_accounts').select('*').eq('host_id', hostId).single(),
     supabase.from('external_event_payments').select('*').eq('host_id', hostId).order('paid_at', { ascending: false }),
+    supabase.from('host_subscriptions')
+      .select('status, current_period_end, payment_provider, started_at, cancelled_at')
+      .eq('host_id', hostId)
+      .in('status', ['active', 'pending_payment', 'past_due'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ])
+
+  // Fuente de verdad del plan: la suscripción viva (no el caché profiles.plan_type).
+  const sub = subRes.data ?? null
+  const isPro = !!sub && sub.status === 'active'
+    && (!sub.current_period_end || new Date(sub.current_period_end).getTime() > Date.now())
 
   return {
     profile:         profileRes.data,
@@ -637,6 +649,8 @@ export async function getAdminHostDetail(hostId: string) {
     externalEvents:  externalRes.data ?? [],
     bankAccount:     bankRes.data     ?? null,
     externalPayments: externalPaymentsRes.data ?? [],
+    subscription:    sub,
+    isPro,
   }
 }
 
