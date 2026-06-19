@@ -152,8 +152,8 @@ export default function AppSidebar({
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-bold truncate" style={{ color: 'var(--text-primary)' }}>{userName ?? userNameFallback}</div>
-            <div className="text-[11px] font-semibold truncate" style={{ color: 'var(--brand)' }}>{roleLabel}</div>
+            <div className="text-sm font-bold leading-tight line-clamp-2 break-words" style={{ color: 'var(--text-primary)' }}>{userName ?? userNameFallback}</div>
+            <div className="text-[11px] font-semibold truncate mt-0.5" style={{ color: 'var(--brand)' }}>{roleLabel}</div>
           </div>
         </div>
       </div>

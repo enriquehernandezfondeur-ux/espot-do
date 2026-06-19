@@ -6,7 +6,7 @@ import { getClientProfile, updateClientProfile } from '@/lib/actions/client'
 import NotificationSettings from '@/components/dashboard/NotificationSettings'
 import { getOrCreateIcalToken, regenerateIcalToken, getGoogleCalendarStatus, disconnectGoogleCalendar, getBankAccount, saveBankAccount, generateHostSlug } from '@/lib/actions/host'
 import { createClient } from '@/lib/supabase/client'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 
@@ -54,6 +54,7 @@ function AjustesInner() {
   const [gcalMessage,      setGcalMessage]      = useState('')
 
   const searchParams = useSearchParams()
+  const router = useRouter()
 
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -136,6 +137,8 @@ function AjustesInner() {
       setAvatarUrl(publicUrl)
       const profileResult = await updateClientProfile({ avatar_url: publicUrl })
       if (profileResult && 'error' in profileResult) throw new Error(profileResult.error ?? 'Error al guardar perfil')
+      // Refrescar el layout (server) para que el avatar aparezca en el sidebar sin recargar
+      router.refresh()
     } catch {
       setError('No se pudo subir la foto. Intenta de nuevo.')
     } finally {

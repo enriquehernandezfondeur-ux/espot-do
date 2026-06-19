@@ -5,8 +5,10 @@ import { Save, Camera, User, Shield, Loader2 } from 'lucide-react'
 import { getClientProfile, updateClientProfile } from '@/lib/actions/client'
 import NotificationSettings from '@/components/dashboard/NotificationSettings'
 import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
 
 export default function PerfilPage() {
+  const router = useRouter()
   const [profile,   setProfile]   = useState<any>(null)
   const [loading,   setLoading]   = useState(true)
   const [saving,    setSaving]    = useState(false)
@@ -71,6 +73,8 @@ export default function PerfilPage() {
       setAvatarUrl(publicUrl)
       const profileResult = await updateClientProfile({ avatar_url: publicUrl })
       if (profileResult && 'error' in profileResult) throw new Error(profileResult.error ?? 'Error al guardar perfil')
+      // Refrescar el layout (server) para que el avatar aparezca en el sidebar sin recargar
+      router.refresh()
     } catch {
       setError('No se pudo subir la foto. Intenta de nuevo.')
     } finally {
