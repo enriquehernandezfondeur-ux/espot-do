@@ -12,11 +12,6 @@
 
 # testing
 /coverage
-**/__tests__/
-**/*.test.ts
-**/*.test.tsx
-**/*.spec.ts
-**/*.spec.tsx
 
 # logs del agente externo
 /logs/
@@ -49,3 +44,7 @@ yarn-error.log*
 next-env.d.ts
 .env*.local
 .github/
+
+# MCP local de Claude Code (contiene credenciales — NUNCA versionar)
+.mcp.json
+.gstack/
