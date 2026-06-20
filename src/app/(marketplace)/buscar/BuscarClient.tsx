@@ -51,6 +51,14 @@ const AMENITIES = [
   { key: 'verified',                   label: 'Espacio verificado' },
 ]
 
+// Condición del precio: el monto se consume (A&B) o cubre el uso del espacio.
+// El match usa summarizePricing.consumption (fuente única); 'optional' (el cliente
+// elige al reservar) cuenta para ambas.
+const CONSUMPTION_OPTS = [
+  { key: 'consumable', label: 'Precio consumible' },
+  { key: 'space',      label: 'Solo uso del espacio' },
+]
+
 const FACILITIES: { key: string; label: string; icon: React.ElementType; dbField: string; isCount?: boolean }[] = [
   { key: 'has_parking',       label: 'Parking',            icon: Car,             dbField: 'has_parking' },
   { key: 'has_valet_parking', label: 'Valet parking',      icon: Car,             dbField: 'has_valet_parking' },
@@ -133,6 +141,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
   const [priceMax,       setPriceMax]       = useState('')
   const [selectedAmenities,   setSelectedAmenities]   = useState<string[]>([])
   const [selectedFacilities,  setSelectedFacilities]  = useState<string[]>([])
+  const [consumptionFilter,   setConsumptionFilter]   = useState<string[]>([])
   const [moreOpen,       setMoreOpen]       = useState(false)
   const [drawerFocus,    setDrawerFocus]    = useState<string | null>(null)
   const drawerContentRef = useRef<HTMLDivElement>(null)
@@ -325,6 +334,16 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
         })
       })
     }
+    // Condición del precio (consumible / uso del espacio). Usa summarizePricing
+    // (fuente única); 'optional' = el cliente elige → cuenta para ambas.
+    if (consumptionFilter.length > 0) {
+      result = result.filter(s => {
+        const c = summarizePricing(getActivePricing(s.space_pricing))?.consumption
+        return consumptionFilter.some(k =>
+          k === 'consumable' ? (c === 'consumable' || c === 'optional')
+                             : (c === 'space'      || c === 'optional'))
+      })
+    }
     // Ordenar
     if (sortBy === 'precio_asc' || sortBy === 'precio_desc') {
       result.sort((a, b) => {
@@ -336,7 +355,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
     }
 
     return result
-  }, [spaces, q, activity, categoria, sector, capacidad, priceMin, priceMax, selectedAmenities, selectedFacilities, sortBy])
+  }, [spaces, q, activity, categoria, sector, capacidad, priceMin, priceMax, selectedAmenities, selectedFacilities, consumptionFilter, sortBy])
 
   function applyCapacity(val: string) {
     setCapacidad(val); setCapacidadInput(val)
@@ -356,6 +375,11 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
       prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key],
     )
   }
+  function toggleConsumption(key: string) {
+    setConsumptionFilter(prev =>
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key],
+    )
+  }
   function pickSector(s: string) {
     setSector(s); setSectorQ(s)
   }
@@ -369,13 +393,13 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
   }
 
   const activeFiltersCount = [
-    activity, categoria, sector, capacidad, dateFrom, ...selectedAmenities, ...selectedFacilities, priceMin, priceMax,
+    activity, categoria, sector, capacidad, dateFrom, ...selectedAmenities, ...selectedFacilities, ...consumptionFilter, priceMin, priceMax,
   ].filter(Boolean).length
 
   function clearAll() {
     closeAllDropdowns()
     setActQ(''); setQ(''); setActivity(''); setSector(''); setSectorQ(''); setCategoria(''); setCapacidad(''); setCapacidadInput('')
-    setSelectedAmenities([]); setSelectedFacilities([]); setPriceMin(''); setPriceMax(''); setDateFrom(''); setTimeFrom('')
+    setSelectedAmenities([]); setSelectedFacilities([]); setConsumptionFilter([]); setPriceMin(''); setPriceMax(''); setDateFrom(''); setTimeFrom('')
   }
 
   const handleCardHover = useCallback((id: string | null) => setHoveredId(id), [])
@@ -404,6 +428,11 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
       key: `fac_${k}`,
       label: FACILITIES.find(f => f.key === k)?.label ?? k,
       onRemove: () => toggleFacility(k),
+    })),
+    ...consumptionFilter.map(k => ({
+      key: `cons_${k}`,
+      label: CONSUMPTION_OPTS.find(o => o.key === k)?.label ?? k,
+      onRemove: () => toggleConsumption(k),
     })),
   ].filter(Boolean) as { key: string; label: string; onRemove: () => void }[]
 
@@ -1408,6 +1437,35 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                         <Icon size={15} className="shrink-0" style={{ color: isActive ? 'var(--brand)' : 'var(--text-muted)' }} />
                         <span className="text-xs font-medium leading-tight flex-1">{fac.label}</span>
                         {isActive && <Check size={12} className="shrink-0" style={{ color: 'var(--brand)' }} />}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* ── CONDICIÓN DEL PRECIO ── */}
+              <div>
+                <h3 className="font-bold text-sm mb-3" style={{ color: 'var(--text-primary)' }}>Condición del precio</h3>
+                <div className="space-y-2">
+                  {CONSUMPTION_OPTS.map(opt => {
+                    const isActive = consumptionFilter.includes(opt.key)
+                    return (
+                      <button key={opt.key} onClick={() => toggleConsumption(opt.key)}
+                        className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl transition-all"
+                        style={isActive
+                          ? { background: 'var(--brand-dim)', border: '1.5px solid var(--brand-border)' }
+                          : { background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }
+                        }>
+                        <span className="text-sm" style={{ color: isActive ? 'var(--brand)' : 'var(--text-primary)' }}>
+                          {opt.label}
+                        </span>
+                        <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all"
+                          style={isActive
+                            ? { background: 'var(--brand)', borderColor: 'var(--brand)' }
+                            : { borderColor: 'var(--border-medium)' }
+                          }>
+                          {isActive && <Check size={11} className="text-white" />}
+                        </div>
                       </button>
                     )
                   })}
