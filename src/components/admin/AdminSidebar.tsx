@@ -9,7 +9,7 @@ import {
   LayoutDashboard, Building2, CalendarDays, Users,
   CreditCard, Settings, BarChart3, LogOut,
   ChevronRight, Shield, Banknote, Globe, Upload, Menu, X, MessageCircle, ShieldAlert, ClipboardList,
-  Trash2, Wrench, Loader2,
+  Trash2, Wrench, Loader2, Crown,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -45,6 +45,12 @@ const sections: { label: string; items: NavItem[]; danger?: boolean }[] = [
     items: [
       { href: '/admin/pagos',         label: 'Comisiones Espot',     icon: CreditCard },
       { href: '/admin/liquidaciones', label: 'Pagos a propietarios', icon: Banknote, badgeKey: 'payouts' },
+    ],
+  },
+  {
+    label: 'Suscripciones',
+    items: [
+      { href: '/admin/pro', label: 'Espot Pro', icon: Crown },
     ],
   },
   {

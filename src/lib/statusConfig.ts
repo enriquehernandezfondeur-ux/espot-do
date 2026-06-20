@@ -75,6 +75,28 @@ export function subscriptionStyle(s: string | null | undefined): StatusStyle {
 /** Estilo "Próximo a vencer" (derivado por días restantes). */
 export const SUBSCRIPTION_EXPIRING: StatusStyle = { label: 'Próximo a vencer', ...AMBER }
 
+/**
+ * Estado admin-facing DERIVADO de la fila del propietario (combina estado base
+ * + plan efectivo + días restantes). Esto es lo que se pinta en el módulo Pro.
+ */
+export function proAdminStyle(row: {
+  plan: 'free' | 'pro'
+  sub: { status: string } | null
+  daysLeft: number | null
+}): StatusStyle {
+  if (!row.sub) return { label: 'Normal', ...GRAY }
+  if (row.plan === 'free') {
+    // Sub existe pero no desbloquea: cancelada/suspendida/pendiente/vencida.
+    if (row.sub.status === 'cancelled') return SUBSCRIPTION_STATUS.cancelled
+    if (row.sub.status === 'suspended') return SUBSCRIPTION_STATUS.suspended
+    if (row.sub.status === 'pending_payment') return SUBSCRIPTION_STATUS.pending_payment
+    return SUBSCRIPTION_STATUS.expired // past_due / expired / prueba vencida
+  }
+  // plan === 'pro' (active o trialing, vigente)
+  if (row.daysLeft != null && row.daysLeft <= 7) return SUBSCRIPTION_EXPIRING
+  return subscriptionStyle(row.sub.status)
+}
+
 // ── external_events (Espot Directo / reservas externas) ──────
 export type ExternalEventStatus = 'pendiente' | 'confirmado' | 'en_curso' | 'completado' | 'cancelado'
 export const EXTERNAL_EVENT_STATUS: Record<ExternalEventStatus, StatusStyle> = {
