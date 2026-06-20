@@ -6,6 +6,7 @@ import { formatCurrency, formatDate } from '@/lib/utils'
 import { hostNetOf } from '@/lib/pricing'
 import { payoutStyle } from '@/lib/statusConfig'
 import { LoadError } from '@/components/LoadError'
+import { EmptyState } from '@/components/ui/EmptyState'
 import {
   Banknote, CheckCircle, Clock, Building2, User,
   CalendarDays, Copy, Check, Loader2, Filter,
@@ -229,12 +230,11 @@ export default function AdminLiquidacionesPage() {
         ) : loadError ? (
           <LoadError message="No pudimos cargar las liquidaciones." onRetry={load} />
         ) : payouts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <CheckCircle size={28} className="mb-3" style={{ color: '#CBD5E1' }} />
-            <p className="font-semibold text-sm" style={{ color: '#374151' }}>
-              {filter === 'pending' ? '¡Todo al día! Sin pagos pendientes.' : 'Sin registros.'}
-            </p>
-          </div>
+          <EmptyState
+            icon={CheckCircle}
+            title={filter === 'pending' ? '¡Todo al día!' : 'Sin registros'}
+            subtitle={filter === 'pending' ? 'No hay pagos pendientes a propietarios.' : undefined}
+          />
         ) : (
           <div className="divide-y divide-[#F8FAFC]">
             {payouts.map((bk: any) => {
