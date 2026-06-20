@@ -8,7 +8,7 @@ import {
   CheckCircle, XCircle, FileText, Loader2, Check, MessageSquare,
 } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
-import { getHostBookingDetail, acceptBooking, rejectBooking, completeBooking } from '@/lib/actions/host'
+import { getHostBookingDetail, acceptBooking, rejectBooking, completeBooking, updateHostBookingNotes } from '@/lib/actions/host'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
 import { platformFeeOf, hostNetOf } from '@/lib/pricing'
 import { payoutStyle } from '@/lib/statusConfig'
@@ -28,6 +28,18 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
   const [showRejectForm, setShowRejectForm] = useState(false)
   const [rejectReason, setRejectReason]   = useState('')
   const [existingDispute, setExistingDispute] = useState<any>(null)
+  // Notas internas del host
+  const [notes, setNotes]       = useState('')
+  const [notesSaved, setNotesSaved] = useState(true)
+  const [notesSaving, setNotesSaving] = useState(false)
+
+  async function saveNotes() {
+    if (!data) return
+    setNotesSaving(true)
+    const r = await updateHostBookingNotes(data.booking.id, notes)
+    setNotesSaving(false)
+    if (!('error' in r)) setNotesSaved(true)
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -38,6 +50,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
       .then(([detail, dispute]) => {
         if (cancelled) return
         setData(detail)
+        setNotes(((detail?.booking as any)?.host_notes ?? '') as string)
         setExistingDispute(dispute)
       })
       .catch(() => {})
@@ -576,6 +589,36 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
         existingDispute={existingDispute}
         onDisputeOpened={(disputeId) => setExistingDispute({ id: disputeId, status: 'abierta' })}
       />
+
+      {/* ── Notas internas del host (no visibles para el cliente) ── */}
+      <div className="rounded-2xl overflow-hidden mt-5"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+        <div className="flex items-center justify-between px-5 py-3.5"
+          style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
+          <div className="flex items-center gap-2">
+            <MessageSquare size={14} style={{ color: 'var(--text-muted)' }} />
+            <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Notas internas</span>
+          </div>
+          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Solo tú las ves</span>
+        </div>
+        <div className="p-4">
+          <textarea
+            value={notes}
+            onChange={e => { setNotes(e.target.value); setNotesSaved(false) }}
+            placeholder="Ej.: confirmar headcount el viernes · cliente pidió decoración extra · llamó por WhatsApp…"
+            rows={3}
+            className="w-full px-3 py-2.5 rounded-xl text-sm resize-y"
+            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: 16 }} />
+          <div className="flex items-center justify-end gap-3 mt-2.5">
+            {notesSaved && !notesSaving && <span className="text-xs" style={{ color: 'var(--brand)' }}>Guardado</span>}
+            <button type="button" onClick={saveNotes} disabled={notesSaving || notesSaved}
+              className="text-xs font-semibold px-4 py-2 rounded-xl transition-all disabled:opacity-50"
+              style={{ background: 'var(--brand)', color: '#fff' }}>
+              {notesSaving ? 'Guardando…' : 'Guardar nota'}
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* ── Botón volver ──────────────────────────────────── */}
       <div className="mt-6">

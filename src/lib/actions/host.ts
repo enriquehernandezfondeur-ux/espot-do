@@ -861,3 +861,27 @@ export async function acceptTeamInvite(token: string) {
 
   return { success: true, hostId: invite.host_id, role: invite.role }
 }
+
+/**
+ * Notas internas del host sobre una reserva (no visibles para el cliente).
+ * Verifica que la reserva pertenece a un espacio del host y escribe con
+ * service-role tras la verificación. (F3 — CRM)
+ */
+export async function updateHostBookingNotes(
+  bookingId: string,
+  notes: string,
+): Promise<{ success?: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+  const { hostId } = await resolveHostId(supabase, user.id)
+
+  const { data: bk } = await supabase
+    .from('bookings').select('id, spaces!space_id(host_id)').eq('id', bookingId).single()
+  const space = (bk as any)?.spaces
+  if (!bk || space?.host_id !== hostId) return { error: 'No autorizado' }
+
+  const svc = createServiceClient()
+  const { error } = await svc.from('bookings').update({ host_notes: notes }).eq('id', bookingId)
+  return error ? { error: error.message } : { success: true }
+}
