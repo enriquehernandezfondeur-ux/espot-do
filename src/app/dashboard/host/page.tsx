@@ -387,14 +387,6 @@ export default function DashboardPage() {
                     style={{ color: overdue ? '#DC2626' : today ? 'var(--brand)' : 'var(--text-muted)' }}>
                     {overdue ? 'Vencido' : today ? 'Hoy' : c.next_action_date}
                   </span>
-                  {c.phone && (
-                    <a href={`https://wa.me/${c.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer"
-                      onClick={e => e.stopPropagation()}
-                      className="shrink-0 text-xs font-semibold px-2.5 py-1.5 rounded-lg"
-                      style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
-                      WhatsApp
-                    </a>
-                  )}
                 </div>
               )
             })}

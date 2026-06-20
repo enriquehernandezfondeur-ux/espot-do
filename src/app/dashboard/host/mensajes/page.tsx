@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Loader2, MessageCircle, Send, Search, Paperclip, FileText, Download, X, ArrowLeft, Building2, Zap, ChevronDown, Trash2 } from 'lucide-react'
 import { getMyConversations, getConversation, sendMessage, markMessagesRead, markAllMessagesRead, hideConversation } from '@/lib/actions/messages'
 import type { MessageAttachment } from '@/lib/actions/messages'
+import { getMessageTemplates, addMessageTemplate, deleteMessageTemplate, type MessageTemplate } from '@/lib/actions/message-templates'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { LoadError } from '@/components/LoadError'
@@ -33,25 +34,21 @@ export default function HostMensajesPage() {
   const [attachment, setAttachment] = useState<{ file: File; preview: string; type: 'image' | 'file' } | null>(null)
   const [showQuickReplies, setShowQuickReplies] = useState(false)
 
-  const DEFAULT_QUICK_REPLIES = [
-    '¡Hola! Gracias por tu interés. Con gusto les atendemos para su evento.',
-    '¿Para cuántas personas sería el evento aproximadamente?',
-    '¡Excelente! Tenemos disponibilidad para esa fecha. ¿Deseas proceder con la reserva?',
-    'Puedes ver más detalles del espacio en nuestra página. ¿Tienes alguna pregunta específica?',
-    'El espacio incluye: sillas, mesas, estacionamiento y acceso desde las 8am. ¿Necesitas algo adicional?',
-    'Lamentablemente no tenemos disponibilidad para esa fecha. ¿Tienes alguna fecha alternativa?',
-    'Puedes programar una visita al espacio. ¿Qué día te quedaría bien?',
-    'El anticipo del 30% confirma tu fecha. El resto se paga según el plan de cuotas.',
-  ]
+  const [templates,    setTemplates]    = useState<MessageTemplate[]>([])
+  const [managing,     setManaging]     = useState(false)
+  const [newTemplate,  setNewTemplate]  = useState('')
 
-  const [quickReplies, setQuickReplies] = useState<string[]>(DEFAULT_QUICK_REPLIES)
+  useEffect(() => { getMessageTemplates().then(setTemplates).catch(() => {}) }, [])
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('espot_quick_replies')
-      if (saved) setQuickReplies(JSON.parse(saved))
-    } catch {}
-  }, [])
+  async function handleAddTemplate() {
+    if (!newTemplate.trim()) return
+    const r = await addMessageTemplate(newTemplate)
+    if (r.template) { setTemplates(t => [...t, r.template!]); setNewTemplate('') }
+  }
+  async function handleDeleteTemplate(id: string) {
+    setTemplates(t => t.filter(x => x.id !== id))
+    await deleteMessageTemplate(id)
+  }
 
   const bottomRef    = useRef<HTMLDivElement>(null)
   const fileRef      = useRef<HTMLInputElement>(null)
@@ -405,20 +402,47 @@ export default function HostMensajesPage() {
                 onClick={() => setShowQuickReplies(o => !o)}
                 className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-xl transition-all"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
-                <Zap size={11} style={{ color: 'var(--brand)' }} /> Respuestas rápidas
+                <Zap size={11} style={{ color: 'var(--brand)' }} /> Plantillas
                 <ChevronDown size={11} style={{ transform: showQuickReplies ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
               </button>
               {showQuickReplies && (
                 <div className="absolute bottom-full mb-1 left-0 right-0 rounded-2xl overflow-hidden shadow-xl z-10"
-                  style={{ background: '#fff', border: '1px solid var(--border-subtle)', maxHeight: 280, overflowY: 'auto' }}>
-                  {quickReplies.map((reply, i) => (
-                    <button key={i} type="button"
-                      onClick={() => { setBody(reply); setShowQuickReplies(false) }}
-                      className="w-full text-left px-4 py-3 text-sm hover:bg-[var(--bg-elevated)] transition-colors"
-                      style={{ color: 'var(--text-primary)', borderBottom: i < quickReplies.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
-                      {reply.length > 80 ? reply.slice(0, 80) + '...' : reply}
+                  style={{ background: '#fff', border: '1px solid var(--border-subtle)', maxHeight: 320, overflowY: 'auto' }}>
+                  <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)' }}>
+                    <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>Tus plantillas</span>
+                    <button type="button" onClick={() => setManaging(m => !m)} className="text-xs font-semibold" style={{ color: 'var(--brand)' }}>
+                      {managing ? 'Listo' : 'Gestionar'}
                     </button>
+                  </div>
+                  {templates.map((t, i) => (
+                    <div key={t.id} className="flex items-center gap-2 px-2"
+                      style={{ borderBottom: i < templates.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
+                      <button type="button" disabled={managing}
+                        onClick={() => { setBody(t.body); setShowQuickReplies(false) }}
+                        className="flex-1 text-left px-2 py-3 text-sm hover:bg-[var(--bg-elevated)] transition-colors rounded-lg disabled:cursor-default"
+                        style={{ color: 'var(--text-primary)' }}>
+                        {t.body.length > 80 ? t.body.slice(0, 80) + '…' : t.body}
+                      </button>
+                      {managing && (
+                        <button type="button" onClick={() => handleDeleteTemplate(t.id)}
+                          className="shrink-0 text-xs font-semibold px-2 py-1 rounded-lg" style={{ color: '#DC2626' }}>
+                          Borrar
+                        </button>
+                      )}
+                    </div>
                   ))}
+                  {managing && (
+                    <div className="flex items-center gap-2 px-3 py-2.5" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                      <input value={newTemplate} onChange={e => setNewTemplate(e.target.value)}
+                        placeholder="Nueva plantilla…"
+                        className="flex-1 px-3 py-2 rounded-lg text-sm"
+                        style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: 16 }} />
+                      <button type="button" onClick={handleAddTemplate}
+                        className="shrink-0 text-xs font-bold px-3 py-2 rounded-lg" style={{ background: 'var(--brand)', color: '#fff' }}>
+                        Añadir
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
