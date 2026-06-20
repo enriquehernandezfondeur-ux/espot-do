@@ -3,7 +3,7 @@ import { sendEmail, sendEmailIfEnabled } from '@/lib/email/send'
 import { tplRecordatorioCuota, tplRecordatorioEvento, tplSolicitudResena, emailBase, infoBox } from '@/lib/email/templates'
 import { daysUntilDate } from '@/lib/payments/schedule'
 import { createServiceClient } from '@/lib/supabase/service'
-import { formatDate, todayInRD } from '@/lib/utils'
+import { formatDate, todayInRD, escapeHtml } from '@/lib/utils'
 import { sendWhatsAppToUser, wa } from '@/lib/whatsapp/send'
 
 const SITE        = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
@@ -513,6 +513,68 @@ export async function GET(req: Request) {
     }
   } catch (err: any) {
     console.error('[cron] direct event review requests failed:', err.message)
+    errors++
+  }
+
+  // ── 7. Espot Pro: expiración automática + recordatorios ───────────────────
+  // Barre suscripciones trialing/active vencidas → expired/cancelled (+ plan_type
+  // free + auditoría) y envía recordatorios 14/7/3/1d. Dedupe por
+  // subscription_notifications (índice único host+evento+periodo+canal).
+  try {
+    const DAY = 86_400_000
+    const nowMs = Date.now()
+    const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
+    const { data: proSubs } = await sb.from('host_subscriptions')
+      .select('id, host_id, status, current_period_end, cancel_at_period_end, activation_type, host:profiles!host_id(full_name, email)')
+      .in('status', ['trialing', 'active'])
+      .not('current_period_end', 'is', null)
+
+    for (const s of (proSubs ?? []) as any[]) {
+      const host = s.host as { full_name?: string; email?: string } | null
+      const end = new Date(s.current_period_end).getTime()
+      const isTrial = s.activation_type === 'trial'
+
+      // Envío con dedupe: inserta una fila 'pending'; si choca con el índice
+      // único, ya se envió ese aviso para este periodo → no reenvía.
+      const notify = async (eventType: string, title: string, bodyHtml: string) => {
+        const { error: insErr, data: row } = await sb.from('subscription_notifications')
+          .insert({ host_id: s.host_id, subscription_id: s.id, event_type: eventType, channel: 'email', period_key: s.current_period_end, status: 'pending' })
+          .select('id').maybeSingle()
+        if (insErr || !row) return
+        if (!host?.email) { await sb.from('subscription_notifications').update({ status: 'failed', error: 'sin email' }).eq('id', row.id); return }
+        try {
+          await sendEmail({ to: host.email, subject: title, html: emailBase({ title, subtitle: '', accentColor: '#B8860B', body: bodyHtml, cta: { text: 'Ver mi plan', url: `${SITE}/dashboard/host/pro` } }) })
+          await sb.from('subscription_notifications').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', row.id)
+          sent++
+        } catch (e: any) {
+          await sb.from('subscription_notifications').update({ status: 'failed', error: String(e?.message ?? e) }).eq('id', row.id)
+          errors++
+        }
+      }
+
+      if (end <= nowMs) {
+        const newStatus = s.cancel_at_period_end ? 'cancelled' : 'expired'
+        const nowISO = new Date().toISOString()
+        await sb.from('host_subscriptions').update({ status: newStatus, updated_at: nowISO, ...(newStatus === 'cancelled' ? { cancelled_at: nowISO } : {}) }).eq('id', s.id)
+        await sb.from('profiles').update({ plan_type: 'free' }).eq('id', s.host_id)
+        await sb.from('subscription_audit_log').insert({ host_id: s.host_id, subscription_id: s.id, admin_id: null, action: 'expirar', old_status: s.status, new_status: newStatus, note: 'Vencimiento automático (cron)' })
+        await notify(isTrial ? 'prueba_terminada' : 'pro_vencido',
+          isTrial ? 'Tu prueba de Espot Pro terminó' : 'Tu Espot Pro venció',
+          `<p style="color:#374151;margin:0 0 16px;">Hola <strong>${escapeHtml(host?.full_name ?? '')}</strong>, tu ${isTrial ? 'prueba gratuita' : 'plan Espot Pro'} terminó. Tus datos (clientes, reservas externas, calendario) se conservan; las funciones Pro quedan en solo lectura. Puedes volver a Pro cuando quieras por RD$499/mes sin perder nada.</p>`)
+        continue
+      }
+
+      const days = Math.ceil((end - nowMs) / DAY)
+      if ([14, 7, 3, 1].includes(days)) {
+        const when = days === 1 ? 'mañana' : `en ${days} días`
+        const verbo = isTrial ? 'termina' : (s.cancel_at_period_end ? 'termina' : 'se renueva')
+        await notify(`${isTrial ? 'prueba' : 'pro'}_${days}d`,
+          isTrial ? `Tu prueba de Espot Pro termina ${when}` : `Tu Espot Pro ${verbo} ${when}`,
+          `<p style="color:#374151;margin:0 0 16px;">Hola <strong>${escapeHtml(host?.full_name ?? '')}</strong>, tu ${isTrial ? 'prueba gratuita' : 'plan Pro'} ${verbo} ${when} (${formatDate(s.current_period_end)}).</p>`)
+      }
+    }
+  } catch (err: any) {
+    console.error('[cron] pro lifecycle failed:', err?.message)
     errors++
   }
 
