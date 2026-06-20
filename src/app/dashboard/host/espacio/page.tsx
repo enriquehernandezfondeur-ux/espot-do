@@ -672,48 +672,48 @@ export default function EspacioPage() {
         {/* Controles — solo cuando el host tiene espacios */}
         {counts.all > 0 && (
           <div className="flex flex-col gap-3 mb-4">
-            {/* Búsqueda */}
-            <div className="flex items-center gap-2 rounded-xl px-3 py-2.5" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-              <Search size={15} style={{ color: 'var(--text-muted)' }} />
+            {/* Búsqueda — mismo patrón que el resto del CRM */}
+            <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+              <Search size={15} className="text-gray-400 shrink-0" />
               <input value={q} onChange={e => setQ(e.target.value)} placeholder="Buscar por nombre, sector o ciudad…"
-                className="flex-1 bg-transparent text-sm focus:outline-none" style={{ color: 'var(--text-primary)', fontSize: 16 }} />
-              {q && <button type="button" onClick={() => setQ('')}><X size={14} style={{ color: 'var(--text-muted)' }} /></button>}
+                className="flex-1 bg-transparent text-sm focus:outline-none text-gray-700 placeholder-gray-400" style={{ fontSize: 16 }} />
+              {q && <button type="button" onClick={() => setQ('')} className="text-gray-400 hover:text-gray-600"><X size={14} /></button>}
             </div>
 
-            {/* Estado (tabs) + categoría + orden + vista */}
+            {/* Filtros: estado (control segmentado) + categoría + orden + vista */}
             <div className="flex items-center gap-2 flex-wrap">
-              {([
-                { key: 'all' as const,       label: 'Todos',       n: counts.all },
-                { key: 'published' as const, label: 'Publicados',  n: counts.published },
-                { key: 'pending' as const,   label: 'En revisión', n: counts.pending },
-                { key: 'draft' as const,     label: 'Borradores',  n: counts.draft },
-              ].filter(t => t.key === 'all' || t.n > 0)).map(t => (
-                <button key={t.key} onClick={() => setSpaceFilter(t.key)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all"
-                  style={spaceFilter === t.key
-                    ? { background: 'var(--text-primary)', color: '#fff' }
-                    : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
-                  {t.label} <span style={{ opacity: 0.65 }}>{t.n}</span>
-                </button>
-              ))}
+              <div className="inline-flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+                {([
+                  { key: 'all' as const,       label: 'Todos',       n: counts.all },
+                  { key: 'published' as const, label: 'Publicados',  n: counts.published },
+                  { key: 'pending' as const,   label: 'En revisión', n: counts.pending },
+                  { key: 'draft' as const,     label: 'Borradores',  n: counts.draft },
+                ].filter(t => t.key === 'all' || t.n > 0)).map(t => (
+                  <button key={t.key} onClick={() => setSpaceFilter(t.key)}
+                    className="px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all"
+                    style={spaceFilter === t.key ? { background: 'var(--text-primary)', color: '#fff' } : { color: '#6B7280' }}>
+                    {t.label} <span style={{ opacity: 0.6 }}>{t.n}</span>
+                  </button>
+                ))}
+              </div>
 
               <div className="flex items-center gap-2 ml-auto">
                 <select value={catFilter} onChange={e => setCatFilter(e.target.value)}
-                  className="text-xs font-semibold px-2.5 py-1.5 rounded-lg" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', fontSize: 16 }}>
+                  className="text-sm font-medium px-3 py-2 rounded-xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', fontSize: 16 }}>
                   <option value="">Toda categoría</option>
                   {categories.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                 </select>
                 <select value={sort} onChange={e => setSort(e.target.value as typeof sort)}
-                  className="text-xs font-semibold px-2.5 py-1.5 rounded-lg" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', fontSize: 16 }}>
+                  className="text-sm font-medium px-3 py-2 rounded-xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', fontSize: 16 }}>
                   <option value="recent">Más recientes</option>
                   <option value="name">Nombre</option>
                   <option value="published">Publicados primero</option>
                 </select>
-                <div className="hidden sm:flex items-center rounded-lg overflow-hidden shrink-0" style={{ border: '1px solid var(--border-subtle)' }}>
-                  <button type="button" onClick={() => changeViewMode('cards')} className="px-2 py-1.5" title="Tarjetas"
-                    style={{ background: viewMode === 'cards' ? 'var(--text-primary)' : 'var(--bg-elevated)', color: viewMode === 'cards' ? '#fff' : 'var(--text-muted)' }}><LayoutGrid size={14} /></button>
-                  <button type="button" onClick={() => changeViewMode('table')} className="px-2 py-1.5" title="Tabla"
-                    style={{ background: viewMode === 'table' ? 'var(--text-primary)' : 'var(--bg-elevated)', color: viewMode === 'table' ? '#fff' : 'var(--text-muted)' }}><ListIcon size={14} /></button>
+                <div className="hidden sm:inline-flex items-center gap-1 p-1 rounded-xl shrink-0" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+                  <button type="button" onClick={() => changeViewMode('cards')} className="px-2 py-1.5 rounded-lg transition-all" title="Tarjetas"
+                    style={{ background: viewMode === 'cards' ? 'var(--text-primary)' : 'transparent', color: viewMode === 'cards' ? '#fff' : '#6B7280' }}><LayoutGrid size={14} /></button>
+                  <button type="button" onClick={() => changeViewMode('table')} className="px-2 py-1.5 rounded-lg transition-all" title="Tabla"
+                    style={{ background: viewMode === 'table' ? 'var(--text-primary)' : 'transparent', color: viewMode === 'table' ? '#fff' : '#6B7280' }}><ListIcon size={14} /></button>
                 </div>
               </div>
             </div>
