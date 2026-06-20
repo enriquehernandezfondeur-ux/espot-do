@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight, Building2, Lock, Loader2, Plus, X, Clock, Users, CheckCircle, Calendar, Link2, Link2Off, Printer, LayoutList, CalendarDays } from 'lucide-react'
 import { cn, formatCurrency, todayInRD } from '@/lib/utils'
+import { LoadError } from '@/components/LoadError'
 import { getHostCalendarBookings, getHostSpaces, getSpaceAvailability, createAvailabilityBlock, deleteAvailabilityBlock, getOrCreateIcalToken, getGoogleCalendarStatus, disconnectGoogleCalendar } from '@/lib/actions/host'
 import { getExternalEvents } from '@/lib/actions/external-events'
 import type { ExternalEvent } from '@/types'
@@ -59,6 +60,7 @@ export default function CalendarioPage() {
   const [externalEvents, setExternalEvents] = useState<ExternalEvent[]>([])
   const [blockedSlots,   setBlockedSlots]   = useState<Record<string, BlockedSlot[]>>({})
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [selected, setSelected] = useState<string | null>(null)
   const panelRef = useRef<HTMLDivElement>(null)
 
@@ -80,10 +82,9 @@ export default function CalendarioPage() {
   const [spaceList, setSpaceList] = useState<{ id: string; name: string }[]>([])
   const [spaceName, setSpaceName] = useState<string>('')
 
-  useEffect(() => {
-    async function load() {
-      // Cargamos calendario y sync por separado para que un fallo en sync
-      // no deje la página en loading infinito
+  async function loadCalendar() {
+    setLoading(true); setLoadError(false)
+    try {
       const [bk, spaces, extEvs] = await Promise.all([
         getHostCalendarBookings(),
         getHostSpaces(),
@@ -112,9 +113,11 @@ export default function CalendarioPage() {
         setBlockedSlots(grouped)
       }
       setLoading(false)
+    } catch {
+      setLoadError(true); setLoading(false)
     }
-    load()
-  }, [])
+  }
+  useEffect(() => { loadCalendar() }, [])
 
   function prevMonth() { setCurrent(c => c.month === 0 ? { year: c.year-1, month: 11 } : {...c, month: c.month-1}) }
   function nextMonth() { setCurrent(c => c.month === 11 ? { year: c.year+1, month: 0 } : {...c, month: c.month+1}) }
@@ -267,6 +270,14 @@ export default function CalendarioPage() {
       </div>
     )
   }
+  if (loadError) return (
+    <div className="p-4 md:p-6 max-w-6xl mx-auto">
+      <h1 className="text-xl md:text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Calendario</h1>
+      <div className="rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+        <LoadError message="No pudimos cargar tu calendario." onRetry={loadCalendar} />
+      </div>
+    </div>
+  )
 
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">

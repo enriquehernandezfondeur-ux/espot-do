@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { getBankAccount, saveBankAccount } from '@/lib/actions/host'
 import { getHostFinance, type HostFinance } from '@/lib/actions/host-finance'
+import { LoadError } from '@/components/LoadError'
 import { payoutStyle, type PayoutStatus } from '@/lib/statusConfig'
 import {
   Loader2, TrendingUp, TrendingDown, Download, Banknote,
@@ -37,6 +38,7 @@ function csvCell(v: string | number): string {
 export default function FinanzasPage() {
   const [fin,     setFin]     = useState<HostFinance | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [period,  setPeriod]  = useState<'6m' | '12m'>('6m')
   const [channel, setChannel] = useState<'total' | 'espot' | 'directo'>('total')
 
@@ -52,7 +54,8 @@ export default function FinanzasPage() {
   const [saved, setSaved]             = useState(false)
   const [saveError, setSaveError]     = useState('')
 
-  useEffect(() => {
+  function load() {
+    setLoading(true); setLoadError(false)
     Promise.all([getHostFinance(), getBankAccount()]).then(([f, bank]) => {
       setFin(f)
       if (bank) {
@@ -65,8 +68,9 @@ export default function FinanzasPage() {
         setBankStatus(bank.status ?? 'pending')
       }
       setLoading(false)
-    }).catch(() => setLoading(false))
-  }, [])
+    }).catch(() => { setLoadError(true); setLoading(false) })
+  }
+  useEffect(() => { load() }, [])
 
   const chartData = useMemo(() => {
     if (!fin) return []
@@ -107,6 +111,14 @@ export default function FinanzasPage() {
   if (loading) return (
     <div className="flex items-center justify-center h-dvh" style={{ background: 'var(--bg-base)' }}>
       <Loader2 size={28} className="animate-spin" style={{ color: 'var(--brand)' }} />
+    </div>
+  )
+  if (loadError) return (
+    <div className="p-4 md:p-6 max-w-5xl mx-auto">
+      <h1 className="text-xl md:text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Finanzas</h1>
+      <div className="rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+        <LoadError message="No pudimos cargar tus finanzas." onRetry={load} />
+      </div>
     </div>
   )
   const f = fin ?? {

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Star, MessageSquare, CheckCircle, Loader2, ChevronDown, ChevronUp, Check, X } from 'lucide-react'
 import { getHostReviews, respondToReview, type Review } from '@/lib/actions/reviews'
 import { formatDate } from '@/lib/utils'
+import { LoadError } from '@/components/LoadError'
 
 function StarRow({ rating, size = 14 }: { rating: number; size?: number }) {
   return (
@@ -21,6 +22,7 @@ function StarRow({ rating, size = 14 }: { rating: number; size?: number }) {
 export default function ResenasPage() {
   const [reviews,   setReviews]   = useState<Review[]>([])
   const [loading,   setLoading]   = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [expanded,  setExpanded]  = useState<string | null>(null)
   const [response,  setResponse]  = useState('')
   const [saving,    setSaving]    = useState<string | null>(null)
@@ -31,9 +33,11 @@ export default function ResenasPage() {
     setTimeout(() => setToast(null), 3000)
   }
 
-  useEffect(() => {
-    getHostReviews().then(r => { setReviews(r); setLoading(false) }).catch(() => setLoading(false))
-  }, [])
+  function load() {
+    setLoading(true); setLoadError(false)
+    getHostReviews().then(r => { setReviews(r); setLoading(false) }).catch(() => { setLoadError(true); setLoading(false) })
+  }
+  useEffect(() => { load() }, [])
 
   async function handleRespond(reviewId: string) {
     if (!response.trim()) return
@@ -95,6 +99,10 @@ export default function ResenasPage() {
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 size={28} className="animate-spin" style={{ color: 'var(--brand)' }} />
+        </div>
+      ) : loadError ? (
+        <div className="rounded-3xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+          <LoadError message="No pudimos cargar tus reseñas." onRetry={load} />
         </div>
       ) : reviews.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 rounded-3xl text-center"

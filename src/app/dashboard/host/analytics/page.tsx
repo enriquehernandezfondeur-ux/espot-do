@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { formatCurrency } from '@/lib/utils'
 import { getHostAnalytics, type HostAnalytics } from '@/lib/actions/host-analytics'
+import { LoadError } from '@/components/LoadError'
 import {
   Loader2, TrendingUp, TrendingDown, Eye, Target, CheckCircle2, Star,
   CalendarDays, Clock, Building2, Filter, MousePointerClick,
@@ -18,16 +19,27 @@ const CARD: React.CSSProperties = { background: 'var(--bg-card)', border: '1px s
 export default function AnalyticsPage() {
   const [a, setA] = useState<HostAnalytics | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [isPro, setIsPro] = useState<boolean | null>(null)
 
-  useEffect(() => {
-    getHostAnalytics().then(d => { setA(d); setLoading(false) }).catch(() => setLoading(false))
-  }, [])
+  function load() {
+    setLoading(true); setLoadError(false)
+    getHostAnalytics().then(d => { setA(d); setLoading(false) }).catch(() => { setLoadError(true); setLoading(false) })
+  }
+  useEffect(() => { load() }, [])
   useEffect(() => { getMyPlan().then(p => setIsPro(p === 'pro')) }, [])
 
   if (loading) return (
     <div className="flex items-center justify-center h-dvh" style={{ background: 'var(--bg-base)' }}>
       <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand)' }} />
+    </div>
+  )
+  if (loadError) return (
+    <div className="p-4 md:p-6 max-w-6xl mx-auto">
+      <h1 className="text-xl md:text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Analytics</h1>
+      <div className="rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+        <LoadError message="No pudimos cargar tus estadísticas." onRetry={load} />
+      </div>
     </div>
   )
 

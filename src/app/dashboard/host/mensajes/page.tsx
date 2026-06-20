@@ -6,6 +6,7 @@ import { getMyConversations, getConversation, sendMessage, markMessagesRead, mar
 import type { MessageAttachment } from '@/lib/actions/messages'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
+import { LoadError } from '@/components/LoadError'
 
 const ACCEPTED = [
   'image/jpeg','image/png','image/gif','image/webp',
@@ -19,6 +20,7 @@ function isImage(t: string) { return t.startsWith('image/') }
 export default function HostMensajesPage() {
   const [convs,     setConvs]     = useState<any[]>([])
   const [loading,   setLoading]   = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [active,    setActive]    = useState<any | null>(null)
   const [messages,  setMessages]  = useState<any[]>([])
   const [userId,    setUserId]    = useState<string | null>(null)
@@ -78,7 +80,7 @@ export default function HostMensajesPage() {
         markAllMessagesRead()
           .then(() => window.dispatchEvent(new Event('espot:messages-read')))
           .catch(() => {})
-      } catch {}
+      } catch { setLoadError(true) }
       setLoading(false)
 
       // Suscripción global: marca conversaciones inactivas como no leídas
@@ -200,6 +202,14 @@ export default function HostMensajesPage() {
   if (loading) return (
     <div className="flex items-center justify-center h-dvh" style={{ background: 'var(--bg-base)' }}>
       <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand)' }} />
+    </div>
+  )
+  if (loadError) return (
+    <div className="p-4 md:p-6 max-w-3xl mx-auto">
+      <h1 className="text-xl md:text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Mensajes</h1>
+      <div className="rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+        <LoadError message="No pudimos cargar tus mensajes." onRetry={() => window.location.reload()} />
+      </div>
     </div>
   )
 
