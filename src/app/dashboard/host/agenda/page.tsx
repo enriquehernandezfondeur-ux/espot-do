@@ -295,15 +295,15 @@ export default function AgendaPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {/* View toggle */}
-          <div className="flex rounded-xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
-            <span className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold"
+          {/* View toggle — segmentado coherente con el resto del CRM */}
+          <div className="inline-flex items-center gap-1 p-1 rounded-xl shrink-0" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
               style={{ background: 'var(--brand)', color: '#fff' }}>
               <LayoutList size={13} /> Reservas
             </span>
             <Link href="/dashboard/host/calendario"
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors"
-              style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+              style={{ color: '#6B7280' }}>
               <CalendarDays size={13} /> Calendario
             </Link>
           </div>
@@ -366,36 +366,20 @@ export default function AgendaPage() {
         )
       })()}
 
-      {/* Origin cards */}
-      <div className="grid grid-cols-3 gap-3 mb-3">
+      {/* Origen — control segmentado (coherente con Mis espacios) */}
+      <div className="inline-flex gap-1 p-1 rounded-xl mb-3 overflow-x-auto scrollbar-hide max-w-full" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
         {([
-          { value: 'all',     label: 'Todos',   count: items.length,
-            dot: '#94A3B8', activeBg: '#EEF2F7', activeBorder: '#94A3B8', activeNum: 'var(--text-primary)', activeLabel: '#64748B' },
-          { value: 'espot',   label: 'Espot',   count: items.filter(i => i.source === 'espot').length,
-            dot: 'var(--brand)', activeBg: 'rgba(53,196,147,0.1)', activeBorder: 'var(--brand)', activeNum: '#0D7A56', activeLabel: 'var(--brand)' },
-          { value: 'directo', label: 'Directo', count: items.filter(i => i.source === 'direct').length,
-            dot: '#818CF8', activeBg: 'rgba(99,102,241,0.08)', activeBorder: '#818CF8', activeNum: '#4338CA', activeLabel: '#818CF8' },
+          { value: 'all',     label: 'Todos',   count: items.length,                                  dot: '#94A3B8' },
+          { value: 'espot',   label: 'Espot',   count: items.filter(i => i.source === 'espot').length, dot: 'var(--brand)' },
+          { value: 'directo', label: 'Directo', count: items.filter(i => i.source === 'direct').length, dot: '#6366F1' },
         ] as const).map(o => {
           const active = origin === o.value
           return (
             <button key={o.value} onClick={() => setOrigin(o.value)}
-              className="flex flex-col items-start p-3 md:p-4 rounded-2xl transition-all text-left"
-              style={{
-                background: active ? o.activeBg : 'var(--bg-card)',
-                border: `2px solid ${active ? o.activeBorder : 'var(--border-subtle)'}`,
-              }}>
-              <div className="flex items-center gap-1.5 mb-2">
-                <div className="w-2 h-2 rounded-full shrink-0"
-                  style={{ background: active ? o.dot : '#D1D5DB' }} />
-                <span className="text-xs font-semibold"
-                  style={{ color: active ? o.activeLabel : 'var(--text-muted)' }}>
-                  {o.label}
-                </span>
-              </div>
-              <span className="text-2xl font-bold leading-none"
-                style={{ color: active ? o.activeNum : 'var(--text-primary)' }}>
-                {o.count}
-              </span>
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all"
+              style={active ? { background: 'var(--text-primary)', color: '#fff' } : { color: '#6B7280' }}>
+              <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: o.dot }} />
+              {o.label} <span style={{ opacity: 0.6 }}>{o.count}</span>
             </button>
           )
         })}
