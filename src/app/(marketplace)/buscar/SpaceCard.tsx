@@ -4,8 +4,9 @@ import React, { useState, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MapPin, Users, ArrowRight, Check, X, ChevronLeft, ChevronRight, Zap, Calendar, MessageCircle, Star, Crown } from 'lucide-react'
+import { MapPin, Users, Check, X, ChevronLeft, ChevronRight, Zap, Star, Crown, Wine, KeyRound } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
+import { summarizePricing, getActivePricing } from '@/lib/pricing'
 import { PRICING_TYPES } from './constants'
 import { getCategoryLabel, getCategoryIcon } from '@/lib/categories'
 
@@ -53,27 +54,6 @@ export function getSpaceRating(space: any): { avg: number; count: number } | nul
   return { avg: Math.round(avg * 10) / 10, count: reviews.length }
 }
 
-export function getPriceInfo(space: any) {
-  const p = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
-  if (!p) return null
-  if (p.pricing_type === 'hourly') {
-    const v = p.hourly_price
-    if (!v) return { type: 'Por hora', unit: '/ hora', amount: null, full: 'Cotizar precio' }
-    return { type: 'Por hora', unit: '/ hora', amount: formatCurrency(v), full: `${formatCurrency(v)} / hora` }
-  }
-  if (p.pricing_type === 'minimum_consumption') {
-    const v = p.minimum_consumption
-    if (!v) return { type: 'Consumibles', unit: '', amount: null, full: 'Cotizar precio' }
-    return { type: 'Consumibles', unit: '', amount: formatCurrency(v), full: formatCurrency(v) }
-  }
-  if (p.pricing_type === 'fixed_package') {
-    const v = p.fixed_price
-    if (!v) return { type: 'Paquete', unit: 'paquete', amount: null, full: 'Cotizar precio' }
-    return { type: 'Paquete', unit: 'paquete', amount: formatCurrency(v), full: formatCurrency(v) }
-  }
-  return { type: 'Cotizar', unit: '', amount: null, full: 'Cotizar precio' }
-}
-
 export function SpaceCard({
   space, isHovered, onHover, dateFilter, timeFilter, isAvailable, eager = false,
 }: {
@@ -87,14 +67,12 @@ export function SpaceCard({
   eager?: boolean
 }) {
   const images     = getImages(space)
-  const priceInfo  = getPriceInfo(space)
+  const pricing    = getActivePricing(space.space_pricing)
+  const summary    = summarizePricing(pricing)
   const rating     = getSpaceRating(space)
   const catLabel   = getCategoryLabel(space.category, { plural: true })
   const CatIcon    = getCategoryIcon(space.category)
-  const pricingDef = PRICING_TYPES.find(p => {
-    const pt = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
-    return p.value === pt?.pricing_type
-  })
+  const pricingDef = PRICING_TYPES.find(p => p.value === summary?.typeKey)
   const href = dateFilter
     ? `/espacios/${space.slug}?fecha=${dateFilter}${timeFilter ? `&hora=${timeFilter}` : ''}`
     : `/espacios/${space.slug}`
@@ -112,9 +90,7 @@ export function SpaceCard({
     fixed_package:       'Precio fijo por el paquete completo, sin importar cuántas horas uses.',
     custom_quote:        'El propietario te envía un precio personalizado según tu evento.',
   }
-  const currentPricingType = space.space_pricing?.find((p: any) => p.is_active)?.pricing_type
-    ?? space.space_pricing?.[0]?.pricing_type
-  const pricingTip = currentPricingType ? PRICING_TIPS[currentPricingType] : null
+  const pricingTip = summary?.typeKey ? PRICING_TIPS[summary.typeKey] : null
 
   function prevPhoto(e: React.MouseEvent) {
     e.preventDefault(); e.stopPropagation()
@@ -237,9 +213,10 @@ export function SpaceCard({
             </span>
           ) : null}
 
-          {/* Badge top-right: destacado por el equipo (is_featured) */}
+          {/* Badge bottom-left: destacado por el equipo (is_featured).
+              Va abajo-izquierda para no solaparse con el botón de Favorito (top-right). */}
           {space.is_featured && (
-            <span className="absolute top-3 right-3 z-20 flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full"
+            <span className="absolute bottom-3 left-3 z-20 flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full"
               style={{ background: 'rgba(3,49,60,0.9)', color: '#fff', backdropFilter: 'blur(8px)' }}>
               <Star size={9} style={{ fill: '#F5C451', color: '#F5C451' }} /> Destacado
             </span>
@@ -289,27 +266,58 @@ export function SpaceCard({
             )}
           </div>
 
-          {/* Precio · badge tipo · capacidad */}
-          <div className="flex items-center gap-2 pt-2.5 mt-auto"
-            style={{ borderTop: '1px solid #F0F2F5' }}>
+          {/* ── Bloque de precio ──────────────────────────────────────
+              Jerarquía: ① mínimo real ("Desde RD$X") → ② tarifa + horas
+              → ③ tipo + condición de consumo + fin de semana. */}
+          <div className="pt-2.5 mt-auto" style={{ borderTop: '1px solid #F0F2F5' }}>
 
-            {/* Grupo izquierdo: precio + badge + tooltip (#4) */}
-            <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-hidden">
-              {priceInfo?.amount ? (
-                <span className="font-bold text-sm shrink-0" style={{ color: '#0F1623' }}>
-                  {priceInfo.amount}
-                </span>
-              ) : (
-                <span className="text-sm font-semibold shrink-0" style={{ color: 'var(--text-muted)' }}>Cotizar</span>
-              )}
+            {/* ① Mínimo real para alquilar + capacidad */}
+            <div className="flex items-end justify-between gap-2">
+              <div className="min-w-0">
+                {summary?.minTotal != null ? (
+                  <div className="flex items-baseline gap-1 flex-wrap">
+                    {summary.typeKey !== 'fixed_package' && (
+                      <span className="text-[11px] font-medium" style={{ color: 'var(--text-muted)' }}>Desde</span>
+                    )}
+                    <span className="font-bold leading-none" style={{ fontSize: 18, color: '#0F1623', letterSpacing: '-0.02em' }}>
+                      {formatCurrency(summary.minTotal)}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="font-bold text-sm" style={{ color: 'var(--text-muted)' }}>Cotizar precio</span>
+                )}
+
+                {/* ② Tarifa por hora + rango de horas */}
+                {(summary?.rate || summary?.hoursLabel) && (
+                  <div className="text-[11px] mt-1 truncate" style={{ color: 'var(--text-muted)' }} title={[
+                    summary?.rate ? `${formatCurrency(summary.rate)}/hora` : null,
+                    summary?.hoursLabel,
+                  ].filter(Boolean).join(' · ')}>
+                    {summary?.rate && <>{formatCurrency(summary.rate)}/hora</>}
+                    {summary?.rate && summary?.hoursLabel && ' · '}
+                    {summary?.hoursLabel}
+                  </div>
+                )}
+              </div>
+
+              <span className="flex items-center gap-1 text-xs font-medium shrink-0" style={{ color: 'var(--text-muted)' }}>
+                <Users size={12} style={{ color: '#35C493', flexShrink: 0 }} />
+                {space.capacity_min && space.capacity_min !== space.capacity_max
+                  ? `${space.capacity_min}–${space.capacity_max}`
+                  : space.capacity_max ?? '—'}
+              </span>
+            </div>
+
+            {/* ③ Tipo + condición de consumo + fin de semana — envuelve, sin recorte */}
+            <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
               {pricingDef?.value && (
-                <div className="relative shrink-0">
+                <div className="relative">
                   <button
                     type="button"
                     onClick={e => { e.preventDefault(); e.stopPropagation(); setShowPriceInfo(o => !o) }}
                     className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap"
                     style={{ background: pricingDef.bg, color: pricingDef.text, border: `1px solid ${pricingDef.border}` }}>
-                    {pricingDef.value === 'minimum_consumption' ? 'Consumibles' : pricingDef.label}
+                    {summary?.typeLabel ?? pricingDef.label}
                   </button>
                   {showPriceInfo && pricingTip && (
                     <>
@@ -326,33 +334,35 @@ export function SpaceCard({
                   )}
                 </div>
               )}
-              {(() => {
-                const p   = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
-                const wm  = Number(p?.weekend_multiplier ?? 1)
-                if (!wm || wm === 1) return null
-                const pct = Math.round(Math.abs(wm - 1) * 100)
-                if (pct === 0) return null
-                const isDiscount = wm < 1
-                return (
-                  <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap shrink-0"
-                    style={{
-                      background: isDiscount ? 'rgba(34,197,94,0.1)' : 'rgba(245,158,11,0.1)',
-                      color:      isDiscount ? '#16A34A' : '#D97706',
-                      border:     `1px solid ${isDiscount ? 'rgba(34,197,94,0.25)' : 'rgba(245,158,11,0.25)'}`,
-                    }}>
-                    {isDiscount ? `-${pct}%` : `+${pct}%`} fines
-                  </span>
-                )
-              })()}
+
+              {/* Condición de consumo (solo cuando es informativa: tarifa por hora).
+                  Para "Consumibles" el propio tipo ya lo dice → no se repite. */}
+              {summary?.typeKey === 'hourly' && summary.consumption === 'consumable' && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap"
+                  style={{ background: 'rgba(180,83,9,0.09)', color: '#B45309', border: '1px solid rgba(180,83,9,0.22)' }}>
+                  <Wine size={10} /> Consumible
+                </span>
+              )}
+              {summary?.typeKey === 'hourly' && summary.consumption === 'space' && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap"
+                  style={{ background: 'rgba(71,85,105,0.08)', color: '#475569', border: '1px solid rgba(71,85,105,0.2)' }}>
+                  <KeyRound size={10} /> Uso del espacio
+                </span>
+              )}
+
+              {/* Recargo/descuento de fin de semana */}
+              {summary?.weekend && (
+                <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap"
+                  style={{
+                    background: summary.weekend.isDiscount ? 'rgba(34,197,94,0.1)' : 'rgba(245,158,11,0.1)',
+                    color:      summary.weekend.isDiscount ? '#16A34A' : '#D97706',
+                    border:     `1px solid ${summary.weekend.isDiscount ? 'rgba(34,197,94,0.25)' : 'rgba(245,158,11,0.25)'}`,
+                  }}>
+                  {summary.weekend.isDiscount ? `-${summary.weekend.pct}%` : `+${summary.weekend.pct}%`} fines
+                </span>
+              )}
             </div>
 
-            {/* Capacidad */}
-            <span className="flex items-center gap-1 text-xs font-medium shrink-0" style={{ color: 'var(--text-muted)' }}>
-              <Users size={11} style={{ color: '#35C493', flexShrink: 0 }} />
-              {space.capacity_min && space.capacity_min !== space.capacity_max
-                ? `${space.capacity_min}–${space.capacity_max}`
-                : space.capacity_max ?? '—'}
-            </span>
           </div>
 
         </div>

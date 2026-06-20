@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { getSpaceReviews, type ReviewsSummary } from '@/lib/actions/reviews'
 import { getCategoryLabel } from '@/lib/categories'
-import { consumptionLabel } from '@/lib/pricing'
+import { consumptionLabel, summarizePricing } from '@/lib/pricing'
 import { trackSpaceClick } from '@/lib/track'
 import Link from 'next/link'
 import {
@@ -200,16 +200,14 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
   const host        = space.profiles
   const facilities  = getFacilities(space)
 
-  // Precio display para el sticky CTA móvil
+  // Precio display para el sticky CTA móvil — mismo mínimo real que la tarjeta
+  // del marketplace ("Desde RD$X"), vía la fuente única summarizePricing.
   function getPriceDisplay() {
     if (!pricing) return null
-    if (pricing.pricing_type === 'hourly')
-      return pricing.hourly_price ? `${formatCurrency(pricing.hourly_price)} / hr` : 'Por hora'
-    if (pricing.pricing_type === 'minimum_consumption')
-      return pricing.minimum_consumption ? `Desde ${formatCurrency(pricing.minimum_consumption)}` : 'Consumibles'
-    if (pricing.pricing_type === 'fixed_package')
-      return pricing.fixed_price ? formatCurrency(pricing.fixed_price) : 'Paquete'
-    return 'Cotizar'
+    const sum = summarizePricing(pricing)
+    if (!sum) return 'Cotizar'
+    if (sum.minTotal == null) return sum.typeKey === 'custom_quote' ? 'Cotizar' : sum.typeLabel
+    return `${sum.typeKey !== 'fixed_package' ? 'Desde ' : ''}${formatCurrency(sum.minTotal)}`
   }
   const priceDisplay = getPriceDisplay()
 

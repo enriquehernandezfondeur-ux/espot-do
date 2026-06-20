@@ -1,4 +1,4 @@
-import { computeBasePrice, computePlatformFee, computeHostNet, platformFeeOf, hostNetOf, isWeekendDate, consumptionLabel } from '@/lib/pricing'
+import { computeBasePrice, computePlatformFee, computeHostNet, platformFeeOf, hostNetOf, isWeekendDate, consumptionLabel, summarizePricing, getMinimumPrice, getActivePricing } from '@/lib/pricing'
 
 describe('isWeekendDate', () => {
   it('trata viernes, sábado y domingo como fin de semana', () => {
@@ -120,5 +120,73 @@ describe('is_consumable no cambia el cálculo', () => {
     const b = computeBasePrice({ pricing_type: 'hourly', hourly_price: 1000, is_consumable: false }, 3, '2026-05-25')
     expect(a).toBe(b)
     expect(a).toBe(3000)
+  })
+})
+
+describe('getActivePricing', () => {
+  it('elige la fila activa', () => {
+    const rows = [{ id: 'a', is_active: false }, { id: 'b', is_active: true }]
+    expect(getActivePricing(rows)?.id).toBe('b')
+  })
+  it('cae a la primera si ninguna está activa', () => {
+    expect(getActivePricing([{ id: 'a' }, { id: 'b' }])?.id).toBe('a')
+  })
+  it('null si no hay filas', () => {
+    expect(getActivePricing([])).toBeNull()
+    expect(getActivePricing(undefined)).toBeNull()
+  })
+})
+
+describe('summarizePricing', () => {
+  it('hourly: mínimo real = tarifa × min_hours (sin recargo de finde)', () => {
+    const s = summarizePricing({ pricing_type: 'hourly', hourly_price: 2000, min_hours: 2, max_hours: 6, is_consumable: false, weekend_multiplier: 1.2 })!
+    expect(s.minTotal).toBe(4000)          // 2000 × 2, sin aplicar +20%
+    expect(s.rate).toBe(2000)
+    expect(s.hoursLabel).toBe('2–6 h')
+    expect(s.consumption).toBe('space')
+    expect(s.weekend).toEqual({ pct: 20, isDiscount: false })
+  })
+  it('hourly sin máximo y consumible', () => {
+    const s = summarizePricing({ pricing_type: 'hourly', hourly_price: 3500, min_hours: 3, is_consumable: true })!
+    expect(s.minTotal).toBe(10500)
+    expect(s.hoursLabel).toBe('Mín. 3 h')
+    expect(s.consumption).toBe('consumable')
+  })
+  it('hourly sin min_hours → asume 1h', () => {
+    const s = summarizePricing({ pricing_type: 'hourly', hourly_price: 5000 })!
+    expect(s.minTotal).toBe(5000)
+    expect(s.hoursLabel).toBeNull()
+    expect(s.consumption).toBeNull()       // is_consumable ausente → no se afirma
+  })
+  it('minimum_consumption: mínimo = consumo y siempre consumible', () => {
+    const s = summarizePricing({ pricing_type: 'minimum_consumption', minimum_consumption: 60000, min_hours: 4, max_hours: 4 })!
+    expect(s.minTotal).toBe(60000)
+    expect(s.rate).toBeNull()
+    expect(s.hoursLabel).toBe('4 h')
+    expect(s.consumption).toBe('consumable')
+  })
+  it('fixed_package: mínimo = precio fijo, sin "Desde"', () => {
+    const s = summarizePricing({ pricing_type: 'fixed_package', fixed_price: 185000, package_hours: 8 })!
+    expect(s.minTotal).toBe(185000)
+    expect(s.typeKey).toBe('fixed_package')
+    expect(s.hoursLabel).toBe('8 h incluidas')
+  })
+  it('custom_quote: sin precio', () => {
+    const s = summarizePricing({ pricing_type: 'custom_quote' })!
+    expect(s.minTotal).toBeNull()
+    expect(s.typeKey).toBe('custom_quote')
+  })
+  it('null si no hay pricing', () => {
+    expect(summarizePricing(null)).toBeNull()
+  })
+})
+
+describe('getMinimumPrice (filtros/orden)', () => {
+  it('coincide con summarizePricing.minTotal', () => {
+    const p = { pricing_type: 'hourly', hourly_price: 2000, min_hours: 2 }
+    expect(getMinimumPrice(p)).toBe(summarizePricing(p)!.minTotal)
+  })
+  it('0 para cotización (no rompe el orden)', () => {
+    expect(getMinimumPrice({ pricing_type: 'custom_quote' })).toBe(0)
   })
 })

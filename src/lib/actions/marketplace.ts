@@ -141,7 +141,7 @@ export async function getPublishedSpaces(filters?: {
       is_verified, is_featured, instant_booking, primary_activity, secondary_activities,
       profiles!host_id(plan_type),
       space_images(url, is_cover, position),
-      space_pricing(pricing_type, hourly_price, minimum_consumption, fixed_price, package_name, weekend_multiplier, min_advance_amount, min_hours, is_active),
+      space_pricing(pricing_type, hourly_price, minimum_consumption, fixed_price, package_name, package_hours, weekend_multiplier, min_advance_amount, min_hours, max_hours, is_consumable, is_active),
       space_conditions(
         allows_external_decoration, allows_external_food, allows_external_alcohol,
         music_cutoff_time, cancellation_policy,

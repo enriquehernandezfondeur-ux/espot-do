@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { CATEGORIES } from './constants'
 import { formatCurrency } from '@/lib/utils'
+import { summarizePricing, getActivePricing, getMinimumPrice } from '@/lib/pricing'
 import { SUB_ACTIVITIES, SUB_TO_BASE } from '@/lib/activities'
 import { SpaceCard } from './SpaceCard'
 import { DateTimePicker } from './DateTimePicker'
@@ -296,18 +297,9 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
     if (capacidad) result = result.filter(s => s.capacity_max >= parseInt(capacidad))
     if (priceMin || priceMax) {
       result = result.filter(s => {
-        const p = s.space_pricing?.find((x: any) => x.is_active) ?? s.space_pricing?.[0]
-        if (!p) return true
-        // Precio normalizado: para hourly, multiplica por mínimo de horas (o 1h si no hay mínimo)
-        // para que la comparación sea equivalente a lo que el cliente pagaría mínimo
-        const normalizedPrice: number | null =
-          p.pricing_type === 'hourly'
-            ? (p.hourly_price ?? 0) * (p.min_hours ?? 1)
-          : p.pricing_type === 'minimum_consumption'
-            ? p.minimum_consumption
-          : p.pricing_type === 'fixed_package'
-            ? p.fixed_price
-          : null
+        // Mínimo real (mismo cálculo que la tarjeta): summarizePricing.minTotal.
+        // null = sin precio fijo (cotización) → no se filtra por precio.
+        const normalizedPrice = summarizePricing(getActivePricing(s.space_pricing))?.minTotal ?? null
         if (normalizedPrice === null) return true
         if (priceMin && normalizedPrice < parseInt(priceMin)) return false
         if (priceMax && normalizedPrice > parseInt(priceMax)) return false
@@ -336,12 +328,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
     // Ordenar
     if (sortBy === 'precio_asc' || sortBy === 'precio_desc') {
       result.sort((a, b) => {
-        const getPrice = (s: any) => {
-          const p = s.space_pricing?.find((x: any) => x.is_active) ?? s.space_pricing?.[0]
-          if (!p) return 0
-          if (p.pricing_type === 'hourly') return (p.hourly_price ?? 0) * (p.min_hours ?? 1)
-          return p.minimum_consumption ?? p.fixed_price ?? p.hourly_price ?? 0
-        }
+        const getPrice = (s: any) => getMinimumPrice(getActivePricing(s.space_pricing))
         return sortBy === 'precio_asc' ? getPrice(a) - getPrice(b) : getPrice(b) - getPrice(a)
       })
     } else if (sortBy === 'capacidad') {
@@ -1070,11 +1057,11 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                 style={{ scrollSnapType: 'x mandatory' }}>
                 {filtered.map(space => {
                   const cover   = space.space_images?.find((i: any) => i.is_cover)?.url ?? space.space_images?.[0]?.url
-                  const p       = space.space_pricing?.find((x: any) => x.is_active) ?? space.space_pricing?.[0]
-                  const price   = p?.pricing_type === 'hourly'              ? `${formatCurrency(p.hourly_price)}/hr`
-                                : p?.pricing_type === 'minimum_consumption' ? `Desde ${formatCurrency(p.minimum_consumption)}`
-                                : p?.pricing_type === 'fixed_package'       ? formatCurrency(p.fixed_price)
-                                : 'Cotizar'
+                  // Mismo mínimo real que la tarjeta: "Desde RD$X" (fuente única).
+                  const sum     = summarizePricing(getActivePricing(space.space_pricing))
+                  const price   = sum?.minTotal != null
+                    ? `${sum.typeKey !== 'fixed_package' ? 'Desde ' : ''}${formatCurrency(sum.minTotal)}`
+                    : 'Cotizar'
                   const isActive = hoveredId === space.id
                   return (
                     <Link

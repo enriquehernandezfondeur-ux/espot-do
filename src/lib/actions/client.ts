@@ -72,9 +72,11 @@ export async function getClientFavorites() {
     .select(`
       id, folder_id,
       spaces!space_id(
-        id, name, slug, category, city, sector, capacity_max,
-        space_images(url, is_cover),
-        space_pricing(pricing_type, hourly_price, minimum_consumption, fixed_price, is_active)
+        id, name, slug, category, city, sector, capacity_min, capacity_max, is_verified, is_featured, instant_booking,
+        profiles!host_id(plan_type),
+        space_images(url, is_cover, position),
+        space_pricing(pricing_type, hourly_price, minimum_consumption, fixed_price, package_hours, weekend_multiplier, min_hours, max_hours, is_consumable, is_active),
+        reviews(rating, is_public)
       )
     `)
     .eq('guest_id', user.id)
