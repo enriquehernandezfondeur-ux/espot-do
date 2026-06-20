@@ -527,19 +527,21 @@ export async function getMySpacesList(opts: {
   return { items, total: count ?? 0 }
 }
 
-/** Conteos por estado para los filtros (solo booleanos — barato con 100+ espacios). */
-export async function getMySpacesCounts(): Promise<{ all: number; published: number; pending: number; draft: number }> {
+/** Conteos por estado + categorías presentes para los filtros (campos mínimos). */
+export async function getMySpacesCounts(): Promise<{ all: number; published: number; pending: number; draft: number; categories: string[] }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { all: 0, published: 0, pending: 0, draft: 0 }
+  if (!user) return { all: 0, published: 0, pending: 0, draft: 0, categories: [] }
   const { hostId, db } = await resolveHostAccess(supabase, user.id)
-  const { data } = await db.from('spaces').select('is_published, is_active').eq('host_id', hostId)
-  const rows = (data ?? []) as { is_published: boolean; is_active: boolean }[]
+  const { data } = await db.from('spaces').select('is_published, is_active, category').eq('host_id', hostId)
+  const rows = (data ?? []) as { is_published: boolean; is_active: boolean; category: string }[]
   return {
     all: rows.length,
     published: rows.filter(s => s.is_published).length,
     pending:   rows.filter(s => !s.is_published && s.is_active).length,
     draft:     rows.filter(s => !s.is_published && !s.is_active).length,
+    // Solo las categorías que el host realmente tiene (no todo el catálogo)
+    categories: [...new Set(rows.map(s => s.category).filter(Boolean))],
   }
 }
 
