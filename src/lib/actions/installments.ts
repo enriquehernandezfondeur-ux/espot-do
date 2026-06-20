@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { buildSchedule } from '@/lib/payments/schedule'
+import { computePaymentState } from '@/lib/booking-balance'
 import { todayInRD } from '@/lib/utils'
 
 export interface BookingInstallment {
@@ -133,6 +134,79 @@ export async function markInstallmentPaid(
     .select('id')
   if (error) return { success: false, error: error.message }
   if (!updated || updated.length === 0) return { success: true, alreadyPaid: true }
+  return { success: true }
+}
+
+/**
+ * Registrar un pago MANUAL de una cuota de reserva Espot (Azul no integrado →
+ * el cliente paga por transferencia/efectivo y el host/admin lo registra).
+ *
+ * Solo el HOST del espacio o un ADMIN pueden registrarlo (no el cliente).
+ * Marca la cuota pagada (con método/referencia), recomputa el estado de pago de
+ * la reserva desde las cuotas (fuente única, igual que el confirm de Azul) y, al
+ * recibir el primer pago de una reserva aceptada, la confirma.
+ *
+ * NOTA DE NEGOCIO (pendiente del dueño): NO altera commission_status/payout_status.
+ * La conciliación de comisión y la liquidación al host se siguen manejando en el
+ * flujo de admin existente. Definir quién retiene el dinero en pagos manuales.
+ */
+export async function recordManualInstallmentPayment(
+  installmentId: string,
+  opts: { method: 'transferencia' | 'efectivo' | 'otro'; reference?: string },
+): Promise<{ success: boolean; error?: string; alreadyPaid?: boolean }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'No autenticado' }
+
+  const { data: inst } = await supabase
+    .from('booking_installments')
+    .select('booking_id, bookings!booking_id(status, spaces!space_id(host_id))')
+    .eq('id', installmentId)
+    .single()
+  if (!inst) return { success: false, error: 'Cuota no encontrada' }
+  const booking = inst.bookings as any
+  const space   = booking?.spaces as any
+
+  // Autorización: host del espacio o admin (el cliente no registra pagos manuales).
+  const isHost = space?.host_id === user.id
+  let isAdmin = false
+  if (!isHost) {
+    const { data: prof } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+    isAdmin = prof?.role === 'admin'
+  }
+  if (!isHost && !isAdmin) return { success: false, error: 'No autorizado' }
+
+  const admin = createServiceClient()
+  // Marcar la cuota pagada con lock anti-doble marcado
+  const { data: updated, error } = await admin
+    .from('booking_installments')
+    .update({
+      status:            'paid',
+      paid_at:           new Date().toISOString(),
+      payment_method:    opts.method,
+      payment_reference: opts.reference ?? null,
+    })
+    .eq('id', installmentId)
+    .neq('status', 'paid')
+    .select('id')
+  if (error) return { success: false, error: error.message }
+  if (!updated || updated.length === 0) return { success: true, alreadyPaid: true }
+
+  // Recomputar el estado de pago de la reserva desde TODAS sus cuotas
+  const { data: allInsts } = await admin
+    .from('booking_installments').select('status, amount').eq('booking_id', inst.booking_id)
+  const { paidAmount, paymentStatus } = computePaymentState(allInsts ?? [])
+
+  // Al recibir el primer pago de una reserva aceptada, se confirma (igual que Azul).
+  const confirm = booking?.status === 'accepted' && paidAmount > 0
+  const { error: bErr } = await admin.from('bookings').update({
+    paid_amount:    paidAmount,
+    payment_status: paymentStatus,
+    paid_at:        new Date().toISOString(),
+    ...(confirm ? { status: 'confirmed', confirmed_at: new Date().toISOString() } : {}),
+  }).eq('id', inst.booking_id)
+  if (bErr) return { success: false, error: bErr.message }
+
   return { success: true }
 }
 
