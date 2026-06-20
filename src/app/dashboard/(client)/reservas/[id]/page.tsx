@@ -100,7 +100,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
   const today = todayInRD()
   const eventPassed = data ? booking.event_date < today : false
   const cover   = space?.space_images?.find((i: any) => i.is_cover)?.url ?? space?.space_images?.[0]?.url
-  const sc      = STATUS_COLORS[(booking as any).status as keyof typeof STATUS_COLORS] ?? { color: '#6B7280', bg: '#F4F6F8' }
+  const sc      = STATUS_COLORS[(booking as any).status as keyof typeof STATUS_COLORS] ?? { color: 'var(--text-muted)', bg: 'var(--bg-elevated)' }
   const sl      = STATUS_LABELS[(booking as any).status as keyof typeof STATUS_LABELS] ?? (booking as any).status
   const allPaid = installments.length > 0 && installments.every(i => i.status === 'paid')
   const nextInst = installments.find(i => i.status !== 'paid')

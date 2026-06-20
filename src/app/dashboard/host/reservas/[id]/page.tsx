@@ -127,7 +127,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
   const addons  = bk.booking_addons ?? []
 
   const cover   = space?.space_images?.find((i: any) => i.is_cover)?.url ?? space?.space_images?.[0]?.url
-  const sc      = STATUS_COLORS[bk.status as keyof typeof STATUS_COLORS] ?? { color: '#6B7280', bg: '#F4F6F8' }
+  const sc      = STATUS_COLORS[bk.status as keyof typeof STATUS_COLORS] ?? { color: 'var(--text-muted)', bg: 'var(--bg-elevated)' }
   const sl      = STATUS_LABELS[bk.status as keyof typeof STATUS_LABELS] ?? bk.status
 
   const totalAmount   = Number(bk.total_amount) || 0
