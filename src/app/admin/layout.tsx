@@ -15,7 +15,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!isSuperAdmin && profile?.role !== 'admin') redirect('/')
 
   return (
-    <div className="flex min-h-dvh" style={{ background: '#F4F6F8' }}>
+    <div className="admin-theme flex min-h-dvh" style={{ background: 'var(--bg-base)' }}>
       <AdminSidebar />
       {/* pt-14 compensa la top bar fija en móvil */}
       <main className="flex-1 min-h-0 overflow-auto pt-14 md:pt-0">

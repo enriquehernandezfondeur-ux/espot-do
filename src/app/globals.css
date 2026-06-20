@@ -97,6 +97,26 @@
   --shadow-hover: 0 8px 28px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
 }
 
+/* ── ADMIN CONSOLE — GREY-BLUE THEME ────────────── */
+/* Misma estructura de tokens que host/cliente para que los componentes
+   compartidos funcionen también en admin. Los valores son la paleta gris-azulada
+   que el admin ya usaba hardcodeada (#0F1623/#94A3B8/#E8ECF0/#F4F6F8): tokenizar
+   no cambia el aspecto, solo lo hace consistente y reutilizable. */
+.admin-theme {
+  --bg-base:      #F4F6F8;
+  --bg-surface:   #FFFFFF;
+  --bg-card:      #FFFFFF;
+  --bg-elevated:  #F8FAFC;
+  --bg-hover:     #F1F5F9;
+  --text-primary:   #0F1623;
+  --text-secondary: #374151;
+  --text-muted:     #94A3B8;
+  --border-subtle:  #E8ECF0;
+  --border-medium:  #CBD5E1;
+  --shadow-card: 0 1px 4px rgba(0,0,0,0.04);
+  --shadow-hover: 0 4px 20px rgba(0,0,0,0.12);
+}
+
 @theme inline {
   --font-sans: var(--font-poppins), system-ui, sans-serif;
   --font-mono: ui-monospace, monospace;
