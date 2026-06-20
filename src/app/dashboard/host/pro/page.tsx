@@ -109,8 +109,13 @@ export default function HostProPage() {
             </div>
             {isPro && sub?.nextChargeISO && (
               <div className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-                Próximo cobro: <strong style={{ color: 'var(--text-primary)' }}>{fmtDate(sub.nextChargeISO)}</strong>
+                {sub.isTrial ? 'Tu prueba termina' : 'Próxima renovación'}: <strong style={{ color: 'var(--text-primary)' }}>{fmtDate(sub.nextChargeISO)}</strong>
                 {sub.daysLeft != null && ` · ${sub.daysLeft} día${sub.daysLeft === 1 ? '' : 's'} restantes`}
+              </div>
+            )}
+            {isPro && sub?.isTrial && (
+              <div className="text-xs mt-1" style={{ color: 'var(--pro-strong)' }}>
+                Estás probando todas las funciones Pro gratis. Al terminar, puedes pasar a Pro por RD${PRO_PRICE_DOP}/mes.
               </div>
             )}
             {!isPro && !isPending && (

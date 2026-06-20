@@ -10,7 +10,7 @@ import {
 import { formatCurrency, formatTime, todayInRD } from '@/lib/utils'
 import Link from 'next/link'
 import { getHostStats, getHostBookings, acceptBooking, rejectBooking } from '@/lib/actions/host'
-import { getMyPlan } from '@/lib/actions/subscription'
+import { getMySubscription } from '@/lib/actions/subscription'
 import { PlanBadge } from '@/components/PlanBadge'
 import { getExternalEvents } from '@/lib/actions/external-events'
 import type { ExternalEvent } from '@/types'
@@ -42,6 +42,8 @@ export default function DashboardPage() {
   const [actionError,    setActionError]    = useState('')
   const [actionId,       setActionId]       = useState<string | null>(null)
   const [isPro,          setIsPro]          = useState(false)
+  const [isTrial,        setIsTrial]        = useState(false)
+  const [daysLeft,       setDaysLeft]       = useState<number | null>(null)
 
   useEffect(() => {
     Promise.all([
@@ -52,7 +54,9 @@ export default function DashboardPage() {
       setStats(s); setBookings(b); setExternalEvents(ev); setLoading(false)
     }).catch(() => setLoading(false))
   }, [])
-  useEffect(() => { getMyPlan().then(p => setIsPro(p === 'pro')).catch(() => {}) }, [])
+  useEffect(() => {
+    getMySubscription().then(s => { setIsPro(s.isPro); setIsTrial(s.isTrial); setDaysLeft(s.daysLeft) }).catch(() => {})
+  }, [])
 
   async function handleConfirm(id: string) {
     if (actionId) return
@@ -172,12 +176,14 @@ export default function DashboardPage() {
         </div>
         <div className="min-w-0 flex-1">
           <div className="font-bold text-sm flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-            {isPro ? 'Espot Pro activo' : 'Plan Normal'}
+            {isTrial ? 'Prueba gratuita' : isPro ? 'Espot Pro activo' : 'Plan Normal'}
             {isPro && <PlanBadge />}
           </div>
           <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
             {isPro
-              ? 'Tienes todas las herramientas Pro desbloqueadas.'
+              ? (daysLeft != null
+                  ? `${isTrial ? 'Tu prueba termina' : 'Se renueva'} en ${daysLeft} día${daysLeft === 1 ? '' : 's'} · todas las funciones Pro activas.`
+                  : 'Tienes todas las herramientas Pro desbloqueadas.')
               : 'Desbloquea Espot Directo, reservas externas y más por RD$499/mes.'}
           </div>
         </div>
