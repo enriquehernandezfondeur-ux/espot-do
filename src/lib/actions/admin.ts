@@ -8,6 +8,7 @@ import { emailBase, infoBox } from '@/lib/email/templates'
 import { formatCurrency, formatDate, escapeHtml } from '@/lib/utils'
 import { platformFeeOf, hostNetOf } from '@/lib/pricing'
 import { resolvePlan } from '@/lib/plans'
+import { logAdminAction } from '@/lib/actions/admin-audit'
 import { startAutoTrialIfEnabled } from '@/lib/proTrial'
 
 const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
@@ -240,6 +241,8 @@ export async function updateSpaceStatus(spaceId: string, updates: {
   if (!supabase) return { error: 'No autorizado' }
   const { error } = await supabase.from('spaces').update(updates).eq('id', spaceId)
   if (!error) {
+    const parts = Object.entries(updates).map(([k, v]) => `${k}=${v}`).join(', ')
+    await logAdminAction('update_space_status', 'space', spaceId, parts || 'sin cambios')
     revalidatePath('/buscar')
     revalidatePath('/espacios', 'layout')
     revalidatePath('/', 'layout')
@@ -317,6 +320,8 @@ export async function updateUserRole(userId: string, role: string) {
 
   const { error } = await supabase.from('profiles').update({ role }).eq('id', userId)
   if (error) return { error: error.message }
+
+  await logAdminAction('change_role', 'user', userId, `rol ${profile?.role ?? '—'} → ${role}`)
 
   // Prueba gratuita automática al volverse propietario (si la config lo permite)
   if (role === 'host' && profile?.role !== 'host') {

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { logAdminAction } from '@/lib/actions/admin-audit'
 import { sendEmail } from '@/lib/email/send'
 import { tplDisputaAbierta } from '@/lib/email/templates'
 
@@ -390,6 +391,8 @@ export async function updateDisputeStatus(
     console.error('[updateDisputeStatus]', error)
     return { error: 'No se pudo actualizar la disputa' }
   }
+
+  await logAdminAction('resolve_dispute', 'dispute', disputeId, `${currentStatus} → ${status}${resolution ? ` · ${resolution.slice(0, 80)}` : ''}`)
 
   return { success: true }
 }

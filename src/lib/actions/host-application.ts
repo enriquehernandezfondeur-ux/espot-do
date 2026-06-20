@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { logAdminAction } from '@/lib/actions/admin-audit'
 import { startAutoTrialIfEnabled } from '@/lib/proTrial'
 import { analyzeApplication } from '@/lib/ai/analyze-application'
 import { sendEmail } from '@/lib/email/send'
@@ -269,6 +270,7 @@ export async function approveApplication(
     }).catch(() => {})
   }
 
+  await logAdminAction('approve_application', 'application', applicationId, 'solicitud de host aprobada')
   return { success: true }
 }
 
@@ -319,6 +321,7 @@ export async function rejectApplication(
     }).catch(() => {})
   }
 
+  await logAdminAction('reject_application', 'application', applicationId, `rechazada · ${reason.slice(0, 80)}`)
   return { success: true }
 }
 
