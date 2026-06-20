@@ -12,8 +12,18 @@ import { emailBase, infoBox } from '@/lib/email/templates'
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'contacto@espot.do'
 const SITE        = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 
-const DEFAULT_CANCELLATION_HOURS = 72
-const DEFAULT_CANCELLATION_REFUND_PCT = 50
+// Presets de cancelación: la política elegida es la FUENTE ÚNICA y define las
+// horas de anticipación y el % de reembolso (deben coincidir con las descripciones
+// del formulario y con el detalle público). Antes el wizard guardaba 72h/50% fijo
+// aunque el host eligiera "flexible" (100%/24h) → reembolso inconsistente.
+const CANCELLATION_PRESETS: Record<string, { hours: number; refundPct: number }> = {
+  flexible: { hours: 24, refundPct: 100 },
+  moderada: { hours: 72, refundPct: 50  },
+  estricta: { hours: 0,  refundPct: 0   },
+}
+function cancellationTerms(policy: string | null | undefined) {
+  return CANCELLATION_PRESETS[policy ?? 'moderada'] ?? CANCELLATION_PRESETS.moderada
+}
 
 async function getPlatformFeePct(): Promise<number> {
   const supabase = await createClient()
@@ -258,10 +268,10 @@ export async function saveSpace(payload: SaveSpacePayload) {
       // Horas extra
       overtime_allowed: payload.allowsExtraHours,
       overtime_price:   num(payload.extraHourPrice),
-      // Cancelación
+      // Cancelación — derivada de la política (fuente única)
       cancellation_policy:         payload.cancellationPolicy,
-      cancellation_hours_before:   DEFAULT_CANCELLATION_HOURS,
-      cancellation_refund_pct:     DEFAULT_CANCELLATION_REFUND_PCT,
+      cancellation_hours_before:   cancellationTerms(payload.cancellationPolicy).hours,
+      cancellation_refund_pct:     cancellationTerms(payload.cancellationPolicy).refundPct,
       custom_rules: payload.customRules || null,
     }),
     payload.paymentTerm
@@ -553,8 +563,8 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
     overtime_allowed:           payload.allowsExtraHours,
     overtime_price:             num(payload.extraHourPrice),
     cancellation_policy:        payload.cancellationPolicy,
-    cancellation_hours_before:  DEFAULT_CANCELLATION_HOURS,
-    cancellation_refund_pct:    DEFAULT_CANCELLATION_REFUND_PCT,
+    cancellation_hours_before:  cancellationTerms(payload.cancellationPolicy).hours,
+    cancellation_refund_pct:    cancellationTerms(payload.cancellationPolicy).refundPct,
     custom_rules:               payload.customRules || null,
   }
 

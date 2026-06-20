@@ -12,7 +12,7 @@ import {
   Clock, CheckCircle, X, Music, Ban,
   ArrowLeft, Share2, CreditCard, Lock, FileText, ChevronDown, Play, Images, MessageCircle,
   Car, Wifi, Wind, UtensilsCrossed, Volume2, Monitor, Music2, Trees, Waves, Wine,
-  Sun, Zap, ShowerHead, Building2, Star, Package, Sparkles, Camera,
+  Sun, Zap, ShowerHead, Building2, Star, Package, Sparkles, Camera, CalendarDays,
 } from 'lucide-react'
 import { cn, formatCurrency, formatTime } from '@/lib/utils'
 import { addonIcon } from '@/lib/icon-map'
@@ -796,6 +796,8 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                       ...(pricing?.pricing_type === 'hourly' && pricing.max_hours ? [{ label: 'Máximo de horas', value: `${pricing.max_hours} horas`, icon: Clock }] : []),
                       ...(pricing?.pricing_type === 'hourly' ? [{ label: 'Condición del precio', value: consumptionLabel(pricing.is_consumable), icon: CreditCard }] : []),
                       ...(pricing?.pricing_type === 'minimum_consumption' && pricing.session_hours ? [{ label: 'Duración de sesión', value: `${pricing.session_hours} horas`, icon: Clock }] : []),
+                      ...(pricing?.weekend_multiplier && pricing.weekend_multiplier > 1 ? [{ label: 'Fines de semana', value: `+${Math.round((pricing.weekend_multiplier - 1) * 100)}% (vie–dom)`, icon: CalendarDays }] : []),
+                      ...(space.instant_booking ? [{ label: 'Reserva', value: 'Instantánea, sin esperar aprobación', icon: Zap }] : []),
                     ].map(({ label, value, icon }) => (
                       <div key={label} className="flex items-center gap-3 p-4 rounded-xl"
                         style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
@@ -1232,6 +1234,11 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                           { ok: conditions.allows_external_alcohol,    label: 'Alcohol externo' },
                           { ok: conditions.allows_smoking,             label: 'Fumar' },
                           { ok: conditions.allows_pets,                label: 'Mascotas' },
+                          { ok: conditions.allows_live_music,          label: 'Música en vivo' },
+                          { ok: conditions.allows_dj,                  label: 'DJ' },
+                          { ok: conditions.allows_children,            label: 'Niños' },
+                          { ok: conditions.allows_parties,             label: 'Fiestas' },
+                          { ok: conditions.allows_corporate,           label: 'Eventos corporativos' },
                         ].map(item => (
                           <div key={item.label} className="flex items-center gap-3 p-4 rounded-xl"
                             style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>

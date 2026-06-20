@@ -231,7 +231,7 @@ export async function createBooking(payload: CreateBookingPayload) {
   let isQuote = false
   if (payload.pricingId) {
     const { data: pricingRow } = await supabase
-      .from('space_pricing').select('pricing_type, instant_booking').eq('id', payload.pricingId).single()
+      .from('space_pricing').select('pricing_type').eq('id', payload.pricingId).single()
     isQuote = pricingRow?.pricing_type === 'custom_quote'
   }
   const { data: spaceRow } = await supabase
