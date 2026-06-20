@@ -141,28 +141,35 @@ export default function AppSidebar({
         </div>
       </div>
 
-      {/* Perfil — badge (como el panel de admin): foto/inicial + nombre + rol */}
+      {/* Perfil — badge: foto/inicial + nombre COMPLETO + rol como chip */}
       <div className="px-4 pt-4 pb-2">
-        <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl"
+        <div className="flex items-start gap-2.5 px-3 py-3 rounded-xl"
           style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border)' }}>
           {showAvatar ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={avatarUrl} alt={userName ?? 'Avatar'} onError={() => setImgError(true)}
-              className="w-9 h-9 rounded-full object-cover shrink-0"
+              className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5"
               style={{ border: '1.5px solid var(--brand-border)' }} />
           ) : (
-            <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-sm font-bold"
+            <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-sm font-bold mt-0.5"
               style={{ background: 'var(--brand)', color: '#fff' }}>
               {userName?.charAt(0)?.toUpperCase() ?? avatarFallback}
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-bold leading-tight line-clamp-2 break-words" style={{ color: 'var(--text-primary)' }}>{userName ?? userNameFallback}</div>
-            <div className="text-[11px] font-semibold truncate mt-0.5" style={{ color: 'var(--brand)' }}>{roleLabel}</div>
+            {/* Nombre completo — nunca se recorta, envuelve las líneas que necesite */}
+            <div className="text-sm font-bold leading-snug break-words" style={{ color: 'var(--text-primary)' }}>
+              {userName ?? userNameFallback}
+            </div>
+            {/* Rol/negocio como chip */}
+            <span className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
+              style={{ background: 'var(--bg-card)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
+              {roleLabel}
+            </span>
           </div>
           {proActive && (
             <span title="Espot Pro" aria-label="Espot Pro activo"
-              className="shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-lg"
+              className="shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-lg mt-0.5"
               style={{ background: 'var(--pro)', color: '#fff' }}>
               <Crown size={14} />
             </span>
