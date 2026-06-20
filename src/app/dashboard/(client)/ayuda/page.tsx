@@ -79,12 +79,15 @@ export default function AyudaPage() {
             Nuestro equipo está disponible de lunes a sábado, 8am – 7pm.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
-            <a href="https://wa.me/18093000000?text=Hola%2C%20necesito%20ayuda%20con%20mi%20reserva%20en%20Espot"
-              target="_blank" rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-semibold text-sm transition-all"
-              style={{ background: '#fff', color: '#16A34A' }}>
-              <MessageCircle size={15} /> WhatsApp
-            </a>
+            {/* Solo se muestra si hay número de soporte configurado (sin placeholder). */}
+            {process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP && (
+              <a href={`https://wa.me/${process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP}?text=Hola%2C%20necesito%20ayuda%20con%20mi%20reserva%20en%20Espot`}
+                target="_blank" rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-semibold text-sm transition-all"
+                style={{ background: '#fff', color: '#16A34A' }}>
+                <MessageCircle size={15} /> WhatsApp
+              </a>
+            )}
             <a href="mailto:contacto@espot.do?subject=Ayuda%20desde%20el%20panel%20del%20cliente"
               className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-semibold text-sm transition-all"
               style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }}>
