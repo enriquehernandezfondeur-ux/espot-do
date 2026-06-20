@@ -152,6 +152,8 @@ export default function Sidebar({ userName, avatarUrl, isAdmin, isOwner = true, 
     if (item.href === '/dashboard/host/mensajes')     return { ...item, badge: unread }
     if (item.href === '/dashboard/host/agenda')       return { ...item, badge: reservasCount }
     if (item.href === '/dashboard/host/pro')          return { ...item, highlight: !isPro }
+    // Clientes (CRM) es función Pro: marca candado para el plan Normal (la página ya muestra el muro Pro)
+    if (item.href === '/dashboard/host/clientes')     return { ...item, pro: !isPro }
     return item
   })
   const mobileBottomNav = MOBILE_NAV.map(item => {

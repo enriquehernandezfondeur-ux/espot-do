@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { resolveHostId } from './_resolveHost'
+import { getMyPlan } from './subscription'
 import { hostNetOf } from '@/lib/pricing'
 
 // ============================================================
@@ -45,6 +46,9 @@ export async function getHostAnalytics(): Promise<HostAnalytics | null> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
   const { hostId } = await resolveHostId(supabase, user.id)
+  // Los clics de intención son métrica Pro (F6b): no se serializan a hosts
+  // gratuitos aunque la UI no los muestre (evita fuga por inspección de red).
+  const isPro = (await getMyPlan()) === 'pro'
 
   const { data: spaceRows } = await supabase
     .from('spaces').select('id, name').eq('host_id', hostId)
@@ -201,6 +205,20 @@ export async function getHostAnalytics(): Promise<HostAnalytics | null> {
   const eventTypes = Object.entries(typeMap)
     .sort((a, b) => b[1] - a[1]).slice(0, 5)
     .map(([name, value]) => ({ name, value }))
+
+  // Básico (gratis): vistas + rating. Avanzado (Pro): el resto.
+  // Para hosts gratuitos los campos Pro NO se serializan (evita fuga por red).
+  if (!isPro) {
+    return {
+      views: { total: viewsTotal, prevTotal: viewsPrev, weekly },
+      rating,
+      funnel: { views: 0, requests: 0, confirmed: 0 },
+      conversionRate: null, acceptanceRate: null, avgTicket: 0,
+      totals: { events: 0, espotNet: 0, directo: 0, combined: 0 },
+      monthly: [], byDay: [], byHour: [], topSpaces: [], eventTypes: [],
+      clicks: { total: 0, byType: {} },
+    }
+  }
 
   return {
     views: { total: viewsTotal, prevTotal: viewsPrev, weekly },

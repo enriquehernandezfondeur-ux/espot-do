@@ -17,6 +17,8 @@ export interface NavItem {
   badge?: number
   /** Resalta el ítem con un pill "Mejora" e icono de marca (p. ej. Espot Pro para gratuitos) */
   highlight?: boolean
+  /** Marca el ítem como función Pro bloqueada para el plan Normal (candado discreto) */
+  pro?: boolean
 }
 
 export interface NotificationItem {
@@ -175,9 +177,10 @@ export default function AppSidebar({
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-2 space-y-0.5">
-        {navItems.map(({ href, label, icon: Icon, badge, highlight }) => {
+        {navItems.map(({ href, label, icon: Icon, badge, highlight, pro }) => {
           const active = isActive(href)
           const promote = !!highlight && !active
+          const proLocked = !!pro && !active && !promote
           return (
             <Link key={href} href={href}
               onClick={() => setMobileOpen(false)}
@@ -197,6 +200,10 @@ export default function AppSidebar({
               {promote && (
                 <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
                   style={{ background: 'var(--pro)', color: '#fff' }}>Mejora</span>
+              )}
+              {proLocked && (
+                <Crown size={12} className="shrink-0" aria-label="Función Espot Pro"
+                  style={{ color: 'var(--pro)', opacity: 0.7 }} />
               )}
               {badge != null && badge > 0 && (
                 <span className="flex items-center justify-center text-xs font-bold rounded-full shrink-0"

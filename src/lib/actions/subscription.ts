@@ -148,6 +148,10 @@ export async function adminSetHostPlan(
     }
     const { error: e2 } = await svc.from('profiles').update({ plan_type: 'free' }).eq('id', hostId)
     if (e2) return { error: `No se pudo actualizar el plan: ${e2.message}` }
+    await svc.from('subscription_audit_log').insert({
+      host_id: hostId, subscription_id: existing?.id ?? null, admin_id: user.id,
+      action: 'cancelar_ahora', old_status: existing?.status ?? null, new_status: 'cancelled', note: null,
+    })
     return { ok: true }
   }
 
@@ -157,6 +161,7 @@ export async function adminSetHostPlan(
   const baseMs = action === 'extend' && vigenteFin > Date.now() ? vigenteFin : Date.now()
   const periodEndISO = new Date(baseMs + dur * DAY_MS).toISOString()
 
+  let subId: string | null = existing?.id ?? null
   if (existing) {
     const { error } = await svc.from('host_subscriptions').update({
       status: 'active',
@@ -168,7 +173,7 @@ export async function adminSetHostPlan(
     }).eq('id', existing.id)
     if (error) return { error: `No se pudo actualizar la suscripción: ${error.message}` }
   } else {
-    const { error } = await svc.from('host_subscriptions').insert({
+    const { data: inserted, error } = await svc.from('host_subscriptions').insert({
       host_id: hostId,
       status: 'active',
       payment_provider: 'manual',
@@ -177,11 +182,17 @@ export async function adminSetHostPlan(
       started_at: nowISO,
       current_period_start: nowISO,
       current_period_end: periodEndISO,
-    })
+    }).select('id').single()
     if (error) return { error: `No se pudo crear la suscripción: ${error.message}` }
+    subId = inserted?.id ?? null
   }
   // Caché de presentación; la fuente de verdad es host_subscriptions.
   const { error: ep } = await svc.from('profiles').update({ plan_type: 'pro' }).eq('id', hostId)
   if (ep) return { error: `Suscripción activada, pero no se pudo sincronizar el plan: ${ep.message}` }
+  await svc.from('subscription_audit_log').insert({
+    host_id: hostId, subscription_id: subId, admin_id: user.id,
+    action: action === 'extend' ? 'extender' : 'activar_pro',
+    old_status: existing?.status ?? null, new_status: 'active', note: null,
+  })
   return { ok: true }
 }
