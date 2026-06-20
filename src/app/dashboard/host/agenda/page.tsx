@@ -767,13 +767,6 @@ function EspotPanel({ booking, actionId, rejectReason, showRejectForm, onClose, 
             </button>
           </div>
         )}
-        {booking.status === 'quote_requested' && !showRejectForm && (
-          <Link href="/dashboard/host/cotizaciones"
-            className="block w-full text-center text-xs font-semibold py-2.5 rounded-xl"
-            style={{ background: 'rgba(53,196,147,0.08)', color: 'var(--brand)', border: '1px solid rgba(53,196,147,0.2)' }}>
-            Ver en Cotizaciones →
-          </Link>
-        )}
         {booking.status === 'accepted' && (
           <div className="rounded-xl px-3 py-2.5 text-xs text-center"
             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: '#6B7280' }}>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import {
   LayoutDashboard, Building2, CalendarDays, ClipboardList,
-  MessageSquareQuote, MessageCircle, BarChart3, Settings,
+  MessageCircle, BarChart3, Settings,
   LogOut, User, Shield, Star, Search, TrendingUp,
   CalendarCheck, Users, CalendarRange, UserPlus, Crown,
 } from 'lucide-react'
@@ -21,7 +21,6 @@ const BASE_NAV = [
   { href: '/dashboard/host/calendario',   label: 'Calendario',   icon: CalendarDays },
   { href: '/dashboard/host/clientes',     label: 'Clientes',     icon: Users },
   // Ventas
-  { href: '/dashboard/host/cotizaciones', label: 'Cotizaciones', icon: MessageSquareQuote },
   { href: '/dashboard/host/mensajes',     label: 'Mensajes',     icon: MessageCircle },
   { href: '/dashboard/host/resenas',      label: 'Reseñas',      icon: Star },
   // Dinero
@@ -49,7 +48,6 @@ export default function Sidebar({ userName, avatarUrl, isAdmin, isOwner = true, 
 }) {
   const [unread,           setUnread]           = useState(0)
   const [reservasCount,    setReservasCount]    = useState(0)
-  const [cotizCount,       setCotizCount]       = useState(0)
   const [isPro,            setIsPro]            = useState(false)
   const pathname = usePathname()
 
@@ -94,9 +92,6 @@ export default function Sidebar({ userName, avatarUrl, isAdmin, isOwner = true, 
           supabase.from('bookings').select('id', { count: 'exact', head: true })
             .in('space_id', spaceIds).eq('status', 'pending').gte('event_date', todayInRD())
             .then(({ count }) => setReservasCount(count ?? 0))
-          supabase.from('bookings').select('id', { count: 'exact', head: true })
-            .in('space_id', spaceIds).eq('status', 'quote_requested').gte('event_date', todayInRD())
-            .then(({ count }) => setCotizCount(count ?? 0))
         }
       })
       return
@@ -107,7 +102,6 @@ export default function Sidebar({ userName, avatarUrl, isAdmin, isOwner = true, 
       if (!user) return
       setUnread(await fetchUnread(supabase, user.id))
       if (pathname?.includes('/agenda'))       setReservasCount(0)
-      if (pathname?.includes('/cotizaciones')) setCotizCount(0)
     })
   }, [pathname])
 
@@ -127,11 +121,6 @@ export default function Sidebar({ userName, avatarUrl, isAdmin, isOwner = true, 
         supabase.from('bookings').select('id', { count: 'exact', head: true })
           .in('space_id', spaceIds).eq('status', 'pending').gte('event_date', todayInRD())
           .then(({ count }) => setReservasCount(count ?? 0))
-
-        // Cotizaciones pendientes
-        supabase.from('bookings').select('id', { count: 'exact', head: true })
-          .in('space_id', spaceIds).eq('status', 'quote_requested').gte('event_date', todayInRD())
-          .then(({ count }) => setCotizCount(count ?? 0))
       }
 
       // ── Realtime: mensajes + bookings ────────────────────
@@ -144,12 +133,9 @@ export default function Sidebar({ userName, avatarUrl, isAdmin, isOwner = true, 
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bookings' },
           async () => {
             if (spaceIds.length === 0) return
-            const [{ count: r }, { count: q }] = await Promise.all([
-              supabase.from('bookings').select('id', { count: 'exact', head: true }).in('space_id', spaceIds).eq('status', 'pending').gte('event_date', todayInRD()),
-              supabase.from('bookings').select('id', { count: 'exact', head: true }).in('space_id', spaceIds).eq('status', 'quote_requested').gte('event_date', todayInRD()),
-            ])
+            const { count: r } = await supabase.from('bookings').select('id', { count: 'exact', head: true })
+              .in('space_id', spaceIds).eq('status', 'pending').gte('event_date', todayInRD())
             setReservasCount(r ?? 0)
-            setCotizCount(q ?? 0)
           })
         .subscribe()
 
@@ -165,7 +151,6 @@ export default function Sidebar({ userName, avatarUrl, isAdmin, isOwner = true, 
   const navItems = filteredNav.map(item => {
     if (item.href === '/dashboard/host/mensajes')     return { ...item, badge: unread }
     if (item.href === '/dashboard/host/agenda')       return { ...item, badge: reservasCount }
-    if (item.href === '/dashboard/host/cotizaciones') return { ...item, badge: cotizCount }
     if (item.href === '/dashboard/host/pro')          return { ...item, highlight: !isPro }
     return item
   })
@@ -197,11 +182,10 @@ export default function Sidebar({ userName, avatarUrl, isAdmin, isOwner = true, 
       drawerShadow="4px 0 32px rgba(0,0,0,0.12)"
       isActiveVariant="host"
       navHoverHandlers={true}
-      totalBadge={unread + reservasCount + cotizCount}
+      totalBadge={unread + reservasCount}
       notifications={[
         { label: 'Mensajes sin leer',     count: unread,        href: '/dashboard/host/mensajes' },
         { label: 'Reservas por aceptar',  count: reservasCount, href: '/dashboard/host/agenda' },
-        { label: 'Cotizaciones nuevas',   count: cotizCount,    href: '/dashboard/host/cotizaciones' },
       ]}
     />
   )
