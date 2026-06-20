@@ -12,7 +12,7 @@ import {
   Clock, CheckCircle, X, Music, Ban,
   ArrowLeft, Share2, CreditCard, Lock, FileText, ChevronDown, Play, Images, MessageCircle,
   Car, Wifi, Wind, UtensilsCrossed, Volume2, Monitor, Music2, Trees, Waves, Wine,
-  Sun, Zap, ShowerHead, Building2, Star, Package, Sparkles, Camera, CalendarDays,
+  Sun, Zap, ShowerHead, Building2, Star, Package, Sparkles, Camera, CalendarDays, Crown,
 } from 'lucide-react'
 import { cn, formatCurrency, formatTime } from '@/lib/utils'
 import { addonIcon } from '@/lib/icon-map'
@@ -986,6 +986,12 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                             <span className="flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full shrink-0"
                               style={{ background: 'rgba(34,197,94,0.12)', color: '#16A34A', border: '1px solid rgba(34,197,94,0.25)' }}>
                               <CheckCircle size={10} /> Verificado
+                            </span>
+                          )}
+                          {(host as any).plan_type === 'pro' && (
+                            <span className="flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full shrink-0"
+                              style={{ background: 'var(--pro-dim)', color: 'var(--pro-strong)', border: '1px solid var(--pro-border)' }}>
+                              <Crown size={10} style={{ color: 'var(--pro)' }} /> Espot Pro
                             </span>
                           )}
                         </div>

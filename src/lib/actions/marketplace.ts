@@ -138,7 +138,8 @@ export async function getPublishedSpaces(filters?: {
     .select(`
       id, name, slug, description, category,
       capacity_min, capacity_max, address, city, sector,
-      is_verified, instant_booking, primary_activity, secondary_activities,
+      is_verified, is_featured, instant_booking, primary_activity, secondary_activities,
+      profiles!host_id(plan_type),
       space_images(url, is_cover, position),
       space_pricing(pricing_type, hourly_price, minimum_consumption, fixed_price, package_name, weekend_multiplier, min_advance_amount, min_hours, is_active),
       space_conditions(
@@ -177,6 +178,7 @@ export async function getPublishedSpaces(filters?: {
   const page     = filters?.page ?? 0
   const pageSize = filters?.pageSize ?? 100
   const { data: spaces } = await query
+    .order('is_featured', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
     .range(page * pageSize, (page + 1) * pageSize - 1)
 
@@ -309,7 +311,7 @@ export const getSpaceBySlug = cache(async function getSpaceBySlug(slug: string) 
       space_conditions(*),
       space_payment_terms(*),
       space_time_blocks(*),
-      profiles!host_id(id, full_name, avatar_url, id_verified, created_at, whatsapp)
+      profiles!host_id(id, full_name, avatar_url, id_verified, created_at, whatsapp, plan_type)
     `)
     .eq('slug', slug)
     .eq('is_published', true)

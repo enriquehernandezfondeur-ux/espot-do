@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MapPin, Users, ArrowRight, Check, X, ChevronLeft, ChevronRight, Zap, Calendar, MessageCircle } from 'lucide-react'
+import { MapPin, Users, ArrowRight, Check, X, ChevronLeft, ChevronRight, Zap, Calendar, MessageCircle, Star, Crown } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 import { PRICING_TYPES } from './constants'
 import { getCategoryLabel, getCategoryIcon } from '@/lib/categories'
@@ -236,6 +236,14 @@ export function SpaceCard({
               <Zap size={9} style={{ fill: '#fff' }} /> Instantánea
             </span>
           ) : null}
+
+          {/* Badge top-right: destacado por el equipo (is_featured) */}
+          {space.is_featured && (
+            <span className="absolute top-3 right-3 z-20 flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full"
+              style={{ background: 'rgba(3,49,60,0.9)', color: '#fff', backdropFilter: 'blur(8px)' }}>
+              <Star size={9} style={{ fill: '#F5C451', color: '#F5C451' }} /> Destacado
+            </span>
+          )}
         </div>
 
         {/* ── Info ── */}
@@ -252,6 +260,13 @@ export function SpaceCard({
               <span className="flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center"
                 style={{ background: '#35C493' }}>
                 <Check size={9} style={{ color: '#fff', strokeWidth: 3 }} />
+              </span>
+            )}
+            {space.profiles?.plan_type === 'pro' && (
+              <span className="flex-shrink-0 inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                title="Anfitrión Espot Pro"
+                style={{ background: 'var(--pro-dim)', color: 'var(--pro-strong)', border: '1px solid var(--pro-border)' }}>
+                <Crown size={9} style={{ color: 'var(--pro)' }} /> Pro
               </span>
             )}
           </div>
