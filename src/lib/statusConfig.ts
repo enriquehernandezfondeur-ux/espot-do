@@ -53,6 +53,28 @@ export function payoutStyle(s: string | null | undefined): StatusStyle {
   return PAYOUT_STATUS[normalizePayoutStatus(s)]
 }
 
+// ── host_subscriptions (Espot Pro) ──────────────────────────
+// Estados internos de la suscripción → etiqueta humana (nunca mostrar el raw).
+// 'Normal' (sin sub) y 'Próximo a vencer'/'Vencido por fecha' son DERIVADOS por
+// la vista admin (no se almacenan); aquí van los estados base persistidos.
+const AMBER = { color: '#F59E0B', bg: 'rgba(245,158,11,0.10)' }
+export type SubscriptionStatus = 'trialing' | 'active' | 'pending_payment' | 'past_due' | 'cancelled' | 'expired' | 'suspended'
+export const SUBSCRIPTION_STATUS: Record<SubscriptionStatus, StatusStyle> = {
+  trialing:        { label: 'Prueba gratuita',  ...BLUE   },
+  active:          { label: 'Pro activo',        ...GREEN  },
+  pending_payment: { label: 'Pendiente de pago', ...ORANGE },
+  past_due:        { label: 'Vencido',           ...RED    },
+  expired:         { label: 'Vencido',           ...RED    },
+  cancelled:       { label: 'Cancelado',         ...GRAY   },
+  suspended:       { label: 'Suspendido',        ...RED    },
+}
+export function subscriptionStyle(s: string | null | undefined): StatusStyle {
+  if (!s) return { label: 'Normal', ...GRAY }
+  return SUBSCRIPTION_STATUS[s as SubscriptionStatus] ?? { label: 'Normal', ...GRAY }
+}
+/** Estilo "Próximo a vencer" (derivado por días restantes). */
+export const SUBSCRIPTION_EXPIRING: StatusStyle = { label: 'Próximo a vencer', ...AMBER }
+
 // ── external_events (Espot Directo / reservas externas) ──────
 export type ExternalEventStatus = 'pendiente' | 'confirmado' | 'en_curso' | 'completado' | 'cancelado'
 export const EXTERNAL_EVENT_STATUS: Record<ExternalEventStatus, StatusStyle> = {

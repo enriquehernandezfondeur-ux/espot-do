@@ -1,6 +1,7 @@
 export type PlanType = 'free' | 'pro'
 export type SubscriptionStatus =
-  | 'active' | 'pending_payment' | 'past_due' | 'cancelled' | 'expired'
+  | 'trialing' | 'active' | 'pending_payment' | 'past_due'
+  | 'cancelled' | 'expired' | 'suspended'
 
 export interface SubscriptionLike {
   status: SubscriptionStatus | string
@@ -10,12 +11,19 @@ export interface SubscriptionLike {
 export const PRO_PRICE_DOP = 499
 
 /**
- * Plan efectivo a partir de la suscripción. Pro sólo si está 'active' y el
- * periodo no venció. Cualquier otro estado (o sin suscripción) => 'free'.
+ * Estados que desbloquean funciones Pro: 'active' (pagado/manual) y 'trialing'
+ * (prueba gratuita). Ambos respetan la expiración por current_period_end.
+ * Fuente única (debe coincidir con is_pro_host en SQL).
+ */
+const PRO_STATUSES = new Set(['active', 'trialing'])
+
+/**
+ * Plan efectivo a partir de la suscripción. Pro si está 'active' o 'trialing' y
+ * el periodo no venció. Cualquier otro estado (o sin suscripción) => 'free'.
  */
 export function resolvePlan(sub: SubscriptionLike | null | undefined, nowISO: string): PlanType {
   if (!sub) return 'free'
-  if (sub.status !== 'active') return 'free'
+  if (!PRO_STATUSES.has(sub.status)) return 'free'
   if (sub.current_period_end) {
     const end = new Date(sub.current_period_end).getTime()
     const now = new Date(nowISO).getTime()
@@ -27,17 +35,20 @@ export function resolvePlan(sub: SubscriptionLike | null | undefined, nowISO: st
 export interface SubscriptionSummary {
   plan: PlanType
   isPro: boolean
+  isTrial: boolean
   statusLabel: string
   nextChargeISO: string | null
   daysLeft: number | null
 }
 
 const STATUS_LABELS: Record<string, string> = {
+  trialing:        'Prueba gratuita',
   active:          'Espot Pro activo',
   pending_payment: 'Pago pendiente',
   past_due:        'Pago vencido',
   cancelled:       'Cancelado',
   expired:         'Expirado',
+  suspended:       'Suspendido',
 }
 
 /** Resumen presentacional de la suscripción para el panel del host. */
@@ -58,6 +69,7 @@ export function subscriptionSummary(
   return {
     plan,
     isPro,
+    isTrial: isPro && sub?.status === 'trialing',
     statusLabel: sub ? (STATUS_LABELS[sub.status] ?? 'Plan Normal (gratis)') : 'Plan Normal (gratis)',
     nextChargeISO: isPro ? (sub?.current_period_end ?? null) : null,
     daysLeft,

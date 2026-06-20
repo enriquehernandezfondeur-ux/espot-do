@@ -19,10 +19,17 @@ describe('resolvePlan', () => {
   it('pending_payment => free', () => {
     expect(resolvePlan({ status: 'pending_payment', current_period_end: '2026-07-19T12:00:00.000Z' }, NOW)).toBe('free')
   })
-  it('cancelled/expired/past_due => free', () => {
+  it('cancelled/expired/past_due/suspended => free', () => {
     expect(resolvePlan({ status: 'cancelled', current_period_end: null }, NOW)).toBe('free')
     expect(resolvePlan({ status: 'expired', current_period_end: null }, NOW)).toBe('free')
     expect(resolvePlan({ status: 'past_due', current_period_end: '2026-07-19T12:00:00.000Z' }, NOW)).toBe('free')
+    expect(resolvePlan({ status: 'suspended', current_period_end: '2026-07-19T12:00:00.000Z' }, NOW)).toBe('free')
+  })
+  it('trialing vigente => pro (la prueba desbloquea)', () => {
+    expect(resolvePlan({ status: 'trialing', current_period_end: '2026-07-19T12:00:00.000Z' }, NOW)).toBe('pro')
+  })
+  it('trialing vencido => free', () => {
+    expect(resolvePlan({ status: 'trialing', current_period_end: '2026-06-01T12:00:00.000Z' }, NOW)).toBe('free')
   })
 })
 
@@ -58,5 +65,12 @@ describe('subscriptionSummary', () => {
     expect(s.nextChargeISO).toBeNull()
     expect(s.daysLeft).toBeNull()
     expect(s.statusLabel).toBe('Cancelado')
+  })
+  it('prueba (trialing) vigente => pro, isTrial true, días restantes', () => {
+    const s = subscriptionSummary({ status: 'trialing', current_period_end: '2026-07-19T12:00:00.000Z' }, NOW)
+    expect(s.isPro).toBe(true)
+    expect(s.isTrial).toBe(true)
+    expect(s.statusLabel).toBe('Prueba gratuita')
+    expect(s.daysLeft).toBe(30)
   })
 })

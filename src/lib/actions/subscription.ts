@@ -5,7 +5,9 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { resolveHostId } from './_resolveHost'
 import { resolvePlan, subscriptionSummary, type PlanType, type SubscriptionSummary } from '@/lib/plans'
 
-const LIVE_STATUSES = ['active', 'pending_payment', 'past_due'] as const
+// Estados "vivos": una sola suscripción por host puede estar en uno de estos
+// (refleja el índice único parcial). Incluye prueba y suspensión.
+const LIVE_STATUSES = ['trialing', 'active', 'pending_payment', 'past_due', 'suspended'] as const
 const DAY_MS = 86_400_000
 const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
 
@@ -21,7 +23,7 @@ export async function getMyPlan(): Promise<PlanType> {
     .from('host_subscriptions')
     .select('status, current_period_end')
     .eq('host_id', hostId)
-    .in('status', ['active', 'pending_payment', 'past_due'])
+    .in('status', LIVE_STATUSES as unknown as string[])
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()

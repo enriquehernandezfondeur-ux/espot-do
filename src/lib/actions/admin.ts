@@ -7,6 +7,7 @@ import { sendEmail } from '@/lib/email/send'
 import { emailBase, infoBox } from '@/lib/email/templates'
 import { formatCurrency, formatDate, escapeHtml } from '@/lib/utils'
 import { platformFeeOf, hostNetOf } from '@/lib/pricing'
+import { resolvePlan } from '@/lib/plans'
 
 const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
 
@@ -584,16 +585,16 @@ export async function getAdminHostDetail(hostId: string) {
     supabase.from('host_subscriptions')
       .select('status, current_period_end, payment_provider, started_at, cancelled_at')
       .eq('host_id', hostId)
-      .in('status', ['active', 'pending_payment', 'past_due'])
+      .in('status', ['trialing', 'active', 'pending_payment', 'past_due', 'suspended'])
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle(),
   ])
 
   // Fuente de verdad del plan: la suscripción viva (no el caché profiles.plan_type).
+  // resolvePlan trata 'active' y 'trialing' como Pro (respeta expiración).
   const sub = subRes.data ?? null
-  const isPro = !!sub && sub.status === 'active'
-    && (!sub.current_period_end || new Date(sub.current_period_end).getTime() > Date.now())
+  const isPro = resolvePlan(sub, new Date().toISOString()) === 'pro'
 
   return {
     profile:         profileRes.data,
