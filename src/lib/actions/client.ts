@@ -253,6 +253,9 @@ export async function getClientStats() {
     total:      bk.length,
     // Solo bookings aceptados que AÚN no tienen pago registrado
     pendingPayment: bk.filter(b => b.status === 'accepted' && !['advance','partial','paid'].includes((b as any).payment_status ?? '')).length,
+    // "Por pagar" como MONTO (fuente única: suma de cuotas pending/overdue de reservas activas).
+    // Misma definición que la página de Pagos, para que no diverjan.
+    pendingAmount: Math.round((installments ?? []).reduce((s, i) => s + Number(i.amount), 0)),
     // Lista de bookings pendientes de pago (para mostrar cuáles son)
     pendingPaymentBookings: bk.filter(b => b.status === 'accepted' && !['advance','partial','paid'].includes((b as any).payment_status ?? '')).slice(0, 3),
     confirmed:  bk.filter(b => b.status === 'confirmed').length,

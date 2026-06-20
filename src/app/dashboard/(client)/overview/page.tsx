@@ -387,8 +387,8 @@ export default function ClientDashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
         {[
           { label: 'Total reservas', value: stats?.total ?? 0,            icon: CalendarDays, color: 'var(--brand)',  featured: true },
-          { label: 'Por pagar',      value: stats?.pendingPayment ?? 0,   icon: Clock,        color: '#2563EB',
-            urgent: (stats?.pendingPayment ?? 0) > 0 },
+          { label: 'Por pagar',      value: formatCurrency(stats?.pendingAmount ?? 0), icon: Clock, color: '#2563EB',
+            urgent: (stats?.pendingAmount ?? 0) > 0 },
           { label: 'Confirmadas',    value: stats?.confirmed ?? 0,        icon: CheckCircle,  color: '#16A34A' },
         ].map(({ label, value, icon: Icon, color, urgent, featured }: any) => (
           <div key={label} className="rounded-2xl p-4 md:p-5 transition-all hover:-translate-y-0.5"
