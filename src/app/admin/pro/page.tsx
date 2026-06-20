@@ -10,7 +10,7 @@ import { LoadError } from '@/components/LoadError'
 import Pagination from '@/components/ui/Pagination'
 import {
   Crown, Users, Gift, CheckCircle, Clock, AlertTriangle, XCircle,
-  Search, Loader2, Building2, ChevronRight, Mail, Phone, Copy, Check, Download,
+  Search, Loader2, Building2, ChevronRight, Mail, Phone, Copy, Check, Download, DollarSign,
 } from 'lucide-react'
 
 const PAGE_SIZE = 25
@@ -166,7 +166,7 @@ export default function AdminProPage() {
       )}
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3 mb-3">
         <StatCard label="Propietarios"   value={s?.total ?? 0}          icon={Users}        color="var(--text-secondary)" />
         <StatCard label="Normal"          value={s?.normal ?? 0}         icon={Users}        color="#6B7280" />
         <StatCard label="Pruebas activas" value={s?.trialsActive ?? 0}   icon={Gift}         color="#2563EB" />
@@ -174,6 +174,19 @@ export default function AdminProPage() {
         <StatCard label="Pendientes pago" value={s?.pendingPayment ?? 0} icon={Clock}        color="#D97706" />
         <StatCard label="Vencen ≤7d"      value={s?.expiringSoon ?? 0}   icon={AlertTriangle} color="#F59E0B" />
         <StatCard label="Vencidos"        value={s?.expired ?? 0}        icon={XCircle}      color="#DC2626" />
+      </div>
+
+      {/* Ingresos — solo Azul pagado cuenta */}
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-6 px-4 py-3 rounded-2xl"
+        style={{ background: 'var(--pro-dim)', border: '1px solid var(--pro-border)' }}>
+        <div className="flex items-center gap-2">
+          <DollarSign size={16} style={{ color: 'var(--pro-strong)' }} />
+          <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Ingreso mensual estimado</span>
+          <span className="text-lg font-bold tabular-nums" style={{ color: 'var(--pro-strong)' }}>RD${(s?.mrr ?? 0).toLocaleString('es-DO')}</span>
+        </div>
+        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+          {s?.payingPro ?? 0} pagando (Azul) · {s?.manualPro ?? 0} manual gratis · {s?.trialsActive ?? 0} en prueba · {s?.pendingPayment ?? 0} pendientes — solo los pagos por Azul cuentan como ingreso.
+        </span>
       </div>
 
       {/* Búsqueda + acciones masivas */}

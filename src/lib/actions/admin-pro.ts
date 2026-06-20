@@ -64,6 +64,10 @@ export interface ProStats {
   expired: number
   cancelled: number
   suspended: number
+  // Ingresos — solo Azul pagado cuenta; manual/prueba/pendiente NO.
+  mrr: number            // ingreso mensual estimado (Pro activos pagados por Azul)
+  payingPro: number      // Pro activos pagados (Azul)
+  manualPro: number      // Pro activos por activación manual gratuita
 }
 
 export interface ProOwnersResult {
@@ -140,6 +144,9 @@ export async function getProOwners(): Promise<ProOwnersResult | null> {
     }
   })
 
+  const PRICE = 499
+  const payingPro = owners.filter(o => o.plan === 'pro' && o.sub?.status === 'active' && o.sub?.activation_type === 'azul').length
+  const manualPro = owners.filter(o => o.plan === 'pro' && o.sub?.status === 'active' && o.sub?.activation_type !== 'azul').length
   const stats: ProStats = {
     total: owners.length,
     normal: owners.filter(o => o.plan === 'free').length,
@@ -150,6 +157,9 @@ export async function getProOwners(): Promise<ProOwnersResult | null> {
     expired: owners.filter(o => o.sub && o.plan === 'free' && (o.sub.status === 'past_due' || o.sub.status === 'expired')).length,
     cancelled: owners.filter(o => o.sub?.status === 'cancelled').length,
     suspended: owners.filter(o => o.sub?.status === 'suspended').length,
+    mrr: payingPro * PRICE,
+    payingPro,
+    manualPro,
   }
 
   return { owners, stats }
