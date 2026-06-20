@@ -14,6 +14,8 @@ export interface CreateClientPayload {
   notes?: string
   tags?: string[]
   source?: ClientSource
+  next_action?: string | null
+  next_action_date?: string | null
 }
 
 export interface UpdateClientPayload extends Partial<CreateClientPayload> {
@@ -76,6 +78,26 @@ export async function getClientWithHistory(clientId: string) {
     events: events ?? [],
     bookings: bookings ?? [],
   }
+}
+
+/**
+ * Cola de seguimientos: clientes del CRM con una próxima acción agendada,
+ * ordenados por fecha (los vencidos primero). Alimenta el widget del Inicio.
+ */
+export async function getUpcomingFollowups(): Promise<HostClient[]> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+  const { hostId, db, canManageClients } = await resolveHostAccess(supabase, user.id)
+  if (!canManageClients) return []
+  const { data } = await db
+    .from('host_clients')
+    .select('id, full_name, phone, email, next_action, next_action_date')
+    .eq('host_id', hostId)
+    .not('next_action_date', 'is', null)
+    .order('next_action_date', { ascending: true })
+    .limit(12)
+  return (data ?? []) as HostClient[]
 }
 
 // ── Vista unificada: host_clients + guests de Espot sin duplicar ──
@@ -240,6 +262,8 @@ export async function updateClient(payload: UpdateClientPayload) {
   if (fields.notes     !== undefined) update.notes     = fields.notes?.trim() || null
   if (fields.tags      !== undefined) update.tags      = fields.tags
   if (fields.source    !== undefined) update.source    = fields.source
+  if (fields.next_action      !== undefined) update.next_action      = fields.next_action?.trim() || null
+  if (fields.next_action_date !== undefined) update.next_action_date = fields.next_action_date || null
 
   const { data, error } = await db
     .from('host_clients')

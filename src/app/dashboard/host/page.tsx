@@ -13,7 +13,8 @@ import { getHostStats, getHostBookings, acceptBooking, rejectBooking } from '@/l
 import { getMySubscription } from '@/lib/actions/subscription'
 import { PlanBadge } from '@/components/PlanBadge'
 import { getExternalEvents } from '@/lib/actions/external-events'
-import type { ExternalEvent } from '@/types'
+import { getUpcomingFollowups } from '@/lib/actions/clients'
+import type { ExternalEvent, HostClient } from '@/types'
 import { StatusBadge } from '@/components/StatusBadge'
 import { externalEventStyle } from '@/lib/statusConfig'
 export { StatusBadge }
@@ -44,14 +45,16 @@ export default function DashboardPage() {
   const [isPro,          setIsPro]          = useState(false)
   const [isTrial,        setIsTrial]        = useState(false)
   const [daysLeft,       setDaysLeft]       = useState<number | null>(null)
+  const [followups,      setFollowups]      = useState<HostClient[]>([])
 
   useEffect(() => {
     Promise.all([
       getHostStats(),
       getHostBookings(),
       getExternalEvents().catch(() => [] as ExternalEvent[]),
-    ]).then(([s, b, ev]) => {
-      setStats(s); setBookings(b); setExternalEvents(ev); setLoading(false)
+      getUpcomingFollowups().catch(() => [] as HostClient[]),
+    ]).then(([s, b, ev, fu]) => {
+      setStats(s); setBookings(b); setExternalEvents(ev); setFollowups(fu); setLoading(false)
     }).catch(() => setLoading(false))
   }, [])
   useEffect(() => {
@@ -361,6 +364,43 @@ export default function DashboardPage() {
         </Link>
 
       </div>
+
+      {/* ── Seguimientos pendientes (próxima acción del CRM) ── */}
+      {followups.length > 0 && (
+        <div className="rounded-2xl overflow-hidden mb-5" style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+          <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+            <h2 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>Seguimientos pendientes</h2>
+            <Link href="/dashboard/host/clientes" className="text-xs font-medium" style={{ color: 'var(--brand)' }}>Ver clientes</Link>
+          </div>
+          <div>
+            {followups.map((c, i) => {
+              const overdue = !!c.next_action_date && c.next_action_date < todayInRD()
+              const today = c.next_action_date === todayInRD()
+              return (
+                <div key={c.id} className="flex items-center gap-3 px-4 py-3"
+                  style={{ borderTop: i > 0 ? '1px solid var(--border-subtle)' : 'none' }}>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{c.full_name}</p>
+                    <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{c.next_action}</p>
+                  </div>
+                  <span className="text-xs font-semibold shrink-0"
+                    style={{ color: overdue ? '#DC2626' : today ? 'var(--brand)' : 'var(--text-muted)' }}>
+                    {overdue ? 'Vencido' : today ? 'Hoy' : c.next_action_date}
+                  </span>
+                  {c.phone && (
+                    <a href={`https://wa.me/${c.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer"
+                      onClick={e => e.stopPropagation()}
+                      className="shrink-0 text-xs font-semibold px-2.5 py-1.5 rounded-lg"
+                      style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
+                      WhatsApp
+                    </a>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* ── Próximos eventos (lista unificada con grupos) ── */}
       <div className="rounded-2xl overflow-hidden mb-5"

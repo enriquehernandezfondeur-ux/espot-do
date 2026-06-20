@@ -220,6 +220,8 @@ export interface HostClient {
   notes?: string
   tags: string[]
   source: ClientSource
+  next_action?: string | null
+  next_action_date?: string | null
   created_at: string
   updated_at: string
   // joins opcionales

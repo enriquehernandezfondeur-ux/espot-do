@@ -78,6 +78,7 @@ export default function ClientesPage() {
   const [form, setForm] = useState({
     full_name: '', email: '', phone: '', company: '', notes: '',
     tags: '', source: 'manual' as ClientSource,
+    next_action: '', next_action_date: '',
   })
 
   function showToast(msg: string, ok: boolean) {
@@ -105,7 +106,7 @@ export default function ClientesPage() {
 
   function openCreateForm() {
     setEditing(null)
-    setForm({ full_name: '', email: '', phone: '', company: '', notes: '', tags: '', source: 'manual' })
+    setForm({ full_name: '', email: '', phone: '', company: '', notes: '', tags: '', source: 'manual', next_action: '', next_action_date: '' })
     setShowForm(true)
   }
 
@@ -119,6 +120,8 @@ export default function ClientesPage() {
       notes:     c.notes ?? '',
       tags:      c.tags?.join(', ') ?? '',
       source:    c.source,
+      next_action:      c.next_action ?? '',
+      next_action_date: c.next_action_date ?? '',
     })
     setShowForm(true)
   }
@@ -560,6 +563,18 @@ export default function ClientesPage() {
                   rows={2}
                   className="w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none resize-none"
                   style={{ border: '1px solid var(--border-subtle)', fontSize: 16 }} />
+              </div>
+
+              {/* Próxima acción / seguimiento (CRM) */}
+              <div className="rounded-xl p-3" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                <label className="text-xs font-semibold text-gray-500 mb-1 block">Próxima acción <span className="font-normal">(seguimiento)</span></label>
+                <input value={form.next_action} onChange={e => setForm(f => ({ ...f, next_action: e.target.value }))}
+                  placeholder="Ej.: llamar para cotización, enviar contrato…"
+                  className="w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none mb-2"
+                  style={{ border: '1px solid var(--border-subtle)', fontSize: 16, background: '#fff' }} />
+                <input type="date" value={form.next_action_date} onChange={e => setForm(f => ({ ...f, next_action_date: e.target.value }))}
+                  className="w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none"
+                  style={{ border: '1px solid var(--border-subtle)', fontSize: 16, background: '#fff' }} />
               </div>
 
               <div className="flex gap-3 pt-1">
