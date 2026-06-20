@@ -798,6 +798,8 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                       ...(pricing?.pricing_type === 'minimum_consumption' && pricing.session_hours ? [{ label: 'Duración de sesión', value: `${pricing.session_hours} horas`, icon: Clock }] : []),
                       ...(pricing?.weekend_multiplier && pricing.weekend_multiplier > 1 ? [{ label: 'Fines de semana', value: `+${Math.round((pricing.weekend_multiplier - 1) * 100)}% (vie–dom)`, icon: CalendarDays }] : []),
                       ...(space.instant_booking ? [{ label: 'Reserva', value: 'Instantánea, sin esperar aprobación', icon: Zap }] : []),
+                      ...(conditions?.cleaning_fee ? [{ label: 'Limpieza', value: `${formatCurrency(conditions.cleaning_fee)} (se coordina aparte)`, icon: Sparkles }] : conditions?.cleaning_included ? [{ label: 'Limpieza', value: 'Incluida', icon: Sparkles }] : []),
+                      ...(conditions?.overtime_price ? [{ label: 'Hora extra', value: `${formatCurrency(conditions.overtime_price)} (se coordina aparte)`, icon: Clock }] : []),
                     ].map(({ label, value, icon }) => (
                       <div key={label} className="flex items-center gap-3 p-4 rounded-xl"
                         style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
