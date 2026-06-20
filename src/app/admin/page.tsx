@@ -9,6 +9,7 @@ import {
 import Link from 'next/link'
 import { STATUS_SHORT, STATUS_COLORS } from '@/lib/bookingConfig'
 import { hostNetOf } from '@/lib/pricing'
+import { StatCard } from '@/components/ui/StatCard'
 
 // Config de estado unificado desde bookingConfig (consistente con reservas/usuarios)
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string }> =
@@ -112,22 +113,9 @@ export default async function AdminDashboard() {
 
       {/* Totales (orientación rápida — lo pendiente vive en el banner, la comisión en la card de la derecha) */}
       <div className="grid grid-cols-3 gap-3 md:gap-4">
-        {[
-          { label: 'Espacios', value: stats?.totalSpaces ?? 0,   icon: Building2,    color: '#7C3AED', href: '/admin/espacios' },
-          { label: 'Reservas', value: stats?.totalBookings ?? 0, icon: CalendarDays, color: '#2563EB', href: '/admin/reservas' },
-          { label: 'Usuarios', value: stats?.totalUsers ?? 0,    icon: Users,        color: '#16A34A', href: '/admin/usuarios' },
-        ].map(({ label, value, icon: Icon, color, href }) => (
-          <Link key={label} href={href}
-            className="group rounded-2xl p-4 transition-all hover:-translate-y-1"
-            style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-3"
-              style={{ background: `color-mix(in srgb, ${color} 8%, transparent)` }}>
-              <Icon size={15} style={{ color }} />
-            </div>
-            <div className="text-xl font-bold mb-0.5" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>{value}</div>
-            <div className="text-xs font-semibold" style={{ color: '#374151' }}>{label}</div>
-          </Link>
-        ))}
+        <StatCard label="Espacios" value={stats?.totalSpaces ?? 0}   icon={Building2}    color="#7C3AED" href="/admin/espacios" />
+        <StatCard label="Reservas" value={stats?.totalBookings ?? 0} icon={CalendarDays} color="#2563EB" href="/admin/reservas" />
+        <StatCard label="Usuarios" value={stats?.totalUsers ?? 0}    icon={Users}        color="#16A34A" href="/admin/usuarios" />
       </div>
 
       {/* Main content — 1 col mobile, 2 cols xl */}
