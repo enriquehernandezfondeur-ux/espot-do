@@ -5,12 +5,14 @@ import { Save, Camera, User, Shield, Loader2 } from 'lucide-react'
 import { getClientProfile, updateClientProfile } from '@/lib/actions/client'
 import NotificationSettings from '@/components/dashboard/NotificationSettings'
 import { createClient } from '@/lib/supabase/client'
+import { LoadError } from '@/components/LoadError'
 import { useRouter } from 'next/navigation'
 
 export default function PerfilPage() {
   const router = useRouter()
   const [profile,   setProfile]   = useState<any>(null)
   const [loading,   setLoading]   = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [saving,    setSaving]    = useState(false)
   const [saved,     setSaved]     = useState(false)
   const [error,     setError]     = useState('')
@@ -23,8 +25,9 @@ export default function PerfilPage() {
 
   const fileRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    async function load() {
+  async function load() {
+    setLoading(true); setLoadError(false)
+    try {
       const p = await getClientProfile()
       setProfile(p)
       setFullName(p?.full_name ?? '')
@@ -44,8 +47,11 @@ export default function PerfilPage() {
         }
       }
       setLoading(false)
+    } catch {
+      setLoadError(true); setLoading(false)
     }
-    load()
+  }
+  useEffect(() => { load()
   }, [])
 
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -99,6 +105,14 @@ export default function PerfilPage() {
   if (loading) return (
     <div className="flex items-center justify-center h-dvh">
       <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand)' }} />
+    </div>
+  )
+  if (loadError) return (
+    <div className="p-4 md:p-6 max-w-2xl mx-auto">
+      <h1 className="text-xl md:text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Mi perfil</h1>
+      <div className="rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+        <LoadError message="No pudimos cargar tu perfil." onRetry={load} />
+      </div>
     </div>
   )
 

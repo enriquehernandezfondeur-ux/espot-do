@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { CalendarDays, Clock, Users, MapPin, ChevronRight, Loader2, Search, CreditCard, CheckCircle, X, AlertTriangle, Building2, Star, MessageCircle, ExternalLink, Bell, Check } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime, todayInRD } from '@/lib/utils'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { LoadError } from '@/components/LoadError'
 import { getClientBookings } from '@/lib/actions/client'
 import { STATUS_LABELS, STATUS_COLORS, isPaid } from '@/lib/bookingConfig'
 import { cn } from '@/lib/utils'
@@ -43,6 +44,7 @@ function getPricingLabel(pricing: any): { label: string; detail: string; color: 
 export default function MisReservasPage() {
   const [bookings, setBookings]   = useState<Booking[]>([])
   const [loading, setLoading]     = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [filter, setFilter]       = useState('Todas')
   const [search, setSearch]       = useState('')
   const [reviewFor, setReviewFor] = useState<string | null>(null) // bookingId activo
@@ -117,7 +119,8 @@ export default function MisReservasPage() {
       setSelected((prev: Booking | null) => prev ? { ...prev, status: 'cancelled_guest' as any } : null)
   }
 
-  useEffect(() => {
+  function loadReservas() {
+    setLoading(true); setLoadError(false)
     Promise.all([
       getClientBookings(),
       getUserReviewedBookings(),
@@ -137,8 +140,9 @@ export default function MisReservasPage() {
           getInstallments(next.id).then(setInstallments).catch(() => {})
         }
       }
-    }).catch(() => setLoading(false))
-  }, [])
+    }).catch(() => { setLoadError(true); setLoading(false) })
+  }
+  useEffect(() => { loadReservas() }, [])
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -205,11 +209,19 @@ export default function MisReservasPage() {
       <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand)' }} />
     </div>
   )
+  if (loadError) return (
+    <div className="p-4 md:p-6 max-w-4xl mx-auto">
+      <h1 className="text-xl md:text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Mis reservas</h1>
+      <div className="rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+        <LoadError message="No pudimos cargar tus reservas." onRetry={loadReservas} />
+      </div>
+    </div>
+  )
 
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
       <div className="mb-5 md:mb-8">
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Mis reservas</h1>
+        <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Mis reservas</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
           {bookings.length} reserva{bookings.length !== 1 ? 's' : ''} en total
           {pendingPayment > 0 && (
@@ -296,7 +308,7 @@ export default function MisReservasPage() {
       ) : (
         <div className="space-y-3">
           {paginated.map((bk: any) => {
-            const sc    = STATUS_COLORS[bk.status as keyof typeof STATUS_COLORS] ?? { color: '#6B7280', bg: '#F4F6F8' }
+            const sc    = STATUS_COLORS[bk.status as keyof typeof STATUS_COLORS] ?? { color: 'var(--text-muted)', bg: 'var(--bg-elevated)' }
             const sl    = STATUS_LABELS[bk.status as keyof typeof STATUS_LABELS] ?? bk.status
             const space = bk.spaces
             const cover = space?.space_images?.find((i: any) => i.is_cover)?.url ?? space?.space_images?.[0]?.url

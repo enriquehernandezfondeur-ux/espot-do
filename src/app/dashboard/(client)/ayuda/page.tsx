@@ -64,7 +64,7 @@ export default function AyudaPage() {
     <div className="p-4 md:p-6 max-w-2xl mx-auto">
       {/* Header */}
       <div className="mb-7">
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Centro de ayuda</h1>
+        <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Centro de ayuda</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
           Encuentra respuestas rápidas o escríbenos directamente.
         </p>

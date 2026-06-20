@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { Heart, Loader2, FolderPlus, Folder, FolderOpen, MoreHorizontal, Pencil, Trash2, X, Check, ArrowLeft, FolderInput } from 'lucide-react'
+import { LoadError } from '@/components/LoadError'
 import { getClientFavorites, getFavoriteFolders, createFavoriteFolder, deleteFavoriteFolder, renameFavoriteFolder, moveFavoriteToFolder } from '@/lib/actions/client'
 import { SpaceCard } from '@/app/(marketplace)/buscar/SpaceCard'
 
@@ -13,6 +14,7 @@ export default function FavoritosPage() {
   const [favorites, setFavorites] = useState<Fav[]>([])
   const [folders,   setFolders]   = useState<FavFolder[]>([])
   const [loading,   setLoading]   = useState(true)
+  const [loadError, setLoadError] = useState(false)
 
   // Navegación
   const [activeFolder, setActiveFolder] = useState<string | null>(null) // null = vista principal
@@ -31,12 +33,14 @@ export default function FavoritosPage() {
   const [movingFav,  setMovingFav]  = useState<string | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
+  function loadFavoritos() {
+    setLoading(true); setLoadError(false)
     Promise.all([getClientFavorites(), getFavoriteFolders()])
       .then(([favs, flds]) => { setFavorites(favs as Fav[]); setFolders(flds) })
-      .catch(() => {})
+      .catch(() => setLoadError(true))
       .finally(() => setLoading(false))
-  }, [])
+  }
+  useEffect(() => { loadFavoritos() }, [])
 
   // Sincronizar al quitar un favorito desde una tarjeta (sin recargar)
   useEffect(() => {
@@ -97,6 +101,14 @@ export default function FavoritosPage() {
   if (loading) return (
     <div className="flex items-center justify-center h-dvh">
       <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand)' }} />
+    </div>
+  )
+  if (loadError) return (
+    <div className="p-4 md:p-6 max-w-4xl mx-auto">
+      <h1 className="text-xl md:text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Favoritos</h1>
+      <div className="rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+        <LoadError message="No pudimos cargar tus favoritos." onRetry={loadFavoritos} />
+      </div>
     </div>
   )
 

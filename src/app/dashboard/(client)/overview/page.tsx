@@ -6,14 +6,27 @@ import { CalendarDays, Clock, CheckCircle, ArrowRight, MapPin, CreditCard, Heart
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getClientStats } from '@/lib/actions/client'
 import { STATUS_SHORT, STATUS_COLORS, type BookingStatus } from '@/lib/bookingConfig'
+import { LoadError } from '@/components/LoadError'
 
 export default function ClientDashboard() {
   const [stats, setStats] = useState<Awaited<ReturnType<typeof getClientStats>>>(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
 
-  useEffect(() => {
-    getClientStats().then(s => { setStats(s); setLoading(false) }).catch(() => setLoading(false))
-  }, [])
+  function load() {
+    setLoading(true); setLoadError(false)
+    getClientStats().then(s => { setStats(s); setLoading(false) }).catch(() => { setLoadError(true); setLoading(false) })
+  }
+  useEffect(() => { load() }, [])
+
+  if (loadError) return (
+    <div className="p-4 md:p-6 max-w-4xl mx-auto">
+      <h1 className="text-xl md:text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Inicio</h1>
+      <div className="rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+        <LoadError message="No pudimos cargar tu panel." onRetry={load} />
+      </div>
+    </div>
+  )
 
   if (loading) return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-4 animate-pulse">

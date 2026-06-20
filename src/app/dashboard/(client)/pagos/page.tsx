@@ -52,7 +52,7 @@ function ComprobanteModal({ data, onClose }: { data: ComprobanteData; onClose: (
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between items-start gap-4">
                   <span className="text-sm shrink-0" style={{ color: '#6B7280' }}>{label}</span>
-                  <span className="text-sm font-semibold text-right" style={{ color: '#0F1623' }}>{value}</span>
+                  <span className="text-sm font-semibold text-right" style={{ color: 'var(--text-primary)' }}>{value}</span>
                 </div>
               ))}
             </div>
@@ -71,7 +71,7 @@ function ComprobanteModal({ data, onClose }: { data: ComprobanteData; onClose: (
 
             <button onClick={() => window.print()}
               className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-semibold text-sm print:hidden"
-              style={{ background: '#0F1623', color: '#fff' }}>
+              style={{ background: 'var(--text-primary)', color: '#fff' }}>
               <Printer size={14} /> Imprimir / Guardar PDF
             </button>
           </div>
@@ -124,7 +124,7 @@ export default function PagosPage() {
   if (loadError) return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto">
       <div className="mb-5 md:mb-8">
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Pagos</h1>
+        <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Pagos</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>Historial de cuotas y comprobantes</p>
       </div>
       <div className="rounded-3xl" style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
@@ -158,7 +158,7 @@ export default function PagosPage() {
   if (installments.length === 0 && !loading) return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto">
       <div className="mb-5 md:mb-8">
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Pagos</h1>
+        <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Pagos</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>Historial de cuotas y comprobantes</p>
       </div>
       <div className="flex flex-col items-center justify-center py-20 rounded-3xl text-center"
@@ -176,7 +176,7 @@ export default function PagosPage() {
 
       {/* Header */}
       <div className="mb-5 md:mb-8">
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Pagos</h1>
+        <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Pagos</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>Cuotas, historial y comprobantes</p>
       </div>
 

@@ -7,6 +7,7 @@ import type { MessageAttachment } from '@/lib/actions/messages'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { LoadError } from '@/components/LoadError'
 
 const ACCEPTED = [
   'image/jpeg','image/png','image/gif','image/webp',
@@ -20,6 +21,7 @@ function isImage(t: string) { return t.startsWith('image/') }
 export default function ClientMensajesPage() {
   const [convs,      setConvs]     = useState<any[]>([])
   const [loading,    setLoading]   = useState(true)
+  const [loadError,  setLoadError] = useState(false)
   const [active,     setActive]    = useState<any | null>(null)
   const [messages,   setMessages]  = useState<any[]>([])
   const [userId,     setUserId]    = useState<string | null>(null)
@@ -58,7 +60,7 @@ export default function ClientMensajesPage() {
         markAllMessagesRead()
           .then(() => window.dispatchEvent(new Event('espot:messages-read')))
           .catch(() => {})
-      } catch {}
+      } catch { setLoadError(true) }
       setLoading(false)
 
       if (uid) {
@@ -172,6 +174,14 @@ export default function ClientMensajesPage() {
       <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand)' }} />
     </div>
   )
+  if (loadError) return (
+    <div className="p-4 md:p-6 max-w-3xl mx-auto">
+      <h1 className="text-xl md:text-2xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Mensajes</h1>
+      <div className="rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+        <LoadError message="No pudimos cargar tus mensajes." onRetry={() => window.location.reload()} />
+      </div>
+    </div>
+  )
 
   return (
     <div className="flex flex-col md:flex-row h-[calc(100dvh-136px)] md:h-[calc(100dvh-56px)] overflow-hidden" style={{ background: 'var(--bg-base)' }}>
@@ -277,7 +287,7 @@ export default function ClientMensajesPage() {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto min-h-0 px-5 py-5 space-y-3" style={{ background: '#FAFBFC' }}>
+          <div className="flex-1 overflow-y-auto min-h-0 px-5 py-5 space-y-3" style={{ background: 'var(--bg-elevated)' }}>
             {messages.map(msg => {
               const isMe = msg.sender_id === userId
               const hasAttach = !!msg.attachment_url
@@ -376,7 +386,7 @@ export default function ClientMensajesPage() {
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex flex-col items-center justify-center text-center" style={{ background: '#FAFBFC' }}>
+        <div className="flex-1 flex flex-col items-center justify-center text-center" style={{ background: 'var(--bg-elevated)' }}>
           <div className="w-16 h-16 rounded-3xl flex items-center justify-center mb-4" style={{ background: 'var(--brand-dim)' }}>
             <MessageCircle size={28} style={{ color: 'var(--brand)' }} />
           </div>
