@@ -3,12 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { getAdminHostDetail } from '@/lib/actions/admin'
-import { adminSetHostPlan } from '@/lib/actions/subscription'
 import { PlanBadge } from '@/components/PlanBadge'
 import {
   ArrowLeft, Building2, Mail, Phone, Calendar, CreditCard,
   TrendingUp, Users, Clock, CheckCircle2, XCircle, AlertCircle,
-  Banknote, ExternalLink, Loader2, Eye, Package, Star,
+  Banknote, ExternalLink, Loader2, Eye, Package, Star, ArrowRight,
 } from 'lucide-react'
 import Link from 'next/link'
 import { STATUS_SHORT, STATUS_COLORS } from '@/lib/bookingConfig'
@@ -93,36 +92,12 @@ export default function AdminHostDetailPage() {
 
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [planWorking, setPlanWorking] = useState(false)
-  const [planDays, setPlanDays] = useState(30)
-  const [planMsg, setPlanMsg] = useState<{ ok: boolean; text: string } | null>(null)
 
   useEffect(() => {
     getAdminHostDetail(hostId)
       .then(d => { setData(d); setLoading(false) })
       .catch(() => { setData(null); setLoading(false) })
   }, [hostId])
-
-  async function handlePlanAction(action: 'activate' | 'extend' | 'cancel') {
-    if (action === 'cancel' && !window.confirm('¿Cancelar el plan Espot Pro de este propietario?')) return
-    setPlanWorking(true)
-    setPlanMsg(null)
-    const res = await adminSetHostPlan(hostId, action, planDays)
-    if (res && 'error' in res) {
-      setPlanMsg({ ok: false, text: res.error })
-      setPlanWorking(false)
-      return
-    }
-    const d = await getAdminHostDetail(hostId)
-    setData(d)
-    setPlanMsg({
-      ok: true,
-      text: action === 'cancel' ? 'Plan Pro cancelado.'
-        : action === 'extend' ? `Plan Pro extendido (+${planDays} días).`
-        : `Plan Pro activado por ${planDays} días.`,
-    })
-    setPlanWorking(false)
-  }
 
   if (loading) {
     return (
@@ -229,57 +204,16 @@ export default function AdminHostDetailPage() {
             </div>
           )}
 
-          {/* Duración */}
-          <div>
-            <div className="text-xs font-medium mb-1.5" style={{ color: '#6B7280' }}>Duración</div>
-            <div className="flex flex-wrap items-center gap-2">
-              {[{ d: 7, l: '7 días' }, { d: 30, l: '1 mes' }, { d: 90, l: '3 meses' }, { d: 180, l: '6 meses' }, { d: 365, l: '1 año' }].map(o => (
-                <button key={o.d} type="button" onClick={() => setPlanDays(o.d)}
-                  className="text-xs font-semibold px-3 py-2 rounded-xl transition-all"
-                  style={planDays === o.d
-                    ? { background: 'var(--pro-dim)', border: '1px solid var(--pro-border)', color: 'var(--pro-strong)' }
-                    : { background: '#fff', border: '1px solid #E8ECF0', color: '#374151' }}>
-                  {o.l}
-                </button>
-              ))}
-              <label className="text-xs flex items-center gap-1.5" style={{ color: '#6B7280' }}>
-                o
-                <input type="number" min={1} value={planDays}
-                  onChange={e => setPlanDays(Math.max(1, Number(e.target.value) || 1))}
-                  className="w-20 rounded-xl px-2 py-1.5 text-sm" style={{ border: '1px solid #E8ECF0', fontSize: 16 }} />
-                días
-              </label>
-            </div>
-          </div>
+          {/* La gestión del plan (activar/extender/cancelar/prueba) vive en el módulo
+              Espot Pro, que tiene todas las acciones + auditoría. Una sola fuente. */}
+          <Link href={`/admin/pro/${hostId}`}
+            className="inline-flex items-center gap-2 text-xs font-semibold px-3.5 py-2.5 rounded-xl transition-all"
+            style={{ background: 'var(--pro-dim)', border: '1px solid var(--pro-border)', color: 'var(--pro-strong)' }}>
+            Gestionar plan en Espot Pro <ArrowRight size={13} />
+          </Link>
 
-          {/* Acciones */}
-          <div className="flex flex-wrap items-center gap-2">
-            <button onClick={() => handlePlanAction('activate')} disabled={planWorking}
-              className="text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-60"
-              style={{ background: 'var(--pro)', color: '#fff' }}>
-              Activar Pro por {planDays} días
-            </button>
-            <button onClick={() => handlePlanAction('extend')} disabled={planWorking}
-              className="text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-60"
-              style={{ background: '#fff', border: '1px solid #E8ECF0', color: '#374151' }}>
-              Extender +{planDays} días
-            </button>
-            <button onClick={() => handlePlanAction('cancel')} disabled={planWorking}
-              className="text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-60"
-              style={{ background: '#fff', border: '1px solid #FCA5A5', color: '#DC2626' }}>
-              Cancelar
-            </button>
-          </div>
-
-          {planMsg && (
-            <div className="text-xs rounded-xl p-2.5" style={planMsg.ok
-              ? { background: 'var(--pro-dim)', color: 'var(--pro-strong)', border: '1px solid var(--pro-border)' }
-              : { background: '#FEE2E2', color: '#B91C1C', border: '1px solid #FCA5A5' }}>
-              {planMsg.ok ? '✓ ' : '✕ '}{planMsg.text}
-            </div>
-          )}
         </div>
-        <p className="text-xs mt-2" style={{ color: '#9CA3AF' }}>Activación manual por la duración elegida (puente mientras el cobro por Azul se habilita).</p>
+        <p className="text-xs mt-2" style={{ color: '#9CA3AF' }}>La gestión completa del plan (activar, prueba, extender, cancelar) y su auditoría están en el módulo Espot Pro.</p>
       </div>
 
       {/* ── Bank account ──────────────────────────────────── */}
