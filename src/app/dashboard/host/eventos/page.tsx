@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import type { ExternalEvent, ExternalEventStatus, ExternalPaymentMethod } from '@/types'
 import { EXTERNAL_EVENT_STATUS } from '@/lib/statusConfig'
+import { EmptyState } from '@/components/ui/EmptyState'
 import Pagination from '@/components/ui/Pagination'
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
@@ -130,18 +131,16 @@ export default function EventosPage() {
                 <Loader2 className="w-6 h-6 animate-spin" style={{ color: 'var(--brand)' }} />
               </div>
             ) : filtered.length === 0 ? (
-              <div className="text-center py-16">
-                <CalendarCheck size={32} className="mx-auto mb-3 text-gray-200" />
-                <p className="text-sm text-gray-400">
-                  {search ? 'Sin resultados' : 'No hay eventos registrados'}
-                </p>
-                {!search && (
+              <EmptyState
+                icon={CalendarCheck}
+                title={search ? 'Sin resultados' : 'No hay eventos registrados'}
+                action={!search ? (
                   <Link href="/dashboard/host/eventos/nuevo"
-                    className="mt-3 inline-block text-sm font-semibold" style={{ color: 'var(--brand)' }}>
+                    className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>
                     Registrar primer evento
                   </Link>
-                )}
-              </div>
+                ) : undefined}
+              />
             ) : (
               <div className="divide-y divide-[#F0F2F5]">
                 {paginated.map(ev => {

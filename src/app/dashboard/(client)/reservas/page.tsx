@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { CalendarDays, Clock, Users, MapPin, ChevronRight, Loader2, Search, CreditCard, CheckCircle, X, AlertTriangle, Building2, Star, MessageCircle, ExternalLink, Bell, Check } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime, todayInRD } from '@/lib/utils'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { getClientBookings } from '@/lib/actions/client'
 import { STATUS_LABELS, STATUS_COLORS, isPaid } from '@/lib/bookingConfig'
 import { cn } from '@/lib/utils'
@@ -284,16 +285,13 @@ export default function MisReservasPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 rounded-3xl text-center"
-          style={{ background: '#fff', border: '2px dashed var(--border-medium)' }}>
-          <CalendarDays size={32} className="mb-3" style={{ color: 'var(--text-muted)' }} />
-          <p className="font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Sin reservas</p>
-          <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-            {filter === 'Todas' ? 'Aún no has hecho ninguna reserva' : `No tienes reservas ${filter.toLowerCase()}`}
-          </p>
-          <Link href="/buscar" className="btn-brand text-sm font-semibold px-5 py-2.5 rounded-xl">
-            Explorar espacios
-          </Link>
+        <div className="rounded-3xl" style={{ background: '#fff', border: '2px dashed var(--border-medium)' }}>
+          <EmptyState
+            icon={CalendarDays}
+            title="Sin reservas"
+            subtitle={filter === 'Todas' ? 'Aún no has hecho ninguna reserva' : `No tienes reservas ${filter.toLowerCase()}`}
+            action={<Link href="/buscar" className="btn-brand text-sm font-semibold px-5 py-2.5 rounded-xl">Explorar espacios</Link>}
+          />
         </div>
       ) : (
         <div className="space-y-3">
