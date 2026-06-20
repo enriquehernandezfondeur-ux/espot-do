@@ -9,6 +9,7 @@ import { CalendarDays, Plus, Search, Loader2, Check, X, CalendarCheck, Paperclip
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import type { ExternalEvent, ExternalEventStatus, ExternalPaymentMethod } from '@/types'
+import { EXTERNAL_EVENT_STATUS } from '@/lib/statusConfig'
 import Pagination from '@/components/ui/Pagination'
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
@@ -23,13 +24,8 @@ const STATUS_OPTIONS: { value: 'all' | ExternalEventStatus; label: string }[] = 
   { value: 'cancelado',  label: 'Cancelados' },
 ]
 
-const statusConfig: Record<ExternalEventStatus, { label: string; color: string; bg: string }> = {
-  pendiente:  { label: 'Pendiente',   color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
-  confirmado: { label: 'Confirmado',  color: '#16A34A', bg: 'rgba(22,163,74,0.1)'   },
-  en_curso:   { label: 'En curso',    color: '#2563EB', bg: 'rgba(37,99,235,0.1)'   },
-  completado: { label: 'Completado',  color: 'var(--brand)', bg: 'rgba(53,196,147,0.1)'  },
-  cancelado:  { label: 'Cancelado',   color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },
-}
+// Estilos de estado de eventos externos: fuente única (statusConfig).
+const statusConfig = EXTERNAL_EVENT_STATUS
 
 export default function EventosPage() {
   const [events,   setEvents]   = useState<ExternalEvent[]>([])

@@ -9,6 +9,7 @@ import {
 import Pagination from '@/components/ui/Pagination'
 import { formatCurrency, formatDate, formatTime, cn, todayInRD } from '@/lib/utils'
 import { hostNetOf, platformFeeOf } from '@/lib/pricing'
+import { EXTERNAL_EVENT_STATUS } from '@/lib/statusConfig'
 import {
   getExternalEvents, updateExternalEvent, addEventPayment,
   deleteExternalEvent, deleteEventPayment,
@@ -24,13 +25,8 @@ type AgendaItem   = { source: 'espot'; data: Booking } | { source: 'direct'; dat
 type SimpleStatus = 'all' | 'pendiente' | 'confirmado' | 'completado' | 'cancelado'
 type OriginFilter = 'all' | 'espot' | 'directo'
 
-const EXT_STATUS: Record<ExternalEventStatus, { label: string; color: string; bg: string }> = {
-  pendiente:  { label: 'Pendiente', color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
-  confirmado: { label: 'Confirmado',  color: '#16A34A', bg: 'rgba(22,163,74,0.1)'   },
-  en_curso:   { label: 'En curso',    color: '#2563EB', bg: 'rgba(37,99,235,0.1)'   },
-  completado: { label: 'Completado',  color: 'var(--brand)', bg: 'rgba(53,196,147,0.1)'  },
-  cancelado:  { label: 'Cancelado',   color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },
-}
+// Estilos de estado de eventos externos: fuente única (statusConfig).
+const EXT_STATUS = EXTERNAL_EVENT_STATUS
 
 const ORIGIN_OPTIONS = [
   { value: 'all',     label: 'Todos'   },

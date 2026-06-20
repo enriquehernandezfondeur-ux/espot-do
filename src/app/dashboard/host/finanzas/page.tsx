@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { getBankAccount, saveBankAccount } from '@/lib/actions/host'
 import { getHostFinance, type HostFinance } from '@/lib/actions/host-finance'
+import { payoutStyle, type PayoutStatus } from '@/lib/statusConfig'
 import {
   Loader2, TrendingUp, TrendingDown, Download, Banknote,
   Building2, Save, AlertCircle, ChevronDown, CheckCircle, CalendarClock,
@@ -22,10 +23,10 @@ const inputStyle: React.CSSProperties = { background: 'var(--bg-elevated)', bord
 const CARD: React.CSSProperties = { background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }
 const AMBER = '#D97706', RED = '#DC2626'
 
-const payoutBadge: Record<string, { label: string; color: string; bg: string }> = {
-  pagado:    { label: 'Pagado',             color: 'var(--brand)', bg: 'var(--bg-elevated)' },
-  pendiente: { label: 'Listo para liquidar', color: AMBER,         bg: 'rgba(217,119,6,0.08)' },
-  en_curso:  { label: 'Cobrando',           color: '#6B7280',      bg: 'rgba(107,114,128,0.08)' },
+// El estado derivado de finanzas (pendiente/pagado/en_curso) se mapea al
+// vocabulario único de liquidación para que host y admin muestren igual.
+const PAYOUT_FROM_FINANCE: Record<string, PayoutStatus> = {
+  pendiente: 'pending', pagado: 'paid', en_curso: 'in_review',
 }
 
 function csvCell(v: string | number): string {
@@ -81,7 +82,7 @@ export default function FinanzasPage() {
     const header = ['Reserva', 'Espacio', 'Fecha evento', 'Neto al host', 'Estado liquidación']
     const rows = fin.payouts.map(p => [
       csvCell(p.guest), csvCell(p.space), csvCell(p.event_date ? formatDate(p.event_date) : ''),
-      csvCell(p.net.toFixed(2)), csvCell(payoutBadge[p.status]?.label ?? p.status),
+      csvCell(p.net.toFixed(2)), csvCell(payoutStyle(PAYOUT_FROM_FINANCE[p.status]).label),
     ])
     const csv = [header.map(csvCell), ...rows].map(r => r.join(',')).join('\n')
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
@@ -341,7 +342,7 @@ export default function FinanzasPage() {
         ) : (
           <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
             {f.payouts.slice(0, 30).map(p => {
-              const badge = payoutBadge[p.status]
+              const badge = payoutStyle(PAYOUT_FROM_FINANCE[p.status])
               return (
                 <div key={p.id} className="flex items-center justify-between gap-3 px-5 py-3.5">
                   <div className="min-w-0">

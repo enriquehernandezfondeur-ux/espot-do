@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { STATUS_SHORT, STATUS_COLORS } from '@/lib/bookingConfig'
 import { formatCurrency } from '@/lib/utils'
 import { platformFeeOf, hostNetOf } from '@/lib/pricing'
+import { payoutStyle, externalEventStyle, paymentStyle } from '@/lib/statusConfig'
 
 // ── Formatters ──────────────────────────────────────────────
 // Formateador único de moneda (delegado a utils para que TODAS las pantallas
@@ -41,18 +42,6 @@ const bookingStatusCfg: Record<string, { label: string; color: string; bg: strin
     (Object.keys(STATUS_COLORS) as (keyof typeof STATUS_COLORS)[])
       .map(k => [k, { label: STATUS_SHORT[k], ...STATUS_COLORS[k] }]),
   )
-const payoutCfg: Record<string, { label: string; color: string; bg: string }> = {
-  pending: { label: 'Por liquidar', color: '#D97706', bg: 'rgba(217,119,6,0.10)' },
-  paid:    { label: 'Liquidado',    color: '#16A34A', bg: 'rgba(22,163,74,0.10)' },
-}
-const externalStatusCfg: Record<string, { label: string; color: string; bg: string }> = {
-  pendiente:   { label: 'Pendiente', color: '#D97706', bg: 'rgba(217,119,6,0.10)' },
-  confirmado:  { label: 'Confirmado',  color: '#2563EB', bg: 'rgba(37,99,235,0.10)' },
-  en_curso:    { label: 'En curso',    color: '#7C3AED', bg: 'rgba(124,58,237,0.10)' },
-  completado:  { label: 'Completado',  color: '#16A34A', bg: 'rgba(22,163,74,0.10)' },
-  cancelado:   { label: 'Cancelado',   color: '#DC2626', bg: 'rgba(220,38,38,0.10)' },
-}
-
 function Badge({ cfg, label }: { cfg?: { label: string; color: string; bg: string }; label?: string }) {
   const c = cfg ?? { label: label ?? '—', color: '#6B7280', bg: 'rgba(107,114,128,0.10)' }
   return (
@@ -400,7 +389,7 @@ export default function AdminHostDetailPage() {
                   const guest = b.profiles as any
                   const space = b.spaces as any
                   const bsCfg = bookingStatusCfg[b.status]
-                  const poCfg = payoutCfg[b.payout_status ?? 'pending']
+                  const poCfg = payoutStyle(b.payout_status)
                   return (
                     <div key={b.id}
                       className="grid gap-3 items-center px-4 py-3 hover:bg-slate-50 transition-colors min-w-[700px] text-sm"
@@ -413,7 +402,7 @@ export default function AdminHostDetailPage() {
                       <div className="font-semibold text-gray-800 tabular-nums">{fmtCurrency(Number(b.total_amount))}</div>
                       <div><Badge cfg={bsCfg} /></div>
                       <div>
-                        <Badge label={b.payment_status === 'paid' ? 'Pagado' : b.payment_status === 'partial' ? 'Parcial' : b.payment_status === 'advance' ? 'Anticipo' : 'No pagado'} />
+                        <Badge cfg={paymentStyle(b.payment_status)} />
                       </div>
                       <div><Badge cfg={poCfg} /></div>
                     </div>
@@ -440,7 +429,7 @@ export default function AdminHostDetailPage() {
               <div className="divide-y divide-[#F0F2F5]">
                 {externalEvents.map((e: any) => {
                   const client = e.host_clients as any
-                  const stCfg = externalStatusCfg[e.status]
+                  const stCfg = externalEventStyle(e.status)
                   return (
                     <div key={e.id}
                       className="grid gap-3 items-center px-4 py-3 hover:bg-slate-50 transition-colors min-w-[600px] text-sm"

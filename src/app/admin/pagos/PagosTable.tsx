@@ -4,14 +4,9 @@ import { useState } from 'react'
 import { CreditCard } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { platformFeeOf } from '@/lib/pricing'
+import { paymentStyle } from '@/lib/statusConfig'
 import Pagination from '@/components/ui/Pagination'
 
-const paymentConfig: Record<string, { label: string; color: string; bg: string }> = {
-  unpaid:  { label: 'Sin pago',         color: '#D97706', bg: 'rgba(217,119,6,0.08)'   },
-  partial: { label: 'Pago parcial',     color: '#2563EB', bg: 'rgba(37,99,235,0.08)'   },
-  advance: { label: 'Anticipo pagado',  color: '#16A34A', bg: 'rgba(22,163,74,0.08)'   },
-  paid:    { label: 'Pago completo',    color: 'var(--brand)', bg: 'rgba(53,196,147,0.08)'  },
-}
 
 const PAGE_SIZE = 25
 
@@ -35,7 +30,7 @@ export default function PagosTable({ bookings }: { bookings: any[] }) {
             </div>
           )}
           {visible.map((bk: any) => {
-            const pc = paymentConfig[bk.payment_status] ?? paymentConfig.unpaid
+            const pc = paymentStyle(bk.payment_status)
             return (
               <div key={bk.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-3 items-center px-5 py-4 hover:bg-slate-50 transition-colors min-w-[640px]">
                 <div>

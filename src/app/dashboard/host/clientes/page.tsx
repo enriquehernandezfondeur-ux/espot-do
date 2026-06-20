@@ -40,7 +40,7 @@ const EVENT_STATUS_LABELS: Record<string, string> = {
   cancelado:  'Cancelado',
   // bookings
   pending:         'Pendiente',
-  accepted:        'Por pagar',
+  accepted:        'Pendiente de pago',
   confirmed:       'Confirmado',
   completed:       'Completado',
   cancelled_guest: 'Cancelado',

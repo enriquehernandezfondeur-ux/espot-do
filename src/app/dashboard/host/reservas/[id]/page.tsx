@@ -11,6 +11,7 @@ import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getHostBookingDetail, acceptBooking, rejectBooking, completeBooking } from '@/lib/actions/host'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
 import { platformFeeOf, hostNetOf } from '@/lib/pricing'
+import { payoutStyle } from '@/lib/statusConfig'
 import { countdownLabel } from '@/lib/payments/schedule'
 import { getDisputeForBooking } from '@/lib/actions/disputes'
 import DisputeSection from '@/app/dashboard/(client)/reservas/[id]/DisputeSection'
@@ -347,13 +348,15 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
             <div className="flex justify-between items-center pt-2"
               style={{ borderTop: '1px solid var(--border-subtle)' }}>
               <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Estado de pago al host</span>
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
-                style={{
-                  background: bk.payout_status === 'paid' ? 'var(--bg-elevated)' : 'rgba(217,119,6,0.1)',
-                  color: bk.payout_status === 'paid' ? 'var(--brand)' : '#D97706',
-                }}>
-                {bk.payout_status === 'paid' ? 'Transferido' : 'Pendiente de transferir'}
-              </span>
+              {(() => {
+                const po = payoutStyle(bk.payout_status)
+                return (
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
+                    style={{ background: po.bg, color: po.color }}>
+                    {po.label}
+                  </span>
+                )
+              })()}
             </div>
           )}
         </div>

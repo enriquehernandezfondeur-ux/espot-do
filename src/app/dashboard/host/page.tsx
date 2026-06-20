@@ -15,6 +15,7 @@ import { PlanBadge } from '@/components/PlanBadge'
 import { getExternalEvents } from '@/lib/actions/external-events'
 import type { ExternalEvent } from '@/types'
 import { StatusBadge } from '@/components/StatusBadge'
+import { externalEventStyle } from '@/lib/statusConfig'
 export { StatusBadge }
 
 function PublishedToast() {
@@ -30,13 +31,6 @@ function PublishedToast() {
   )
 }
 
-const EXT_STATUS: Record<string, { label: string; color: string; bg: string }> = {
-  pendiente:  { label: 'Pendiente', color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
-  confirmado: { label: 'Confirmado', color: '#16A34A', bg: 'rgba(22,163,74,0.1)'   },
-  en_curso:   { label: 'En curso',   color: '#2563EB', bg: 'rgba(37,99,235,0.1)'   },
-  completado: { label: 'Completado', color: 'var(--brand)', bg: 'rgba(53,196,147,0.1)'  },
-  cancelado:  { label: 'Cancelado',  color: '#EF4444', bg: 'rgba(239,68,68,0.08)'  },
-}
 
 type CalBooking = Awaited<ReturnType<typeof getHostBookings>>[0]
 
@@ -533,7 +527,7 @@ export default function DashboardPage() {
                       {isEspot
                         ? <StatusBadge status={item.b.status} />
                         : (() => {
-                            const st = EXT_STATUS[item.ev.status]
+                            const st = externalEventStyle(item.ev.status)
                             return st ? (
                               <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
                                 style={{ background: st.bg, color: st.color }}>

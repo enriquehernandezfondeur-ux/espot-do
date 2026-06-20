@@ -4,6 +4,7 @@ import { useState, useEffect, useTransition, useRef, useCallback } from 'react'
 import { getAdminPayouts, markPayoutPaid, getHostBankAccount, saveLiquidacionNote } from '@/lib/actions/admin'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { hostNetOf } from '@/lib/pricing'
+import { payoutStyle } from '@/lib/statusConfig'
 import {
   Banknote, CheckCircle, Clock, Building2, User,
   CalendarDays, Copy, Check, Loader2, Filter,
@@ -11,14 +12,6 @@ import {
 } from 'lucide-react'
 
 type FilterType = 'pending' | 'paid' | 'all'
-
-const STATUS_COLORS: Record<string, { label: string; color: string; bg: string }> = {
-  pending:      { label: 'Pendiente',   color: '#D97706', bg: 'rgba(217,119,6,0.08)'  },
-  in_review:    { label: 'En revisión', color: '#2563EB', bg: 'rgba(37,99,235,0.08)'  },
-  paid:         { label: 'Liquidado',   color: '#16A34A', bg: 'rgba(22,163,74,0.08)'  },
-  retained:     { label: 'Retenido',    color: '#DC2626', bg: 'rgba(220,38,38,0.08)'  },
-  refunded:     { label: 'Reembolsado', color: '#6B7280', bg: 'rgba(107,114,128,0.08)'},
-}
 
 function CopyBtn({ text }: { text: string }) {
   const [copied, setCopied] = useState(false)
@@ -277,13 +270,13 @@ export default function AdminLiquidacionesPage() {
                     <div>
                       <div className="text-base font-bold mb-1" style={{ color: 'var(--brand)' }}>{formatCurrency(hostAmt)}</div>
                       {(() => {
-                        const sc = STATUS_COLORS[bk.payout_status]
-                        return sc ? (
+                        const sc = payoutStyle(bk.payout_status)
+                        return (
                           <span className="inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-full"
                             style={{ background: sc.bg, color: sc.color }}>
                             {sc.label}
                           </span>
-                        ) : null
+                        )
                       })()}
                     </div>
 
