@@ -333,6 +333,8 @@ export async function adminProAction(
       if (!params.endDate) return { error: 'Indica la fecha de vencimiento.' }
       const ms = new Date(params.endDate + 'T12:00').getTime()
       if (isNaN(ms)) return { error: 'Fecha inválida.' }
+      if (ms <= now) return { error: 'La fecha de fin debe ser futura.' }
+      if (ms > now + 3650 * DAY_MS) return { error: 'La fecha de fin no puede superar 10 años.' }
       const end = new Date(ms).toISOString()
       next = { ...next, current_period_end: end }
       endForPlan = end
