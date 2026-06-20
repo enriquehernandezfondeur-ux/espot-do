@@ -86,8 +86,8 @@ export default function EventosPage() {
 
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>Eventos</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{events.length} eventos registrados</p>
+          <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Eventos</h1>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>{events.length} eventos registrados</p>
         </div>
         <Link href="/dashboard/host/eventos/nuevo"
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all active:scale-95"
@@ -98,31 +98,31 @@ export default function EventosPage() {
 
       <div className="flex flex-col gap-3 mb-5">
         <div className="flex gap-1 p-1 rounded-xl overflow-x-auto scrollbar-hide"
-          style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
           {STATUS_OPTIONS.map(o => (
             <button key={o.value} onClick={() => setFilter(o.value)}
               className="px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap shrink-0"
-              style={filter === o.value ? { background: '#0F1623', color: '#fff' } : { color: '#6B7280' }}>
+              style={filter === o.value ? { background: 'var(--brand)', color: '#fff' } : { color: 'var(--text-secondary)' }}>
               {o.label}
             </button>
           ))}
         </div>
         <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl"
-          style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
-          <Search size={15} className="text-gray-400 shrink-0" />
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+          <Search size={15} className="shrink-0" style={{ color: 'var(--text-muted)' }} />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Buscar evento, cliente o espacio..."
-            className="bg-transparent text-sm flex-1 focus:outline-none text-gray-700 placeholder-gray-400"
-            style={{ fontSize: 16 }} />
-          {search && <button onClick={() => setSearch('')} className="text-gray-400"><X size={14} /></button>}
+            className="bg-transparent text-sm flex-1 focus:outline-none"
+            style={{ fontSize: 16, color: 'var(--text-primary)' }} />
+          {search && <button onClick={() => setSearch('')} style={{ color: 'var(--text-muted)' }}><X size={14} /></button>}
         </div>
       </div>
 
       <div className="flex flex-col lg:grid lg:grid-cols-[1fr_360px] gap-5 items-start">
-        <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+        <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <div className="overflow-x-auto scrollbar-hide">
             <div className="hidden md:grid grid-cols-[2fr_1fr_1fr_auto] gap-3 px-5 py-3 text-xs font-semibold md:min-w-[500px] uppercase tracking-widest text-gray-400"
-              style={{ borderBottom: '1px solid #F0F2F5', background: '#FAFBFC' }}>
+              style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)' }}>
               <span>Evento</span><span>Fecha</span><span>Total</span><span>Estado</span>
             </div>
 
@@ -142,7 +142,7 @@ export default function EventosPage() {
                 ) : undefined}
               />
             ) : (
-              <div className="divide-y divide-[#F0F2F5]">
+              <div className="divide-y divide-[var(--border-subtle)]">
                 {paginated.map(ev => {
                   const st = statusConfig[ev.status]
                   const balance = ev.total_amount ? ev.total_amount - (ev.paid_amount ?? 0) : null
@@ -153,7 +153,7 @@ export default function EventosPage() {
                         selected?.id === ev.id && 'bg-slate-50'
                       )}>
                       <div className="min-w-0">
-                        <div className="font-semibold text-sm truncate" style={{ color: '#0F1623' }}>
+                        <div className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>
                           {ev.title}
                         </div>
                         <div className="text-xs text-gray-400 truncate">
@@ -162,7 +162,7 @@ export default function EventosPage() {
                       </div>
                       <div className="text-sm text-gray-600">{formatDate(ev.event_date)}</div>
                       <div className="text-sm">
-                        <div className="font-bold" style={{ color: '#0F1623' }}>
+                        <div className="font-bold" style={{ color: 'var(--text-primary)' }}>
                           {ev.total_amount ? formatCurrency(ev.total_amount) : '—'}
                         </div>
                         {balance !== null && balance > 0 && (
@@ -198,7 +198,7 @@ export default function EventosPage() {
             }}
           />
         ) : (
-          <div className="rounded-2xl p-8 text-center" style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
+          <div className="rounded-2xl p-8 text-center" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
             <CalendarDays size={24} className="mx-auto mb-3 text-gray-300" />
             <p className="text-sm text-gray-400">Selecciona un evento para ver el detalle</p>
           </div>
@@ -317,10 +317,10 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
 
   return (
     <div className="rounded-2xl overflow-hidden sticky top-8"
-      style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-      <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid #F0F2F5' }}>
+      style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+      <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         <div>
-          <div className="font-bold text-sm" style={{ color: '#0F1623' }}>Detalle del evento</div>
+          <div className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Detalle del evento</div>
           <div className="text-xs text-gray-400 mt-0.5">ID: {event.id.slice(0, 8).toUpperCase()}</div>
         </div>
         <div className="flex items-center gap-1">
@@ -334,8 +334,8 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
 
       <div className="p-5 space-y-4">
         <div>
-          <div className="font-semibold text-sm mb-3" style={{ color: '#0F1623' }}>{event.title}</div>
-          <div className="rounded-xl p-4 space-y-2" style={{ background: '#F8FAFB', border: '1px solid #E8ECF0' }}>
+          <div className="font-semibold text-sm mb-3" style={{ color: 'var(--text-primary)' }}>{event.title}</div>
+          <div className="rounded-xl p-4 space-y-2" style={{ background: '#F8FAFB', border: '1px solid var(--border-subtle)' }}>
             {[
               { label: 'Tipo',     value: event.event_type ?? '—' },
               { label: 'Fecha',    value: formatDate(event.event_date) },
@@ -345,7 +345,7 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
             ].map(({ label, value }) => (
               <div key={label} className="flex items-baseline justify-between gap-4 text-sm">
                 <span className="text-gray-500 shrink-0">{label}</span>
-                <span className="font-medium text-right break-words min-w-0" style={{ color: '#0F1623' }}>{value}</span>
+                <span className="font-medium text-right break-words min-w-0" style={{ color: 'var(--text-primary)' }}>{value}</span>
               </div>
             ))}
           </div>
@@ -354,7 +354,7 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
         {client && (
           <div>
             <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1">Cliente</div>
-            <div className="font-semibold text-sm" style={{ color: '#0F1623' }}>{client}</div>
+            <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{client}</div>
             {event.client?.email && <div className="text-xs text-gray-500">{event.client.email}</div>}
             {event.client?.phone && <div className="text-xs text-gray-500">{event.client.phone}</div>}
           </div>
@@ -363,7 +363,7 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
         <div className="rounded-xl p-4 space-y-2" style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid rgba(53,196,147,0.15)' }}>
           <div className="flex justify-between text-sm text-gray-500">
             <span>Total evento</span>
-            <span className="font-medium" style={{ color: '#0F1623' }}>{event.total_amount ? formatCurrency(event.total_amount) : '—'}</span>
+            <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{event.total_amount ? formatCurrency(event.total_amount) : '—'}</span>
           </div>
           <div className="flex justify-between text-sm text-gray-500">
             <span>Cobrado</span>
@@ -385,7 +385,7 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
               setTimeout(() => setLinkCopied(false), 2500)
             }}
             className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold transition-all"
-            style={{ background: linkCopied ? 'rgba(53,196,147,0.1)' : '#F8FAFB', color: linkCopied ? 'var(--brand)' : '#6B7280', border: `1px solid ${linkCopied ? 'rgba(53,196,147,0.3)' : '#E8ECF0'}` }}>
+            style={{ background: linkCopied ? 'rgba(53,196,147,0.1)' : '#F8FAFB', color: linkCopied ? 'var(--brand)' : 'var(--text-muted)', border: `1px solid ${linkCopied ? 'rgba(53,196,147,0.3)' : 'var(--border-subtle)'}` }}>
             {linkCopied ? <><Check size={13} /> Link copiado</> : <><Link2 size={13} /> Copiar link de pago</>}
           </button>
         )}
@@ -396,7 +396,7 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
             <div className="space-y-1.5">
               {event.payments!.map(p => (
                 <div key={p.id} className="flex items-center justify-between text-xs py-1.5 px-3 rounded-lg group"
-                  style={{ background: '#F8FAFB', border: '1px solid #F0F2F5' }}>
+                  style={{ background: '#F8FAFB', border: '1px solid var(--border-subtle)' }}>
                   <div className="min-w-0">
                     <span className="font-semibold text-gray-700">{formatCurrency(p.amount)}</span>
                     <span className="text-gray-400 ml-2">{formatDate(p.payment_date)} · {p.payment_method}</span>
@@ -420,7 +420,7 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
         )}
 
         {showPay ? (
-          <form onSubmit={handleAddPayment} className="rounded-xl p-4 space-y-3" style={{ background: '#F8FAFB', border: '1px solid #E8ECF0' }}>
+          <form onSubmit={handleAddPayment} className="rounded-xl p-4 space-y-3" style={{ background: '#F8FAFB', border: '1px solid var(--border-subtle)' }}>
             <div className="text-xs font-semibold text-gray-600">Registrar pago</div>
             <div className="grid grid-cols-2 gap-2">
               <div>
@@ -428,14 +428,14 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
                 <input type="number" required min="1" value={payForm.amount}
                   onChange={e => setPayForm(f => ({ ...f, amount: e.target.value }))}
                   placeholder="0" className="w-full px-3 py-2 rounded-lg text-sm border focus:outline-none"
-                  style={{ border: '1px solid #E8ECF0', fontSize: 16 }} />
+                  style={{ border: '1px solid var(--border-subtle)', fontSize: 16 }} />
               </div>
               <div>
                 <label className="text-xs text-gray-500 mb-1 block">Método</label>
                 <select value={payForm.method}
                   onChange={e => setPayForm(f => ({ ...f, method: e.target.value as ExternalPaymentMethod }))}
                   className="w-full px-3 py-2 rounded-lg text-sm border focus:outline-none"
-                  style={{ border: '1px solid #E8ECF0', fontSize: 16 }}>
+                  style={{ border: '1px solid var(--border-subtle)', fontSize: 16 }}>
                   <option value="efectivo">Efectivo</option>
                   <option value="transferencia">Transferencia</option>
                   <option value="tarjeta">Tarjeta</option>
@@ -448,7 +448,7 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
               <input type="date" required value={payForm.date}
                 onChange={e => setPayForm(f => ({ ...f, date: e.target.value }))}
                 className="w-full px-3 py-2 rounded-lg text-sm border focus:outline-none"
-                style={{ border: '1px solid #E8ECF0', fontSize: 16 }} />
+                style={{ border: '1px solid var(--border-subtle)', fontSize: 16 }} />
             </div>
             <div>
               <label className="text-xs text-gray-500 mb-1 block">Comprobante (foto/PDF)</label>
@@ -476,7 +476,7 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
             <div className="flex gap-2">
               <button type="button" onClick={() => { setShowPay(false); setReceiptFile(null) }}
                 className="flex-1 py-2 rounded-lg text-xs font-semibold text-gray-500 hover:bg-slate-100"
-                style={{ border: '1px solid #E8ECF0' }}>
+                style={{ border: '1px solid var(--border-subtle)' }}>
                 Cancelar
               </button>
               <button type="submit" disabled={saving}
@@ -505,7 +505,7 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
                   className="text-xs font-semibold px-3 py-2 rounded-lg transition-all disabled:opacity-40"
                   style={event.status === status
                     ? { background: s.bg, color: s.color, border: `1px solid ${s.color}30` }
-                    : { background: '#F4F6F8', color: '#6B7280', border: '1px solid #E8ECF0' }}>
+                    : { background: '#F4F6F8', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}>
                   {s.label}
                 </button>
               )
@@ -514,7 +514,7 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
         </div>
 
         {event.notes && (
-          <div className="rounded-xl p-3 text-xs text-gray-500" style={{ background: '#F8FAFB', border: '1px solid #E8ECF0' }}>
+          <div className="rounded-xl p-3 text-xs text-gray-500" style={{ background: '#F8FAFB', border: '1px solid var(--border-subtle)' }}>
             {event.notes}
           </div>
         )}

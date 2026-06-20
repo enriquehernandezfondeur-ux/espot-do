@@ -574,12 +574,8 @@ export default function EspacioPage() {
 
         <div className="flex items-center justify-between mb-5 md:mb-8">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Building2 size={14} style={{ color: 'var(--brand)' }} />
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--brand)' }}>Mi espacio</span>
-            </div>
             <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+              <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
                 Mis espacios
               </h1>
               {spaces.length > 0 && (

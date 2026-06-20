@@ -226,7 +226,7 @@ export default function ClientesPage() {
       <div className="mb-5 flex items-start justify-between gap-3">
         <div>
           <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Clientes</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{clients.length} registrados</p>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>{clients.length} registrados</p>
         </div>
         <button onClick={openCreateForm}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all active:scale-95 shrink-0"

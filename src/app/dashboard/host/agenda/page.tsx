@@ -289,7 +289,7 @@ export default function AgendaPage() {
       <div className="mb-6 flex items-start justify-between gap-3">
         <div>
           <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Reservas</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
             {items.length} eventos en total
             {pendingEspot > 0 && <span className="ml-2 font-semibold" style={{ color: '#D97706' }}>· {pendingEspot} por aceptar</span>}
           </p>
