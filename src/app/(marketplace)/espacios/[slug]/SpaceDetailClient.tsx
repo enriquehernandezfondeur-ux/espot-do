@@ -847,6 +847,23 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                     </div>
                   )}
 
+                  {/* Qué incluye el paquete (lo que el host configuró) */}
+                  {pricing?.pricing_type === 'fixed_package' && Array.isArray(pricing.package_includes) && pricing.package_includes.length > 0 && (
+                    <div className="mt-3">
+                      {pricing.package_name && (
+                        <p className="text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{pricing.package_name}</p>
+                      )}
+                      <ul className="flex flex-col gap-1.5">
+                        {pricing.package_includes.map((item: string, i: number) => (
+                          <li key={i} className="flex items-start gap-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
+                            <CheckCircle size={15} className="shrink-0" style={{ color: 'var(--brand)', marginTop: 1 }} />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
                   {pricing?.pricing_type === 'custom_quote' && (
                     <div className="mt-3 flex items-start gap-2.5 px-4 py-3 rounded-xl"
                       style={{ background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.15)' }}>
