@@ -12,6 +12,7 @@ import {
 import type { HostClient, ClientSource } from '@/types'
 import { getMyPlan } from '@/lib/actions/subscription'
 import { ProUpsell } from '@/components/ProUpsell'
+import { LoadError } from '@/components/LoadError'
 import Pagination from '@/components/ui/Pagination'
 
 const PAGE_SIZE = 25
@@ -71,6 +72,7 @@ export default function ClientesPage() {
   const [toast,    setToast]    = useState<{ msg: string; ok: boolean } | null>(null)
   const [copied,   setCopied]   = useState(false)
   const [page,     setPage]     = useState(1)
+  const [loadError, setLoadError] = useState(false)
 
   // Form state
   const [form, setForm] = useState({
@@ -83,10 +85,14 @@ export default function ClientesPage() {
     setTimeout(() => setToast(null), 3000)
   }
 
-  useEffect(() => {
+  function loadClients() {
     setLoading(true)
-    getUnifiedClients().then(d => { setClients(d); setLoading(false) })
-  }, [])
+    setLoadError(false)
+    getUnifiedClients()
+      .then(d => { setClients(d); setLoading(false) })
+      .catch(() => { setLoadError(true); setLoading(false) })
+  }
+  useEffect(() => { loadClients() }, [])
 
   useEffect(() => {
     if (!selected) { setHistory(null); return }
@@ -278,6 +284,8 @@ export default function ClientesPage() {
             <div className="flex items-center justify-center py-16">
               <Loader2 className="w-6 h-6 animate-spin" style={{ color: 'var(--brand)' }} />
             </div>
+          ) : loadError ? (
+            <LoadError message="No pudimos cargar tus clientes." onRetry={loadClients} />
           ) : filtered.length === 0 ? (
             <div className="text-center py-16">
               <Users size={32} className="mx-auto mb-3 text-gray-200" />

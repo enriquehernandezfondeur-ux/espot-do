@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { CreditCard, CheckCircle, Clock, Loader2, Receipt, AlertCircle, Printer, X } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { getClientPagosData } from '@/lib/actions/client'
+import { LoadError } from '@/components/LoadError'
 
 // ── Comprobante modal ────────────────────────────────────────
 type ComprobanteData = { inst: any; booking: any; totalInstallments: number; userName: string }
@@ -102,17 +103,33 @@ function urgencyLabel(days: number) {
 export default function PagosPage() {
   const [pagosData, setPagosData] = useState<Awaited<ReturnType<typeof getClientPagosData>>>(null)
   const [loading, setLoading]     = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [comprobante, setComprobante] = useState<ComprobanteData | null>(null)
 
-  useEffect(() => {
+  function load() {
+    setLoading(true)
+    setLoadError(false)
     getClientPagosData()
       .then(d => { setPagosData(d); setLoading(false) })
-      .catch(() => setLoading(false))
-  }, [])
+      .catch(() => { setLoadError(true); setLoading(false) })
+  }
+  useEffect(() => { load() }, [])
 
   if (loading) return (
     <div className="flex items-center justify-center h-dvh">
       <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand)' }} />
+    </div>
+  )
+
+  if (loadError) return (
+    <div className="p-4 md:p-6 max-w-4xl mx-auto">
+      <div className="mb-5 md:mb-8">
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Pagos</h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>Historial de cuotas y comprobantes</p>
+      </div>
+      <div className="rounded-3xl" style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+        <LoadError message="No pudimos cargar tus pagos." onRetry={load} />
+      </div>
     </div>
   )
 

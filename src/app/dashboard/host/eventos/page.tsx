@@ -284,6 +284,8 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
       setShowPay(false)
       setReceiptFile(null)
       setPayForm({ amount: '', method: 'efectivo', date: new Date().toISOString().slice(0, 10), notes: '', is_deposit: false })
+    } else {
+      alert(`No se pudo registrar el pago: ${r.error ?? 'error desconocido'}`)
     }
     setSaving(false)
   }
@@ -297,6 +299,8 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
         paid_amount: Math.max(0, (event.paid_amount ?? 0) - amount),
         payments: (event.payments ?? []).filter(p => p.id !== paymentId),
       })
+    } else {
+      alert(`No se pudo eliminar el pago: ${r.error ?? 'error desconocido'}`)
     }
   }
 
@@ -305,6 +309,7 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
     setDeleting(true)
     const r = await deleteExternalEvent(event.id)
     if (!('error' in r)) onDeleted()
+    else alert(`No se pudo eliminar el evento: ${r.error ?? 'error desconocido'}`)
     setDeleting(false)
   }
 

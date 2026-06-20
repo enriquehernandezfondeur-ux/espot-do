@@ -5,6 +5,7 @@ import { getAdminPayouts, markPayoutPaid, getHostBankAccount, saveLiquidacionNot
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { hostNetOf } from '@/lib/pricing'
 import { payoutStyle } from '@/lib/statusConfig'
+import { LoadError } from '@/components/LoadError'
 import {
   Banknote, CheckCircle, Clock, Building2, User,
   CalendarDays, Copy, Check, Loader2, Filter,
@@ -65,6 +66,7 @@ export default function AdminLiquidacionesPage() {
   const [filter, setFilter]     = useState<FilterType>('pending')
   const [payouts, setPayouts]   = useState<any[]>([])
   const [loading, setLoading]   = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [paying,  setPaying]    = useState<string | null>(null)
   const [notes,    setNotes]    = useState<Record<string, string>>({})
   const [showNote, setShowNote] = useState<string | null>(null)
@@ -95,16 +97,22 @@ export default function AdminLiquidacionesPage() {
 
   async function load() {
     setLoading(true)
-    const data = await getAdminPayouts(filter)
-    setPayouts(data)
-    // Cargar notas guardadas en DB
-    const dbNotes: Record<string, string> = {}
-    data.forEach((b: any) => {
-      const note = (b.liquidaciones as any)?.[0]?.admin_notes ?? (b.liquidaciones as any)?.admin_notes
-      if (note) dbNotes[b.id] = note
-    })
-    setNotes(dbNotes)
-    setLoading(false)
+    setLoadError(false)
+    try {
+      const data = await getAdminPayouts(filter)
+      setPayouts(data)
+      // Cargar notas guardadas en DB
+      const dbNotes: Record<string, string> = {}
+      data.forEach((b: any) => {
+        const note = (b.liquidaciones as any)?.[0]?.admin_notes ?? (b.liquidaciones as any)?.admin_notes
+        if (note) dbNotes[b.id] = note
+      })
+      setNotes(dbNotes)
+    } catch {
+      setLoadError(true)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { load() }, [filter])
@@ -218,6 +226,8 @@ export default function AdminLiquidacionesPage() {
           <div className="flex items-center justify-center py-16">
             <Loader2 size={24} className="animate-spin" style={{ color: 'var(--brand)' }} />
           </div>
+        ) : loadError ? (
+          <LoadError message="No pudimos cargar las liquidaciones." onRetry={load} />
         ) : payouts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <CheckCircle size={28} className="mb-3" style={{ color: '#CBD5E1' }} />
