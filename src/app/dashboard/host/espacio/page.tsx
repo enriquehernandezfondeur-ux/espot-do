@@ -13,7 +13,10 @@ const VideoUploader   = dynamic(() => import('@/components/dashboard/VideoUpload
 const MenuUploader    = dynamic(() => import('@/components/dashboard/MenuUploader'),    { ssr: false })
 import type { BaseActivity } from '@/lib/activities'
 import type { SpaceCategory, PricingType, PaymentTermType } from '@/types'
-import { SPACE_CATEGORIES } from '@/lib/categories'
+import { SPACE_CATEGORIES, getCategoryLabel } from '@/lib/categories'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Skeleton } from '@/components/ui/Skeleton'
+import { LoadError } from '@/components/LoadError'
 
 const steps = [
   { id: 1, label: 'Información básica', icon: Building2 },
@@ -86,9 +89,11 @@ export default function EspacioPage() {
   const [view, setView] = useState<'list' | 'create'>('list')
   const [spaces, setSpaces] = useState<Awaited<ReturnType<typeof getMySpaces>>>([])
   const [loadingSpaces, setLoadingSpaces] = useState(true)
+  const [spacesLoadError, setSpacesLoadError] = useState(false)
   const [spaceFilter, setSpaceFilter] = useState<'all' | 'published' | 'pending' | 'draft'>('all')
 
-  useEffect(() => {
+  function loadSpaces() {
+    setLoadingSpaces(true); setSpacesLoadError(false)
     getMySpaces()
       .then(data => {
         setSpaces(data)
@@ -96,8 +101,9 @@ export default function EspacioPage() {
         // Si no tiene espacios, ir directo al form de creación
         if (data.length === 0) setView('create')
       })
-      .catch(() => setLoadingSpaces(false))
-  }, [])
+      .catch(() => { setSpacesLoadError(true); setLoadingSpaces(false) })
+  }
+  useEffect(() => { loadSpaces() }, [])
 
   const [currentStep, setCurrentStep] = useState(1)
   const [saving, setSaving] = useState(false)
@@ -568,6 +574,10 @@ export default function EspacioPage() {
 
         <div className="flex items-center justify-between mb-5 md:mb-8">
           <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Building2 size={14} style={{ color: 'var(--brand)' }} />
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--brand)' }}>Mi espacio</span>
+            </div>
             <div className="flex items-center gap-3 mb-1">
               <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
                 Mis espacios
@@ -622,26 +632,21 @@ export default function EspacioPage() {
         })()}
 
         {loadingSpaces ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 size={28} className="animate-spin" style={{ color: 'var(--brand)' }} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-64 rounded-2xl" />)}
+          </div>
+        ) : spacesLoadError ? (
+          <div className="rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+            <LoadError message="No pudimos cargar tus espacios." onRetry={loadSpaces} />
           </div>
         ) : spaces.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center rounded-2xl"
-            style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
-              style={{ background: 'var(--brand-dim)' }}>
-              <Building2 size={24} style={{ color: 'var(--brand)' }} />
-            </div>
-            <h2 className="font-semibold text-base mb-1" style={{ color: 'var(--text-primary)' }}>
-              Aún no tienes espacios
-            </h2>
-            <p className="text-sm mb-6" style={{ color: 'var(--text-muted)', maxWidth: 300 }}>
-              Crea tu primer espacio para empezar a recibir reservas en la plataforma.
-            </p>
-            <button onClick={() => setView('create')}
-              className="btn-brand flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold">
-              <PlusCircle size={16} /> Crear mi primer espacio
-            </button>
+          <div className="rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+            <EmptyState
+              icon={Building2}
+              title="Aún no tienes espacios"
+              subtitle="Crea tu primer espacio para empezar a recibir reservas en la plataforma."
+              action={<button onClick={() => setView('create')} className="btn-brand inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold"><PlusCircle size={16} /> Crear mi primer espacio</button>}
+            />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -681,14 +686,14 @@ export default function EspacioPage() {
                   <div className="p-5">
                     <div className="flex items-start justify-between gap-2 mb-3">
                       <div className="min-w-0">
-                        <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{space.name}</h3>
+                        <h3 className="font-bold text-base leading-tight" style={{ color: 'var(--text-primary)' }}>{space.name}</h3>
                         <div className="flex items-center gap-1 mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
                           <MapPin size={10} />{space.sector ? `${space.sector}, ` : ''}{space.city}
                         </div>
                       </div>
-                      <span className="text-xs font-medium px-2 py-1 rounded-lg shrink-0 capitalize"
+                      <span className="text-xs font-medium px-2 py-1 rounded-lg shrink-0"
                         style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                        {space.category}
+                        {getCategoryLabel(space.category)}
                       </span>
                     </div>
                     <div className="flex items-center gap-3 mb-4 text-xs" style={{ color: 'var(--text-muted)' }}>

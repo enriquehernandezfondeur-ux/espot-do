@@ -7,6 +7,9 @@ import {
   CalendarDays, ArrowUpDown, CalendarRange,
 } from 'lucide-react'
 import Pagination from '@/components/ui/Pagination'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Skeleton } from '@/components/ui/Skeleton'
+import { LoadError } from '@/components/LoadError'
 import { formatCurrency, formatDate, formatTime, cn, todayInRD } from '@/lib/utils'
 import { hostNetOf, platformFeeOf } from '@/lib/pricing'
 import { EXTERNAL_EVENT_STATUS } from '@/lib/statusConfig'
@@ -106,6 +109,7 @@ function itemStatusChip(item: AgendaItem): { label: string; color: string; bg: s
 export default function AgendaPage() {
   const [items,    setItems]    = useState<AgendaItem[]>([])
   const [loading,  setLoading]  = useState(true)
+  const [agendaError, setAgendaError] = useState(false)
   const [origin,   setOrigin]   = useState<OriginFilter>('all')
   const [status,   setStatus]   = useState<SimpleStatus>('all')
   const [dateFilter, setDateFilter] = useState('all')
@@ -131,20 +135,22 @@ export default function AgendaPage() {
     setTimeout(() => setToast(null), 3000)
   }
 
-  useEffect(() => {
-    setLoading(true)
-    Promise.all([
-      getHostBookings().catch(() => [] as Booking[]),
-      getExternalEvents().catch(() => [] as ExternalEvent[]),
-    ]).then(([bookings, events]) => {
+  function loadAgenda() {
+    setLoading(true); setAgendaError(false)
+    Promise.allSettled([getHostBookings(), getExternalEvents()]).then(([rb, re]) => {
+      // Error real solo si fallan AMBAS fuentes (si una carga, mostramos lo que hay)
+      if (rb.status === 'rejected' && re.status === 'rejected') { setAgendaError(true); setLoading(false); return }
+      const bookings = rb.status === 'fulfilled' ? rb.value : ([] as Booking[])
+      const events   = re.status === 'fulfilled' ? re.value : ([] as ExternalEvent[])
       const all: AgendaItem[] = [
-        ...bookings.map(b => ({ source: 'espot'   as const, data: b })),
-        ...events.map(e  => ({ source: 'direct'   as const, data: e })),
+        ...bookings.map(b => ({ source: 'espot'  as const, data: b })),
+        ...events.map(e  => ({ source: 'direct' as const, data: e })),
       ]
       setItems(all)
       setLoading(false)
     })
-  }, [])
+  }
+  useEffect(() => { loadAgenda() }, [])
 
   // Reset page when filters change
   useEffect(() => { setPage(1) }, [origin, status, dateFilter, dateFrom, dateTo, sortOrder, search])
@@ -486,22 +492,19 @@ export default function AgendaPage() {
             </div>
 
             {loading ? (
-              <div className="flex items-center justify-center py-16">
-                <Loader2 className="w-6 h-6 animate-spin" style={{ color: 'var(--brand)' }} />
+              <div className="p-3 space-y-2">
+                {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-14" />)}
               </div>
+            ) : agendaError ? (
+              <LoadError message="No pudimos cargar tus reservas." onRetry={loadAgenda} />
             ) : filtered.length === 0 ? (
-              <div className="text-center py-16">
-                <LayoutList size={32} className="mx-auto mb-3 text-gray-200" />
-                <p className="text-sm text-gray-400">
-                  {search || status !== 'all' || origin !== 'all' ? 'Sin resultados' : 'Sin eventos registrados'}
-                </p>
-                {!search && status === 'all' && origin === 'all' && (
-                  <Link href="/dashboard/host/eventos/nuevo"
-                    className="mt-3 inline-block text-sm font-semibold" style={{ color: 'var(--brand)' }}>
-                    Registrar primer evento
-                  </Link>
-                )}
-              </div>
+              <EmptyState
+                icon={LayoutList}
+                title={search || status !== 'all' || origin !== 'all' ? 'Sin resultados' : 'Sin reservas registradas'}
+                action={!search && status === 'all' && origin === 'all'
+                  ? <Link href="/dashboard/host/eventos/nuevo" className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>Registrar primer evento</Link>
+                  : undefined}
+              />
             ) : (
               <div className="divide-y divide-[var(--border-subtle)]">
                 {paginated.map(item => {
