@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createExternalEvent, updateExternalEvent, getExternalEvent } from '@/lib/actions/external-events'
 import { searchClients, createClient_ } from '@/lib/actions/clients'
+import { getMyPlan } from '@/lib/actions/subscription'
+import { ProUpsell } from '@/components/ProUpsell'
 import { getHostSpaces } from '@/lib/actions/host'
 import type { CreateClientPayload } from '@/lib/actions/clients'
 import { createClient } from '@/lib/supabase/client'
@@ -55,6 +57,9 @@ export default function NuevoEventoPage() {
   const [saving,       setSaving]       = useState(false)
   const [loadingEvent, setLoadingEvent] = useState(isEditing)
   const [error,        setError]        = useState('')
+  const [isPro,        setIsPro]        = useState<boolean | null>(null)
+
+  useEffect(() => { getMyPlan().then(p => setIsPro(p === 'pro')).catch(() => setIsPro(null)) }, [])
 
   const [typeSuggs,    setTypeSuggs]    = useState<string[]>([])
   const [showTypeSugg, setShowTypeSugg] = useState(false)
@@ -228,7 +233,7 @@ export default function NuevoEventoPage() {
     router.push('/dashboard/host/eventos')
   }
 
-  const canSubmit = !!form.event_date && !saving
+  const canSubmit = !!form.event_date && !saving && isPro !== false
 
   const inputStyle = {
     border: '1.5px solid var(--border-medium)',
@@ -261,6 +266,12 @@ export default function NuevoEventoPage() {
         <div className="flex items-center justify-center py-12">
           <Loader2 size={20} className="animate-spin" style={{ color: 'var(--brand)' }} />
         </div>
+      )}
+
+      {isPro === false && (
+        <ProUpsell title="Espot Directo es una función Pro">
+          Registra eventos y reservas externas, capta leads y lleva el CRM con Espot Pro. Abajo puedes ver cómo funciona; para guardar, mejora tu plan.
+        </ProUpsell>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-3">

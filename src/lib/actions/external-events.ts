@@ -9,7 +9,7 @@ import { createBookingEvent, deleteBookingEvent, isGoogleCalendarConfigured } fr
 import { formatDate } from '@/lib/utils'
 import type { ExternalEvent, ExternalEventStatus, ExternalEventSource, ExternalPaymentMethod } from '@/types'
 import { resolveHostId } from './_resolveHost'
-import { requirePro } from './subscription'
+import { requirePro, isHostProById } from './subscription'
 
 export interface CreateExternalEventPayload {
   title: string
@@ -419,6 +419,10 @@ export async function getHostPublicProfile(slug: string) {
     .single()
   if (!data) return null
 
+  // El microsite público (Espot Directo) es función Pro — igual que la tarjeta
+  // digital /t/[slug]. Un host gratuito no expone página pública de captación.
+  if (!(await isHostProById((data as any).id))) return null
+
   // Obtener espacios activos del host
   const { data: spaces } = await sb
     .from('spaces')
@@ -455,6 +459,9 @@ export async function createFromPublicForm(payload: PublicFormPayload) {
     .eq('role', 'host' as any)
     .single()
   if (!host) return { error: 'Organizador no encontrado' }
+
+  // El microsite es Pro: si el host ya no es Pro, no se aceptan nuevos leads.
+  if (!(await isHostProById(payload.hostId))) return { error: 'Este organizador no está recibiendo solicitudes en este momento.' }
 
   // Si el cliente ya existe en el CRM del host, vincular
   const { data: existingClient } = await sb
