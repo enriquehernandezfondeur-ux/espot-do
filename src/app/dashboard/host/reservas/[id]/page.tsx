@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getHostBookingDetail, acceptBooking, rejectBooking, completeBooking } from '@/lib/actions/host'
+import { recordManualInstallmentPayment } from '@/lib/actions/installments'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
 import { platformFeeOf, hostNetOf } from '@/lib/pricing'
 import { payoutStyle } from '@/lib/statusConfig'
@@ -28,6 +29,23 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
   const [showRejectForm, setShowRejectForm] = useState(false)
   const [rejectReason, setRejectReason]   = useState('')
   const [existingDispute, setExistingDispute] = useState<any>(null)
+  // Registro de pago manual de una cuota
+  const [payInst,   setPayInst]   = useState<any>(null)
+  const [payMethod, setPayMethod] = useState<'transferencia' | 'efectivo' | 'otro'>('transferencia')
+  const [payRef,    setPayRef]    = useState('')
+  const [paySaving, setPaySaving] = useState(false)
+  const [payError,  setPayError]  = useState('')
+
+  async function handleRecordPayment() {
+    if (!payInst) return
+    setPaySaving(true); setPayError('')
+    const res = await recordManualInstallmentPayment(payInst.id, { method: payMethod, reference: payRef.trim() || undefined })
+    setPaySaving(false)
+    if (!res.success) { setPayError(res.error ?? 'No se pudo registrar el pago'); return }
+    setPayInst(null); setPayRef(''); setPayMethod('transferencia')
+    const fresh = await getHostBookingDetail(id)
+    setData(fresh)
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -391,7 +409,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
         </div>
       )}
 
-      {/* ── Plan de cuotas (solo lectura para el host) ────── */}
+      {/* ── Plan de cuotas (con registro de pago manual) ────── */}
       {installments.length > 0 && (
         <div className="rounded-2xl overflow-hidden mb-4"
           style={{ border: '1.5px solid var(--border-subtle)' }}>
@@ -440,6 +458,15 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
                     {inst.label ?? `Cuota ${inst.installment_number}`}
                   </p>
                 </div>
+                {/* Registrar pago manual (Azul no integrado: cobros por transferencia/efectivo) */}
+                {!paid && (
+                  <button type="button"
+                    onClick={() => { setPayInst(inst); setPayError('') }}
+                    className="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all"
+                    style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
+                    Registrar pago
+                  </button>
+                )}
               </div>
             )
           })}
@@ -585,6 +612,56 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
           <ArrowLeft size={15} /> Volver a reservas
         </Link>
       </div>
+
+      {/* ── Modal: registrar pago manual de una cuota ────────── */}
+      {payInst && (
+        <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4"
+          style={{ background: 'rgba(0,0,0,0.45)' }}
+          onClick={() => !paySaving && setPayInst(null)}>
+          <div className="w-full sm:max-w-sm rounded-t-3xl sm:rounded-2xl p-5"
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
+            onClick={e => e.stopPropagation()}>
+            <p className="text-sm font-bold mb-1" style={{ color: 'var(--text-primary)' }}>Registrar pago</p>
+            <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }}>
+              {(payInst.label ?? `Cuota ${payInst.installment_number}`)} · {formatCurrency(Number(payInst.amount))}
+            </p>
+
+            <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Método</label>
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              {(['transferencia', 'efectivo', 'otro'] as const).map(m => (
+                <button key={m} type="button" onClick={() => setPayMethod(m)}
+                  className="text-xs font-semibold py-2 rounded-lg capitalize transition-all"
+                  style={payMethod === m
+                    ? { background: 'var(--brand-dim)', color: 'var(--brand)', border: '1.5px solid var(--brand-border)' }
+                    : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+                  {m}
+                </button>
+              ))}
+            </div>
+
+            <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Referencia (opcional)</label>
+            <input value={payRef} onChange={e => setPayRef(e.target.value)}
+              placeholder="Nº de transferencia, etc."
+              className="w-full px-3 py-2.5 rounded-lg text-sm mb-3"
+              style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)', fontSize: 16 }} />
+
+            {payError && <p className="text-xs mb-3" style={{ color: '#DC2626' }}>{payError}</p>}
+
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setPayInst(null)} disabled={paySaving}
+                className="flex-1 py-3 rounded-xl text-sm font-semibold"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+                Cancelar
+              </button>
+              <button type="button" onClick={handleRecordPayment} disabled={paySaving}
+                className="flex-1 py-3 rounded-xl text-sm font-bold"
+                style={{ background: 'var(--brand)', color: '#fff', opacity: paySaving ? 0.6 : 1 }}>
+                {paySaving ? 'Guardando…' : 'Confirmar pago'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
