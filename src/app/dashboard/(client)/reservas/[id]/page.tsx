@@ -13,6 +13,7 @@ import { getClientBookingDetail } from '@/lib/actions/client'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
 import { countdownLabel } from '@/lib/payments/schedule'
 import { cancellationPolicyText } from '@/lib/cancellation'
+import { bookingBalance, computePaymentState } from '@/lib/booking-balance'
 import { submitReview, getUserReviewedBookings } from '@/lib/actions/reviews'
 import DisputeSection from './DisputeSection'
 import { getDisputeForBooking } from '@/lib/actions/disputes'
@@ -223,6 +224,30 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
               {formatCurrency(Number(booking.total_amount))} total
             </span>
           </div>
+
+          {/* Balance por reserva: pagado vs pendiente (fuente única bookingBalance) */}
+          {(() => {
+            const bal = bookingBalance({ totalAmount: Number(booking.total_amount), paidAmount: computePaymentState(installments).paidAmount })
+            const pct = bal.total > 0 ? Math.round((bal.paid / bal.total) * 100) : 0
+            return (
+              <div className="px-5 py-3.5" style={{ borderBottom: '1px solid var(--border-subtle)', background: '#fff' }}>
+                <div className="flex items-baseline justify-between mb-2">
+                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                    Pagaste <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(bal.paid)}</strong> de {formatCurrency(bal.total)}
+                  </span>
+                  {bal.pending > 0 ? (
+                    <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Faltan {formatCurrency(bal.pending)}</span>
+                  ) : (
+                    <span className="text-sm font-bold" style={{ color: '#16A34A' }}>Pagado completo</span>
+                  )}
+                </div>
+                <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-elevated)' }}>
+                  <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: 'var(--brand)' }} />
+                </div>
+              </div>
+            )
+          })()}
+
           {installments.map((inst, i) => {
             const paid = inst.status === 'paid'
             const overdue = inst.status === 'overdue'
