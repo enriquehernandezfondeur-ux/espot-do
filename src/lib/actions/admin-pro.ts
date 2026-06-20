@@ -1,8 +1,10 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { resolvePlan } from '@/lib/plans'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 // ============================================================
 // Módulo administrativo "Espot Pro".
@@ -15,8 +17,8 @@ const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeu
 const LIVE = ['trialing', 'active', 'pending_payment', 'past_due', 'suspended']
 const DAY_MS = 86_400_000
 
-/** Mismo criterio que requireAdmin() de admin.ts. */
-async function requireAdmin() {
+/** Mismo criterio que requireAdmin() de admin.ts. Devuelve el cliente service-role + el admin. */
+async function requireAdmin(): Promise<{ svc: SupabaseClient; adminId: string } | null> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
@@ -24,7 +26,7 @@ async function requireAdmin() {
     const { data } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
     if (data?.role !== 'admin') return null
   }
-  try { return createServiceClient() } catch { return null }
+  try { return { svc: createServiceClient(), adminId: user.id } } catch { return null }
 }
 
 export interface ProOwnerSub {
@@ -70,8 +72,9 @@ export interface ProOwnersResult {
 }
 
 export async function getProOwners(): Promise<ProOwnersResult | null> {
-  const svc = await requireAdmin()
-  if (!svc) return null
+  const auth = await requireAdmin()
+  if (!auth) return null
+  const { svc } = auth
 
   const nowISO = new Date().toISOString()
   const nowMs = Date.now()
@@ -150,4 +153,217 @@ export async function getProOwners(): Promise<ProOwnersResult | null> {
   }
 
   return { owners, stats }
+}
+
+// ── Detalle de un propietario ────────────────────────────────
+export interface ProAuditEntry {
+  id: string; action: string; old_status: string | null; new_status: string | null
+  note: string | null; admin_id: string | null; created_at: string
+}
+export interface ProNotifEntry {
+  id: string; event_type: string; channel: string; status: string
+  error: string | null; sent_at: string | null; created_at: string
+}
+export interface ProOwnerDetail {
+  profile: any
+  sub: (ProOwnerSub & { id: string; price_amount: number | null; admin_note: string | null }) | null
+  plan: 'free' | 'pro'
+  daysLeft: number | null
+  spaces: { id: string; name: string; is_published: boolean }[]
+  audit: ProAuditEntry[]
+  notifications: ProNotifEntry[]
+  bookingsCount: number
+  externalCount: number
+  lastActivity: string | null
+}
+
+export async function getProOwnerDetail(hostId: string): Promise<ProOwnerDetail | null> {
+  const auth = await requireAdmin()
+  if (!auth) return null
+  const { svc } = auth
+  const nowISO = new Date().toISOString()
+
+  const [{ data: profile }, { data: sub }, { data: spaces }, { data: audit }, { data: notifs }, spaceIdsRes] = await Promise.all([
+    svc.from('profiles').select('*').eq('id', hostId).maybeSingle(),
+    svc.from('host_subscriptions')
+      .select('id, status, activation_type, payment_provider, current_period_start, current_period_end, cancel_at_period_end, started_at, cancelled_at, price_amount, admin_note')
+      .eq('host_id', hostId).in('status', LIVE).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+    svc.from('spaces').select('id, name, is_published').eq('host_id', hostId).order('created_at', { ascending: false }),
+    svc.from('subscription_audit_log').select('id, action, old_status, new_status, note, admin_id, created_at').eq('host_id', hostId).order('created_at', { ascending: false }).limit(50),
+    svc.from('subscription_notifications').select('id, event_type, channel, status, error, sent_at, created_at').eq('host_id', hostId).order('created_at', { ascending: false }).limit(50),
+    svc.from('spaces').select('id').eq('host_id', hostId),
+  ])
+
+  const spaceIds = (spaceIdsRes.data ?? []).map((s: any) => s.id)
+  let bookingsCount = 0, externalCount = 0, lastActivity: string | null = profile?.created_at ?? null
+  if (spaceIds.length) {
+    const [{ count: bc, data: lastBk }, { count: ec, data: lastEv }] = await Promise.all([
+      svc.from('bookings').select('updated_at', { count: 'exact' }).in('space_id', spaceIds).order('updated_at', { ascending: false }).limit(1),
+      svc.from('external_events').select('updated_at', { count: 'exact' }).eq('host_id', hostId).order('updated_at', { ascending: false }).limit(1),
+    ])
+    bookingsCount = bc ?? 0; externalCount = ec ?? 0
+    const cands = [lastActivity, (lastBk as any)?.[0]?.updated_at, (lastEv as any)?.[0]?.updated_at].filter(Boolean) as string[]
+    if (cands.length) lastActivity = cands.sort().reverse()[0]
+  }
+
+  const plan = resolvePlan(sub, nowISO)
+  let daysLeft: number | null = null
+  if (plan === 'pro' && sub?.current_period_end) {
+    daysLeft = Math.max(0, Math.ceil((new Date(sub.current_period_end).getTime() - Date.now()) / DAY_MS))
+  }
+
+  return {
+    profile, sub: sub as any, plan, daysLeft,
+    spaces: (spaces ?? []) as any,
+    audit: (audit ?? []) as any,
+    notifications: (notifs ?? []) as any,
+    bookingsCount, externalCount, lastActivity,
+  }
+}
+
+// ── Acción administrativa integral (con auditoría) ───────────
+export type ProAction =
+  | 'activar_prueba' | 'activar_pro' | 'extender' | 'renovar_30' | 'cambiar_fin'
+  | 'marcar_pagado' | 'marcar_pendiente' | 'cancelar_fin_periodo' | 'cancelar_ahora'
+  | 'suspender' | 'restaurar' | 'volver_normal' | 'nota'
+
+export interface ProActionParams {
+  days?: number
+  endDate?: string            // 'YYYY-MM-DD'
+  note?: string
+  activationType?: 'manual' | 'azul'
+}
+
+function clampDays(d?: number): number { return Math.min(3650, Math.max(1, Math.round(d || 30))) }
+
+export async function adminProAction(
+  hostId: string, action: ProAction, params: ProActionParams = {},
+): Promise<{ ok: true } | { error: string }> {
+  const auth = await requireAdmin()
+  if (!auth) return { error: 'No autorizado' }
+  const { svc, adminId } = auth
+
+  const now = Date.now()
+  const nowISO = new Date(now).toISOString()
+
+  // Suscripción viva actual
+  const { data: existing } = await svc.from('host_subscriptions')
+    .select('id, status, current_period_end, activation_type, cancel_at_period_end')
+    .eq('host_id', hostId).in('status', LIVE).order('created_at', { ascending: false }).limit(1).maybeSingle()
+
+  const oldStatus: string | null = existing?.status ?? null
+  const vigenteFin = existing?.current_period_end ? new Date(existing.current_period_end).getTime() : 0
+  const baseMs = vigenteFin > now ? vigenteFin : now
+
+  // Construye el "siguiente" estado de la suscripción (campos a escribir).
+  let next: Record<string, any> = { updated_at: nowISO }
+  let needsExisting = true          // la acción requiere una sub viva
+  let endForPlan: string | null = existing?.current_period_end ?? null
+  let statusForPlan = oldStatus
+
+  const periodFrom = (fromMs: number, days: number) => new Date(fromMs + clampDays(days) * DAY_MS).toISOString()
+
+  switch (action) {
+    case 'activar_prueba': {
+      needsExisting = false
+      const end = periodFrom(now, params.days ?? 30)
+      next = { ...next, status: 'trialing', activation_type: 'trial', payment_provider: 'manual', activated_by: adminId, current_period_start: nowISO, current_period_end: end, cancel_at_period_end: false }
+      statusForPlan = 'trialing'; endForPlan = end
+      break
+    }
+    case 'activar_pro': {
+      needsExisting = false
+      const end = periodFrom(now, params.days ?? 30)
+      next = { ...next, status: 'active', activation_type: params.activationType ?? 'manual', payment_provider: params.activationType === 'azul' ? 'azul' : 'manual', activated_by: adminId, current_period_start: nowISO, current_period_end: end, cancel_at_period_end: false }
+      statusForPlan = 'active'; endForPlan = end
+      break
+    }
+    case 'extender':
+    case 'renovar_30': {
+      const days = action === 'renovar_30' ? 30 : (params.days ?? 30)
+      const end = periodFrom(baseMs, days)
+      const st = action === 'renovar_30' ? 'active' : (oldStatus === 'trialing' ? 'trialing' : 'active')
+      next = { ...next, status: st, current_period_end: end, cancel_at_period_end: false }
+      statusForPlan = st; endForPlan = end
+      break
+    }
+    case 'cambiar_fin': {
+      if (!params.endDate) return { error: 'Indica la fecha de vencimiento.' }
+      const ms = new Date(params.endDate + 'T12:00').getTime()
+      if (isNaN(ms)) return { error: 'Fecha inválida.' }
+      const end = new Date(ms).toISOString()
+      next = { ...next, current_period_end: end }
+      endForPlan = end
+      break
+    }
+    case 'marcar_pagado': {
+      const end = vigenteFin > now ? existing!.current_period_end! : periodFrom(now, 30)
+      next = { ...next, status: 'active', activation_type: 'azul', payment_provider: 'azul', current_period_start: nowISO, current_period_end: end, cancel_at_period_end: false }
+      statusForPlan = 'active'; endForPlan = end
+      break
+    }
+    case 'marcar_pendiente':
+      next = { ...next, status: 'pending_payment' }
+      statusForPlan = 'pending_payment'
+      break
+    case 'cancelar_fin_periodo':
+      next = { ...next, cancel_at_period_end: true }
+      break // mantiene el estado/plan vigente hasta el fin
+    case 'cancelar_ahora':
+    case 'volver_normal':
+      next = { ...next, status: 'cancelled', cancelled_at: nowISO }
+      statusForPlan = 'cancelled'
+      break
+    case 'suspender':
+      next = { ...next, status: 'suspended' }
+      statusForPlan = 'suspended'
+      break
+    case 'restaurar': {
+      const end = vigenteFin > now ? existing!.current_period_end! : periodFrom(now, 30)
+      next = { ...next, status: 'active', current_period_start: nowISO, current_period_end: end, cancel_at_period_end: false, cancelled_at: null }
+      statusForPlan = 'active'; endForPlan = end
+      break
+    }
+    case 'nota':
+      if (params.note == null) return { error: 'Escribe la nota.' }
+      next = { ...next, admin_note: params.note }
+      break
+    default:
+      return { error: 'Acción no reconocida.' }
+  }
+
+  if (needsExisting && !existing) return { error: 'Este propietario no tiene una suscripción activa.' }
+  if (params.note != null && action !== 'nota') next.admin_note = params.note
+
+  // Escribe la suscripción (update existente o insert nueva)
+  let subId = existing?.id ?? null
+  if (existing) {
+    const { error } = await svc.from('host_subscriptions').update(next).eq('id', existing.id)
+    if (error) return { error: `No se pudo actualizar la suscripción: ${error.message}` }
+  } else {
+    const { data: ins, error } = await svc.from('host_subscriptions')
+      .insert({ host_id: hostId, price_amount: 499, started_at: nowISO, ...next })
+      .select('id').maybeSingle()
+    if (error) return { error: `No se pudo crear la suscripción: ${error.message}` }
+    subId = ins?.id ?? null
+  }
+
+  // Sincroniza el caché plan_type (fuente de verdad = la sub) y marca prueba usada
+  const plan = resolvePlan({ status: statusForPlan ?? '', current_period_end: endForPlan }, nowISO)
+  const profilePatch: Record<string, any> = { plan_type: plan }
+  if (action === 'activar_prueba') profilePatch.pro_trial_used = true
+  const { error: ep } = await svc.from('profiles').update(profilePatch).eq('id', hostId)
+  if (ep) return { error: `Suscripción guardada, pero no se pudo sincronizar el plan: ${ep.message}` }
+
+  // Registro de auditoría
+  await svc.from('subscription_audit_log').insert({
+    host_id: hostId, subscription_id: subId, admin_id: adminId,
+    action, old_status: oldStatus, new_status: statusForPlan ?? oldStatus, note: params.note ?? null,
+  })
+
+  // Sincronización inmediata de las superficies que dependen del plan
+  for (const p of ['/admin/pro', `/admin/usuarios/${hostId}`, '/dashboard/host', '/dashboard/host/pro', '/buscar']) {
+    try { revalidatePath(p) } catch {}
+  }
+  return { ok: true }
 }

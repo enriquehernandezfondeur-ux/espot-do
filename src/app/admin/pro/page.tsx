@@ -187,7 +187,7 @@ export default function AdminProPage() {
               {paginated.map(o => {
                 const st = proAdminStyle(o)
                 return (
-                  <Link key={o.id} href={`/admin/usuarios/${o.id}`}
+                  <Link key={o.id} href={`/admin/pro/${o.id}`}
                     className="grid gap-3 px-5 py-3.5 items-center hover:bg-[var(--bg-elevated)] transition-colors"
                     style={{ gridTemplateColumns: '2fr 1fr 0.8fr 1.1fr 1fr 0.6fr', minWidth: 760 }}>
                     <div className="min-w-0">
