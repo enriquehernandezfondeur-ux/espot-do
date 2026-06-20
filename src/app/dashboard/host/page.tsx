@@ -434,7 +434,7 @@ export default function DashboardPage() {
 
             // Color barra
             const barColor = isEspot
-              ? item.b.status === 'confirmed' ? '#22C55E' : item.b.status === 'pending' ? '#F59E0B' : '#9CA3AF'
+              ? item.b.status === 'confirmed' ? '#16A34A' : item.b.status === 'pending' ? '#D97706' : '#9CA3AF'
               : item.ev.status === 'confirmado' ? 'var(--brand)' : item.ev.status === 'en_curso' ? '#2563EB' : '#D97706'
 
             // Espacio/salon

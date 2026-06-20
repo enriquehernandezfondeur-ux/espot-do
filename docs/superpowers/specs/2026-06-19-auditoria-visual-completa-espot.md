@@ -1,5 +1,8 @@
 # Auditoría visual + funcional completa — Espot (2026-06-19)
 
+> **ESTADO DE REMEDIACIÓN (2026-06-19):** F0–F7 ejecutadas. Commits locales `c417b39`(F0 dinero) · `30d5aea`(F1 estados) · `be739b4`(F2 datos) · `a49e256`(F3 carga) · `9fca263`(F4 admin tokens) · `9da1fb9`(F5 componentes) · `e1171b3`(F6 Pro) + F7 pulido. Todos los Críticos resueltos. tsc+build+83 tests verde. Deuda incremental restante: barrido hex→token en los 21 archivos del admin; adopción de componentes en el resto de pantallas; decisiones de producto (is_featured, badge Pro público, cleaning/overtime).
+
+
 > Solo lectura. **Ningún cambio aplicado.** Este documento es el informe + plan de corrección por fases para aprobación del dueño. Evidencia = `archivo:línea` (el QA con login headless no es posible — Supabase local vacío, gate `SITE_PASSWORD`, OAuth no headless; ver memoria `local_run_qa_constraints`). Capturas públicas de prod posibles a pedido; paneles autenticados se evidencian por código.
 
 Método: 6 auditorías paralelas de solo lectura sobre todo `src/` — (A) fuente única de datos del espacio, (B) lenguaje de estados, (C) sistema visual, (D) precios, (E) gating Pro, (F) inventario + CRM + estados.

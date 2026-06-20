@@ -716,7 +716,7 @@ export default function CalendarioPage() {
                     {upcoming.map(item => {
                       const isEspot = item.kind === 'espot'
                       const barColor = isEspot
-                        ? item.b.status === 'confirmed' ? '#22C55E' : '#F59E0B'
+                        ? item.b.status === 'confirmed' ? '#16A34A' : '#D97706'
                         : 'var(--brand)'
                       const title   = isEspot
                         ? ((item.b as any).profiles?.full_name ?? 'Cliente')
