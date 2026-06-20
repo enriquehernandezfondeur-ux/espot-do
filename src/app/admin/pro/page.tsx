@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import { getProOwners, getProConfig, setProConfig, type ProOwnersResult, type ProOwnerRow, type ProConfig } from '@/lib/actions/admin-pro'
+import { getProOwners, getProConfig, setProConfig, logCommunication, type ProOwnersResult, type ProOwnerRow, type ProConfig } from '@/lib/actions/admin-pro'
 import { proAdminStyle } from '@/lib/statusConfig'
 import { StatCard } from '@/components/ui/StatCard'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -10,7 +10,7 @@ import { LoadError } from '@/components/LoadError'
 import Pagination from '@/components/ui/Pagination'
 import {
   Crown, Users, Gift, CheckCircle, Clock, AlertTriangle, XCircle,
-  Search, Loader2, Building2, ChevronRight, Mail, Phone, Copy, Check, Download, DollarSign,
+  Search, Loader2, Building2, ChevronRight, Mail, Phone, Copy, Check, Download, DollarSign, Send,
 } from 'lucide-react'
 
 const PAGE_SIZE = 25
@@ -18,37 +18,46 @@ const PAGE_SIZE = 25
 type FilterKey =
   | 'all' | 'trial' | 'pro' | 'exp30' | 'exp14' | 'exp7' | 'exp3' | 'exp1'
   | 'expired' | 'pending' | 'cancelled' | 'normal'
+  | 'never_trial' | 'published' | 'with_external' | 'no_pro_use'
 
 const FILTERS: { key: FilterKey; label: string }[] = [
-  { key: 'all',       label: 'Todos' },
-  { key: 'trial',     label: 'Pruebas activas' },
-  { key: 'pro',       label: 'Pro activos' },
-  { key: 'exp30',     label: 'Vencen ≤30d' },
-  { key: 'exp14',     label: '≤14d' },
-  { key: 'exp7',      label: '≤7d' },
-  { key: 'exp3',      label: '≤3d' },
-  { key: 'exp1',      label: 'Mañana' },
-  { key: 'expired',   label: 'Vencidos' },
-  { key: 'pending',   label: 'Pendientes de pago' },
-  { key: 'cancelled', label: 'Cancelados' },
-  { key: 'normal',    label: 'Normal' },
+  { key: 'all',          label: 'Todos' },
+  { key: 'trial',        label: 'Pruebas activas' },
+  { key: 'pro',          label: 'Pro activos' },
+  { key: 'exp30',        label: 'Vencen ≤30d' },
+  { key: 'exp14',        label: '≤14d' },
+  { key: 'exp7',         label: '≤7d' },
+  { key: 'exp3',         label: '≤3d' },
+  { key: 'exp1',         label: 'Mañana' },
+  { key: 'expired',      label: 'Vencidos' },
+  { key: 'pending',      label: 'Pendientes de pago' },
+  { key: 'cancelled',    label: 'Cancelados' },
+  { key: 'normal',       label: 'Normal' },
+  { key: 'never_trial',  label: 'Nunca probó Pro' },
+  { key: 'published',    label: 'Con espacios publicados' },
+  { key: 'with_external',label: 'Con reservas externas' },
+  { key: 'no_pro_use',   label: 'Pro sin usar funciones' },
 ]
 
 function matchesFilter(o: ProOwnerRow, f: FilterKey): boolean {
   const d = o.daysLeft
   switch (f) {
-    case 'all':       return true
-    case 'trial':     return o.plan === 'pro' && o.sub?.status === 'trialing'
-    case 'pro':       return o.plan === 'pro' && o.sub?.status === 'active'
-    case 'exp30':     return o.plan === 'pro' && d != null && d <= 30
-    case 'exp14':     return o.plan === 'pro' && d != null && d <= 14
-    case 'exp7':      return o.plan === 'pro' && d != null && d <= 7
-    case 'exp3':      return o.plan === 'pro' && d != null && d <= 3
-    case 'exp1':      return o.plan === 'pro' && d != null && d <= 1
-    case 'expired':   return o.plan === 'free' && !!o.sub && (o.sub.status === 'past_due' || o.sub.status === 'expired')
-    case 'pending':   return o.sub?.status === 'pending_payment'
-    case 'cancelled': return o.sub?.status === 'cancelled'
-    case 'normal':    return !o.sub
+    case 'all':           return true
+    case 'trial':         return o.plan === 'pro' && o.sub?.status === 'trialing'
+    case 'pro':           return o.plan === 'pro' && o.sub?.status === 'active'
+    case 'exp30':         return o.plan === 'pro' && d != null && d <= 30
+    case 'exp14':         return o.plan === 'pro' && d != null && d <= 14
+    case 'exp7':          return o.plan === 'pro' && d != null && d <= 7
+    case 'exp3':          return o.plan === 'pro' && d != null && d <= 3
+    case 'exp1':          return o.plan === 'pro' && d != null && d <= 1
+    case 'expired':       return o.plan === 'free' && !!o.sub && (o.sub.status === 'past_due' || o.sub.status === 'expired')
+    case 'pending':       return o.sub?.status === 'pending_payment'
+    case 'cancelled':     return o.sub?.status === 'cancelled'
+    case 'normal':        return !o.sub
+    case 'never_trial':   return o.plan === 'free' && !o.proTrialUsed && !o.sub
+    case 'published':     return o.publishedCount > 0
+    case 'with_external': return o.externalCount > 0
+    case 'no_pro_use':    return o.plan === 'pro' && o.externalCount === 0
   }
 }
 
@@ -69,6 +78,7 @@ export default function AdminProPage() {
   const [copied, setCopied]   = useState(false)
   const [config, setConfig]   = useState<ProConfig | null>(null)
   const [cfgSaving, setCfgSaving] = useState(false)
+  const [commMsg, setCommMsg] = useState('')
 
   function load() {
     setLoading(true); setLoadError(false)
@@ -110,6 +120,15 @@ export default function AdminProPage() {
     const emails = filtered.map(o => o.email).filter(Boolean).join(', ')
     navigator.clipboard.writeText(emails)
     setCopied(true); setTimeout(() => setCopied(false), 1500)
+  }
+  async function registrarComunicacion() {
+    const label = window.prompt(`Registrar comunicación a ${filtered.length} propietario(s) del segmento.\n\nEtiqueta de la campaña (ej. "Recordatorio prueba 3d"):`)
+    if (!label) return
+    const channel: 'email' | 'whatsapp' = window.confirm('¿Por WhatsApp?  (Aceptar = WhatsApp · Cancelar = Email)') ? 'whatsapp' : 'email'
+    const res = await logCommunication(filtered.map(o => o.id), channel, label)
+    if ('error' in res) { setCommMsg(`✕ ${res.error}`); }
+    else setCommMsg(`✓ Registrada para ${res.count} propietario(s) por ${channel}.`)
+    setTimeout(() => setCommMsg(''), 4000)
   }
   function exportCSV() {
     const rows = [['Nombre', 'Email', 'Teléfono', 'Plan', 'Estado', 'Días restantes', 'Espacios', 'Registro']]
@@ -209,7 +228,13 @@ export default function AdminProPage() {
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
           <Download size={13} /> Exportar CSV
         </button>
+        <button onClick={registrarComunicacion}
+          className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl"
+          style={{ background: 'var(--pro-dim)', border: '1px solid var(--pro-border)', color: 'var(--pro-strong)' }}>
+          <Send size={13} /> Registrar comunicación
+        </button>
       </div>
+      {commMsg && <div className="text-xs mb-3" style={{ color: commMsg.startsWith('✓') ? 'var(--pro-strong)' : '#DC2626' }}>{commMsg}</div>}
 
       {/* Filtros */}
       <div className="flex flex-wrap items-center gap-1.5 mb-4">

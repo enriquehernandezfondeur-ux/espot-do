@@ -48,6 +48,7 @@ export interface ProOwnerRow {
   created_at: string | null
   spacesCount: number
   publishedCount: number
+  externalCount: number
   plan: 'free' | 'pro'
   proTrialUsed: boolean
   sub: ProOwnerSub | null
@@ -83,7 +84,7 @@ export async function getProOwners(): Promise<ProOwnersResult | null> {
   const nowISO = new Date().toISOString()
   const nowMs = Date.now()
 
-  const [{ data: hosts }, { data: subs }, { data: spaces }] = await Promise.all([
+  const [{ data: hosts }, { data: subs }, { data: spaces }, { data: external }] = await Promise.all([
     svc.from('profiles')
       .select('id, full_name, email, phone, created_at, pro_trial_used')
       .eq('role', 'host' as any)
@@ -93,7 +94,11 @@ export async function getProOwners(): Promise<ProOwnersResult | null> {
       .in('status', LIVE)
       .order('created_at', { ascending: false }),
     svc.from('spaces').select('host_id, is_published'),
+    svc.from('external_events').select('host_id'),
   ])
+
+  const externalByHost = new Map<string, number>()
+  for (const e of (external ?? []) as any[]) externalByHost.set(e.host_id, (externalByHost.get(e.host_id) ?? 0) + 1)
 
   // Sub viva más reciente por host (la query ya viene ordenada desc).
   const subByHost = new Map<string, ProOwnerSub>()
@@ -137,6 +142,7 @@ export async function getProOwners(): Promise<ProOwnersResult | null> {
       created_at: h.created_at,
       spacesCount: counts.total,
       publishedCount: counts.published,
+      externalCount: externalByHost.get(h.id) ?? 0,
       plan,
       proTrialUsed: !!h.pro_trial_used,
       sub,
@@ -163,6 +169,32 @@ export async function getProOwners(): Promise<ProOwnersResult | null> {
   }
 
   return { owners, stats }
+}
+
+// ── Marketing: registrar una comunicación a un segmento ──────
+// Deja constancia (en subscription_notifications) de que se contactó a estos
+// propietarios. NO envía nada (la integración email/WhatsApp llega después);
+// sirve para tracking de campañas y para "ver última comunicación".
+export async function logCommunication(
+  hostIds: string[], channel: 'email' | 'whatsapp', label: string,
+): Promise<{ ok: true; count: number } | { error: string }> {
+  const auth = await requireAdmin()
+  if (!auth) return { error: 'No autorizado' }
+  const ids = (hostIds ?? []).filter(Boolean).slice(0, 2000)
+  if (!ids.length) return { error: 'No hay propietarios en el segmento.' }
+  const clean = (label || 'campaña').trim().slice(0, 80)
+  if (channel !== 'email' && channel !== 'whatsapp') return { error: 'Canal inválido.' }
+
+  const nowISO = new Date().toISOString()
+  // period_key con timestamp evita el choque del índice único (cada registro es uno nuevo).
+  const rows = ids.map(host_id => ({
+    host_id, subscription_id: null, event_type: `campaña: ${clean}`,
+    channel, status: 'sent', period_key: nowISO, sent_at: nowISO,
+  }))
+  const { error } = await auth.svc.from('subscription_notifications').insert(rows)
+  if (error) return { error: error.message }
+  revalidatePath('/admin/pro')
+  return { ok: true, count: ids.length }
 }
 
 // ── Configuración del módulo ─────────────────────────────────
