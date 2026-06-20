@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { sendEmail } from '@/lib/email/send'
 import { emailBase, infoBox } from '@/lib/email/templates'
 import { formatCurrency, formatDate, escapeHtml } from '@/lib/utils'
-import { suggestHourlyFromLegacy, platformFeeOf, hostNetOf } from '@/lib/pricing'
+import { platformFeeOf, hostNetOf } from '@/lib/pricing'
 
 const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
 
@@ -28,53 +28,6 @@ async function requireAdmin() {
     console.error('[requireAdmin] SUPABASE_SERVICE_ROLE_KEY no configurada — acceso admin denegado')
     return null
   }
-}
-
-// ── COLA DE REVISIÓN DE PRECIOS LEGACY (Espot 2.0 F8) ────────
-export async function getPricingReviewQueue() {
-  const supabase = await requireAdmin()
-  if (!supabase) return []
-  const { data } = await supabase
-    .from('space_pricing')
-    .select(`
-      id, space_id, pricing_type, minimum_consumption, session_hours,
-      min_hours, max_hours, fixed_price, package_hours, hourly_price, is_consumable,
-      spaces!space_id(name, slug)
-    `)
-    .eq('needs_pricing_review', true)
-  return (data ?? []).map((p: any) => ({
-    id:           p.id as string,
-    spaceId:      p.space_id as string,
-    spaceName:    (p.spaces?.name as string) ?? '—',
-    spaceSlug:    (p.spaces?.slug as string) ?? null,
-    pricingType:  p.pricing_type as string,
-    minHoursCur:  p.min_hours as number | null,
-    maxHoursCur:  p.max_hours as number | null,
-    suggestion:   suggestHourlyFromLegacy(p),
-  }))
-}
-
-export async function applyHourlyConversion(pricingId: string, payload: {
-  hourlyPrice: number
-  minHours: number
-  maxHours: number | null
-  isConsumable: boolean
-}): Promise<{ ok: true } | { error: string }> {
-  const supabase = await requireAdmin()
-  if (!supabase) return { error: 'No autorizado' }
-  if (!payload.hourlyPrice || payload.hourlyPrice <= 0) return { error: 'Indica un precio por hora válido.' }
-
-  const { error } = await supabase.from('space_pricing').update({
-    pricing_type:         'hourly',
-    hourly_price:         payload.hourlyPrice,
-    min_hours:            payload.minHours || 1,
-    max_hours:            payload.maxHours,
-    is_consumable:        payload.isConsumable,
-    needs_pricing_review: false,
-  }).eq('id', pricingId)
-  if (error) return { error: error.message }
-  revalidatePath('/admin/revision-precios')
-  return { ok: true }
 }
 
 // ── OBTENER ESPACIO COMPLETO ─────────────────────────────

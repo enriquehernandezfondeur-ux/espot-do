@@ -1,4 +1,4 @@
-import { computeBasePrice, computePlatformFee, computeHostNet, platformFeeOf, hostNetOf, isWeekendDate, consumptionLabel, suggestHourlyFromLegacy } from '@/lib/pricing'
+import { computeBasePrice, computePlatformFee, computeHostNet, platformFeeOf, hostNetOf, isWeekendDate, consumptionLabel } from '@/lib/pricing'
 
 describe('isWeekendDate', () => {
   it('trata viernes, sábado y domingo como fin de semana', () => {
@@ -111,33 +111,6 @@ describe('consumptionLabel', () => {
     expect(consumptionLabel(false)).toBe('Cubre el uso del espacio')
     expect(consumptionLabel(null)).toBe('Cubre el uso del espacio')
     expect(consumptionLabel(undefined)).toBe('Cubre el uso del espacio')
-  })
-})
-
-describe('suggestHourlyFromLegacy', () => {
-  it('minimum_consumption con session_hours: deriva y marca consumible', () => {
-    const s = suggestHourlyFromLegacy({ pricing_type: 'minimum_consumption', minimum_consumption: 6000, session_hours: 4 })
-    expect(s.hourlyPrice).toBe(1500)
-    expect(s.minHours).toBe(4)
-    expect(s.isConsumable).toBe(true)
-    expect(s.confident).toBe(false)
-  })
-  it('minimum_consumption sin horas: sin sugerencia', () => {
-    const s = suggestHourlyFromLegacy({ pricing_type: 'minimum_consumption', minimum_consumption: 6000, session_hours: null })
-    expect(s.hourlyPrice).toBeNull()
-  })
-  it('fixed_package con package_hours: deriva, no consumible', () => {
-    const s = suggestHourlyFromLegacy({ pricing_type: 'fixed_package', fixed_price: 10000, package_hours: 5 })
-    expect(s.hourlyPrice).toBe(2000)
-    expect(s.minHours).toBe(5)
-    expect(s.isConsumable).toBe(false)
-  })
-  it('custom_quote: sin sugerencia', () => {
-    expect(suggestHourlyFromLegacy({ pricing_type: 'custom_quote' }).hourlyPrice).toBeNull()
-  })
-  it('nunca es confident (siempre requiere revisión humana)', () => {
-    expect(suggestHourlyFromLegacy({ pricing_type: 'minimum_consumption', minimum_consumption: 6000, session_hours: 4 }).confident).toBe(false)
-    expect(suggestHourlyFromLegacy({ pricing_type: 'fixed_package', fixed_price: 10000, package_hours: 5 }).confident).toBe(false)
   })
 })
 
