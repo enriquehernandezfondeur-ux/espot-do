@@ -383,14 +383,13 @@ export default function ClientDashboard() {
         )
       })()}
 
-      {/* Stats — 2 cols en móvil, 4 en desktop */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+      {/* Stats — 3 KPIs accionables (sin "Total gastado", métrica contable no accionable) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
         {[
           { label: 'Total reservas', value: stats?.total ?? 0,            icon: CalendarDays, color: 'var(--brand)',  featured: true },
           { label: 'Por pagar',      value: stats?.pendingPayment ?? 0,   icon: Clock,        color: '#2563EB',
             urgent: (stats?.pendingPayment ?? 0) > 0 },
           { label: 'Confirmadas',    value: stats?.confirmed ?? 0,        icon: CheckCircle,  color: '#16A34A' },
-          { label: 'Total gastado',  value: formatCurrency(stats?.totalSpent ?? 0), icon: CreditCard, color: '#7C3AED' },
         ].map(({ label, value, icon: Icon, color, urgent, featured }: any) => (
           <div key={label} className="rounded-2xl p-4 md:p-5 transition-all hover:-translate-y-0.5"
             style={{
