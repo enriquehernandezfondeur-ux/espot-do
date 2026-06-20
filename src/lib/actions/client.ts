@@ -41,6 +41,7 @@ export async function getClientBookingDetail(bookingId: string) {
       spaces!space_id(
         id, name, slug, category, address, city, sector,
         space_images(url, is_cover),
+        space_conditions(cancellation_policy, cancellation_refund_pct, cancellation_hours_before),
         profiles!host_id(id, full_name, email, phone, avatar_url)
       ),
       space_pricing!pricing_id(package_name, package_includes, pricing_type, hourly_price, minimum_consumption, fixed_price),

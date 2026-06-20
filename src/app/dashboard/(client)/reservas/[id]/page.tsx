@@ -12,6 +12,7 @@ import { formatCurrency, formatDate, formatTime, todayInRD } from '@/lib/utils'
 import { getClientBookingDetail } from '@/lib/actions/client'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
 import { countdownLabel } from '@/lib/payments/schedule'
+import { cancellationPolicyText } from '@/lib/cancellation'
 import { submitReview, getUserReviewedBookings } from '@/lib/actions/reviews'
 import DisputeSection from './DisputeSection'
 import { getDisputeForBooking } from '@/lib/actions/disputes'
@@ -170,6 +171,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
             booking.is_consumable != null ? { label: 'Modalidad', value: booking.is_consumable ? 'Consumible (crédito en A&B)' : 'Uso del espacio' } : null,
             pricingLabel        ? { label: 'Tipo de reserva', value: pricingLabel } : null,
             space?.address      ? { label: 'Dirección', value: `${space.address}, ${space?.sector ?? ''}, ${space?.city ?? ''}` } : null,
+            space?.space_conditions?.[0] ? { label: 'Cancelación', value: cancellationPolicyText(space.space_conditions[0].cancellation_policy, space.space_conditions[0].cancellation_refund_pct, space.space_conditions[0].cancellation_hours_before) } : null,
           ].filter(Boolean).map((row: any) => (
             <div key={row.label} className="flex items-baseline gap-4 px-5 py-3"
               style={{ borderTop: '1px solid var(--border-subtle)' }}>
