@@ -141,7 +141,8 @@ export default function EspacioPage() {
   // Step 2 - Pricing
   const [pricingType, setPricingType] = useState<PricingType | ''>('hourly')
   const [hourlyPrice, setHourlyPrice] = useState('')
-  const [isConsumable, setIsConsumable] = useState(false)
+  // 'space' = solo uso del espacio · 'consumable' = solo consumible · 'choice' = el cliente elige al reservar
+  const [consumableMode, setConsumableMode] = useState<'space' | 'consumable' | 'choice'>('space')
   const [minHours, setMinHours] = useState('1')
   const [maxHours, setMaxHours] = useState('')
   const [minConsumption, setMinConsumption] = useState('')
@@ -260,7 +261,8 @@ export default function EspacioPage() {
       name, category, description, address, sector, lat, lng, capacityMin, capacityMax, videoUrl, menuUrl, menuFileName,
       primaryActivity, secondaryActivities,
       pricingType: pricingType as PricingType,
-      hourlyPrice, isConsumable, minHours, maxHours, minConsumption, sessionHours,
+      hourlyPrice, isConsumable: consumableMode === 'consumable', consumableOptional: consumableMode === 'choice',
+      minHours, maxHours, minConsumption, sessionHours,
       fixedPrice, packageName, packageHours, pkgExtraHourPrice, packageIncludes,
       weekendMultiplier: (() => {
         if (!weekendEnabled || !weekendPrice) return 1
@@ -380,7 +382,7 @@ export default function EspacioPage() {
     if (p) {
       setPricingType(p.pricing_type ?? '')
       setHourlyPrice(String(p.hourly_price ?? ''))
-      setIsConsumable(Boolean(p.is_consumable))
+      setConsumableMode(p.consumable_optional ? 'choice' : p.is_consumable ? 'consumable' : 'space')
       setMinHours(String(p.min_hours ?? ''))
       setMaxHours(String(p.max_hours ?? ''))
       setMinConsumption(String(p.minimum_consumption ?? ''))
@@ -516,7 +518,7 @@ export default function EspacioPage() {
     setStepError('')
     setName(''); setCategory(''); setDescription(''); setAddress(''); setSector('')
     setLat(''); setLng(''); setCapacityMin(''); setCapacityMax('')
-    setPricingType('hourly'); setHourlyPrice(''); setIsConsumable(false); setMinHours('1'); setMaxHours('')
+    setPricingType('hourly'); setHourlyPrice(''); setConsumableMode('space'); setMinHours('1'); setMaxHours('')
     setMinConsumption(''); setSessionHours(''); setFixedPrice(''); setPackageName('')
     setPackageHours(''); setPkgExtraHourPrice(''); setPackageIncludes([])
     setWeekendEnabled(false); setWeekendPrice(''); setMinAdvanceAmount('0')
@@ -1188,14 +1190,15 @@ export default function EspacioPage() {
                     (no cambia el cálculo, solo la presentación al cliente). */}
                 <div className="space-y-2">
                   <label className="block text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>¿Qué incluye el precio?</label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {[
-                      { val: false, title: 'Solo uso del espacio', desc: 'El precio cubre el alquiler del espacio.' },
-                      { val: true,  title: 'Precio consumible',     desc: 'Todo el monto se aplica en alimentos y bebidas el día del evento.' },
-                    ].map(opt => {
-                      const active = isConsumable === opt.val
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {([
+                      { val: 'space',      title: 'Solo uso del espacio', desc: 'El precio cubre el alquiler del espacio.' },
+                      { val: 'consumable', title: 'Precio consumible',     desc: 'Todo el monto se aplica en alimentos y bebidas el día del evento.' },
+                      { val: 'choice',     title: 'El cliente elige',       desc: 'El cliente decide al reservar entre uso del espacio o consumible. El precio es el mismo.' },
+                    ] as const).map(opt => {
+                      const active = consumableMode === opt.val
                       return (
-                        <button key={String(opt.val)} type="button" onClick={() => setIsConsumable(opt.val)}
+                        <button key={opt.val} type="button" onClick={() => setConsumableMode(opt.val)}
                           className="text-left rounded-xl p-3 transition-all"
                           style={{
                             background: active ? 'rgba(53,196,147,0.06)' : 'var(--bg-elevated)',

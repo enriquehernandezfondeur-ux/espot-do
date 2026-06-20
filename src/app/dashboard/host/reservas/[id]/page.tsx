@@ -218,6 +218,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
             bk.start_time ? { icon: <Clock size={13} />,    label: 'Horario',  value: `${formatTime(bk.start_time)} – ${formatTime(bk.end_time ?? '')}` } : null,
             { icon: <Users size={13} />,        label: 'Personas', value: String(bk.guest_count) },
             bk.event_type ? { icon: null, label: 'Tipo',    value: bk.event_type } : null,
+            bk.is_consumable != null ? { icon: null, label: 'Modalidad', value: bk.is_consumable ? 'Consumible (crédito en A&B)' : 'Uso del espacio' } : null,
           ].filter(Boolean).map((row: any) => (
             <div key={row.label}
               className="flex items-center gap-4 px-5 py-3"

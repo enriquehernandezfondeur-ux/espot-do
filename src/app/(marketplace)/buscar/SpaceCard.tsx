@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
-import { MapPin, Users, Check, X, ChevronLeft, ChevronRight, Zap, Star, Crown, Wine, KeyRound } from 'lucide-react'
+import { MapPin, Users, Check, X, ChevronLeft, ChevronRight, Zap, Star, Wine, KeyRound, ArrowLeftRight } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 import { summarizePricing, getActivePricing } from '@/lib/pricing'
 import { PRICING_TYPES } from './constants'
@@ -239,13 +239,7 @@ export function SpaceCard({
                 <Check size={9} style={{ color: '#fff', strokeWidth: 3 }} />
               </span>
             )}
-            {space.profiles?.plan_type === 'pro' && (
-              <span className="flex-shrink-0 inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                title="Anfitrión Espot Pro"
-                style={{ background: 'var(--pro-dim)', color: 'var(--pro-strong)', border: '1px solid var(--pro-border)' }}>
-                <Crown size={9} style={{ color: 'var(--pro)' }} /> Pro
-              </span>
-            )}
+            {/* El plan Pro es información interna del propietario — no se muestra al público. */}
           </div>
 
           {/* Ubicación + categoría + rating — todo en una línea */}
@@ -347,6 +341,13 @@ export function SpaceCard({
                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap"
                   style={{ background: 'rgba(71,85,105,0.08)', color: '#475569', border: '1px solid rgba(71,85,105,0.2)' }}>
                   <KeyRound size={10} /> Uso del espacio
+                </span>
+              )}
+              {/* El host permite que el cliente elija la modalidad al reservar. */}
+              {summary?.typeKey === 'hourly' && summary.consumption === 'optional' && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-1.5 py-0.5 rounded-md whitespace-nowrap"
+                  style={{ background: 'rgba(53,196,147,0.09)', color: '#0B7A55', border: '1px solid rgba(53,196,147,0.25)' }}>
+                  <ArrowLeftRight size={10} /> Tú eliges
                 </span>
               )}
 

@@ -75,7 +75,7 @@ export async function getClientFavorites() {
         id, name, slug, category, city, sector, capacity_min, capacity_max, is_verified, is_featured, instant_booking,
         profiles!host_id(plan_type),
         space_images(url, is_cover, position),
-        space_pricing(pricing_type, hourly_price, minimum_consumption, fixed_price, package_hours, weekend_multiplier, min_hours, max_hours, is_consumable, is_active),
+        space_pricing(pricing_type, hourly_price, minimum_consumption, fixed_price, package_hours, weekend_multiplier, min_hours, max_hours, is_consumable, consumable_optional, is_active),
         reviews(rating, is_public)
       )
     `)

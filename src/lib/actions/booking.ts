@@ -36,6 +36,8 @@ export interface CreateBookingPayload {
   addonsTotal: number
   platformFee: number
   totalAmount: number
+  /** Elección del cliente cuando el espacio permite elegir (consumable_optional). */
+  isConsumable?: boolean
 }
 
 export async function createBooking(payload: CreateBookingPayload) {
@@ -229,10 +231,19 @@ export async function createBooking(payload: CreateBookingPayload) {
 
   // Determinar si es cotización o reserva instantánea
   let isQuote = false
+  // Elección de consumible fijada al reservar. Se valida en servidor: solo se respeta
+  // la elección del cliente si el espacio es hourly y la permite (consumable_optional);
+  // si no, se fija el valor del host. NULL para tipos sin concepto de consumible.
+  let bookingConsumable: boolean | null = null
   if (payload.pricingId) {
     const { data: pricingRow } = await supabase
-      .from('space_pricing').select('pricing_type').eq('id', payload.pricingId).single()
+      .from('space_pricing').select('pricing_type, is_consumable, consumable_optional').eq('id', payload.pricingId).single()
     isQuote = pricingRow?.pricing_type === 'custom_quote'
+    if (pricingRow?.pricing_type === 'hourly') {
+      bookingConsumable = pricingRow.consumable_optional
+        ? (payload.isConsumable ?? false)
+        : !!pricingRow.is_consumable
+    }
   }
   const { data: spaceRow } = await supabase
     .from('spaces').select('instant_booking').eq('id', payload.spaceId).single()
@@ -268,6 +279,7 @@ export async function createBooking(payload: CreateBookingPayload) {
       addons_total: payload.addonsTotal,
       platform_fee: payload.platformFee,
       total_amount: payload.totalAmount,
+      is_consumable: bookingConsumable,
       status:         isQuote ? 'quote_requested' : isInstant ? 'accepted' : 'pending',
       accepted_at:    isInstant ? new Date().toISOString() : null,
       payment_status: 'unpaid',

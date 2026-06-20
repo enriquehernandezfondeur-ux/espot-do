@@ -57,6 +57,8 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   const isHourly      = pricing?.pricing_type === 'hourly'
   const isConsumption = pricing?.pricing_type === 'minimum_consumption'
   const isPackage     = pricing?.pricing_type === 'fixed_package'
+  // El host permite que el cliente elija la modalidad (uso del espacio vs consumible).
+  const consumableOptional = isHourly && pricing?.consumable_optional === true
   const isQuote       = pricing?.pricing_type === 'custom_quote'
 
   const steps   = addons.length > 0 ? STEPS : STEPS.filter(s => s.id !== 4)
@@ -75,6 +77,8 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
   const [customEventType,setCustomEventType]= useState('')
   const [selectedAddons, setSelectedAddons] = useState<string[]>([])
   const [guestNote,      setGuestNote]      = useState('')
+  // Elección del cliente cuando el espacio lo permite (consumableOptional). Default: uso del espacio.
+  const [chosenConsumable, setChosenConsumable] = useState(false)
 
   const [showNote,         setShowNote]         = useState(false)
   const [showPaymentPlan,  setShowPaymentPlan]  = useState(false)
@@ -401,6 +405,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
         selectedAddonIds: selectedAddons,
         basePrice, addonsTotal, platformFee,
         totalAmount: subtotal,
+        isConsumable: consumableOptional ? chosenConsumable : undefined,
       })
       if ('error' in result) {
         setError(result.error ?? 'Error al procesar la solicitud')
@@ -1076,6 +1081,36 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
               ))}
             </div>
 
+            {/* Elección de modalidad cuando el host lo permite (mismo precio, distinto destino) */}
+            {consumableOptional && (
+              <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
+                <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)' }}>
+                  <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
+                    ¿Cómo quieres usar el monto?
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3">
+                  {([
+                    { val: false, title: 'Uso del espacio', desc: 'El monto cubre el alquiler del espacio.' },
+                    { val: true,  title: 'Consumible',       desc: 'El monto se aplica en alimentos y bebidas el día del evento.' },
+                  ] as const).map(opt => {
+                    const active = chosenConsumable === opt.val
+                    return (
+                      <button key={String(opt.val)} type="button" onClick={() => setChosenConsumable(opt.val)}
+                        className="text-left rounded-xl p-3 transition-all"
+                        style={{
+                          background: active ? 'rgba(53,196,147,0.06)' : 'var(--bg-elevated)',
+                          border: `1.5px solid ${active ? 'var(--brand-border)' : 'var(--border-subtle)'}`,
+                        }}>
+                        <div className="font-medium text-sm" style={{ color: active ? 'var(--brand)' : 'var(--text-primary)' }}>{opt.title}</div>
+                        <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{opt.desc}</div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Desglose de precio */}
             {subtotal > 0 && (
               <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
@@ -1131,9 +1166,9 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                   <div className="flex justify-between px-4 py-3 text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
                     <span>Total</span><span>{formatCurrency(subtotal)}</span>
                   </div>
-                  {isHourly && pricing?.is_consumable && (
+                  {isHourly && (consumableOptional || pricing?.is_consumable) && (
                     <div className="px-4 py-3 text-xs" style={{ color: 'var(--brand)', borderTop: '1px solid var(--border-subtle)' }}>
-                      {consumptionLabel(true)} el día del evento.
+                      {consumptionLabel(consumableOptional ? chosenConsumable : true)}{(consumableOptional ? chosenConsumable : true) ? ' el día del evento.' : '.'}
                     </div>
                   )}
                 </div>

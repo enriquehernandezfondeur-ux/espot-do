@@ -62,6 +62,8 @@ export interface SaveSpacePayload {
   pricingType: PricingType
   hourlyPrice: string
   isConsumable: boolean
+  /** Si true (solo hourly), el cliente elige uso del espacio vs consumible al reservar. */
+  consumableOptional?: boolean
   minHours: string
   maxHours: string
   minConsumption: string
@@ -137,6 +139,7 @@ function buildPricingData(spaceId: string, p: SaveSpacePayload) {
     ...base,
     hourly_price: num(p.hourlyPrice),
     is_consumable: p.isConsumable,
+    consumable_optional: p.consumableOptional ?? false,
     min_hours: int(p.minHours) ?? 1,
     max_hours: int(p.maxHours),
   }
@@ -497,6 +500,7 @@ export async function updateSpace(spaceId: string, payload: Omit<SaveSpacePayloa
     is_active: true,
     // consumible solo aplica al modelo por hora; al cambiar a otro modelo se resetea
     is_consumable: payload.pricingType === 'hourly' ? payload.isConsumable : false,
+    consumable_optional: payload.pricingType === 'hourly' ? (payload.consumableOptional ?? false) : false,
   }
   if (payload.pricingType === 'hourly') {
     pricingData.hourly_price = num(payload.hourlyPrice)

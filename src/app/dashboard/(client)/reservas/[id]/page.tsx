@@ -167,6 +167,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
             booking.start_time ? { label: 'Horario',   value: `${formatTime(booking.start_time)} – ${formatTime(booking.end_time ?? '')}` } : null,
             { label: 'Personas',  value: `${booking.guest_count}` },
             booking.event_type  ? { label: 'Tipo',      value: booking.event_type } : null,
+            booking.is_consumable != null ? { label: 'Modalidad', value: booking.is_consumable ? 'Consumible (crédito en A&B)' : 'Uso del espacio' } : null,
             pricingLabel        ? { label: 'Tipo de reserva', value: pricingLabel } : null,
             space?.address      ? { label: 'Dirección', value: `${space.address}, ${space?.sector ?? ''}, ${space?.city ?? ''}` } : null,
           ].filter(Boolean).map((row: any) => (

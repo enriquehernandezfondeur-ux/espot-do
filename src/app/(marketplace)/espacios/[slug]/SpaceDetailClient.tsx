@@ -12,7 +12,7 @@ import {
   Clock, CheckCircle, X, Music, Ban,
   ArrowLeft, Share2, CreditCard, Lock, FileText, ChevronDown, Play, Images, MessageCircle,
   Car, Wifi, Wind, UtensilsCrossed, Volume2, Monitor, Music2, Trees, Waves, Wine,
-  Sun, Zap, ShowerHead, Building2, Star, Package, Sparkles, Camera, CalendarDays, Crown,
+  Sun, Zap, ShowerHead, Building2, Star, Package, Sparkles, Camera, CalendarDays,
 } from 'lucide-react'
 import { cn, formatCurrency, formatTime } from '@/lib/utils'
 import { addonIcon } from '@/lib/icon-map'
@@ -792,7 +792,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                       { label: 'Modalidad', value: pricingTypeLabel[pricing?.pricing_type] ?? '—', icon: CreditCard },
                       ...(pricing?.pricing_type === 'hourly' && pricing.min_hours ? [{ label: 'Mínimo de horas', value: `${pricing.min_hours} hora${pricing.min_hours > 1 ? 's' : ''}`, icon: Clock }] : []),
                       ...(pricing?.pricing_type === 'hourly' && pricing.max_hours ? [{ label: 'Máximo de horas', value: `${pricing.max_hours} horas`, icon: Clock }] : []),
-                      ...(pricing?.pricing_type === 'hourly' ? [{ label: 'Condición del precio', value: consumptionLabel(pricing.is_consumable), icon: CreditCard }] : []),
+                      ...(pricing?.pricing_type === 'hourly' ? [{ label: 'Condición del precio', value: pricing.consumable_optional ? 'Eliges al reservar: uso del espacio o consumible' : consumptionLabel(pricing.is_consumable), icon: CreditCard }] : []),
                       ...(pricing?.pricing_type === 'minimum_consumption' && pricing.session_hours ? [{ label: 'Duración de sesión', value: `${pricing.session_hours} horas`, icon: Clock }] : []),
                       ...(pricing?.weekend_multiplier && pricing.weekend_multiplier > 1 ? [{ label: 'Fines de semana', value: `+${Math.round((pricing.weekend_multiplier - 1) * 100)}% (vie–dom)`, icon: CalendarDays }] : []),
                       ...(space.instant_booking ? [{ label: 'Reserva', value: 'Instantánea, sin esperar aprobación', icon: Zap }] : []),
@@ -988,12 +988,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                               <CheckCircle size={10} /> Verificado
                             </span>
                           )}
-                          {(host as any).plan_type === 'pro' && (
-                            <span className="flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full shrink-0"
-                              style={{ background: 'var(--pro-dim)', color: 'var(--pro-strong)', border: '1px solid var(--pro-border)' }}>
-                              <Crown size={10} style={{ color: 'var(--pro)' }} /> Espot Pro
-                            </span>
-                          )}
+                          {/* El plan Pro es información interna del propietario — no se muestra al público. */}
                         </div>
                         <div className="text-xs mt-0.5 font-medium" style={{ color: 'var(--brand)' }}>
                           Propietario{(host as any).created_at

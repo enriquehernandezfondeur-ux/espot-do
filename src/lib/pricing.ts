@@ -19,6 +19,7 @@ export interface PricingInput {
   extra_hour_price?: number | null
   weekend_multiplier?: number | null
   is_consumable?: boolean | null
+  consumable_optional?: boolean | null
   min_hours?: number | null
   max_hours?: number | null
 }
@@ -146,8 +147,9 @@ export interface PricingSummary {
   maxHours: number | null
   /** Texto de rango de horas, p. ej. "2–6 h". null si no aplica. */
   hoursLabel: string | null
-  /** Si el monto se consume (A&B) o cubre solo el uso del espacio. null = no aplica. */
-  consumption: 'consumable' | 'space' | null
+  /** Si el monto se consume (A&B), cubre solo el espacio, o el cliente elige al
+   *  reservar ('optional'). null = no aplica. */
+  consumption: 'consumable' | 'space' | 'optional' | null
   /** Recargo/descuento de fin de semana, si lo hay. */
   weekend: { pct: number; isDiscount: boolean } | null
 }
@@ -176,8 +178,10 @@ export function summarizePricing(pricing: PricingInput | null | undefined): Pric
         minTotal: rate > 0 ? computeBasePrice(pricing, h, null) : null,
         rate: rate > 0 ? rate : null,
         minHours, maxHours, hoursLabel: hoursRangeLabel(minHours, maxHours),
-        consumption: typeof pricing.is_consumable === 'boolean'
-          ? (pricing.is_consumable ? 'consumable' : 'space') : null,
+        consumption: pricing.consumable_optional === true
+          ? 'optional'
+          : typeof pricing.is_consumable === 'boolean'
+            ? (pricing.is_consumable ? 'consumable' : 'space') : null,
         weekend,
       }
     }

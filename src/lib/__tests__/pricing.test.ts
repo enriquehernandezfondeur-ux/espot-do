@@ -152,6 +152,11 @@ describe('summarizePricing', () => {
     expect(s.hoursLabel).toBe('Mín. 3 h')
     expect(s.consumption).toBe('consumable')
   })
+  it('hourly con consumable_optional → consumption "optional", precio igual', () => {
+    const s = summarizePricing({ pricing_type: 'hourly', hourly_price: 2000, min_hours: 2, max_hours: 6, is_consumable: false, consumable_optional: true })!
+    expect(s.consumption).toBe('optional')   // gana sobre is_consumable
+    expect(s.minTotal).toBe(4000)            // el precio no cambia
+  })
   it('hourly sin min_hours → asume 1h', () => {
     const s = summarizePricing({ pricing_type: 'hourly', hourly_price: 5000 })!
     expect(s.minTotal).toBe(5000)
