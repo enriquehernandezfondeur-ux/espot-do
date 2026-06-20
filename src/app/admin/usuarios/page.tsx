@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { getAdminUsers, updateUserRole } from '@/lib/actions/admin'
+import { useConfirm } from '@/components/ui/ConfirmDialog'
 import { Search, Shield, Building2, User, Loader2, Download, Copy, Check, Users, ExternalLink, Mail, Eye, X } from 'lucide-react'
 import Link from 'next/link'
 import Pagination from '@/components/ui/Pagination'
@@ -25,6 +26,7 @@ export default function AdminUsersPage() {
   const [filter,   setFilter]   = useState('all')
   const [search,   setSearch]   = useState('')
   const [updating, setUpdating] = useState<string | null>(null)
+  const { confirm, dialog } = useConfirm()
   const [toast,    setToast]    = useState<{ msg: string; ok: boolean } | null>(null)
   const [copied,   setCopied]   = useState(false)
   const [page,     setPage]     = useState(1)
@@ -90,7 +92,16 @@ export default function AdminUsersPage() {
   // ── Cambio de rol ─────────────────────────────────────
   async function handleRoleChange(userId: string, role: string) {
     const label = roleConfig[role]?.label ?? role
-    if (!window.confirm(`¿Cambiar el rol de este usuario a "${label}"?`)) return
+    const isAdminGrant = role === 'admin'
+    const ok = await confirm({
+      title: `¿Cambiar el rol a "${label}"?`,
+      message: isAdminGrant
+        ? 'Otorgar administrador da acceso total a la plataforma (usuarios, pagos, espacios). Esta acción queda registrada en la bitácora.'
+        : undefined,
+      confirmText: isAdminGrant ? 'Sí, otorgar admin' : 'Cambiar rol',
+      tone: isAdminGrant ? 'danger' : 'default',
+    })
+    if (!ok) return
     setUpdating(userId)
     const result = await updateUserRole(userId, role)
     if ('error' in result) {
@@ -104,6 +115,7 @@ export default function AdminUsersPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
+      {dialog}
       {toast && (
         <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
           style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
