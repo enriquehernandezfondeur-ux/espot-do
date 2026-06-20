@@ -1,6 +1,8 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
+import { startAutoTrialIfEnabled } from '@/lib/proTrial'
 import { analyzeApplication } from '@/lib/ai/analyze-application'
 import { sendEmail } from '@/lib/email/send'
 import {
@@ -248,6 +250,10 @@ export async function approveApplication(
     .from('profiles')
     .update({ role: 'host', host_status: 'approved' })
     .eq('id', app.user_id)
+
+  // Prueba gratuita automática (si la config lo permite) — service-role para
+  // escribir suscripción + auditoría (RLS service-role-only).
+  try { await startAutoTrialIfEnabled(createServiceClient(), app.user_id, user.id) } catch {}
 
   // Notify applicant
   const applicant = app.user as any

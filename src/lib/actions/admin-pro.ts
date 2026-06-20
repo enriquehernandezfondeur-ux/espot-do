@@ -155,6 +155,38 @@ export async function getProOwners(): Promise<ProOwnersResult | null> {
   return { owners, stats }
 }
 
+// ── Configuración del módulo ─────────────────────────────────
+const PRO_CONFIG_KEYS = ['pro_auto_trial_enabled', 'pro_trial_days', 'pro_price_dop'] as const
+export type ProConfigKey = typeof PRO_CONFIG_KEYS[number]
+export interface ProConfig { autoTrialEnabled: boolean; trialDays: number; priceDop: number }
+
+export async function getProConfig(): Promise<ProConfig | null> {
+  const auth = await requireAdmin()
+  if (!auth) return null
+  const { data } = await auth.svc.from('marketplace_config').select('key, value').in('key', PRO_CONFIG_KEYS as unknown as string[])
+  const m = new Map((data ?? []).map((c: any) => [c.key, c.value]))
+  return {
+    autoTrialEnabled: m.get('pro_auto_trial_enabled') === 'true',
+    trialDays: Number(m.get('pro_trial_days')) || 30,
+    priceDop:  Number(m.get('pro_price_dop')) || 499,
+  }
+}
+
+export async function setProConfig(key: ProConfigKey, value: string): Promise<{ ok: true } | { error: string }> {
+  if (!PRO_CONFIG_KEYS.includes(key)) return { error: 'Clave no permitida' }
+  const auth = await requireAdmin()
+  if (!auth) return { error: 'No autorizado' }
+  if (key === 'pro_trial_days' || key === 'pro_price_dop') {
+    const n = Number(value)
+    if (!Number.isFinite(n) || n < 1) return { error: 'Valor numérico inválido.' }
+  }
+  if (key === 'pro_auto_trial_enabled' && value !== 'true' && value !== 'false') return { error: 'Valor inválido.' }
+  const { error } = await auth.svc.from('marketplace_config').update({ value }).eq('key', key)
+  if (error) return { error: error.message }
+  revalidatePath('/admin/pro')
+  return { ok: true }
+}
+
 // ── Detalle de un propietario ────────────────────────────────
 export interface ProAuditEntry {
   id: string; action: string; old_status: string | null; new_status: string | null

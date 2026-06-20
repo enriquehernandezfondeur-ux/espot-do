@@ -8,6 +8,7 @@ import { emailBase, infoBox } from '@/lib/email/templates'
 import { formatCurrency, formatDate, escapeHtml } from '@/lib/utils'
 import { platformFeeOf, hostNetOf } from '@/lib/pricing'
 import { resolvePlan } from '@/lib/plans'
+import { startAutoTrialIfEnabled } from '@/lib/proTrial'
 
 const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
 
@@ -316,6 +317,11 @@ export async function updateUserRole(userId: string, role: string) {
 
   const { error } = await supabase.from('profiles').update({ role }).eq('id', userId)
   if (error) return { error: error.message }
+
+  // Prueba gratuita automática al volverse propietario (si la config lo permite)
+  if (role === 'host' && profile?.role !== 'host') {
+    await startAutoTrialIfEnabled(supabase, userId)
+  }
 
   // Notificar al usuario cuando se le asigna el rol 'host' (si venía de otro rol)
   if (role === 'host' && profile?.email && profile?.role !== 'host') {

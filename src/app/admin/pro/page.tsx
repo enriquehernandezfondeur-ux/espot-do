@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import { getProOwners, type ProOwnersResult, type ProOwnerRow } from '@/lib/actions/admin-pro'
+import { getProOwners, getProConfig, setProConfig, type ProOwnersResult, type ProOwnerRow, type ProConfig } from '@/lib/actions/admin-pro'
 import { proAdminStyle } from '@/lib/statusConfig'
 import { StatCard } from '@/components/ui/StatCard'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -67,14 +67,30 @@ export default function AdminProPage() {
   const [filter, setFilter]   = useState<FilterKey>('all')
   const [page, setPage]       = useState(1)
   const [copied, setCopied]   = useState(false)
+  const [config, setConfig]   = useState<ProConfig | null>(null)
+  const [cfgSaving, setCfgSaving] = useState(false)
 
   function load() {
     setLoading(true); setLoadError(false)
     getProOwners()
       .then(d => { if (!d) { setLoadError(true) } else setData(d); setLoading(false) })
       .catch(() => { setLoadError(true); setLoading(false) })
+    getProConfig().then(c => setConfig(c)).catch(() => {})
   }
   useEffect(() => { load() }, [])
+
+  async function toggleAutoTrial() {
+    if (!config) return
+    setCfgSaving(true)
+    await setProConfig('pro_auto_trial_enabled', config.autoTrialEnabled ? 'false' : 'true')
+    setConfig({ ...config, autoTrialEnabled: !config.autoTrialEnabled })
+    setCfgSaving(false)
+  }
+  async function saveTrialDays(v: number) {
+    if (!config) return
+    setConfig({ ...config, trialDays: v })
+    await setProConfig('pro_trial_days', String(v))
+  }
 
   const filtered = useMemo(() => {
     const owners = data?.owners ?? []
@@ -121,6 +137,33 @@ export default function AdminProPage() {
         <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Espot Pro</h1>
         <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>Propietarios, planes y prueba gratuita</p>
       </div>
+
+      {/* Config de prueba gratuita */}
+      {config && (
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-3 mb-5 px-4 py-3 rounded-2xl"
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-card)' }}>
+          <div className="flex items-center gap-2">
+            <Gift size={16} style={{ color: 'var(--pro)' }} />
+            <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Prueba gratuita automática al registrarse</span>
+          </div>
+          <button onClick={toggleAutoTrial} disabled={cfgSaving} role="switch" aria-checked={config.autoTrialEnabled}
+            className="relative inline-flex items-center rounded-full transition-colors disabled:opacity-60"
+            style={{ width: 44, height: 24, background: config.autoTrialEnabled ? 'var(--pro)' : 'var(--border-medium)' }}>
+            <span className="inline-block rounded-full bg-white transition-transform"
+              style={{ width: 18, height: 18, transform: `translateX(${config.autoTrialEnabled ? 23 : 3}px)` }} />
+          </button>
+          <span className="text-xs font-semibold" style={{ color: config.autoTrialEnabled ? 'var(--pro-strong)' : 'var(--text-muted)' }}>
+            {config.autoTrialEnabled ? 'Activada' : 'Desactivada'}
+          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Duración</span>
+            <input type="number" min={1} value={config.trialDays}
+              onChange={e => saveTrialDays(Math.max(1, Number(e.target.value) || 30))}
+              className="w-16 rounded-lg px-2 py-1 text-sm" style={{ border: '1px solid var(--border-subtle)', fontSize: 16 }} />
+            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>días · RD${config.priceDop}/mes</span>
+          </div>
+        </div>
+      )}
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3 mb-6">
