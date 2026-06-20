@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { resolveHostAccess } from './_resolveHost'
-import { generateSlug, num, int } from '@/lib/utils'
+import { generateSlug, num, int, todayInRD } from '@/lib/utils'
 import { revalidatePath } from 'next/cache'
 import type { PricingType, PaymentTermType } from '@/types'
 import { sendEmail } from '@/lib/email/send'
@@ -415,6 +415,145 @@ export async function getMySpaces() {
     .order('created_at', { ascending: false })
 
   return data ?? []
+}
+
+export interface SpaceListItem {
+  id: string
+  name: string
+  slug: string
+  category: string
+  sector: string | null
+  city: string | null
+  capacity_max: number | null
+  is_published: boolean
+  is_active: boolean
+  is_featured: boolean
+  created_at: string
+  updated_at: string | null
+  cover: string | null
+  pricing_type: string | null
+  hourly_price: number | null
+  minimum_consumption: number | null
+  fixed_price: number | null
+  plan_type: string | null
+  next_event_date: string | null
+  cancellation_policy: string | null
+  cancellation_refund_pct: number | null
+  cancellation_hours_before: number | null
+}
+
+/**
+ * Lista PAGINADA de los espacios del host para "Mis espacios". Filtra/ordena en
+ * el SERVIDOR y trae solo los campos de la lista (no las 6 relaciones pesadas).
+ * Reemplaza a getMySpaces() en la vista de lista para no descargar todo.
+ */
+export async function getMySpacesList(opts: {
+  status?: 'all' | 'published' | 'pending' | 'draft'
+  q?: string
+  category?: string
+  sort?: 'recent' | 'name' | 'published'
+  page?: number
+  pageSize?: number
+} = {}): Promise<{ items: SpaceListItem[]; total: number }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { items: [], total: 0 }
+  const { hostId, db } = await resolveHostAccess(supabase, user.id)
+
+  const page = opts.page ?? 0
+  const size = opts.pageSize ?? 12
+
+  let query = db
+    .from('spaces')
+    .select('id, name, slug, category, sector, city, capacity_max, is_published, is_active, is_featured, created_at, updated_at, profiles!host_id(plan_type), space_images(url, is_cover), space_pricing(pricing_type, hourly_price, minimum_consumption, fixed_price, is_active), space_conditions(cancellation_policy, cancellation_refund_pct, cancellation_hours_before)', { count: 'exact' })
+    .eq('host_id', hostId)
+
+  if (opts.status === 'published')    query = query.eq('is_published', true)
+  else if (opts.status === 'pending') query = query.eq('is_published', false).eq('is_active', true)
+  else if (opts.status === 'draft')   query = query.eq('is_published', false).eq('is_active', false)
+
+  if (opts.category) query = query.eq('category', opts.category)
+
+  if (opts.q?.trim()) {
+    const term = opts.q.trim().replace(/[%,()]/g, '')
+    query = query.or(`name.ilike.%${term}%,sector.ilike.%${term}%,city.ilike.%${term}%`)
+  }
+
+  if (opts.sort === 'name')           query = query.order('name', { ascending: true })
+  else if (opts.sort === 'published') query = query.order('is_published', { ascending: false }).order('created_at', { ascending: false })
+  else                                query = query.order('created_at', { ascending: false })
+
+  query = query.range(page * size, page * size + size - 1)
+
+  const { data, count } = await query
+
+  const items: SpaceListItem[] = (data ?? []).map((s: any) => {
+    const pricing = s.space_pricing?.find((p: any) => p.is_active) ?? s.space_pricing?.[0]
+    const cover = s.space_images?.find((i: any) => i.is_cover)?.url ?? s.space_images?.[0]?.url ?? null
+    return {
+      id: s.id, name: s.name, slug: s.slug, category: s.category,
+      sector: s.sector, city: s.city, capacity_max: s.capacity_max,
+      is_published: s.is_published, is_active: s.is_active, is_featured: s.is_featured,
+      created_at: s.created_at, updated_at: s.updated_at, cover,
+      pricing_type: pricing?.pricing_type ?? null,
+      hourly_price: pricing?.hourly_price ?? null,
+      minimum_consumption: pricing?.minimum_consumption ?? null,
+      fixed_price: pricing?.fixed_price ?? null,
+      plan_type: (s.profiles as any)?.plan_type ?? null,
+      next_event_date: null,
+      cancellation_policy:       s.space_conditions?.[0]?.cancellation_policy ?? null,
+      cancellation_refund_pct:   s.space_conditions?.[0]?.cancellation_refund_pct ?? null,
+      cancellation_hours_before: s.space_conditions?.[0]?.cancellation_hours_before ?? null,
+    }
+  })
+
+  // Próxima reserva por espacio: consulta ligera sobre los ids de ESTA página.
+  const ids = items.map(i => i.id)
+  if (ids.length > 0) {
+    const { data: bks } = await db
+      .from('bookings')
+      .select('space_id, event_date')
+      .in('space_id', ids)
+      .in('status', ['accepted', 'confirmed'])
+      .gte('event_date', todayInRD())
+      .order('event_date', { ascending: true })
+    const nextBy: Record<string, string> = {}
+    for (const b of (bks ?? []) as any[]) {
+      if (!nextBy[b.space_id]) nextBy[b.space_id] = b.event_date
+    }
+    items.forEach(i => { i.next_event_date = nextBy[i.id] ?? null })
+  }
+
+  return { items, total: count ?? 0 }
+}
+
+/** Conteos por estado para los filtros (solo booleanos — barato con 100+ espacios). */
+export async function getMySpacesCounts(): Promise<{ all: number; published: number; pending: number; draft: number }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { all: 0, published: 0, pending: 0, draft: 0 }
+  const { hostId, db } = await resolveHostAccess(supabase, user.id)
+  const { data } = await db.from('spaces').select('is_published, is_active').eq('host_id', hostId)
+  const rows = (data ?? []) as { is_published: boolean; is_active: boolean }[]
+  return {
+    all: rows.length,
+    published: rows.filter(s => s.is_published).length,
+    pending:   rows.filter(s => !s.is_published && s.is_active).length,
+    draft:     rows.filter(s => !s.is_published && !s.is_active).length,
+  }
+}
+
+/** Un espacio COMPLETO (con todas las relaciones) para abrirlo en el editor. */
+export async function getMySpaceForEdit(spaceId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+  const { hostId, db } = await resolveHostAccess(supabase, user.id)
+  const { data } = await db
+    .from('spaces')
+    .select('*, space_pricing(*), space_addons(*), space_conditions(*), space_payment_terms(*), space_time_blocks(*), space_images(*)')
+    .eq('id', spaceId).eq('host_id', hostId).single()
+  return data
 }
 
 // Guardar URLs de fotos ya subidas a Storage en la tabla space_images

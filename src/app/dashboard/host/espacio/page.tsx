@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { Building2, Clock, DollarSign, Plus, Gift, Shield, CreditCard, CheckCircle, ChevronRight, ChevronLeft, X, Loader2, Eye, EyeOff, MapPin, Users, Pencil, PlusCircle, Wine, UtensilsCrossed, Sunset, Trees, Camera, Briefcase, Home, Leaf, Package, MessageSquare, Music2, Volume2, Sun, Car, Wifi, Wind, Waves, Monitor, Zap, ShowerHead, Sparkles, Trash2, Save } from 'lucide-react'
-import { cn, formatCurrency } from '@/lib/utils'
-import { saveSpace, publishSpace, getMySpaces, saveSpaceImages, updateSpace, deactivateSpace, deleteSpaceByHost, updateCancellationPolicy } from '@/lib/actions/space'
+import React, { useState, useEffect, useCallback } from 'react'
+import { Building2, Clock, DollarSign, Plus, Gift, Shield, CreditCard, CheckCircle, ChevronRight, ChevronLeft, X, Loader2, Eye, EyeOff, MapPin, Users, Pencil, PlusCircle, Wine, UtensilsCrossed, Sunset, Trees, Camera, Briefcase, Home, Leaf, Package, MessageSquare, Music2, Volume2, Sun, Car, Wifi, Wind, Waves, Monitor, Zap, ShowerHead, Sparkles, Trash2, Save, Search, MoreVertical, LayoutGrid, List as ListIcon, CalendarClock, Crown } from 'lucide-react'
+import { cn, formatCurrency, formatDate } from '@/lib/utils'
+import { saveSpace, publishSpace, getMySpaces, getMySpacesList, getMySpacesCounts, getMySpaceForEdit, saveSpaceImages, updateSpace, deactivateSpace, deleteSpaceByHost, updateCancellationPolicy, type SpaceListItem } from '@/lib/actions/space'
+import { useConfirm } from '@/components/ui/ConfirmDialog'
 import PhotoUploader from '@/components/dashboard/PhotoUploader'
 import WeeklySchedule from '@/components/dashboard/WeeklySchedule'
 import ActivityPicker from '@/components/dashboard/ActivityPicker'
@@ -86,24 +87,108 @@ const pricingLabel: Record<string, string> = {
 }
 
 export default function EspacioPage() {
+  const PAGE_SIZE = 12
   const [view, setView] = useState<'list' | 'create'>('list')
-  const [spaces, setSpaces] = useState<Awaited<ReturnType<typeof getMySpaces>>>([])
+  const [spaces, setSpaces] = useState<SpaceListItem[]>([])
+  const [total, setTotal]   = useState(0)
+  const [counts, setCounts] = useState({ all: 0, published: 0, pending: 0, draft: 0 })
   const [loadingSpaces, setLoadingSpaces] = useState(true)
+  const [loadingMore, setLoadingMore]     = useState(false)
   const [spacesLoadError, setSpacesLoadError] = useState(false)
   const [spaceFilter, setSpaceFilter] = useState<'all' | 'published' | 'pending' | 'draft'>('all')
+  const [q, setQ]               = useState('')
+  const [catFilter, setCatFilter] = useState('')
+  const [sort, setSort]         = useState<'recent' | 'name' | 'published'>('recent')
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards')
+  const [page, setPage]         = useState(0)
+  const [menuOpen, setMenuOpen] = useState<string | null>(null)
+  const { confirm, dialog }     = useConfirm()
 
-  function loadSpaces() {
-    setLoadingSpaces(true); setSpacesLoadError(false)
-    getMySpaces()
-      .then(data => {
-        setSpaces(data)
-        setLoadingSpaces(false)
-        // Si no tiene espacios, ir directo al form de creación
-        if (data.length === 0) setView('create')
-      })
-      .catch(() => { setSpacesLoadError(true); setLoadingSpaces(false) })
+  // Acciones secundarias compartidas entre tarjeta y tabla
+  function openCancelModal(s: SpaceListItem) {
+    setMenuOpen(null)
+    setCancelModal({ id: s.id, name: s.name })
+    setCancelPolicy(s.cancellation_policy ?? 'moderada')
+    setCancelRefundPct(String(s.cancellation_refund_pct ?? 50))
+    setCancelHoursBefore(String(s.cancellation_hours_before ?? 72))
   }
-  useEffect(() => { loadSpaces() }, [])
+  async function handlePublishSpace(s: SpaceListItem) {
+    setMenuOpen(null); setPublishingId(s.id); setSaveError('')
+    const result = await publishSpace(s.id)
+    setPublishingId(null)
+    if ('error' in result) { setSaveError(result.error ?? 'Error al enviar para revisión'); return }
+    setSpaces(prev => prev.map(x => x.id === s.id ? { ...x, is_active: true } : x))
+    setCounts(c => ({ ...c, pending: c.pending + 1, draft: Math.max(0, c.draft - 1) }))
+    if ('pending' in result && result.pending) setPublishedPending(true)
+  }
+  async function handleUnpublish(s: SpaceListItem) {
+    setMenuOpen(null)
+    if (!(await confirm({ title: `¿Despublicar "${s.name}"?`, message: 'Dejará de aparecer en el marketplace hasta que lo vuelvas a publicar.', confirmText: 'Despublicar', tone: 'danger' }))) return
+    const r = await deactivateSpace(s.id)
+    if (!('error' in r)) {
+      setSpaces(prev => prev.map(x => x.id === s.id ? { ...x, is_published: false, is_active: false } : x))
+      setCounts(c => ({ ...c, published: Math.max(0, c.published - 1), draft: c.draft + 1 }))
+    }
+  }
+  async function handleDelete(s: SpaceListItem) {
+    setMenuOpen(null)
+    if (!(await confirm({ title: `¿Eliminar "${s.name}"?`, message: 'Esta acción no se puede deshacer.', confirmText: 'Eliminar', tone: 'danger' }))) return
+    const r = await deleteSpaceByHost(s.id)
+    if ('error' in r) { setSaveError(r.error ?? 'No se pudo eliminar el espacio'); return }
+    setSpaces(prev => prev.filter(x => x.id !== s.id))
+    setTotal(t => Math.max(0, t - 1))
+    setCounts(c => ({ ...c, all: Math.max(0, c.all - 1), draft: Math.max(0, c.draft - 1) }))
+  }
+  function spaceStatus(s: SpaceListItem): { label: string; bg: string; color: string } {
+    if (s.is_published) return { label: 'Publicado', bg: 'var(--brand)', color: '#fff' }
+    if (s.is_active)    return { label: 'En revisión', bg: 'rgba(217,119,6,0.92)', color: '#fff' }
+    return { label: 'Borrador', bg: 'rgba(0,0,0,0.65)', color: '#fff' }
+  }
+  function priceLabel(s: SpaceListItem): string {
+    if (s.pricing_type === 'hourly')              return s.hourly_price ? `${formatCurrency(s.hourly_price)}/hr` : 'Por hora'
+    if (s.pricing_type === 'minimum_consumption') return s.minimum_consumption ? `Mín. ${formatCurrency(s.minimum_consumption)}` : 'Consumibles'
+    if (s.pricing_type === 'fixed_package')       return s.fixed_price ? formatCurrency(s.fixed_price) : 'Paquete'
+    if (s.pricing_type === 'custom_quote')        return 'Cotización'
+    return '—'
+  }
+
+  useEffect(() => {
+    try { const v = localStorage.getItem('espot_spaces_view'); if (v === 'table' || v === 'cards') setViewMode(v) } catch {}
+  }, [])
+  function changeViewMode(v: 'cards' | 'table') { setViewMode(v); try { localStorage.setItem('espot_spaces_view', v) } catch {} }
+
+  // Carga la primera página + conteos. Filtra/ordena en el SERVIDOR (no descarga todo).
+  const reload = useCallback(async () => {
+    setLoadingSpaces(true); setSpacesLoadError(false)
+    try {
+      const [res, c] = await Promise.all([
+        getMySpacesList({ status: spaceFilter, q, category: catFilter, sort, page: 0, pageSize: PAGE_SIZE }),
+        getMySpacesCounts(),
+      ])
+      setSpaces(res.items); setTotal(res.total); setCounts(c); setPage(0); setLoadingSpaces(false)
+      if (c.all === 0) setView('create')
+    } catch { setSpacesLoadError(true); setLoadingSpaces(false) }
+  }, [spaceFilter, q, catFilter, sort])
+
+  // Recarga al cambiar filtros (debounce para la búsqueda).
+  useEffect(() => {
+    const t = setTimeout(reload, q ? 350 : 0)
+    return () => clearTimeout(t)
+  }, [reload, q])
+
+  async function loadMore() {
+    const next = page + 1
+    setLoadingMore(true)
+    try {
+      const res = await getMySpacesList({ status: spaceFilter, q, category: catFilter, sort, page: next, pageSize: PAGE_SIZE })
+      setSpaces(prev => [...prev, ...res.items]); setTotal(res.total); setPage(next)
+    } finally { setLoadingMore(false) }
+  }
+
+  async function handleEditSpace(id: string) {
+    const full = await getMySpaceForEdit(id)
+    if (full) loadSpaceForEdit(full)
+  }
 
   const [currentStep, setCurrentStep] = useState(1)
   const [saving, setSaving] = useState(false)
@@ -343,9 +428,8 @@ export default function EspacioPage() {
 
     setSaving(false)
     setEditingSpaceId(null)
-    const updated = await getMySpaces()
-    setSpaces(updated)
     setView('list')
+    reload()
   }
 
   function loadSpaceForEdit(space: any) {
@@ -574,234 +658,207 @@ export default function EspacioPage() {
           </div>
         )}
 
-        <div className="flex items-center justify-between mb-5 md:mb-8">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-                Mis espacios
-              </h1>
-              {spaces.length > 0 && (
-                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-sm font-semibold"
-                  style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
-                  {spaces.length}
-                </span>
-              )}
-            </div>
-            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-              Gestiona tus espacios publicados en espot.do
-            </p>
+        {/* Header — título sin número (el total va en la línea de resultados) */}
+        <div className="flex items-center justify-between gap-3 mb-5">
+          <div className="min-w-0">
+            <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Mis espacios</h1>
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Gestiona tus espacios en espot.do</p>
           </div>
-          <button
-            onClick={startNewSpace}
-            className="btn-brand flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold"
-          >
-            <PlusCircle size={16} /> Nuevo espacio
+          <button onClick={startNewSpace} className="btn-brand flex items-center gap-2 px-4 md:px-5 py-2.5 rounded-xl text-sm font-semibold shrink-0">
+            <PlusCircle size={16} /> <span className="hidden sm:inline">Nuevo espacio</span><span className="sm:hidden">Nuevo</span>
           </button>
         </div>
 
-        {/* Filtros — solo cuando hay espacios */}
-        {!loadingSpaces && spaces.length > 0 && (() => {
-          const counts = {
-            all:       spaces.length,
-            published: spaces.filter(s => s.is_published).length,
-            pending:   spaces.filter(s => !s.is_published && s.is_active).length,
-            draft:     spaces.filter(s => !s.is_published && !s.is_active).length,
-          }
-          const allTabs: { key: typeof spaceFilter; label: string }[] = [
-            { key: 'all',       label: `Todos (${counts.all})` },
-            { key: 'published', label: `Publicados (${counts.published})` },
-            { key: 'pending',   label: `En revisión (${counts.pending})` },
-            { key: 'draft',     label: `Borradores (${counts.draft})` },
-          ]
-          const tabs = allTabs.filter(t => t.key === 'all' || counts[t.key] > 0)
-          return (
-            <div className="flex gap-1.5 mb-5 overflow-x-auto scrollbar-hide">
-              {tabs.map(({ key, label }) => (
-                <button key={key} onClick={() => setSpaceFilter(key)}
-                  className="px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all shrink-0"
-                  style={spaceFilter === key
+        {/* Controles — solo cuando el host tiene espacios */}
+        {counts.all > 0 && (
+          <div className="flex flex-col gap-3 mb-4">
+            {/* Búsqueda */}
+            <div className="flex items-center gap-2 rounded-xl px-3 py-2.5" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+              <Search size={15} style={{ color: 'var(--text-muted)' }} />
+              <input value={q} onChange={e => setQ(e.target.value)} placeholder="Buscar por nombre, sector o ciudad…"
+                className="flex-1 bg-transparent text-sm focus:outline-none" style={{ color: 'var(--text-primary)', fontSize: 16 }} />
+              {q && <button type="button" onClick={() => setQ('')}><X size={14} style={{ color: 'var(--text-muted)' }} /></button>}
+            </div>
+
+            {/* Estado (tabs) + categoría + orden + vista */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {([
+                { key: 'all' as const,       label: 'Todos',       n: counts.all },
+                { key: 'published' as const, label: 'Publicados',  n: counts.published },
+                { key: 'pending' as const,   label: 'En revisión', n: counts.pending },
+                { key: 'draft' as const,     label: 'Borradores',  n: counts.draft },
+              ].filter(t => t.key === 'all' || t.n > 0)).map(t => (
+                <button key={t.key} onClick={() => setSpaceFilter(t.key)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all"
+                  style={spaceFilter === t.key
                     ? { background: 'var(--text-primary)', color: '#fff' }
                     : { background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
-                  {label}
+                  {t.label} <span style={{ opacity: 0.65 }}>{t.n}</span>
                 </button>
               ))}
+
+              <div className="flex items-center gap-2 ml-auto">
+                <select value={catFilter} onChange={e => setCatFilter(e.target.value)}
+                  className="text-xs font-semibold px-2.5 py-1.5 rounded-lg" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', fontSize: 16 }}>
+                  <option value="">Toda categoría</option>
+                  {categories.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                </select>
+                <select value={sort} onChange={e => setSort(e.target.value as typeof sort)}
+                  className="text-xs font-semibold px-2.5 py-1.5 rounded-lg" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', fontSize: 16 }}>
+                  <option value="recent">Más recientes</option>
+                  <option value="name">Nombre</option>
+                  <option value="published">Publicados primero</option>
+                </select>
+                <div className="hidden sm:flex items-center rounded-lg overflow-hidden shrink-0" style={{ border: '1px solid var(--border-subtle)' }}>
+                  <button type="button" onClick={() => changeViewMode('cards')} className="px-2 py-1.5" title="Tarjetas"
+                    style={{ background: viewMode === 'cards' ? 'var(--text-primary)' : 'var(--bg-elevated)', color: viewMode === 'cards' ? '#fff' : 'var(--text-muted)' }}><LayoutGrid size={14} /></button>
+                  <button type="button" onClick={() => changeViewMode('table')} className="px-2 py-1.5" title="Tabla"
+                    style={{ background: viewMode === 'table' ? 'var(--text-primary)' : 'var(--bg-elevated)', color: viewMode === 'table' ? '#fff' : 'var(--text-muted)' }}><ListIcon size={14} /></button>
+                </div>
+              </div>
             </div>
-          )
-        })()}
+          </div>
+        )}
 
         {loadingSpaces ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-64 rounded-2xl" />)}
+          <div className={viewMode === 'cards' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4' : 'flex flex-col gap-2'}>
+            {[...Array(6)].map((_, i) => <Skeleton key={i} className={viewMode === 'cards' ? 'h-44 rounded-2xl' : 'h-16 rounded-xl'} />)}
           </div>
         ) : spacesLoadError ? (
           <div className="rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-            <LoadError message="No pudimos cargar tus espacios." onRetry={loadSpaces} />
+            <LoadError message="No pudimos cargar tus espacios." onRetry={reload} />
+          </div>
+        ) : counts.all === 0 ? (
+          <div className="rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+            <EmptyState icon={Building2} title="Aún no tienes espacios"
+              subtitle="Crea tu primer espacio para empezar a recibir reservas en la plataforma."
+              action={<button onClick={() => setView('create')} className="btn-brand inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold"><PlusCircle size={16} /> Crear mi primer espacio</button>} />
           </div>
         ) : spaces.length === 0 ? (
-          <div className="rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-            <EmptyState
-              icon={Building2}
-              title="Aún no tienes espacios"
-              subtitle="Crea tu primer espacio para empezar a recibir reservas en la plataforma."
-              action={<button onClick={() => setView('create')} className="btn-brand inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold"><PlusCircle size={16} /> Crear mi primer espacio</button>}
-            />
+          <div className="rounded-2xl text-center py-14 px-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+            <Search size={26} className="mx-auto mb-2" style={{ color: 'var(--text-muted)' }} />
+            <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Sin resultados</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Prueba con otra búsqueda, categoría o estado.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {spaces.filter(s => {
-              if (spaceFilter === 'published') return s.is_published
-              if (spaceFilter === 'pending')   return !s.is_published && s.is_active
-              if (spaceFilter === 'draft')     return !s.is_published && !s.is_active
-              return true
-            }).map((space: any) => {
-              const pricing = space.space_pricing?.find((p: any) => p.is_active) ?? space.space_pricing?.[0]
-              const cover   = space.space_images?.find((i: any) => i.is_cover)?.url ?? space.space_images?.[0]?.url
-              return (
-                <div key={space.id} className="rounded-2xl overflow-hidden transition-all"
-                  style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-                  <div className="relative h-48 overflow-hidden" style={{ background: 'var(--bg-elevated)' }}>
-                    {cover ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={cover} alt={space.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Building2 size={32} style={{ color: 'var(--text-muted)' }} />
-                      </div>
-                    )}
-                    <div className="absolute top-3 right-3 inline-flex items-center text-xs font-semibold px-2.5 py-1.5 rounded-full"
-                      style={space.is_published
-                        ? { background: 'var(--brand)', color: '#fff', gap: 5 }
-                        : space.is_active
-                          ? { background: 'rgba(217,119,6,0.92)', color: '#fff', gap: 5 }
-                          : { background: 'rgba(0,0,0,0.65)', color: '#fff', gap: 5 }}>
-                      {space.is_published
-                        ? <><Eye size={11} style={{ flexShrink: 0 }} /><span>Publicado</span></>
-                        : space.is_active
-                          ? <><Clock size={11} style={{ flexShrink: 0 }} /><span>En revisión</span></>
-                          : <><EyeOff size={11} style={{ flexShrink: 0 }} /><span>Borrador</span></>}
-                    </div>
-                  </div>
-                  <div className="p-5">
-                    <div className="flex items-start justify-between gap-2 mb-3">
-                      <div className="min-w-0">
-                        <h3 className="font-bold text-base leading-tight" style={{ color: 'var(--text-primary)' }}>{space.name}</h3>
-                        <div className="flex items-center gap-1 mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
-                          <MapPin size={10} />{space.sector ? `${space.sector}, ` : ''}{space.city}
-                        </div>
-                      </div>
-                      <span className="text-xs font-medium px-2 py-1 rounded-lg shrink-0"
-                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                        {getCategoryLabel(space.category)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3 mb-4 text-xs" style={{ color: 'var(--text-muted)' }}>
-                      <span className="flex items-center gap-1"><Users size={11} /> {space.capacity_max} personas máx.</span>
-                      {pricing && (
-                        <span className="flex items-center gap-1">
-                          <DollarSign size={11} />
-                          {pricing.pricing_type === 'hourly' && `${formatCurrency(pricing.hourly_price)}/hr`}
-                          {pricing.pricing_type === 'minimum_consumption' && `Min. ${formatCurrency(pricing.minimum_consumption)}`}
-                          {pricing.pricing_type === 'fixed_package' && formatCurrency(pricing.fixed_price)}
-                          {pricing.pricing_type === 'custom_quote' && 'Cotización'}
-                        </span>
-                      )}
-                    </div>
-                    {pricing && (
-                      <div className="flex items-center gap-2 mb-4">
-                        <span className="text-xs px-2.5 py-1 rounded-lg"
-                          style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
-                          {pricingLabel[pricing.pricing_type] ?? pricing.pricing_type}
-                        </span>
-                        {space.space_addons?.length > 0 && (
-                          <span className="text-xs px-2.5 py-1 rounded-lg"
-                            style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                            {space.space_addons.length} adicionales
-                          </span>
+          <>
+            <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>Mostrando {spaces.length} de {total}</p>
+
+            {viewMode === 'cards' ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {spaces.map(space => {
+                  const st = spaceStatus(space)
+                  return (
+                    <div key={space.id} className="rounded-2xl overflow-hidden flex flex-col"
+                      style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                      <div className="relative h-36 overflow-hidden" style={{ background: 'var(--bg-elevated)' }}>
+                        {space.cover ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={space.cover} alt={space.name} className="w-full h-full object-cover" loading="lazy" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center"><Building2 size={28} style={{ color: 'var(--text-muted)' }} /></div>
+                        )}
+                        <span className="absolute top-2.5 left-2.5 inline-flex items-center text-[11px] font-semibold px-2 py-1 rounded-full" style={{ background: st.bg, color: st.color }}>{st.label}</span>
+                        {space.plan_type === 'pro' && (
+                          <span className="absolute top-2.5 right-2.5 inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(0,0,0,0.55)', color: '#fff' }}><Crown size={9} /> Pro</span>
                         )}
                       </div>
-                    )}
-                    <div className="flex gap-2 flex-wrap">
-                      <button onClick={() => loadSpaceForEdit(space)}
-                        className="flex-1 flex items-center justify-center gap-1.5 text-sm font-medium py-2 rounded-xl transition-colors"
-                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
-                        <Pencil size={13} /> Editar
-                      </button>
-                      <button onClick={() => {
-                        const c = space.space_conditions?.[0]
-                        setCancelModal({ id: space.id, name: space.name })
-                        setCancelPolicy(c?.cancellation_policy ?? 'moderada')
-                        setCancelRefundPct(String(c?.cancellation_refund_pct ?? 50))
-                        setCancelHoursBefore(String(c?.cancellation_hours_before ?? 72))
-                      }}
-                        className="flex items-center justify-center gap-1.5 text-xs font-medium py-2 px-3 rounded-xl transition-colors"
-                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}
-                        title="Política de cancelación">
-                        <Shield size={12} /> Cancelación
-                      </button>
-
-                      {!space.is_published && !space.is_active && (
-                        <button
-                          disabled={publishingId === space.id}
-                          onClick={async () => {
-                            setPublishingId(space.id)
-                            setSaveError('')
-                            const result = await publishSpace(space.id)
-                            setPublishingId(null)
-                            if ('error' in result) {
-                              setSaveError(result.error ?? 'Error al enviar para revisión')
-                            } else {
-                              setSpaces(prev => prev.map(s => s.id === space.id ? { ...s, is_active: true } : s))
-                              if ('pending' in result && result.pending) setPublishedPending(true)
-                            }
-                          }}
-                          className="btn-brand flex-1 inline-flex items-center justify-center text-sm font-medium py-2 rounded-xl disabled:opacity-60"
-                          style={{ gap: 6 }}>
-                          {publishingId === space.id
-                            ? <><Loader2 size={13} className="animate-spin" style={{ flexShrink: 0 }} /><span>Enviando...</span></>
-                            : <><Eye size={13} style={{ flexShrink: 0 }} /><span>Enviar a revisión</span></>
-                          }
-                        </button>
-                      )}
-                      {!space.is_published && space.is_active && (
-                        <div className="flex-1 inline-flex items-center justify-center text-xs font-semibold px-3 py-2 rounded-xl"
-                          style={{ background: 'var(--bg-elevated)', color: 'var(--brand)', border: '1px solid var(--border-subtle)', gap: 6 }}>
-                          <Clock size={12} style={{ flexShrink: 0 }} /><span>En revisión</span>
+                      <div className="p-3.5 flex flex-col gap-1.5 flex-1">
+                        <h3 className="font-bold text-sm leading-tight truncate" style={{ color: 'var(--text-primary)' }} title={space.name}>{space.name}</h3>
+                        <div className="flex items-center gap-1 text-xs truncate" style={{ color: 'var(--text-muted)' }}>
+                          <MapPin size={10} className="shrink-0" />{[space.sector, space.city].filter(Boolean).join(', ') || '—'} <span style={{ color: '#D1D5DB' }}>·</span> {getCategoryLabel(space.category)}
                         </div>
-                      )}
-
-                      {space.is_published && (
-                        <button
-                          onClick={async () => {
-                            const r = await deactivateSpace(space.id)
-                            if (!('error' in r)) setSpaces(prev => prev.map(s => s.id === space.id ? { ...s, is_published: false, is_active: false } : s))
-                          }}
-                          className="flex items-center justify-center gap-1.5 text-sm font-medium py-2 px-3 rounded-xl transition-colors"
-                          style={{ background: 'rgba(217,119,6,0.08)', color: '#D97706', border: '1px solid rgba(217,119,6,0.2)' }}>
-                          <EyeOff size={13} /> Despublicar
-                        </button>
-                      )}
-
-                      {!space.is_published && !space.is_active && (
-                        <button
-                          onClick={async () => {
-                            if (!window.confirm(`¿Eliminar "${space.name}"? Esta acción no se puede deshacer.`)) return
-                            const r = await deleteSpaceByHost(space.id)
-                            if ('error' in r) { setSaveError(r.error ?? 'No se pudo eliminar el espacio'); return }
-                            setSpaces(prev => prev.filter(s => s.id !== space.id))
-                          }}
-                          className="flex items-center justify-center gap-1.5 text-sm font-medium py-2 px-3 rounded-xl transition-colors"
-                          style={{ background: 'rgba(220,38,38,0.08)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.2)' }}>
-                          <Trash2 size={13} /> Eliminar
-                        </button>
-                      )}
+                        <div className="flex items-center gap-3 text-xs">
+                          <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{priceLabel(space)}</span>
+                          {space.capacity_max && <span className="flex items-center gap-1" style={{ color: 'var(--text-muted)' }}><Users size={11} /> {space.capacity_max}</span>}
+                        </div>
+                        {space.next_event_date && (
+                          <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--brand)' }}><CalendarClock size={11} /> Próx: {formatDate(space.next_event_date)}</div>
+                        )}
+                        <div className="flex items-center gap-2 mt-auto pt-2">
+                          <button onClick={() => handleEditSpace(space.id)} className="flex-1 flex items-center justify-center gap-1.5 text-sm font-semibold py-2 rounded-xl"
+                            style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>
+                            <Pencil size={13} /> Editar
+                          </button>
+                          <div className="relative shrink-0">
+                            <button onClick={() => setMenuOpen(menuOpen === space.id ? null : space.id)} className="w-9 h-9 flex items-center justify-center rounded-xl"
+                              style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }} aria-label="Más acciones"><MoreVertical size={15} /></button>
+                            {menuOpen === space.id && (
+                              <>
+                                <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(null)} />
+                                <div className="absolute bottom-full right-0 mb-1 z-50 w-56 rounded-xl overflow-hidden shadow-xl" style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+                                  <button onClick={() => openCancelModal(space)} className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm transition-colors hover:bg-[var(--bg-elevated)]" style={{ color: 'var(--text-secondary)' }}><Shield size={13} /> Política de cancelación</button>
+                                  {!space.is_published && !space.is_active && <button onClick={() => handlePublishSpace(space)} disabled={publishingId === space.id} className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm transition-colors hover:bg-[var(--bg-elevated)]" style={{ color: 'var(--brand)' }}><Eye size={13} /> Enviar a revisión</button>}
+                                  {space.is_published && <button onClick={() => handleUnpublish(space)} className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm transition-colors hover:bg-[var(--bg-elevated)]" style={{ color: '#D97706' }}><EyeOff size={13} /> Despublicar</button>}
+                                  {!space.is_published && !space.is_active && <button onClick={() => handleDelete(space)} className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm transition-colors hover:bg-red-50" style={{ color: '#DC2626' }}><Trash2 size={13} /> Eliminar</button>}
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+                {spaces.map((space, i) => {
+                  const st = spaceStatus(space)
+                  return (
+                    <div key={space.id} className="flex items-center gap-3 px-3 py-2.5" style={{ borderTop: i > 0 ? '1px solid var(--border-subtle)' : 'none' }}>
+                      <div className="w-11 h-11 rounded-lg overflow-hidden shrink-0" style={{ background: 'var(--bg-elevated)' }}>
+                        {space.cover
+                          // eslint-disable-next-line @next/next/no-img-element
+                          ? <img src={space.cover} alt="" className="w-full h-full object-cover" loading="lazy" />
+                          : <div className="w-full h-full flex items-center justify-center"><Building2 size={16} style={{ color: 'var(--text-muted)' }} /></div>}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{space.name}</p>
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0" style={{ background: st.bg, color: st.color }}>{st.label}</span>
+                        </div>
+                        <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
+                          {[space.sector, space.city].filter(Boolean).join(', ') || '—'} · {priceLabel(space)}{space.next_event_date ? ` · Próx: ${formatDate(space.next_event_date)}` : ''}
+                        </p>
+                      </div>
+                      <button onClick={() => handleEditSpace(space.id)} className="hidden sm:inline-flex shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg"
+                        style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)' }}>Editar</button>
+                      <div className="relative shrink-0">
+                        <button onClick={() => setMenuOpen(menuOpen === space.id ? null : space.id)} className="w-8 h-8 flex items-center justify-center rounded-lg" style={{ color: 'var(--text-muted)' }} aria-label="Más acciones"><MoreVertical size={15} /></button>
+                        {menuOpen === space.id && (
+                          <>
+                            <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(null)} />
+                            <div className="absolute top-full right-0 mt-1 z-50 w-56 rounded-xl overflow-hidden shadow-xl" style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
+                              <button onClick={() => handleEditSpace(space.id)} className="w-full flex sm:hidden items-center gap-2 px-3.5 py-2.5 text-sm transition-colors hover:bg-[var(--bg-elevated)]" style={{ color: 'var(--text-secondary)' }}><Pencil size={13} /> Editar</button>
+                              <button onClick={() => openCancelModal(space)} className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm transition-colors hover:bg-[var(--bg-elevated)]" style={{ color: 'var(--text-secondary)' }}><Shield size={13} /> Política de cancelación</button>
+                              {!space.is_published && !space.is_active && <button onClick={() => handlePublishSpace(space)} className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm transition-colors hover:bg-[var(--bg-elevated)]" style={{ color: 'var(--brand)' }}><Eye size={13} /> Enviar a revisión</button>}
+                              {space.is_published && <button onClick={() => handleUnpublish(space)} className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm transition-colors hover:bg-[var(--bg-elevated)]" style={{ color: '#D97706' }}><EyeOff size={13} /> Despublicar</button>}
+                              {!space.is_published && !space.is_active && <button onClick={() => handleDelete(space)} className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm transition-colors hover:bg-red-50" style={{ color: '#DC2626' }}><Trash2 size={13} /> Eliminar</button>}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {spaces.length < total && (
+              <div className="flex justify-center mt-5">
+                <button onClick={loadMore} disabled={loadingMore}
+                  className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-xl disabled:opacity-60"
+                  style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+                  {loadingMore ? <><Loader2 size={14} className="animate-spin" /> Cargando…</> : `Cargar más (${total - spaces.length} restantes)`}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
+
+      {dialog}
 
       {/* ── Modal: Editar política de cancelación ── */}
       {cancelModal ? (
