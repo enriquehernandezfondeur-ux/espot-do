@@ -56,6 +56,13 @@ export default function ClientMensajesPage() {
         setUserId(uid)
         const data = await getMyConversations()
         setConvs(data)
+        // Deep-link: si vienen con ?espacio=<spaceId> (desde "Contactar propietario"),
+        // abrir directo esa conversación en vez de dejarlos en la bandeja.
+        const targetSpace = new URLSearchParams(window.location.search).get('espacio')
+        if (targetSpace) {
+          const match = data.find((c: any) => c.spaceId === targetSpace)
+          if (match) openConv(match)
+        }
         // Abrir la bandeja marca todo como leído y limpia el punto del sidebar
         markAllMessagesRead()
           .then(() => window.dispatchEvent(new Event('espot:messages-read')))

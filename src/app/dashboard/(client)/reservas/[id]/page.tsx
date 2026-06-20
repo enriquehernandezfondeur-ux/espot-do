@@ -301,7 +301,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
             <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{host.full_name}</p>
             <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Propietario del espacio</p>
           </div>
-          <Link href="/dashboard/mensajes"
+          <Link href={`/dashboard/mensajes?espacio=${space?.id ?? ''}`}
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold shrink-0 transition-all"
             style={{ background: 'var(--bg-elevated)', color: 'var(--brand)', border: '1px solid var(--border-subtle)' }}>
             <MessageCircle size={13} /> Mensaje

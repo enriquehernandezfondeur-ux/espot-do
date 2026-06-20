@@ -709,7 +709,7 @@ export default function MisReservasPage() {
                             </p>
                           </div>
                           <div className="flex gap-2 flex-wrap">
-                            <Link href="/dashboard/mensajes"
+                            <Link href={`/dashboard/mensajes?espacio=${(bk as any).space_id ?? ''}`}
                               className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
                               style={{ color: 'var(--text-secondary)', background: 'var(--bg-elevated)' }}>
                               <MessageCircle size={12} /> Contactar propietario
@@ -745,7 +745,7 @@ export default function MisReservasPage() {
                             {expired ? 'El propietario no respondió en el plazo. Escríbele directamente o cancela.' : 'Te notificamos por email cuando el propietario envíe el precio. Puedes escribirle mientras tanto.'}
                           </p>
                         </div>
-                        <Link href="/dashboard/mensajes"
+                        <Link href={`/dashboard/mensajes?espacio=${(bk as any).space_id ?? ''}`}
                           className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all w-fit"
                           style={{ color: 'var(--text-secondary)', background: 'var(--bg-elevated)' }}>
                           <MessageCircle size={12} /> Contactar propietario
@@ -756,7 +756,7 @@ export default function MisReservasPage() {
                     {bk.status === 'accepted' && (
                       <div className="mt-4 space-y-2">
                         <div className="flex gap-2 flex-wrap">
-                          <Link href="/dashboard/mensajes"
+                          <Link href={`/dashboard/mensajes?espacio=${(bk as any).space_id ?? ''}`}
                             className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
                             style={{ color: 'var(--text-secondary)', background: 'var(--bg-elevated)' }}>
                             <MessageCircle size={12} /> Contactar propietario
@@ -786,7 +786,7 @@ export default function MisReservasPage() {
                           Reserva confirmada. Las cuotas restantes se cobrarán según el plan de pagos.
                         </div>
                         <div className="flex gap-2 flex-wrap">
-                          <Link href="/dashboard/mensajes"
+                          <Link href={`/dashboard/mensajes?espacio=${(bk as any).space_id ?? ''}`}
                             className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
                             style={{ color: 'var(--text-secondary)', background: 'var(--bg-elevated)' }}>
                             <MessageCircle size={12} /> Contactar propietario
