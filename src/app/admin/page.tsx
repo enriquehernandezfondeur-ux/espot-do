@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { STATUS_SHORT, STATUS_COLORS } from '@/lib/bookingConfig'
+import { hostNetOf } from '@/lib/pricing'
 
 // Config de estado unificado desde bookingConfig (consistente con reservas/usuarios)
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string }> =
@@ -41,7 +42,7 @@ export default async function AdminDashboard() {
   ])
 
   const pendingPayoutTotal = pendingPayouts.reduce(
-    (s, b: any) => s + (Number(b.total_amount) || 0) * 0.90, 0
+    (s, b: any) => s + hostNetOf(b), 0
   )
 
   const now = new Date()

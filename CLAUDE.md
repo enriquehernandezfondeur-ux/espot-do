@@ -2,88 +2,103 @@
 
 # Espot — Marketplace de espacios para eventos en República Dominicana
 
-## Qué es este proyecto
-**espot.do** — plataforma para reservar salones, rooftops, restaurantes, villas y más para eventos en RD. El nombre de la marca es **Espot** (no EspotHub). El dominio es espot.do.
+> **espot.do** — plataforma para reservar salones, rooftops, restaurantes, villas y más para eventos en RD. Marca: **Espot**. Dominio: espot.do.
+>
+> Este `CLAUDE.md` tiene dos partes: (1) **reglas de gobernanza, diseño, datos, seguridad y gstack** (de cumplimiento obligatorio) y (2) la **referencia técnica** del proyecto (stack, marca, rutas, pagos, etc.).
+
+---
+
+## Espot — reglas de gobernanza (negocio)
+
+* Espot es un **marketplace y SaaS** para la **gestión y reserva de espacios** para eventos.
+* El modelo de datos conecta: **propietarios (hosts), espacios, sedes, usuarios (guests), reservas (bookings), calendarios, pagos, disponibilidad y recursos**. Toda información debe tener **trazabilidad y relaciones claras**.
+* Debe manejar **reservas por hora, por día, por persona o por consumo mínimo** según el tipo de pricing del espacio (`hourly`, `minimum_consumption`, `fixed_package`, `custom_quote`).
+* Debe **respetar calendarios, bloqueos, capacidades, precios y disponibilidad** — nunca sobre-reservar ni ignorar un bloqueo.
+* Deben mantenerse **separados** el **marketplace público**, el **panel del propietario (host)** y la **administración interna (admin)**.
+* **No alterar pagos, reservas ni disponibilidad en producción sin autorización.**
+* **No duplicar** espacios, reservas, propietarios ni usuarios.
+* Todo cambio de base de datos debe hacerse mediante **migraciones controladas** (`supabase/migrations/`).
+* **No hacer push, merge, deploy ni cambios en producción automáticamente.**
+* **Espot y PuntualPago son proyectos completamente separados** (Supabase, repos, tokens y variables de entorno distintos). Nunca mezclar configuraciones, credenciales ni datos entre ellos.
+
+## Diseño y experiencia de usuario
+
+* Mantener el **branding actual de Espot** (logo, colores `#35C493` / `#03313C`, tipografías TypoGraphica + Poppins — ver referencia técnica).
+* No cambiar colores, tipografías ni identidad sin autorización.
+* Usar **siempre variables CSS del tema** (`var(--brand)`, `var(--bg-base)`, etc.); nunca hardcodear colores.
+* Priorizar legibilidad, jerarquía visual, buen contraste y facilidad de uso.
+* Evitar espacios vacíos excesivos, letras pequeñas (inputs `font-size: 16px` mínimo) y pantallas incompletas.
+* Validar siempre en **laptop, tablet y móvil**, y en los tres temas (`.light-theme`, `.white-theme`, `.host-theme`).
+* No rediseñar todo el sistema por iniciativa propia: aplicar mejoras en **una sola pantalla** y comprobar resultados antes de extender.
+
+## Formularios y datos
+
+* Validar los formularios en **frontend y backend** (Server Actions verifican `auth.getUser()` primero).
+* Evitar formularios innecesariamente largos; usar pasos, secciones, desplegables y valores por defecto cuando ayuden (ej. el `BookingWidget` multi-paso).
+* Mostrar mensajes claros de error y confirmación.
+* No guardar registros incompletos sin indicar su estado (respetar la máquina de estados de reserva).
+* Revisar las **relaciones entre host, espacio, reserva, usuario, pago y disponibilidad** antes de cualquier cambio.
+
+## Seguridad
+
+* Nunca mostrar secretos, tokens o contraseñas completos.
+* **No incluir credenciales en archivos versionados** (ni en `.claude/settings*.json`, ni en `.mcp.json`). *(Ver `PENDIENTES_MANUALES.md`: hay un token de Resend expuesto por rotar.)*
+* No hacer cambios en producción sin autorización.
+* No ejecutar migraciones destructivas (`supabase db reset/push`, `dropdb`).
+* No realizar commits, push, merge o despliegues automáticamente.
+* Solicitar aprobación antes de cualquier acción irreversible.
+* Estas reglas están reforzadas por las reglas `deny` en `.claude/settings.json` (ver `POLITICA_DE_SEGURIDAD_CLAUDE.md`).
+
+## Uso de gstack
+
+gstack (global) se usa principalmente para: **planificación, revisión de producto, revisión técnica, investigación de errores, revisión de código, QA en navegador y documentación de cambios.**
+
+Usa `/browse` para: recorrer visualmente el marketplace, el panel del host y el admin; comprobar flujos de reserva; validar responsive; revisar formularios; reproducir errores; pruebas de UX.
+
+**No** uses `/browse` como reemplazo de: consultas a Supabase/Postgres, revisión del código fuente, análisis de migraciones, ni herramientas más precisas.
+
+Prioriza: `/autoplan`, `/plan-ceo-review`, `/plan-eng-review`, `/review`, `/investigate`, `/qa-only`, `/document-generate`, `/document-release`.
+
+**No** utilices `/ship`, despliegues automáticos ni acciones que hagan push hasta autorización explícita. (Las 12 skills de alto riesgo ya están en modo manual-only a nivel global.)
+
+## Estado de las herramientas opcionales
+
+* No instalar `gbrain` por ahora.
+* No instalar los hooks de `plan-tune` por ahora.
+* No instalar Homebrew/`coreutils` solo por gstack, salvo problema real.
+* Documentar estas opciones como pendientes, no como errores críticos.
+
+---
+
+# Referencia técnica del proyecto
 
 ## Stack técnico
 - **Next.js App Router** (16.2.6), React 19, TypeScript 5
 - **Tailwind CSS v4** — usar variables CSS del tema, NO clases dark de Tailwind
-- **Supabase** — Auth + PostgreSQL + Storage + Realtime
+- **Supabase** — Auth + PostgreSQL + Storage + Realtime *(proyecto Supabase de Espot; ver `MCP_ESPOT.md`)*
 - **Azul Payments** — gateway de pagos dominicano (modelo PaymentPage, no API directa)
 - **Resend** — emails transaccionales
-- **Google Maps** (`@googlemaps/js-api-loader`) — mapas con marcadores de espacios
+- **Twilio** — WhatsApp transaccional (sí se usa en Espot)
+- **Sentry** — monitoreo de errores
+- **next-intl** — internacionalización
+- **Google Maps** — mapas con marcadores de espacios
 
 ## Logo
+- Wordmark **"espot"** en minúsculas con la "o" como pin de ubicación. Tipografía del logo: **TypoGraphica Regular**.
+- `public/logo-dark.svg` (navy `#03313C`, fondos claros) · `public/logo-green.svg` (verde `#35C493`, fondos oscuros).
+- Fondo oscuro → `logo-green.svg`; fondo claro → `logo-dark.svg`. Nunca distorsionar (`viewBox="0 0 1682.16 585.47"`). Altura mínima 22px navbar / 28px headers. No recrear en HTML/CSS.
 
-### Descripción visual
-- Wordmark **"espot"** en minúsculas con la "o" reemplazada por un pin de ubicación (mapa) con punto blanco interior
-- La tipografía del logo es **TypoGraphica Regular** — letras redondeadas, bold, geométricas
-- La "t" tiene un corte diagonal característico en la parte superior derecha
-- El pin dentro de la "o" es el símbolo de la marca — siempre respetarlo en cualquier uso
-
-### Archivos en `public/`
-| Archivo | Uso |
-|---|---|
-| `logo-dark.svg` | Logo en navy `#03313C` — fondos claros, headers blancos |
-| `logo-green.svg` | Logo en verde `#35C493` — fondos oscuros, hero del marketplace |
-
-### Reglas de uso
-- **Fondo oscuro** → usar `logo-green.svg`
-- **Fondo claro/blanco** → usar `logo-dark.svg`
-- Nunca distorsionar las proporciones — el SVG tiene `viewBox="0 0 1682.16 585.47"`
-- Altura mínima: 22px en navbar, 28px en headers
-- No recrear el logo en HTML/CSS — siempre usar los archivos SVG
-
-### Dónde se usa en el código
-- Navbar del marketplace: `<img src="/logo-green.svg">` (fondo oscuro del footer y nav dark)
-- Navbar claro: `<img src="/logo-dark.svg">`
-- Páginas de pago y auth: `<img src="/logo-dark.svg">`
-
-## Tipografía oficial (Manual de Marca)
-
-### Sistema de dos fuentes:
-
-**1. TypoGraphica Regular** — fuente de display/headlines
-- Fuente comercial, NO es Google Font
-- Uso: títulos grandes, hero headlines, logotipo, números destacados
-- Peso: Regular (bold visual por diseño de la fuente)
-- Estado en el proyecto: ⚠️ PENDIENTE DE INSTALAR — los archivos (.woff2/.ttf) deben agregarse a `public/fonts/`
-- Variable CSS objetivo: `--font-typographica`
-- Fallback temporal hasta instalar: `var(--font-poppins)` en peso 800/900
-
-**2. Poppins** (Google Fonts) — fuente de UI y cuerpo
-- Cargada vía `next/font/google` en `src/app/layout.tsx`
-- Variable CSS: `--font-poppins`
-- Aplicada en `body` como fuente base
-- Dos pesos principales según el manual:
-  - **Medium (500)** — subtítulos, labels, botones, elementos de interfaz
-  - **Light (300)** — cuerpo de texto, descripciones, texto secundario
-- Pesos también disponibles: 400, 600, 700, 800, 900
-
-### Reglas de uso:
-- `font-size: 16px` mínimo en todos los inputs (previene zoom en iOS Safari)
-- `letter-spacing: -0.02em` a `-0.04em` en títulos grandes
-- `font-smoothing: antialiased` activado globalmente
-- **Nunca** usar Inter, Geist u otra fuente — solo TypoGraphica + Poppins
-
-### Cómo instalar TypoGraphica (pendiente):
-1. Poner archivos en `public/fonts/TypoGraphica-Regular.woff2` (y `.woff` de fallback)
-2. Declarar `@font-face` en `globals.css`
-3. Agregar `variable: '--font-typographica'` en `layout.tsx` con `next/font/local`
-4. Usar en headlines: `font-family: var(--font-typographica)`
+## Tipografía oficial
+- **TypoGraphica Regular** — display/headlines (comercial, NO Google Font). ⚠️ PENDIENTE DE INSTALAR en `public/fonts/`. Variable objetivo `--font-typographica`; fallback `var(--font-poppins)` 800/900.
+- **Poppins** (Google Fonts) — UI y cuerpo, vía `next/font/google` en `src/app/layout.tsx` (`--font-poppins`). Medium (500) para UI; Light (300) para cuerpo.
+- `font-size: 16px` mínimo en inputs (anti-zoom iOS). `letter-spacing: -0.02em..-0.04em` en títulos. Nunca usar Inter/Geist.
 
 ## Paleta de colores oficial
-- `#35C493` — Verde marca (brand principal, iconos, bordes, UI)
-- `#D4FF58` — Lima acento (NO usar en producción hasta decisión del dueño)
-- `#03313C` — Navy (textos oscuros, fondos dark)
-- Variables CSS: `var(--brand)`, `var(--brand-dim)`, `var(--brand-border)`, `var(--bg-base)`, etc.
-- **Regla**: siempre usar variables del tema. Nunca hardcodear colores en componentes nuevos.
+- `#35C493` Verde marca · `#D4FF58` Lima acento (NO usar en prod hasta decisión del dueño) · `#03313C` Navy.
+- Variables: `var(--brand)`, `var(--brand-dim)`, `var(--brand-border)`, `var(--bg-base)`, etc. Siempre usar variables del tema.
 
-## Temas CSS (en globals.css)
-- `.light-theme` — Solo homepage `/` (bg #F4F6F5, texto #03313C) — NO tocar
-- `.white-theme` — Buscar, detalle espacio, **dashboard cliente**, pagos (bg #FFFFFF, texto #1A1A1A)
-- `.host-theme` — Dashboard propietario/host (bg #FFFFFF, texto #1A1A1A) — premium white
-- `.dark-theme` — Definida en CSS pero NO usada actualmente
+## Temas CSS (globals.css)
+- `.light-theme` — solo homepage `/` (NO tocar) · `.white-theme` — buscar, detalle, dashboard cliente, pagos · `.host-theme` — dashboard propietario · `.dark-theme` — definida pero no usada.
 
 ## Estructura de rutas principales
 ```
@@ -104,85 +119,49 @@ src/app/
 4. `custom_quote` — cotización personalizada
 
 ## Estados de reserva (booking)
-`pending → accepted → confirmed → completed`
-`pending → rejected`
-`confirmed → cancelled_guest / cancelled_host`
-`pending → quote_requested` (para cotizaciones)
+`pending → accepted → confirmed → completed` · `pending → rejected` · `confirmed → cancelled_guest / cancelled_host` · `pending → quote_requested`.
 
 ## Comisión de la plataforma
 **10%** sobre el total de cada reserva. El host recibe el 90% neto después del evento.
 
 ## Sistema de pagos
-- Flujo: cliente paga → Azul PaymentPage → webhook confirm → liquidación al host
-- Archivo clave: `src/lib/azul/client.ts` (HMAC-SHA512)
-- El redirect a Azul está en `src/app/api/payments/redirect/[bookingId]/route.ts`
-- **Problema conocido**: el redirect a Azul no completa (HMAC field order puede ser incorrecto). Pendiente contactar soporte Azul.
+- Flujo: cliente paga → Azul PaymentPage → webhook confirm → liquidación al host.
+- Archivo clave: `src/lib/azul/client.ts` (HMAC-SHA512). Redirect en `src/app/api/payments/redirect/[bookingId]/route.ts`.
+- **Problema conocido**: el redirect a Azul no completa (orden de campos del HMAC). Pendiente soporte Azul.
 
 ## Convenciones de código
-- **Componentes**: usar variables CSS del tema (`var(--brand)`, `var(--bg-base)`)
-- **Server Actions**: en `src/lib/actions/` — siempre verificar `auth.getUser()` primero
-- **Fechas**: siempre parsear con `T12:00` para evitar bug de timezone UTC-4 (RD)
-  - ✅ `new Date(date + 'T12:00')`
-  - ❌ `new Date(date)` — da el día anterior a las 8pm en RD
-- **revalidatePath**: para invalidar páginas de espacios usar `revalidatePath('/espacios', 'layout')`
-- **Supabase client en componentes**: usar `useRef(createClient())`, no `createClient()` en el body
+- Componentes: variables CSS del tema. Server Actions en `src/lib/actions/` (verificar `auth.getUser()`).
+- Fechas: parsear con `T12:00` (bug timezone UTC-4 RD). ✅ `new Date(date + 'T12:00')` ❌ `new Date(date)`.
+- `revalidatePath('/espacios', 'layout')` para invalidar espacios. Supabase en componentes: `useRef(createClient())`.
 
 ## Archivos más importantes
-- `src/components/marketplace/BookingWidget.tsx` — widget multi-paso de reserva (1200+ líneas)
-- `src/app/(marketplace)/buscar/BuscarClient.tsx` — página de búsqueda con mapa
-- `src/app/(marketplace)/espacios/[slug]/SpaceDetailClient.tsx` — detalle del espacio
-- `src/components/map/SpacesMap.tsx` — mapa Google Maps (pins: click usa window.location.href; reusa refs de marcadores y actualiza el icono con `buildSvgIcon`, sin recrear el marcador en hover)
-- `src/lib/actions/booking.ts` — lógica de reservas
-- `src/lib/payments/schedule.ts` — cálculo de cuotas
+- `src/components/marketplace/BookingWidget.tsx` (1200+ líneas) · `src/app/(marketplace)/buscar/BuscarClient.tsx` · `src/app/(marketplace)/espacios/[slug]/SpaceDetailClient.tsx` · `src/components/map/SpacesMap.tsx` · `src/lib/actions/booking.ts` · `src/lib/payments/schedule.ts`.
 
 ## Integraciones activas
 | Servicio | Uso | Estado |
 |---|---|---|
-| Supabase | Auth + DB + Storage | ✅ Funcional |
-| Azul Payments | Pagos | ⚠️ Redirect pendiente de fix |
-| Resend | Emails | ✅ Funcional |
-| Google OAuth | Login social | ✅ Funcional |
-| Google Maps | Mapas | ✅ Funcional |
-| Google Calendar | Sync opcional | ✅ Implementado |
+| Supabase | Auth + DB + Storage | ✅ |
+| Azul Payments | Pagos | ⚠️ Redirect pendiente |
+| Resend | Emails | ✅ |
+| Twilio | WhatsApp | ✅ |
+| Google OAuth | Login social | ✅ |
+| Google Maps | Mapas | ✅ |
+| Google Calendar | Sync opcional | ✅ |
 
 ## Categorías de espacios
-`salon`, `restaurante`, `bar`, `rooftop`, `terraza`, `jardin`, `estudio`, `coworking`, `hotel`, `villa`, `otro`
+`salon`, `restaurante`, `bar`, `rooftop`, `terraza`, `jardin`, `estudio`, `coworking`, `hotel`, `villa`, `otro`.
 
 ## Roles de usuario
-- `guest` — cliente que reserva
-- `host` — propietario de espacios
-- `admin` — solo enriquehernandezfondeur@gmail.com (superadmin)
+- `guest` — cliente que reserva · `host` — propietario de espacios · `admin` — superadmin.
 
 ## WhatsApp (Twilio)
-- Módulo: `src/lib/whatsapp/send.ts`
-- ENV vars requeridas en Vercel:
-  - `TWILIO_ACCOUNT_SID` — Account SID de Twilio
-  - `TWILIO_AUTH_TOKEN` — Auth Token de Twilio
-  - `TWILIO_WHATSAPP_FROM` — Número aprobado (sandbox: `whatsapp:+14155238886`)
-- Para sandbox de pruebas: activar en twilio.com/console/sms/whatsapp/sandbox
-- Para producción: necesitas templates aprobados por Meta vía Twilio
-- Notificaciones enviadas:
-  - Host: nueva solicitud de reserva
-  - Guest: reserva aceptada (con link de pago)
-  - Guest + Host: primer pago confirmado
-  - Guest: cuota vence mañana (cron 1d)
-  - Guest: recordatorio 24h antes del evento (cron)
-- En desarrollo (sin TWILIO_ACCOUNT_SID) los mensajes se simulan en consola
+- Módulo: `src/lib/whatsapp/send.ts`. ENV en Vercel: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM`.
+- Notificaciones: nueva solicitud (host), reserva aceptada con link de pago (guest), primer pago confirmado (guest+host), cuota vence mañana (cron), recordatorio 24h pre-evento (cron). Sin `TWILIO_ACCOUNT_SID` → se simulan en consola.
 
 ## Cron Jobs
-- Archivo: `src/app/api/cron/payment-reminders/route.ts`
-- Configurado en `vercel.json`: diario a las 9am RD (13:00 UTC)
-- ENV var requerida: `CRON_SECRET` — cadena aleatoria para proteger el endpoint
-- Configurar en Vercel Dashboard → Settings → Environment Variables
-- Tareas del cron:
-  1. Marcar cuotas vencidas como `overdue`
-  2. Auto-cancelar reservas `accepted+unpaid` con más de 72h sin pago
-  3. Recordatorio de cuota: 7d y 1d antes de vencimiento (email + WhatsApp 1d)
-  4. Recordatorio pre-evento: 24h antes (email + WhatsApp)
-  5. Solicitud de reseña: 24-48h después del evento
-  6. SLA: aviso al host si no responde solicitud en 48h
+- `src/app/api/cron/payment-reminders/route.ts`, configurado en `vercel.json` (9am RD / 13:00 UTC), protegido con `CRON_SECRET`.
+- Tareas: marcar cuotas `overdue`; auto-cancelar `accepted+unpaid` >72h; recordatorios 7d/1d; pre-evento 24h; reseña 24-48h post; SLA host 48h.
 
 ## Deploy
-- Repositorio: `https://github.com/enriquehernandezfondeur-ux/espot-do.git`
-- Branch principal: `main` → Vercel despliega automáticamente
-- Dominio: `espothub.com` (dominio actual) + `espot.do` (dominio final)
+- Repo: `https://github.com/enriquehernandezfondeur-ux/espot-do.git`. Branch `main` → Vercel auto-deploy. Dominio: `espot.do`.
+- ⚠️ El deploy/push **no debe ejecutarse automáticamente** por Claude (ver gobernanza y `POLITICA_DE_SEGURIDAD_CLAUDE.md`).

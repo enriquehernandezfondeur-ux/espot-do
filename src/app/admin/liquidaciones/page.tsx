@@ -3,6 +3,7 @@
 import { useState, useEffect, useTransition, useRef, useCallback } from 'react'
 import { getAdminPayouts, markPayoutPaid, getHostBankAccount, saveLiquidacionNote } from '@/lib/actions/admin'
 import { formatCurrency, formatDate } from '@/lib/utils'
+import { hostNetOf } from '@/lib/pricing'
 import {
   Banknote, CheckCircle, Clock, Building2, User,
   CalendarDays, Copy, Check, Loader2, Filter,
@@ -117,7 +118,7 @@ export default function AdminLiquidacionesPage() {
 
   async function handlePay(bookingId: string) {
     const bk = payouts.find(b => b.id === bookingId)
-    const amt = bk ? formatCurrency(Number(bk.total_amount) * 0.90) : ''
+    const amt = bk ? formatCurrency(hostNetOf(bk)) : ''
     if (!window.confirm(`Marcar esta liquidación como PAGADA${amt ? ` (${amt} al propietario)` : ''}.\n\nEsta acción declara el pago como realizado y no se puede deshacer. ¿Continuar?`)) return
     setPaying(bookingId)
     startTransition(async () => {
@@ -132,8 +133,8 @@ export default function AdminLiquidacionesPage() {
     })
   }
 
-  const totalPending = payouts.filter(b => b.payout_status !== 'paid').reduce((s, b) => s + Number(b.total_amount) * 0.90, 0)
-  const totalPaid    = payouts.filter(b => b.payout_status === 'paid').reduce((s, b) => s + Number(b.total_amount) * 0.90, 0)
+  const totalPending = payouts.filter(b => b.payout_status !== 'paid').reduce((s, b) => s + hostNetOf(b), 0)
+  const totalPaid    = payouts.filter(b => b.payout_status === 'paid').reduce((s, b) => s + hostNetOf(b), 0)
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
@@ -236,7 +237,7 @@ export default function AdminLiquidacionesPage() {
             {payouts.map((bk: any) => {
               const space   = bk.spaces as any
               const host    = space?.profiles as any
-              const hostAmt = Number(bk.total_amount) * 0.90
+              const hostAmt = hostNetOf(bk)
               const isPaid  = bk.payout_status === 'paid'
 
               return (

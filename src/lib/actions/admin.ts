@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { sendEmail } from '@/lib/email/send'
 import { emailBase, infoBox } from '@/lib/email/templates'
 import { formatCurrency, formatDate, escapeHtml } from '@/lib/utils'
-import { suggestHourlyFromLegacy, computePlatformFee } from '@/lib/pricing'
+import { suggestHourlyFromLegacy, platformFeeOf, hostNetOf } from '@/lib/pricing'
 
 const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
 
@@ -217,8 +217,8 @@ export async function getAdminStats() {
     supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'admin'),
   ])
 
-  const totalRevenue   = (payments.data ?? []).reduce((s, b) => s + Number(b.total_amount) * 0.10, 0)
-  const monthlyRevenue = (monthRevenue.data ?? []).reduce((s, b) => s + Number(b.total_amount) * 0.10, 0)
+  const totalRevenue   = (payments.data ?? []).reduce((s, b) => s + platformFeeOf(b), 0)
+  const monthlyRevenue = (monthRevenue.data ?? []).reduce((s, b) => s + platformFeeOf(b), 0)
 
   return {
     totalSpaces:      spaces.count ?? 0,
@@ -537,9 +537,9 @@ export async function markPayoutPaid(
     const space     = (booking as any).spaces as any
     const host      = space?.profiles as any
     const hostEmail = host?.email as string | undefined
-    // Neto consistente con la liquidación registrada: total − comisión 10%
-    // (antes total×0.90, que difería en ±RD$1 por redondeo).
-    const netAmount = Number(booking.total_amount) - computePlatformFee(Number(booking.total_amount))
+    // Neto consistente con la liquidación: usa la comisión real guardada
+    // (fuente única hostNetOf; antes total×0.90, que difería en ±RD$1).
+    const netAmount = hostNetOf(booking)
     const SITE      = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 
     if (hostEmail) {
@@ -555,7 +555,7 @@ export async function markPayoutPaid(
             { label: 'Evento',         value: booking.event_type ?? '—' },
             { label: 'Fecha',          value: formatDate(booking.event_date) },
             { label: 'Total cliente',  value: formatCurrency(Number(booking.total_amount)) },
-            { label: 'Comisión Espot', value: formatCurrency(Number(booking.platform_fee ?? Number(booking.total_amount) * 0.10)) },
+            { label: 'Comisión Espot', value: formatCurrency(platformFeeOf(booking)) },
             { label: 'Neto transferido', value: formatCurrency(netAmount) },
           ])}
           <p style="font-size:13px;color:#6B7280;margin:16px 0 0;line-height:1.6;">

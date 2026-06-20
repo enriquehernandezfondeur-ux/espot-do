@@ -6,6 +6,7 @@ import { sendEmail } from '@/lib/email/send'
 import { tplPagoCompletado, tplCuotaPagada } from '@/lib/email/templates'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { markInstallmentPaid, getInstallments } from '@/lib/actions/installments'
+import { computePlatformFee } from '@/lib/pricing'
 import { createBookingEvent } from '@/lib/google-calendar'
 import { sendWhatsAppToUser, wa } from '@/lib/whatsapp/send'
 
@@ -90,7 +91,7 @@ export async function POST(req: NextRequest) {
   const totalAmount = Number(booking.total_amount)
 
   const commissionPct = 10
-  const commissionAmt = Math.round(totalAmount * 0.10)
+  const commissionAmt = computePlatformFee(totalAmount)
   const netToHost     = totalAmount - commissionAmt   // deriva el neto: comisión + neto = total exacto
 
   // Si es pago de cuota específica, marcarla como pagada (valida el monto cobrado)

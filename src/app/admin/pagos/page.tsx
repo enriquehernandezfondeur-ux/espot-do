@@ -1,5 +1,6 @@
 import { getAdminPayments } from '@/lib/actions/admin'
 import { formatCurrency } from '@/lib/utils'
+import { platformFeeOf } from '@/lib/pricing'
 import { CreditCard, TrendingUp, Clock, CheckCircle } from 'lucide-react'
 import PagosTable from './PagosTable'
 
@@ -8,7 +9,7 @@ const PAID = ['advance', 'partial', 'paid']
 export default async function AdminPagosPage() {
   const bookings = await getAdminPayments()
 
-  const commission      = (b: any) => Number((b as any).total_amount) * 0.10
+  const commission      = (b: any) => platformFeeOf(b)
   const totalRevenue    = bookings.reduce((s, b) => s + commission(b), 0)
   const totalPaid       = bookings.filter(b => PAID.includes((b as any).payment_status)).reduce((s, b) => s + commission(b), 0)
   const totalPending    = bookings.filter(b => !PAID.includes((b as any).payment_status)).reduce((s, b) => s + commission(b), 0)

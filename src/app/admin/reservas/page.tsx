@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { getAdminBookings, updateBookingStatus } from '@/lib/actions/admin'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
+import { platformFeeOf } from '@/lib/pricing'
 import { Search, ChevronDown, Loader2, CalendarDays, Clock, Users, MapPin, Check, X } from 'lucide-react'
 import Pagination from '@/components/ui/Pagination'
 import { STATUS_SHORT, STATUS_COLORS } from '@/lib/bookingConfig'
@@ -250,7 +251,7 @@ export default function AdminReservasPage() {
                   <span>Total evento</span><span>{formatCurrency(Number(selected.total_amount))}</span>
                 </div>
                 <div className="flex justify-between text-sm font-bold" style={{ color: 'var(--brand)' }}>
-                  <span>Comisión Espot</span><span>{formatCurrency(Number(selected.platform_fee ?? Number(selected.total_amount) * 0.10))}</span>
+                  <span>Comisión Espot</span><span>{formatCurrency(platformFeeOf(selected))}</span>
                 </div>
                 <div className="flex justify-between text-xs pt-1" style={{ borderTop: '1px solid rgba(53,196,147,0.15)', color: '#6B7280' }}>
                   <span>Estado de pago</span>

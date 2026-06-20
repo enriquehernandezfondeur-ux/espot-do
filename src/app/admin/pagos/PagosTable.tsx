@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { CreditCard } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
+import { platformFeeOf } from '@/lib/pricing'
 import Pagination from '@/components/ui/Pagination'
 
 const paymentConfig: Record<string, { label: string; color: string; bg: string }> = {
@@ -43,7 +44,7 @@ export default function PagosTable({ bookings }: { bookings: any[] }) {
                 </div>
                 <div className="text-sm text-gray-600">{formatDate(bk.event_date)}</div>
                 <div className="text-sm font-bold tabular-nums" style={{ color: '#0F1623' }}>{formatCurrency(Number(bk.total_amount))}</div>
-                <div className="text-sm font-bold tabular-nums" style={{ color: 'var(--brand)' }}>{formatCurrency(Number(bk.total_amount) * 0.10)}</div>
+                <div className="text-sm font-bold tabular-nums" style={{ color: 'var(--brand)' }}>{formatCurrency(platformFeeOf(bk))}</div>
                 <span className="text-xs font-semibold px-2.5 py-1 rounded-full w-fit"
                   style={{ background: pc.bg, color: pc.color }}>
                   {pc.label}

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { resolveHostId } from './_resolveHost'
+import { hostNetOf } from '@/lib/pricing'
 
 // ============================================================
 // Analytics del host — agregación server-side.
@@ -35,8 +36,7 @@ export interface HostAnalytics {
 }
 
 function feeNet(total: number, fee: number | null): number {
-  const f = fee != null ? Number(fee) : Math.round(total * 0.10)
-  return Math.max(0, total - f)
+  return Math.max(0, hostNetOf({ total_amount: total, platform_fee: fee }))
 }
 function ym(d: string): string { return d.slice(0, 7) }
 

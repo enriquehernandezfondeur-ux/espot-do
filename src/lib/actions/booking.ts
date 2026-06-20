@@ -655,7 +655,7 @@ export async function confirmPayment(bookingId: string) {
   // Registrar liquidación para el host (consistente con el flujo Azul,
   // que sí la crea; antes el pago manual no aparecía en liquidaciones)
   const totalAmount   = Number(bk.total_amount)
-  const commissionAmt = Math.round(totalAmount * 0.10)
+  const commissionAmt = computePlatformFee(totalAmount)
   const netToHost     = totalAmount - commissionAmt   // deriva el neto: comisión + neto = total exacto
   const { error: liqErr } = await admin.from('liquidaciones').upsert({
     booking_id:       bookingId,

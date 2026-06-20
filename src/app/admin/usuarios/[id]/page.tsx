@@ -12,11 +12,13 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { STATUS_SHORT, STATUS_COLORS } from '@/lib/bookingConfig'
+import { formatCurrency } from '@/lib/utils'
+import { platformFeeOf, hostNetOf } from '@/lib/pricing'
 
 // ── Formatters ──────────────────────────────────────────────
-function fmtCurrency(n: number) {
-  return new Intl.NumberFormat('es-DO', { style: 'currency', currency: 'DOP', minimumFractionDigits: 0 }).format(n)
-}
+// Formateador único de moneda (delegado a utils para que TODAS las pantallas
+// muestren idéntico símbolo/decimales).
+const fmtCurrency = formatCurrency
 function fmtDate(d: string | null | undefined, opts?: Intl.DateTimeFormatOptions) {
   if (!d) return '—'
   return new Date(d + (d.length === 10 ? 'T12:00' : '')).toLocaleDateString('es-DO', opts ?? { day: 'numeric', month: 'short', year: 'numeric' })
@@ -155,14 +157,14 @@ export default function AdminHostDetailPage() {
   const paidStatuses = ['confirmed', 'completed']
   const paidBookings = bookings.filter((b: any) => paidStatuses.includes(b.status))
   const espotRevenue = paidBookings.reduce((s: number, b: any) => s + Number(b.total_amount), 0)
-  const espotFees    = paidBookings.reduce((s: number, b: any) => s + Number(b.platform_fee ?? Number(b.total_amount) * 0.10), 0)
+  const espotFees    = paidBookings.reduce((s: number, b: any) => s + platformFeeOf(b), 0)
   const hostNet      = espotRevenue - espotFees
 
   const directRevenue = externalEvents.reduce((s: number, e: any) => s + Number(e.paid_amount ?? 0), 0)
   const totalRevenue  = espotRevenue + directRevenue
 
   const pendingPayout = paidBookings.filter((b: any) => b.payout_status === 'pending')
-    .reduce((s: number, b: any) => s + Math.round(Number(b.total_amount) * 0.90), 0)
+    .reduce((s: number, b: any) => s + hostNetOf(b), 0)
 
   const totalEvents   = bookings.length + externalEvents.length
   const activeSpaces  = spaces.filter((s: any) => s.is_published && s.is_active).length

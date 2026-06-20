@@ -1,4 +1,4 @@
-import { computeBasePrice, computePlatformFee, computeHostNet, isWeekendDate, consumptionLabel, suggestHourlyFromLegacy } from '@/lib/pricing'
+import { computeBasePrice, computePlatformFee, computeHostNet, platformFeeOf, hostNetOf, isWeekendDate, consumptionLabel, suggestHourlyFromLegacy } from '@/lib/pricing'
 
 describe('isWeekendDate', () => {
   it('trata viernes, sábado y domingo como fin de semana', () => {
@@ -75,6 +75,31 @@ describe('computeHostNet', () => {
   it('neto = total − comisión 10% (consistente con la liquidación)', () => {
     expect(computeHostNet(10000)).toBe(9000)
     expect(computeHostNet(1505)).toBe(1505 - 151) // 1354, no 1355 (round(total*0.90))
+  })
+})
+
+describe('platformFeeOf / hostNetOf (fuente única de pantallas)', () => {
+  it('usa la comisión guardada cuando existe', () => {
+    expect(platformFeeOf({ total_amount: 10000, platform_fee: 1234 })).toBe(1234)
+    expect(hostNetOf({ total_amount: 10000, platform_fee: 1234 })).toBe(8766)
+  })
+  it('cae a computePlatformFee cuando platform_fee es null/undefined', () => {
+    expect(platformFeeOf({ total_amount: 10000, platform_fee: null })).toBe(1000)
+    expect(platformFeeOf({ total_amount: 10000 })).toBe(1000)
+    expect(hostNetOf({ total_amount: 10000 })).toBe(9000)
+  })
+  it('platform_fee = 0 se respeta (no se trata como ausente)', () => {
+    expect(platformFeeOf({ total_amount: 10000, platform_fee: 0 })).toBe(0)
+    expect(hostNetOf({ total_amount: 10000, platform_fee: 0 })).toBe(10000)
+  })
+  it('IDENTIDAD: comisión + neto = total en montos no múltiplos de 10', () => {
+    for (const total of [1005, 1505, 999, 12345, 7, 333]) {
+      expect(platformFeeOf({ total_amount: total }) + hostNetOf({ total_amount: total })).toBe(total)
+    }
+  })
+  it('maneja fila vacía/nula sin romper', () => {
+    expect(platformFeeOf({})).toBe(0)
+    expect(hostNetOf({})).toBe(0)
   })
 })
 

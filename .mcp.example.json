@@ -1,0 +1,35 @@
+{
+  "_instructions": [
+    "Plantilla de MCP local para Espot. Copia este archivo a .mcp.json y reemplaza los marcadores <...> con los valores REALES de Espot.",
+    ".mcp.json está en .gitignore y NUNCA debe versionarse (contiene credenciales). Este .mcp.example.json sí se versiona, SIN credenciales.",
+    "NO reutilices tokens, contraseñas ni conexiones de PuntualPago. Espot debe usar su propio proyecto, token y cadena de Postgres.",
+    "Supabase queda en modo --read-only. El server de Postgres (@modelcontextprotocol/server-postgres) es de solo lectura por diseño.",
+    "Dónde obtener cada dato: ver MCP_ESPOT.md y PENDIENTES_MANUALES.md.",
+    "<ESPOT_SUPABASE_PROJECT_REF>     = Supabase Dashboard > proyecto Espot > Settings > General > 'Reference ID'.",
+    "<ESPOT_SUPABASE_ACCESS_TOKEN>    = Supabase Dashboard > Account > Access Tokens > 'Generate new token' (token PROPIO de Espot).",
+    "<ESPOT_POSTGRES_CONNECTION_STRING> = Supabase Dashboard > proyecto Espot > Settings > Database > 'Connection string' (URI)."
+  ],
+  "mcpServers": {
+    "espot-supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase",
+        "--project-ref",
+        "<ESPOT_SUPABASE_PROJECT_REF>",
+        "--read-only"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "<ESPOT_SUPABASE_ACCESS_TOKEN>"
+      }
+    },
+    "espot-postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "<ESPOT_POSTGRES_CONNECTION_STRING>"
+      ]
+    }
+  }
+}

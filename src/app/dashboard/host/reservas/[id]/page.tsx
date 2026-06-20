@@ -10,6 +10,7 @@ import {
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getHostBookingDetail, acceptBooking, rejectBooking, completeBooking } from '@/lib/actions/host'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
+import { platformFeeOf, hostNetOf } from '@/lib/pricing'
 import { countdownLabel } from '@/lib/payments/schedule'
 import { getDisputeForBooking } from '@/lib/actions/disputes'
 import DisputeSection from '@/app/dashboard/(client)/reservas/[id]/DisputeSection'
@@ -109,7 +110,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
     <div className="flex flex-col items-center justify-center h-dvh gap-3 px-4 text-center"
       style={{ background: 'var(--bg-base)' }}>
       <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>Reserva no encontrada</p>
-      <Link href="/dashboard/host/reservas"
+      <Link href="/dashboard/host/agenda"
         className="text-sm px-5 py-2.5 rounded-xl font-semibold"
         style={{ background: 'var(--brand)', color: '#fff' }}>
         Volver a mis reservas
@@ -129,8 +130,8 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
   const sl      = STATUS_LABELS[bk.status as keyof typeof STATUS_LABELS] ?? bk.status
 
   const totalAmount   = Number(bk.total_amount) || 0
-  const platformFee   = Number(bk.platform_fee) || Math.round(totalAmount * 0.10)
-  const hostNet       = Math.round(totalAmount * 0.90)
+  const platformFee   = platformFeeOf(bk)
+  const hostNet       = hostNetOf(bk)
   const paidAmount    = installments
     .filter((i: any) => i.status === 'paid')
     .reduce((s: number, i: any) => s + Number(i.amount), 0)
@@ -154,7 +155,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
 
       {/* Header — volver + nombre espacio */}
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/dashboard/host/reservas"
+        <Link href="/dashboard/host/agenda"
           className="inline-flex items-center gap-1.5 text-sm font-medium shrink-0"
           style={{ color: 'var(--text-muted)' }}>
           <ArrowLeft size={15} /> Reservas
@@ -574,7 +575,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
 
       {/* ── Botón volver ──────────────────────────────────── */}
       <div className="mt-6">
-        <Link href="/dashboard/host/reservas"
+        <Link href="/dashboard/host/agenda"
           className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl text-sm font-semibold"
           style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
           <ArrowLeft size={15} /> Volver a reservas

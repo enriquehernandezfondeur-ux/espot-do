@@ -5,6 +5,7 @@ import { getSpaceBySlug } from '@/lib/actions/marketplace'
 import { isHostProById } from '@/lib/actions/subscription'
 import { getCategoryLabel } from '@/lib/categories'
 import { consumptionLabel } from '@/lib/pricing'
+import { formatCurrency } from '@/lib/utils'
 import { ShareButton } from '@/components/ShareButton'
 import { MapPin, Users, CalendarDays, Crown } from 'lucide-react'
 
@@ -29,7 +30,7 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
 
   const isHourly  = pricing?.pricing_type === 'hourly'
   const priceLine = isHourly && pricing.hourly_price
-    ? `RD$${Number(pricing.hourly_price).toLocaleString('es-DO')} / hora`
+    ? `${formatCurrency(Number(pricing.hourly_price))} / hora`
     : 'Consultar precio'
 
   return (

@@ -80,6 +80,30 @@ export function computeHostNet(total: number): number {
   return total - computePlatformFee(total)
 }
 
+/** Fila mínima de una reserva para calcular comisión/neto. */
+export interface FeeRow {
+  total_amount?: number | null
+  platform_fee?: number | null
+}
+
+/**
+ * Comisión EFECTIVA de una reserva: usa la `platform_fee` realmente guardada si
+ * existe (la que se cobró), y sólo si es null la recalcula con `computePlatformFee`.
+ * Toda pantalla de visualización/liquidación debe usar esto — nunca `total * 0.10`.
+ */
+export function platformFeeOf(row: FeeRow): number {
+  const total = Number(row?.total_amount) || 0
+  return row?.platform_fee != null ? Math.round(Number(row.platform_fee)) : computePlatformFee(total)
+}
+
+/**
+ * Neto del propietario de una reserva: total − comisión efectiva. Garantiza que
+ * `comisión + neto = total` en TODAS las pantallas (evita `Math.round(total*0.90)`).
+ */
+export function hostNetOf(row: FeeRow): number {
+  return (Number(row?.total_amount) || 0) - platformFeeOf(row)
+}
+
 /**
  * Texto de la condición de consumo para mostrar al cliente.
  * NO afecta el cálculo — el precio es el mismo, sólo cambia la explicación.

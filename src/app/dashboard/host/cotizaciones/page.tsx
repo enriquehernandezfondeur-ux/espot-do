@@ -9,6 +9,7 @@ import { formatDate, formatCurrency } from '@/lib/utils'
 import { getHostQuotes, respondToQuote } from '@/lib/actions/host'
 import { rejectBooking } from '@/lib/actions/booking'
 import { buildSchedule } from '@/lib/payments/schedule'
+import { computePlatformFee, computeHostNet } from '@/lib/pricing'
 import { cn } from '@/lib/utils'
 import { getConversation, sendMessage, markMessagesRead } from '@/lib/actions/messages'
 import type { MessageAttachment } from '@/lib/actions/messages'
@@ -314,7 +315,7 @@ export default function CotizacionesPage() {
                     {price && !isNaN(parseFloat(price)) && (
                       <div className="mt-2 space-y-1.5">
                         <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                          Comisión 10%: {formatCurrency(parseFloat(price) * 0.10)} · <strong style={{ color: 'var(--text-primary)' }}>Recibes: {formatCurrency(parseFloat(price) * 0.90)}</strong>
+                          Comisión 10%: {formatCurrency(computePlatformFee(parseFloat(price)))} · <strong style={{ color: 'var(--text-primary)' }}>Recibes: {formatCurrency(computeHostNet(parseFloat(price)))}</strong>
                         </p>
                         <QuoteSchedulePreview price={parseFloat(price)} eventDate={selected?.event_date ?? ''} />
                       </div>

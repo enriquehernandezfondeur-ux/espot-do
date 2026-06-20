@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import Pagination from '@/components/ui/Pagination'
 import { formatCurrency, formatDate, formatTime, cn, todayInRD } from '@/lib/utils'
+import { hostNetOf, platformFeeOf } from '@/lib/pricing'
 import {
   getExternalEvents, updateExternalEvent, addEventPayment,
   deleteExternalEvent, deleteEventPayment,
@@ -721,12 +722,12 @@ function EspotPanel({ booking, actionId, rejectReason, showRejectForm, onClose, 
           </div>
           <div className="flex justify-between text-sm text-gray-500">
             <span>Comisión Espot (10%)</span>
-            <span>{formatCurrency(Number(booking.platform_fee))}</span>
+            <span>{formatCurrency(platformFeeOf(booking))}</span>
           </div>
           <div className="flex justify-between text-sm font-bold pt-1"
             style={{ borderTop: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}>
             <span>Tu neto</span>
-            <span style={{ color: 'var(--brand)' }}>{formatCurrency(Math.round(Number(booking.total_amount) * 0.90))}</span>
+            <span style={{ color: 'var(--brand)' }}>{formatCurrency(hostNetOf(booking))}</span>
           </div>
         </div>
 

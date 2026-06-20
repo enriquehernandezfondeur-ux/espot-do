@@ -8,6 +8,7 @@ import { emailBase, infoBox } from '@/lib/email/templates'
 import { formatCurrency, formatDate, escapeHtml } from '@/lib/utils'
 import { userLogger, logError } from '@/lib/logger'
 import { resolveHostId } from './_resolveHost'
+import { computePlatformFee } from '@/lib/pricing'
 import { createServiceClient } from '@/lib/supabase/service'
 
 export { acceptBooking, rejectBooking, confirmPayment as confirmBooking, cancelBooking }
@@ -504,7 +505,7 @@ export async function respondToQuote(bookingId: string, quotedPrice: number, mes
   const { hostId: rqHostId } = await resolveHostId(supabase, user.id)
   if (!bk || (bk.spaces as any)?.host_id !== rqHostId) return { error: 'No autorizado' }
 
-  const platformFee = Math.round(quotedPrice * 0.10)
+  const platformFee = computePlatformFee(quotedPrice)
 
   // Actualizar booking: precio real + pasar a 'accepted' directamente
   // (el host ya aceptó la cotización al responder con precio).

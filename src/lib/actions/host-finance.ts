@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { resolveHostId } from './_resolveHost'
+import { platformFeeOf, hostNetOf } from '@/lib/pricing'
 
 // ============================================================
 // Datos financieros del host — agregación server-side correcta.
@@ -35,13 +36,13 @@ type B = {
   spaces?: { name?: string | null } | null
 }
 
-/** Comisión real de la reserva (cae a 10% si platform_fee no está poblado). */
+/** Comisión real de la reserva (fuente única: usa platform_fee guardado, cae a 10%). */
 function feeOf(b: B): number {
-  return b.platform_fee != null ? Number(b.platform_fee) : Math.round(Number(b.total_amount ?? 0) * 0.10)
+  return platformFeeOf(b)
 }
-/** Neto al host = total − comisión. */
+/** Neto al host = total − comisión (no negativo). */
 function netOf(b: B): number {
-  return Math.max(0, Number(b.total_amount ?? 0) - feeOf(b))
+  return Math.max(0, hostNetOf(b))
 }
 function ym(dateStr: string): string { return dateStr.slice(0, 7) } // YYYY-MM
 

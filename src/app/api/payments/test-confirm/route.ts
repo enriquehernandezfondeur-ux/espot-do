@@ -5,6 +5,7 @@ import { tplPagoCompletado } from '@/lib/email/templates'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { markInstallmentPaid } from '@/lib/actions/installments'
 import { createServiceClient } from '@/lib/supabase/service'
+import { computePlatformFee, computeHostNet } from '@/lib/pricing'
 
 // POST /api/payments/test-confirm
 // Solo activo cuando PAYMENT_TEST_MODE=1
@@ -98,16 +99,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, already: true })
   }
 
-  // Registrar en liquidaciones
-  const commissionAmt = Number(booking.total_amount) * 0.10
+  // Registrar en liquidaciones (fuente única: comisión + neto = total exacto)
+  const totalAmt      = Number(booking.total_amount)
+  const commissionAmt = computePlatformFee(totalAmt)
+  const netAmt        = computeHostNet(totalAmt)
   await admin.from('liquidaciones').upsert({
     booking_id:       bookingId,
     host_id:          host?.id ?? space?.host_id,
     space_id:         space?.id,
-    total_reserva:    Number(booking.total_amount),
+    total_reserva:    totalAmt,
     comision_pct:     10,
     comision_monto:   commissionAmt,
-    neto_propietario: Number(booking.total_amount) * 0.90,
+    neto_propietario: netAmt,
     estado:           'pendiente',
   }, { onConflict: 'booking_id' })
 
@@ -124,7 +127,7 @@ export async function POST(req: NextRequest) {
         eventDate: booking.event_date, eventInfo,
         totalAmount: Number(booking.total_amount),
         commissionAmount: commissionAmt,
-        netAmount: Number(booking.total_amount) * 0.90,
+        netAmount: netAmt,
         azulOrderId: fakeOrderId, siteUrl: SITE,
       }),
     }),
@@ -137,7 +140,7 @@ export async function POST(req: NextRequest) {
         eventDate: booking.event_date, eventInfo,
         totalAmount: Number(booking.total_amount),
         commissionAmount: commissionAmt,
-        netAmount: Number(booking.total_amount) * 0.90,
+        netAmount: netAmt,
         azulOrderId: fakeOrderId, siteUrl: SITE, isHost: true,
       }),
     }),

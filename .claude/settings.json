@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(git push:*)",
+      "Bash(git push)",
+      "Bash(git merge:*)",
+      "Bash(git merge)",
+      "Bash(git rebase:*)",
+      "Bash(git rebase)",
+      "Bash(git reset --hard:*)",
+      "Bash(git reset --keep:*)",
+      "Bash(git clean -fd:*)",
+      "Bash(git clean -fdx:*)",
+      "Bash(vercel deploy:*)",
+      "Bash(vercel --prod:*)",
+      "Bash(vercel deploy)",
+      "Bash(vercel --prod)",
+      "Bash(npx vercel deploy:*)",
+      "Bash(npx vercel --prod:*)",
+      "Bash(supabase db push:*)",
+      "Bash(supabase db reset:*)",
+      "Bash(supabase migration up:*)",
+      "Bash(npx supabase db push:*)",
+      "Bash(npx supabase db reset:*)",
+      "Bash(dropdb:*)",
+      "Bash(dropuser:*)",
+      "Bash(rm -rf:*)",
+      "Bash(rm -fr:*)",
+      "Bash(rm -r:*)",
+      "Bash(find . -delete:*)"
+    ],
+    "allow": [
+      "Bash(npx tsc --noEmit *)",
+      "Bash(npm run test:*)",
+      "Bash(npx vercel ls *)",
+      "Bash(npx vercel inspect *)",
+      "Bash(npx vercel project *)"
+    ]
+  }
+}

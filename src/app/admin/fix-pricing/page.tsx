@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { DollarSign, RefreshCw, CheckCircle, AlertCircle, Zap } from 'lucide-react'
+import { formatCurrency } from '@/lib/utils'
 
 export default function FixPricingPage() {
   const [preview, setPreview] = useState<any>(null)
@@ -121,7 +122,7 @@ export default function FixPricingPage() {
                           {typeLabel(s.fix.type)}
                         </p>
                         <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                          RD${s.fix.price.toLocaleString()}
+                          {formatCurrency(s.fix.price)}
                         </p>
                       </div>
                     ) : (
