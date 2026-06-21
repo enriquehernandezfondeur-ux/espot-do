@@ -477,7 +477,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                   {(() => { const cat = CATEGORIES.find(c => c.value === categoria); const Icon = cat?.icon ?? LayoutList; return <Icon size={14} style={{ flexShrink: 0 }} /> })()}
                   <span>{categoria ? CATEGORIES.find(c => c.value === categoria)?.label : 'Tipo de espacio'}</span>
                   {categoria
-                    ? <button onClick={e => { e.stopPropagation(); setCategoria('') }}><X size={12} /></button>
+                    ? <button type="button" aria-label="Quitar filtro" onClick={e => { e.stopPropagation(); setCategoria('') }}><X size={12} /></button>
                     : <ChevronDown size={13} style={{ opacity: 0.5 }} />
                   }
                 </button>
@@ -518,7 +518,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                   <LayoutList size={14} style={{ flexShrink: 0 }} />
                   <span>{activityLabel || 'Tipo de evento'}</span>
                   {activity
-                    ? <button onClick={e => { e.stopPropagation(); setActivity(''); setActQ('') }}><X size={12} /></button>
+                    ? <button type="button" aria-label="Quitar filtro" onClick={e => { e.stopPropagation(); setActivity(''); setActQ('') }}><X size={12} /></button>
                     : <ChevronDown size={13} style={{ opacity: 0.5 }} />
                   }
                 </button>
@@ -541,7 +541,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                           className="flex-1 bg-transparent text-sm focus:outline-none"
                           style={{ color: 'var(--text-primary)', fontSize: 16 }}
                         />
-                        {actQ && <button onClick={() => setActQ('')} style={{ color: 'var(--text-muted)' }}><X size={11} /></button>}
+                        {actQ && <button onClick={() => setActQ('')} aria-label="Limpiar búsqueda" style={{ color: 'var(--text-muted)' }}><X size={11} /></button>}
                       </div>
                     </div>
                     {/* Lista plana ordenada por popularidad */}
@@ -595,7 +595,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                   <Users size={14} style={{ flexShrink: 0 }} />
                   <span>{capacidad ? `${capacidad}+ personas` : 'Personas'}</span>
                   {capacidad
-                    ? <button onClick={e => { e.stopPropagation(); applyCapacity('') }}><X size={12} /></button>
+                    ? <button type="button" aria-label="Quitar filtro" onClick={e => { e.stopPropagation(); applyCapacity('') }}><X size={12} /></button>
                     : <ChevronDown size={13} style={{ opacity: 0.5 }} />
                   }
                 </button>
@@ -667,7 +667,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                   <MapPin size={14} style={{ flexShrink: 0 }} />
                   <span className="max-w-[120px] truncate">{sector || 'Dónde'}</span>
                   {sector
-                    ? <button onClick={e => { e.stopPropagation(); clearSector(); setSecOpen(false) }}><X size={12} /></button>
+                    ? <button type="button" aria-label="Quitar filtro" onClick={e => { e.stopPropagation(); clearSector(); setSecOpen(false) }}><X size={12} /></button>
                     : <ChevronDown size={13} style={{ opacity: 0.5 }} />
                   }
                 </button>
@@ -718,7 +718,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                   }
                   <span>{dateFrom ? (timeFrom ? `${fmtDateShort(dateFrom)} · ${fmtTime(timeFrom)}` : fmtDateShort(dateFrom)) : 'Fecha'}</span>
                   {dateFrom
-                    ? <button onClick={e => { e.stopPropagation(); setDateFrom(''); setTimeFrom('') }}><X size={12} /></button>
+                    ? <button type="button" aria-label="Quitar filtro" onClick={e => { e.stopPropagation(); setDateFrom(''); setTimeFrom('') }}><X size={12} /></button>
                     : <ChevronDown size={13} style={{ opacity: 0.5 }} />
                   }
                 </button>
@@ -814,7 +814,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
               style={{ color: 'var(--text-primary)', fontSize: 16 }}
             />
             {q && (
-              <button onClick={() => setQ('')}
+              <button onClick={() => setQ('')} aria-label="Limpiar búsqueda"
                 className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
                 <X size={10} />
@@ -838,50 +838,60 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
 
             {/* Tipo de espacio */}
             {(() => { const cat = CATEGORIES.find(c => c.value === categoria); const Icon = cat?.icon ?? LayoutList; return (
-              <button onClick={() => openDrawer('tipo-espacio')}
+              <div
                 className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all min-h-[44px]"
                 style={{ background: categoria ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${categoria ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: categoria ? 'var(--brand)' : 'var(--text-primary)' }}>
-                <Icon size={13} style={{ flexShrink: 0 }} />
-                <span>{categoria ? cat?.label : 'Espacio'}</span>
-                {categoria ? <span onClick={e => { e.stopPropagation(); setCategoria('') }} className="flex items-center justify-center w-7 h-7 -mr-1"><X size={12} /></span> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
-              </button>
+                <button type="button" onClick={() => openDrawer('tipo-espacio')} className="flex items-center gap-1.5">
+                  <Icon size={13} style={{ flexShrink: 0 }} />
+                  <span>{categoria ? cat?.label : 'Espacio'}</span>
+                </button>
+                {categoria ? <button type="button" aria-label="Quitar filtro" onClick={e => { e.stopPropagation(); setCategoria('') }} className="flex items-center justify-center w-7 h-7 -mr-1"><X size={12} /></button> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
+              </div>
             )})()}
 
             {/* Tipo de evento */}
-            <button onClick={() => openDrawer('tipo-evento')}
+            <div
               className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all min-h-[44px]"
               style={{ background: activity ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${activity ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: activity ? 'var(--brand)' : 'var(--text-primary)' }}>
-              <LayoutList size={13} style={{ flexShrink: 0 }} />
-              <span>{activityLabel || 'Evento'}</span>
-              {activity ? <span onClick={e => { e.stopPropagation(); setActivity('') }} className="flex items-center justify-center w-7 h-7 -mr-1"><X size={12} /></span> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
-            </button>
+              <button type="button" onClick={() => openDrawer('tipo-evento')} className="flex items-center gap-1.5">
+                <LayoutList size={13} style={{ flexShrink: 0 }} />
+                <span>{activityLabel || 'Evento'}</span>
+              </button>
+              {activity ? <button type="button" aria-label="Quitar filtro" onClick={e => { e.stopPropagation(); setActivity('') }} className="flex items-center justify-center w-7 h-7 -mr-1"><X size={12} /></button> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
+            </div>
 
             {/* Personas */}
-            <button onClick={() => openDrawer('personas')}
+            <div
               className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all min-h-[44px]"
               style={{ background: capacidad ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${capacidad ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: capacidad ? 'var(--brand)' : 'var(--text-primary)' }}>
-              <Users size={13} style={{ flexShrink: 0 }} />
-              <span>{capacidad ? `${capacidad}+` : 'Personas'}</span>
-              {capacidad ? <span onClick={e => { e.stopPropagation(); applyCapacity('') }} className="flex items-center justify-center w-7 h-7 -mr-1"><X size={12} /></span> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
-            </button>
+              <button type="button" onClick={() => openDrawer('personas')} className="flex items-center gap-1.5">
+                <Users size={13} style={{ flexShrink: 0 }} />
+                <span>{capacidad ? `${capacidad}+` : 'Personas'}</span>
+              </button>
+              {capacidad ? <button type="button" aria-label="Quitar filtro" onClick={e => { e.stopPropagation(); applyCapacity('') }} className="flex items-center justify-center w-7 h-7 -mr-1"><X size={12} /></button> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
+            </div>
 
             {/* Sector */}
-            <button onClick={() => openDrawer('sector')}
+            <div
               className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all min-h-[44px]"
               style={{ background: sector ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${sector ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: sector ? 'var(--brand)' : 'var(--text-primary)' }}>
-              <MapPin size={13} style={{ flexShrink: 0 }} />
-              <span className="max-w-[90px] truncate">{sector || 'Dónde'}</span>
-              {sector ? <span onClick={e => { e.stopPropagation(); clearSector() }} className="flex items-center justify-center w-7 h-7 -mr-1"><X size={12} /></span> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
-            </button>
+              <button type="button" onClick={() => openDrawer('sector')} className="flex items-center gap-1.5">
+                <MapPin size={13} style={{ flexShrink: 0 }} />
+                <span className="max-w-[90px] truncate">{sector || 'Dónde'}</span>
+              </button>
+              {sector ? <button type="button" aria-label="Quitar filtro" onClick={e => { e.stopPropagation(); clearSector() }} className="flex items-center justify-center w-7 h-7 -mr-1"><X size={12} /></button> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
+            </div>
 
             {/* Fecha */}
-            <button onClick={() => openDrawer('fecha')}
+            <div
               className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-all min-h-[44px]"
               style={{ background: dateFrom ? 'var(--brand-dim)' : '#fff', border: `1.5px solid ${dateFrom ? 'var(--brand-border)' : 'var(--border-medium)'}`, color: dateFrom ? 'var(--brand)' : 'var(--text-primary)' }}>
-              <CalendarDays size={13} style={{ flexShrink: 0 }} />
-              <span>{dateFrom ? fmtDateShort(dateFrom) : 'Fecha'}</span>
-              {dateFrom ? <span onClick={e => { e.stopPropagation(); setDateFrom(''); setTimeFrom('') }} className="flex items-center justify-center w-7 h-7 -mr-1"><X size={12} /></span> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
-            </button>
+              <button type="button" onClick={() => openDrawer('fecha')} className="flex items-center gap-1.5">
+                <CalendarDays size={13} style={{ flexShrink: 0 }} />
+                <span>{dateFrom ? fmtDateShort(dateFrom) : 'Fecha'}</span>
+              </button>
+              {dateFrom ? <button type="button" aria-label="Quitar filtro" onClick={e => { e.stopPropagation(); setDateFrom(''); setTimeFrom('') }} className="flex items-center justify-center w-7 h-7 -mr-1"><X size={12} /></button> : <ChevronDown size={11} style={{ opacity: 0.5 }} />}
+            </div>
 
           </div>
 
@@ -1175,7 +1185,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                   </p>
                 )}
               </div>
-              <button onClick={() => { setMoreOpen(false); setActQ('') }}
+              <button onClick={() => { setMoreOpen(false); setActQ('') }} aria-label="Cerrar filtros"
                 className="w-9 h-9 rounded-xl flex items-center justify-center"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
                 <X size={16} />
@@ -1202,7 +1212,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                     style={{ color: 'var(--text-primary)', fontSize: 16 }}
                   />
                   {sectorQ && (
-                    <button onClick={clearSector}
+                    <button onClick={clearSector} aria-label="Limpiar sector"
                       className="absolute right-3.5 top-1/2 -translate-y-1/2"
                       style={{ color: 'var(--text-muted)' }}>
                       <X size={14} />
@@ -1324,7 +1334,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                     style={{ color: 'var(--text-primary)', fontSize: 16 }}
                   />
                   {actQ && (
-                    <button onClick={() => setActQ('')}
+                    <button onClick={() => setActQ('')} aria-label="Limpiar búsqueda"
                       className="absolute right-3.5 top-1/2 -translate-y-1/2"
                       style={{ color: 'var(--text-muted)' }}>
                       <X size={14} />

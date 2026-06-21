@@ -583,7 +583,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                   <h3 className="font-bold text-lg mb-2" style={{ color: '#fff', letterSpacing: '-0.025em' }}>
                     ¿Cómo publicar mi espacio?
                   </h3>
-                  <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                  <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.72)' }}>
                     Publica tu salón, rooftop o villa, configura precios y disponibilidad, y empieza a recibir reservas sin costo fijo.
                   </p>
                 </div>

@@ -258,7 +258,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
               <h3 className="font-bold text-sm truncate" style={{ color: 'var(--text-primary)' }}>
                 {space.name}
               </h3>
-              <button onClick={() => setShowMobileWidget(false)}
+              <button onClick={() => setShowMobileWidget(false)} aria-label="Cerrar"
                 className="w-10 h-10 flex items-center justify-center rounded-full"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
                 <X size={18} />
@@ -337,6 +337,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
             {/* Botón compartir — visible en mobile y desktop */}
             <div className="relative">
               <button
+                aria-label="Compartir"
                 onClick={() => {
                   const url = window.location.href
                   // En móvil con Web Share API → share sheet nativo (WhatsApp, Instagram, SMS...)
@@ -542,19 +543,19 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
 
             {images.length > 1 && (
               <>
-                <button onClick={() => setPhotoIdx(i => (i - 1 + images.length) % images.length)}
+                <button onClick={() => setPhotoIdx(i => (i - 1 + images.length) % images.length)} aria-label="Foto anterior"
                   className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 flex items-center justify-center shadow-lg transition-all active:scale-95"
                   style={{ color: 'var(--text-primary)' }}>
                   <ChevronLeft size={18} />
                 </button>
-                <button onClick={() => setPhotoIdx(i => (i + 1) % images.length)}
+                <button onClick={() => setPhotoIdx(i => (i + 1) % images.length)} aria-label="Foto siguiente"
                   className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 flex items-center justify-center shadow-lg transition-all active:scale-95"
                   style={{ color: 'var(--text-primary)' }}>
                   <ChevronRight size={18} />
                 </button>
                 <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                   {images.slice(0, 8).map((img: any, i: number) => (
-                    <button key={img?.url ?? i} onClick={() => setPhotoIdx(i)}
+                    <button key={img?.url ?? i} onClick={() => setPhotoIdx(i)} aria-label={`Ir a la foto ${i + 1}`}
                       className={cn('h-1.5 rounded-full bg-white transition-all', photoIdx === i ? 'w-5 opacity-100' : 'w-1.5 opacity-40')} />
                   ))}
                 </div>
@@ -597,12 +598,12 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
               {/* Flechas */}
               {images.length > 1 && (
                 <>
-                  <button onClick={() => setPhotoIdx(i => (i - 1 + images.length) % images.length)}
+                  <button onClick={() => setPhotoIdx(i => (i - 1 + images.length) % images.length)} aria-label="Foto anterior"
                     className="absolute left-2 md:left-6 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110"
                     style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>
                     <ChevronLeft size={20} />
                   </button>
-                  <button onClick={() => setPhotoIdx(i => (i + 1) % images.length)}
+                  <button onClick={() => setPhotoIdx(i => (i + 1) % images.length)} aria-label="Foto siguiente"
                     className="absolute right-2 md:right-6 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110"
                     style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>
                     <ChevronRight size={20} />
@@ -621,7 +622,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
               <div className="flex gap-2 mt-3 px-4 overflow-x-auto scrollbar-hide max-w-full"
                 onClick={e => e.stopPropagation()}>
                 {images.map((img: any, i: number) => (
-                  <button key={i} onClick={() => setPhotoIdx(i)}
+                  <button key={i} onClick={() => setPhotoIdx(i)} aria-label={`Ir a la foto ${i + 1}`}
                     className={cn('relative h-14 w-20 rounded-lg overflow-hidden shrink-0 transition-all', i === photoIdx ? 'ring-2 opacity-100 scale-105' : 'opacity-35 hover:opacity-65')}
                     style={{ ['--tw-ring-color' as any]: 'var(--brand)' }}>
                     <Image src={img.url} alt="" fill sizes="80px" className="object-cover" />
@@ -631,7 +632,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
             )}
 
             {/* Cerrar */}
-            <button onClick={() => setShowLightbox(false)}
+            <button onClick={() => setShowLightbox(false)} aria-label="Cerrar galería"
               className="absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110"
               style={{ background: 'rgba(255,255,255,0.12)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>
               <X size={18} />
@@ -650,6 +651,7 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                 {/* Cerrar */}
                 <button
                   onClick={() => setShowVideoModal(false)}
+                  aria-label="Cerrar video"
                   className="absolute -top-4 -right-4 z-10 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110"
                   style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)' }}>
                   <X size={17} />

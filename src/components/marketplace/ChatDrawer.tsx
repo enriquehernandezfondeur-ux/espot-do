@@ -173,7 +173,7 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, hostA
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-4"
           style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-          <button onClick={onClose} className="w-11 h-11 rounded-xl flex items-center justify-center hover:bg-gray-100"
+          <button onClick={onClose} aria-label="Cerrar" className="w-11 h-11 rounded-xl flex items-center justify-center hover:bg-gray-100"
             style={{ color: 'var(--text-secondary)' }}>
             <X size={18} />
           </button>
@@ -338,7 +338,7 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, hostA
                     {(attachment.file.size / 1024 / 1024).toFixed(1)} MB
                   </p>
                 </div>
-                <button onClick={removeAttachment}
+                <button onClick={removeAttachment} aria-label="Quitar archivo"
                   className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
                   style={{ background: 'rgba(220,38,38,0.1)', color: 'var(--danger)' }}>
                   <X size={14} />
@@ -358,6 +358,7 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, hostA
               <button
                 onClick={() => fileRef.current?.click()}
                 disabled={sending || uploading}
+                aria-label="Adjuntar archivo"
                 className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-all disabled:opacity-40"
                 style={{ background: 'var(--bg-elevated)', color: attachment ? 'var(--brand)' : 'var(--text-muted)', border: attachment ? '1.5px solid var(--brand-border)' : '1.5px solid var(--border-medium)' }}>
                 <Paperclip size={18} />
@@ -390,6 +391,7 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, hostA
               <button
                 onClick={handleSend}
                 disabled={!canSend}
+                aria-label="Enviar mensaje"
                 className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-all disabled:opacity-40"
                 style={{ background: 'var(--brand)', color: '#fff', boxShadow: canSend ? '0 2px 8px rgba(53,196,147,0.3)' : 'none' }}>
                 {(sending || uploading) ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
