@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   ChevronLeft, MapPin, CalendarDays, Clock, Share2, MoreVertical, Trash2,
-  Users, UserPlus, Check, Loader2, CalendarPlus, Pencil, Plus, X, QrCode,
+  Users, UserPlus, Check, Loader2, CalendarPlus, Pencil, Plus, X, QrCode, Bell,
 } from 'lucide-react'
 import { formatDate, formatTime, todayInRD } from '@/lib/utils'
 import { useConfirm } from '@/components/ui/ConfirmDialog'
@@ -13,6 +13,7 @@ import { ActivityStatusBadge } from '@/components/activities/ActivityStatusBadge
 import { ShareSheet } from '@/components/activities/ShareSheet'
 import { EditActivityModal } from '@/components/activities/EditActivityModal'
 import { QuestionsManager } from '@/components/activities/QuestionsManager'
+import { ReminderSheet } from '@/components/activities/ReminderSheet'
 import { effectiveStatus, capacity } from '@/lib/activities/display'
 import { buildIcs, icsDataUri } from '@/lib/activities/ics'
 import {
@@ -39,6 +40,7 @@ export function ActivityDetailClient({ detail }: { detail: ActivityDetail }) {
   const [menuOpen, setMenu]   = useState(false)
   const [shareOpen, setShare] = useState(false)
   const [editOpen, setEdit]   = useState(false)
+  const [reminderOpen, setReminder] = useState(false)
   const [cancelling, setCancelling] = useState(false)
 
   const status = effectiveStatus(activity, todayInRD())
@@ -52,6 +54,11 @@ export function ActivityDetailClient({ detail }: { detail: ActivityDetail }) {
     event_date: activity.event_date, start_time: activity.start_time, end_time: activity.end_time,
     location: locationLabel(detail),
   })
+
+  const reminderDateLine = activity.event_date
+    ? formatDate(new Date(activity.event_date + 'T12:00')) +
+      (activity.start_time && activity.end_time ? ` · ${formatTime(activity.start_time)}–${formatTime(activity.end_time)}` : '')
+    : null
 
   async function handleCancel() {
     setMenu(false)
@@ -218,13 +225,20 @@ export function ActivityDetailClient({ detail }: { detail: ActivityDetail }) {
             })}
           </div>
 
-          {/* Check-in (día del evento) */}
+          {/* Acciones del día */}
           {status !== 'cancelada' && (
-            <Link href={`/dashboard/actividades/${activity.id}/checkin`}
-              className="flex items-center justify-center gap-2 text-sm font-bold px-4 py-3 rounded-xl w-full"
-              style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand)' }}>
-              <QrCode size={16} /> Modo check-in
-            </Link>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Link href={`/dashboard/actividades/${activity.id}/checkin`}
+                className="flex items-center justify-center gap-2 text-sm font-bold px-4 py-3 rounded-xl"
+                style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand)' }}>
+                <QrCode size={16} /> Modo check-in
+              </Link>
+              <button type="button" onClick={() => setReminder(true)}
+                className="flex items-center justify-center gap-2 text-sm font-bold px-4 py-3 rounded-xl"
+                style={{ background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}>
+                <Bell size={16} style={{ color: 'var(--brand)' }} /> Enviar recordatorio
+              </button>
+            </div>
           )}
 
           {/* Agregar al calendario */}
@@ -250,6 +264,9 @@ export function ActivityDetailClient({ detail }: { detail: ActivityDetail }) {
 
       <ShareSheet code={activity.public_code} title={activity.title} open={shareOpen} onClose={() => setShare(false)} />
       <EditActivityModal activity={activity} open={editOpen} onClose={() => setEdit(false)} />
+      <ReminderSheet open={reminderOpen} onClose={() => setReminder(false)}
+        title={activity.title} dateLine={reminderDateLine} location={locationLabel(detail)}
+        code={activity.public_code} participants={participants} />
 
       {dialog}
     </div>
