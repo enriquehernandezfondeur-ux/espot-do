@@ -29,6 +29,19 @@
   --pro-strong:   #8C6400;
   --pro-dim:      rgba(184, 134, 11, 0.12);
   --pro-border:   rgba(184, 134, 11, 0.32);
+
+  /* Estados semánticos — capa única para reemplazar hex sueltos
+     (#DC2626/#EF4444 rojos, #2563EB/#3B82F6 azules, #16A34A éxito, ámbar, morado). */
+  --danger:        #DC2626;
+  --danger-bg:     rgba(220, 38, 38, 0.08);
+  --danger-border: rgba(220, 38, 38, 0.20);
+  --success:       #16A34A;
+  --success-bg:    rgba(22, 163, 74, 0.10);
+  --info:          #2563EB;
+  --info-bg:       rgba(37, 99, 235, 0.10);
+  --warning:       #D97706;
+  --warning-bg:    rgba(217, 119, 6, 0.10);
+  --accent-purple: #7C3AED;
 }
 
 /* ── MARKETPLACE — LIGHT GREY THEME ──────────────── */
@@ -47,7 +60,7 @@
   --shadow-hover: 0 4px 20px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06);
 }
 
-/* ── DASHBOARD — DARK THEME ──────────────────────── */
+/* ── DASHBOARD — DARK THEME (definido, SIN USO actual) ──── */
 .dark-theme {
   --bg-base:      #0B0F0E;
   --bg-surface:   #111916;
@@ -63,8 +76,12 @@
   --shadow-hover: none;
 }
 
-/* ── HOST DASHBOARD — CLEAN WHITE THEME ─────────── */
-.host-theme {
+/* ── HOST + PÁGINAS INTERNAS — CLEAN WHITE THEME ─────────── */
+/* host (panel del propietario) y white (buscar, detalle, cliente, pagos)
+   son idénticos → un solo bloque para ambos. El homepage conserva light-theme.
+   (Nota: los overrides [class*="..."] de abajo siguen separados; deuda menor.) */
+.host-theme,
+.white-theme {
   --bg-base:      #FFFFFF;
   --bg-surface:   #FFFFFF;
   --bg-card:      #FFFFFF;
@@ -75,24 +92,6 @@
   --text-muted:     #6B7280;
   --border-subtle:  #EBEBEB;
   --border-medium:  #D5D5D5;
-  --shadow-card: 0 2px 8px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-hover: 0 8px 28px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
-}
-
-/* ── PÁGINAS INTERNAS — WHITE THEME ─────────────── */
-/* Buscar, detalle espacio, dashboard cliente, pagos. */
-/* El homepage conserva light-theme (#F4F6F5).        */
-.white-theme {
-  --bg-base:      #FFFFFF;
-  --bg-surface:   #FFFFFF;
-  --bg-card:      #FFFFFF;
-  --bg-elevated:  #F7F7F7;
-  --bg-hover:     #F0F0F0;
-  --text-primary:   #111827;
-  --text-secondary: #374151;
-  --text-muted:     #6B7280;
-  --border-subtle: #EBEBEB;
-  --border-medium: #D5D5D5;
   --shadow-card: 0 2px 8px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
   --shadow-hover: 0 8px 28px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
 }
