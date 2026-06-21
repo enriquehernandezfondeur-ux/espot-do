@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import QRCode from 'qrcode'
 import { getSpaceBySlug } from '@/lib/actions/marketplace'
 import { isHostProById } from '@/lib/actions/subscription'
@@ -39,8 +40,7 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
         {/* Portada */}
         <div className="relative h-48" style={{ background: 'var(--bg-elevated)' }}>
           {cover && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={cover} alt={space.name} className="w-full h-full object-cover" />
+            <Image src={cover} alt={space.name} fill sizes="(max-width: 768px) 100vw, 448px" className="object-cover" />
           )}
           <span className="absolute top-3 left-3 inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-full"
             style={{ background: 'var(--pro-dim)', color: 'var(--pro-strong)', border: '1px solid var(--pro-border)' }}>

@@ -480,9 +480,9 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                       onClick={() => { setPhotoIdx(photoIndex); setShowLightbox(true) }}
                       className="relative overflow-hidden group cursor-zoom-in"
                       style={{ background: 'var(--bg-elevated)' }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={img.url} alt="" loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+                      <Image src={img.url} alt="" fill
+                        sizes="(max-width: 768px) 100vw, 30vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
                       {/* Overlay "+N más" en la última celda de fotos */}
                       {isLastPhotoSlot && hiddenCount > 0 && (
                         <div className="absolute inset-0 flex items-center justify-center"
@@ -622,10 +622,9 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                 onClick={e => e.stopPropagation()}>
                 {images.map((img: any, i: number) => (
                   <button key={i} onClick={() => setPhotoIdx(i)}
-                    className={cn('h-14 w-20 rounded-lg overflow-hidden shrink-0 transition-all', i === photoIdx ? 'ring-2 opacity-100 scale-105' : 'opacity-35 hover:opacity-65')}
+                    className={cn('relative h-14 w-20 rounded-lg overflow-hidden shrink-0 transition-all', i === photoIdx ? 'ring-2 opacity-100 scale-105' : 'opacity-35 hover:opacity-65')}
                     style={{ ['--tw-ring-color' as any]: 'var(--brand)' }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img.url} alt="" loading="lazy" className="w-full h-full object-cover" />
+                    <Image src={img.url} alt="" fill sizes="80px" className="object-cover" />
                   </button>
                 ))}
               </div>
@@ -1405,10 +1404,9 @@ export default function SpaceDetailClient({ space, similarSpaces = [], initialDa
                         <div className="relative overflow-hidden shrink-0"
                           style={{ aspectRatio: '4/3', background: 'var(--bg-elevated)' }}>
                           {cover ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={cover} alt={s.name}
-                              loading="lazy"
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            <Image src={cover} alt={s.name} fill
+                              sizes="(max-width: 768px) 50vw, 25vw"
+                              className="object-cover group-hover:scale-105 transition-transform duration-500" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center"
                               style={{ color: 'var(--border-medium)', fontSize: 28 }}>■</div>

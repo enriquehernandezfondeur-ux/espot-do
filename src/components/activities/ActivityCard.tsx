@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { CalendarDays, MapPin, Users, ChevronRight, Sparkles, Share2 } from 'lucide-react'
 import { formatDate, todayInRD } from '@/lib/utils'
 import type { Activity } from '@/lib/activities/types'
@@ -24,8 +25,8 @@ export function ActivityCard({ activity, confirmedCount }: { activity: Activity;
       {/* Portada o placeholder de marca */}
       <div className="relative" style={{ aspectRatio: '16/9', background: 'var(--bg-elevated)' }}>
         {activity.cover_image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={activity.cover_image} alt={activity.title} className="w-full h-full object-cover" />
+          <Image src={activity.cover_image} alt={activity.title} fill
+            sizes="(max-width: 640px) 100vw, 400px" className="object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center"
             style={{ background: 'linear-gradient(135deg,var(--brand-navy),#0D4A3A)' }}>
