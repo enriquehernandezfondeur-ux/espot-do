@@ -169,7 +169,9 @@ function ExitoContent() {
             ¡Pago exitoso!
           </h1>
           <p className="text-base" style={{ color: 'rgba(255,255,255,0.5)' }}>
-            Tu reserva está confirmada. Revisa tu email.
+            {remaining > 0
+              ? 'Recibimos tu pago. Aún quedan cuotas — revísalas en "Mis reservas".'
+              : 'Tu reserva está confirmada. Revisa tu email.'}
           </p>
         </div>
 
