@@ -14,22 +14,23 @@ import { todayInRD } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
 
 const BASE_NAV = [
-  { href: '/dashboard/host',              label: 'Inicio',       icon: LayoutDashboard },
-  { href: '/dashboard/host/espacio',      label: 'Mi espacio',   icon: Building2 },
-  // Operaciones
-  { href: '/dashboard/host/agenda',       label: 'Reservas',     icon: CalendarRange },
-  { href: '/dashboard/host/calendario',   label: 'Calendario',   icon: CalendarDays },
-  { href: '/dashboard/host/clientes',     label: 'Clientes',     icon: Users },
-  // Ventas
-  { href: '/dashboard/host/mensajes',     label: 'Mensajes',     icon: MessageCircle },
-  { href: '/dashboard/host/resenas',      label: 'Reseñas',      icon: Star },
-  // Dinero
-  { href: '/dashboard/host/finanzas',     label: 'Finanzas',     icon: BarChart3 },
-  { href: '/dashboard/host/analytics',   label: 'Analytics',    icon: TrendingUp },
-  // Config
-  { href: '/dashboard/host/pro',          label: 'Espot Pro',    icon: Crown },
-  { href: '/dashboard/host/equipo',       label: 'Equipo',       icon: UserPlus },
-  { href: '/dashboard/host/ajustes',      label: 'Ajustes',      icon: Settings },
+  { href: '/dashboard/host',              label: 'Inicio',       icon: LayoutDashboard, section: 'Inicio' },
+  // Operación
+  { href: '/dashboard/host/agenda',       label: 'Reservas',     icon: CalendarRange,   section: 'Operación' },
+  { href: '/dashboard/host/calendario',   label: 'Calendario',   icon: CalendarDays,    section: 'Operación' },
+  { href: '/dashboard/host/clientes',     label: 'Clientes',     icon: Users,           section: 'Operación' },
+  { href: '/dashboard/host/mensajes',     label: 'Mensajes',     icon: MessageCircle,   section: 'Operación' },
+  // Mi negocio
+  { href: '/dashboard/host/espacio',      label: 'Mi espacio',   icon: Building2,       section: 'Mi negocio' },
+  { href: '/dashboard/host/resenas',      label: 'Reseñas',      icon: Star,            section: 'Mi negocio' },
+  // Finanzas
+  { href: '/dashboard/host/finanzas',     label: 'Finanzas',     icon: BarChart3,       section: 'Finanzas' },
+  { href: '/dashboard/host/analytics',    label: 'Analytics',    icon: TrendingUp,      section: 'Finanzas' },
+  // Suscripción
+  { href: '/dashboard/host/pro',          label: 'Espot Pro',    icon: Crown,           section: 'Suscripción' },
+  // Cuenta
+  { href: '/dashboard/host/equipo',       label: 'Equipo',       icon: UserPlus,        section: 'Cuenta' },
+  { href: '/dashboard/host/ajustes',      label: 'Ajustes',      icon: Settings,        section: 'Cuenta' },
 ]
 
 const MOBILE_NAV = [
@@ -169,6 +170,7 @@ export default function Sidebar({ userName, avatarUrl, isAdmin, isOwner = true, 
       isAdmin={isAdmin}
       proActive={isPro}
       navItems={navItems}
+      activeAccent
       mobileBottomNav={mobileBottomNav}
       roleLabel={isOwner ? 'Negocio' : teamRole === 'admin' ? 'Admin' : teamRole === 'coordinador' ? 'Coordinador' : 'Equipo'}
       userNameFallback="Propietario"

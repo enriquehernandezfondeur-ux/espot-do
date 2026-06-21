@@ -19,6 +19,8 @@ export interface NavItem {
   highlight?: boolean
   /** Marca el ítem como función Pro bloqueada para el plan Normal (candado discreto) */
   pro?: boolean
+  /** Encabezado de sección en mayúsculas mostrado encima del primer ítem de cada grupo */
+  section?: string
 }
 
 export interface NotificationItem {
@@ -32,6 +34,8 @@ export interface AppSidebarProps {
   avatarUrl?: string
   /** Nav links shown in the sidebar body */
   navItems: NavItem[]
+  /** Resalta el ítem activo con barra + tinte verde marca (selector intuitivo) */
+  activeAccent?: boolean
   /** Nav links shown in the mobile bottom bar */
   mobileBottomNav: NavItem[]
   /** Role label shown under the user name (e.g. 'Propietario' | 'Cliente') */
@@ -74,6 +78,7 @@ export default function AppSidebar({
   userName,
   avatarUrl,
   navItems,
+  activeAccent = false,
   mobileBottomNav,
   roleLabel,
   userNameFallback,
@@ -177,41 +182,51 @@ export default function AppSidebar({
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-2 space-y-0.5">
-        {navItems.map(({ href, label, icon: Icon, badge, highlight, pro }) => {
+        {navItems.map((item, i) => {
+          const { href, label, icon: Icon, badge, highlight, pro, section } = item
           const active = isActive(href)
           const promote = !!highlight && !active
           const proLocked = !!pro && !active && !promote
+          const showHeader = !!section && section !== navItems[i - 1]?.section
+          // Estilo del ítem activo: con activeAccent, selector verde (barra + tinte).
+          const activeStyle: React.CSSProperties = activeAccent
+            ? { background: 'var(--brand-dim)', color: 'var(--brand)', boxShadow: 'inset 3px 0 0 var(--brand)' }
+            : { background: 'var(--bg-elevated)', color: 'var(--text-primary)' }
           return (
-            <Link key={href} href={href}
-              onClick={() => setMobileOpen(false)}
-              className={cn('flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all')}
-              style={active ? {
-                background: 'var(--bg-elevated)',
-                color: 'var(--text-primary)',
-              } : {
-                color: 'var(--text-secondary)',
-              }}
-              {...(navHoverHandlers ? {
-                onMouseEnter: (e: React.MouseEvent<HTMLAnchorElement>) => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' } },
-                onMouseLeave: (e: React.MouseEvent<HTMLAnchorElement>) => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'; (e.currentTarget as HTMLElement).style.background = 'transparent' } },
-              } : {})}>
-              <Icon size={15} className="shrink-0" style={promote ? { color: 'var(--pro)' } : active ? { color: 'var(--brand)' } : undefined} />
-              <span className="flex-1">{label}</span>
-              {promote && (
-                <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                  style={{ background: 'var(--pro)', color: '#fff' }}>Mejora</span>
+            <div key={href}>
+              {showHeader && (
+                <div className={cn('text-[10px] font-bold uppercase tracking-widest px-3 mb-1', i === 0 ? '' : 'mt-3')}
+                  style={{ color: 'var(--text-muted)' }}>
+                  {section}
+                </div>
               )}
-              {proLocked && (
-                <Crown size={12} className="shrink-0" aria-label="Función Espot Pro"
-                  style={{ color: 'var(--pro)', opacity: 0.7 }} />
-              )}
-              {badge != null && badge > 0 && (
-                <span className="flex items-center justify-center text-xs font-bold rounded-full shrink-0"
-                  style={{ minWidth: 18, height: 18, padding: '0 4px', background: '#EF4444', color: '#fff', fontSize: 10 }}>
-                  {badge > 99 ? '99+' : badge}
-                </span>
-              )}
-            </Link>
+              <Link href={href}
+                aria-current={active ? 'page' : undefined}
+                onClick={() => setMobileOpen(false)}
+                className={cn('flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all')}
+                style={active ? activeStyle : { color: 'var(--text-secondary)' }}
+                {...(navHoverHandlers ? {
+                  onMouseEnter: (e: React.MouseEvent<HTMLAnchorElement>) => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; (e.currentTarget as HTMLElement).style.background = 'var(--bg-elevated)' } },
+                  onMouseLeave: (e: React.MouseEvent<HTMLAnchorElement>) => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'; (e.currentTarget as HTMLElement).style.background = 'transparent' } },
+                } : {})}>
+                <Icon size={15} className="shrink-0" style={promote ? { color: 'var(--pro)' } : active ? { color: 'var(--brand)' } : undefined} />
+                <span className="flex-1">{label}</span>
+                {promote && (
+                  <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                    style={{ background: 'var(--pro)', color: '#fff' }}>Mejora</span>
+                )}
+                {proLocked && (
+                  <Crown size={12} className="shrink-0" aria-label="Función Espot Pro"
+                    style={{ color: 'var(--pro)', opacity: 0.7 }} />
+                )}
+                {badge != null && badge > 0 && (
+                  <span className="flex items-center justify-center text-xs font-bold rounded-full shrink-0"
+                    style={{ minWidth: 18, height: 18, padding: '0 4px', background: '#EF4444', color: '#fff', fontSize: 10 }}>
+                    {badge > 99 ? '99+' : badge}
+                  </span>
+                )}
+              </Link>
+            </div>
           )
         })}
       </nav>
