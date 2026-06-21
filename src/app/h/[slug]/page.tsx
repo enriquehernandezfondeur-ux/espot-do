@@ -45,7 +45,7 @@ export default async function HostPublicPage({ params }: Props) {
               width: 72, height: 72, borderRadius: '50%', background: 'rgba(53,196,147,0.15)',
               border: '3px solid #fff', boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              margin: '0 auto 16px', fontSize: 28, fontWeight: 700, color: '#35C493',
+              margin: '0 auto 16px', fontSize: 28, fontWeight: 700, color: 'var(--brand)',
             }}>
               {hostData.full_name.charAt(0).toUpperCase()}
             </div>
@@ -73,7 +73,7 @@ export default async function HostPublicPage({ params }: Props) {
 
         <p style={{ textAlign: 'center', fontSize: 11, color: '#9CA3AF', marginTop: 20 }}>
           Powered by{' '}
-          <a href="https://espot.do" style={{ color: '#35C493', textDecoration: 'none', fontWeight: 600 }}>
+          <a href="https://espot.do" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>
             espot.do
           </a>
         </p>

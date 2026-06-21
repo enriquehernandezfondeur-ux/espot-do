@@ -26,9 +26,9 @@ const STATUS_OPTIONS: { value: DisputeStatus | 'all'; label: string }[] = [
 
 const STATUS_CONFIG: Record<DisputeStatus, { label: string; color: string; bg: string }> = {
   abierta:          { label: 'Abierta',                    color: '#D97706', bg: 'rgba(217,119,6,0.1)'   },
-  en_revision:      { label: 'En revisión',                color: '#2563EB', bg: 'rgba(37,99,235,0.1)'   },
+  en_revision:      { label: 'En revisión',                color: 'var(--info)', bg: 'rgba(37,99,235,0.1)'   },
   resuelta_cliente: { label: 'Resuelta: cliente',          color: '#16A34A', bg: 'rgba(22,163,74,0.1)'   },
-  resuelta_host:    { label: 'Resuelta: host',             color: '#7C3AED', bg: 'rgba(124,58,237,0.1)'  },
+  resuelta_host:    { label: 'Resuelta: host',             color: 'var(--accent-purple)', bg: 'rgba(124,58,237,0.1)'  },
   cerrada:          { label: 'Cerrada',                    color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },
 }
 
@@ -138,7 +138,7 @@ export default function AdminDisputasPage() {
       {/* Toast */}
       {toast && (
         <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
-          style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
+          style={{ background: toast.ok ? '#16A34A' : 'var(--danger)', color: '#fff' }}>
           {toast.ok ? <CheckCircle2 size={15} /> : <X size={15} />}
           {toast.msg}
         </div>

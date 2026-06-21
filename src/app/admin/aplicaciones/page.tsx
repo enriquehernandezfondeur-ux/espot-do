@@ -8,18 +8,18 @@ import { getCategoryLabel } from '@/lib/categories'
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
   pending_admin:   { label: 'Pendiente',         color: '#D97706', bg: 'rgba(234,179,8,0.1)' },
-  analyzing:       { label: 'Analizando (IA)',   color: '#3B82F6', bg: 'rgba(59,130,246,0.1)' },
+  analyzing:       { label: 'Analizando (IA)',   color: 'var(--info)', bg: 'rgba(59,130,246,0.1)' },
   submitted:       { label: 'Enviada',           color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },
   approved:        { label: 'Aprobada',          color: '#16A34A', bg: 'rgba(22,163,74,0.1)' },
-  rejected:        { label: 'Rechazada',         color: '#EF4444', bg: 'rgba(239,68,68,0.1)' },
-  info_requested:  { label: 'Más info pedida',   color: '#8B5CF6', bg: 'rgba(139,92,246,0.1)' },
+  rejected:        { label: 'Rechazada',         color: 'var(--danger)', bg: 'rgba(239,68,68,0.1)' },
+  info_requested:  { label: 'Más info pedida',   color: 'var(--accent-purple)', bg: 'rgba(139,92,246,0.1)' },
   draft:           { label: 'Borrador',          color: '#9CA3AF', bg: 'rgba(156,163,175,0.1)' },
 }
 
 function scoreColor(score: number): string {
   if (score >= 70) return '#16A34A'
   if (score >= 45) return '#D97706'
-  return '#EF4444'
+  return 'var(--danger)'
 }
 
 function scoreBg(score: number): string {
@@ -197,7 +197,7 @@ export default async function AplicacionesPage({
                   <div className="flex gap-1.5 mt-3 flex-wrap">
                     {app.ai_analysis.flags.map((flag: string) => (
                       <span key={flag} className="text-[10px] px-2 py-0.5 rounded-full font-medium"
-                        style={{ background: 'rgba(239,68,68,0.08)', color: '#EF4444' }}>
+                        style={{ background: 'rgba(239,68,68,0.08)', color: 'var(--danger)' }}>
                         ⚠ {flag.replace(/_/g, ' ')}
                       </span>
                     ))}

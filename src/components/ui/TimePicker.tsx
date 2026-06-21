@@ -182,7 +182,7 @@ export default function TimePicker({
           gap:         10,
           padding:     '14px 16px',
           borderRadius: 14,
-          border:      `1.5px solid ${open ? '#35C493' : value ? '#D1D5DB' : '#E5E7EB'}`,
+          border:      `1.5px solid ${open ? 'var(--brand)' : value ? '#D1D5DB' : '#E5E7EB'}`,
           background:  disabled ? '#F9FAFB' : '#fff',
           boxShadow:   open ? '0 0 0 3px rgba(53,196,147,0.12)' : '0 1px 3px rgba(0,0,0,0.05)',
           cursor:      disabled ? 'not-allowed' : 'pointer',
@@ -195,7 +195,7 @@ export default function TimePicker({
           alignItems: 'center', justifyContent: 'center', flexShrink: 0,
           background: value ? 'rgba(53,196,147,0.1)' : '#F3F4F6',
         }}>
-          <Clock size={15} color={value ? '#35C493' : '#9CA3AF'} />
+          <Clock size={15} color={value ? 'var(--brand)' : '#9CA3AF'} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
@@ -280,15 +280,15 @@ export default function TimePicker({
                           background: isSel ? 'rgba(53,196,147,0.08)' : isBusy ? '#FEF2F2' : 'transparent',
                           cursor: isBusy ? 'not-allowed' : 'pointer',
                           transition: 'background 0.1s',
-                          borderLeft: isSel ? '3px solid #35C493' : isBusy ? '3px solid #FCA5A5' : '3px solid transparent',
+                          borderLeft: isSel ? '3px solid var(--brand)' : isBusy ? '3px solid #FCA5A5' : '3px solid transparent',
                           opacity: isBusy ? 0.6 : 1,
                         }}
                         onMouseEnter={e => { if (!isSel && !isBusy) (e.currentTarget as HTMLElement).style.background = '#F9FAFB' }}
                         onMouseLeave={e => { if (!isSel && !isBusy) (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
-                        <span style={{ fontSize: 14, fontWeight: isSel ? 700 : 400, color: isSel ? '#35C493' : isBusy ? '#EF4444' : '#374151' }}>
+                        <span style={{ fontSize: 14, fontWeight: isSel ? 700 : 400, color: isSel ? 'var(--brand)' : isBusy ? 'var(--danger)' : '#374151' }}>
                           {slot.l}{isBusy ? ' · Ocupado' : ''}
                         </span>
-                        {isSel && <Check size={15} color="#35C493" />}
+                        {isSel && <Check size={15} color="var(--brand)" />}
                       </button>
                     )
                   })}

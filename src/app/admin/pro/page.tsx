@@ -188,11 +188,11 @@ export default function AdminProPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3 mb-3">
         <StatCard label="Propietarios"   value={s?.total ?? 0}          icon={Users}        color="var(--text-secondary)" />
         <StatCard label="Normal"          value={s?.normal ?? 0}         icon={Users}        color="#6B7280" />
-        <StatCard label="Pruebas activas" value={s?.trialsActive ?? 0}   icon={Gift}         color="#2563EB" />
+        <StatCard label="Pruebas activas" value={s?.trialsActive ?? 0}   icon={Gift}         color="var(--info)" />
         <StatCard label="Pro activos"     value={s?.proActive ?? 0}      icon={CheckCircle}  color="#16A34A" />
         <StatCard label="Pendientes pago" value={s?.pendingPayment ?? 0} icon={Clock}        color="#D97706" />
         <StatCard label="Vencen ≤7d"      value={s?.expiringSoon ?? 0}   icon={AlertTriangle} color="#F59E0B" />
-        <StatCard label="Vencidos"        value={s?.expired ?? 0}        icon={XCircle}      color="#DC2626" />
+        <StatCard label="Vencidos"        value={s?.expired ?? 0}        icon={XCircle}      color="var(--danger)" />
       </div>
 
       {/* Ingresos — solo Azul pagado cuenta */}
@@ -234,7 +234,7 @@ export default function AdminProPage() {
           <Send size={13} /> Registrar comunicación
         </button>
       </div>
-      {commMsg && <div className="text-xs mb-3" style={{ color: commMsg.startsWith('✓') ? 'var(--pro-strong)' : '#DC2626' }}>{commMsg}</div>}
+      {commMsg && <div className="text-xs mb-3" style={{ color: commMsg.startsWith('✓') ? 'var(--pro-strong)' : 'var(--danger)' }}>{commMsg}</div>}
 
       {/* Filtros */}
       <div className="flex flex-wrap items-center gap-1.5 mb-4">

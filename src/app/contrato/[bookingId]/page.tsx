@@ -46,17 +46,17 @@ export default async function ContratoPage({ params }: { params: Promise<{ booki
         .subtitle { text-align: center; color: #888; margin-bottom: 28px; font-size: 12px; }
         .ref { text-align: center; margin-bottom: 28px; }
         .ref span { background: #f0fdf9; border: 1px solid rgba(53,196,147,0.3); padding: 4px 14px; border-radius: 20px; font-family: monospace; font-size: 13px; color: #065f46; font-weight: 700; }
-        .intro { margin-bottom: 24px; font-size: 13px; color: #555; line-height: 1.7; padding: 16px; background: #f8fafc; border-radius: 8px; border-left: 3px solid #35C493; }
-        h2 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin: 28px 0 10px; padding-bottom: 6px; border-bottom: 2px solid #35C493; color: #03313C; }
+        .intro { margin-bottom: 24px; font-size: 13px; color: #555; line-height: 1.7; padding: 16px; background: #f8fafc; border-radius: 8px; border-left: 3px solid var(--brand); }
+        h2 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin: 28px 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--brand); color: var(--brand-navy); }
         table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
         td { padding: 7px 12px; vertical-align: top; font-size: 13px; word-break: break-word; }
         td:first-child { width: 42%; color: #666; font-weight: 400; }
         td:last-child { font-weight: 600; color: #1a1a1a; }
         tr:nth-child(even) td { background: #f8fafc; }
         .clause { margin-bottom: 14px; padding: 12px 14px; background: #f8fafc; border-radius: 8px; }
-        .clause-title { font-weight: 700; margin-bottom: 4px; font-size: 13px; color: #03313C; }
+        .clause-title { font-weight: 700; margin-bottom: 4px; font-size: 13px; color: var(--brand-navy); }
         .clause p { color: #555; font-size: 12px; line-height: 1.6; }
-        .total-row td { font-size: 15px; font-weight: 700; padding-top: 12px; border-top: 2px solid #03313C; color: #03313C; background: #f0fdf9 !important; }
+        .total-row td { font-size: 15px; font-weight: 700; padding-top: 12px; border-top: 2px solid var(--brand-navy); color: var(--brand-navy); background: #f0fdf9 !important; }
         .sigs { display: flex; gap: 40px; margin-top: 48px; padding-top: 32px; border-top: 1px solid #e5e7eb; }
         @media (max-width: 480px) { .sigs { flex-direction: column; gap: 24px; } }
         .sig { flex: 1; text-align: center; font-size: 12px; color: #666; }

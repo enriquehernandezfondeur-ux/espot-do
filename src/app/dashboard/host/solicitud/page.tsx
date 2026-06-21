@@ -37,7 +37,7 @@ export default async function SolicitudPage() {
     analyzing: {
       icon:        RefreshCw,
       iconBg:      'rgba(59,130,246,0.1)',
-      iconColor:   '#3B82F6',
+      iconColor:   'var(--info)',
       title:       'Analizando solicitud',
       subtitle:    'La IA está revisando tu espacio...',
       description: 'Estamos evaluando automáticamente tus fotos y descripción. Esto toma pocos segundos.',
@@ -69,7 +69,7 @@ export default async function SolicitudPage() {
     rejected: {
       icon:        XCircle,
       iconBg:      'rgba(239,68,68,0.1)',
-      iconColor:   '#EF4444',
+      iconColor:   'var(--danger)',
       title:       'Solicitud no aprobada',
       subtitle:    'En esta ocasión no pudimos aprobar tu solicitud.',
       description: app.rejection_reason ?? 'No se indicó una razón específica.',

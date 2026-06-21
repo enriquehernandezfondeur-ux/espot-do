@@ -6,7 +6,7 @@ type Size = 'sm' | 'md'
 const VARIANTS: Record<Variant, React.CSSProperties> = {
   primary: { background: 'var(--brand)', color: '#fff' },
   outline: { background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1.5px solid var(--border-medium)' },
-  danger:  { background: '#fff', color: '#DC2626', border: '1px solid #FCA5A5' },
+  danger:  { background: '#fff', color: 'var(--danger)', border: '1px solid #FCA5A5' },
   pro:     { background: 'var(--pro)', color: '#fff' },
 }
 const SIZES: Record<Size, string> = {

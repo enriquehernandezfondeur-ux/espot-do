@@ -350,7 +350,7 @@ export default function CalendarioPage() {
       {/* ── Selector de espacio ── */}
       <div className="relative mb-6 rounded-2xl overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, #03313C 0%, #0A4A3A 100%)',
+          background: 'linear-gradient(135deg, var(--brand-navy) 0%, #0A4A3A 100%)',
           boxShadow: '0 4px 16px rgba(3,49,60,0.18)',
         }}>
 
@@ -585,7 +585,7 @@ export default function CalendarioPage() {
 
                   {blockError && (
                     <div className="text-xs px-3 py-2 rounded-lg mb-3"
-                      style={{ background: 'rgba(239,68,68,0.06)', color: '#DC2626', border: '1px solid rgba(239,68,68,0.15)' }}>
+                      style={{ background: 'rgba(239,68,68,0.06)', color: 'var(--danger)', border: '1px solid rgba(239,68,68,0.15)' }}>
                       {blockError}
                     </div>
                   )}
@@ -609,7 +609,7 @@ export default function CalendarioPage() {
                     onClick={handleBlockTime}
                     disabled={blockSaving}
                     className="w-full text-sm font-semibold py-2.5 rounded-xl transition-colors disabled:opacity-50"
-                    style={{ background: '#DC2626', color: '#fff' }}>
+                    style={{ background: 'var(--danger)', color: '#fff' }}>
                     {blockSaving ? 'Guardando...' : 'Bloquear horario'}
                   </button>
                 </div>
@@ -656,7 +656,7 @@ export default function CalendarioPage() {
                           style={{ background: 'rgba(239,68,68,0.08)' }}>
                           <div className="flex items-center gap-2 min-w-0">
                             <Lock size={11} className="shrink-0 text-red-400" />
-                            <span className="text-xs truncate" style={{ color: '#EF4444' }}>
+                            <span className="text-xs truncate" style={{ color: 'var(--danger)' }}>
                               {status.block?.reason || 'Bloqueado'}
                             </span>
                           </div>

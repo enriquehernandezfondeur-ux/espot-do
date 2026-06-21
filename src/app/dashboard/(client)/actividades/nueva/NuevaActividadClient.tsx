@@ -368,7 +368,7 @@ export function NuevaActividadClient({ bookings }: { bookings: BookingOption[] }
           )}
 
           {error && (
-            <p className="text-xs font-semibold px-1" style={{ color: '#DC2626' }}>{error}</p>
+            <p className="text-xs font-semibold px-1" style={{ color: 'var(--danger)' }}>{error}</p>
           )}
 
           <button type="button" disabled={!canSubmit || submitting} onClick={handleSubmit}

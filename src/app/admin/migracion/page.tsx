@@ -172,7 +172,7 @@ export default function MigracionPage() {
 
         {parseError && (
           <div className="flex items-start gap-2 mt-3 px-4 py-3 rounded-xl"
-            style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)', color: '#DC2626' }}>
+            style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)', color: 'var(--danger)' }}>
             <AlertCircle size={14} className="mt-0.5 shrink-0" />
             <span className="text-xs">{parseError}</span>
           </div>
@@ -229,7 +229,7 @@ export default function MigracionPage() {
               <span className="flex items-center gap-1.5" style={{ color: '#D97706' }}>
                 <SkipForward size={13} /> {summary.skip} saltados
               </span>
-              <span className="flex items-center gap-1.5" style={{ color: '#DC2626' }}>
+              <span className="flex items-center gap-1.5" style={{ color: 'var(--danger)' }}>
                 <AlertCircle size={13} /> {summary.error} errores
               </span>
             </div>
@@ -241,10 +241,10 @@ export default function MigracionPage() {
               <div key={i} className="flex items-center gap-3 px-5 py-3 text-sm">
                 {r.status === 'ok'    && <CheckCircle size={15} style={{ color: '#16A34A', flexShrink: 0 }} />}
                 {r.status === 'skip'  && <SkipForward size={15} style={{ color: '#D97706', flexShrink: 0 }} />}
-                {r.status === 'error' && <AlertCircle size={15} style={{ color: '#DC2626', flexShrink: 0 }} />}
+                {r.status === 'error' && <AlertCircle size={15} style={{ color: 'var(--danger)', flexShrink: 0 }} />}
                 <span className="flex-1 font-medium" style={{ color: 'var(--text-primary)' }}>{r.name}</span>
                 <span className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>{r.slug}</span>
-                {r.reason && <span className="text-xs" style={{ color: r.status === 'error' ? '#DC2626' : 'var(--text-muted)' }}>{r.reason}</span>}
+                {r.reason && <span className="text-xs" style={{ color: r.status === 'error' ? 'var(--danger)' : 'var(--text-muted)' }}>{r.reason}</span>}
               </div>
             ))}
           </div>

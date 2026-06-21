@@ -7,7 +7,7 @@ const ACTIVITY_STATUS: Record<ActivityStatus, { label: string; color: string; bg
   publicada:  { label: 'Publicada',  color: '#16A34A', bg: 'rgba(22,163,74,0.10)' },
   en_curso:   { label: 'En curso',   color: '#0891B2', bg: 'rgba(8,145,178,0.10)' },
   finalizada: { label: 'Finalizada', color: '#6B7280', bg: 'rgba(107,114,128,0.10)' },
-  cancelada:  { label: 'Cancelada',  color: '#DC2626', bg: 'rgba(220,38,38,0.10)' },
+  cancelada:  { label: 'Cancelada',  color: 'var(--danger)', bg: 'rgba(220,38,38,0.10)' },
 }
 
 export function ActivityStatusBadge({ status }: { status: ActivityStatus }) {

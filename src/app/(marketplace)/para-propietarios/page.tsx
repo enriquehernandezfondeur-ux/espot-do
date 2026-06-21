@@ -62,7 +62,7 @@ export default function ParaPropietariosPage() {
     <div>
 
       {/* ── HERO SPLIT ───────────────────────────────────────── */}
-      <section style={{ background: '#03313C', position: 'relative', overflow: 'hidden' }}>
+      <section style={{ background: 'var(--brand-navy)', position: 'relative', overflow: 'hidden' }}>
         <div style={{
           position: 'absolute', inset: 0,
           background: 'radial-gradient(ellipse 80% 60% at 100% 50%, rgba(53,196,147,0.1) 0%, transparent 60%)',
@@ -75,13 +75,13 @@ export default function ParaPropietariosPage() {
             {/* Texto izquierda */}
             <div>
               <div className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 mb-6 text-xs font-bold"
-                style={{ background: 'rgba(53,196,147,0.12)', color: '#35C493', border: '1px solid rgba(53,196,147,0.25)' }}>
+                style={{ background: 'rgba(53,196,147,0.12)', color: 'var(--brand)', border: '1px solid rgba(53,196,147,0.25)' }}>
                 Para propietarios de espacios en RD
               </div>
               <h1 className="font-bold text-white mb-5"
                 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', letterSpacing: '-0.04em', lineHeight: 1.05 }}>
                 Tu espacio,<br />
-                <span style={{ color: '#35C493' }}>una fuente de ingresos</span>
+                <span style={{ color: 'var(--brand)' }}>una fuente de ingresos</span>
               </h1>
               <p className="text-base mb-8 leading-relaxed" style={{ color: 'rgba(255,255,255,0.55)', maxWidth: 420 }}>
                 Publica tu salón, rooftop, villa o restaurant y conecta con clientes que buscan el lugar perfecto para su evento.
@@ -89,7 +89,7 @@ export default function ParaPropietariosPage() {
               <div className="flex flex-wrap gap-3">
                 <Link href={REGISTER_URL}
                   className="inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl font-bold text-sm"
-                  style={{ background: '#35C493', color: '#03313C', boxShadow: '0 4px 20px rgba(53,196,147,0.3)' }}>
+                  style={{ background: 'var(--brand)', color: 'var(--brand-navy)', boxShadow: '0 4px 20px rgba(53,196,147,0.3)' }}>
                   Publicar mi espacio <ArrowRight size={15} />
                 </Link>
                 <Link href="/buscar"
@@ -114,7 +114,7 @@ export default function ParaPropietariosPage() {
                     border: accent ? '1px solid rgba(53,196,147,0.25)' : '1px solid rgba(255,255,255,0.08)',
                   }}>
                   <p className="font-bold text-2xl mb-1"
-                    style={{ color: accent ? '#35C493' : '#fff', letterSpacing: '-0.04em' }}>{n}</p>
+                    style={{ color: accent ? 'var(--brand)' : '#fff', letterSpacing: '-0.04em' }}>{n}</p>
                   <p className="text-xs leading-snug" style={{ color: accent ? 'rgba(53,196,147,0.7)' : 'rgba(255,255,255,0.4)' }}>{label}</p>
                 </div>
               ))}
@@ -204,7 +204,7 @@ export default function ParaPropietariosPage() {
       </section>
 
       {/* ── POR QUÉ ESPOT ────────────────────────────────────── */}
-      <section style={{ background: '#03313C', position: 'relative', overflow: 'hidden' }}>
+      <section style={{ background: 'var(--brand-navy)', position: 'relative', overflow: 'hidden' }}>
         {/* Orbe decorativo */}
         <div style={{
           position: 'absolute', top: '-80px', right: '-80px',
@@ -252,7 +252,7 @@ export default function ParaPropietariosPage() {
                 style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
                   style={{ background: 'rgba(53,196,147,0.12)', border: '1px solid rgba(53,196,147,0.2)' }}>
-                  <Icon size={18} style={{ color: '#35C493' }} />
+                  <Icon size={18} style={{ color: 'var(--brand)' }} />
                 </div>
                 <h3 className="font-bold text-white text-sm mb-2" style={{ letterSpacing: '-0.01em' }}>{title}</h3>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>{body}</p>
@@ -322,7 +322,7 @@ export default function ParaPropietariosPage() {
             <div className="flex flex-col gap-2 shrink-0">
               <Link href={REGISTER_URL}
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-sm whitespace-nowrap"
-                style={{ background: '#35C493', color: '#03313C', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
+                style={{ background: 'var(--brand)', color: 'var(--brand-navy)', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
                 Crear cuenta gratis <ArrowRight size={15} />
               </Link>
               <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>

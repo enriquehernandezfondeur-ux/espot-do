@@ -134,7 +134,7 @@ function AuthContent() {
   // ── Shared styles ────────────────────────────────────────
   const focusHandlers = {
     onFocus: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      e.currentTarget.style.borderColor = '#35C493'
+      e.currentTarget.style.borderColor = 'var(--brand)'
       e.currentTarget.style.boxShadow   = '0 0 0 3px rgba(53,196,147,0.2)'
     },
     onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -166,7 +166,7 @@ function AuthContent() {
     <div className="min-h-dvh flex items-center justify-center"
       style={{ background: 'linear-gradient(145deg, #071410 0%, #0B0F0E 60%, #0a0d12 100%)' }}>
       <div className="w-6 h-6 rounded-full border-2 animate-spin"
-        style={{ borderColor: 'rgba(53,196,147,0.3)', borderTopColor: '#35C493' }} />
+        style={{ borderColor: 'rgba(53,196,147,0.3)', borderTopColor: 'var(--brand)' }} />
     </div>
   )
 
@@ -178,7 +178,7 @@ function AuthContent() {
         <div className="text-center py-4">
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
             style={{ background: 'rgba(53,196,147,0.12)', border: '1px solid rgba(53,196,147,0.2)' }}>
-            <CheckCircle2 size={32} style={{ color: '#35C493' }} />
+            <CheckCircle2 size={32} style={{ color: 'var(--brand)' }} />
           </div>
           <h2 className="text-xl font-bold text-white mb-2">
             {password ? 'Revisa tu email' : 'Enlace enviado'}
@@ -191,7 +191,7 @@ function AuthContent() {
           </p>
           <button onClick={() => { setScreen('login'); reset() }}
             className="w-full py-3 rounded-xl text-sm font-semibold"
-            style={{ background: '#35C493', color: '#0B0F0E' }}>
+            style={{ background: 'var(--brand)', color: '#0B0F0E' }}>
             Volver al inicio de sesión
           </button>
         </div>
@@ -229,7 +229,7 @@ function AuthContent() {
           </div>
           <button type="submit" disabled={loading}
             className="w-full font-bold py-3.5 rounded-xl text-sm transition-all disabled:opacity-50"
-            style={{ background: '#35C493', color: '#0B0F0E', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
+            style={{ background: 'var(--brand)', color: '#0B0F0E', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
             {loading ? 'Enviando...' : 'Enviar enlace de recuperación'}
           </button>
         </form>
@@ -249,7 +249,7 @@ function AuthContent() {
             onClick={() => { setScreen(s); reset() }}
             className="flex-1 py-3 px-4 rounded-lg text-sm font-semibold transition-all"
             style={screen === s
-              ? { background: '#35C493', color: '#0B0F0E' }
+              ? { background: 'var(--brand)', color: '#0B0F0E' }
               : { color: 'rgba(255,255,255,0.45)' }}>
             {s === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
           </button>
@@ -313,7 +313,7 @@ function AuthContent() {
               style={{ background: 'rgba(255,255,255,0.04)', border: '1.5px solid rgba(255,255,255,0.08)' }}
               onMouseEnter={e => {
                 const el = e.currentTarget as HTMLElement
-                el.style.borderColor = '#35C493'
+                el.style.borderColor = 'var(--brand)'
                 el.style.background = 'rgba(53,196,147,0.07)'
               }}
               onMouseLeave={e => {
@@ -323,7 +323,7 @@ function AuthContent() {
               }}>
               <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                 style={{ background: 'rgba(53,196,147,0.1)', border: '1px solid rgba(53,196,147,0.2)' }}>
-                <Icon size={18} style={{ color: '#35C493' }} />
+                <Icon size={18} style={{ color: 'var(--brand)' }} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-bold text-white leading-snug">{title}</div>
@@ -345,9 +345,9 @@ function AuthContent() {
               style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.15)' }}>
               <div className="flex items-center gap-2">
                 {userType === 'host'
-                  ? <Building2 size={13} style={{ color: '#35C493' }} />
-                  : <CalendarDays size={13} style={{ color: '#35C493' }} />}
-                <span className="text-xs font-semibold" style={{ color: '#35C493' }}>
+                  ? <Building2 size={13} style={{ color: 'var(--brand)' }} />
+                  : <CalendarDays size={13} style={{ color: 'var(--brand)' }} />}
+                <span className="text-xs font-semibold" style={{ color: 'var(--brand)' }}>
                   {userType === 'host' ? 'Publicar mi espacio' : 'Reservar espacios'}
                 </span>
               </div>
@@ -395,7 +395,7 @@ function AuthContent() {
             {screen === 'login' && (
               <button type="button" onClick={() => setScreen('forgot')}
                 className="text-xs font-medium transition-colors"
-                style={{ color: '#35C493' }}>
+                style={{ color: 'var(--brand)' }}>
                 ¿Olvidaste tu contraseña?
               </button>
             )}
@@ -421,7 +421,7 @@ function AuthContent() {
 
         <button type="submit" disabled={loading || !!oauthLoading}
           className="w-full font-bold py-3.5 rounded-xl text-sm transition-all mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ background: '#35C493', color: '#0B0F0E', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
+          style={{ background: 'var(--brand)', color: '#0B0F0E', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
           {loading ? 'Cargando...' : screen === 'login'
             ? 'Iniciar sesión'
             : userType === 'host' ? 'Crear cuenta de negocio' : 'Crear mi cuenta'}
@@ -449,7 +449,7 @@ function AuthShell({ children, isHost, redirectTo }: {
 }) {
   return (
     <div className="min-h-dvh flex flex-col"
-      style={{ background: 'linear-gradient(160deg, #03313C 0%, #041f24 50%, #030d0f 100%)' }}>
+      style={{ background: 'linear-gradient(160deg, var(--brand-navy) 0%, #041f24 50%, #030d0f 100%)' }}>
 
       {/* Orbes decorativos de marca */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">

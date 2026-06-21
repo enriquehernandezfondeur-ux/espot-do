@@ -123,8 +123,8 @@ export default function FavoriteButton({ spaceId, size = 'md', className = '' }:
       <Heart
         size={dims.icon}
         style={{
-          color:      saved ? '#35C493' : '#374151',
-          fill:       saved ? '#35C493' : 'transparent',
+          color:      saved ? 'var(--brand)' : '#374151',
+          fill:       saved ? 'var(--brand)' : 'transparent',
           transition: 'fill 0.2s ease, color 0.2s ease, transform 0.2s ease',
           transform:  saved ? 'scale(1.05)' : 'scale(1)',
           strokeWidth: saved ? 2 : 1.75,

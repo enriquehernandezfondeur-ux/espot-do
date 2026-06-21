@@ -28,7 +28,7 @@ export default async function AdminPagosPage() {
         <StatCard label="Comisión total"      value={formatCurrency(totalRevenue)}    icon={TrendingUp}  color="var(--brand)" />
         <StatCard label="Comisión cobrada"    value={formatCurrency(totalPaid)}       icon={CheckCircle} color="#16A34A" />
         <StatCard label="Comisión pendiente"  value={formatCurrency(totalPending)}    icon={Clock}       color="#D97706" />
-        <StatCard label="Valor total eventos" value={formatCurrency(totalEventValue)} icon={CreditCard}  color="#7C3AED" />
+        <StatCard label="Valor total eventos" value={formatCurrency(totalEventValue)} icon={CreditCard}  color="var(--accent-purple)" />
       </div>
 
       {/* Table (paginada en cliente — el resumen agrega sobre el total) */}

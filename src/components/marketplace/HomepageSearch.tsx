@@ -243,8 +243,8 @@ export default function HomepageSearch() {
               onClick={() => pickDay(day)}
               className="aspect-square rounded-xl text-sm flex items-center justify-center font-medium transition-all"
               style={
-                isSel   ? { background: '#35C493', color: '#fff', fontWeight: 700 } :
-                isToday ? { background: 'rgba(53,196,147,0.12)', color: '#35C493', fontWeight: 600 } :
+                isSel   ? { background: 'var(--brand)', color: '#fff', fontWeight: 700 } :
+                isToday ? { background: 'rgba(53,196,147,0.12)', color: 'var(--brand)', fontWeight: 600 } :
                 isPast  ? { color: '#D1D5DB', cursor: 'not-allowed' } :
                           { color: '#374151' }
               }
@@ -261,7 +261,7 @@ export default function HomepageSearch() {
           <span className="text-sm font-medium" style={{ color: '#374151' }}>{fmtDate(dateFrom)}</span>
           <button type="button" onClick={() => { setDateFrom(''); closeAllModals() }}
             className="text-xs font-semibold px-3 py-1.5 rounded-lg"
-            style={{ background: 'rgba(220,38,38,0.07)', color: '#DC2626' }}>
+            style={{ background: 'rgba(220,38,38,0.07)', color: 'var(--danger)' }}>
             Limpiar
           </button>
         </div>
@@ -308,7 +308,7 @@ export default function HomepageSearch() {
           <div ref={cityRef}
             className="flex items-center gap-3 flex-1 px-5"
             style={{ minHeight: 64 }}>
-            <MapPin size={15} style={{ color: city ? '#35C493' : '#9CA3AF', flexShrink: 0 }} />
+            <MapPin size={15} style={{ color: city ? 'var(--brand)' : '#9CA3AF', flexShrink: 0 }} />
             <div className="flex-1 min-w-0">
               <div className="text-xs font-semibold uppercase tracking-wide mb-0.5" style={{ color: '#9CA3AF' }}>Sector / Ciudad</div>
               <input
@@ -336,7 +336,7 @@ export default function HomepageSearch() {
             onClick={() => openPanel('date', dateRef.current, 308)}
             className="flex items-center gap-3 px-5 text-left focus:outline-none"
             style={{ width: 192, background: panel === 'date' ? 'rgba(53,196,147,0.04)' : 'transparent', transition: 'background 0.15s' }}>
-            <CalendarDays size={15} style={{ color: dateFrom ? '#35C493' : '#9CA3AF', flexShrink: 0 }} />
+            <CalendarDays size={15} style={{ color: dateFrom ? 'var(--brand)' : '#9CA3AF', flexShrink: 0 }} />
             <div className="flex-1 min-w-0">
               <div className="text-xs font-semibold uppercase tracking-wide mb-0.5" style={{ color: '#9CA3AF' }}>Fecha</div>
               <div className="text-sm truncate" style={{ color: dateFrom ? '#111827' : '#9CA3AF', fontWeight: dateFrom ? 500 : 400 }}>
@@ -355,7 +355,7 @@ export default function HomepageSearch() {
           {/* Buscar */}
           <button type="button" onClick={search}
             className="flex items-center gap-2 px-7 text-sm font-bold text-white shrink-0 transition-opacity hover:opacity-90"
-            style={{ background: 'linear-gradient(135deg, #35C493, #28A87C)', borderRadius: '0 16px 16px 0' }}>
+            style={{ background: 'linear-gradient(135deg, var(--brand), #28A87C)', borderRadius: '0 16px 16px 0' }}>
             <Search size={15} />
             Buscar
           </button>
@@ -375,7 +375,7 @@ export default function HomepageSearch() {
             style={{ borderBottom: '1px solid #F3F4F6' }}>
             <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
               style={{ background: activity ? 'rgba(53,196,147,0.12)' : '#F4F6F8' }}>
-              <Search size={15} style={{ color: activity ? '#35C493' : '#9CA3AF' }} />
+              <Search size={15} style={{ color: activity ? 'var(--brand)' : '#9CA3AF' }} />
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: '#9CA3AF' }}>Evento</div>
@@ -396,7 +396,7 @@ export default function HomepageSearch() {
             <button type="button" onClick={() => setMobileModal('city')}
               className="flex-1 flex items-center gap-2 px-4 py-3.5 text-left active:bg-gray-50"
               style={{ borderRight: '1px solid #F3F4F6' }}>
-              <MapPin size={13} style={{ color: city ? '#35C493' : '#9CA3AF', flexShrink: 0 }} />
+              <MapPin size={13} style={{ color: city ? 'var(--brand)' : '#9CA3AF', flexShrink: 0 }} />
               <div className="flex-1 min-w-0">
                 <div className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: '#9CA3AF' }}>Sector</div>
                 <div className="text-xs font-semibold truncate" style={{ color: city ? '#111827' : '#9CA3AF' }}>
@@ -406,7 +406,7 @@ export default function HomepageSearch() {
             </button>
             <button type="button" onClick={() => setMobileModal('date')}
               className="flex-1 flex items-center gap-2 px-4 py-3.5 text-left active:bg-gray-50">
-              <CalendarDays size={13} style={{ color: dateFrom ? '#35C493' : '#9CA3AF', flexShrink: 0 }} />
+              <CalendarDays size={13} style={{ color: dateFrom ? 'var(--brand)' : '#9CA3AF', flexShrink: 0 }} />
               <div className="flex-1 min-w-0">
                 <div className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: '#9CA3AF' }}>Fecha</div>
                 <div className="text-xs font-semibold truncate" style={{ color: dateFrom ? '#111827' : '#9CA3AF' }}>
@@ -419,7 +419,7 @@ export default function HomepageSearch() {
           {/* Buscar */}
           <button type="button" onClick={search}
             className="w-full flex items-center justify-center gap-2 py-4 text-sm font-bold text-white"
-            style={{ background: 'linear-gradient(135deg, #35C493, #28A87C)' }}>
+            style={{ background: 'linear-gradient(135deg, var(--brand), #28A87C)' }}>
             <Search size={16} /> Buscar espacios
           </button>
         </div>
@@ -437,11 +437,11 @@ export default function HomepageSearch() {
             {filteredActivities.map(act => (
               <button key={act.key} type="button" onClick={() => pickActivity(act.key, act.label)}
                 className="w-full text-left px-4 py-2.5 text-sm flex items-center justify-between"
-                style={{ color: activity === act.key ? '#35C493' : '#374151', fontWeight: activity === act.key ? 600 : 400 }}
+                style={{ color: activity === act.key ? 'var(--brand)' : '#374151', fontWeight: activity === act.key ? 600 : 400 }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#F9FAFB' }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
                 {act.label}
-                {activity === act.key && <span style={{ color: '#35C493', fontSize: 12 }}>✓</span>}
+                {activity === act.key && <span style={{ color: 'var(--brand)', fontSize: 12 }}>✓</span>}
               </button>
             ))}
           </div>
@@ -455,10 +455,10 @@ export default function HomepageSearch() {
             {filteredSectors.map(s => (
               <button key={s} type="button" onClick={() => pickCity(s)}
                 className="w-full text-left px-4 py-2.5 text-sm flex items-center gap-2.5"
-                style={{ color: city === s ? '#35C493' : '#374151', fontWeight: city === s ? 600 : 400 }}
+                style={{ color: city === s ? 'var(--brand)' : '#374151', fontWeight: city === s ? 600 : 400 }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#F9FAFB' }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
-                <MapPin size={12} style={{ color: city === s ? '#35C493' : '#9CA3AF', flexShrink: 0 }} />
+                <MapPin size={12} style={{ color: city === s ? 'var(--brand)' : '#9CA3AF', flexShrink: 0 }} />
                 {s}
               </button>
             ))}
@@ -524,10 +524,10 @@ export default function HomepageSearch() {
                       <button key={act.key} type="button" onClick={() => pickActivity(act.key, act.label)}
                         className="flex items-center gap-2 px-4 py-3.5 rounded-xl text-left text-sm font-medium transition-all"
                         style={activity === act.key
-                          ? { background: 'rgba(53,196,147,0.1)', color: '#35C493', border: '1.5px solid rgba(53,196,147,0.3)' }
+                          ? { background: 'rgba(53,196,147,0.1)', color: 'var(--brand)', border: '1.5px solid rgba(53,196,147,0.3)' }
                           : { background: '#F9FAFB', color: '#374151', border: '1.5px solid #E5E7EB' }}>
                         <span className="w-2 h-2 rounded-full shrink-0"
-                          style={{ background: activity === act.key ? '#35C493' : '#D1D5DB' }} />
+                          style={{ background: activity === act.key ? 'var(--brand)' : '#D1D5DB' }} />
                         {act.label}
                       </button>
                     ))}
@@ -559,13 +559,13 @@ export default function HomepageSearch() {
                       <button key={s} type="button" onClick={() => pickCity(s)}
                         className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm transition-all"
                         style={city === s
-                          ? { background: 'rgba(53,196,147,0.08)', color: '#35C493', fontWeight: 600 }
+                          ? { background: 'rgba(53,196,147,0.08)', color: 'var(--brand)', fontWeight: 600 }
                           : { background: 'transparent', color: '#374151' }}
                         onMouseEnter={e => { if (city !== s) (e.currentTarget as HTMLElement).style.background = '#F9FAFB' }}
                         onMouseLeave={e => { if (city !== s) (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
-                        <MapPin size={14} style={{ color: city === s ? '#35C493' : '#9CA3AF', flexShrink: 0 }} />
+                        <MapPin size={14} style={{ color: city === s ? 'var(--brand)' : '#9CA3AF', flexShrink: 0 }} />
                         {s}
-                        {city === s && <span className="ml-auto text-xs font-bold" style={{ color: '#35C493' }}>✓</span>}
+                        {city === s && <span className="ml-auto text-xs font-bold" style={{ color: 'var(--brand)' }}>✓</span>}
                       </button>
                     ))}
                   </div>
@@ -584,7 +584,7 @@ export default function HomepageSearch() {
             <div className="px-4 py-4 shrink-0 pb-safe" style={{ borderTop: '1px solid #F3F4F6' }}>
               <button type="button" onClick={() => setMobileModal(null)}
                 className="w-full py-3.5 rounded-2xl text-sm font-bold text-white"
-                style={{ background: '#35C493' }}>
+                style={{ background: 'var(--brand)' }}>
                 Confirmar
               </button>
             </div>

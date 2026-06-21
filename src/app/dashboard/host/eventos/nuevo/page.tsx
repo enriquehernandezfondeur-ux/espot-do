@@ -536,7 +536,7 @@ export default function NuevoEventoPage() {
 
         {error && (
           <div className="px-4 py-3 rounded-xl text-sm font-medium"
-            style={{ background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.2)', color: '#DC2626' }}>
+            style={{ background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.2)', color: 'var(--danger)' }}>
             {error}
           </div>
         )}

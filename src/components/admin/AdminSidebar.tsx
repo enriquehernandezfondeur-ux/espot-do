@@ -167,7 +167,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
                     <span className="flex-1">{label}</span>
                     {badge > 0 && (
                       <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center"
-                        style={{ background: '#EF4444', color: '#fff' }}>
+                        style={{ background: 'var(--danger)', color: '#fff' }}>
                         {badge > 99 ? '99+' : badge}
                       </span>
                     )}

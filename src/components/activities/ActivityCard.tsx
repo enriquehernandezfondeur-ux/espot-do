@@ -28,7 +28,7 @@ export function ActivityCard({ activity, confirmedCount }: { activity: Activity;
           <img src={activity.cover_image} alt={activity.title} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg,#03313C,#0D4A3A)' }}>
+            style={{ background: 'linear-gradient(135deg,var(--brand-navy),#0D4A3A)' }}>
             <Sparkles size={30} style={{ color: 'var(--brand)', opacity: 0.7 }} />
           </div>
         )}

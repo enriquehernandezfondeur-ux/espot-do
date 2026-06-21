@@ -98,7 +98,7 @@ export default function ClientDashboard() {
       <div className="grid grid-cols-2 gap-3">
         {[
           { href: '/buscar', label: 'Buscar espacios', sub: 'Explora ahora', icon: MapPin, color: 'var(--brand)' },
-          { href: '/para-clientes', label: 'Cómo reservar', sub: 'Aprende más', icon: CalendarDays, color: '#2563EB' },
+          { href: '/para-clientes', label: 'Cómo reservar', sub: 'Aprende más', icon: CalendarDays, color: 'var(--info)' },
         ].map(({ href, label, sub, icon: Icon, color }) => (
           <Link key={href} href={href}
             className="flex items-center gap-3 p-4 rounded-2xl transition-all card-hover"
@@ -135,9 +135,9 @@ export default function ClientDashboard() {
       {(stats?.overdueInstallments?.length ?? 0) > 0 && (
         <div className="mb-4 rounded-2xl px-4 py-4 flex items-start gap-3"
           style={{ background: 'rgba(220,38,38,0.06)', border: '1.5px solid rgba(220,38,38,0.25)' }}>
-          <AlertTriangle size={18} style={{ color: '#DC2626', flexShrink: 0, marginTop: 1 }} />
+          <AlertTriangle size={18} style={{ color: 'var(--danger)', flexShrink: 0, marginTop: 1 }} />
           <div className="flex-1 min-w-0">
-            <div className="font-semibold text-sm" style={{ color: '#DC2626' }}>
+            <div className="font-semibold text-sm" style={{ color: 'var(--danger)' }}>
               {stats!.overdueInstallments!.length === 1
                 ? 'Tienes una cuota vencida'
                 : `Tienes ${stats!.overdueInstallments!.length} cuotas vencidas`}
@@ -148,7 +148,7 @@ export default function ClientDashboard() {
           </div>
           <Link href="/dashboard/reservas"
             className="text-xs font-bold px-3 py-2 rounded-xl shrink-0"
-            style={{ background: '#DC2626', color: '#fff' }}>
+            style={{ background: 'var(--danger)', color: '#fff' }}>
             Ver ahora
           </Link>
         </div>
@@ -159,7 +159,7 @@ export default function ClientDashboard() {
           style={{ border: '1.5px solid rgba(37,99,235,0.2)' }}>
           <div className="px-4 py-3 flex items-center gap-2.5"
             style={{ background: 'rgba(37,99,235,0.06)', borderBottom: '1px solid rgba(37,99,235,0.12)' }}>
-            <Bell size={15} style={{ color: '#2563EB', flexShrink: 0 }} />
+            <Bell size={15} style={{ color: 'var(--info)', flexShrink: 0 }} />
             <span className="text-sm font-semibold flex-1" style={{ color: '#1D4ED8' }}>
               {stats!.pendingPayment === 1
                 ? 'Reserva aceptada — pendiente de pago'
@@ -176,7 +176,7 @@ export default function ClientDashboard() {
                 {cover
                   ? <img src={cover} alt={sp?.name} className="w-10 h-10 rounded-xl object-cover shrink-0" />
                   : <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shrink-0 text-sm"
-                      style={{ background: 'linear-gradient(135deg, #2563EB, #1D4ED8)' }}>
+                      style={{ background: 'linear-gradient(135deg, var(--info), #1D4ED8)' }}>
                       {sp?.name?.charAt(0)}
                     </div>
                 }
@@ -200,7 +200,7 @@ export default function ClientDashboard() {
               </Link>
               <Link href={`/pago/${bk.id}`}
                 className="text-xs font-bold px-3 py-2 rounded-xl shrink-0"
-                style={{ background: '#2563EB', color: '#fff', whiteSpace: 'nowrap' }}>
+                style={{ background: 'var(--info)', color: '#fff', whiteSpace: 'nowrap' }}>
                 Pagar →
               </Link>
             </div>
@@ -231,7 +231,7 @@ export default function ClientDashboard() {
                   {cover
                     ? <img src={cover} alt={sp?.name} className="w-9 h-9 rounded-xl object-cover shrink-0" />
                     : <div className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold text-white shrink-0"
-                        style={{ background: 'linear-gradient(135deg, #35C493, #16A34A)' }}>
+                        style={{ background: 'linear-gradient(135deg, var(--brand), #16A34A)' }}>
                         {sp?.name?.charAt(0)}
                       </div>
                   }
@@ -261,7 +261,7 @@ export default function ClientDashboard() {
         const today = new Date(); today.setHours(0, 0, 0, 0)
         const daysLeft = Math.ceil((new Date(inst.due_date + 'T12:00').getTime() - today.getTime()) / 86400000)
         const isUrgent = daysLeft <= 7
-        const color = isUrgent ? '#D97706' : '#2563EB'
+        const color = isUrgent ? '#D97706' : 'var(--info)'
         const bg    = isUrgent ? 'rgba(217,119,6,0.06)' : 'rgba(37,99,235,0.05)'
         const bdr   = isUrgent ? 'rgba(217,119,6,0.2)'  : 'rgba(37,99,235,0.2)'
         return (
@@ -275,7 +275,7 @@ export default function ClientDashboard() {
                   · {daysLeft === 0 ? 'vence hoy' : daysLeft === 1 ? 'vence mañana' : `vence en ${daysLeft} días`}
                 </span>
               </div>
-              <div className="text-xs mt-0.5" style={{ color: isUrgent ? '#B45309' : '#3B82F6' }}>
+              <div className="text-xs mt-0.5" style={{ color: isUrgent ? '#B45309' : 'var(--info)' }}>
                 Próxima cuota · {formatDate(inst.due_date)}
               </div>
             </div>
@@ -387,7 +387,7 @@ export default function ClientDashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
         {[
           { label: 'Total reservas', value: stats?.total ?? 0,            icon: CalendarDays, color: 'var(--brand)',  featured: true },
-          { label: 'Por pagar',      value: formatCurrency(stats?.pendingAmount ?? 0), icon: Clock, color: '#2563EB',
+          { label: 'Por pagar',      value: formatCurrency(stats?.pendingAmount ?? 0), icon: Clock, color: 'var(--info)',
             urgent: (stats?.pendingAmount ?? 0) > 0 },
           { label: 'Confirmadas',    value: stats?.confirmed ?? 0,        icon: CheckCircle,  color: '#16A34A' },
         ].map(({ label, value, icon: Icon, color, urgent, featured }: any) => (
@@ -421,10 +421,10 @@ export default function ClientDashboard() {
             <div className="flex items-center justify-between px-4 md:px-5 py-3.5"
               style={{ borderBottom: '1px solid var(--border-subtle)' }}>
               <div className="flex items-center gap-2">
-                <CreditCard size={14} style={{ color: '#2563EB' }} />
+                <CreditCard size={14} style={{ color: 'var(--info)' }} />
                 <h2 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Cuotas pendientes</h2>
                 <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-full"
-                  style={{ background: 'rgba(37,99,235,0.08)', color: '#2563EB' }}>
+                  style={{ background: 'rgba(37,99,235,0.08)', color: 'var(--info)' }}>
                   {items.length}
                 </span>
               </div>
@@ -436,7 +436,7 @@ export default function ClientDashboard() {
               {items.map((inst: any) => {
                 const today2 = new Date(); today2.setHours(0, 0, 0, 0)
                 const daysLeft = Math.ceil((new Date(inst.due_date + 'T12:00').getTime() - today2.getTime()) / 86400000)
-                const color = daysLeft <= 3 ? '#DC2626' : daysLeft <= 7 ? '#D97706' : '#2563EB'
+                const color = daysLeft <= 3 ? 'var(--danger)' : daysLeft <= 7 ? '#D97706' : 'var(--info)'
                 const spaceName = byBooking[inst.booking_id]?.spaceName ?? '—'
                 return (
                   <div key={inst.id} className="flex items-center gap-3 px-4 md:px-5 py-3">
@@ -517,9 +517,9 @@ export default function ClientDashboard() {
                           const p = (bk as any).space_pricing as any
                           if (!p) return null
                           const map: Record<string, { label: string; color: string }> = {
-                            hourly:              { label: 'Por hora',      color: '#2563EB' },
+                            hourly:              { label: 'Por hora',      color: 'var(--info)' },
                             minimum_consumption: { label: 'Consumibles',  color: '#D97706' },
-                            fixed_package:       { label: p.package_name ?? 'Paquete', color: '#7C3AED' },
+                            fixed_package:       { label: p.package_name ?? 'Paquete', color: 'var(--accent-purple)' },
                             custom_quote:        { label: 'Cotización',    color: '#0891B2' },
                           }
                           const cfg = map[p.pricing_type]

@@ -163,7 +163,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
       {/* Toast de error */}
       {actionError && (
         <div className="fixed top-5 left-4 right-4 md:left-auto md:right-5 md:max-w-sm z-50 flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
-          style={{ background: '#DC2626', color: '#fff' }}>
+          style={{ background: 'var(--danger)', color: '#fff' }}>
           <XCircle size={15} /> {actionError}
         </div>
       )}
@@ -431,7 +431,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
                 <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
                   style={{
                     background: paid ? 'var(--bg-elevated)' : overdue ? 'rgba(220,38,38,0.08)' : isNext ? 'var(--bg-elevated)' : 'var(--bg-elevated)',
-                    color: paid ? 'var(--brand)' : overdue ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)',
+                    color: paid ? 'var(--brand)' : overdue ? 'var(--danger)' : isNext ? 'var(--brand)' : 'var(--text-muted)',
                     border: `1.5px solid ${paid ? 'var(--bg-elevated)' : overdue ? 'rgba(220,38,38,0.2)' : isNext ? 'var(--border-subtle)' : 'var(--border-medium)'}`,
                   }}>
                   {paid ? <Check size={12} /> : i + 1}
@@ -444,7 +444,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
                       {formatCurrency(Number(inst.amount))}
                     </span>
                     <span className="text-xs font-medium"
-                      style={{ color: paid ? 'var(--brand)' : overdue ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)' }}>
+                      style={{ color: paid ? 'var(--brand)' : overdue ? 'var(--danger)' : isNext ? 'var(--brand)' : 'var(--text-muted)' }}>
                       {paid
                         ? `Recibido${inst.paid_at ? ' · ' + formatDate(inst.paid_at.split('T')[0]) : ''}`
                         : countdownLabel(inst.due_date)}
@@ -482,7 +482,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
       {isCancelled && cancelReason && (
         <div className="rounded-2xl p-4 mb-4"
           style={{ background: 'rgba(220,38,38,0.04)', border: '1px solid rgba(220,38,38,0.15)' }}>
-          <p className="text-xs font-semibold mb-1" style={{ color: '#DC2626' }}>Motivo de cancelación</p>
+          <p className="text-xs font-semibold mb-1" style={{ color: 'var(--danger)' }}>Motivo de cancelación</p>
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{cancelReason}</p>
         </div>
       )}
@@ -503,7 +503,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
             onClick={() => setShowRejectForm(true)}
             disabled={!!actionId}
             className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-bold transition-all disabled:opacity-50"
-            style={{ background: 'rgba(220,38,38,0.08)', color: '#DC2626', border: '1.5px solid rgba(220,38,38,0.2)' }}>
+            style={{ background: 'rgba(220,38,38,0.08)', color: 'var(--danger)', border: '1.5px solid rgba(220,38,38,0.2)' }}>
             <XCircle size={15} /> Rechazar
           </button>
         </div>
@@ -514,7 +514,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
         <div className="rounded-2xl overflow-hidden mb-4"
           style={{ background: 'rgba(220,38,38,0.03)', border: '1.5px solid rgba(220,38,38,0.2)' }}>
           <div className="px-5 py-4" style={{ borderBottom: '1px solid rgba(220,38,38,0.12)' }}>
-            <p className="text-sm font-semibold" style={{ color: '#DC2626' }}>Confirmar rechazo</p>
+            <p className="text-sm font-semibold" style={{ color: 'var(--danger)' }}>Confirmar rechazo</p>
             <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
               El cliente será notificado por email.
             </p>
@@ -543,7 +543,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
                 onClick={doReject}
                 disabled={!!actionId}
                 className="flex-1 flex items-center justify-center gap-2 text-sm font-bold py-3 rounded-xl disabled:opacity-50"
-                style={{ background: '#DC2626', color: '#fff' }}>
+                style={{ background: 'var(--danger)', color: '#fff' }}>
                 {actionId === 'reject'
                   ? <><Loader2 size={14} className="animate-spin" /> Enviando...</>
                   : 'Confirmar rechazo'}
@@ -576,7 +576,7 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
           onClick={doComplete}
           disabled={!!actionId}
           className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-bold mb-4 transition-all disabled:opacity-50"
-          style={{ background: 'rgba(124,58,237,0.1)', color: '#7C3AED', border: '1.5px solid rgba(124,58,237,0.2)' }}>
+          style={{ background: 'rgba(124,58,237,0.1)', color: 'var(--accent-purple)', border: '1.5px solid rgba(124,58,237,0.2)' }}>
           {actionId === 'complete'
             ? <><Loader2 size={15} className="animate-spin" /> Procesando...</>
             : <><CheckCircle size={15} /> Marcar evento como completado</>}

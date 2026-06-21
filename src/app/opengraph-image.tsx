@@ -13,7 +13,7 @@ export default function OGImage() {
           width: '100%', height: '100%',
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
-          background: '#03313C',
+          background: 'var(--brand-navy)',
           position: 'relative',
           overflow: 'hidden',
         }}
@@ -32,7 +32,7 @@ export default function OGImage() {
           fontSize: 96, fontWeight: 900, letterSpacing: '-0.05em',
           lineHeight: 1,
         }}>
-          <span style={{ color: '#35C493' }}>espot</span>
+          <span style={{ color: 'var(--brand)' }}>espot</span>
           <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 72 }}>.do</span>
         </div>
 
@@ -54,7 +54,7 @@ export default function OGImage() {
               border: '1px solid rgba(53,196,147,0.25)',
               borderRadius: 100, paddingLeft: 18, paddingRight: 18,
               paddingTop: 8, paddingBottom: 8,
-              color: '#35C493', fontSize: 18, fontWeight: 600,
+              color: 'var(--brand)', fontSize: 18, fontWeight: 600,
             }}>
               {label}
             </div>

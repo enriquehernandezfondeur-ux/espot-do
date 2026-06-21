@@ -51,7 +51,7 @@ export default function PaymentClient({ eventId, bank, remaining, hostName }: Pr
     return (
       <div style={{ background: '#fff', borderRadius: 20, padding: '32px 24px', textAlign: 'center', boxShadow: '0 4px 24px rgba(0,0,0,0.07)', border: '1px solid #E8ECF0' }}>
         <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(53,196,147,0.1)', border: '2px solid rgba(53,196,147,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
-          <CheckCircle2 size={28} color="#35C493" />
+          <CheckCircle2 size={28} color="var(--brand)" />
         </div>
         <h3 style={{ fontSize: 17, fontWeight: 800, color: '#0F1623', margin: '0 0 8px' }}>¡Notificación enviada!</h3>
         <p style={{ fontSize: 13, color: '#6B7280', margin: 0, lineHeight: 1.6 }}>
@@ -67,7 +67,7 @@ export default function PaymentClient({ eventId, bank, remaining, hostName }: Pr
       {bank ? (
         <div style={{ background: '#fff', borderRadius: 20, padding: '24px', boxShadow: '0 4px 24px rgba(0,0,0,0.07)', border: '1px solid #E8ECF0' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <Building2 size={16} color="#35C493" />
+            <Building2 size={16} color="var(--brand)" />
             <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#0F1623' }}>Transferencia bancaria</h3>
           </div>
 
@@ -86,7 +86,7 @@ export default function PaymentClient({ eventId, bank, remaining, hostName }: Pr
                 {['Cuenta', 'Cédula / RNC', 'Monto'].includes(row.label) && (
                   <button
                     onClick={() => copy(row.value, row.label)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: copied === row.label ? '#35C493' : '#9CA3AF' }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: copied === row.label ? 'var(--brand)' : '#9CA3AF' }}
                   >
                     {copied === row.label ? <CheckCircle2 size={14} /> : <Copy size={14} />}
                   </button>
@@ -122,7 +122,7 @@ export default function PaymentClient({ eventId, bank, remaining, hostName }: Pr
           onClick={handleNotify}
           disabled={loading}
           style={{
-            marginTop: 12, width: '100%', background: '#35C493', color: '#fff',
+            marginTop: 12, width: '100%', background: 'var(--brand)', color: '#fff',
             fontWeight: 800, fontSize: 14, padding: '13px 20px', borderRadius: 50,
             border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
             opacity: loading ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,

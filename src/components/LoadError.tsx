@@ -18,7 +18,7 @@ export function LoadError({
     <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
       <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3"
         style={{ background: 'rgba(220,38,38,0.08)' }}>
-        <AlertTriangle size={22} style={{ color: '#DC2626' }} />
+        <AlertTriangle size={22} style={{ color: 'var(--danger)' }} />
       </div>
       <p className="font-semibold text-sm mb-1" style={{ color: 'var(--text-primary)' }}>
         Algo salió mal

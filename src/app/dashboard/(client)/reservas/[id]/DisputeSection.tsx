@@ -19,7 +19,7 @@ const STATUS_CONFIG: Record<DisputeStatus, { label: string; color: string; bg: s
   abierta:          { label: 'Abierta',                   color: '#D97706', bg: 'rgba(217,119,6,0.08)'   },
   en_revision:      { label: 'En revisión',               color: 'var(--brand)', bg: 'var(--bg-elevated)'   },
   resuelta_cliente: { label: 'Resuelta: a tu favor',      color: 'var(--brand)', bg: 'var(--bg-elevated)'   },
-  resuelta_host:    { label: 'Resuelta: a favor del host', color: '#7C3AED', bg: 'rgba(124,58,237,0.08)' },
+  resuelta_host:    { label: 'Resuelta: a favor del host', color: 'var(--accent-purple)', bg: 'rgba(124,58,237,0.08)' },
   cerrada:          { label: 'Cerrada',                   color: '#6B7280', bg: 'rgba(107,114,128,0.08)' },
 }
 
@@ -245,7 +245,7 @@ export default function DisputeSection({ bookingId, bookingStatus, existingDispu
                 }}
               />
               <div className="flex justify-between items-center mt-1">
-                <span className="text-xs" style={{ color: reason.length >= 20 ? '#35C493' : 'var(--text-muted)' }}>
+                <span className="text-xs" style={{ color: reason.length >= 20 ? 'var(--brand)' : 'var(--text-muted)' }}>
                   {reason.length} / mín. 20 caracteres
                 </span>
               </div>
@@ -253,7 +253,7 @@ export default function DisputeSection({ bookingId, bookingStatus, existingDispu
 
             {error && (
               <div className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm"
-                style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', color: '#DC2626' }}>
+                style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', color: 'var(--danger)' }}>
                 <AlertTriangle size={14} />
                 {error}
               </div>

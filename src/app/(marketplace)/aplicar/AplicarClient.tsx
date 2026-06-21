@@ -330,12 +330,12 @@ export default function AplicarClient() {
                 className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all"
                 style={{
                   background: 'var(--bg-elevated)',
-                  border:     errors.business_name ? '2px solid #EF4444' : '1.5px solid var(--border-subtle)',
+                  border:     errors.business_name ? '2px solid var(--danger)' : '1.5px solid var(--border-subtle)',
                   color:      'var(--text-primary)',
                   fontSize:   16,
                 }}
               />
-              {errors.business_name && <p className="text-xs mt-1" style={{ color: '#EF4444' }}>{errors.business_name}</p>}
+              {errors.business_name && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{errors.business_name}</p>}
             </div>
 
             <div>
@@ -348,14 +348,14 @@ export default function AplicarClient() {
                 className="w-full rounded-xl px-4 py-3 text-sm outline-none"
                 style={{
                   background: 'var(--bg-elevated)',
-                  border:     errors.space_type ? '2px solid #EF4444' : '1.5px solid var(--border-subtle)',
+                  border:     errors.space_type ? '2px solid var(--danger)' : '1.5px solid var(--border-subtle)',
                   color:      form.space_type ? 'var(--text-primary)' : 'var(--text-muted)',
                   fontSize:   16,
                 }}>
                 <option value="">Selecciona el tipo...</option>
                 {SPACE_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
-              {errors.space_type && <p className="text-xs mt-1" style={{ color: '#EF4444' }}>{errors.space_type}</p>}
+              {errors.space_type && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{errors.space_type}</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -369,14 +369,14 @@ export default function AplicarClient() {
                   className="w-full rounded-xl px-4 py-3 text-sm outline-none"
                   style={{
                     background: 'var(--bg-elevated)',
-                    border:     errors.city ? '2px solid #EF4444' : '1.5px solid var(--border-subtle)',
+                    border:     errors.city ? '2px solid var(--danger)' : '1.5px solid var(--border-subtle)',
                     color:      form.city ? 'var(--text-primary)' : 'var(--text-muted)',
                     fontSize:   16,
                   }}>
                   <option value="">Selecciona...</option>
                   {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
-                {errors.city && <p className="text-xs mt-1" style={{ color: '#EF4444' }}>{errors.city}</p>}
+                {errors.city && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{errors.city}</p>}
               </div>
               <div>
                 <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--text-primary)' }}>
@@ -410,12 +410,12 @@ export default function AplicarClient() {
                   className="w-full rounded-xl px-4 py-3 text-sm outline-none"
                   style={{
                     background: 'var(--bg-elevated)',
-                    border:     errors.phone ? '2px solid #EF4444' : '1.5px solid var(--border-subtle)',
+                    border:     errors.phone ? '2px solid var(--danger)' : '1.5px solid var(--border-subtle)',
                     color:      'var(--text-primary)',
                     fontSize:   16,
                   }}
                 />
-                {errors.phone && <p className="text-xs mt-1" style={{ color: '#EF4444' }}>{errors.phone}</p>}
+                {errors.phone && <p className="text-xs mt-1" style={{ color: 'var(--danger)' }}>{errors.phone}</p>}
               </div>
               <div>
                 <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--text-primary)' }}>
@@ -476,7 +476,7 @@ export default function AplicarClient() {
                 className="w-full rounded-xl px-4 py-3 text-sm outline-none resize-none"
                 style={{
                   background: 'var(--bg-elevated)',
-                  border:     errors.description ? '2px solid #EF4444' : '1.5px solid var(--border-subtle)',
+                  border:     errors.description ? '2px solid var(--danger)' : '1.5px solid var(--border-subtle)',
                   color:      'var(--text-primary)',
                   fontSize:   16,
                   lineHeight: 1.6,
@@ -484,10 +484,10 @@ export default function AplicarClient() {
               />
               <div className="flex items-center justify-between mt-1">
                 {errors.description
-                  ? <p className="text-xs" style={{ color: '#EF4444' }}>{errors.description}</p>
+                  ? <p className="text-xs" style={{ color: 'var(--danger)' }}>{errors.description}</p>
                   : <span />
                 }
-                <p className="text-xs" style={{ color: form.description.length < 50 ? '#EF4444' : 'var(--text-muted)' }}>
+                <p className="text-xs" style={{ color: form.description.length < 50 ? 'var(--danger)' : 'var(--text-muted)' }}>
                   {form.description.length} / 50 mín.
                 </p>
               </div>
@@ -517,7 +517,7 @@ export default function AplicarClient() {
               <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
                 Tipos de eventos que recibes *
               </label>
-              {errors.event_types && <p className="text-xs mb-2" style={{ color: '#EF4444' }}>{errors.event_types}</p>}
+              {errors.event_types && <p className="text-xs mb-2" style={{ color: 'var(--danger)' }}>{errors.event_types}</p>}
               <div className="flex flex-wrap gap-2">
                 {EVENT_TYPES.map(type => {
                   const selected = form.event_types.includes(type)
@@ -552,7 +552,7 @@ export default function AplicarClient() {
             </div>
 
             {errors.photos && (
-              <p className="text-sm font-medium" style={{ color: '#EF4444' }}>{errors.photos}</p>
+              <p className="text-sm font-medium" style={{ color: 'var(--danger)' }}>{errors.photos}</p>
             )}
 
             {/* Upload zone */}
@@ -680,7 +680,7 @@ export default function AplicarClient() {
             </div>
 
             {submitError && (
-              <p className="text-sm font-medium" style={{ color: '#EF4444' }}>{submitError}</p>
+              <p className="text-sm font-medium" style={{ color: 'var(--danger)' }}>{submitError}</p>
             )}
           </div>
         )}

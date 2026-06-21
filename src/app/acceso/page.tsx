@@ -50,7 +50,7 @@ function AccessForm() {
             background: 'rgba(53,196,147,0.12)', border: '1px solid rgba(53,196,147,0.25)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px',
           }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#35C493" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
@@ -91,7 +91,7 @@ function AccessForm() {
             disabled={loading || !password}
             style={{
               width: '100%', padding: '14px 24px', borderRadius: 14,
-              background: loading || !password ? 'rgba(53,196,147,0.4)' : '#35C493',
+              background: loading || !password ? 'rgba(53,196,147,0.4)' : 'var(--brand)',
               color: '#060D09', fontWeight: 700, fontSize: 15,
               border: 'none', cursor: loading || !password ? 'not-allowed' : 'pointer',
               fontFamily: 'inherit', transition: 'background 0.2s',

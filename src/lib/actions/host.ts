@@ -564,7 +564,7 @@ export async function respondToQuote(bookingId: string, quotedPrice: number, mes
       html: emailBase({
         title:       'Tu cotización fue respondida',
         subtitle:    `${space?.name} tiene una propuesta de precio para ti.`,
-        accentColor: '#2563EB',
+        accentColor: 'var(--info)',
         body: `
           <p style="color:#374151;margin:0 0 16px;">Hola <strong>${guest?.full_name ?? 'Cliente'}</strong>, el propietario de <strong>${space?.name}</strong> revisó tu solicitud.</p>
           ${infoBox([

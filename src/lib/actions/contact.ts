@@ -82,7 +82,7 @@ export async function sendContactForm(data: ContactFormData): Promise<ContactFor
   const internalHtml = emailBase({
     title: `Nuevo mensaje de contacto`,
     subtitle: `${safeName} escribió desde el formulario de contacto de espot.do`,
-    accentColor: '#35C493',
+    accentColor: 'var(--brand)',
     body: `
       <p style="color:#374151;margin:0 0 16px;">Un usuario envió un mensaje a través del formulario de contacto.</p>
       ${infoBox(internalRows)}
@@ -114,7 +114,7 @@ export async function sendContactForm(data: ContactFormData): Promise<ContactFor
   const confirmHtml = emailBase({
     title: `Recibimos tu mensaje, ${safeName}`,
     subtitle: 'Te respondemos en menos de 24 horas hábiles.',
-    accentColor: '#35C493',
+    accentColor: 'var(--brand)',
     body: `
       <p style="color:#374151;margin:0 0 16px;">Hola <strong>${safeName}</strong>, gracias por contactarnos. Tu mensaje fue recibido correctamente y un miembro de nuestro equipo te responderá pronto.</p>
       ${infoBox(confirmRows)}
@@ -122,7 +122,7 @@ export async function sendContactForm(data: ContactFormData): Promise<ContactFor
         <p style="color:#6B7280;font-size:12px;font-weight:600;margin:0 0 8px;text-transform:uppercase;letter-spacing:0.05em;">Tu mensaje</p>
         <p style="color:#0F1623;font-size:14px;margin:0;line-height:1.7;white-space:pre-wrap;">${safeMessage}</p>
       </div>
-      <p style="color:#6B7280;font-size:13px;margin:0;">Si tu consulta es urgente, puedes escribirnos directamente a <a href="mailto:${CONTACT_EMAIL}" style="color:#35C493;">${CONTACT_EMAIL}</a> o llamarnos al <strong>+1 (829) 548-1998</strong>.</p>`,
+      <p style="color:#6B7280;font-size:13px;margin:0;">Si tu consulta es urgente, puedes escribirnos directamente a <a href="mailto:${CONTACT_EMAIL}" style="color:var(--brand);">${CONTACT_EMAIL}</a> o llamarnos al <strong>+1 (829) 548-1998</strong>.</p>`,
     cta: { text: 'Explorar espacios', url: `${SITE}/buscar` },
   })
 

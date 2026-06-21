@@ -48,7 +48,7 @@ export default async function DirectEventPaymentPage({ params }: Props) {
             {host.avatar_url ? (
               <img src={host.avatar_url} alt={host.full_name} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover' }} />
             ) : (
-              <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(53,196,147,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700, color: '#35C493' }}>
+              <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(53,196,147,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700, color: 'var(--brand)' }}>
                 {(host.full_name ?? 'H').charAt(0).toUpperCase()}
               </div>
             )}
@@ -84,7 +84,7 @@ export default async function DirectEventPaymentPage({ params }: Props) {
             {remaining > 0 && (
               <div style={{ marginTop: 12, background: 'rgba(53,196,147,0.08)', border: '1.5px solid rgba(53,196,147,0.25)', borderRadius: 14, padding: '14px 16px', textAlign: 'center' }}>
                 <p style={{ margin: '0 0 2px', fontSize: 12, color: '#374151' }}>Monto pendiente</p>
-                <p style={{ margin: 0, fontSize: 26, fontWeight: 900, color: '#35C493', letterSpacing: '-0.03em' }}>{formatCurrency(remaining)}</p>
+                <p style={{ margin: 0, fontSize: 26, fontWeight: 900, color: 'var(--brand)', letterSpacing: '-0.03em' }}>{formatCurrency(remaining)}</p>
               </div>
             )}
 
@@ -108,7 +108,7 @@ export default async function DirectEventPaymentPage({ params }: Props) {
 
         <p style={{ textAlign: 'center', fontSize: 11, color: '#9CA3AF', marginTop: 20 }}>
           Powered by{' '}
-          <a href="https://espot.do" style={{ color: '#35C493', textDecoration: 'none', fontWeight: 600 }}>espot.do</a>
+          <a href="https://espot.do" style={{ color: 'var(--brand)', textDecoration: 'none', fontWeight: 600 }}>espot.do</a>
         </p>
       </div>
     </div>

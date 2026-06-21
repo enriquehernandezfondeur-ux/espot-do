@@ -97,8 +97,8 @@ export default function PhotoUploader({ spaceId, onChange, initialPhotos }: Prop
         className={cn(
           'border-2 border-dashed rounded-2xl p-5 md:p-8 text-center cursor-pointer transition-all',
           dragOver
-            ? 'border-[#35C493] bg-[rgba(53,196,147,0.05)]'
-            : 'border-[var(--border-medium)] hover:border-[#35C493] hover:bg-[rgba(53,196,147,0.03)]'
+            ? 'border-[var(--brand)] bg-[rgba(53,196,147,0.05)]'
+            : 'border-[var(--border-medium)] hover:border-[var(--brand)] hover:bg-[rgba(53,196,147,0.03)]'
         )}>
         <input
           ref={inputRef}
@@ -131,7 +131,7 @@ export default function PhotoUploader({ spaceId, onChange, initialPhotos }: Prop
 
       {uploadError && (
         <div className="text-xs px-3 py-2 rounded-xl flex items-center gap-2"
-          style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444' }}>
+          style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: 'var(--danger)' }}>
           <X size={12} className="shrink-0" /> {uploadError}
         </div>
       )}

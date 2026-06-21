@@ -243,7 +243,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
       {/* Toast */}
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-xl flex items-center gap-2"
-          style={{ background: toast.ok ? '#0F1623' : '#DC2626', color: '#fff' }}>
+          style={{ background: toast.ok ? '#0F1623' : 'var(--danger)', color: '#fff' }}>
           {toast.ok ? <CheckCircle size={15} /> : <X size={15} />} {toast.msg}
         </div>
       )}
@@ -268,7 +268,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
         <div className="flex items-center gap-2">
           {[
             { field: 'is_published', val: isPublished, set: setIsPublished, icon: isPublished ? Eye : EyeOff, label: isPublished ? 'Publicado' : 'Oculto',   active: '#16A34A' },
-            { field: 'is_verified',  val: isVerified,  set: setIsVerified,  icon: Shield,  label: 'Verificado',  active: '#2563EB' },
+            { field: 'is_verified',  val: isVerified,  set: setIsVerified,  icon: Shield,  label: 'Verificado',  active: 'var(--info)' },
             { field: 'is_featured',  val: isFeatured,  set: setIsFeatured,  icon: Star,    label: 'Destacado',   active: '#CA8A04' },
             { field: 'is_active',    val: isActive,    set: setIsActive,    icon: isActive ? CheckCircle : Trash2, label: isActive ? 'Activo' : 'Inactivo', active: 'var(--brand)' },
           ].map(({ field, val, set, icon: Icon, label, active }) => (
@@ -295,7 +295,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
       {/* Error banner */}
       {saveError && (
         <div className="mb-6 px-4 py-3 rounded-xl text-sm flex items-center gap-2"
-          style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.2)', color: '#DC2626' }}>
+          style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.2)', color: 'var(--danger)' }}>
           <X size={15} className="shrink-0" /> {saveError}
         </div>
       )}
@@ -482,7 +482,7 @@ export default function AdminEditSpaceClient({ space }: { space: any }) {
                 <button onClick={() => handleDeleteAddon(addon.id)}
                   disabled={saving === 'del-' + addon.id}
                   className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-red-50"
-                  style={{ color: '#DC2626' }}>
+                  style={{ color: 'var(--danger)' }}>
                   {saving === 'del-' + addon.id ? <Loader2 size={14} className="animate-spin" /> : <X size={14} />}
                 </button>
               </div>

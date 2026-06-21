@@ -596,7 +596,7 @@ export async function notifyPaymentMade(eventId: string, clientNote?: string) {
           </p>
           ${clientNote ? `<p style="background:#F3F4F6;padding:12px 16px;border-radius:8px;color:#374151">"${clientNote}"</p>` : ''}
           <a href="${SITE}/dashboard/host/eventos/${eventId}"
-            style="display:inline-block;margin-top:16px;background:#35C493;color:#fff;padding:12px 24px;border-radius:50px;text-decoration:none;font-weight:700">
+            style="display:inline-block;margin-top:16px;background:var(--brand);color:#fff;padding:12px 24px;border-radius:50px;text-decoration:none;font-weight:700">
             Ver evento →
           </a>
         </div>`,

@@ -86,7 +86,7 @@ export default function ActivityPicker({ primary, secondary, onChange }: Props) 
               </div>
 
               {/* Texto */}
-              <div className="font-semibold text-sm mb-0.5" style={{ color: '#03313C' }}>{act.label}</div>
+              <div className="font-semibold text-sm mb-0.5" style={{ color: 'var(--brand-navy)' }}>{act.label}</div>
               <div className="text-xs leading-snug" style={{ color: '#64748B' }}>{act.description}</div>
               {/* Hint: qué búsquedas activa */}
               {isSelected && (

@@ -42,7 +42,7 @@ export default async function AdminReportesPage() {
         {/* Por categoría */}
         <div className="rounded-2xl p-6" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <div className="flex items-center gap-2 mb-5">
-            <Tag size={16} style={{ color: '#7C3AED' }} />
+            <Tag size={16} style={{ color: 'var(--accent-purple)' }} />
             <h2 className="font-bold text-sm" style={{ color: '#0F1623' }}>Espacios por categoría</h2>
           </div>
           <div className="space-y-3">
@@ -57,7 +57,7 @@ export default async function AdminReportesPage() {
                     </div>
                     <div className="flex-1 h-5 rounded-lg overflow-hidden" style={{ background: '#F4F6F8' }}>
                       <div className="h-full rounded-lg"
-                        style={{ width: `${(count / maxCat) * 100}%`, background: '#7C3AED' }} />
+                        style={{ width: `${(count / maxCat) * 100}%`, background: 'var(--accent-purple)' }} />
                     </div>
                     <div className="w-6 text-xs font-bold text-right shrink-0" style={{ color: '#0F1623' }}>{count}</div>
                   </div>
@@ -70,7 +70,7 @@ export default async function AdminReportesPage() {
       {/* Top espacios */}
       <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E8ECF0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
         <div className="px-6 py-4 flex items-center gap-2" style={{ borderBottom: '1px solid #F0F2F5' }}>
-          <Building2 size={16} style={{ color: '#2563EB' }} />
+          <Building2 size={16} style={{ color: 'var(--info)' }} />
           <h2 className="font-bold text-sm" style={{ color: '#0F1623' }}>Espacios más reservados</h2>
         </div>
         <div className="divide-y divide-[#F0F2F5]">

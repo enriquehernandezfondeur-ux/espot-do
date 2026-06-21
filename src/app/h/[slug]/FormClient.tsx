@@ -71,7 +71,7 @@ export default function FormClient({ hostId, hostName, spaces }: Props) {
       <div className="flex flex-col items-center justify-center py-16 text-center px-4">
         <div className="w-16 h-16 rounded-full flex items-center justify-center mb-5"
           style={{ background: 'rgba(53,196,147,0.1)', border: '2px solid rgba(53,196,147,0.3)' }}>
-          <CheckCircle2 size={32} color="#35C493" />
+          <CheckCircle2 size={32} color="var(--brand)" />
         </div>
         <h2 className="text-xl font-bold mb-2" style={{ color: '#0F1623', letterSpacing: '-0.02em' }}>
           ¡Solicitud enviada!
@@ -222,7 +222,7 @@ export default function FormClient({ hostId, hostName, spaces }: Props) {
       </div>
 
       {error && (
-        <p style={{ color: '#DC2626', fontSize: 13, background: '#FEF2F2', border: '1px solid #FEE2E2', borderRadius: 10, padding: '10px 14px', margin: 0 }}>
+        <p style={{ color: 'var(--danger)', fontSize: 13, background: '#FEF2F2', border: '1px solid #FEE2E2', borderRadius: 10, padding: '10px 14px', margin: 0 }}>
           {error}
         </p>
       )}
@@ -230,7 +230,7 @@ export default function FormClient({ hostId, hostName, spaces }: Props) {
       <button
         type="submit" disabled={loading}
         style={{
-          background: '#35C493', color: '#fff', fontWeight: 800, fontSize: 15,
+          background: 'var(--brand)', color: '#fff', fontWeight: 800, fontSize: 15,
           padding: '15px 24px', borderRadius: 50, border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
           opacity: loading ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
           fontFamily: 'inherit', letterSpacing: '-0.01em', boxShadow: '0 4px 20px rgba(53,196,147,0.35)',

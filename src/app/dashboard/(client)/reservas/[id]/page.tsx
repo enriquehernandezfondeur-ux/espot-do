@@ -258,7 +258,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
                 <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
                   style={{
                     background: paid ? 'var(--bg-elevated)' : overdue ? 'rgba(220,38,38,0.08)' : isNext ? 'var(--bg-elevated)' : 'var(--bg-elevated)',
-                    color: paid ? 'var(--brand)' : overdue ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)',
+                    color: paid ? 'var(--brand)' : overdue ? 'var(--danger)' : isNext ? 'var(--brand)' : 'var(--text-muted)',
                     border: `1.5px solid ${paid ? 'var(--bg-elevated)' : overdue ? 'rgba(220,38,38,0.2)' : isNext ? 'var(--border-subtle)' : 'var(--border-medium)'}`,
                   }}>
                   {paid ? <Check size={12} /> : i + 1}
@@ -268,7 +268,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
                     <span className="text-sm font-semibold" style={{ color: paid ? 'var(--text-secondary)' : 'var(--text-primary)' }}>
                       {formatCurrency(inst.amount)}
                     </span>
-                    <span className="text-xs font-medium" style={{ color: paid ? 'var(--brand)' : overdue ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)' }}>
+                    <span className="text-xs font-medium" style={{ color: paid ? 'var(--brand)' : overdue ? 'var(--danger)' : isNext ? 'var(--brand)' : 'var(--text-muted)' }}>
                       {paid ? `Pagado${inst.paid_at ? ' · ' + formatDate(inst.paid_at.split('T')[0]) : ''}` : countdownLabel(inst.due_date)}
                     </span>
                   </div>
@@ -536,7 +536,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
               </div>
 
               {reviewError && (
-                <p className="text-xs font-medium" style={{ color: '#DC2626' }}>{reviewError}</p>
+                <p className="text-xs font-medium" style={{ color: 'var(--danger)' }}>{reviewError}</p>
               )}
 
               <button

@@ -143,8 +143,8 @@ export function SpaceCard({
 
           {images.length === 0 ? (
             <div className="absolute inset-0 flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg,#03313C,#0D4A3A)' }}>
-              <CatIcon size={36} style={{ color: '#35C493', opacity: 0.6 }} />
+              style={{ background: 'linear-gradient(135deg,var(--brand-navy),#0D4A3A)' }}>
+              <CatIcon size={36} style={{ color: 'var(--brand)', opacity: 0.6 }} />
             </div>
           ) : images.map((url, i) => (
             <Image key={i} src={url} alt={space.name} fill
@@ -235,7 +235,7 @@ export function SpaceCard({
             </h3>
             {space.is_verified && (
               <span className="flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center"
-                style={{ background: '#35C493' }}>
+                style={{ background: 'var(--brand)' }}>
                 <Check size={9} style={{ color: '#fff', strokeWidth: 3 }} />
               </span>
             )}
@@ -295,7 +295,7 @@ export function SpaceCard({
               </div>
 
               <span className="flex items-center gap-1 text-xs font-medium shrink-0" style={{ color: 'var(--text-muted)' }}>
-                <Users size={12} style={{ color: '#35C493', flexShrink: 0 }} />
+                <Users size={12} style={{ color: 'var(--brand)', flexShrink: 0 }} />
                 {space.capacity_min && space.capacity_min !== space.capacity_max
                   ? `${space.capacity_min}–${space.capacity_max}`
                   : space.capacity_max ?? '—'}

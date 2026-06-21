@@ -338,7 +338,7 @@ export async function updateUserRole(userId: string, role: string) {
       html: emailBase({
         title:       '¡Ya puedes publicar tu espacio!',
         subtitle:    'Tu cuenta fue activada como propietario (host) en espot.do.',
-        accentColor: '#35C493',
+        accentColor: 'var(--brand)',
         body: `
           <p style="color:#374151;margin:0 0 16px;">Hola <strong>${escapeHtml(name)}</strong>, el equipo de Espot revisó tu solicitud y activó tu cuenta como propietario.</p>
           <p style="color:#374151;margin:0 0 16px;">Ahora puedes publicar tu espacio, recibir solicitudes de reserva y gestionar tus eventos directamente desde el panel de propietario.</p>

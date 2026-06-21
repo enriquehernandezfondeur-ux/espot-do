@@ -53,7 +53,7 @@ export function useConfirm() {
           <button type="button" onClick={() => close(true)}
             className="flex-1 py-3 rounded-xl text-sm font-bold"
             style={danger
-              ? { background: '#DC2626', color: '#fff' }
+              ? { background: 'var(--danger)', color: '#fff' }
               : { background: 'var(--brand)', color: '#fff' }}>
             {state.opts.confirmText ?? 'Confirmar'}
           </button>

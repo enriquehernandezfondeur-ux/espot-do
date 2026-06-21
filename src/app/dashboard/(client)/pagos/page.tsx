@@ -26,7 +26,7 @@ function ComprobanteModal({ data, onClose }: { data: ComprobanteData; onClose: (
 
           {/* Header verde */}
           <div className="px-6 py-5 text-center relative"
-            style={{ background: 'linear-gradient(135deg, #35C493 0%, #1a9e70 100%)' }}>
+            style={{ background: 'linear-gradient(135deg, var(--brand) 0%, #1a9e70 100%)' }}>
             <button onClick={onClose}
               className="absolute top-3 right-3 p-1 rounded-full print:hidden"
               style={{ color: 'rgba(255,255,255,0.7)' }}>
@@ -60,7 +60,7 @@ function ComprobanteModal({ data, onClose }: { data: ComprobanteData; onClose: (
             {/* Monto */}
             <div className="text-center py-4 mb-4 rounded-2xl" style={{ background: 'rgba(53,196,147,0.07)', border: '1px dashed rgba(53,196,147,0.4)' }}>
               <div className="text-xs font-medium mb-1" style={{ color: '#6B7280' }}>Monto pagado</div>
-              <div className="text-3xl font-bold" style={{ color: '#35C493', letterSpacing: '-0.03em' }}>
+              <div className="text-3xl font-bold" style={{ color: 'var(--brand)', letterSpacing: '-0.03em' }}>
                 {formatCurrency(Number(data.inst.amount))}
               </div>
             </div>
@@ -87,10 +87,10 @@ function daysUntil(dateStr: string) {
   return Math.ceil((new Date(dateStr + 'T12:00').getTime() - today.getTime()) / 86400000)
 }
 function urgencyColor(days: number) {
-  if (days < 0)  return '#DC2626'
-  if (days <= 3) return '#DC2626'
+  if (days < 0)  return 'var(--danger)'
+  if (days <= 3) return 'var(--danger)'
   if (days <= 7) return '#D97706'
-  return '#2563EB'
+  return 'var(--info)'
 }
 function urgencyLabel(days: number) {
   if (days < 0)  return `Venció hace ${Math.abs(days)} día${Math.abs(days) !== 1 ? 's' : ''}`
@@ -185,7 +185,7 @@ export default function PagosPage() {
         {[
           { label: 'Total pagado',      value: formatCurrency(totalPaid),    color: 'var(--brand)', icon: CheckCircle },
           { label: 'Por pagar',         value: formatCurrency(totalPending), color: '#D97706',       icon: Clock },
-          { label: 'Próx. vencimiento', value: nextDueDate ? formatDate(nextDueDate, { day: 'numeric', month: 'short' }) : '—', color: '#2563EB', icon: CreditCard },
+          { label: 'Próx. vencimiento', value: nextDueDate ? formatDate(nextDueDate, { day: 'numeric', month: 'short' }) : '—', color: 'var(--info)', icon: CreditCard },
         ].map(({ label, value, color, icon: Icon }) => (
           <div key={label} className="rounded-2xl p-4"
             style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
@@ -204,7 +204,7 @@ export default function PagosPage() {
           <div className="flex items-center gap-2 mb-3">
             <h2 className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>Por pagar</h2>
             <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
-              style={{ background: 'rgba(220,38,38,0.08)', color: '#DC2626' }}>
+              style={{ background: 'rgba(220,38,38,0.08)', color: 'var(--danger)' }}>
               {pending.length}
             </span>
           </div>
@@ -312,7 +312,7 @@ export default function PagosPage() {
                         </span>
                         <button onClick={() => openComprobante(inst)}
                           className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-xl transition-all"
-                          style={{ background: 'rgba(37,99,235,0.07)', color: '#2563EB' }}>
+                          style={{ background: 'rgba(37,99,235,0.07)', color: 'var(--info)' }}>
                           <Receipt size={11} /> Comprobante
                         </button>
                       </div>

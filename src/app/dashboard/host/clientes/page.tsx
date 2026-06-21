@@ -28,8 +28,8 @@ const SOURCE_LABELS: Record<ClientSource, string> = {
 const SOURCE_COLORS: Record<ClientSource, { bg: string; color: string }> = {
   espot:    { bg: 'rgba(53,196,147,0.1)',  color: '#16A34A' },
   manual:   { bg: 'rgba(15,22,35,0.06)',   color: '#6B7280' },
-  referido: { bg: 'rgba(124,58,237,0.1)',  color: '#7C3AED' },
-  redes:    { bg: 'rgba(37,99,235,0.1)',   color: '#2563EB' },
+  referido: { bg: 'rgba(124,58,237,0.1)',  color: 'var(--accent-purple)' },
+  redes:    { bg: 'rgba(37,99,235,0.1)',   color: 'var(--info)' },
   otro:     { bg: 'rgba(217,119,6,0.1)',   color: '#D97706' },
 }
 
@@ -235,7 +235,7 @@ export default function ClientesPage() {
       {/* Toast */}
       {toast && (
         <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
-          style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
+          style={{ background: toast.ok ? '#16A34A' : 'var(--danger)', color: '#fff' }}>
           {toast.ok ? <Check size={14} /> : <X size={14} />} {toast.msg}
         </div>
       )}

@@ -125,17 +125,17 @@ function ExitoContent() {
 
   if (verifying) return (
     <div className="min-h-dvh flex flex-col items-center justify-center gap-4"
-      style={{ background: 'linear-gradient(160deg, #03313C 0%, #03313C 55%)' }}>
-      <Loader2 size={32} className="animate-spin" style={{ color: '#35C493' }} />
+      style={{ background: 'linear-gradient(160deg, var(--brand-navy) 0%, var(--brand-navy) 55%)' }}>
+      <Loader2 size={32} className="animate-spin" style={{ color: 'var(--brand)' }} />
       <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>Verificando pago con Azul...</p>
     </div>
   )
 
   if (!booking) return (
     <div className="min-h-dvh flex flex-col items-center justify-center gap-4"
-      style={{ background: 'linear-gradient(160deg, #03313C 0%, #03313C 55%)' }}>
+      style={{ background: 'linear-gradient(160deg, var(--brand-navy) 0%, var(--brand-navy) 55%)' }}>
       <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>No se encontró información del pago.</p>
-      <a href="/" className="text-sm font-semibold" style={{ color: '#35C493' }}>Volver al inicio</a>
+      <a href="/" className="text-sm font-semibold" style={{ color: 'var(--brand)' }}>Volver al inicio</a>
     </div>
   )
 
@@ -146,7 +146,7 @@ function ExitoContent() {
   const txId      = booking?.azul_order_id ?? azulOrderId ?? booking?.id?.slice(0, 8).toUpperCase()
 
   return (
-    <div className="min-h-dvh" style={{ background: 'linear-gradient(160deg, #03313C 0%, #03313C 55%)' }}>
+    <div className="min-h-dvh" style={{ background: 'linear-gradient(160deg, var(--brand-navy) 0%, var(--brand-navy) 55%)' }}>
       <div style={{
         position: 'fixed', top: 0, left: 0, right: 0, height: 320,
         background: 'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(53,196,147,0.14) 0%, transparent 70%)',
@@ -163,7 +163,7 @@ function ExitoContent() {
               border: '2px solid rgba(53,196,147,0.35)',
               boxShadow: '0 0 40px rgba(53,196,147,0.15)',
             }}>
-            <CheckCircle size={44} style={{ color: '#35C493' }} />
+            <CheckCircle size={44} style={{ color: 'var(--brand)' }} />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2" style={{ letterSpacing: '-0.03em' }}>
             ¡Pago exitoso!
@@ -183,31 +183,31 @@ function ExitoContent() {
             <div className="px-6 py-5 flex items-center justify-between"
               style={{ background: 'rgba(53,196,147,0.1)', borderBottom: '1px solid rgba(53,196,147,0.15)' }}>
               <div className="min-w-0 flex-1 mr-3">
-                <p className="text-xs font-semibold mb-0.5" style={{ color: '#35C493' }}>
+                <p className="text-xs font-semibold mb-0.5" style={{ color: 'var(--brand)' }}>
                   {booking.event_type ? `${booking.event_type} · ` : ''}RESERVA CONFIRMADA
                 </p>
                 <p className="text-white font-bold truncate">{space?.name}</p>
               </div>
               <div className="text-right">
                 <p className="text-xs mb-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>ID Transacción</p>
-                <p className="font-mono text-xs font-bold" style={{ color: '#35C493' }}>{txId}</p>
+                <p className="font-mono text-xs font-bold" style={{ color: 'var(--brand)' }}>{txId}</p>
               </div>
             </div>
 
             <div className="px-6 py-5 space-y-2.5">
               <div className="flex items-center gap-2.5 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                <MapPin size={14} style={{ color: '#35C493', flexShrink: 0 }} />
+                <MapPin size={14} style={{ color: 'var(--brand)', flexShrink: 0 }} />
                 {space?.address
                   ? `${space.address}, ${[space?.sector, space?.city].filter(Boolean).join(', ')}`
                   : [space?.sector, space?.city].filter(Boolean).join(', ')}
               </div>
               <div className="flex items-center gap-2.5 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                <Calendar size={14} style={{ color: '#35C493', flexShrink: 0 }} />
+                <Calendar size={14} style={{ color: 'var(--brand)', flexShrink: 0 }} />
                 {formatDate(booking.event_date)} · {formatTime(booking.start_time)} – {formatTime(booking.end_time)}
               </div>
               {booking.guest_count && (
                 <div className="flex items-center gap-2.5 text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                  <Users size={14} style={{ color: '#35C493', flexShrink: 0 }} />
+                  <Users size={14} style={{ color: 'var(--brand)', flexShrink: 0 }} />
                   {booking.guest_count} personas
                 </div>
               )}
@@ -257,7 +257,7 @@ function ExitoContent() {
           style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.2s' }}>
           <Link href={`/dashboard/reservas/${bookingId}`}
             className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-bold text-base"
-            style={{ background: '#35C493', color: '#03313C', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
+            style={{ background: 'var(--brand)', color: 'var(--brand-navy)', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
             <Calendar size={17} /> Ver mi reserva y plan de pagos <ArrowRight size={15} />
           </Link>
           {bookingId && (
@@ -287,8 +287,8 @@ function ExitoContent() {
 
 export default function ExitoPage() {
   return <Suspense fallback={
-    <div className="min-h-dvh flex items-center justify-center" style={{ background: '#03313C' }}>
-      <Loader2 size={28} className="animate-spin" style={{ color: '#35C493' }} />
+    <div className="min-h-dvh flex items-center justify-center" style={{ background: 'var(--brand-navy)' }}>
+      <Loader2 size={28} className="animate-spin" style={{ color: 'var(--brand)' }} />
     </div>
   }><ExitoContent /></Suspense>
 }

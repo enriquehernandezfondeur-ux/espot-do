@@ -91,7 +91,7 @@ export default function MenuUploader({ initialUrl, initialName, onChange, onRemo
           </a>
           <button type="button" onClick={handleRemove}
             className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-xl transition-all"
-            style={{ background: 'rgba(220,38,38,0.07)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }}>
+            style={{ background: 'rgba(220,38,38,0.07)', color: 'var(--danger)', border: '1px solid rgba(220,38,38,0.15)' }}>
             <X size={12} /> Quitar
           </button>
         </div>
@@ -127,7 +127,7 @@ export default function MenuUploader({ initialUrl, initialName, onChange, onRemo
       </div>
       {error && (
         <p className="text-xs px-3 py-2 rounded-xl"
-          style={{ background: 'rgba(220,38,38,0.06)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.1)' }}>
+          style={{ background: 'rgba(220,38,38,0.06)', color: 'var(--danger)', border: '1px solid rgba(220,38,38,0.1)' }}>
           {error}
         </p>
       )}

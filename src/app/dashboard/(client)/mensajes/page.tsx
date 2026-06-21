@@ -360,7 +360,7 @@ export default function ClientMensajesPage() {
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{(attachment.file.size / 1024 / 1024).toFixed(1)} MB</p>
                 </div>
                 <button onClick={removeAttachment} className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
-                  style={{ background: 'rgba(220,38,38,0.1)', color: '#DC2626' }}>
+                  style={{ background: 'rgba(220,38,38,0.1)', color: 'var(--danger)' }}>
                   <X size={13} />
                 </button>
               </div>
@@ -387,7 +387,7 @@ export default function ClientMensajesPage() {
                 {(sending || uploading) ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
               </button>
             </div>
-            <p className="text-xs text-center mt-2" style={{ color: sendError ? '#DC2626' : 'var(--text-muted)' }}>
+            <p className="text-xs text-center mt-2" style={{ color: sendError ? 'var(--danger)' : 'var(--text-muted)' }}>
               {sendError || 'Fotos, PDF, Word · Máx 20MB'}
             </p>
           </div>

@@ -273,7 +273,7 @@ export default function FavoritosPage() {
                                 </button>
                                 <button onClick={() => handleDeleteFolder(folder.id)}
                                   className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-left transition-colors hover:bg-red-50"
-                                  style={{ color: '#DC2626', borderTop: '1px solid var(--border-subtle)' }}>
+                                  style={{ color: 'var(--danger)', borderTop: '1px solid var(--border-subtle)' }}>
                                   <Trash2 size={13} /> Eliminar
                                 </button>
                               </>
@@ -350,7 +350,7 @@ export default function FavoritosPage() {
                     <button
                       onClick={() => handleMove(fav.id, null)}
                       className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
-                      style={{ background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(6px)', color: '#DC2626', boxShadow: '0 1px 6px rgba(0,0,0,0.1)' }}>
+                      style={{ background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(6px)', color: 'var(--danger)', boxShadow: '0 1px 6px rgba(0,0,0,0.1)' }}>
                       <X size={11} /> Quitar
                     </button>
                   </div>

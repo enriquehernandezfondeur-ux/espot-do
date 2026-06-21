@@ -471,7 +471,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
       style={{ background: '#fff', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 40px rgba(0,0,0,0.08)' }}>
       <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
         style={{ background: successType === 'instant' ? 'rgba(37,99,235,0.1)' : successType === 'quote' ? 'rgba(8,145,178,0.1)' : 'rgba(53,196,147,0.1)' }}>
-        <CheckCircle size={32} style={{ color: successType === 'instant' ? '#2563EB' : successType === 'quote' ? '#0891B2' : 'var(--brand)' }} />
+        <CheckCircle size={32} style={{ color: successType === 'instant' ? 'var(--info)' : successType === 'quote' ? '#0891B2' : 'var(--brand)' }} />
       </div>
 
       {successType === 'instant' ? (
@@ -484,7 +484,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
           </p>
           <div className="flex items-start gap-2.5 text-left px-4 py-3 rounded-xl mb-5"
             style={{ background: 'rgba(37,99,235,0.06)', border: '1px solid rgba(37,99,235,0.2)' }}>
-            <Timer size={15} style={{ color: '#2563EB', flexShrink: 0, marginTop: 1 }} />
+            <Timer size={15} style={{ color: 'var(--info)', flexShrink: 0, marginTop: 1 }} />
             <p className="text-xs" style={{ color: '#1E40AF', lineHeight: 1.6 }}>
               <strong>Tienes 24 horas para completar el pago.</strong>{' '}
               Si no pagas en ese tiempo, la fecha se liberará automáticamente.
@@ -492,7 +492,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
           </div>
           <Link href={createdBookingId ? `/pago/${createdBookingId}` : '/dashboard/reservas'}
             className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-3 rounded-xl"
-            style={{ background: '#2563EB', color: '#fff' }}>
+            style={{ background: 'var(--info)', color: '#fff' }}>
             Completar pago ahora <ChevronRight size={15} />
           </Link>
           <div className="mt-3">
@@ -772,7 +772,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             {/* Fecha bloqueada manualmente por el propietario */}
             {dateBlocked && eventDate && (
               <div className="px-4 py-3 rounded-xl text-sm"
-                style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)', color: '#DC2626' }}>
+                style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)', color: 'var(--danger)' }}>
                 El propietario ha bloqueado esta fecha. Elige otro día o contáctalo directamente.
               </div>
             )}
@@ -780,7 +780,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             {/* Sin horario configurado para este día de la semana */}
             {!dateBlocked && allowedTimeRange === null && eventDate && (
               <div className="px-4 py-3 rounded-xl text-sm"
-                style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)', color: '#DC2626' }}>
+                style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)', color: 'var(--danger)' }}>
                 El propietario no tiene este día habilitado. Elige otra fecha o consulta con él.
               </div>
             )}
@@ -792,7 +792,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
                 {/* Error: bloque demasiado corto */}
                 {blockTooShort && (
                   <div className="px-4 py-3 rounded-xl text-sm"
-                    style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)', color: '#DC2626' }}>
+                    style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)', color: 'var(--danger)' }}>
                     El horario disponible este día no es suficiente para completar la sesión de {fixedDuration}h.
                     Elige otra fecha o consulta al propietario.
                   </div>
@@ -894,8 +894,8 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
             {/* Error de horas */}
             {hoursError && (
               <div className="flex items-start gap-2 px-4 py-3 rounded-xl"
-                style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.2)', color: '#DC2626' }}>
-                <AlertCircle size={15} style={{ color: '#DC2626', flexShrink: 0, marginTop: 2 }} />
+                style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.2)', color: 'var(--danger)' }}>
+                <AlertCircle size={15} style={{ color: 'var(--danger)', flexShrink: 0, marginTop: 2 }} />
                 <span className="text-xs md:text-sm leading-snug">{hoursError}</span>
               </div>
             )}
@@ -1260,7 +1260,7 @@ export default function BookingWidget({ space, onChat, initialDate }: Props) {
 
             {error && (
               <div ref={errorRef} className="text-sm px-4 py-3 rounded-xl"
-                style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626' }}>
+                style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: 'var(--danger)' }}>
                 {error}
               </div>
             )}

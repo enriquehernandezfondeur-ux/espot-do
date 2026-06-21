@@ -340,7 +340,7 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, hostA
                 </div>
                 <button onClick={removeAttachment}
                   className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
-                  style={{ background: 'rgba(220,38,38,0.1)', color: '#DC2626' }}>
+                  style={{ background: 'rgba(220,38,38,0.1)', color: 'var(--danger)' }}>
                   <X size={14} />
                 </button>
               </div>
@@ -397,7 +397,7 @@ export default function ChatDrawer({ spaceId, spaceName, hostId, hostName, hostA
             </div>
 
             {/* Tipos soportados / error */}
-            <p className="text-xs text-center mt-2" style={{ color: sendError ? '#DC2626' : 'var(--text-muted)' }}>
+            <p className="text-xs text-center mt-2" style={{ color: sendError ? 'var(--danger)' : 'var(--text-muted)' }}>
               {sendError || 'Fotos, PDF, Word · Máx 20MB'}
             </p>
           </div>

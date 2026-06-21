@@ -37,7 +37,7 @@ function BankInfo({ hostId }: { hostId?: string }) {
   if (!hostId)  return <span className="text-xs" style={{ color: '#94A3B8' }}>—</span>
   if (!loaded)  return <span className="text-xs" style={{ color: '#94A3B8' }}>Cargando...</span>
   if (!bank)    return (
-    <span className="flex items-center gap-1 text-xs" style={{ color: '#DC2626' }}>
+    <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--danger)' }}>
       <AlertCircle size={11} /> Sin cuenta registrada
     </span>
   )
@@ -142,7 +142,7 @@ export default function AdminLiquidacionesPage() {
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {toast && (
         <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
-          style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
+          style={{ background: toast.ok ? '#16A34A' : 'var(--danger)', color: '#fff' }}>
           {toast.ok ? <Check size={15} /> : <X size={15} />} {toast.msg}
         </div>
       )}

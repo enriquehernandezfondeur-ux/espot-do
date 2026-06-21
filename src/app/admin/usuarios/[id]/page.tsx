@@ -177,9 +177,9 @@ export default function AdminHostDetailPage() {
       {/* ── KPIs ──────────────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <KpiCard label="Ingresos totales"    value={fmtCurrency(totalRevenue)}  sub={`${fmtCurrency(espotRevenue)} Espot + ${fmtCurrency(directRevenue)} Directo`} color="var(--brand)" icon={TrendingUp} />
-        <KpiCard label="Neto host (Espot)"   value={fmtCurrency(hostNet)}       sub={`Comisión Espot: ${fmtCurrency(espotFees)}`} color="#2563EB" icon={Banknote} />
+        <KpiCard label="Neto host (Espot)"   value={fmtCurrency(hostNet)}       sub={`Comisión Espot: ${fmtCurrency(espotFees)}`} color="var(--info)" icon={Banknote} />
         <KpiCard label="Por liquidar"        value={fmtCurrency(pendingPayout)} sub="Reservas Espot pendientes" color="#D97706" icon={Clock} />
-        <KpiCard label="Total eventos"       value={totalEvents}                sub={`${spaces.length} espacios · ${activeSpaces} activos`} color="#7C3AED" icon={Users} />
+        <KpiCard label="Total eventos"       value={totalEvents}                sub={`${spaces.length} espacios · ${activeSpaces} activos`} color="var(--accent-purple)" icon={Users} />
       </div>
 
       {/* ── Plan Espot Pro ────────────────────────────────── */}

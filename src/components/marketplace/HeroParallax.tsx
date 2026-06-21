@@ -88,7 +88,7 @@ export default function HeroParallax() {
           El espacio perfecto
           <br />
           <span style={{
-            background: 'linear-gradient(95deg, #35C493 0%, #6EE7C7 50%, #35C493 100%)',
+            background: 'linear-gradient(95deg, var(--brand) 0%, #6EE7C7 50%, var(--brand) 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundSize: '200% auto',

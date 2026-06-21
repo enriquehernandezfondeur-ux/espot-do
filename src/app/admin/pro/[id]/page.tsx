@@ -70,7 +70,7 @@ export default function AdminProDetailPage({ params }: { params: Promise<{ id: s
     <button onClick={onClick} disabled={working}
       className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-50 transition-all"
       style={tone === 'pro' ? { background: 'var(--pro)', color: '#fff' }
-        : tone === 'danger' ? { background: '#fff', border: '1px solid #FCA5A5', color: '#DC2626' }
+        : tone === 'danger' ? { background: '#fff', border: '1px solid #FCA5A5', color: 'var(--danger)' }
         : { background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
       <Icon size={13} /> {children}
     </button>

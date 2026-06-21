@@ -73,7 +73,7 @@ export default function EventosPage() {
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {toast && (
         <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
-          style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
+          style={{ background: toast.ok ? '#16A34A' : 'var(--danger)', color: '#fff' }}>
           {toast.ok ? <Check size={14} /> : <X size={14} />} {toast.msg}
         </div>
       )}
@@ -400,7 +400,7 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
                   <div className="min-w-0">
                     <span className="font-semibold text-gray-700">{formatCurrency(p.amount)}</span>
                     <span className="text-gray-400 ml-2">{formatDate(p.payment_date)} · {p.payment_method}</span>
-                    {p.is_deposit && <span className="ml-1 text-[#7C3AED]">· Depósito</span>}
+                    {p.is_deposit && <span className="ml-1 text-[var(--accent-purple)]">· Depósito</span>}
                     {(p as any).receipt_url && (
                       <a href={(p as any).receipt_url} target="_blank" rel="noopener noreferrer"
                         className="ml-2 inline-flex items-center gap-0.5 text-[10px] font-semibold"

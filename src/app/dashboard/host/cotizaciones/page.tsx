@@ -342,13 +342,13 @@ export default function CotizacionesPage() {
                     </button>
                     <button onClick={() => handleReject(selected.id)} disabled={actionId === selected.id + 'r'}
                       className="px-4 py-3 rounded-xl text-sm font-semibold"
-                      style={{ background: 'rgba(220,38,38,0.07)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.18)' }}>
+                      style={{ background: 'rgba(220,38,38,0.07)', color: 'var(--danger)', border: '1px solid rgba(220,38,38,0.18)' }}>
                       {actionId === selected.id + 'r' ? <Loader2 size={14} className="animate-spin" /> : <X size={15} />}
                     </button>
                   </div>
 
                   {(sendError || rejectError) && (
-                    <p className="text-xs text-center font-semibold" style={{ color: '#DC2626' }}>{sendError || rejectError}</p>
+                    <p className="text-xs text-center font-semibold" style={{ color: 'var(--danger)' }}>{sendError || rejectError}</p>
                   )}
                   <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
                     Al enviar, el cliente recibe el precio y plan de cuotas por email.
@@ -444,7 +444,7 @@ export default function CotizacionesPage() {
                       </button>
                     </div>
                   )}
-                  {chatError && <p className="text-xs mb-2 font-medium" style={{ color: '#DC2626' }}>{chatError}</p>}
+                  {chatError && <p className="text-xs mb-2 font-medium" style={{ color: 'var(--danger)' }}>{chatError}</p>}
 
                   <input ref={fileRef} type="file" accept={ACCEPTED_TYPES.join(',')} className="hidden" onChange={handleFileChange} />
 

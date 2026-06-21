@@ -221,7 +221,7 @@ export default function AppSidebar({
                 )}
                 {badge != null && badge > 0 && (
                   <span className="flex items-center justify-center text-xs font-bold rounded-full shrink-0"
-                    style={{ minWidth: 18, height: 18, padding: '0 4px', background: '#EF4444', color: '#fff', fontSize: 10 }}>
+                    style={{ minWidth: 18, height: 18, padding: '0 4px', background: 'var(--danger)', color: '#fff', fontSize: 10 }}>
                     {badge > 99 ? '99+' : badge}
                   </span>
                 )}
@@ -325,7 +325,7 @@ export default function AppSidebar({
               <Bell size={18} />
               {activeNotifs.length > 0 && (
                 <span className="absolute top-2 right-2 w-2 h-2 rounded-full"
-                  style={{ background: '#EF4444' }} />
+                  style={{ background: 'var(--danger)' }} />
               )}
             </button>
 
@@ -365,7 +365,7 @@ export default function AppSidebar({
                           {n.label}
                         </span>
                         <span className="flex items-center justify-center text-xs font-bold rounded-full px-2 py-0.5"
-                          style={{ background: '#EF4444', color: '#fff', minWidth: 22 }}>
+                          style={{ background: 'var(--danger)', color: '#fff', minWidth: 22 }}>
                           {n.count}
                         </span>
                       </Link>
@@ -432,7 +432,7 @@ export default function AppSidebar({
                   <Icon size={18} />
                   {badge != null && badge > 0 && (
                     <span className="absolute -top-1 -right-1 flex items-center justify-center rounded-full text-[9px] font-bold text-white"
-                      style={{ minWidth: 14, height: 14, padding: '0 3px', background: '#EF4444' }}>
+                      style={{ minWidth: 14, height: 14, padding: '0 3px', background: 'var(--danger)' }}>
                       {badge > 9 ? '9+' : badge}
                     </span>
                   )}

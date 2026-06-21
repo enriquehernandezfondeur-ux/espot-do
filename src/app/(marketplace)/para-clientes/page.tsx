@@ -44,7 +44,7 @@ const paymentModels = [
     label: 'Menos de 7 días',
     model: 'Pago único',
     desc: 'El evento es próximo, se requiere el total al confirmar.',
-    bars: [{ pct: 100, label: 'Al confirmar', color: '#35C493' }],
+    bars: [{ pct: 100, label: 'Al confirmar', color: 'var(--brand)' }],
   },
   {
     icon: Clock,
@@ -52,7 +52,7 @@ const paymentModels = [
     model: '2 cuotas — 50/50',
     desc: 'La mitad al confirmar, la otra mitad 48 horas antes.',
     bars: [
-      { pct: 50, label: 'Al confirmar', color: '#35C493' },
+      { pct: 50, label: 'Al confirmar', color: 'var(--brand)' },
       { pct: 50, label: '48h antes',    color: '#4DD9A7' },
     ],
   },
@@ -62,7 +62,7 @@ const paymentModels = [
     model: '2 cuotas — 30/70',
     desc: 'El 30% asegura la fecha. El 70% se paga 48h antes.',
     bars: [
-      { pct: 30, label: 'Al confirmar', color: '#35C493' },
+      { pct: 30, label: 'Al confirmar', color: 'var(--brand)' },
       { pct: 70, label: '48h antes',    color: '#4DD9A7' },
     ],
   },
@@ -72,7 +72,7 @@ const paymentModels = [
     model: '3 cuotas — 25/50/25',
     desc: 'El plan más flexible. Tres momentos clave de pago.',
     bars: [
-      { pct: 25, label: 'Al confirmar',  color: '#35C493' },
+      { pct: 25, label: 'Al confirmar',  color: 'var(--brand)' },
       { pct: 50, label: '60 días antes', color: '#4DD9A7' },
       { pct: 25, label: '48h antes',     color: '#28A87C' },
     ],
@@ -132,7 +132,7 @@ export default function ParaClientesPage() {
               <div className="flex flex-wrap gap-3">
                 <Link href="/buscar"
                   className="inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl font-bold text-sm"
-                  style={{ background: 'var(--brand)', color: '#03313C', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
+                  style={{ background: 'var(--brand)', color: 'var(--brand-navy)', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
                   Explorar espacios <ArrowRight size={15} />
                 </Link>
                 <Link href="/auth?mode=register"
@@ -224,7 +224,7 @@ export default function ParaClientesPage() {
       </section>
 
       {/* ── GUÍA DE PAGOS — SECCIÓN TECH ──────────────────────── */}
-      <section style={{ background: '#03313C', position: 'relative', overflow: 'hidden' }}>
+      <section style={{ background: 'var(--brand-navy)', position: 'relative', overflow: 'hidden' }}>
         <div style={{
           position: 'absolute', inset: 0, opacity: 0.04,
           backgroundImage: 'linear-gradient(rgba(53,196,147,1) 1px, transparent 1px), linear-gradient(90deg, rgba(53,196,147,1) 1px, transparent 1px)',
@@ -239,7 +239,7 @@ export default function ParaClientesPage() {
         <div className="relative max-w-5xl mx-auto px-5 py-12 md:py-20">
           <div className="mb-14">
             <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 mb-5 text-xs font-semibold"
-              style={{ background: 'rgba(53,196,147,0.1)', color: '#35C493', border: '1px solid rgba(53,196,147,0.2)' }}>
+              style={{ background: 'rgba(53,196,147,0.1)', color: 'var(--brand)', border: '1px solid rgba(53,196,147,0.2)' }}>
               Guía de pagos
             </div>
             <h2 className="font-bold text-white mb-3"
@@ -257,11 +257,11 @@ export default function ParaClientesPage() {
                 style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                    style={{ background: 'rgba(53,196,147,0.12)', color: '#35C493' }}>
+                    style={{ background: 'rgba(53,196,147,0.12)', color: 'var(--brand)' }}>
                     <Icon size={17} />
                   </div>
                   <div>
-                    <p className="text-xs font-bold" style={{ color: '#35C493' }}>{label}</p>
+                    <p className="text-xs font-bold" style={{ color: 'var(--brand)' }}>{label}</p>
                     <p className="text-sm font-bold text-white">{model}</p>
                   </div>
                 </div>
@@ -285,7 +285,7 @@ export default function ParaClientesPage() {
 
           <div className="mt-8 rounded-2xl px-6 py-4 flex items-start gap-3"
             style={{ background: 'rgba(53,196,147,0.07)', border: '1px solid rgba(53,196,147,0.18)' }}>
-            <Check size={15} style={{ color: '#35C493', flexShrink: 0, marginTop: 2 }} />
+            <Check size={15} style={{ color: 'var(--brand)', flexShrink: 0, marginTop: 2 }} />
             <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.55)' }}>
               Todos los pagos del plan se procesan a través de <strong style={{ color: 'rgba(255,255,255,0.75)' }}>espot.do</strong> vía <strong style={{ color: 'rgba(255,255,255,0.75)' }}>Azul</strong>. Recibirás un recordatorio por correo antes de cada vencimiento.
             </p>
@@ -340,7 +340,7 @@ export default function ParaClientesPage() {
       <section style={{ background: 'var(--bg-base)', borderTop: '1px solid var(--border-subtle)' }}>
         <div className="max-w-6xl mx-auto px-5 py-10 md:py-16">
           <div className="rounded-3xl overflow-hidden relative"
-            style={{ background: '#03313C' }}>
+            style={{ background: 'var(--brand-navy)' }}>
             <div style={{
               position: 'absolute', top: 0, right: 0, width: 400, height: 400,
               background: 'radial-gradient(circle, rgba(53,196,147,0.12) 0%, transparent 70%)',
@@ -359,12 +359,12 @@ export default function ParaClientesPage() {
               <div className="flex flex-col gap-3 shrink-0">
                 <Link href="/buscar"
                   className="inline-flex items-center justify-center gap-2 font-bold px-8 py-4 rounded-2xl text-sm whitespace-nowrap"
-                  style={{ background: '#35C493', color: '#03313C', boxShadow: '0 4px 24px rgba(53,196,147,0.3)' }}>
+                  style={{ background: 'var(--brand)', color: 'var(--brand-navy)', boxShadow: '0 4px 24px rgba(53,196,147,0.3)' }}>
                   Ver todos los espacios <ArrowRight size={15} />
                 </Link>
                 <p className="text-xs text-center" style={{ color: 'rgba(255,255,255,0.3)' }}>
                   ¿Quieres publicar?{' '}
-                  <Link href="/para-propietarios" style={{ color: '#35C493' }}>Ver guía para anfitriones</Link>
+                  <Link href="/para-propietarios" style={{ color: 'var(--brand)' }}>Ver guía para anfitriones</Link>
                 </p>
               </div>
             </div>

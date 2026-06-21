@@ -280,7 +280,7 @@ export default function AgendaPage() {
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {toast && (
         <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
-          style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
+          style={{ background: toast.ok ? '#16A34A' : 'var(--danger)', color: '#fff' }}>
           {toast.ok ? <Check size={14} /> : <X size={14} />} {toast.msg}
         </div>
       )}
@@ -334,7 +334,7 @@ export default function AgendaPage() {
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
                     style={isEspot
                       ? { background: 'rgba(53,196,147,0.15)', color: '#16A34A' }
-                      : { background: 'rgba(37,99,235,0.1)', color: '#2563EB' }}>
+                      : { background: 'rgba(37,99,235,0.1)', color: 'var(--info)' }}>
                     {isEspot ? 'Espot' : 'Directo'}
                   </span>
                 </div>
@@ -459,7 +459,7 @@ export default function AgendaPage() {
             {(dateFrom || dateTo) && (
               <button onClick={() => { setDateFrom(''); setDateTo('') }}
                 className="col-span-2 text-xs px-3 py-2 rounded-xl"
-                style={{ color: '#DC2626', background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)' }}>
+                style={{ color: 'var(--danger)', background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)' }}>
                 Limpiar rango
               </button>
             )}
@@ -524,13 +524,13 @@ export default function AgendaPage() {
                         'w-full flex flex-col md:grid gap-2 md:gap-3 md:items-center px-5 py-4 md:min-w-[520px] text-left transition-colors hover:bg-slate-50',
                         isSelected && 'bg-slate-50'
                       )}
-                      style={{ gridTemplateColumns: '2fr 1fr 1fr auto', borderLeft: `3px solid ${isEspot ? 'var(--brand)' : '#2563EB'}` }}>
+                      style={{ gridTemplateColumns: '2fr 1fr 1fr auto', borderLeft: `3px solid ${isEspot ? 'var(--brand)' : 'var(--info)'}` }}>
                       <div className="min-w-0">
                         <div className="mb-0.5">
                           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
                             style={isEspot
                               ? { background: 'rgba(53,196,147,0.12)', color: '#16A34A' }
-                              : { background: 'rgba(37,99,235,0.08)', color: '#2563EB' }}>
+                              : { background: 'rgba(37,99,235,0.08)', color: 'var(--info)' }}>
                             {isEspot ? 'Espot' : 'Directo'}
                           </span>
                         </div>
@@ -658,7 +658,7 @@ function EspotPanel({ booking, actionId, rejectReason, showRejectForm, onClose, 
 
       {showRejectForm && (
         <div className="px-5 py-4" style={{ borderBottom: '1px solid var(--border-subtle)', background: 'rgba(220,38,38,0.02)' }}>
-          <p className="text-xs font-semibold mb-2" style={{ color: '#DC2626' }}>Motivo de rechazo (opcional)</p>
+          <p className="text-xs font-semibold mb-2" style={{ color: 'var(--danger)' }}>Motivo de rechazo (opcional)</p>
           <textarea value={rejectReason} onChange={e => setRejectReason(e.target.value)}
             placeholder="Ej: Sin disponibilidad para esa fecha" rows={2}
             className="w-full text-xs px-3 py-2 rounded-xl resize-none focus:outline-none"
@@ -666,7 +666,7 @@ function EspotPanel({ booking, actionId, rejectReason, showRejectForm, onClose, 
           <div className="flex gap-2 mt-2">
             <button onClick={onReject} disabled={!!actionId}
               className="flex-1 text-xs font-semibold py-2 rounded-xl disabled:opacity-50"
-              style={{ background: '#DC2626', color: '#fff' }}>
+              style={{ background: 'var(--danger)', color: '#fff' }}>
               {actionId ? 'Enviando...' : 'Confirmar rechazo'}
             </button>
             <button onClick={() => { setShowRejectForm(false); setRejectReason('') }}
@@ -746,7 +746,7 @@ function EspotPanel({ booking, actionId, rejectReason, showRejectForm, onClose, 
                   <div className="text-right">
                     <div className="font-bold text-xs" style={{ color: 'var(--text-primary)' }}>{formatCurrency(Number(inst.amount))}</div>
                     <div className="text-[11px] font-semibold"
-                      style={{ color: inst.status === 'paid' ? 'var(--brand)' : inst.status === 'overdue' ? '#DC2626' : '#6B7280' }}>
+                      style={{ color: inst.status === 'paid' ? 'var(--brand)' : inst.status === 'overdue' ? 'var(--danger)' : '#6B7280' }}>
                       {inst.status === 'paid' ? 'Recibido' : inst.status === 'overdue' ? 'Vencido' : 'Pendiente'}
                     </div>
                   </div>
@@ -765,7 +765,7 @@ function EspotPanel({ booking, actionId, rejectReason, showRejectForm, onClose, 
             </button>
             <button onClick={() => setShowRejectForm(true)}
               className="flex-1 flex items-center justify-center gap-1 text-xs font-semibold py-2.5 rounded-xl"
-              style={{ background: 'rgba(220,38,38,0.1)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.2)' }}>
+              style={{ background: 'rgba(220,38,38,0.1)', color: 'var(--danger)', border: '1px solid rgba(220,38,38,0.2)' }}>
               <X size={13} /> Rechazar
             </button>
           </div>
@@ -891,7 +891,7 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
         <div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-bold px-2 py-0.5 rounded"
-              style={{ background: 'rgba(37,99,235,0.08)', color: '#2563EB' }}>Directo</span>
+              style={{ background: 'rgba(37,99,235,0.08)', color: 'var(--info)' }}>Directo</span>
             <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Detalle del evento</span>
           </div>
           <div className="text-xs text-gray-400 mt-0.5">ID: {event.id.slice(0, 8).toUpperCase()}</div>

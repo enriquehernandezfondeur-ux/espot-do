@@ -154,7 +154,7 @@ const MAP_STYLES: google.maps.MapTypeStyle[] = [
 ]
 
 function buildSvgIcon(g: typeof google, active: boolean): google.maps.Icon {
-  const color = active ? '#0F1623' : '#35C493'
+  const color = active ? '#0F1623' : 'var(--brand)'
   const svg = `<svg width="28" height="36" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 0C6.3 0 0 6.3 0 14c0 5.2 2.8 9.7 7 12.2L14 36l7-9.8C25.2 23.7 28 19.2 28 14 28 6.3 21.7 0 14 0z" fill="${color}"/><circle cx="14" cy="13" r="6" fill="white"/></svg>`
   return {
     url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,

@@ -9,7 +9,7 @@ export default function NotFound() {
       <div style={{ textAlign: 'center', maxWidth: 420 }}>
         <div style={{
           fontSize: 96, fontWeight: 800, letterSpacing: '-0.05em', lineHeight: 1,
-          background: 'linear-gradient(135deg, #35C493, #5CE8BC)',
+          background: 'linear-gradient(135deg, var(--brand), #5CE8BC)',
           WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
           marginBottom: 16,
         }}>
@@ -26,7 +26,7 @@ export default function NotFound() {
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '12px 24px', borderRadius: 14, fontWeight: 700,
-              fontSize: 14, background: '#35C493', color: '#060D09', textDecoration: 'none',
+              fontSize: 14, background: 'var(--brand)', color: '#060D09', textDecoration: 'none',
               boxShadow: '0 4px 20px rgba(53,196,147,0.3)',
             }}>
             🔍 Buscar espacios

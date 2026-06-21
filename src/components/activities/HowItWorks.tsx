@@ -33,7 +33,7 @@ function StepRow({ icon: Icon, n, title, desc }: typeof STEPS[number]) {
 export function HowItWorksHero() {
   return (
     <div className="rounded-3xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-      <div className="px-6 pt-7 pb-6 text-center" style={{ background: 'linear-gradient(135deg,#03313C,#0D4A3A)' }}>
+      <div className="px-6 pt-7 pb-6 text-center" style={{ background: 'linear-gradient(135deg,var(--brand-navy),#0D4A3A)' }}>
         <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full mb-3"
           style={{ background: 'rgba(53,196,147,0.18)', color: 'var(--brand)' }}>
           <Sparkles size={12} /> GRATIS

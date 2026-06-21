@@ -66,7 +66,7 @@ export default function ResenasPage() {
     <div className="p-4 md:p-6 max-w-3xl mx-auto">
       {toast && (
         <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
-          style={{ background: toast.ok ? 'var(--brand)' : '#DC2626', color: '#fff' }}>
+          style={{ background: toast.ok ? 'var(--brand)' : 'var(--danger)', color: '#fff' }}>
           {toast.ok ? <Check size={15} /> : <X size={15} />} {toast.msg}
         </div>
       )}

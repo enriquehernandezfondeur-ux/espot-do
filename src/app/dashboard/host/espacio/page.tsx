@@ -652,8 +652,8 @@ export default function EspacioPage() {
         {saveError && (
           <div className="mb-5 rounded-2xl px-5 py-4 flex items-center gap-3"
             style={{ background: 'rgba(220,38,38,0.06)', border: '1.5px solid rgba(220,38,38,0.2)' }}>
-            <span className="text-sm font-semibold flex-1" style={{ color: '#DC2626' }}>{saveError}</span>
-            <button onClick={() => setSaveError('')} className="shrink-0" style={{ color: '#DC2626' }}>
+            <span className="text-sm font-semibold flex-1" style={{ color: 'var(--danger)' }}>{saveError}</span>
+            <button onClick={() => setSaveError('')} className="shrink-0" style={{ color: 'var(--danger)' }}>
               <X size={16} />
             </button>
           </div>
@@ -784,7 +784,7 @@ export default function EspacioPage() {
                                   <button onClick={() => openCancelModal(space)} className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm transition-colors hover:bg-[var(--bg-elevated)]" style={{ color: 'var(--text-secondary)' }}><Shield size={13} /> Política de cancelación</button>
                                   {!space.is_published && !space.is_active && <button onClick={() => handlePublishSpace(space)} disabled={publishingId === space.id} className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm transition-colors hover:bg-[var(--bg-elevated)]" style={{ color: 'var(--brand)' }}><Eye size={13} /> Enviar a revisión</button>}
                                   {space.is_published && <button onClick={() => handleUnpublish(space)} className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm transition-colors hover:bg-[var(--bg-elevated)]" style={{ color: '#D97706' }}><EyeOff size={13} /> Despublicar</button>}
-                                  {!space.is_published && !space.is_active && <button onClick={() => handleDelete(space)} className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm transition-colors hover:bg-red-50" style={{ color: '#DC2626' }}><Trash2 size={13} /> Eliminar</button>}
+                                  {!space.is_published && !space.is_active && <button onClick={() => handleDelete(space)} className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm transition-colors hover:bg-red-50" style={{ color: 'var(--danger)' }}><Trash2 size={13} /> Eliminar</button>}
                                 </div>
                               </>
                             )}
@@ -828,7 +828,7 @@ export default function EspacioPage() {
                               <button onClick={() => openCancelModal(space)} className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm transition-colors hover:bg-[var(--bg-elevated)]" style={{ color: 'var(--text-secondary)' }}><Shield size={13} /> Política de cancelación</button>
                               {!space.is_published && !space.is_active && <button onClick={() => handlePublishSpace(space)} className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm transition-colors hover:bg-[var(--bg-elevated)]" style={{ color: 'var(--brand)' }}><Eye size={13} /> Enviar a revisión</button>}
                               {space.is_published && <button onClick={() => handleUnpublish(space)} className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm transition-colors hover:bg-[var(--bg-elevated)]" style={{ color: '#D97706' }}><EyeOff size={13} /> Despublicar</button>}
-                              {!space.is_published && !space.is_active && <button onClick={() => handleDelete(space)} className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm transition-colors hover:bg-red-50" style={{ color: '#DC2626' }}><Trash2 size={13} /> Eliminar</button>}
+                              {!space.is_published && !space.is_active && <button onClick={() => handleDelete(space)} className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm transition-colors hover:bg-red-50" style={{ color: 'var(--danger)' }}><Trash2 size={13} /> Eliminar</button>}
                             </div>
                           </>
                         )}
@@ -1136,7 +1136,7 @@ export default function EspacioPage() {
                 initialPhotos={existingPhotos}
                 onChange={photos => { setPendingPhotos(photos); setPhotosTouched(true) }}
               />
-              <p className="text-xs mt-1.5" style={{ color: pendingPhotos.length === 0 ? '#EF4444' : 'var(--text-muted)' }}>
+              <p className="text-xs mt-1.5" style={{ color: pendingPhotos.length === 0 ? 'var(--danger)' : 'var(--text-muted)' }}>
                 * Obligatorio: al menos una foto para publicar
               </p>
             </div>
@@ -1334,7 +1334,7 @@ export default function EspacioPage() {
                       placeholder="Ej: Música, bartender, decoración básica..."
                       className="flex-1 input-base rounded-xl px-4 py-2.5 text-sm" />
                     <button onClick={() => { if (newInclude.trim()) { setPackageIncludes([...packageIncludes, newInclude.trim()]); setNewInclude('') }}}
-                      className="bg-[#35C493] hover:bg-[#4DD9A7] text-white px-4 py-2.5 rounded-xl transition-colors text-sm">
+                      className="bg-[var(--brand)] hover:bg-[#4DD9A7] text-white px-4 py-2.5 rounded-xl transition-colors text-sm">
                       Agregar
                     </button>
                   </div>
@@ -1457,7 +1457,7 @@ export default function EspacioPage() {
                 </p>
                 {addons.length > 0 && (
                   <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
-                    style={{ background: 'rgba(53,196,147,0.1)', color: '#35C493' }}>
+                    style={{ background: 'rgba(53,196,147,0.1)', color: 'var(--brand)' }}>
                     {addons.length} seleccionado{addons.length !== 1 ? 's' : ''}
                   </span>
                 )}
@@ -1489,7 +1489,7 @@ export default function EspacioPage() {
                         </div>
                       </div>
                       <div className="shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all"
-                        style={selected ? { background: '#35C493', borderColor: '#35C493' } : { borderColor: 'var(--border-medium)' }}>
+                        style={selected ? { background: 'var(--brand)', borderColor: 'var(--brand)' } : { borderColor: 'var(--border-medium)' }}>
                         {selected && <CheckCircle size={10} className="text-white" />}
                       </div>
                     </button>
@@ -1640,7 +1640,7 @@ export default function EspacioPage() {
                     <button
                       onClick={() => item.setter(!item.value)}
                       className="w-11 h-6 rounded-full relative transition-all shrink-0 ml-3"
-                      style={{ background: item.value ? '#35C493' : 'var(--border-medium)' }}>
+                      style={{ background: item.value ? 'var(--brand)' : 'var(--border-medium)' }}>
                       <span className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
                         style={{ left: item.value ? 22 : 2 }} />
                     </button>
@@ -1662,7 +1662,7 @@ export default function EspacioPage() {
                     </div>
                     <button onClick={() => setAllowsExtraHours(!allowsExtraHours)}
                       className="w-11 h-6 rounded-full relative transition-all shrink-0"
-                      style={{ background: allowsExtraHours ? '#35C493' : 'var(--border-medium)' }}>
+                      style={{ background: allowsExtraHours ? 'var(--brand)' : 'var(--border-medium)' }}>
                       <span className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
                         style={{ left: allowsExtraHours ? 22 : 2 }} />
                     </button>
@@ -1741,8 +1741,8 @@ export default function EspacioPage() {
                     onClick={() => setPaymentTerm(option.value)}
                     className="w-full text-left rounded-2xl transition-all"
                     style={isSel ? {
-                      background: '#03313C',
-                      border: '2px solid #03313C',
+                      background: 'var(--brand-navy)',
+                      border: '2px solid var(--brand-navy)',
                       boxShadow: '0 4px 16px rgba(3,49,60,0.15)',
                     } : {
                       background: '#ffffff',
@@ -1752,19 +1752,19 @@ export default function EspacioPage() {
                       <div className="flex items-start justify-between gap-3 mb-1.5">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-bold text-sm"
-                            style={{ color: isSel ? '#ffffff' : '#03313C' }}>
+                            style={{ color: isSel ? '#ffffff' : 'var(--brand-navy)' }}>
                             {option.label}
                           </span>
                           {isRec && (
                             <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
-                              style={{ background: 'rgba(53,196,147,0.15)', color: '#35C493' }}>
+                              style={{ background: 'rgba(53,196,147,0.15)', color: 'var(--brand)' }}>
                               Recomendado
                             </span>
                           )}
                         </div>
                         {isSel && (
                           <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
-                            style={{ background: '#35C493' }}>
+                            style={{ background: 'var(--brand)' }}>
                             <CheckCircle size={13} color="#fff" />
                           </div>
                         )}
@@ -1788,7 +1788,7 @@ export default function EspacioPage() {
               style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.18)' }}>
               <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
                 style={{ background: 'rgba(53,196,147,0.12)' }}>
-                <CreditCard size={14} style={{ color: '#35C493' }} />
+                <CreditCard size={14} style={{ color: 'var(--brand)' }} />
               </div>
               <div>
                 <p className="text-xs font-semibold mb-0.5" style={{ color: '#0A7A50' }}>
@@ -1921,7 +1921,7 @@ export default function EspacioPage() {
         {/* Navigation buttons */}
         <div className="mt-8 pt-6 border-t space-y-3" style={{ borderColor: 'var(--border-subtle)' }}>
           {stepError && (
-            <p className="text-xs font-medium text-center" style={{ color: '#DC2626' }}>{stepError}</p>
+            <p className="text-xs font-medium text-center" style={{ color: 'var(--danger)' }}>{stepError}</p>
           )}
           <div className="flex items-center justify-between gap-3">
             <button

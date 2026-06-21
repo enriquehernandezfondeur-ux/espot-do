@@ -194,7 +194,7 @@ export default function ContactoPage() {
             {error && (
               <div className="flex items-start gap-3 rounded-xl p-4 mb-4"
                 style={{ background: 'rgba(220,38,38,0.06)', border: '1.5px solid rgba(220,38,38,0.2)' }}>
-                <AlertCircle size={18} style={{ color: '#DC2626', flexShrink: 0, marginTop: '1px' }} />
+                <AlertCircle size={18} style={{ color: 'var(--danger)', flexShrink: 0, marginTop: '1px' }} />
                 <p className="text-sm" style={{ color: '#B91C1C' }}>{error}</p>
               </div>
             )}
@@ -203,7 +203,7 @@ export default function ContactoPage() {
               {/* Nombre */}
               <div>
                 <label style={labelStyle}>
-                  Nombre completo <span style={{ color: '#DC2626' }}>*</span>
+                  Nombre completo <span style={{ color: 'var(--danger)' }}>*</span>
                 </label>
                 <input
                   type="text"
@@ -220,7 +220,7 @@ export default function ContactoPage() {
               {/* Email */}
               <div>
                 <label style={labelStyle}>
-                  Correo electrónico <span style={{ color: '#DC2626' }}>*</span>
+                  Correo electrónico <span style={{ color: 'var(--danger)' }}>*</span>
                 </label>
                 <input
                   type="email"
@@ -251,7 +251,7 @@ export default function ContactoPage() {
               {/* Motivo */}
               <div>
                 <label style={labelStyle}>
-                  Motivo <span style={{ color: '#DC2626' }}>*</span>
+                  Motivo <span style={{ color: 'var(--danger)' }}>*</span>
                 </label>
                 <select
                   value={subject}
@@ -280,10 +280,10 @@ export default function ContactoPage() {
               {/* Mensaje */}
               <div>
                 <label style={{ ...labelStyle, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span>Mensaje <span style={{ color: '#DC2626' }}>*</span></span>
+                  <span>Mensaje <span style={{ color: 'var(--danger)' }}>*</span></span>
                   <span style={{
                     fontWeight: 400,
-                    color: message.length > MAX_CHARS * 0.9 ? '#DC2626' : 'var(--text-muted)',
+                    color: message.length > MAX_CHARS * 0.9 ? 'var(--danger)' : 'var(--text-muted)',
                     fontSize: '12px',
                   }}>
                     {message.length}/{MAX_CHARS}

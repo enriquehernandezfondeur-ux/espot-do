@@ -9,9 +9,9 @@
 export interface StatusStyle { label: string; color: string; bg: string }
 
 const ORANGE = { color: '#D97706', bg: 'rgba(217,119,6,0.08)' }
-const BLUE   = { color: '#2563EB', bg: 'rgba(37,99,235,0.08)' }
+const BLUE   = { color: 'var(--info)', bg: 'rgba(37,99,235,0.08)' }
 const GREEN  = { color: '#16A34A', bg: 'rgba(22,163,74,0.08)' }
-const RED    = { color: '#DC2626', bg: 'rgba(220,38,38,0.08)' }
+const RED    = { color: 'var(--danger)', bg: 'rgba(220,38,38,0.08)' }
 const GRAY   = { color: '#6B7280', bg: 'rgba(107,114,128,0.08)' }
 
 // ── payment_status ───────────────────────────────────────────

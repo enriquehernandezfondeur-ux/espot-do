@@ -142,7 +142,7 @@ export function ActivityDetailClient({ detail }: { detail: ActivityDetail }) {
                   </button>
                   <button type="button" onClick={handleCancel} disabled={status === 'cancelada' || cancelling}
                     className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium text-left disabled:opacity-40"
-                    style={{ color: '#DC2626' }}>
+                    style={{ color: 'var(--danger)' }}>
                     {cancelling ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                     Cancelar actividad
                   </button>
@@ -362,7 +362,7 @@ function ParticipantRow({ p, onRemove }: { p: ActivityParticipant; onRemove: () 
   const STATUS: Record<string, { label: string; color: string }> = {
     confirmado: { label: 'Confirmado', color: '#16A34A' },
     invitado:   { label: 'Invitado',   color: '#6B7280' },
-    rechazado:  { label: 'No asiste',  color: '#DC2626' },
+    rechazado:  { label: 'No asiste',  color: 'var(--danger)' },
     registrado: { label: 'Registrado', color: '#0891B2' },
   }
   const s = STATUS[p.status] ?? STATUS.confirmado

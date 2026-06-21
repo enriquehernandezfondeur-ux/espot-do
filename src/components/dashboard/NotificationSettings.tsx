@@ -188,7 +188,7 @@ export default function NotificationSettings({ role }: { role: 'client' | 'host'
             className="text-xs font-semibold px-3 py-1.5 rounded-xl transition-all"
             style={{
               background:  allOn ? 'rgba(220,38,38,0.07)' : 'var(--brand-dim)',
-              color:       allOn ? '#DC2626' : 'var(--brand)',
+              color:       allOn ? 'var(--danger)' : 'var(--brand)',
               border:      `1px solid ${allOn ? 'rgba(220,38,38,0.18)' : 'var(--brand-border)'}`,
             }}>
             {allOn ? 'Desactivar todo' : 'Activar todo'}

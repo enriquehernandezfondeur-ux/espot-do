@@ -9,8 +9,8 @@ import { ProGate } from '@/components/ProGate'
 import type { TeamRole } from '@/types'
 
 const ROLE_CONFIG: Record<TeamRole, { label: string; desc: string; color: string; bg: string; icon: any }> = {
-  admin:       { label: 'Admin',       desc: 'Acceso completo excepto facturación', color: '#7C3AED', bg: 'rgba(124,58,237,0.08)', icon: Shield },
-  coordinador: { label: 'Coordinador', desc: 'Reservas, eventos y mensajes',        color: '#2563EB', bg: 'rgba(37,99,235,0.08)',  icon: Users },
+  admin:       { label: 'Admin',       desc: 'Acceso completo excepto facturación', color: 'var(--accent-purple)', bg: 'rgba(124,58,237,0.08)', icon: Shield },
+  coordinador: { label: 'Coordinador', desc: 'Reservas, eventos y mensajes',        color: 'var(--info)', bg: 'rgba(37,99,235,0.08)',  icon: Users },
   viewer:      { label: 'Visualizador',desc: 'Solo puede ver, no editar',           color: '#6B7280', bg: 'rgba(107,114,128,0.08)', icon: Eye },
 }
 
@@ -93,7 +93,7 @@ export default function EquipoPage() {
     <div className="p-4 md:p-6 max-w-2xl mx-auto">
       {toast && (
         <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
-          style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
+          style={{ background: toast.ok ? '#16A34A' : 'var(--danger)', color: '#fff' }}>
           {toast.ok ? <Check size={14} /> : <X size={14} />} {toast.msg}
         </div>
       )}

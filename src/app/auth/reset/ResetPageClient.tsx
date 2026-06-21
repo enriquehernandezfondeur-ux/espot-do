@@ -68,7 +68,7 @@ function ResetContent() {
             <div className="text-center py-4">
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
                 style={{ background: 'rgba(53,196,147,0.12)', border: '1px solid rgba(53,196,147,0.2)' }}>
-                <CheckCircle2 size={32} style={{ color: '#35C493' }} />
+                <CheckCircle2 size={32} style={{ color: 'var(--brand)' }} />
               </div>
               <h2 className="text-xl font-bold text-white mb-2">¡Contraseña actualizada!</h2>
               <p className="text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
@@ -130,7 +130,7 @@ function ResetContent() {
                 </div>
                 <button type="submit" disabled={loading}
                   className="w-full font-bold py-3.5 rounded-xl text-sm transition-all disabled:opacity-50"
-                  style={{ background: '#35C493', color: '#0B0F0E', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
+                  style={{ background: 'var(--brand)', color: '#0B0F0E', boxShadow: '0 4px 20px rgba(53,196,147,0.25)' }}>
                   {loading ? 'Actualizando...' : 'Actualizar contraseña'}
                 </button>
               </form>

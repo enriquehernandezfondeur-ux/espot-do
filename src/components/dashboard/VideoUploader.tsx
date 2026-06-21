@@ -101,7 +101,7 @@ export default function VideoUploader({ initialUrl, onChange, onRemove }: Props)
             type="button"
             onClick={handleRemove}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all"
-            style={{ background: 'rgba(220,38,38,0.07)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }}>
+            style={{ background: 'rgba(220,38,38,0.07)', color: 'var(--danger)', border: '1px solid rgba(220,38,38,0.15)' }}>
             <X size={13} /> Eliminar video
           </button>
         </div>
@@ -170,7 +170,7 @@ export default function VideoUploader({ initialUrl, onChange, onRemove }: Props)
 
       {uploadError && (
         <p className="text-xs px-3 py-2.5 rounded-xl"
-          style={{ background: 'rgba(220,38,38,0.06)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.12)' }}>
+          style={{ background: 'rgba(220,38,38,0.06)', color: 'var(--danger)', border: '1px solid rgba(220,38,38,0.12)' }}>
           {uploadError}
         </p>
       )}

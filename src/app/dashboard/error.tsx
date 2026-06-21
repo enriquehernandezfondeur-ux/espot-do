@@ -20,7 +20,7 @@ export default function DashboardError({ error, reset }: { error: Error & { dige
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
-            stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            stroke="var(--danger)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
             <line x1="12" y1="9" x2="12" y2="13"/>
             <line x1="12" y1="17" x2="12.01" y2="17"/>
@@ -38,7 +38,7 @@ export default function DashboardError({ error, reset }: { error: Error & { dige
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '12px 24px', borderRadius: 14, fontWeight: 700,
-              fontSize: 14, background: '#35C493', color: '#060D09',
+              fontSize: 14, background: 'var(--brand)', color: '#060D09',
               border: 'none', cursor: 'pointer',
             }}>
             Intentar de nuevo

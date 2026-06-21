@@ -177,7 +177,7 @@ export default function Sidebar({ userName, avatarUrl, isAdmin, isOwner = true, 
       roleLabel={isOwner ? 'Negocio' : teamRole === 'admin' ? 'Admin' : teamRole === 'coordinador' ? 'Coordinador' : 'Equipo'}
       userNameFallback="Propietario"
       avatarFallback={<Building2 size={14} />}
-      mobileAvatarBg="#03313C"
+      mobileAvatarBg="var(--brand-navy)"
       mobileAvatarChar="N"
       mobileLogoHref="/dashboard/host"
       crossPanelHref="/dashboard/overview"

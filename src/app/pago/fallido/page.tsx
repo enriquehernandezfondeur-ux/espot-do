@@ -43,7 +43,7 @@ function FallidoContent() {
   const { short, tip } = defaultTip(code)
 
   return (
-    <div className="min-h-dvh" style={{ background: 'linear-gradient(160deg, #03313C 0%, #03313C 55%)' }}>
+    <div className="min-h-dvh" style={{ background: 'linear-gradient(160deg, var(--brand-navy) 0%, var(--brand-navy) 55%)' }}>
 
       {/* Fondo decorativo rojo */}
       <div style={{
@@ -62,7 +62,7 @@ function FallidoContent() {
               background: 'radial-gradient(circle, rgba(220,38,38,0.18) 0%, rgba(220,38,38,0.05) 70%)',
               border: '2px solid rgba(220,38,38,0.25)',
             }}>
-            <XCircle size={44} style={{ color: '#EF4444' }} />
+            <XCircle size={44} style={{ color: 'var(--danger)' }} />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2" style={{ letterSpacing: '-0.03em' }}>
             Pago no procesado
@@ -84,7 +84,7 @@ function FallidoContent() {
 
           <div className="px-5 py-4"
             style={{ background: 'rgba(220,38,38,0.08)', borderBottom: '1px solid rgba(220,38,38,0.12)' }}>
-            <p className="text-xs font-semibold mb-0.5" style={{ color: '#EF4444' }}>
+            <p className="text-xs font-semibold mb-0.5" style={{ color: 'var(--danger)' }}>
               {code ? `CÓDIGO ${code} — ` : ''}{short.toUpperCase()}
             </p>
             <p className="text-sm text-white">{reason}</p>
@@ -114,7 +114,7 @@ function FallidoContent() {
           {bookingId && (
             <Link href={`/pago/${bookingId}`}
               className="flex items-center justify-center gap-2.5 w-full py-4 rounded-2xl font-bold text-base"
-              style={{ background: '#35C493', color: '#03313C', boxShadow: '0 4px 20px rgba(53,196,147,0.2)' }}>
+              style={{ background: 'var(--brand)', color: 'var(--brand-navy)', boxShadow: '0 4px 20px rgba(53,196,147,0.2)' }}>
               <CreditCard size={17} /> Intentar con otra tarjeta
             </Link>
           )}
@@ -140,8 +140,8 @@ function FallidoContent() {
 
 export default function FallidoPage() {
   return <Suspense fallback={
-    <div className="min-h-dvh flex items-center justify-center" style={{ background: '#03313C' }}>
-      <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#EF4444' }} />
+    <div className="min-h-dvh flex items-center justify-center" style={{ background: 'var(--brand-navy)' }}>
+      <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'var(--danger)' }} />
     </div>
   }><FallidoContent /></Suspense>
 }

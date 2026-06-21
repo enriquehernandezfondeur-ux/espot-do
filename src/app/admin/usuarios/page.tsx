@@ -10,9 +10,9 @@ import Pagination from '@/components/ui/Pagination'
 const PAGE_SIZE = 25
 
 const roleConfig: Record<string, { label: string; color: string; bg: string; icon: any }> = {
-  guest: { label: 'Cliente',      color: '#2563EB', bg: 'rgba(37,99,235,0.08)', icon: User },
+  guest: { label: 'Cliente',      color: 'var(--info)', bg: 'rgba(37,99,235,0.08)', icon: User },
   host:  { label: 'Propietario',  color: '#16A34A', bg: 'rgba(22,163,74,0.08)', icon: Building2 },
-  admin: { label: 'Admin',        color: '#DC2626', bg: 'rgba(220,38,38,0.08)', icon: Shield },
+  admin: { label: 'Admin',        color: 'var(--danger)', bg: 'rgba(220,38,38,0.08)', icon: Shield },
 }
 
 function fmtDate(d: string) {
@@ -118,7 +118,7 @@ export default function AdminUsersPage() {
       {dialog}
       {toast && (
         <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
-          style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
+          style={{ background: toast.ok ? '#16A34A' : 'var(--danger)', color: '#fff' }}>
           {toast.ok ? <Check size={15} /> : <X size={15} />} {toast.msg}
         </div>
       )}
@@ -151,9 +151,9 @@ export default function AdminUsersPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {[
           { label: 'Total',          value: stats.total,  color: '#0F1623', icon: Users },
-          { label: 'Clientes',       value: stats.guests, color: '#2563EB', icon: User },
+          { label: 'Clientes',       value: stats.guests, color: 'var(--info)', icon: User },
           { label: 'Propietarios',   value: stats.hosts,  color: '#16A34A', icon: Building2 },
-          { label: 'Admins',         value: stats.admins, color: '#DC2626', icon: Shield },
+          { label: 'Admins',         value: stats.admins, color: 'var(--danger)', icon: Shield },
         ].map(({ label, value, color, icon: Icon }) => (
           <div key={label} className="rounded-2xl p-4"
             style={{ background: '#fff', border: '1px solid #E8ECF0' }}>
@@ -169,7 +169,7 @@ export default function AdminUsersPage() {
       {/* Nota de entregabilidad */}
       <div className="flex items-start gap-3 rounded-2xl px-4 py-3.5 mb-5"
         style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.15)' }}>
-        <Mail size={14} style={{ color: '#2563EB', flexShrink: 0, marginTop: 1 }} />
+        <Mail size={14} style={{ color: 'var(--info)', flexShrink: 0, marginTop: 1 }} />
         <div className="text-xs" style={{ color: '#1E40AF' }}>
           <span className="font-semibold">Para monitorear entregabilidad de emails</span> (aperturas, rebotes, spam): ve a{' '}
           <a href="https://resend.com/emails" target="_blank" rel="noopener noreferrer"
@@ -285,7 +285,7 @@ export default function AdminUsersPage() {
                       {user.role === 'host' ? (
                         <Link href={`/admin/usuarios/${user.id}`}
                           className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition-all whitespace-nowrap"
-                          style={{ background: 'rgba(37,99,235,0.07)', color: '#2563EB' }}
+                          style={{ background: 'rgba(37,99,235,0.07)', color: 'var(--info)' }}
                           title="Ver perfil completo del propietario">
                           <Eye size={12} /> Ver
                         </Link>

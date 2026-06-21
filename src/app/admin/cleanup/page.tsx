@@ -60,7 +60,7 @@ export default function CleanupPage() {
 
       {error && (
         <div className="rounded-2xl p-4 mb-6 flex items-center gap-2"
-          style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)', color: '#DC2626' }}>
+          style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)', color: 'var(--danger)' }}>
           <AlertCircle size={15} />
           <span className="text-sm">{error}</span>
         </div>
@@ -81,7 +81,7 @@ export default function CleanupPage() {
             </span>
             <div className="flex items-center gap-4 text-xs font-medium">
               <span className="inline-flex items-center gap-1" style={{ color: '#16A34A' }}><CheckCircle size={13} /> Conservar: {preview.keep}</span>
-              <span className="inline-flex items-center gap-1" style={{ color: '#DC2626' }}><Trash2 size={13} /> Eliminar: {preview.to_delete}</span>
+              <span className="inline-flex items-center gap-1" style={{ color: 'var(--danger)' }}><Trash2 size={13} /> Eliminar: {preview.to_delete}</span>
             </div>
           </div>
 
@@ -90,7 +90,7 @@ export default function CleanupPage() {
               <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
                 {preview.spaces_to_delete.map((s: any) => (
                   <div key={s.id} className="flex items-center gap-3 px-5 py-3">
-                    <Trash2 size={14} style={{ color: '#DC2626', flexShrink: 0 }} />
+                    <Trash2 size={14} style={{ color: 'var(--danger)', flexShrink: 0 }} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{s.name}</p>
                       <p className="text-xs font-mono truncate" style={{ color: 'var(--text-muted)' }}>{s.slug}</p>
@@ -104,7 +104,7 @@ export default function CleanupPage() {
                   onClick={deleteSpaces}
                   disabled={loading}
                   className="flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-sm transition-all disabled:opacity-40"
-                  style={{ background: '#DC2626', color: '#fff' }}>
+                  style={{ background: 'var(--danger)', color: '#fff' }}>
                   {loading
                     ? <><RefreshCw size={15} className="animate-spin" /> Eliminando...</>
                     : <><Trash2 size={15} /> Eliminar {preview.to_delete} espacios</>}

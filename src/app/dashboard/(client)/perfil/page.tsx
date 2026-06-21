@@ -217,7 +217,7 @@ export default function PerfilPage() {
 
       {error && (
         <div className="text-sm px-4 py-3 rounded-xl mb-4"
-          style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626' }}>
+          style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: 'var(--danger)' }}>
           {error}
         </div>
       )}

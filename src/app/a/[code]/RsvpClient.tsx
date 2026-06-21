@@ -176,7 +176,7 @@ export function RsvpClient({ code, data }: { code: string; data: PublicData }) {
                 {/* Adquisición: momento de máxima intención (acaba de confirmar) */}
                 <a href={ACQUISITION_URL} target="_blank" rel="noopener noreferrer"
                   className="flex items-center justify-between gap-3 rounded-2xl px-4 py-3.5"
-                  style={{ background: 'linear-gradient(135deg,#03313C,#0D4A3A)' }}>
+                  style={{ background: 'linear-gradient(135deg,var(--brand-navy),#0D4A3A)' }}>
                   <span className="min-w-0">
                     <span className="block text-sm font-bold text-white">¿Organizas tus propios eventos?</span>
                     <span className="block text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>Créalos gratis en Espot y recibe confirmaciones así.</span>

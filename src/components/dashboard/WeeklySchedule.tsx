@@ -299,7 +299,7 @@ export default function WeeklySchedule({ onChange, initial = [] }: Props) {
 
                 {/* Nombre */}
                 <span className="text-sm font-semibold w-24 shrink-0"
-                  style={{ color: day.enabled ? '#03313C' : '#9CA3AF' }}>
+                  style={{ color: day.enabled ? 'var(--brand-navy)' : '#9CA3AF' }}>
                   {label}
                 </span>
 

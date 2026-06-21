@@ -646,7 +646,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                     {capacidad && (
                       <button onClick={() => { applyCapacity(''); setCapOpen(false) }}
                         className="flex items-center gap-1 mt-3 text-xs font-medium mx-auto"
-                        style={{ color: '#DC2626' }}>
+                        style={{ color: 'var(--danger)' }}>
                         <X size={10} /> Quitar filtro
                       </button>
                     )}
@@ -897,7 +897,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
               ))}
               <button onClick={clearAll}
                 className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold shrink-0"
-                style={{ background: 'rgba(220,38,38,0.08)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }}>
+                style={{ background: 'rgba(220,38,38,0.08)', color: 'var(--danger)', border: '1px solid rgba(220,38,38,0.15)' }}>
                 Limpiar todo
               </button>
             </div>
@@ -928,7 +928,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                 {activeFiltersCount > 0 && (
                   <button onClick={clearAll}
                     className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full"
-                    style={{ color: '#DC2626', background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.12)' }}>
+                    style={{ color: 'var(--danger)', background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.12)' }}>
                     <X size={9} /> Limpiar
                   </button>
                 )}
@@ -1241,7 +1241,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                 {(dateFrom || timeFrom) && (
                   <button onClick={() => { setDateFrom(''); setTimeFrom('') }}
                     className="flex items-center gap-1.5 mt-2.5 text-xs font-medium"
-                    style={{ color: '#DC2626' }}>
+                    style={{ color: 'var(--danger)' }}>
                     <X size={11} /> Quitar fecha y hora
                   </button>
                 )}
@@ -1285,7 +1285,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                 </div>
                 <div className="flex justify-between mb-3 text-xs px-1" style={{ color: 'var(--text-muted)' }}>
                   <span>Desde 1 persona</span>
-                  {capacidadInput && <button onClick={() => applyCapacity('')} style={{ color: '#DC2626' }}>Quitar</button>}
+                  {capacidadInput && <button onClick={() => applyCapacity('')} style={{ color: 'var(--danger)' }}>Quitar</button>}
                 </div>
                 {/* Quick presets */}
                 <div className="grid grid-cols-4 gap-2">
@@ -1364,7 +1364,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                 {activity && (
                   <button onClick={() => { setActivity(''); setActQ('') }}
                     className="flex items-center gap-1.5 mt-2.5 text-xs font-medium"
-                    style={{ color: '#DC2626' }}>
+                    style={{ color: 'var(--danger)' }}>
                     <X size={11} /> Quitar tipo de evento
                   </button>
                 )}
@@ -1396,7 +1396,7 @@ export default function BuscarClient({ spaces: initialSpaces, initialParams }: P
                 {categoria && (
                   <button onClick={() => setCategoria('')}
                     className="flex items-center gap-1.5 mt-3 text-xs font-medium"
-                    style={{ color: '#DC2626' }}>
+                    style={{ color: 'var(--danger)' }}>
                     <X size={11} /> Quitar tipo de espacio
                   </button>
                 )}

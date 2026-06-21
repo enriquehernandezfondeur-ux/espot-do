@@ -85,7 +85,7 @@ export default function AdminSpacesPage() {
       {/* Toast */}
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg flex items-center gap-2"
-          style={{ background: toast.ok ? '#0F1623' : '#DC2626', color: '#fff', animation: 'fadeIn 0.2s ease' }}>
+          style={{ background: toast.ok ? '#0F1623' : 'var(--danger)', color: '#fff', animation: 'fadeIn 0.2s ease' }}>
           {toast.ok ? <CheckCircle size={15} /> : null} {toast.msg}
         </div>
       )}
@@ -101,8 +101,8 @@ export default function AdminSpacesPage() {
           title={spaces.every(s => s.is_verified) ? 'Todos los espacios ya están verificados' : 'Verificar todos los espacios visibles'}
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
           style={{
-            background: spaces.every(s => s.is_verified) ? 'rgba(37,99,235,0.1)' : '#2563EB',
-            color: spaces.every(s => s.is_verified) ? '#2563EB' : '#fff',
+            background: spaces.every(s => s.is_verified) ? 'rgba(37,99,235,0.1)' : 'var(--info)',
+            color: spaces.every(s => s.is_verified) ? 'var(--info)' : '#fff',
             cursor: spaces.every(s => s.is_verified) ? 'default' : 'pointer',
           }}>
           {actionId === 'bulk'
@@ -190,13 +190,13 @@ export default function AdminSpacesPage() {
                     {/* Status badges — prioridad: Inactivo > Pendiente > Publicado */}
                     <div className="flex flex-wrap gap-1.5">
                       {!space.is_active
-                        ? <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(220,38,38,0.1)', color: '#DC2626' }}>Inactivo</span>
+                        ? <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(220,38,38,0.1)', color: 'var(--danger)' }}>Inactivo</span>
                         : !space.is_published
                           ? <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(217,119,6,0.1)', color: '#D97706' }}>Pendiente</span>
                           : <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(22,163,74,0.1)', color: '#16A34A' }}>Publicado</span>
                       }
                       {space.is_verified && (
-                        <span className="text-xs px-2 py-0.5 rounded-full font-medium flex items-center gap-0.5" style={{ background: 'rgba(37,99,235,0.1)', color: '#2563EB' }}>
+                        <span className="text-xs px-2 py-0.5 rounded-full font-medium flex items-center gap-0.5" style={{ background: 'rgba(37,99,235,0.1)', color: 'var(--info)' }}>
                           <Shield size={9} /> Verificado
                         </span>
                       )}
@@ -243,7 +243,7 @@ export default function AdminSpacesPage() {
                         disabled={actionId === space.id + 'is_verified'}
                         title={space.is_verified ? 'Quitar verificación' : 'Verificar'}
                         className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:bg-slate-100"
-                        style={{ color: space.is_verified ? '#2563EB' : '#9CA3AF' }}>
+                        style={{ color: space.is_verified ? 'var(--info)' : '#9CA3AF' }}>
                         {actionId === space.id + 'is_verified'
                           ? <Loader2 size={14} className="animate-spin" />
                           : <Shield size={14} />}
@@ -270,7 +270,7 @@ export default function AdminSpacesPage() {
                         disabled={actionId === space.id + 'is_active'}
                         title={space.is_active ? 'Desactivar' : 'Activar'}
                         className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:bg-red-50"
-                        style={{ color: space.is_active ? '#9CA3AF' : '#DC2626' }}>
+                        style={{ color: space.is_active ? '#9CA3AF' : 'var(--danger)' }}>
                         {actionId === space.id + 'is_active'
                           ? <Loader2 size={14} className="animate-spin" />
                           : space.is_active ? <Power size={14} /> : <CheckCircle size={14} />}
@@ -278,7 +278,7 @@ export default function AdminSpacesPage() {
 
                       <Link href={`/admin/espacios/${space.id}`}
                         className="w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:bg-blue-50"
-                        style={{ color: '#2563EB' }} title="Editar espacio">
+                        style={{ color: 'var(--info)' }} title="Editar espacio">
                         <Pencil size={14} />
                       </Link>
 

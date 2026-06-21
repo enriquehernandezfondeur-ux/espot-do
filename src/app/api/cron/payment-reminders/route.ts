@@ -114,7 +114,7 @@ export async function GET(req: Request) {
                   { label: 'Motivo',       value: 'Pago no recibido en 72 horas' },
                 ])}
                 <p style="color:#374151;margin:0 0 16px;">La fecha quedó libre. Si aún te interesa el espacio, puedes hacer una nueva solicitud.</p>
-                <p style="color:#6B7280;font-size:13px;margin:0;">¿Tienes preguntas? Escríbenos a <a href="mailto:contacto@espot.do" style="color:#35C493;">contacto@espot.do</a>.</p>`,
+                <p style="color:#6B7280;font-size:13px;margin:0;">¿Tienes preguntas? Escríbenos a <a href="mailto:contacto@espot.do" style="color:var(--brand);">contacto@espot.do</a>.</p>`,
               cta: { text: 'Explorar espacios', url: `${SITE}/buscar` },
             }),
           })
@@ -129,7 +129,7 @@ export async function GET(req: Request) {
             html:    emailBase({
               title:       'La fecha volvió a estar disponible',
               subtitle:    `El cliente no completó el pago en 72 horas.`,
-              accentColor: '#35C493',
+              accentColor: 'var(--brand)',
               body: `
                 <p style="color:#374151;margin:0 0 16px;">Hola <strong>${host.full_name ?? 'Propietario'}</strong>, la reserva para el ${formatDate(bk.event_date)} en <strong>${space?.name ?? ''}</strong> fue cancelada automáticamente porque el cliente no completó el pago.</p>
                 ${infoBox([
@@ -411,7 +411,7 @@ export async function GET(req: Request) {
                 </table>
                 <p style="color:#92400E;font-size:13px;background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:12px 16px;margin:0 0 24px;">Si no respondes en las próximas 24 horas, la solicitud podría cancelarse automáticamente y el cliente buscará otra opción.</p>
                 <div style="text-align:center;">
-                  <a href="${SITE}/dashboard/host/agenda" style="display:inline-block;background:#35C493;color:#060D09;font-weight:700;font-size:14px;padding:14px 32px;border-radius:14px;text-decoration:none;">Responder solicitud &rarr;</a>
+                  <a href="${SITE}/dashboard/host/agenda" style="display:inline-block;background:var(--brand);color:#060D09;font-weight:700;font-size:14px;padding:14px 32px;border-radius:14px;text-decoration:none;">Responder solicitud &rarr;</a>
                 </div>
               </div>
             </div>

@@ -145,7 +145,7 @@ export default function DashboardPage() {
 
       {actionError && (
         <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
-          style={{ background: '#DC2626', color: '#fff' }}>
+          style={{ background: 'var(--danger)', color: '#fff' }}>
           <X size={15} /> {actionError}
         </div>
       )}
@@ -262,7 +262,7 @@ export default function DashboardPage() {
                       {new Date((b.event_date ?? '') + 'T12:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
                       {b.guest_count ? ` · ${b.guest_count} personas` : ''}
                       {daysLeft <= 14 && (
-                        <span className="ml-1.5 font-semibold" style={{ color: daysLeft <= 7 ? '#DC2626' : '#D97706' }}>
+                        <span className="ml-1.5 font-semibold" style={{ color: daysLeft <= 7 ? 'var(--danger)' : '#D97706' }}>
                           · en {daysLeft}d
                         </span>
                       )}
@@ -273,7 +273,7 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-2 shrink-0">
                     {isUrgent && (
                       <span className="hidden sm:block text-[10px] font-bold px-1.5 py-0.5 rounded"
-                        style={{ background: 'rgba(220,38,38,0.1)', color: '#DC2626' }}>
+                        style={{ background: 'rgba(220,38,38,0.1)', color: 'var(--danger)' }}>
                         URGENTE
                       </span>
                     )}
@@ -354,10 +354,10 @@ export default function DashboardPage() {
             <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>Por cobrar</span>
             <div className="w-7 h-7 rounded-lg flex items-center justify-center"
               style={{ background: porCobrar > 0 ? 'rgba(37,99,235,0.08)' : 'var(--bg-elevated)' }}>
-              <Banknote size={13} style={{ color: porCobrar > 0 ? '#2563EB' : 'var(--text-muted)' }} />
+              <Banknote size={13} style={{ color: porCobrar > 0 ? 'var(--info)' : 'var(--text-muted)' }} />
             </div>
           </div>
-          <div className="text-lg font-bold truncate" style={{ color: porCobrar > 0 ? '#2563EB' : 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+          <div className="text-lg font-bold truncate" style={{ color: porCobrar > 0 ? 'var(--info)' : 'var(--text-primary)', letterSpacing: '-0.02em' }}>
             {formatCurrency(porCobrar)}
           </div>
           <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>en eventos directos</p>
@@ -384,7 +384,7 @@ export default function DashboardPage() {
                     <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{c.next_action}</p>
                   </div>
                   <span className="text-xs font-semibold shrink-0"
-                    style={{ color: overdue ? '#DC2626' : today ? 'var(--brand)' : 'var(--text-muted)' }}>
+                    style={{ color: overdue ? 'var(--danger)' : today ? 'var(--brand)' : 'var(--text-muted)' }}>
                     {overdue ? 'Vencido' : today ? 'Hoy' : c.next_action_date}
                   </span>
                 </div>
@@ -458,7 +458,7 @@ export default function DashboardPage() {
             // Color barra
             const barColor = isEspot
               ? item.b.status === 'confirmed' ? '#16A34A' : item.b.status === 'pending' ? '#D97706' : '#9CA3AF'
-              : item.ev.status === 'confirmado' ? 'var(--brand)' : item.ev.status === 'en_curso' ? '#2563EB' : '#D97706'
+              : item.ev.status === 'confirmado' ? 'var(--brand)' : item.ev.status === 'en_curso' ? 'var(--info)' : '#D97706'
 
             // Espacio/salon
             const spaceName = isEspot
@@ -512,7 +512,7 @@ export default function DashboardPage() {
                         </span>
                         <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
                           style={isEspot
-                            ? { background: 'rgba(37,99,235,0.08)', color: '#2563EB' }
+                            ? { background: 'rgba(37,99,235,0.08)', color: 'var(--info)' }
                             : { background: 'rgba(53,196,147,0.1)',  color: 'var(--brand)' }
                           }>
                           {isEspot ? 'Espot' : 'Directo'}
@@ -567,7 +567,7 @@ export default function DashboardPage() {
                       <div className="mt-2">
                         <div className="flex items-center justify-between text-xs mb-1" style={{ color: 'var(--text-muted)' }}>
                           <span>Cobrado {formatCurrency(paidAmt)}</span>
-                          <span style={{ color: '#2563EB' }}>{formatCurrency(totalAmt - paidAmt)} pendiente</span>
+                          <span style={{ color: 'var(--info)' }}>{formatCurrency(totalAmt - paidAmt)} pendiente</span>
                         </div>
                         <div className="h-1 rounded-full overflow-hidden" style={{ background: 'var(--bg-elevated)' }}>
                           <div className="h-1 rounded-full" style={{ width: `${pctPaid}%`, background: 'var(--brand)' }} />
@@ -587,7 +587,7 @@ export default function DashboardPage() {
                         <button onClick={() => handleReject(item.b.id)}
                           disabled={actionId === item.b.id}
                           className="flex-1 text-xs font-semibold py-1.5 rounded-lg disabled:opacity-60"
-                          style={{ background: 'rgba(220,38,38,0.06)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.15)' }}>
+                          style={{ background: 'rgba(220,38,38,0.06)', color: 'var(--danger)', border: '1px solid rgba(220,38,38,0.15)' }}>
                           Rechazar
                         </button>
                       </div>
@@ -617,8 +617,8 @@ export default function DashboardPage() {
       <div className="grid grid-cols-4 gap-3">
         {[
           { href: '/dashboard/host/eventos/nuevo', icon: Plus,               label: 'Nuevo evento', color: 'var(--brand)', bg: 'rgba(53,196,147,0.1)' },
-          { href: '/dashboard/host/calendario',    icon: CalendarDays,       label: 'Calendario',   color: '#2563EB',      bg: 'rgba(37,99,235,0.08)' },
-          { href: '/dashboard/host/mensajes',      icon: MessageCircle,      label: 'Mensajes',     color: '#7C3AED',      bg: 'rgba(124,58,237,0.08)' },
+          { href: '/dashboard/host/calendario',    icon: CalendarDays,       label: 'Calendario',   color: 'var(--info)',      bg: 'rgba(37,99,235,0.08)' },
+          { href: '/dashboard/host/mensajes',      icon: MessageCircle,      label: 'Mensajes',     color: 'var(--accent-purple)',      bg: 'rgba(124,58,237,0.08)' },
           { href: '/dashboard/host/clientes',      icon: Users,              label: 'Clientes',     color: '#D97706',      bg: 'rgba(217,119,6,0.08)' },
         ].map(({ href, icon: Icon, label, color, bg }) => (
           <Link key={href} href={href}

@@ -15,18 +15,18 @@ import { getCategoryLabel } from '@/lib/categories'
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
   pending_admin:  { label: 'Pendiente revisión', color: '#D97706', bg: 'rgba(234,179,8,0.1)' },
-  analyzing:      { label: 'Analizando IA',      color: '#3B82F6', bg: 'rgba(59,130,246,0.1)' },
+  analyzing:      { label: 'Analizando IA',      color: 'var(--info)', bg: 'rgba(59,130,246,0.1)' },
   submitted:      { label: 'Enviada',            color: '#6B7280', bg: 'rgba(107,114,128,0.1)' },
   approved:       { label: 'Aprobada',           color: '#16A34A', bg: 'rgba(22,163,74,0.1)' },
-  rejected:       { label: 'Rechazada',          color: '#EF4444', bg: 'rgba(239,68,68,0.1)' },
-  info_requested: { label: 'Más info pedida',    color: '#8B5CF6', bg: 'rgba(139,92,246,0.1)' },
+  rejected:       { label: 'Rechazada',          color: 'var(--danger)', bg: 'rgba(239,68,68,0.1)' },
+  info_requested: { label: 'Más info pedida',    color: 'var(--accent-purple)', bg: 'rgba(139,92,246,0.1)' },
   draft:          { label: 'Borrador',           color: '#9CA3AF', bg: 'rgba(156,163,175,0.1)' },
 }
 
 function scoreColor(score: number) {
   if (score >= 70) return '#16A34A'
   if (score >= 45) return '#D97706'
-  return '#EF4444'
+  return 'var(--danger)'
 }
 function scoreBg(score: number) {
   if (score >= 70) return 'rgba(22,163,74,0.1)'
@@ -273,7 +273,7 @@ export default async function AplicacionDetailPage({
                   style={{ borderTop: '1px solid #F3F4F6' }}>
                   {app.ai_analysis.flags.map((flag: string) => (
                     <span key={flag} className="text-[10px] px-2 py-0.5 rounded-full font-medium"
-                      style={{ background: 'rgba(239,68,68,0.08)', color: '#EF4444' }}>
+                      style={{ background: 'rgba(239,68,68,0.08)', color: 'var(--danger)' }}>
                       ⚠ {flag.replace(/_/g, ' ')}
                     </span>
                   ))}
@@ -302,7 +302,7 @@ export default async function AplicacionDetailPage({
               <details>
                 <summary
                   className="cursor-pointer w-full py-3 rounded-xl text-sm font-bold text-center select-none"
-                  style={{ background: 'rgba(239,68,68,0.07)', color: '#EF4444', listStyle: 'none' }}>
+                  style={{ background: 'rgba(239,68,68,0.07)', color: 'var(--danger)', listStyle: 'none' }}>
                   <span className="inline-flex items-center justify-center gap-2"><X size={15} /> Rechazar solicitud</span>
                 </summary>
                 <form action={handleReject} className="mt-3 space-y-2">
@@ -316,7 +316,7 @@ export default async function AplicacionDetailPage({
                     }} />
                   <button type="submit"
                     className="w-full py-2.5 rounded-xl text-sm font-bold text-white"
-                    style={{ background: '#EF4444' }}>
+                    style={{ background: 'var(--danger)' }}>
                     Confirmar rechazo
                   </button>
                 </form>
@@ -325,7 +325,7 @@ export default async function AplicacionDetailPage({
               <details>
                 <summary
                   className="cursor-pointer w-full py-3 rounded-xl text-sm font-bold text-center select-none"
-                  style={{ background: 'rgba(139,92,246,0.07)', color: '#8B5CF6', listStyle: 'none' }}>
+                  style={{ background: 'rgba(139,92,246,0.07)', color: 'var(--accent-purple)', listStyle: 'none' }}>
                   <span className="inline-flex items-center justify-center gap-2"><Info size={15} /> Pedir más información</span>
                 </summary>
                 <form action={handleRequestInfo} className="mt-3 space-y-2">
@@ -339,7 +339,7 @@ export default async function AplicacionDetailPage({
                     }} />
                   <button type="submit"
                     className="w-full py-2.5 rounded-xl text-sm font-bold text-white"
-                    style={{ background: '#8B5CF6' }}>
+                    style={{ background: 'var(--accent-purple)' }}>
                     Enviar mensaje
                   </button>
                 </form>

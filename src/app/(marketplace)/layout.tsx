@@ -217,7 +217,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                     )}
                     {notifCount > 0 && (
                       <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white"
-                        style={{ background: '#EF4444' }} />
+                        style={{ background: 'var(--danger)' }} />
                     )}
                   </div>
                   <span className="hidden lg:block text-sm font-medium">{displayName}</span>
@@ -408,7 +408,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                       )}
                       {notifCount > 0 && (
                         <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white"
-                          style={{ background: '#EF4444' }} />
+                          style={{ background: 'var(--danger)' }} />
                       )}
                     </div>
                     <div className="min-w-0">
@@ -620,7 +620,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
               <button
                 onClick={async () => { setAccountSheet(false); await handleSignOut() }}
                 className="w-full flex items-center justify-center gap-2.5 py-4 rounded-2xl font-bold text-sm transition-all active:scale-[0.98]"
-                style={{ background: 'rgba(239,68,68,0.07)', color: '#DC2626', border: '1.5px solid rgba(239,68,68,0.18)' }}>
+                style={{ background: 'rgba(239,68,68,0.07)', color: 'var(--danger)', border: '1.5px solid rgba(239,68,68,0.18)' }}>
                 <LogOut size={17} />
                 Cerrar sesión
               </button>
@@ -634,10 +634,10 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
       <footer style={{ background: '#F4F6F5', borderTop: '1px solid #E0E7E3' }}>
         <style>{`
           .ft-link { transition: color .18s ease; }
-          .ft-link:hover { color: #35C493 !important; }
+          .ft-link:hover { color: var(--brand) !important; }
           .ft-soc { transition: background .18s ease, color .18s ease, transform .18s ease; }
-          .ft-soc:hover { background: #35C493 !important; color: #fff !important; transform: translateY(-2px); }
-          .ft-link:focus-visible, .ft-soc:focus-visible, .ft-appstore:focus-visible { outline: 2px solid #35C493; outline-offset: 3px; border-radius: 8px; }
+          .ft-soc:hover { background: var(--brand) !important; color: #fff !important; transform: translateY(-2px); }
+          .ft-link:focus-visible, .ft-soc:focus-visible, .ft-appstore:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; border-radius: 8px; }
           /* Medios de pago monocromáticos (grayscale: no difumina; brightness(0) se
              descartó por mostrar siluetas incorrectas). Discreto y uniforme. */
           .ft-pay img { filter: grayscale(1); opacity: .62; transition: opacity .18s ease; }
@@ -687,7 +687,7 @@ export default function MarketplaceLayout({ children }: { children: React.ReactN
                 { title: 'Legal', links: [{href:'/terminos',label:'Términos'},{href:'/privacidad',label:'Privacidad'},{href:'/reembolso',label:'Reembolsos'},{href:'/seguridad',label:'Seguridad'},{href:'/cookies',label:'Cookies'}] },
               ].map(col => (
                 <div key={col.title}>
-                  <p className="text-[11px] font-bold uppercase tracking-widest mb-3.5" style={{color:'#35C493'}}>{col.title}</p>
+                  <p className="text-[11px] font-bold uppercase tracking-widest mb-3.5" style={{color:'var(--brand)'}}>{col.title}</p>
                   <div className="flex flex-col gap-2.5">
                     {col.links.map(({href,label})=>(
                       <Link key={href} href={href} className="ft-link text-sm" style={{color:'#6B7280'}}>{label}</Link>

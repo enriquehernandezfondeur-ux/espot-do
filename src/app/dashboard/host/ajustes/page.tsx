@@ -325,7 +325,7 @@ function AjustesInner() {
 
       {error && (
         <div className="text-sm px-4 py-3 rounded-xl mb-4"
-          style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626' }}>{error}</div>
+          style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: 'var(--danger)' }}>{error}</div>
       )}
 
       <button onClick={handleSave} disabled={saving}
@@ -441,7 +441,7 @@ function AjustesInner() {
 
           {bankError && (
             <div className="text-sm px-4 py-3 rounded-xl"
-              style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626' }}>
+              style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: 'var(--danger)' }}>
               {bankError}
             </div>
           )}
@@ -659,13 +659,13 @@ function AjustesInner() {
             ) : (
               <div className="px-4 py-3 rounded-xl"
                 style={{ background: '#FEF2F2', border: '1px solid #FECACA' }}>
-                <p className="text-xs font-semibold mb-2" style={{ color: '#DC2626' }}>
+                <p className="text-xs font-semibold mb-2" style={{ color: 'var(--danger)' }}>
                   Esto invalida el enlace anterior. Tendrás que actualizarlo en todos tus calendarios.
                 </p>
                 <div className="flex items-center gap-2">
                   <button onClick={handleRegenerate} disabled={regenerating}
                     className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg disabled:opacity-50"
-                    style={{ background: '#DC2626', color: '#fff' }}>
+                    style={{ background: 'var(--danger)', color: '#fff' }}>
                     {regenerating ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
                     Regenerar
                   </button>

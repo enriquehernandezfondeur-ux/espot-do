@@ -22,7 +22,7 @@ export default function SeguridadPage() {
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
               style={{ background: 'rgba(37,99,235,0.08)' }}>
-              <Lock size={22} style={{ color: '#2563EB' }} />
+              <Lock size={22} style={{ color: 'var(--info)' }} />
             </div>
             <div>
               <h1 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
@@ -64,7 +64,7 @@ export default function SeguridadPage() {
 
           <div className="rounded-2xl p-5 md:p-6" style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
             <div className="flex items-center gap-2 mb-3">
-              <Shield size={16} style={{ color: '#2563EB' }} />
+              <Shield size={16} style={{ color: 'var(--info)' }} />
               <h2 className="font-bold" style={{ color: 'var(--text-primary)' }}>Procesamiento de pagos</h2>
             </div>
             <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
@@ -77,7 +77,7 @@ export default function SeguridadPage() {
 
           <div className="rounded-2xl p-5 md:p-6" style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
             <div className="flex items-center gap-2 mb-3">
-              <CreditCard size={16} style={{ color: '#2563EB' }} />
+              <CreditCard size={16} style={{ color: 'var(--info)' }} />
               <h2 className="font-bold" style={{ color: 'var(--text-primary)' }}>Autenticación 3D Secure</h2>
             </div>
             <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
@@ -92,7 +92,7 @@ export default function SeguridadPage() {
 
           <div className="rounded-2xl p-5 md:p-6" style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
             <div className="flex items-center gap-2 mb-3">
-              <Lock size={16} style={{ color: '#2563EB' }} />
+              <Lock size={16} style={{ color: 'var(--info)' }} />
               <h2 className="font-bold" style={{ color: 'var(--text-primary)' }}>Protección de datos personales</h2>
             </div>
             <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
@@ -103,7 +103,7 @@ export default function SeguridadPage() {
 
           <div className="rounded-2xl p-5 md:p-6" style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
             <div className="flex items-center gap-2 mb-3">
-              <Shield size={16} style={{ color: '#2563EB' }} />
+              <Shield size={16} style={{ color: 'var(--info)' }} />
               <h2 className="font-bold" style={{ color: 'var(--text-primary)' }}>Responsabilidades del tarjetahabiente</h2>
             </div>
             <ul className="text-sm space-y-2" style={{ color: 'var(--text-secondary)' }}>
@@ -115,7 +115,7 @@ export default function SeguridadPage() {
 
           <div className="rounded-2xl p-5 md:p-6" style={{ background: '#fff', border: '1px solid var(--border-subtle)' }}>
             <div className="flex items-center gap-2 mb-3">
-              <CreditCard size={16} style={{ color: '#2563EB' }} />
+              <CreditCard size={16} style={{ color: 'var(--info)' }} />
               <h2 className="font-bold" style={{ color: 'var(--text-primary)' }}>Contacto de seguridad</h2>
             </div>
             <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>

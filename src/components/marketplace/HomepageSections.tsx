@@ -57,7 +57,7 @@ function SocialSection() {
             </div>
             <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
               Espacios reales,{' '}
-              <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              <span style={{ background: 'linear-gradient(95deg, var(--brand), #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 eventos reales
               </span>
             </h2>
@@ -166,7 +166,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
           <Reveal className="mb-10 md:mb-12">
             <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
               Explora{' '}
-              <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              <span style={{ background: 'linear-gradient(95deg, var(--brand), #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 tu espacio
               </span>
             </h2>
@@ -198,7 +198,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                     const iconBox = el.querySelector('[data-icon-box]') as HTMLElement | null
                     if (iconBox) iconBox.style.background = 'rgba(53,196,147,0.1)'
                     const iconSvg = el.querySelector('svg') as SVGElement | null
-                    if (iconSvg) (iconSvg as any).style.color = '#35C493'
+                    if (iconSvg) (iconSvg as any).style.color = 'var(--brand)'
                     const label = el.querySelector('[data-label]') as HTMLElement | null
                     if (label) label.style.color = '#0F1623'
                   }}
@@ -240,7 +240,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
             <div>
               <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
                 ¿Qué tipo de actividad{' '}
-                <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                <span style={{ background: 'linear-gradient(95deg, var(--brand), #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                   deseas realizar?
                 </span>
               </h2>
@@ -298,7 +298,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
             <div>
               <h2 className="font-bold" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
                 Espacios{' '}
-                <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                <span style={{ background: 'linear-gradient(95deg, var(--brand), #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                   en República Dominicana
                 </span>
               </h2>
@@ -327,12 +327,12 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
             </div>
           ) : (
             <Reveal className="py-20 text-center rounded-2xl" style={{ background: '#fff', border: '1px solid #E2E8F0' }}>
-              <Building2 size={32} style={{ color: '#35C493', margin: '0 auto 12px' }} />
+              <Building2 size={32} style={{ color: 'var(--brand)', margin: '0 auto 12px' }} />
               <h3 className="font-bold text-lg mb-2" style={{ color: '#0F1623' }}>Próximamente más espacios</h3>
               <p className="text-sm mb-6" style={{ color: '#6B7280' }}>Sé el primero en publicar tu espacio</p>
               <Link href="/auth?mode=register&redirect=/dashboard/host/espacio"
                 className="inline-flex items-center gap-2 text-sm font-bold px-6 py-3 rounded-xl"
-                style={{ background: '#35C493', color: '#fff' }}>
+                style={{ background: 'var(--brand)', color: '#fff' }}>
                 Publicar espacio gratis
               </Link>
             </Reveal>
@@ -353,7 +353,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
           <Reveal>
             <h2 className="font-bold mb-8 md:mb-10" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
               Reserva en{' '}
-              <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              <span style={{ background: 'linear-gradient(95deg, var(--brand), #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 tres pasos
               </span>
             </h2>
@@ -364,14 +364,14 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                 style={{ background: '#F8FAFC', border: '1px solid #E5EAE8' }}>
                 <div className="flex items-center justify-between">
                   <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
-                    style={{ background: 'rgba(53,196,147,0.1)', color: '#35C493' }}>
+                    style={{ background: 'rgba(53,196,147,0.1)', color: 'var(--brand)' }}>
                     <Search size={18} />
                   </div>
-                  <ArrowRight size={16} className="guide-arrow" style={{ color: '#35C493' }} />
+                  <ArrowRight size={16} className="guide-arrow" style={{ color: 'var(--brand)' }} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: '#35C493' }}>Paso 01</p>
-                  <h3 className="font-bold text-lg mb-2" style={{ color: '#03313C', letterSpacing: '-0.025em' }}>Busca tu espacio</h3>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: 'var(--brand)' }}>Paso 01</p>
+                  <h3 className="font-bold text-lg mb-2" style={{ color: 'var(--brand-navy)', letterSpacing: '-0.025em' }}>Busca tu espacio</h3>
                   <p className="text-sm leading-relaxed" style={{ color: '#527068' }}>
                     Filtra por sector, tipo y capacidad. Todos los espacios son verificados por nuestro equipo antes de publicarse.
                   </p>
@@ -380,16 +380,16 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
 
               {/* Card 2 — Fecha — dark */}
               <div className="guide-card guide-card-dark relative overflow-hidden rounded-3xl p-7 flex flex-col gap-4"
-                style={{ background: '#03313C', border: '1px solid rgba(53,196,147,0.15)' }}>
+                style={{ background: 'var(--brand-navy)', border: '1px solid rgba(53,196,147,0.15)' }}>
                 <div className="flex items-center justify-between">
                   <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
-                    style={{ background: 'rgba(53,196,147,0.12)', color: '#35C493' }}>
+                    style={{ background: 'rgba(53,196,147,0.12)', color: 'var(--brand)' }}>
                     <Clock size={18} />
                   </div>
-                  <ArrowRight size={16} className="guide-arrow" style={{ color: '#35C493' }} />
+                  <ArrowRight size={16} className="guide-arrow" style={{ color: 'var(--brand)' }} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: '#35C493' }}>Paso 02</p>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: 'var(--brand)' }}>Paso 02</p>
                   <h3 className="font-bold text-lg mb-2" style={{ color: '#fff', letterSpacing: '-0.025em' }}>Elige fecha y horario</h3>
                   <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>
                     Selecciona el día, horario y adicionales. El propietario revisará tu solicitud y confirmará disponibilidad.
@@ -402,14 +402,14 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                 style={{ background: '#F8FAFC', border: '1px solid #E5EAE8' }}>
                 <div className="flex items-center justify-between">
                   <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
-                    style={{ background: 'rgba(53,196,147,0.1)', color: '#35C493' }}>
+                    style={{ background: 'rgba(53,196,147,0.1)', color: 'var(--brand)' }}>
                     <CreditCard size={18} />
                   </div>
-                  <ArrowRight size={16} className="guide-arrow" style={{ color: '#35C493' }} />
+                  <ArrowRight size={16} className="guide-arrow" style={{ color: 'var(--brand)' }} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: '#35C493' }}>Paso 03</p>
-                  <h3 className="font-bold text-lg mb-2" style={{ color: '#03313C', letterSpacing: '-0.025em' }}>Paga y asegura tu fecha</h3>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: 'var(--brand)' }}>Paso 03</p>
+                  <h3 className="font-bold text-lg mb-2" style={{ color: 'var(--brand-navy)', letterSpacing: '-0.025em' }}>Paga y asegura tu fecha</h3>
                   <p className="text-sm leading-relaxed" style={{ color: '#527068' }}>
                     Una vez confirmada tu reserva, paga de forma segura con Azul Payments. El precio que ves es el que pagas.
                   </p>
@@ -426,7 +426,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <Reveal>
             <div className="relative overflow-hidden rounded-3xl"
-              style={{ background: 'linear-gradient(140deg, #03313C 0%, #0A3530 50%, #1A4D38 100%)' }}>
+              style={{ background: 'linear-gradient(140deg, var(--brand-navy) 0%, #0A3530 50%, #1A4D38 100%)' }}>
 
               {/* Keyframe del patrón animado */}
               <style>{`@keyframes patternDrift { from { background-position: 0 0; } to { background-position: 620px 310px; } }`}</style>
@@ -468,7 +468,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                 <div className="flex flex-col gap-3 shrink-0">
                   <Link href="/auth?mode=register&redirect=/dashboard/host/espacio"
                     className="inline-flex items-center justify-center gap-2 font-bold px-8 py-4 rounded-2xl text-sm whitespace-nowrap"
-                    style={{ background: '#35C493', color: '#03313C', boxShadow: '0 4px 24px rgba(53,196,147,0.3)' }}>
+                    style={{ background: 'var(--brand)', color: 'var(--brand-navy)', boxShadow: '0 4px 24px rgba(53,196,147,0.3)' }}>
                     Publicar espacio gratis <ArrowRight size={15} />
                   </Link>
                   <Link href="/auth?mode=login"
@@ -520,7 +520,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
           .guide-card-light:hover .guide-arrow,
           .guide-card-dark:hover .guide-arrow  { transform: translateX(6px); }
           .guide-shimmer {
-            background: linear-gradient(90deg, #35C493 0%, #4DD9A7 35%, #D4FF58 50%, #4DD9A7 65%, #35C493 100%);
+            background: linear-gradient(90deg, var(--brand) 0%, #4DD9A7 35%, #D4FF58 50%, #4DD9A7 65%, var(--brand) 100%);
             background-size: 200% 100%;
             animation: guide-shimmer 2.6s ease-in-out infinite;
           }
@@ -539,7 +539,7 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
           <Reveal>
             <h2 className="font-bold mb-8 md:mb-10" style={{ color: '#0F1623', fontSize: 'clamp(1.6rem, 4vw, 2.25rem)', letterSpacing: '-0.04em' }}>
               Todo sobre{' '}
-              <span style={{ background: 'linear-gradient(95deg, #35C493, #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              <span style={{ background: 'linear-gradient(95deg, var(--brand), #5CE8BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 Espot
               </span>
             </h2>
@@ -551,14 +551,14 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
                 style={{ background: '#F8FAFC', border: '1px solid #E5EAE8' }}>
                 <div className="flex items-center justify-between">
                   <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
-                    style={{ background: 'rgba(53,196,147,0.1)', color: '#35C493' }}>
+                    style={{ background: 'rgba(53,196,147,0.1)', color: 'var(--brand)' }}>
                     <Search size={18} />
                   </div>
-                  <ArrowRight size={16} className="guide-arrow" style={{ color: '#35C493' }} />
+                  <ArrowRight size={16} className="guide-arrow" style={{ color: 'var(--brand)' }} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: '#35C493' }}>Para clientes</p>
-                  <h3 className="font-bold text-lg mb-2" style={{ color: '#03313C', letterSpacing: '-0.025em' }}>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: 'var(--brand)' }}>Para clientes</p>
+                  <h3 className="font-bold text-lg mb-2" style={{ color: 'var(--brand-navy)', letterSpacing: '-0.025em' }}>
                     ¿Cómo reservar un espacio?
                   </h3>
                   <p className="text-sm leading-relaxed" style={{ color: '#527068' }}>
@@ -570,16 +570,16 @@ export default function HomepageSections({ spaces }: { spaces: any[] }) {
               {/* Card propietarios */}
               <Link href="/para-propietarios"
                 className="guide-card guide-card-dark relative overflow-hidden rounded-3xl p-7 flex flex-col gap-4"
-                style={{ background: '#03313C', border: '1px solid rgba(53,196,147,0.15)' }}>
+                style={{ background: 'var(--brand-navy)', border: '1px solid rgba(53,196,147,0.15)' }}>
                 <div className="flex items-center justify-between">
                   <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
-                    style={{ background: 'rgba(53,196,147,0.12)', color: '#35C493' }}>
+                    style={{ background: 'rgba(53,196,147,0.12)', color: 'var(--brand)' }}>
                     <Building2 size={18} />
                   </div>
-                  <ArrowRight size={16} className="guide-arrow" style={{ color: '#35C493' }} />
+                  <ArrowRight size={16} className="guide-arrow" style={{ color: 'var(--brand)' }} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: '#35C493' }}>Para propietarios</p>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: 'var(--brand)' }}>Para propietarios</p>
                   <h3 className="font-bold text-lg mb-2" style={{ color: '#fff', letterSpacing: '-0.025em' }}>
                     ¿Cómo publicar mi espacio?
                   </h3>

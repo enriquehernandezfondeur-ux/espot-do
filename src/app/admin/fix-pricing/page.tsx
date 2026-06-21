@@ -67,7 +67,7 @@ export default function FixPricingPage() {
                 {r.status === 'created' || r.status === 'updated'
                   ? <span style={{ color: '#16A34A' }}>✓</span>
                   : r.status === 'skip' ? <span style={{ color: 'var(--text-muted)' }}>—</span>
-                  : <span style={{ color: '#DC2626' }}>✗</span>}
+                  : <span style={{ color: 'var(--danger)' }}>✗</span>}
                 <span className="font-medium">{r.name}</span>
                 <span style={{ color: 'var(--text-muted)' }}>{r.status}{r.reason ? `: ${r.reason}` : ''}</span>
               </div>
@@ -78,7 +78,7 @@ export default function FixPricingPage() {
 
       {error && (
         <div className="rounded-2xl p-4 mb-6 flex items-center gap-2"
-          style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)', color: '#DC2626' }}>
+          style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)', color: 'var(--danger)' }}>
           <AlertCircle size={15} />
           <span className="text-sm">{error}</span>
         </div>

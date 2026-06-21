@@ -53,7 +53,7 @@ export default async function AdminDashboard() {
 
   const alerts = [
     stats?.pendingSpaces  && stats.pendingSpaces  > 0 && { label: `${stats.pendingSpaces} espacio${stats.pendingSpaces > 1 ? 's' : ''} por aprobar`,   href: '/admin/espacios?status=pending', color: '#F59E0B', icon: Building2 },
-    stats?.pendingBookings && stats.pendingBookings > 0 && { label: `${stats.pendingBookings} reserva${stats.pendingBookings > 1 ? 's' : ''} pendiente${stats.pendingBookings > 1 ? 's' : ''}`, href: '/admin/reservas?status=pending', color: '#3B82F6', icon: CalendarDays },
+    stats?.pendingBookings && stats.pendingBookings > 0 && { label: `${stats.pendingBookings} reserva${stats.pendingBookings > 1 ? 's' : ''} pendiente${stats.pendingBookings > 1 ? 's' : ''}`, href: '/admin/reservas?status=pending', color: 'var(--info)', icon: CalendarDays },
     pendingPayouts.length  > 0 && { label: `${pendingPayouts.length} pago${pendingPayouts.length > 1 ? 's' : ''} a propietarios pendiente${pendingPayouts.length > 1 ? 's' : ''} — ${formatCurrency(pendingPayoutTotal)}`, href: '/admin/liquidaciones', color: 'var(--brand)', icon: Banknote },
   ].filter(Boolean) as { label: string; href: string; color: string; icon: React.ElementType }[]
 
@@ -113,8 +113,8 @@ export default async function AdminDashboard() {
 
       {/* Totales (orientación rápida — lo pendiente vive en el banner, la comisión en la card de la derecha) */}
       <div className="grid grid-cols-3 gap-3 md:gap-4">
-        <StatCard label="Espacios" value={stats?.totalSpaces ?? 0}   icon={Building2}    color="#7C3AED" href="/admin/espacios" />
-        <StatCard label="Reservas" value={stats?.totalBookings ?? 0} icon={CalendarDays} color="#2563EB" href="/admin/reservas" />
+        <StatCard label="Espacios" value={stats?.totalSpaces ?? 0}   icon={Building2}    color="var(--accent-purple)" href="/admin/espacios" />
+        <StatCard label="Reservas" value={stats?.totalBookings ?? 0} icon={CalendarDays} color="var(--info)" href="/admin/reservas" />
         <StatCard label="Usuarios" value={stats?.totalUsers ?? 0}    icon={Users}        color="#16A34A" href="/admin/usuarios" />
       </div>
 

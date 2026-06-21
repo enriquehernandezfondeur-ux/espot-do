@@ -235,7 +235,7 @@ OrderNumber: <strong>${ORDER}</strong> · Amount: <strong>${AMT}</strong> · ITB
       for (const name of NAMES) {
         for (const type of TYPES) {
           const hash = makeHash(name, type)
-          const colors = ['#0057A8','#16A34A','#7C3AED','#D97706','#DC2626']
+          const colors = ['#0057A8','#16A34A','var(--accent-purple)','#D97706','var(--danger)']
           const ci = (NAMES.indexOf(name) * TYPES.length + TYPES.indexOf(type)) % colors.length
           combos += mkForm(name, type, hash, `Name: "${name}" | Type: "${type}"`, colors[ci])
         }
@@ -329,7 +329,7 @@ function errorHtml(msg: string) {
 <style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;
 min-height:100vh;background:#F4F6F8}
 .c{background:#fff;padding:32px;border-radius:20px;text-align:center;max-width:340px}
-h2{color:#DC2626;margin:0 0 8px}p{color:#6B7280;font-size:13px}a{color:#35C493}</style>
+h2{color:var(--danger);margin:0 0 8px}p{color:#6B7280;font-size:13px}a{color:var(--brand)}</style>
 </head><body><div class="c"><h2>Error</h2><p>${escapeHtml(msg)}</p><br>
 <a href="javascript:history.back()">← Volver</a></div></body></html>`
 }

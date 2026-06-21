@@ -274,7 +274,7 @@ export default function MisReservasPage() {
               {f}
               {(filterCounts[f] ?? 0) > 0 && (
                 <span className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
-                  style={{ background: '#EF4444', color: '#fff' }}>
+                  style={{ background: 'var(--danger)', color: '#fff' }}>
                   {filterCounts[f]}
                 </span>
               )}
@@ -466,7 +466,7 @@ export default function MisReservasPage() {
                         onClick={() => handleRejectQuotation(bk)}
                         disabled={rejectingId === bk.id}
                         className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all disabled:opacity-50 mt-2"
-                        style={{ background: 'rgba(220,38,38,0.06)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.2)' }}>
+                        style={{ background: 'rgba(220,38,38,0.06)', color: 'var(--danger)', border: '1px solid rgba(220,38,38,0.2)' }}>
                         {rejectingId === bk.id ? <><Loader2 size={13} className="animate-spin" /> Rechazando...</> : <><X size={13} /> Rechazar precio</>}
                       </button>
                     )}
@@ -561,7 +561,7 @@ export default function MisReservasPage() {
                                     <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
                                       style={{
                                         background: isPaidI ? 'var(--bg-elevated)' : isOvD ? 'rgba(220,38,38,0.08)' : isNext ? 'var(--bg-elevated)' : 'var(--bg-elevated)',
-                                        color:      isPaidI ? 'var(--brand)' : isOvD ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)',
+                                        color:      isPaidI ? 'var(--brand)' : isOvD ? 'var(--danger)' : isNext ? 'var(--brand)' : 'var(--text-muted)',
                                         border:     `1.5px solid ${isPaidI ? 'var(--border-subtle)' : isOvD ? 'rgba(220,38,38,0.2)' : isNext ? 'var(--border-subtle)' : 'var(--border-medium)'}`,
                                       }}>
                                       {isPaidI ? <Check size={13} /> : i + 1}
@@ -571,13 +571,13 @@ export default function MisReservasPage() {
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-center justify-between gap-2">
                                         <span className="text-sm font-bold" style={{
-                                          color: isPaidI ? 'var(--text-secondary)' : isOvD ? '#DC2626' : 'var(--text-primary)',
+                                          color: isPaidI ? 'var(--text-secondary)' : isOvD ? 'var(--danger)' : 'var(--text-primary)',
                                           letterSpacing: '-0.02em',
                                         }}>
                                           {formatCurrency(inst.amount)}
                                         </span>
                                         <span className="text-xs shrink-0 font-medium" style={{
-                                          color: isPaidI ? 'var(--brand)' : isOvD ? '#DC2626' : isNext ? 'var(--brand)' : 'var(--text-muted)',
+                                          color: isPaidI ? 'var(--brand)' : isOvD ? 'var(--danger)' : isNext ? 'var(--brand)' : 'var(--text-muted)',
                                         }}>
                                           {isPaidI
                                             ? `✓ Pagado${inst.paid_at ? ' · ' + formatDate(inst.paid_at.split('T')[0]) : ''}`
@@ -595,7 +595,7 @@ export default function MisReservasPage() {
                                     )}
                                     {isOvD && (
                                       <span className="text-[10px] font-bold px-2 py-1 rounded-lg shrink-0"
-                                        style={{ background: 'rgba(220,38,38,0.08)', color: '#DC2626' }}>
+                                        style={{ background: 'rgba(220,38,38,0.08)', color: 'var(--danger)' }}>
                                         Vencida
                                       </span>
                                     )}
@@ -610,7 +610,7 @@ export default function MisReservasPage() {
                                 <Link href={`/pago/${selected?.id}?cuota=${nextInst.id}`}
                                   className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold transition-all"
                                   style={{
-                                    background: isOD ? '#DC2626' : 'var(--brand)',
+                                    background: isOD ? 'var(--danger)' : 'var(--brand)',
                                     color: '#fff',
                                     boxShadow: isOD ? '0 2px 12px rgba(220,38,38,0.25)' : '0 2px 12px rgba(0,0,0,0.1)',
                                   }}>
@@ -684,14 +684,14 @@ export default function MisReservasPage() {
                             }}>
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-xs font-semibold flex items-center gap-1.5"
-                                style={{ color: expired ? '#DC2626' : '#92400E' }}>
+                                style={{ color: expired ? 'var(--danger)' : '#92400E' }}>
                                 {expired
                                   ? <><AlertTriangle size={12} /> Sin respuesta después de 48h</>
                                   : urgent
                                     ? <><Clock size={12} /> El propietario tiene {hoursLeft}h para responder</>
                                     : <><Clock size={12} /> Esperando respuesta · {hoursLeft}h restantes</>}
                               </span>
-                              <span className="text-xs tabular-nums" style={{ color: expired ? '#DC2626' : 'var(--text-muted)' }}>
+                              <span className="text-xs tabular-nums" style={{ color: expired ? 'var(--danger)' : 'var(--text-muted)' }}>
                                 {hoursElapsed}h transcurridas
                               </span>
                             </div>
@@ -699,10 +699,10 @@ export default function MisReservasPage() {
                               <div className="h-1.5 rounded-full transition-all"
                                 style={{
                                   width: `${Math.min(100, (hoursElapsed / 48) * 100)}%`,
-                                  background: expired ? '#DC2626' : urgent ? '#D97706' : 'var(--brand)',
+                                  background: expired ? 'var(--danger)' : urgent ? '#D97706' : 'var(--brand)',
                                 }} />
                             </div>
-                            <p className="text-xs mt-2" style={{ color: expired ? '#DC2626' : '#92400E' }}>
+                            <p className="text-xs mt-2" style={{ color: expired ? 'var(--danger)' : '#92400E' }}>
                               {expired
                                 ? 'La solicitud no tiene pagos — puedes cancelarla cuando quieras. Si prefieres esperar, el propietario aún puede confirmar.'
                                 : 'Te notificamos por email cuando el propietario responda.'}
@@ -716,7 +716,7 @@ export default function MisReservasPage() {
                             </Link>
                             <button onClick={() => openCancelModal(bk)}
                               className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
-                              style={{ color: '#DC2626', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
+                              style={{ color: 'var(--danger)', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
                               <X size={12} /> Cancelar solicitud
                             </button>
                           </div>
@@ -730,7 +730,7 @@ export default function MisReservasPage() {
                       return (
                       <div className="mt-4 space-y-3">
                         <div className="px-4 py-3 rounded-xl"
-                          style={{ background: expired ? 'rgba(220,38,38,0.05)' : 'rgba(8,145,178,0.05)', border: `1px solid ${expired ? 'rgba(220,38,38,0.2)' : 'rgba(8,145,178,0.2)'}`, color: expired ? '#DC2626' : '#0369A1' }}>
+                          style={{ background: expired ? 'rgba(220,38,38,0.05)' : 'rgba(8,145,178,0.05)', border: `1px solid ${expired ? 'rgba(220,38,38,0.2)' : 'rgba(8,145,178,0.2)'}`, color: expired ? 'var(--danger)' : '#0369A1' }}>
                           <div className="flex items-center justify-between mb-1.5">
                             <span className="text-xs font-semibold flex items-center gap-1.5">
                               {expired
@@ -739,7 +739,7 @@ export default function MisReservasPage() {
                             </span>
                           </div>
                           <div className="w-full h-1.5 rounded-full mb-2" style={{ background: 'var(--border-subtle)' }}>
-                            <div className="h-1.5 rounded-full" style={{ width: `${Math.min(100, (hoursElapsed / 48) * 100)}%`, background: expired ? '#DC2626' : 'var(--brand)' }} />
+                            <div className="h-1.5 rounded-full" style={{ width: `${Math.min(100, (hoursElapsed / 48) * 100)}%`, background: expired ? 'var(--danger)' : 'var(--brand)' }} />
                           </div>
                           <p className="text-xs">
                             {expired ? 'El propietario no respondió en el plazo. Escríbele directamente o cancela.' : 'Te notificamos por email cuando el propietario envíe el precio. Puedes escribirle mientras tanto.'}
@@ -766,13 +766,13 @@ export default function MisReservasPage() {
                               onClick={() => handleRejectQuotation(bk)}
                               disabled={rejectingId === bk.id}
                               className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all disabled:opacity-50"
-                              style={{ color: '#DC2626', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
+                              style={{ color: 'var(--danger)', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
                               {rejectingId === bk.id ? <><Loader2 size={12} className="animate-spin" /> Rechazando...</> : <><X size={12} /> Rechazar precio</>}
                             </button>
                           ) : (
                             <button onClick={() => openCancelModal(bk)}
                               className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
-                              style={{ color: '#DC2626', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
+                              style={{ color: 'var(--danger)', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
                               <X size={12} /> Cancelar reserva
                             </button>
                           )}
@@ -794,7 +794,7 @@ export default function MisReservasPage() {
                           {new Date(bk.event_date + 'T12:00') > new Date() && (
                             <button onClick={() => openCancelModal(bk)}
                               className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-all"
-                              style={{ color: '#DC2626', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
+                              style={{ color: 'var(--danger)', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)' }}>
                               <X size={12} /> Cancelar reserva
                             </button>
                           )}
@@ -804,7 +804,7 @@ export default function MisReservasPage() {
                     {bk.status === 'rejected' && (
                       <div className="mt-4 space-y-3">
                         <div className="px-4 py-3 rounded-xl text-sm"
-                          style={{ background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)', color: '#DC2626' }}>
+                          style={{ background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)', color: 'var(--danger)' }}>
                           El propietario no pudo aceptar tu solicitud para esta fecha.
                           {bk.rejection_reason && (
                             <p className="mt-1 font-medium">Motivo: {bk.rejection_reason}</p>
@@ -818,7 +818,7 @@ export default function MisReservasPage() {
                     {bk.status === 'cancelled_host' && (
                       <div className="mt-4 space-y-3">
                         <div className="px-4 py-3 rounded-xl text-sm"
-                          style={{ background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)', color: '#DC2626' }}>
+                          style={{ background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.15)', color: 'var(--danger)' }}>
                           El propietario canceló esta reserva.
                           {bk.cancellation_reason && (
                             <p className="mt-1 font-medium">Motivo: {bk.cancellation_reason}</p>
@@ -900,7 +900,7 @@ export default function MisReservasPage() {
                                   }
                                 }}
                                 className="px-4 py-2 rounded-xl text-sm font-bold disabled:opacity-40"
-                                style={{ background: '#35C493', color: '#fff' }}>
+                                style={{ background: 'var(--brand)', color: '#fff' }}>
                                 {submitting ? 'Publicando...' : 'Publicar reseña'}
                               </button>
                               <button onClick={() => { setReviewFor(null); setRating(0); setComment(''); setHoverStar(0); setReviewError('') }}
@@ -910,7 +910,7 @@ export default function MisReservasPage() {
                               </button>
                             </div>
                             {reviewError && (
-                              <p className="text-xs font-semibold mt-2" style={{ color: '#DC2626' }}>{reviewError}</p>
+                              <p className="text-xs font-semibold mt-2" style={{ color: 'var(--danger)' }}>{reviewError}</p>
                             )}
                           </div>
                         ) : (
@@ -945,7 +945,7 @@ export default function MisReservasPage() {
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
                       style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.15)' }}>
-                      <AlertTriangle size={20} style={{ color: '#DC2626' }} />
+                      <AlertTriangle size={20} style={{ color: 'var(--danger)' }} />
                     </div>
                     <div>
                       <h3 className="font-bold text-base mb-1" style={{ color: 'var(--text-primary)' }}>
@@ -972,7 +972,7 @@ export default function MisReservasPage() {
                                     {' '}({refundPct}% de lo pagado). Política: {cond?.cancellation_policy ?? 'estándar'}.
                                   </span>
                                 ) : (
-                                  <span style={{ color: '#DC2626' }}>
+                                  <span style={{ color: 'var(--danger)' }}>
                                     <strong>Sin reembolso</strong> — cancelación con menos de {cond.cancellation_hours_before}h de anticipación. Política: {cond?.cancellation_policy ?? 'estándar'}.
                                   </span>
                                 )}
@@ -1012,12 +1012,12 @@ export default function MisReservasPage() {
                       onClick={() => cancelHasPaid ? setCancelStep(2) : handleCancel()}
                       disabled={cancelling}
                       className="flex-1 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50"
-                      style={{ background: '#DC2626', color: '#fff' }}>
+                      style={{ background: 'var(--danger)', color: '#fff' }}>
                       {cancelHasPaid ? 'Continuar →' : (cancelling ? <><Loader2 size={15} className="animate-spin" /> Cancelando...</> : 'Sí, cancelar')}
                     </button>
                   </div>
                   {cancelError && !cancelHasPaid && (
-                    <p className="text-xs text-center font-semibold mt-2" style={{ color: '#DC2626' }}>
+                    <p className="text-xs text-center font-semibold mt-2" style={{ color: 'var(--danger)' }}>
                       {cancelError}
                     </p>
                   )}
@@ -1114,7 +1114,7 @@ export default function MisReservasPage() {
                       onClick={handleCancel}
                       disabled={cancelling || !refundBank.holderName || !refundBank.bank || !refundBank.accountNumber}
                       className="flex-1 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50"
-                      style={{ background: '#DC2626', color: '#fff' }}>
+                      style={{ background: 'var(--danger)', color: '#fff' }}>
                       {cancelling ? <><Loader2 size={15} className="animate-spin" /> Procesando...</> : 'Confirmar cancelación'}
                     </button>
                   </div>
@@ -1122,7 +1122,7 @@ export default function MisReservasPage() {
                     Estos datos solo se usan para procesarte el reembolso.
                   </p>
                   {cancelError && (
-                    <p className="text-xs text-center font-semibold mt-2" style={{ color: '#DC2626' }}>
+                    <p className="text-xs text-center font-semibold mt-2" style={{ color: 'var(--danger)' }}>
                       {cancelError}
                     </p>
                   )}
