@@ -198,6 +198,22 @@ export async function removeParticipant(participantId: string, activityId: strin
   return { ok: true as const }
 }
 
+/** Marca o desmarca la entrada de un participante el día del evento. */
+export async function setCheckin(participantId: string, activityId: string, checkedIn: boolean) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ok: false as const, error: 'No autenticado.' }
+  // RLS: solo afecta participantes de actividades del organizador.
+  const { error } = await supabase.from('activity_participants').update({
+    status: checkedIn ? 'registrado' : 'confirmado',
+    checked_in_at: checkedIn ? new Date().toISOString() : null,
+  }).eq('id', participantId)
+  if (error) return { ok: false as const, error: 'No se pudo actualizar.' }
+  revalidatePath(`/dashboard/actividades/${activityId}/checkin`)
+  revalidatePath(`/dashboard/actividades/${activityId}`)
+  return { ok: true as const }
+}
+
 export interface UpdateActivityInput {
   title?: string
   event_date?: string | null

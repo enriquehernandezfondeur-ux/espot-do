@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   ChevronLeft, MapPin, CalendarDays, Clock, Share2, MoreVertical, Trash2,
-  Users, UserPlus, Check, Loader2, CalendarPlus, Pencil, Plus, X,
+  Users, UserPlus, Check, Loader2, CalendarPlus, Pencil, Plus, X, QrCode,
 } from 'lucide-react'
 import { formatDate, formatTime, todayInRD } from '@/lib/utils'
 import { useConfirm } from '@/components/ui/ConfirmDialog'
@@ -121,6 +122,11 @@ export function ActivityDetailClient({ detail }: { detail: ActivityDetail }) {
                 <div className="fixed inset-0 z-40" onClick={() => setMenu(false)} />
                 <div className="absolute right-0 mt-1.5 z-50 w-44 rounded-xl py-1 overflow-hidden"
                   style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
+                  <Link href={`/dashboard/actividades/${activity.id}/checkin`}
+                    className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium text-left"
+                    style={{ color: 'var(--text-primary)' }}>
+                    <QrCode size={14} /> Check-in
+                  </Link>
                   <button type="button" onClick={() => { setMenu(false); setEdit(true) }}
                     className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium text-left"
                     style={{ color: 'var(--text-primary)' }}>
@@ -210,6 +216,15 @@ export function ActivityDetailClient({ detail }: { detail: ActivityDetail }) {
               )
             })}
           </div>
+
+          {/* Check-in (día del evento) */}
+          {status !== 'cancelada' && (
+            <Link href={`/dashboard/actividades/${activity.id}/checkin`}
+              className="flex items-center justify-center gap-2 text-sm font-bold px-4 py-3 rounded-xl w-full"
+              style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand)' }}>
+              <QrCode size={16} /> Modo check-in
+            </Link>
+          )}
 
           {/* Agregar al calendario */}
           {ics && (
