@@ -496,7 +496,7 @@ function Segmented({ value, onChange, options }: { value: string; onChange: (v: 
       {options.map(o => (
         <button key={o.v} onClick={() => onChange(o.v)}
           className="px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all"
-          style={value === o.v ? { background: 'var(--bg-card)', color: 'var(--text-primary)', boxShadow: '0 1px 2px rgba(0,0,0,0.08)' } : { color: 'var(--text-muted)' }}>
+          style={value === o.v ? { background: 'var(--brand)', color: '#fff' } : { color: 'var(--text-muted)' }}>
           {o.l}
         </button>
       ))}
