@@ -21,7 +21,7 @@ export default function OgImage() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'var(--brand-navy)',
+          background: '#03313C',
           position: 'relative',
           overflow: 'hidden',
         }}
@@ -50,7 +50,7 @@ export default function OgImage() {
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0,
           height: 4, display: 'flex',
-          background: 'linear-gradient(90deg, transparent, var(--brand), transparent)',
+          background: 'linear-gradient(90deg, transparent, #35C493, transparent)',
         }} />
 
         {/* Contenido central */}
@@ -106,7 +106,7 @@ export default function OgImage() {
                 borderRadius: 100,
                 border: '1px solid rgba(53,196,147,0.30)',
                 background: 'rgba(53,196,147,0.07)',
-                color: 'var(--brand)',
+                color: '#35C493',
                 fontSize: 16,
                 fontFamily: 'sans-serif',
                 fontWeight: 500,
