@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import {
-  LayoutDashboard, CalendarDays, Heart,
+  LayoutDashboard, CalendarDays, CalendarCheck, Heart,
   CreditCard, User, MessageCircle, Building2, HelpCircle,
 } from 'lucide-react'
 import AppSidebar from '@/components/shared/AppSidebar'
@@ -13,6 +13,7 @@ import { usePathname } from 'next/navigation'
 const BASE_NAV = [
   { href: '/dashboard/overview',   label: 'Inicio',       icon: LayoutDashboard },
   { href: '/dashboard/reservas',   label: 'Mis reservas', icon: CalendarDays },
+  { href: '/dashboard/actividades', label: 'Actividades', icon: CalendarCheck },
   { href: '/dashboard/favoritos',  label: 'Favoritos',    icon: Heart },
   { href: '/dashboard/pagos',      label: 'Pagos',        icon: CreditCard },
   { href: '/dashboard/mensajes',   label: 'Mensajes',     icon: MessageCircle },
