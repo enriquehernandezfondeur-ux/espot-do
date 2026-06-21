@@ -262,8 +262,8 @@ export default function ClientesPage() {
         <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl mb-3 text-xs"
           style={{ background: 'rgba(53,196,147,0.06)', border: '1px solid rgba(53,196,147,0.15)' }}>
           <span style={{ color: '#16A34A' }} className="font-semibold">Listos para campaña:</span>
-          <span className="flex items-center gap-1 text-gray-600"><Phone size={11} /> {withPhone} con teléfono</span>
-          <span className="flex items-center gap-1 text-gray-600"><Mail size={11} /> {withEmail} con email</span>
+          <span className="flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}><Phone size={11} /> {withPhone} con teléfono</span>
+          <span className="flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}><Mail size={11} /> {withEmail} con email</span>
         </div>
       )}
 
@@ -271,13 +271,13 @@ export default function ClientesPage() {
       <div className="flex flex-col sm:flex-row gap-2 mb-5">
         <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl flex-1"
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-          <Search size={15} className="text-gray-400 shrink-0" />
+          <Search size={15} className="shrink-0" style={{ color: 'var(--text-muted)' }} />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Buscar por nombre, email, teléfono o empresa..."
-            className="bg-transparent text-sm flex-1 focus:outline-none text-gray-700 placeholder-gray-400"
-            style={{ fontSize: 16 }} />
+            className="bg-transparent text-sm flex-1 focus:outline-none placeholder-gray-400"
+            style={{ fontSize: 16, color: 'var(--text-secondary)' }} />
           {search && (
-            <button onClick={() => setSearch('')} className="text-gray-400 hover:text-gray-600">
+            <button onClick={() => setSearch('')} className="hover:text-gray-600" style={{ color: 'var(--text-muted)' }}>
               <X size={14} />
             </button>
           )}
@@ -310,8 +310,8 @@ export default function ClientesPage() {
             <LoadError message="No pudimos cargar tus clientes." onRetry={loadClients} />
           ) : filtered.length === 0 ? (
             <div className="text-center py-16">
-              <Users size={32} className="mx-auto mb-3 text-gray-200" />
-              <p className="text-sm text-gray-400">
+              <Users size={32} className="mx-auto mb-3" style={{ color: 'var(--border-medium)' }} />
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                 {search ? 'Sin resultados para esa búsqueda' : 'Aún no tienes clientes registrados'}
               </p>
               {!search && (
@@ -328,8 +328,8 @@ export default function ClientesPage() {
                 return (
                   <button key={c.id}
                     onClick={() => setSelected(selected?.id === c.id ? null : c)}
-                    className={cn('w-full flex items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-slate-50',
-                      selected?.id === c.id && 'bg-slate-50'
+                    className={cn('w-full flex items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-[var(--bg-elevated)]',
+                      selected?.id === c.id && 'bg-[var(--bg-elevated)]'
                     )}>
                     {/* Avatar */}
                     <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-sm font-bold text-white"
@@ -341,7 +341,7 @@ export default function ClientesPage() {
                       <div className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>
                         {c.full_name}
                       </div>
-                      <div className="text-xs text-gray-400 truncate">
+                      <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
                         {c.email || c.phone || c.company || '—'}
                       </div>
                     </div>
@@ -360,7 +360,7 @@ export default function ClientesPage() {
                         <MessageCircle size={14} />
                       </a>
                     )}
-                    <ChevronRight size={14} className="text-gray-300 shrink-0" />
+                    <ChevronRight size={14} className="shrink-0" style={{ color: 'var(--text-muted)' }} />
                   </button>
                 )
               })}
@@ -381,16 +381,16 @@ export default function ClientesPage() {
               <div className="flex items-center gap-1">
                 {!(selected as any)._is_espot_guest && <>
                   <button onClick={() => openEditForm(selected)}
-                    className="p-1.5 rounded-lg transition-colors hover:bg-slate-100 text-gray-400 hover:text-gray-700">
+                    className="p-1.5 rounded-lg transition-colors hover:bg-[var(--bg-elevated)]" style={{ color: 'var(--text-muted)' }}>
                     <Pencil size={13} />
                   </button>
                   <button onClick={() => handleDelete(selected.id)} disabled={deleting === selected.id}
-                    className="p-1.5 rounded-lg transition-colors hover:bg-red-50 text-gray-400 hover:text-red-500">
+                    className="p-1.5 rounded-lg transition-colors hover:bg-red-50 hover:text-red-500" style={{ color: 'var(--text-muted)' }}>
                     {deleting === selected.id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
                   </button>
                 </>}
                 <button onClick={() => setSelected(null)}
-                  className="p-1.5 rounded-lg transition-colors hover:bg-slate-100 text-gray-400">
+                  className="p-1.5 rounded-lg transition-colors hover:bg-[var(--bg-elevated)]" style={{ color: 'var(--text-muted)' }}>
                   <X size={13} />
                 </button>
               </div>
@@ -400,15 +400,15 @@ export default function ClientesPage() {
               {/* Datos de contacto */}
               <div className="space-y-2">
                 {selected.email && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Mail size={13} className="text-gray-400 shrink-0" />
+                  <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    <Mail size={13} className="shrink-0" style={{ color: 'var(--text-muted)' }} />
                     <span className="truncate">{selected.email}</span>
                   </div>
                 )}
                 {selected.phone && (
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Phone size={13} className="text-gray-400 shrink-0" />
+                    <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
+                      <Phone size={13} className="shrink-0" style={{ color: 'var(--text-muted)' }} />
                       <span>{selected.phone}</span>
                     </div>
                     <a href={`https://wa.me/${selected.phone.replace(/[^0-9]/g, '')}`}
@@ -420,8 +420,8 @@ export default function ClientesPage() {
                   </div>
                 )}
                 {selected.company && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Building2 size={13} className="text-gray-400 shrink-0" />
+                  <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    <Building2 size={13} className="shrink-0" style={{ color: 'var(--text-muted)' }} />
                     <span>{selected.company}</span>
                   </div>
                 )}
@@ -441,7 +441,7 @@ export default function ClientesPage() {
 
               {/* Notas */}
               {selected.notes && (
-                <div className="rounded-xl p-3 text-xs text-gray-500" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
+                <div className="rounded-xl p-3 text-xs" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}>
                   {selected.notes}
                 </div>
               )}
@@ -449,25 +449,25 @@ export default function ClientesPage() {
               {/* Resumen histórico */}
               {histLoading ? (
                 <div className="flex justify-center py-4">
-                  <Loader2 size={18} className="animate-spin text-gray-300" />
+                  <Loader2 size={18} className="animate-spin" style={{ color: 'var(--text-muted)' }} />
                 </div>
               ) : history && (
                 <>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                       <div className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{history.total_events}</div>
-                      <div className="text-xs text-gray-400 mt-0.5">Eventos</div>
+                      <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Eventos</div>
                     </div>
                     <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(53,196,147,0.05)', border: '1px solid rgba(53,196,147,0.15)' }}>
                       <div className="text-base font-bold" style={{ color: 'var(--brand)' }}>{formatCurrency(history.total_revenue)}</div>
-                      <div className="text-xs text-gray-400 mt-0.5">Facturado</div>
+                      <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Facturado</div>
                     </div>
                   </div>
 
                   {/* Historial de eventos */}
                   {(history.events.length > 0 || history.bookings.length > 0) && (
                     <div>
-                      <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Historial</div>
+                      <div className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>Historial</div>
                       <div className="space-y-2 max-h-64 overflow-y-auto">
                         {[
                           ...history.events.map((e: any) => ({ ...e, _type: 'manual' })),
@@ -478,15 +478,15 @@ export default function ClientesPage() {
                             <div key={ev.id} className="flex items-center justify-between text-xs py-1.5 px-3 rounded-lg"
                               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
                               <div>
-                                <div className="font-medium text-gray-700 truncate max-w-[160px]">{ev.title}</div>
-                                <div className="text-gray-400 flex items-center gap-1">
+                                <div className="font-medium truncate max-w-[160px]" style={{ color: 'var(--text-secondary)' }}>{ev.title}</div>
+                                <div className="flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
                                   <CalendarDays size={9} /> {formatDate(ev.event_date)}
                                   {ev._type === 'espot' && <span className="ml-1 text-[#16A34A] font-medium">· Espot</span>}
                                 </div>
                               </div>
                               <div className="text-right">
-                                <div className="font-semibold text-gray-700">{formatCurrency(Number(ev.total_amount ?? 0))}</div>
-                                <div className="text-gray-400">{EVENT_STATUS_LABELS[ev.status] ?? ev.status}</div>
+                                <div className="font-semibold" style={{ color: 'var(--text-secondary)' }}>{formatCurrency(Number(ev.total_amount ?? 0))}</div>
+                                <div style={{ color: 'var(--text-muted)' }}>{EVENT_STATUS_LABELS[ev.status] ?? ev.status}</div>
                               </div>
                             </div>
                           ))}
@@ -499,8 +499,8 @@ export default function ClientesPage() {
           </div>
         ) : (
           <div className="rounded-2xl p-8 text-center" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-            <Users size={24} className="mx-auto mb-3 text-gray-300" />
-            <p className="text-sm text-gray-400">Selecciona un cliente para ver su historial</p>
+            <Users size={24} className="mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Selecciona un cliente para ver su historial</p>
           </div>
         )}
         </div>
@@ -517,14 +517,14 @@ export default function ClientesPage() {
               <div className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
                 {editing ? 'Editar cliente' : 'Nuevo cliente'}
               </div>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => setShowForm(false)} className="hover:text-gray-600" style={{ color: 'var(--text-muted)' }}>
                 <X size={16} />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="p-5 space-y-3">
               <div>
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Nombre completo *</label>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: 'var(--text-muted)' }}>Nombre completo *</label>
                 <input required value={form.full_name} onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))}
                   placeholder="Ej. María García"
                   className="w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2"
@@ -533,14 +533,14 @@ export default function ClientesPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Email</label>
+                  <label className="text-xs font-semibold mb-1 block" style={{ color: 'var(--text-muted)' }}>Email</label>
                   <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                     placeholder="correo@ejemplo.com"
                     className="w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none"
                     style={{ border: '1px solid var(--border-subtle)', fontSize: 16 }} />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 mb-1 block">Teléfono</label>
+                  <label className="text-xs font-semibold mb-1 block" style={{ color: 'var(--text-muted)' }}>Teléfono</label>
                   <input type="tel" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
                     placeholder="809-000-0000"
                     className="w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none"
@@ -549,7 +549,7 @@ export default function ClientesPage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Empresa</label>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: 'var(--text-muted)' }}>Empresa</label>
                 <input value={form.company} onChange={e => setForm(f => ({ ...f, company: e.target.value }))}
                   placeholder="Nombre de empresa (opcional)"
                   className="w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none"
@@ -557,7 +557,7 @@ export default function ClientesPage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Origen</label>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: 'var(--text-muted)' }}>Origen</label>
                 <select value={form.source} onChange={e => setForm(f => ({ ...f, source: e.target.value as ClientSource }))}
                   className="w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none"
                   style={{ border: '1px solid var(--border-subtle)', fontSize: 16 }}>
@@ -568,7 +568,7 @@ export default function ClientesPage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Etiquetas <span className="font-normal">(separadas por coma)</span></label>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: 'var(--text-muted)' }}>Etiquetas <span className="font-normal">(separadas por coma)</span></label>
                 <input value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))}
                   placeholder="VIP, corporativo, frecuente"
                   className="w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none"
@@ -576,7 +576,7 @@ export default function ClientesPage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Notas internas</label>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: 'var(--text-muted)' }}>Notas internas</label>
                 <textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
                   placeholder="Preferencias, observaciones, etc."
                   rows={2}
@@ -586,20 +586,20 @@ export default function ClientesPage() {
 
               {/* Próxima acción / seguimiento (CRM) */}
               <div className="rounded-xl p-3" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Próxima acción <span className="font-normal">(seguimiento)</span></label>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: 'var(--text-muted)' }}>Próxima acción <span className="font-normal">(seguimiento)</span></label>
                 <input value={form.next_action} onChange={e => setForm(f => ({ ...f, next_action: e.target.value }))}
                   placeholder="Ej.: llamar para cotización, enviar contrato…"
                   className="w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none mb-2"
-                  style={{ border: '1px solid var(--border-subtle)', fontSize: 16, background: '#fff' }} />
+                  style={{ border: '1px solid var(--border-subtle)', fontSize: 16, background: 'var(--bg-card)' }} />
                 <input type="date" value={form.next_action_date} onChange={e => setForm(f => ({ ...f, next_action_date: e.target.value }))}
                   className="w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none"
-                  style={{ border: '1px solid var(--border-subtle)', fontSize: 16, background: '#fff' }} />
+                  style={{ border: '1px solid var(--border-subtle)', fontSize: 16, background: 'var(--bg-card)' }} />
               </div>
 
               <div className="flex gap-3 pt-1">
                 <button type="button" onClick={() => setShowForm(false)}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-gray-600 transition-colors hover:bg-slate-50"
-                  style={{ border: '1px solid var(--border-subtle)' }}>
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors hover:bg-[var(--bg-elevated)]"
+                  style={{ border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
                   Cancelar
                 </button>
                 <button type="submit" disabled={saving || !form.full_name.trim()}

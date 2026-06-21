@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { CalendarDays, Clock, CheckCircle, ArrowRight, MapPin, CreditCard, Heart, MessageCircle, AlertTriangle, Bell } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils'
 import { getClientStats } from '@/lib/actions/client'
@@ -174,7 +175,7 @@ export default function ClientDashboard() {
               style={{ borderBottom: '1px solid rgba(37,99,235,0.08)', background: '#fff' }}>
               <Link href={`/dashboard/reservas/${bk.id}`} className="min-w-0 flex-1 flex items-center gap-3">
                 {cover
-                  ? <img src={cover} alt={sp?.name} className="w-10 h-10 rounded-xl object-cover shrink-0" />
+                  ? <Image src={cover} alt={sp?.name ?? ''} width={40} height={40} className="w-10 h-10 rounded-xl object-cover shrink-0" />
                   : <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shrink-0 text-sm"
                       style={{ background: 'linear-gradient(135deg, var(--info), #1D4ED8)' }}>
                       {sp?.name?.charAt(0)}
@@ -229,7 +230,7 @@ export default function ClientDashboard() {
                 style={{ borderBottom: '1px solid rgba(22,163,74,0.08)' }}>
                 <div className="flex items-center gap-3 min-w-0">
                   {cover
-                    ? <img src={cover} alt={sp?.name} className="w-9 h-9 rounded-xl object-cover shrink-0" />
+                    ? <Image src={cover} alt={sp?.name ?? ''} width={36} height={36} className="w-9 h-9 rounded-xl object-cover shrink-0" />
                     : <div className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold text-white shrink-0"
                         style={{ background: 'linear-gradient(135deg, var(--brand), #16A34A)' }}>
                         {sp?.name?.charAt(0)}
@@ -301,8 +302,8 @@ export default function ClientDashboard() {
             {/* Foto + overlay */}
             <div className="relative h-48 md:h-56" style={{ background: '#0F2A22' }}>
               {cover && (
-                <img src={cover} alt={sp?.name}
-                  className="w-full h-full object-cover" />
+                <Image src={cover} alt={sp?.name ?? ''} fill
+                  className="object-cover" sizes="(max-width:768px) 100vw, 360px" />
               )}
               {/* Gradiente sobre la foto */}
               <div className="absolute inset-0"
@@ -493,7 +494,7 @@ export default function ClientDashboard() {
                   {(() => {
                     const cover = space?.space_images?.find((i: any) => i.is_cover)?.url ?? space?.space_images?.[0]?.url
                     return cover
-                      ? <img src={cover} alt={space?.name} className="w-10 h-10 rounded-xl object-cover shrink-0" />
+                      ? <Image src={cover} alt={space?.name ?? ''} width={40} height={40} className="w-10 h-10 rounded-xl object-cover shrink-0" />
                       : <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shrink-0 text-sm"
                           style={{ background: 'linear-gradient(135deg, var(--brand), var(--brand-dark))' }}>
                           {space?.name?.charAt(0)}

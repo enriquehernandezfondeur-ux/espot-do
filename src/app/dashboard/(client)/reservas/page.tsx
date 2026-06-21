@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { CalendarDays, Clock, Users, MapPin, ChevronRight, Loader2, Search, CreditCard, CheckCircle, X, AlertTriangle, Building2, Star, MessageCircle, ExternalLink, Bell, Check } from 'lucide-react'
 import { formatCurrency, formatDate, formatTime, todayInRD } from '@/lib/utils'
@@ -354,9 +355,9 @@ export default function MisReservasPage() {
                 }}>
                   <div className="flex items-center gap-3 p-4">
                     {/* Imagen */}
-                    <div className="w-16 h-14 md:w-20 md:h-16 rounded-xl overflow-hidden shrink-0" style={{ background: 'var(--bg-elevated)' }}>
+                    <div className="relative w-16 h-14 md:w-20 md:h-16 rounded-xl overflow-hidden shrink-0" style={{ background: 'var(--bg-elevated)' }}>
                       {cover
-                        ? <img src={cover} alt={space?.name} className="w-full h-full object-cover" />
+                        ? <Image src={cover} alt={space?.name ?? ''} fill className="object-cover" sizes="96px" />
                         : <div className="w-full h-full flex items-center justify-center" style={{ color: 'var(--text-muted)' }}><Building2 size={24} /></div>}
                     </div>
 

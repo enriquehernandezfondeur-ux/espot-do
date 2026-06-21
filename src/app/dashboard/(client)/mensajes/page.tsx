@@ -6,6 +6,7 @@ import { getMyConversations, getConversation, sendMessage, markMessagesRead, mar
 import type { MessageAttachment } from '@/lib/actions/messages'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { LoadError } from '@/components/LoadError'
 import { useConfirm } from '@/components/ui/ConfirmDialog'
@@ -227,8 +228,8 @@ export default function ClientMensajesPage() {
               <button onClick={() => openConv(conv)}
                 className={cn('w-full text-left px-5 py-4 transition-colors', active?.spaceId === conv.spaceId ? 'bg-[var(--brand-dim)]' : 'hover:bg-[var(--bg-elevated)]')}>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl overflow-hidden shrink-0" style={{ background: 'var(--bg-elevated)' }}>
-                    {conv.cover ? <img src={conv.cover} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Building2 size={18} style={{ color: '#CBD5E1' }} /></div>}
+                  <div className="relative w-10 h-10 rounded-2xl overflow-hidden shrink-0" style={{ background: 'var(--bg-elevated)' }}>
+                    {conv.cover ? <Image src={conv.cover} alt="" fill className="object-cover" sizes="64px" /> : <div className="w-full h-full flex items-center justify-center"><Building2 size={18} style={{ color: '#CBD5E1' }} /></div>}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
@@ -274,8 +275,8 @@ export default function ClientMensajesPage() {
               style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
               <ArrowLeft size={17} />
             </button>
-            <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0" style={{ background: 'var(--bg-elevated)' }}>
-              {active.cover ? <img src={active.cover} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Building2 size={16} style={{ color: '#CBD5E1' }} /></div>}
+            <div className="relative w-9 h-9 rounded-xl overflow-hidden shrink-0" style={{ background: 'var(--bg-elevated)' }}>
+              {active.cover ? <Image src={active.cover} alt="" fill className="object-cover" sizes="64px" /> : <div className="w-full h-full flex items-center justify-center"><Building2 size={16} style={{ color: '#CBD5E1' }} /></div>}
             </div>
             <div>
               <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{active.spaceName}</div>
