@@ -16,6 +16,7 @@ import { getInstallments, type BookingInstallment } from '@/lib/actions/installm
 import { countdownLabel } from '@/lib/payments/schedule'
 import { notifications } from '@/lib/notifications'
 import Pagination from '@/components/ui/Pagination'
+import { useConfirm } from '@/components/ui/ConfirmDialog'
 
 const PAGE_SIZE = 15
 
@@ -64,6 +65,7 @@ export default function MisReservasPage() {
   const [refundBank, setRefundBank]   = useState<RefundBankInfo>({ holderName: '', bank: '', accountNumber: '', accountType: 'ahorro' })
   const [installments, setInstallments] = useState<BookingInstallment[]>([])
   const [page,         setPage]         = useState(1)
+  const { confirm, dialog } = useConfirm()
   const router = useRouter()
 
   const cancelHasPaid = cancelModal ? isPaid((cancelModal as any).payment_status) : false
@@ -103,7 +105,7 @@ export default function MisReservasPage() {
   }
 
   async function handleRejectQuotation(bk: Booking) {
-    const confirmed = window.confirm('¿Rechazar esta cotización? No podrás deshacer esta acción.')
+    const confirmed = await confirm({ title: '¿Rechazar esta cotización?', message: 'No podrás deshacer esta acción.', confirmText: 'Rechazar', tone: 'danger' })
     if (!confirmed) return
     setRejectingId(bk.id)
     const result = await rejectQuotation(bk.id)
@@ -220,6 +222,7 @@ export default function MisReservasPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
+      {dialog}
       <div className="mb-5 md:mb-8">
         <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Mis reservas</h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>

@@ -936,12 +936,16 @@ export default function EspacioPage() {
   // ── VISTA: Wizard de creación ─────────────────────────────
   return (
     <div className="px-4 py-5 md:px-6 md:py-8 max-w-4xl mx-auto">
+      {dialog}
       {/* Header */}
       <div className="mb-5 md:mb-8 flex items-center gap-3">
         <button
-          onClick={() => {
+          onClick={async () => {
             const hasUnsavedChanges = !!(name || description || category || capacityMax || pricingType || timeBlocks.length || addons.length || photosTouched)
-            if (hasUnsavedChanges && !window.confirm('Tienes cambios sin guardar. ¿Descartar y volver a Mis espacios?')) return
+            if (hasUnsavedChanges) {
+              const ok = await confirm({ title: 'Tienes cambios sin guardar', message: '¿Descartar y volver a Mis espacios?', confirmText: 'Descartar', tone: 'danger' })
+              if (!ok) return
+            }
             setView('list')
           }}
           className="transition-colors text-sm flex items-center gap-1.5"

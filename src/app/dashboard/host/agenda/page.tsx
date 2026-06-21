@@ -21,6 +21,7 @@ import { getHostBookings, acceptBooking, rejectBooking, completeBooking } from '
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
 import { createClient } from '@/lib/supabase/client'
 import DatePicker from '@/components/ui/DatePicker'
+import { useConfirm } from '@/components/ui/ConfirmDialog'
 import type { ExternalEvent, ExternalEventStatus, ExternalPaymentMethod } from '@/types'
 
 type Booking      = Awaited<ReturnType<typeof getHostBookings>>[0]
@@ -805,13 +806,15 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
     date: todayInRD(), notes: '', is_deposit: false,
   })
   const supabaseRef = useRef(createClient())
+  const { confirm, dialog } = useConfirm()
 
   const client  = (event as any).client_name ?? event.client?.full_name ?? ''
   const balance = (event.total_amount ?? 0) - (event.paid_amount ?? 0)
 
   async function handleStatusChange(status: ExternalEventStatus) {
     if (status === 'pendiente' && event.status === 'confirmado') {
-      if (!confirm('¿Volver el evento a "Pendiente"? Se quitará del calendario sincronizado.')) return
+      const ok = await confirm({ title: '¿Volver el evento a "Pendiente"?', message: 'Se quitará del calendario sincronizado.', confirmText: 'Volver a Pendiente' })
+      if (!ok) return
     }
     setSaving(true)
     const r = await updateExternalEvent({ id: event.id, status })
@@ -865,7 +868,8 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
   }
 
   async function handleDeletePayment(paymentId: string, amount: number) {
-    if (!confirm('¿Eliminar este pago?')) return
+    const ok = await confirm({ title: '¿Eliminar este pago?', confirmText: 'Eliminar', tone: 'danger' })
+    if (!ok) return
     const r = await deleteEventPayment(paymentId)
     if (!('error' in r)) {
       onUpdated({
@@ -877,7 +881,8 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
   }
 
   async function handleDelete() {
-    if (!confirm('¿Eliminar este evento? No se puede deshacer.')) return
+    const ok = await confirm({ title: '¿Eliminar este evento?', message: 'No se puede deshacer.', confirmText: 'Eliminar', tone: 'danger' })
+    if (!ok) return
     setDeleting(true)
     const r = await deleteExternalEvent(event.id)
     if (!('error' in r)) onDeleted()
@@ -887,6 +892,7 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
   return (
     <div className="rounded-2xl overflow-hidden sticky top-8"
       style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+      {dialog}
       <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         <div>
           <div className="flex items-center gap-2">

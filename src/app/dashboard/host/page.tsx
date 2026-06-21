@@ -17,6 +17,7 @@ import { getUpcomingFollowups } from '@/lib/actions/clients'
 import type { ExternalEvent, HostClient } from '@/types'
 import { StatusBadge } from '@/components/StatusBadge'
 import { externalEventStyle } from '@/lib/statusConfig'
+import { useConfirm } from '@/components/ui/ConfirmDialog'
 export { StatusBadge }
 
 function PublishedToast() {
@@ -46,6 +47,7 @@ export default function DashboardPage() {
   const [isTrial,        setIsTrial]        = useState(false)
   const [daysLeft,       setDaysLeft]       = useState<number | null>(null)
   const [followups,      setFollowups]      = useState<HostClient[]>([])
+  const { confirm, dialog } = useConfirm()
 
   useEffect(() => {
     Promise.all([
@@ -77,7 +79,8 @@ export default function DashboardPage() {
   }
   async function handleReject(id: string) {
     if (actionId) return
-    if (!window.confirm('¿Rechazar esta solicitud? No se puede deshacer.')) return
+    const ok = await confirm({ title: '¿Rechazar esta solicitud?', message: 'No se puede deshacer.', confirmText: 'Rechazar', tone: 'danger' })
+    if (!ok) return
     setActionId(id)
     try {
       const r = await rejectBooking(id)
@@ -141,6 +144,7 @@ export default function DashboardPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-5xl mx-auto">
+      {dialog}
       <Suspense fallback={null}><PublishedToast /></Suspense>
 
       {actionError && (

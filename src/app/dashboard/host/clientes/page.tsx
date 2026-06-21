@@ -14,6 +14,7 @@ import { getMyPlan } from '@/lib/actions/subscription'
 import { ProGate } from '@/components/ProGate'
 import { LoadError } from '@/components/LoadError'
 import Pagination from '@/components/ui/Pagination'
+import { useConfirm } from '@/components/ui/ConfirmDialog'
 
 const PAGE_SIZE = 25
 
@@ -73,6 +74,7 @@ export default function ClientesPage() {
   const [copied,   setCopied]   = useState(false)
   const [page,     setPage]     = useState(1)
   const [loadError, setLoadError] = useState(false)
+  const { confirm, dialog } = useConfirm()
 
   // Form state
   const [form, setForm] = useState({
@@ -156,7 +158,8 @@ export default function ClientesPage() {
   }
 
   async function handleDelete(clientId: string) {
-    if (!confirm('¿Eliminar este cliente? Los eventos vinculados no se eliminarán.')) return
+    const ok = await confirm({ title: '¿Eliminar este cliente?', message: 'Los eventos vinculados no se eliminarán.', confirmText: 'Eliminar', tone: 'danger' })
+    if (!ok) return
     setDeleting(clientId)
     const r = await deleteClient(clientId)
     if ('error' in r) { showToast(r.error ?? 'Error', false) }
@@ -232,6 +235,7 @@ export default function ClientesPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
+      {dialog}
       {/* Toast */}
       {toast && (
         <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"

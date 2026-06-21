@@ -6,6 +6,7 @@ import { formatDate } from '@/lib/utils'
 import { UserPlus, Loader2, Check, X, Users, Mail, Shield, Eye, Crown } from 'lucide-react'
 import { getMyPlan } from '@/lib/actions/subscription'
 import { ProGate } from '@/components/ProGate'
+import { useConfirm } from '@/components/ui/ConfirmDialog'
 import type { TeamRole } from '@/types'
 
 const ROLE_CONFIG: Record<TeamRole, { label: string; desc: string; color: string; bg: string; icon: any }> = {
@@ -21,6 +22,7 @@ export default function EquipoPage() {
   const [toast,    setToast]    = useState<{ msg: string; ok: boolean } | null>(null)
   const [form,     setForm]     = useState({ email: '', role: 'coordinador' as TeamRole })
   const [isPro,    setIsPro]    = useState<boolean | null>(null)
+  const { confirm, dialog } = useConfirm()
 
   function showToast(msg: string, ok: boolean) {
     setToast({ msg, ok })
@@ -51,7 +53,8 @@ export default function EquipoPage() {
 
   async function handleRevoke(memberId: string | undefined, email: string) {
     if (!memberId) return
-    if (!confirm(`¿Revocar acceso a ${email}?`)) return
+    const ok = await confirm({ title: `¿Revocar acceso a ${email}?`, message: 'Esta persona dejará de poder gestionar tu espacio.', confirmText: 'Revocar', tone: 'danger' })
+    if (!ok) return
     setSaving(true)
     const r = await revokeTeamMember(memberId)
     if ('error' in r) {
@@ -91,6 +94,7 @@ export default function EquipoPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-2xl mx-auto">
+      {dialog}
       {toast && (
         <div className="fixed top-16 right-4 md:top-5 md:right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold shadow-xl"
           style={{ background: toast.ok ? '#16A34A' : 'var(--danger)', color: '#fff' }}>

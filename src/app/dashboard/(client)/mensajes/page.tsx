@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { LoadError } from '@/components/LoadError'
+import { useConfirm } from '@/components/ui/ConfirmDialog'
 
 const ACCEPTED = [
   'image/jpeg','image/png','image/gif','image/webp',
@@ -32,6 +33,7 @@ export default function ClientMensajesPage() {
   const [sendError,  setSendError] = useState('')
   const [search,     setSearch]    = useState('')
   const [attachment, setAttachment] = useState<{ file: File; preview: string; type: 'image' | 'file' } | null>(null)
+  const { confirm, dialog } = useConfirm()
 
   const bottomRef    = useRef<HTMLDivElement>(null)
   const fileRef      = useRef<HTMLInputElement>(null)
@@ -192,6 +194,7 @@ export default function ClientMensajesPage() {
 
   return (
     <div className="flex flex-col md:flex-row h-[calc(100dvh-136px)] md:h-[calc(100dvh-56px)] overflow-hidden" style={{ background: 'var(--bg-base)' }}>
+      {dialog}
 
       {/* Sidebar */}
       <div className={`w-full md:w-72 md:flex-col md:shrink-0 flex flex-col ${active ? 'hidden md:flex' : 'flex'}`}
@@ -244,7 +247,8 @@ export default function ClientMensajesPage() {
               <button
                 onClick={async e => {
                   e.stopPropagation()
-                  if (!window.confirm('¿Eliminar esta conversación de tu lista? Los mensajes quedan guardados en el sistema.')) return
+                  const ok = await confirm({ title: '¿Eliminar esta conversación de tu lista?', message: 'Los mensajes quedan guardados en el sistema.', confirmText: 'Eliminar', tone: 'danger' })
+                  if (!ok) return
                   await hideConversation(conv.spaceId, conv.otherId)
                   setConvs(prev => prev.filter(c => !(c.spaceId === conv.spaceId && c.otherId === conv.otherId)))
                   if (active?.spaceId === conv.spaceId && active?.otherId === conv.otherId) setActive(null)

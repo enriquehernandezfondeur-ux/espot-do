@@ -6,6 +6,7 @@ import { Heart, Loader2, FolderPlus, Folder, FolderOpen, MoreHorizontal, Pencil,
 import { LoadError } from '@/components/LoadError'
 import { getClientFavorites, getFavoriteFolders, createFavoriteFolder, deleteFavoriteFolder, renameFavoriteFolder, moveFavoriteToFolder } from '@/lib/actions/client'
 import { SpaceCard } from '@/app/(marketplace)/buscar/SpaceCard'
+import { useConfirm } from '@/components/ui/ConfirmDialog'
 
 type FavFolder = { id: string; name: string; created_at: string }
 type Fav       = { id: string; folder_id: string | null; spaces: any }
@@ -32,6 +33,7 @@ export default function FavoritosPage() {
   // Mover favorito a carpeta
   const [movingFav,  setMovingFav]  = useState<string | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
+  const { confirm, dialog } = useConfirm()
 
   function loadFavoritos() {
     setLoading(true); setLoadError(false)
@@ -84,7 +86,8 @@ export default function FavoritosPage() {
   }
 
   async function handleDeleteFolder(folderId: string) {
-    if (!confirm('¿Eliminar esta carpeta? Los favoritos dentro quedarán sin carpeta.')) return
+    const ok = await confirm({ title: '¿Eliminar esta carpeta?', message: 'Los favoritos dentro quedarán sin carpeta.', confirmText: 'Eliminar', tone: 'danger' })
+    if (!ok) return
     await deleteFavoriteFolder(folderId)
     setFolders(f => f.filter(fd => fd.id !== folderId))
     setFavorites(fv => fv.map(f => f.folder_id === folderId ? { ...f, folder_id: null } : f))
@@ -121,6 +124,7 @@ export default function FavoritosPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
+      {dialog}
 
       {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-6 md:mb-8">

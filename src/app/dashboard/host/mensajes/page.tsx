@@ -8,6 +8,7 @@ import { getMessageTemplates, addMessageTemplate, deleteMessageTemplate, type Me
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { LoadError } from '@/components/LoadError'
+import { useConfirm } from '@/components/ui/ConfirmDialog'
 
 const ACCEPTED = [
   'image/jpeg','image/png','image/gif','image/webp',
@@ -33,6 +34,7 @@ export default function HostMensajesPage() {
   const [search,    setSearch]    = useState('')
   const [attachment, setAttachment] = useState<{ file: File; preview: string; type: 'image' | 'file' } | null>(null)
   const [showQuickReplies, setShowQuickReplies] = useState(false)
+  const { confirm, dialog } = useConfirm()
 
   const [templates,    setTemplates]    = useState<MessageTemplate[]>([])
   const [managing,     setManaging]     = useState(false)
@@ -212,6 +214,7 @@ export default function HostMensajesPage() {
 
   return (
     <div className="flex flex-col md:flex-row h-[calc(100dvh-136px)] md:h-dvh overflow-hidden" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
+      {dialog}
 
       {/* Sidebar */}
       <div className={`w-full md:w-72 md:flex-col md:shrink-0 flex flex-col ${active ? 'hidden md:flex' : 'flex'}`}
@@ -275,7 +278,8 @@ export default function HostMensajesPage() {
               <button
                 onClick={async e => {
                   e.stopPropagation()
-                  if (!window.confirm('¿Eliminar esta conversación de tu lista? Los mensajes quedan guardados en el sistema.')) return
+                  const ok = await confirm({ title: '¿Eliminar esta conversación de tu lista?', message: 'Los mensajes quedan guardados en el sistema.', confirmText: 'Eliminar', tone: 'danger' })
+                  if (!ok) return
                   await hideConversation(conv.spaceId, conv.otherId)
                   setConvs(prev => prev.filter(c => !(c.spaceId === conv.spaceId && c.otherId === conv.otherId)))
                   if (active?.spaceId === conv.spaceId && active?.otherId === conv.otherId) setActive(null)
