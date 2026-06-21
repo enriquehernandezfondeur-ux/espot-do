@@ -68,7 +68,7 @@ function PagoContent({ bookingId }: { bookingId: string }) {
       // Pago normal (primera cuota o pago único)
       const { data } = await supabase
         .from('bookings')
-        .select('total_amount, payment_status, booking_installments(id, amount, status, installment_number)')
+        .select('total_amount, payment_status, status, booking_installments(id, amount, status, installment_number)')
         .eq('id', bookingId)
         .eq('guest_id', user.id)
         .single()
@@ -77,6 +77,11 @@ function PagoContent({ bookingId }: { bookingId: string }) {
 
       const { isPaid } = await import('@/lib/bookingConfig')
       if (isPaid(data.payment_status)) { router.push(`/pago/exitoso?b=${bookingId}`); return }
+
+      // Solo se puede pagar una reserva confirmada por el propietario y activa.
+      if (!['accepted', 'confirmed'].includes((data as any).status)) {
+        router.push('/dashboard/reservas'); return
+      }
 
       // Si hay cuotas, pagar la primera pendiente
       const insts = (data as any).booking_installments ?? []

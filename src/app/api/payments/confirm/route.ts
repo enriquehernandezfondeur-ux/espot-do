@@ -124,9 +124,23 @@ export async function POST(req: NextRequest) {
       newPaymentStatus = 'partial'
     }
   } else {
-    // Pago único sin cuotas → pagado completo
+    // Pago único sin cuotas → debe cubrir el total. Si el monto cobrado por Azul
+    // NO coincide con el total (manipulación pese al hash, error de centavos/ITBIS),
+    // NO marcar 'paid': registrar 'partial' y alertar para revisión manual.
     newPaidTotal = Math.round(paidAmount)
-    newPaymentStatus = 'paid'
+    if (Math.abs(paidAmount - totalAmount) <= 1) {
+      newPaymentStatus = 'paid'
+    } else {
+      newPaymentStatus = 'partial'
+      console.error('[confirm] Monto cobrado distinto al total de la reserva', {
+        bookingId, paidAmount, totalAmount, azulOrderId: azulParams.AzulOrderId,
+      })
+      Promise.resolve(sendEmail({
+        to: process.env.ADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com',
+        subject: `ALERTA pago: monto distinto al total — ${bookingId.slice(0, 8).toUpperCase()}`,
+        html: `<p>El pago único de la reserva <b>${bookingId}</b> cobró <b>RD$${paidAmount}</b> pero el total es <b>RD$${totalAmount}</b>. Se marcó <b>partial</b> para revisión manual. AzulOrderId: ${azulParams.AzulOrderId}</p>`,
+      })).catch(() => {})
+    }
   }
 
   // Actualizar booking con lock optimista — solo afecta si no fue ya procesado por otra request

@@ -45,12 +45,17 @@ export async function GET(
           status: 404, headers: { 'Content-Type': 'text/html' },
         })
       }
-      // Verificar que la reserva pertenece al usuario
+      // Verificar que la reserva pertenece al usuario y sigue activa
       const { data: bk } = await supabase
-        .from('bookings').select('guest_id').eq('id', bookingId).single()
+        .from('bookings').select('guest_id, status').eq('id', bookingId).single()
       if (!bk || bk.guest_id !== user.id) {
         return new NextResponse(errorHtml('No autorizado para este pago.'), {
           status: 403, headers: { 'Content-Type': 'text/html' },
+        })
+      }
+      if (!['accepted', 'confirmed'].includes(bk.status)) {
+        return new NextResponse(errorHtml('Esta reserva ya no está activa.'), {
+          status: 400, headers: { 'Content-Type': 'text/html' },
         })
       }
       if (inst.status === 'paid') {
@@ -63,12 +68,17 @@ export async function GET(
       // Pago único: obtener el total real de la reserva en DB
       const { data: booking } = await supabase
         .from('bookings')
-        .select('guest_id, total_amount')
+        .select('guest_id, total_amount, status')
         .eq('id', bookingId)
         .single()
       if (!booking || booking.guest_id !== user.id) {
         return new NextResponse(errorHtml('No autorizado para este pago.'), {
           status: 403, headers: { 'Content-Type': 'text/html' },
+        })
+      }
+      if (!['accepted', 'confirmed'].includes(booking.status)) {
+        return new NextResponse(errorHtml('Esta reserva aún no está confirmada por el propietario o ya no está activa.'), {
+          status: 400, headers: { 'Content-Type': 'text/html' },
         })
       }
       amount = Math.round(Number(booking.total_amount))
