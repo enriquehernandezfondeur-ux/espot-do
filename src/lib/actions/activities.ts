@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { generatePublicCode } from '@/lib/activities/public-code'
 import { getTemplate } from '@/lib/activities/templates'
 import { validateCreateActivity, validateRsvp } from '@/lib/activities/validate'
-import type { Activity, ActivityQuestion, ActivityParticipant, ActivityType, LocationMode } from '@/lib/activities/types'
+import type { Activity, ActivityQuestion, ActivityParticipant, ActivityType, LocationMode, QuestionFieldType } from '@/lib/activities/types'
 
 export interface CreateActivityInput {
   type: ActivityType
@@ -193,6 +193,43 @@ export async function removeParticipant(participantId: string, activityId: strin
   if (!user) return { ok: false as const, error: 'No autenticado.' }
   // RLS: el delete solo afecta filas de actividades del organizador.
   const { error } = await supabase.from('activity_participants').delete().eq('id', participantId)
+  if (error) return { ok: false as const, error: 'No se pudo quitar.' }
+  revalidatePath(`/dashboard/actividades/${activityId}`)
+  return { ok: true as const }
+}
+
+/** Agrega una pregunta personalizada al RSVP de la actividad. */
+export async function addQuestion(activityId: string, input: {
+  label: string; field_type: QuestionFieldType; options?: string[] | null; required?: boolean
+}) {
+  if (!input.label.trim()) return { ok: false as const, error: 'Escribe la pregunta.' }
+  if (input.field_type === 'choice' && !(input.options && input.options.length))
+    return { ok: false as const, error: 'Agrega al menos una opción.' }
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ok: false as const, error: 'No autenticado.' }
+  const { data: last } = await supabase.from('activity_questions')
+    .select('sort_order').eq('activity_id', activityId).order('sort_order', { ascending: false }).limit(1)
+  const nextOrder = ((last?.[0]?.sort_order as number | undefined) ?? -1) + 1
+  // RLS: el WITH CHECK exige que la actividad sea del organizador.
+  const { error } = await supabase.from('activity_questions').insert({
+    activity_id: activityId,
+    label: input.label.trim(),
+    field_type: input.field_type,
+    options: input.field_type === 'choice' ? (input.options ?? null) : null,
+    required: input.required ?? false,
+    sort_order: nextOrder,
+  })
+  if (error) return { ok: false as const, error: 'No se pudo agregar.' }
+  revalidatePath(`/dashboard/actividades/${activityId}`)
+  return { ok: true as const }
+}
+
+export async function removeQuestion(questionId: string, activityId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ok: false as const, error: 'No autenticado.' }
+  const { error } = await supabase.from('activity_questions').delete().eq('id', questionId)
   if (error) return { ok: false as const, error: 'No se pudo quitar.' }
   revalidatePath(`/dashboard/actividades/${activityId}`)
   return { ok: true as const }

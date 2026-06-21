@@ -12,6 +12,7 @@ import { useConfirm } from '@/components/ui/ConfirmDialog'
 import { ActivityStatusBadge } from '@/components/activities/ActivityStatusBadge'
 import { ShareSheet } from '@/components/activities/ShareSheet'
 import { EditActivityModal } from '@/components/activities/EditActivityModal'
+import { QuestionsManager } from '@/components/activities/QuestionsManager'
 import { effectiveStatus, capacity } from '@/lib/activities/display'
 import { buildIcs, icsDataUri } from '@/lib/activities/ics'
 import {
@@ -242,33 +243,9 @@ export function ActivityDetailClient({ detail }: { detail: ActivityDetail }) {
         <ParticipantsTab activityId={activity.id} participants={participants} onConfirm={confirm} />
       )}
 
-      {/* ── Preguntas (solo lectura) ── */}
+      {/* ── Preguntas (editable) ── */}
       {tab === 'preguntas' && (
-        <div className="space-y-2">
-          {questions.length === 0 ? (
-            <div className="rounded-2xl p-8 text-center"
-              style={{ background: 'var(--bg-card)', border: '2px dashed var(--border-medium)' }}>
-              <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Sin preguntas</p>
-              <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Este tipo de actividad no pide datos extra.</p>
-            </div>
-          ) : questions.map(q => (
-            <div key={q.id} className="rounded-xl p-3.5"
-              style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{q.label}</span>
-                {q.required && (
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md"
-                    style={{ background: 'var(--brand-dim)', color: 'var(--brand)' }}>Obligatoria</span>
-                )}
-              </div>
-              <div className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-                {q.field_type === 'choice' && q.options?.length
-                  ? `Opciones: ${q.options.join(' · ')}`
-                  : ({ text: 'Texto libre', number: 'Número', boolean: 'Sí / No', choice: 'Selección' } as Record<string, string>)[q.field_type]}
-              </div>
-            </div>
-          ))}
-        </div>
+        <QuestionsManager activityId={activity.id} questions={questions} />
       )}
 
       <ShareSheet code={activity.public_code} title={activity.title} open={shareOpen} onClose={() => setShare(false)} />
