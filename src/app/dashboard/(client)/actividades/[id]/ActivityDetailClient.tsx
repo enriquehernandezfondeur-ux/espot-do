@@ -4,13 +4,18 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   ChevronLeft, MapPin, CalendarDays, Clock, Share2, MoreVertical, Trash2,
-  Users, UserPlus, Check, Loader2,
+  Users, UserPlus, Check, Loader2, CalendarPlus, Pencil, Plus, X,
 } from 'lucide-react'
-import { formatDate, formatTime } from '@/lib/utils'
+import { formatDate, formatTime, todayInRD } from '@/lib/utils'
 import { useConfirm } from '@/components/ui/ConfirmDialog'
 import { ActivityStatusBadge } from '@/components/activities/ActivityStatusBadge'
 import { ShareSheet } from '@/components/activities/ShareSheet'
-import { cancelActivity, type ActivityDetail } from '@/lib/actions/activities'
+import { EditActivityModal } from '@/components/activities/EditActivityModal'
+import { effectiveStatus, capacity } from '@/lib/activities/display'
+import { buildIcs, icsDataUri } from '@/lib/activities/ics'
+import {
+  cancelActivity, addParticipant, removeParticipant, type ActivityDetail,
+} from '@/lib/actions/activities'
 import type { ActivityParticipant } from '@/lib/activities/types'
 
 type Tab = 'resumen' | 'participantes' | 'preguntas'
@@ -31,11 +36,20 @@ export function ActivityDetailClient({ detail }: { detail: ActivityDetail }) {
   const [tab, setTab]         = useState<Tab>('resumen')
   const [menuOpen, setMenu]   = useState(false)
   const [shareOpen, setShare] = useState(false)
+  const [editOpen, setEdit]   = useState(false)
   const [cancelling, setCancelling] = useState(false)
 
+  const status = effectiveStatus(activity, todayInRD())
   const confirmed = participants.filter(p => p.status === 'confirmado')
   const totalCompanions = confirmed.reduce((s, p) => s + (p.companions ?? 0), 0)
   const totalGuests = confirmed.length + totalCompanions
+  const cap = capacity(activity.expected_people, totalGuests)
+
+  const ics = buildIcs({
+    uid: activity.public_code, title: activity.title, description: activity.description,
+    event_date: activity.event_date, start_time: activity.start_time, end_time: activity.end_time,
+    location: locationLabel(detail),
+  })
 
   async function handleCancel() {
     setMenu(false)
@@ -52,9 +66,9 @@ export function ActivityDetailClient({ detail }: { detail: ActivityDetail }) {
     if (res.ok) router.refresh()
   }
 
-  const tabs: { key: Tab; label: string }[] = [
+  const tabs: { key: Tab; label: string; count?: number }[] = [
     { key: 'resumen', label: 'Resumen' },
-    { key: 'participantes', label: 'Participantes' },
+    { key: 'participantes', label: 'Participantes', count: participants.length },
     { key: 'preguntas', label: 'Preguntas' },
   ]
 
@@ -70,7 +84,7 @@ export function ActivityDetailClient({ detail }: { detail: ActivityDetail }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{activity.title}</h1>
-            <ActivityStatusBadge status={activity.status} />
+            <ActivityStatusBadge status={status} />
           </div>
           <div className="flex items-center gap-3 mt-1.5 flex-wrap text-sm" style={{ color: 'var(--text-secondary)' }}>
             {activity.event_date && (
@@ -107,7 +121,12 @@ export function ActivityDetailClient({ detail }: { detail: ActivityDetail }) {
                 <div className="fixed inset-0 z-40" onClick={() => setMenu(false)} />
                 <div className="absolute right-0 mt-1.5 z-50 w-44 rounded-xl py-1 overflow-hidden"
                   style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
-                  <button type="button" onClick={handleCancel} disabled={activity.status === 'cancelada' || cancelling}
+                  <button type="button" onClick={() => { setMenu(false); setEdit(true) }}
+                    className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium text-left"
+                    style={{ color: 'var(--text-primary)' }}>
+                    <Pencil size={14} /> Editar
+                  </button>
+                  <button type="button" onClick={handleCancel} disabled={status === 'cancelada' || cancelling}
                     className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm font-medium text-left disabled:opacity-40"
                     style={{ color: '#DC2626' }}>
                     {cancelling ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
@@ -128,7 +147,7 @@ export function ActivityDetailClient({ detail }: { detail: ActivityDetail }) {
             <button key={t.key} type="button" onClick={() => setTab(t.key)}
               className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
               style={active ? { background: 'var(--brand)', color: '#fff' } : { background: 'transparent', color: '#6B7280' }}>
-              {t.label}
+              {t.label}{t.count ? <span className="ml-1.5 opacity-80">{t.count}</span> : null}
             </button>
           )
         })}
@@ -136,39 +155,76 @@ export function ActivityDetailClient({ detail }: { detail: ActivityDetail }) {
 
       {/* ── Resumen ── */}
       {tab === 'resumen' && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {[
-            { icon: Users,    label: 'Confirmados',  value: confirmed.length },
-            { icon: UserPlus, label: 'Acompañantes', value: totalCompanions },
-            { icon: Check,    label: 'Total asistentes', value: totalGuests },
-          ].map(stat => {
-            const Icon = stat.icon
-            return (
-              <div key={stat.label} className="rounded-2xl p-4"
-                style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-                <span className="w-9 h-9 rounded-xl flex items-center justify-center mb-2.5"
-                  style={{ background: 'var(--bg-elevated)' }}>
-                  <Icon size={16} style={{ color: 'var(--brand)' }} />
-                </span>
-                <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{stat.value}</div>
-                <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{stat.label}</div>
+        <div className="space-y-4">
+          {/* Comparte primero (cuando no hay confirmaciones) */}
+          {confirmed.length === 0 && status !== 'cancelada' && (
+            <div className="rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4"
+              style={{ background: 'var(--brand-dim)', border: '1px solid var(--brand-border, rgba(53,196,147,0.25))' }}>
+              <div className="flex-1">
+                <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Comparte para empezar a recibir confirmaciones</p>
+                <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
+                  Envía el enlace por WhatsApp o cópialo. Tus invitados confirman sin crear cuenta.
+                </p>
               </div>
-            )
-          })}
+              <button type="button" onClick={() => setShare(true)}
+                className="flex items-center justify-center gap-1.5 text-sm font-bold px-4 py-2.5 rounded-xl shrink-0"
+                style={{ background: 'var(--brand)', color: '#fff' }}>
+                <Share2 size={15} /> Compartir enlace
+              </button>
+            </div>
+          )}
+
+          {/* Capacidad */}
+          {cap.pct !== null && (
+            <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Aforo</span>
+                <span className="text-sm font-bold" style={{ color: cap.reached ? 'var(--brand)' : 'var(--text-secondary)' }}>
+                  {cap.label}{cap.reached ? ' · ¡completo!' : ''}
+                </span>
+              </div>
+              <div className="h-2.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-elevated)' }}>
+                <div className="h-full rounded-full transition-all" style={{ width: `${cap.pct}%`, background: 'var(--brand)' }} />
+              </div>
+            </div>
+          )}
+
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { icon: Users,    label: 'Confirmados',  value: confirmed.length },
+              { icon: UserPlus, label: 'Acompañantes', value: totalCompanions },
+              { icon: Check,    label: 'Total',        value: totalGuests },
+            ].map(stat => {
+              const Icon = stat.icon
+              return (
+                <div key={stat.label} className="rounded-2xl p-4"
+                  style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+                  <span className="w-9 h-9 rounded-xl flex items-center justify-center mb-2.5"
+                    style={{ background: 'var(--bg-elevated)' }}>
+                    <Icon size={16} style={{ color: 'var(--brand)' }} />
+                  </span>
+                  <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{stat.value}</div>
+                  <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{stat.label}</div>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Agregar al calendario */}
+          {ics && (
+            <a href={icsDataUri(ics)} download={`${activity.title}.ics`}
+              className="flex items-center justify-center gap-2 text-sm font-semibold px-4 py-3 rounded-xl w-full"
+              style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}>
+              <CalendarPlus size={16} style={{ color: 'var(--brand)' }} /> Agregar a mi calendario
+            </a>
+          )}
         </div>
       )}
 
       {/* ── Participantes ── */}
       {tab === 'participantes' && (
-        <div className="space-y-2">
-          {participants.length === 0 ? (
-            <div className="rounded-2xl p-8 text-center"
-              style={{ background: 'var(--bg-card)', border: '2px dashed var(--border-medium)' }}>
-              <p className="text-sm font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>Aún no hay confirmaciones</p>
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Comparte el enlace para que tus invitados confirmen.</p>
-            </div>
-          ) : participants.map(p => <ParticipantRow key={p.id} p={p} />)}
-        </div>
+        <ParticipantsTab activityId={activity.id} participants={participants} onConfirm={confirm} />
       )}
 
       {/* ── Preguntas (solo lectura) ── */}
@@ -201,13 +257,99 @@ export function ActivityDetailClient({ detail }: { detail: ActivityDetail }) {
       )}
 
       <ShareSheet code={activity.public_code} title={activity.title} open={shareOpen} onClose={() => setShare(false)} />
+      <EditActivityModal activity={activity} open={editOpen} onClose={() => setEdit(false)} />
 
       {dialog}
     </div>
   )
 }
 
-function ParticipantRow({ p }: { p: ActivityParticipant }) {
+function ParticipantsTab({
+  activityId, participants, onConfirm,
+}: {
+  activityId: string
+  participants: ActivityParticipant[]
+  onConfirm: (opts: { title: string; message?: string; confirmText?: string; tone?: 'default' | 'danger' }) => Promise<boolean>
+}) {
+  const router = useRouter()
+  const [adding, setAdding] = useState(false)
+  const [name, setName] = useState('')
+  const [companions, setCompanions] = useState(0)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function add() {
+    setError(null)
+    setBusy(true)
+    const res = await addParticipant(activityId, { name, companions })
+    setBusy(false)
+    if (!res.ok) { setError(res.error); return }
+    setName(''); setCompanions(0); setAdding(false)
+    router.refresh()
+  }
+
+  async function remove(p: ActivityParticipant) {
+    const ok = await onConfirm({ title: `¿Quitar a ${p.name}?`, confirmText: 'Quitar', tone: 'danger' })
+    if (!ok) return
+    const res = await removeParticipant(p.id, activityId)
+    if (res.ok) router.refresh()
+  }
+
+  const field: React.CSSProperties = {
+    fontSize: 16, padding: '10px 12px', borderRadius: 12,
+    background: 'var(--bg-elevated)', border: '1px solid var(--border-medium)', color: 'var(--text-primary)', outline: 'none',
+  }
+
+  return (
+    <div className="space-y-3">
+      {/* Barra: contador + agregar */}
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>
+          {participants.length} {participants.length === 1 ? 'participante' : 'participantes'}
+        </span>
+        <button type="button" onClick={() => setAdding(a => !a)}
+          className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg"
+          style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}>
+          <Plus size={13} /> Agregar
+        </button>
+      </div>
+
+      {/* Form inline de alta manual */}
+      {adding && (
+        <div className="rounded-2xl p-4 space-y-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Nombre del participante"
+              style={{ ...field, flex: 1 }} />
+            <select value={companions} onChange={e => setCompanions(Number(e.target.value))} style={field} aria-label="Acompañantes">
+              {Array.from({ length: 21 }, (_, i) => <option key={i} value={i}>{i === 0 ? 'Sin acompañantes' : `+${i}`}</option>)}
+            </select>
+          </div>
+          {error && <p className="text-xs" style={{ color: '#B91C1C' }}>{error}</p>}
+          <div className="flex gap-2">
+            <button type="button" onClick={() => { setAdding(false); setError(null) }}
+              className="flex-1 py-2 rounded-lg text-sm font-semibold" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>Cancelar</button>
+            <button type="button" onClick={add} disabled={busy}
+              className="flex-1 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-1.5"
+              style={{ background: 'var(--brand)', color: '#fff', opacity: busy ? 0.7 : 1 }}>
+              {busy && <Loader2 size={13} className="animate-spin" />} Agregar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Lista */}
+      {participants.length === 0 ? (
+        <div className="rounded-2xl p-8 text-center"
+          style={{ background: 'var(--bg-card)', border: '2px dashed var(--border-medium)' }}>
+          <p className="text-sm font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>Aún no hay confirmaciones</p>
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Comparte el enlace o agrega participantes a mano.</p>
+        </div>
+      ) : participants.map(p => <ParticipantRow key={p.id} p={p} onRemove={() => remove(p)} />)}
+    </div>
+  )
+}
+
+function ParticipantRow({ p, onRemove }: { p: ActivityParticipant; onRemove: () => void }) {
   const STATUS: Record<string, { label: string; color: string }> = {
     confirmado: { label: 'Confirmado', color: '#16A34A' },
     invitado:   { label: 'Invitado',   color: '#6B7280' },
@@ -229,10 +371,16 @@ function ParticipantRow({ p }: { p: ActivityParticipant }) {
             </span>
           )}
         </div>
-        <span className="flex items-center gap-1.5 text-xs font-medium shrink-0" style={{ color: s.color }}>
-          <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.color }} />
-          {s.label}
-        </span>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="flex items-center gap-1.5 text-xs font-medium" style={{ color: s.color }}>
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.color }} />
+            {s.label}
+          </span>
+          <button type="button" onClick={onRemove} aria-label="Quitar participante"
+            className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ color: 'var(--text-muted)' }}>
+            <X size={14} />
+          </button>
+        </div>
       </div>
       {answers && (
         <div className="mt-2 space-y-1 pt-2" style={{ borderTop: '1px solid var(--border-subtle)' }}>

@@ -1,8 +1,8 @@
 import type { ActivityTemplate, ActivityType } from './types'
 
 export const ACTIVITY_TYPE_ORDER: ActivityType[] = [
-  'podcast', 'sesion_foto', 'taller', 'reunion',
-  'casting', 'cena', 'cumpleanos', 'networking', 'otro',
+  'cumpleanos', 'reunion', 'cena', 'taller',
+  'sesion_foto', 'networking', 'casting', 'podcast', 'otro',
 ]
 
 export const ACTIVITY_TEMPLATES: Record<ActivityType, ActivityTemplate> = {

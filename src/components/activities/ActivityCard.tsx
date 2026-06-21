@@ -1,7 +1,8 @@
 import Link from 'next/link'
-import { CalendarDays, MapPin, Users, ChevronRight, Sparkles } from 'lucide-react'
-import { formatDate } from '@/lib/utils'
+import { CalendarDays, MapPin, Users, ChevronRight, Sparkles, Share2 } from 'lucide-react'
+import { formatDate, todayInRD } from '@/lib/utils'
 import type { Activity } from '@/lib/activities/types'
+import { effectiveStatus } from '@/lib/activities/display'
 import { ActivityStatusBadge } from './ActivityStatusBadge'
 
 /** Texto corto de ubicación según el modo de la actividad. */
@@ -13,6 +14,9 @@ function locationLabel(a: Activity): string {
 }
 
 export function ActivityCard({ activity, confirmedCount }: { activity: Activity; confirmedCount: number }) {
+  const status = effectiveStatus(activity, todayInRD())
+  const shareUrl = `https://espot.do/a/${activity.public_code}`
+  const waHref = `https://wa.me/?text=${encodeURIComponent(`Te invito: ${activity.title} ${shareUrl}`)}`
   return (
     <div className="rounded-2xl overflow-hidden flex flex-col h-full"
       style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
@@ -29,8 +33,15 @@ export function ActivityCard({ activity, confirmedCount }: { activity: Activity;
           </div>
         )}
         <div className="absolute top-3 left-3">
-          <ActivityStatusBadge status={activity.status} />
+          <ActivityStatusBadge status={status} />
         </div>
+        {status !== 'cancelada' && (
+          <a href={waHref} target="_blank" rel="noopener noreferrer" title="Compartir por WhatsApp"
+            className="absolute top-3 right-3 w-8 h-8 rounded-lg flex items-center justify-center backdrop-blur-sm"
+            style={{ background: 'rgba(0,0,0,0.35)', color: '#fff' }}>
+            <Share2 size={14} />
+          </a>
+        )}
       </div>
 
       {/* Info */}

@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import { CalendarDays, Clock, MapPin, CheckCircle2 } from 'lucide-react'
+import { CalendarDays, Clock, MapPin, CheckCircle2, CalendarPlus, ArrowRight } from 'lucide-react'
 import { submitRsvp, getPublicActivity } from '@/lib/actions/activity-public'
+import { buildIcs, icsDataUri } from '@/lib/activities/ics'
 
 // TODO fase 2: instrumentar vistas/clics (no hay infraestructura de eventos todavía)
 
@@ -37,6 +38,18 @@ export function RsvpClient({ code, data }: { code: string; data: PublicData }) {
   const [submitting, setSubmitting] = useState(false)
   const [done, setDone] = useState(false)
 
+  // Memoria local: si este dispositivo ya confirmó, mostramos el estado final.
+  const storageKey = `espot_rsvp_${code}`
+  useEffect(() => {
+    try { if (localStorage.getItem(storageKey)) setDone(true) } catch { /* noop */ }
+  }, [storageKey])
+
+  const ics = buildIcs({
+    uid: code, title: activity.title, description: activity.description,
+    event_date: activity.event_date, start_time: activity.start_time, end_time: activity.end_time,
+    location: space ? [space.name, space.address].filter(Boolean).join(', ') : activity.external_location,
+  })
+
   const inputBase: React.CSSProperties = {
     fontSize: 16,
     width: '100%',
@@ -66,6 +79,7 @@ export function RsvpClient({ code, data }: { code: string; data: PublicData }) {
       setError(res.error) // se conserva todo lo escrito
       return
     }
+    try { localStorage.setItem(storageKey, '1') } catch { /* noop */ }
     setDone(true)
   }
 
@@ -142,15 +156,33 @@ export function RsvpClient({ code, data }: { code: string; data: PublicData }) {
 
             {done ? (
               /* Estado de confirmación cálido y final — reemplaza el formulario */
-              <div className="flex flex-col items-center gap-3 py-6 text-center">
-                <div
-                  className="flex h-14 w-14 items-center justify-center rounded-full"
-                  style={{ background: 'var(--brand-dim)' }}
-                >
-                  <CheckCircle2 size={30} style={{ color: 'var(--brand)' }} />
+              <div className="space-y-4">
+                <div className="flex flex-col items-center gap-3 py-4 text-center">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full" style={{ background: 'var(--brand-dim)' }}>
+                    <CheckCircle2 size={30} style={{ color: 'var(--brand)' }} />
+                  </div>
+                  <div className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>¡Confirmado!</div>
+                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Te esperamos. Recibirás un recordatorio si el organizador lo envía.</p>
                 </div>
-                <div className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>¡Confirmado!</div>
-                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Te esperamos.</p>
+
+                {ics && (
+                  <a href={icsDataUri(ics)} download={`${activity.title}.ics`}
+                    className="flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold"
+                    style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}>
+                    <CalendarPlus size={16} style={{ color: 'var(--brand)' }} /> Agregar a mi calendario
+                  </a>
+                )}
+
+                {/* Adquisición: momento de máxima intención (acaba de confirmar) */}
+                <a href={ACQUISITION_URL} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-between gap-3 rounded-2xl px-4 py-3.5"
+                  style={{ background: 'linear-gradient(135deg,#03313C,#0D4A3A)' }}>
+                  <span className="min-w-0">
+                    <span className="block text-sm font-bold text-white">¿Organizas tus propios eventos?</span>
+                    <span className="block text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>Créalos gratis en Espot y recibe confirmaciones así.</span>
+                  </span>
+                  <ArrowRight size={18} style={{ color: 'var(--brand)' }} className="shrink-0" />
+                </a>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">

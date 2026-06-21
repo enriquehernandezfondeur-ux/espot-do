@@ -1,9 +1,9 @@
 import Link from 'next/link'
-import { Plus, CalendarCheck } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { getMyActivities, getConfirmedCounts } from '@/lib/actions/activities'
 import { todayInRD } from '@/lib/utils'
-import { EmptyState } from '@/components/ui/EmptyState'
 import { ActivityCard } from '@/components/activities/ActivityCard'
+import { HowItWorksHero, HowItWorksBanner } from '@/components/activities/HowItWorks'
 import { ActivitiesTabs } from './ActivitiesTabs'
 
 export const dynamic = 'force-dynamic'
@@ -35,21 +35,12 @@ export default async function ActividadesPage() {
       </div>
 
       {activities.length === 0 ? (
-        <div className="rounded-3xl" style={{ background: 'var(--bg-card)', border: '2px dashed var(--border-medium)' }}>
-          <EmptyState
-            icon={CalendarCheck}
-            title="Aún no tienes actividades"
-            subtitle="Crea tu primera actividad para compartir un enlace y recibir confirmaciones."
-            action={
-              <Link href="/dashboard/actividades/nueva"
-                className="text-sm font-semibold px-5 py-2.5 rounded-xl"
-                style={{ background: 'var(--brand)', color: '#fff' }}>
-                Crear actividad
-              </Link>
-            }
-          />
+        <div className="max-w-lg mx-auto">
+          <HowItWorksHero />
         </div>
       ) : (
+        <>
+        <HowItWorksBanner />
         <ActivitiesTabs
           upcomingCount={upcoming.length}
           pastCount={past.length}
@@ -64,6 +55,7 @@ export default async function ActividadesPage() {
             </div>
           }
         />
+        </>
       )}
     </div>
   )

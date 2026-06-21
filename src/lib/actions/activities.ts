@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { generatePublicCode } from '@/lib/activities/public-code'
 import { getTemplate } from '@/lib/activities/templates'
-import { validateCreateActivity } from '@/lib/activities/validate'
+import { validateCreateActivity, validateRsvp } from '@/lib/activities/validate'
 import type { Activity, ActivityQuestion, ActivityParticipant, ActivityType, LocationMode } from '@/lib/activities/types'
 
 export interface CreateActivityInput {
@@ -28,6 +28,20 @@ export async function createActivity(input: CreateActivityInput) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { ok: false as const, error: 'No autenticado.' }
 
+  // Auto-portada: si la actividad usa un espacio (directo o vía reserva),
+  // tomamos su foto de portada para que la card y la página pública luzcan.
+  let cover: string | null = null
+  let coverSpaceId = input.space_id ?? null
+  if (!coverSpaceId && input.booking_id) {
+    const { data: bk } = await supabase.from('bookings').select('space_id').eq('id', input.booking_id).single()
+    coverSpaceId = (bk as { space_id?: string } | null)?.space_id ?? null
+  }
+  if (coverSpaceId) {
+    const { data: sp } = await supabase.from('spaces').select('space_images(url, is_cover)').eq('id', coverSpaceId).single()
+    const imgs = (sp as { space_images?: { url: string; is_cover: boolean }[] } | null)?.space_images
+    cover = imgs?.find(i => i.is_cover)?.url ?? imgs?.[0]?.url ?? null
+  }
+
   const code = generatePublicCode()
   const { data, error } = await supabase.from('activities').insert({
     organizer_id: user.id,
@@ -41,6 +55,7 @@ export async function createActivity(input: CreateActivityInput) {
     booking_id: input.booking_id ?? null,
     space_id: input.space_id ?? null,
     external_location: input.external_location ?? null,
+    cover_image: cover,
     public_code: code,
     public_enabled: true,
     status: 'publicada',
@@ -148,6 +163,67 @@ export async function searchSpacesForActivity(query: string): Promise<SpaceSearc
     address: s.address ?? null,
     cover: s.space_images?.find((i: any) => i.is_cover)?.url ?? s.space_images?.[0]?.url ?? null,
   }))
+}
+
+/** Alta manual de un participante (p.ej. alguien que confirmó por teléfono). */
+export async function addParticipant(activityId: string, input: { name: string; companions?: number; contact?: string }) {
+  const v = validateRsvp({ name: input.name, companions: input.companions })
+  if (!v.ok) return { ok: false as const, error: v.error }
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ok: false as const, error: 'No autenticado.' }
+  // La RLS de activity_participants exige que la actividad sea del organizador.
+  const token = `manual-${crypto.randomUUID()}`
+  const { error } = await supabase.from('activity_participants').insert({
+    activity_id: activityId,
+    name: input.name.trim(),
+    contact: input.contact?.trim() || null,
+    status: 'confirmado',
+    companions: input.companions ?? 0,
+    rsvp_token: token,
+  })
+  if (error) return { ok: false as const, error: 'No se pudo agregar.' }
+  revalidatePath(`/dashboard/actividades/${activityId}`)
+  return { ok: true as const }
+}
+
+export async function removeParticipant(participantId: string, activityId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ok: false as const, error: 'No autenticado.' }
+  // RLS: el delete solo afecta filas de actividades del organizador.
+  const { error } = await supabase.from('activity_participants').delete().eq('id', participantId)
+  if (error) return { ok: false as const, error: 'No se pudo quitar.' }
+  revalidatePath(`/dashboard/actividades/${activityId}`)
+  return { ok: true as const }
+}
+
+export interface UpdateActivityInput {
+  title?: string
+  event_date?: string | null
+  start_time?: string | null
+  end_time?: string | null
+  expected_people?: number | null
+  external_location?: string | null
+}
+
+export async function updateActivity(id: string, patch: UpdateActivityInput) {
+  if (patch.title !== undefined && !patch.title.trim())
+    return { ok: false as const, error: 'El nombre no puede quedar vacío.' }
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ok: false as const, error: 'No autenticado.' }
+  const update: Record<string, unknown> = { updated_at: new Date().toISOString() }
+  if (patch.title !== undefined)             update.title = patch.title.trim()
+  if (patch.event_date !== undefined)        update.event_date = patch.event_date
+  if (patch.start_time !== undefined)        update.start_time = patch.start_time
+  if (patch.end_time !== undefined)          update.end_time = patch.end_time
+  if (patch.expected_people !== undefined)   update.expected_people = patch.expected_people
+  if (patch.external_location !== undefined) update.external_location = patch.external_location
+  const { error } = await supabase.from('activities').update(update).eq('id', id).eq('organizer_id', user.id)
+  if (error) return { ok: false as const, error: 'No se pudo guardar.' }
+  revalidatePath(`/dashboard/actividades/${id}`)
+  return { ok: true as const }
 }
 
 export async function cancelActivity(id: string) {
