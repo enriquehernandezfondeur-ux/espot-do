@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { generatePublicCode } from '@/lib/activities/public-code'
 import { getTemplate } from '@/lib/activities/templates'
 import { validateCreateActivity, validateRsvp } from '@/lib/activities/validate'
@@ -277,6 +278,52 @@ export async function updateActivity(id: string, patch: UpdateActivityInput) {
   if (error) return { ok: false as const, error: 'No se pudo guardar.' }
   revalidatePath(`/dashboard/actividades/${id}`)
   return { ok: true as const }
+}
+
+// ── Panel de preparación para el PROPIETARIO (solo-lectura, sin PII) ──────────
+export interface ActivityPrep {
+  id: string
+  type: string
+  title: string
+  event_date: string | null
+  start_time: string | null
+  end_time: string | null
+  expected_people: number | null
+  confirmedPeople: number
+}
+
+/**
+ * Actividades enlazadas a una reserva del host. Devuelve SOLO lo necesario para
+ * preparar el espacio (tipo, fecha, horario, # personas, confirmados agregados).
+ * Nunca expone datos de invitados. Gateado por propiedad del espacio.
+ */
+export async function getBookingActivityPrep(bookingId: string): Promise<ActivityPrep[]> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+  // El host solo lee SU reserva (RLS) y verificamos que el espacio sea suyo.
+  const { data: bk } = await supabase
+    .from('bookings').select('id, spaces!space_id(host_id)').eq('id', bookingId).single()
+  const hostId = (bk as { spaces?: { host_id?: string } } | null)?.spaces?.host_id
+  if (!bk || !hostId || hostId !== user.id) return []
+
+  // Las actividades tienen RLS organizer-only → leemos por service-role.
+  const svc = createServiceClient()
+  const { data: acts } = await svc.from('activities')
+    .select('id, type, title, event_date, start_time, end_time, expected_people')
+    .eq('booking_id', bookingId)
+    .neq('status', 'cancelada')
+  const list = (acts ?? []) as Omit<ActivityPrep, 'confirmedPeople'>[]
+  if (list.length === 0) return []
+
+  const ids = list.map(a => a.id)
+  const { data: parts } = await svc.from('activity_participants')
+    .select('activity_id, companions').in('activity_id', ids).eq('status', 'confirmado')
+  const counts: Record<string, number> = {}
+  for (const p of (parts ?? []) as { activity_id: string; companions: number }[]) {
+    counts[p.activity_id] = (counts[p.activity_id] ?? 0) + 1 + (p.companions ?? 0)
+  }
+  return list.map(a => ({ ...a, confirmedPeople: counts[a.id] ?? 0 }))
 }
 
 export async function cancelActivity(id: string) {

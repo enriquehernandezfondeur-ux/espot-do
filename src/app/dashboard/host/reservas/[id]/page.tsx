@@ -15,6 +15,7 @@ import { payoutStyle } from '@/lib/statusConfig'
 import { countdownLabel } from '@/lib/payments/schedule'
 import { getDisputeForBooking } from '@/lib/actions/disputes'
 import DisputeSection from '@/app/dashboard/(client)/reservas/[id]/DisputeSection'
+import { ActivityPrepPanel } from '@/components/activities/ActivityPrepPanel'
 
 type DetailData = Awaited<ReturnType<typeof getHostBookingDetail>>
 
@@ -581,6 +582,9 @@ export default function HostBookingDetailPage({ params }: { params: Promise<{ id
             : <><CheckCircle size={15} /> Marcar evento como completado</>}
         </button>
       )}
+
+      {/* ── Preparación: actividad del cliente (solo-lectura) ── */}
+      <ActivityPrepPanel bookingId={bk.id} />
 
       {/* ── Sección de disputa ────────────────────────────── */}
       <DisputeSection
