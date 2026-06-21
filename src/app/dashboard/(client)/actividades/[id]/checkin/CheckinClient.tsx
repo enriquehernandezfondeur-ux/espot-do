@@ -1,9 +1,9 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { QRCodeSVG } from 'qrcode.react'
-import { ChevronLeft, Search, QrCode, Check, UserPlus, X } from 'lucide-react'
+import { ChevronLeft, Search, QrCode, Check, UserPlus, X, RefreshCw } from 'lucide-react'
 import { setCheckin, type ActivityDetail } from '@/lib/actions/activities'
 import type { ActivityParticipant } from '@/lib/activities/types'
 
@@ -28,6 +28,12 @@ export function CheckinClient({ detail }: { detail: ActivityDetail }) {
   const [query, setQuery] = useState('')
   const [showQr, setShowQr] = useState(false)
   const [busy, setBusy] = useState<Set<string>>(new Set())
+
+  // Reconciliar con el servidor cuando llegan confirmaciones nuevas (tras refresh).
+  useEffect(() => {
+    if (busy.size === 0) setRows(detail.participants.filter(p => p.status !== 'rechazado'))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [detail.participants])
 
   const publicUrl = `https://espot.do/a/${activity.public_code}`
   const registered = rows.filter(p => p.status === 'registrado').length
@@ -72,8 +78,13 @@ export function CheckinClient({ detail }: { detail: ActivityDetail }) {
             <h1 className="text-lg font-bold truncate" style={{ color: 'var(--text-primary)' }}>Check-in</h1>
             <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{activity.title}</p>
           </div>
+          <button type="button" onClick={() => router.refresh()} aria-label="Actualizar"
+            className="ml-auto w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+            <RefreshCw size={15} />
+          </button>
           <button type="button" onClick={() => setShowQr(s => !s)}
-            className="ml-auto flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl shrink-0"
+            className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl shrink-0"
             style={{ background: showQr ? 'var(--brand)' : 'var(--bg-elevated)', color: showQr ? '#fff' : 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}>
             <QrCode size={14} /> QR
           </button>
@@ -87,7 +98,7 @@ export function CheckinClient({ detail }: { detail: ActivityDetail }) {
               <QRCodeSVG value={publicUrl} size={172} />
             </div>
             <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Escanea para confirmar</p>
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Quien aún no confirmó aparece aquí al instante.</p>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Quien aún no confirmó puede hacerlo aquí. Toca Actualizar para verlo en la lista.</p>
           </div>
         )}
 
