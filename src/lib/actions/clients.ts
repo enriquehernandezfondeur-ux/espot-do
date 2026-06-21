@@ -102,6 +102,8 @@ export async function getUpcomingFollowups(): Promise<HostClient[]> {
 
 // ── Vista unificada: host_clients + guests de Espot sin duplicar ──
 export async function getUnifiedClients() {
+  const gate = await requirePro()
+  if (!gate.ok) return [] // CRM de clientes es función Pro
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []

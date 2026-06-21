@@ -10,7 +10,7 @@ import {
   CalendarDays, Clock, Building2, Filter, MousePointerClick,
 } from 'lucide-react'
 import { getMyPlan } from '@/lib/actions/subscription'
-import { ProUpsell } from '@/components/ProUpsell'
+import { ProGate } from '@/components/ProGate'
 import { clickThroughRate } from '@/lib/analytics'
 
 const PIE_COLORS = ['#35C493', '#3B82F6', '#F59E0B', '#EC4899', '#8B5CF6', '#EF4444']
@@ -40,6 +40,27 @@ export default function AnalyticsPage() {
       <div className="rounded-2xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
         <LoadError message="No pudimos cargar tus estadísticas." onRetry={load} />
       </div>
+    </div>
+  )
+
+  // Esperar a saber el plan para no parpadear contenido antes del muro.
+  if (isPro === null) return (
+    <div className="flex items-center justify-center h-dvh" style={{ background: 'var(--bg-base)' }}>
+      <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand)' }} />
+    </div>
+  )
+  // Analytics es función Pro: el plan Normal no ve los datos.
+  if (isPro === false) return (
+    <div className="p-4 md:p-6 max-w-3xl mx-auto">
+      <div className="mb-5 md:mb-7">
+        <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Analytics</h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Demanda, conversión y rendimiento de tus espacios</p>
+      </div>
+      <ProGate
+        title="Analytics es parte de Espot Pro"
+        description="Entiende qué impulsa tus reservas: vistas, conversión, embudo, clics de intención y rendimiento por espacio."
+        features={['Vistas y CTR de tus espacios', 'Embudo de conversión', 'Ingresos por canal y por espacio', 'Tendencias por día y hora']}
+      />
     </div>
   )
 
@@ -82,25 +103,18 @@ export default function AnalyticsPage() {
           foot={<span style={{ color: 'var(--text-muted)' }}>{d.rating.count} reseña{d.rating.count !== 1 ? 's' : ''}</span>} />
       </div>
 
-      {/* Avanzado (Pro): clics de intención y CTR */}
-      {isPro === false && (
-        <ProUpsell title="Estadísticas avanzadas con Espot Pro">
-          Mide los clics de intención de reserva y tu tasa de conversión de clic (CTR), por RD$499 al mes.
-        </ProUpsell>
-      )}
-      {isPro === true && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-5 md:mb-6">
-          <Kpi icon={MousePointerClick} color="#EC4899" label="Clics de reserva (28 días)" value={String(d.clicks.total)}
-            foot={<span style={{ color: 'var(--text-muted)' }}>intención de reservar</span>} />
-          {(() => {
-            const ctr = clickThroughRate(d.views.total, d.clicks.total)
-            return (
-              <Kpi icon={Target} color="#0EA5E9" label="CTR (clic → vista)" value={ctr === null ? '—' : `${ctr}%`}
-                foot={<span style={{ color: 'var(--text-muted)' }}>clics ÷ vistas</span>} />
-            )
-          })()}
-        </div>
-      )}
+      {/* Avanzado: clics de intención y CTR (Pro — la página completa ya está gateada) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-5 md:mb-6">
+        <Kpi icon={MousePointerClick} color="#EC4899" label="Clics de reserva (28 días)" value={String(d.clicks.total)}
+          foot={<span style={{ color: 'var(--text-muted)' }}>intención de reservar</span>} />
+        {(() => {
+          const ctr = clickThroughRate(d.views.total, d.clicks.total)
+          return (
+            <Kpi icon={Target} color="#0EA5E9" label="CTR (clic → vista)" value={ctr === null ? '—' : `${ctr}%`}
+              foot={<span style={{ color: 'var(--text-muted)' }}>clics ÷ vistas</span>} />
+          )
+        })()}
+      </div>
 
       {/* Embudo de conversión */}
       <div className="rounded-2xl p-5 md:p-6 mb-5 md:mb-6" style={CARD}>

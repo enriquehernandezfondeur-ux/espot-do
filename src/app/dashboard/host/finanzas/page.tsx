@@ -9,8 +9,10 @@ import { payoutStyle, type PayoutStatus } from '@/lib/statusConfig'
 import {
   Loader2, TrendingUp, TrendingDown, Download, Banknote,
   Building2, Save, AlertCircle, ChevronDown, CheckCircle, CalendarClock,
-  ArrowDownToLine, PiggyBank, Hourglass, Info,
+  ArrowDownToLine, PiggyBank, Hourglass, Info, Crown, ArrowRight,
 } from 'lucide-react'
+import Link from 'next/link'
+import { getMyPlan } from '@/lib/actions/subscription'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 
 const BANKS = [
@@ -41,6 +43,7 @@ export default function FinanzasPage() {
   const [loadError, setLoadError] = useState(false)
   const [period,  setPeriod]  = useState<'6m' | '12m'>('6m')
   const [channel, setChannel] = useState<'total' | 'espot' | 'directo'>('total')
+  const [isPro,   setIsPro]   = useState<boolean | null>(null)
 
   // Cuenta bancaria
   const [bankName, setBankName]       = useState('')
@@ -71,6 +74,7 @@ export default function FinanzasPage() {
     }).catch(() => { setLoadError(true); setLoading(false) })
   }
   useEffect(() => { load() }, [])
+  useEffect(() => { getMyPlan().then(p => setIsPro(p === 'pro')) }, [])
 
   const chartData = useMemo(() => {
     if (!fin) return []
@@ -218,12 +222,27 @@ export default function FinanzasPage() {
           <div className="flex items-center gap-2 mb-3">
             <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#8B5CF6' }} />
             <span className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>Directo (tus eventos)</span>
+            {isPro !== true && <Crown size={13} style={{ color: 'var(--pro)' }} className="ml-auto" />}
           </div>
-          <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>{formatCurrency(directoEarned)}</div>
-          <div className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>sin comisión · el 100% es tuyo</div>
-          <div className="text-xs mt-2.5 pt-2.5" style={{ borderTop: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}>
-            {f.directo.count} evento{f.directo.count !== 1 ? 's' : ''} · cobrado {formatCurrency(f.directo.collected)}
-          </div>
+          {isPro === true ? (
+            <>
+              <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>{formatCurrency(directoEarned)}</div>
+              <div className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>sin comisión · el 100% es tuyo</div>
+              <div className="text-xs mt-2.5 pt-2.5" style={{ borderTop: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}>
+                {f.directo.count} evento{f.directo.count !== 1 ? 's' : ''} · cobrado {formatCurrency(f.directo.collected)}
+              </div>
+            </>
+          ) : (
+            <Link href="/dashboard/host/pro" className="block">
+              <div className="text-base font-bold" style={{ color: 'var(--pro)' }}>Disponible con Espot Pro</div>
+              <p className="text-xs mt-1 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                Cobra y registra tus eventos propios (sin comisión, el 100% es tuyo) directo en Espot.
+              </p>
+              <span className="inline-flex items-center gap-1 text-xs font-bold mt-2.5" style={{ color: 'var(--pro)' }}>
+                Activar Espot Pro <ArrowRight size={12} />
+              </span>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -238,7 +257,9 @@ export default function FinanzasPage() {
           </div>
           <div className="flex items-center gap-2">
             <Segmented value={channel} onChange={v => setChannel(v as typeof channel)}
-              options={[{ v: 'total', l: 'Total' }, { v: 'espot', l: 'Espot' }, { v: 'directo', l: 'Directo' }]} />
+              options={isPro === true
+                ? [{ v: 'total', l: 'Total' }, { v: 'espot', l: 'Espot' }, { v: 'directo', l: 'Directo' }]
+                : [{ v: 'total', l: 'Total' }, { v: 'espot', l: 'Espot' }]} />
             <Segmented value={period} onChange={v => setPeriod(v as typeof period)}
               options={[{ v: '6m', l: '6m' }, { v: '12m', l: '12m' }]} />
           </div>

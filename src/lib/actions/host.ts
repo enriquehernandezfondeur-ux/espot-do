@@ -8,6 +8,7 @@ import { emailBase, infoBox } from '@/lib/email/templates'
 import { formatCurrency, formatDate, escapeHtml } from '@/lib/utils'
 import { userLogger, logError } from '@/lib/logger'
 import { resolveHostId } from './_resolveHost'
+import { requirePro } from './subscription'
 import { computePlatformFee } from '@/lib/pricing'
 import { createServiceClient } from '@/lib/supabase/service'
 
@@ -709,6 +710,8 @@ export async function generateHostSlug() {
 
 // ── Equipo: obtener miembros ──────────────────────────────
 export async function getTeamMembers() {
+  const gate = await requirePro()
+  if (!gate.ok) return [] // Equipo es función Pro
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
@@ -727,6 +730,8 @@ export async function getTeamMembers() {
 
 // ── Equipo: invitar miembro ───────────────────────────────
 export async function inviteTeamMember(email: string, role: 'admin' | 'coordinador' | 'viewer') {
+  const gate = await requirePro()
+  if (!gate.ok) return { error: gate.error }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
@@ -784,6 +789,8 @@ export async function inviteTeamMember(email: string, role: 'admin' | 'coordinad
 
 // ── Equipo: revocar / desactivar miembro ──────────────────
 export async function revokeTeamMember(memberId: string) {
+  const gate = await requirePro()
+  if (!gate.ok) return { error: gate.error }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }

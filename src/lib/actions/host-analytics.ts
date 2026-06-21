@@ -49,6 +49,8 @@ export async function getHostAnalytics(): Promise<HostAnalytics | null> {
   // Los clics de intención son métrica Pro (F6b): no se serializan a hosts
   // gratuitos aunque la UI no los muestre (evita fuga por inspección de red).
   const isPro = (await getMyPlan()) === 'pro'
+  // Analytics es función Pro: el plan Normal no recibe datos (ni por inspección de red).
+  if (!isPro) return null
 
   const { data: spaceRows } = await supabase
     .from('spaces').select('id, name').eq('host_id', hostId)

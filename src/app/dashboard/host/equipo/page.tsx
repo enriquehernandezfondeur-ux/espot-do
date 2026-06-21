@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { getTeamMembers, inviteTeamMember, revokeTeamMember } from '@/lib/actions/host'
 import { formatDate } from '@/lib/utils'
 import { UserPlus, Loader2, Check, X, Users, Mail, Shield, Eye, Crown } from 'lucide-react'
+import { getMyPlan } from '@/lib/actions/subscription'
+import { ProGate } from '@/components/ProGate'
 import type { TeamRole } from '@/types'
 
 const ROLE_CONFIG: Record<TeamRole, { label: string; desc: string; color: string; bg: string; icon: any }> = {
@@ -18,6 +20,7 @@ export default function EquipoPage() {
   const [saving,   setSaving]   = useState(false)
   const [toast,    setToast]    = useState<{ msg: string; ok: boolean } | null>(null)
   const [form,     setForm]     = useState({ email: '', role: 'coordinador' as TeamRole })
+  const [isPro,    setIsPro]    = useState<boolean | null>(null)
 
   function showToast(msg: string, ok: boolean) {
     setToast({ msg, ok })
@@ -27,6 +30,7 @@ export default function EquipoPage() {
   useEffect(() => {
     getTeamMembers().then(d => { setMembers(d); setLoading(false) })
   }, [])
+  useEffect(() => { getMyPlan().then(p => setIsPro(p === 'pro')) }, [])
 
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault()
@@ -61,6 +65,29 @@ export default function EquipoPage() {
 
   const activeMembers  = members.filter(m => m.status === 'active')
   const pendingMembers = members.filter(m => m.status === 'pending')
+
+  // Esperar el plan para no parpadear antes del muro.
+  if (isPro === null) return (
+    <div className="flex items-center justify-center h-dvh" style={{ background: 'var(--bg-base)' }}>
+      <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand)' }} />
+    </div>
+  )
+  // Equipo es función Pro: el plan Normal no puede invitar ni gestionar.
+  if (isPro === false) return (
+    <div className="p-4 md:p-6 max-w-3xl mx-auto">
+      <div className="mb-5">
+        <h1 className="text-2xl font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+          <Users size={22} style={{ color: 'var(--brand)' }} /> Equipo
+        </h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>Invita personas de confianza para gestionar tu espacio contigo.</p>
+      </div>
+      <ProGate
+        title="Equipo es parte de Espot Pro"
+        description="Invita coordinadores y colaboradores para gestionar tus reservas, mensajes y calendario contigo, con permisos por rol."
+        features={['Invita por correo', 'Roles y permisos (admin, coordinador, lectura)', 'Trabajen las reservas en equipo']}
+      />
+    </div>
+  )
 
   return (
     <div className="p-4 md:p-6 max-w-2xl mx-auto">

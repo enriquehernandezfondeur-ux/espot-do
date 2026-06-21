@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import type { HostClient, ClientSource } from '@/types'
 import { getMyPlan } from '@/lib/actions/subscription'
-import { ProUpsell } from '@/components/ProUpsell'
+import { ProGate } from '@/components/ProGate'
 import { LoadError } from '@/components/LoadError'
 import Pagination from '@/components/ui/Pagination'
 
@@ -209,6 +209,27 @@ export default function ClientesPage() {
     setTimeout(() => setCopied(false), 2500)
   }
 
+  // Esperar el plan para no parpadear datos antes del muro.
+  if (isPro === null) return (
+    <div className="flex items-center justify-center h-dvh" style={{ background: 'var(--bg-base)' }}>
+      <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--brand)' }} />
+    </div>
+  )
+  // CRM de clientes es función Pro: el plan Normal no ve los datos.
+  if (isPro === false) return (
+    <div className="p-4 md:p-6 max-w-3xl mx-auto">
+      <div className="mb-5">
+        <h1 className="text-xl md:text-2xl font-bold" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Clientes</h1>
+        <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>Tu CRM de clientes</p>
+      </div>
+      <ProGate
+        title="El CRM de clientes es de Espot Pro"
+        description="Guarda y organiza a tus clientes en un solo lugar: historial de eventos, etiquetas, contacto y notas para fidelizarlos."
+        features={['Ficha e historial por cliente', 'Etiquetas y origen', 'Exportar y contactar por WhatsApp', 'Clientes de Espot + directos unificados']}
+      />
+    </div>
+  )
+
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {/* Toast */}
@@ -217,12 +238,6 @@ export default function ClientesPage() {
           style={{ background: toast.ok ? '#16A34A' : '#DC2626', color: '#fff' }}>
           {toast.ok ? <Check size={14} /> : <X size={14} />} {toast.msg}
         </div>
-      )}
-
-      {isPro === false && (
-        <ProUpsell title="Tu CRM de clientes es parte de Espot Pro">
-          Guarda y organiza tus clientes, con historial y etiquetas, por RD$499 al mes. Puedes ver esta sección, pero crear o editar requiere Pro.
-        </ProUpsell>
       )}
 
       {/* Header */}
