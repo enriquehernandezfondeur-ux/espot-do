@@ -102,7 +102,7 @@ export default function HeroParallax() {
         <p
           className="mb-10"
           style={{
-            color: 'rgba(255,255,255,0.45)',
+            color: 'rgba(255,255,255,0.78)',
             fontSize: 'clamp(0.9rem, 2vw, 1.1rem)',
             lineHeight: 1.8,
             maxWidth: 500,
