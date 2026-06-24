@@ -43,6 +43,7 @@ export default function HeroParallax() {
           width: '100%', height: '115%', // más alto para el parallax
           objectFit: 'cover', zIndex: 0,
           willChange: 'transform',
+          filter: 'brightness(1.18) saturate(1.05)',
         }}>
         <source src="/dia.mp4" type="video/mp4" />
       </video>
@@ -51,7 +52,7 @@ export default function HeroParallax() {
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'linear-gradient(160deg, rgba(3,10,7,0.85) 0%, rgba(6,18,12,0.78) 50%, rgba(3,8,6,0.88) 100%)',
+          background: 'linear-gradient(160deg, rgba(3,10,7,0.55) 0%, rgba(6,18,12,0.42) 50%, rgba(3,8,6,0.60) 100%)',
           zIndex: 1,
         }}
       />
