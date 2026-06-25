@@ -3,6 +3,24 @@
 > El push a Vercel **no** aplica SQL. Estos cambios deben correrse manualmente en el
 > SQL Editor de Supabase del proyecto Espot. Revisar antes de aplicar.
 
+> **Actualización 2026-06-25 (re-auditoría — verificada contra la DB de prod):**
+> Se corrió `supabase/VERIFICACION_2026-06-25.sql` en producción. Resultado:
+> - ✅ **Punto 1 (021 RLS WITH CHECK) — RESUELTO.** Aplicada completa (Parte A y B). Los 4
+>   triggers existen (`trg_lock_booking_financials`, `trg_lock_installment_paid`,
+>   `trg_prevent_profile_escalation`, `trg_lock_profile_plan_type`). Las 3 políticas que el
+>   verificador marca "SIN WITH CHECK" (`profiles`, `bookings`, `booking_installments`) son
+>   correctas así **por diseño**: se protegen con trigger (compara OLD vs NEW), no con WITH CHECK.
+> - ✅ **Punto 2 (anti-overbooking) — RESUELTO.** Constraint EXCLUDE `no_overlap_active_booking`
+>   activo en `bookings`. Migración versionada: `032_prevent_double_booking.sql`.
+> - ✅ **Punto 3 (conversation_hides) — RESUELTO.** La columna `other_id` existe en prod y el
+>   código ya la usa (`src/lib/actions/messages.ts`: filtro por `space_id:other_id`, upsert con
+>   `onConflict user_id,space_id,other_id`). La nota de "código sin aplicar" quedó obsoleta.
+> - ⚠️ **Punto 4 (versionar `messages`/`conversation_hides`) — SIGUE ABIERTO.** Ambas tienen
+>   RLS habilitado en prod, pero falta su DDL en `supabase/migrations/` (auditabilidad).
+> - **Migración 038**: no falta nada. Era `038_installment_manual_payment.sql`, de un feature
+>   **revertido** (`817bc83` → revert `b8fd04f`, 2026-06-20). Salto 037→039 esperado.
+> - Build de producción y suite de tests (139) en verde al 2026-06-25.
+
 ## 1. CRÍTICO — Verificar/aplicar migración 021 (RLS WITH CHECK)
 La memoria del proyecto indica que `021_rls_with_check.sql` podría estar **pendiente**.
 Sin ella, un cliente autenticado podría (vía API REST directa de Supabase) marcar su
