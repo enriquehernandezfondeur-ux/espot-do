@@ -18,6 +18,8 @@ import {
   deleteExternalEvent, deleteEventPayment,
 } from '@/lib/actions/external-events'
 import { getHostBookings, acceptBooking, rejectBooking, completeBooking } from '@/lib/actions/host'
+import { getMyPlan } from '@/lib/actions/subscription'
+import { ProUpsell } from '@/components/ProUpsell'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
 import { createClient } from '@/lib/supabase/client'
 import DatePicker from '@/components/ui/DatePicker'
@@ -808,6 +810,12 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
   const supabaseRef = useRef(createClient())
   const { confirm, dialog } = useConfirm()
 
+  // Espot Directo es función Pro. La vista previa es de solo lectura para hosts
+  // Normal; las escrituras (abono, cambiar estado, eliminar) ya están gated en las
+  // server actions — aquí ocultamos sus controles y mostramos el upsell.
+  const [isPro, setIsPro] = useState<boolean | null>(null)
+  useEffect(() => { getMyPlan().then(p => setIsPro(p === 'pro')).catch(() => setIsPro(null)) }, [])
+
   const client  = (event as any).client_name ?? event.client?.full_name ?? ''
   const balance = (event.total_amount ?? 0) - (event.paid_amount ?? 0)
 
@@ -829,6 +837,7 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
 
   async function handleAddPayment(e: React.FormEvent) {
     e.preventDefault()
+    if (isPro === false) return   // el server ya bloquea; evita request inútil
     if (!payForm.amount || Number(payForm.amount) <= 0) return
     setSaving(true)
 
@@ -986,7 +995,13 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
           </div>
         )}
 
-        {showPay ? (
+        {isPro === false && (
+          <ProUpsell title="Espot Directo es función Pro">
+            Mejora tu plan para registrar pagos, cambiar el estado y gestionar este evento. Tus datos siguen visibles.
+          </ProUpsell>
+        )}
+
+        {isPro !== false && (showPay ? (
           <form onSubmit={handleAddPayment} className="rounded-xl p-4 space-y-3"
             style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
             <div className="text-xs font-semibold text-gray-600">Registrar pago</div>
@@ -1057,8 +1072,9 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
             style={{ background: 'rgba(53,196,147,0.08)', color: 'var(--brand)', border: '1px solid rgba(53,196,147,0.2)' }}>
             + Registrar pago
           </button>
-        )}
+        ))}
 
+        {isPro !== false && (
         <div>
           <div className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Cambiar estado</div>
           <div className="grid grid-cols-2 gap-2">
@@ -1077,6 +1093,7 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
             })}
           </div>
         </div>
+        )}
 
         {event.notes && (
           <div className="rounded-xl p-3 text-xs text-gray-500" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)' }}>
@@ -1084,10 +1101,12 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
           </div>
         )}
 
+        {isPro !== false && (
         <button onClick={handleDelete} disabled={deleting}
           className="w-full py-2 rounded-xl text-xs font-semibold text-red-400 hover:bg-red-50 transition-colors disabled:opacity-40">
           {deleting ? <Loader2 size={13} className="animate-spin mx-auto" /> : 'Eliminar evento'}
         </button>
+        )}
       </div>
     </div>
   )
