@@ -15,8 +15,9 @@
 > - ✅ **Punto 3 (conversation_hides) — RESUELTO.** La columna `other_id` existe en prod y el
 >   código ya la usa (`src/lib/actions/messages.ts`: filtro por `space_id:other_id`, upsert con
 >   `onConflict user_id,space_id,other_id`). La nota de "código sin aplicar" quedó obsoleta.
-> - ⚠️ **Punto 4 (versionar `messages`/`conversation_hides`) — SIGUE ABIERTO.** Ambas tienen
->   RLS habilitado en prod, pero falta su DDL en `supabase/migrations/` (auditabilidad).
+> - ✅ **Punto 4 (versionar `messages`/`conversation_hides`) — RESUELTO.** Se exportó el DDL real
+>   de prod (columnas, FKs, índices, RLS) y se versionó en `supabase/migrations/20260625_messages.sql`
+>   y `20260625_conversation_hides.sql` (idempotentes; no-op en prod, recrean todo en una DB limpia).
 > - **Migración 038**: no falta nada. Era `038_installment_manual_payment.sql`, de un feature
 >   **revertido** (`817bc83` → revert `b8fd04f`, 2026-06-20). Salto 037→039 esperado.
 > - Build de producción y suite de tests (139) en verde al 2026-06-25.
