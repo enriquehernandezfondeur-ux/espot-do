@@ -29,7 +29,7 @@ export default function SeguridadPage() {
                 Seguridad en los Pagos
               </h1>
               <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                Última actualización: mayo 2026
+                Última actualización: junio 2026
               </p>
             </div>
           </div>

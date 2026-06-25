@@ -57,7 +57,16 @@ En estos casos, el usuario debe contactar a contacto@espot.do dentro de los 7 d�
 El proceso de revisión puede tomar hasta 15 días laborables. Espot notificará el resultado por correo electrónico. Los reembolsos aprobados se procesan a través de Azul y pueden tardar entre 3 y 10 días hábiles adicionales según el banco emisor.`,
   },
   {
-    num: '7', title: 'Fuerza Mayor',
+    num: '7', title: 'Suscripción Espot Pro',
+    content: `Espot Pro es una suscripción mensual opcional para Anfitriones (RD$499/mes vía Azul), independiente de la comisión del 10% sobre las reservas.
+
+• Los cargos de un período ya iniciado no son reembolsables, salvo error técnico comprobable imputable a Espot o a Azul (ej. cobro duplicado).
+• Al cancelar, la suscripción permanece activa hasta el final del período ya pagado y luego las funciones Pro pasan a solo lectura; no se prorratea ni se devuelve el período en curso.
+• Los datos generados con Pro se conservan tras la cancelación.
+• Para reportar un cobro indebido de la suscripción, escribir a contacto@espot.do dentro de los 7 días calendario siguientes, adjuntando el comprobante.`,
+  },
+  {
+    num: '8', title: 'Fuerza Mayor',
     content: `Espot no será responsable por reembolsos en casos de fuerza mayor, incluyendo:
 
 • Desastres naturales (huracanes, terremotos, inundaciones).
@@ -68,13 +77,13 @@ El proceso de revisión puede tomar hasta 15 días laborables. Espot notificará
 En estos casos, Espot puede facilitar la comunicación entre las partes sin asumir obligación de reembolso.`,
   },
   {
-    num: '8', title: 'Limitación de Responsabilidad',
+    num: '9', title: 'Limitación de Responsabilidad',
     content: `• Espot no responde con fondos propios ante incumplimientos del Anfitrión.
 • La responsabilidad máxima de Espot se limita al monto efectivamente procesado por la plataforma.
 • Espot no garantiza reembolsos sobre montos en disputa entre Anfitrión y Huésped derivados del incumplimiento del servicio del espacio.`,
   },
   {
-    num: '9', title: 'Ley Aplicable',
+    num: '10', title: 'Ley Aplicable',
     content: 'Esta política se rige por las leyes de la República Dominicana. Cualquier controversia será sometida a los tribunales del Distrito Nacional.',
   },
 ]
@@ -94,7 +103,7 @@ export default function ReembolsoPage() {
             Política de Reembolso
           </h1>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            Última actualización: 10 de mayo de 2026
+            Última actualización: 25 de junio de 2026
           </p>
         </div>
 

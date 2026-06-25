@@ -46,7 +46,7 @@ Nota importante: Espot NO almacena, procesa ni tiene acceso a los datos de tarje
 • Gestionar tu cuenta de usuario y reservas.
 • Enviar notificaciones de reserva, confirmaciones y recordatorios por correo electrónico.
 • Facilitar la comunicación entre clientes y propietarios de espacios.
-• Procesar pagos a través del procesador externo Azul Payments.
+• Procesar pagos de reservas y la suscripción Espot Pro a través del procesador externo Azul Payments.
 • Mejorar la experiencia de usuario en la plataforma.
 • Cumplir con obligaciones legales aplicables en la República Dominicana.`,
   },
@@ -63,7 +63,7 @@ Nota importante: Espot NO almacena, procesa ni tiene acceso a los datos de tarje
     num: '5', title: 'Compartir datos con terceros',
     content: `Espot no vende ni alquila tus datos personales. Solo los compartimos en los siguientes casos:
 
-• Con Azul Payments: para procesar pagos con tarjeta (solo datos necesarios para la transacción).
+• Con Azul Payments: para procesar pagos con tarjeta de reservas y de la suscripción Espot Pro (solo datos necesarios para la transacción).
 • Con Resend (servicio de email): para enviar notificaciones de reservas.
 • Con Supabase: infraestructura de base de datos segura donde se almacena la información.
 • Por requerimiento legal: si una autoridad competente lo solicita conforme a las leyes dominicanas.
@@ -128,7 +128,7 @@ export default function PrivacidadPage() {
             Política de Privacidad
           </h1>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            Última actualización: 10 de mayo de 2026
+            Última actualización: 25 de junio de 2026
           </p>
         </div>
 

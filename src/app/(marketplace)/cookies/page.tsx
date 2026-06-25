@@ -65,7 +65,7 @@ export default function CookiesPage() {
             Política de Cookies
           </h1>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            Última actualización: 10 de mayo de 2026
+            Última actualización: 25 de junio de 2026
           </p>
         </div>
 

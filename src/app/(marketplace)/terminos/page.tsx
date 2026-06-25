@@ -135,7 +135,19 @@ Todos los derechos sobre la plataforma, su diseño, código y marca pertenecen a
 • El usuario puede solicitar la eliminación de sus datos escribiendo a contacto@espot.do.`,
   },
   {
-    num: '14', title: 'Modificaciones y Ley Aplicable',
+    num: '14', title: 'Espot Pro — Suscripción de Anfitriones',
+    content: `Espot Pro es una suscripción opcional de pago para Anfitriones que desbloquea funciones avanzadas de gestión (eventos externos, CRM de clientes, analítica de clics y CTR, tarjeta digital y micrositio del espacio, entre otras). Publicar y operar en Espot sigue siendo gratuito; Pro es complementario.
+
+• Precio: RD$499 mensuales (DOP), cobrados a través de Azul.
+• Período de prueba: el Anfitrión puede iniciar una prueba gratuita para evaluar las funciones Pro. Al finalizar la prueba, para mantener el acceso debe activar la suscripción de pago.
+• Renovación: la suscripción se renueva automáticamente cada mes mientras esté activa, con cargo a través de Azul.
+• Cancelación: el Anfitrión puede cancelar en cualquier momento desde su panel. La suscripción permanece activa hasta el final del período ya pagado; después, las funciones Pro pasan a modo de solo lectura. Los datos generados con Pro (clientes, eventos externos, calendario) se conservan y vuelven a estar disponibles si reactiva.
+• Falta de pago: si un cargo de renovación no se completa, la cuenta puede quedar en estado de pago vencido y las funciones Pro se limitan hasta regularizar el pago.
+• La suscripción Pro es independiente de la comisión del 10% sobre las reservas; son cargos distintos.
+• Los pagos de la suscripción no son reembolsables por períodos ya iniciados, salvo error técnico comprobable imputable a Espot o a Azul (ver Política de Reembolso).`,
+  },
+  {
+    num: '15', title: 'Modificaciones y Ley Aplicable',
     content: `Espot puede modificar estos términos en cualquier momento. Los cambios entran en vigor al ser publicados en esta página. El uso continuado de la plataforma implica la aceptación de los términos vigentes.
 
 Estos términos se rigen por las leyes de la República Dominicana. Cualquier disputa será conocida por los tribunales del Distrito Nacional.`,
@@ -157,7 +169,7 @@ export default function TerminosPage() {
             Términos y Condiciones
           </h1>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            Última actualización: 10 de mayo de 2026
+            Última actualización: 25 de junio de 2026
           </p>
         </div>
 
