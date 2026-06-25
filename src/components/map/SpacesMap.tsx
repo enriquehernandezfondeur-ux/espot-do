@@ -65,8 +65,9 @@ export const SECTOR_COORDS: Record<string, [number, number]> = {
 }
 
 export const CITY_VIEW: Record<string, { center: [number, number]; zoom: number }> = {
-  default:          { center: [18.4719, -69.9312], zoom: 13 },
-  'santo domingo':  { center: [18.4719, -69.9312], zoom: 13 },
+  default:            { center: [18.4719, -69.9312], zoom: 13 },
+  'santo domingo':    { center: [18.4719, -69.9312], zoom: 13 },
+  'distrito nacional':{ center: [18.4719, -69.9312], zoom: 13 },
   'santiago':       { center: [19.4517, -70.6970], zoom: 13 },
   'la romana':      { center: [18.4274, -68.9728], zoom: 13 },
   'punta cana':     { center: [18.5601, -68.3725], zoom: 12 },
@@ -133,15 +134,17 @@ export function getPricePin(space: any): string {
   return 'Cotizar'
 }
 
-// ── Estilo neutro limpio — fondo claro, agua azul, sin verdes ─
+// ── Estilo claro con un toque de verde marca sutil (parques/naturaleza) ─
 const MAP_STYLES: google.maps.MapTypeStyle[] = [
-  { elementType: 'geometry',            stylers: [{ color: '#f5f5f5' }] },
+  { elementType: 'geometry',            stylers: [{ color: '#f3f7f5' }] },
   { elementType: 'labels.icon',         stylers: [{ visibility: 'off' }] },
   { elementType: 'labels.text.fill',    stylers: [{ color: '#616161' }] },
   { elementType: 'labels.text.stroke',  stylers: [{ color: '#f5f5f5' }] },
   { featureType: 'poi',     elementType: 'geometry',          stylers: [{ color: '#eeeeee' }] },
   { featureType: 'poi',     elementType: 'labels.text.fill',  stylers: [{ color: '#757575' }] },
-  { featureType: 'poi.park',elementType: 'geometry',          stylers: [{ color: '#e5e5e5' }] },
+  { featureType: 'landscape.natural', elementType: 'geometry', stylers: [{ color: '#e9f4ef' }] },
+  { featureType: 'poi.park',elementType: 'geometry',          stylers: [{ color: '#d8efe5' }] },
+  { featureType: 'poi.park',elementType: 'labels.text.fill',  stylers: [{ color: '#5a9b82' }] },
   { featureType: 'road',    elementType: 'geometry',          stylers: [{ color: '#ffffff' }] },
   { featureType: 'road.arterial', elementType: 'labels.text.fill', stylers: [{ color: '#757575' }] },
   { featureType: 'road.highway',  elementType: 'geometry',         stylers: [{ color: '#dadada' }] },
@@ -273,9 +276,20 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
   // Sin resultados → vista de la ciudad. 1 resultado → zoom cómodo.
   // Varios → fitBounds con padding, con tope de acercamiento.
   function frameMap(g: any, map: any) {
+    const cf      = (cityFilterRef.current ?? '').trim().toLowerCase()
     const markers = Array.from(markersRef.current.values()) as any[]
+
+    // Sin ciudad seleccionada → vista por defecto: Santo Domingo (céntrico).
+    // (No encuadramos todo el país: dejaría el mapa centrado fuera de la capital.)
+    if (!cf) {
+      const view = CITY_VIEW['default']
+      map.panTo({ lat: view.center[0], lng: view.center[1] })
+      map.setZoom(view.zoom)
+      return
+    }
+
+    // Ciudad seleccionada pero sin resultados → vista de esa ciudad.
     if (markers.length === 0) {
-      const cf   = (cityFilterRef.current ?? '').toLowerCase()
       const key  = Object.keys(CITY_VIEW).find(k => k !== 'default' && cf.includes(k))
       const view = CITY_VIEW[key ?? 'default']
       map.panTo({ lat: view.center[0], lng: view.center[1] })
