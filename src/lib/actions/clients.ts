@@ -37,7 +37,7 @@ export async function getClientWithHistory(clientId: string) {
     .eq('host_id', hostId)
   const spaceIds = (spaces ?? []).map((s: any) => s.id)
 
-  const [{ data: client }, { data: events }, { data: bookings }] = await Promise.all([
+  const [{ data: client }, { data: events }, { data: allBookings }] = await Promise.all([
     db
       .from('host_clients')
       .select('*')
@@ -54,13 +54,20 @@ export async function getClientWithHistory(clientId: string) {
       ? Promise.resolve({ data: [] })
       : db
           .from('bookings')
-          .select('id, event_date, event_type, total_amount, status')
-          .eq('client_id', clientId)
+          .select('id, event_date, event_type, total_amount, status, guest:profiles!guest_id(email)')
           .in('space_id', spaceIds)
           .order('event_date', { ascending: false }),
   ])
 
   if (!client) return null
+
+  // Vincular reservas del marketplace por EMAIL. bookings.client_id no se puebla
+  // al reservar, así que el vínculo real con el CRM es el email del huésped
+  // (mismo criterio que el de-dup de getUnifiedClients). Sin email no hay match.
+  const clientEmail = (client as any).email?.toLowerCase() ?? null
+  const bookings = clientEmail
+    ? (allBookings ?? []).filter((b: any) => ((b.guest as any)?.email ?? '').toLowerCase() === clientEmail)
+    : []
 
   // Solo cuenta como facturado lo concretado (no canceladas/pendientes/rechazadas)
   const totalRevenue =
@@ -125,7 +132,10 @@ export async function getUnifiedClients() {
     .in('space_id', spaceIds)
     .not('guest_id', 'is', null)
 
+  // De-dup entre canales por email y por teléfono normalizado (últimos 10 dígitos).
+  const normPhone = (p: string | null | undefined) => (p ?? '').replace(/\D/g, '').slice(-10)
   const directEmails = new Set(direct.map((c: any) => c.email?.toLowerCase()).filter(Boolean))
+  const directPhones = new Set(direct.map((c: any) => normPhone(c.phone)).filter((p) => p.length >= 7))
   const seenGuestIds = new Set<string>()
   const espotGuests: HostClient[] = []
 
@@ -134,6 +144,8 @@ export async function getUnifiedClients() {
     if (!g || seenGuestIds.has(g.id)) continue
     seenGuestIds.add(g.id)
     if (g.email && directEmails.has(g.email.toLowerCase())) continue
+    const gp = normPhone(g.phone)
+    if (gp.length >= 7 && directPhones.has(gp)) continue
     espotGuests.push({
       id:        g.id,
       host_id:   hostId,
@@ -144,6 +156,9 @@ export async function getUnifiedClients() {
       notes:     null,
       tags:      [],
       source:    'espot' as ClientSource,
+      // Discriminador que la UI usa (clientes/page.tsx) para cargar el historial
+      // por guest_id y para ocultar Editar/Eliminar en huéspedes Espot.
+      _is_espot_guest: true,
       created_at: '',
     } as any)
   }
