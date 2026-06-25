@@ -38,11 +38,11 @@ Defensa en profundidad: **ninguna capa puede ser la única barrera**.
 | Server action lead público | ✅ | `external-events.ts` `createFromPublicForm` (`isHostProById`) |
 | RLS `external_events` | ✅ | `supabase/migrations/029_espot_directo_gating.sql` |
 | RLS `host_clients` | ✅ | `029_espot_directo_gating.sql` |
-| RLS `external_event_payments` | 🔴 **NO** | **sin migración ni política** — Hueco #1 |
+| RLS `external_event_payments` | ✅ (tras fix) | `supabase/migrations/20260625_external_event_payments_gating.sql` — Hueco #1 cerrado |
 | Página pública `/t/[slug]` | ✅ | `isHostProById` → `notFound()` |
 | Página pública `/h/[slug]` | ✅ | `getHostPublicProfile` → null → `notFound()` |
 | UI eventos / eventos-nuevo / clientes / finanzas | ✅ | `ProUpsell` + `canSubmit` deshabilitado |
-| UI agenda (form de abono) | ⚠️ Parcial | Sin candado; server-gated — Hueco #2 |
+| UI agenda (panel de evento Directo) | ✅ (tras fix) | `agenda/page.tsx` `DirectPanel` — ProUpsell + oculta abono/estado/eliminar — Hueco #2 cerrado |
 | UI calendario | ✅ N/A | Solo lectura; sin ruta de escritura |
 
 Un barrido de `src` confirma que **no hay escrituras directas** a tablas de Directo
