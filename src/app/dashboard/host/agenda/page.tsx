@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import {
   Check, X, Search, Loader2, Plus, LayoutList, Paperclip,
-  CalendarDays, ArrowUpDown, CalendarRange,
+  CalendarDays, ArrowUpDown, CalendarRange, Crown,
 } from 'lucide-react'
 import Pagination from '@/components/ui/Pagination'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -400,6 +400,9 @@ export default function AgendaPage() {
                   style={{ color: active ? o.activeLabel : 'var(--text-muted)' }}>
                   {o.label}
                 </span>
+                {o.value === 'directo' && (
+                  <Crown size={11} className="shrink-0" style={{ color: 'var(--pro)' }} aria-label="Función Espot Pro" />
+                )}
               </div>
               <span className="text-2xl font-bold leading-none"
                 style={{ color: active ? o.activeNum : 'var(--text-primary)' }}>
