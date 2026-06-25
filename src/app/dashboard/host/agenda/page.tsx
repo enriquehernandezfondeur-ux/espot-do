@@ -20,6 +20,7 @@ import {
 import { getHostBookings, acceptBooking, rejectBooking, completeBooking } from '@/lib/actions/host'
 import { getMyPlan } from '@/lib/actions/subscription'
 import { ProUpsell } from '@/components/ProUpsell'
+import { ProGate } from '@/components/ProGate'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
 import { createClient } from '@/lib/supabase/client'
 import DatePicker from '@/components/ui/DatePicker'
@@ -132,6 +133,9 @@ export default function AgendaPage() {
   const [rejectReason,   setRejectReason]   = useState('')
   const [showRejectForm, setShowRejectForm] = useState(false)
   const [page,           setPage]           = useState(1)
+  // Espot Directo es función Pro: un host gratuito ve el muro al entrar a la pestaña Directo.
+  const [isPro, setIsPro] = useState<boolean | null>(null)
+  useEffect(() => { getMyPlan().then(p => setIsPro(p === 'pro')).catch(() => setIsPro(null)) }, [])
 
   function showToast(msg: string, ok: boolean) {
     setToast({ msg, ok })
@@ -310,11 +314,13 @@ export default function AgendaPage() {
               <CalendarDays size={13} /> Calendario
             </Link>
           </div>
+          {isPro !== false && (
           <Link href="/dashboard/host/eventos/nuevo"
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all active:scale-95"
             style={{ background: 'var(--brand)' }}>
             <Plus size={15} /> Nuevo evento
           </Link>
+          )}
         </div>
       </div>
 
@@ -486,7 +492,16 @@ export default function AgendaPage() {
 
       {/* Content */}
       <div className={cn('flex flex-col gap-5 items-start', selected && 'lg:grid lg:grid-cols-[1fr_380px]')}>
-        {/* List */}
+        {/* List — para host gratuito, la pestaña Directo muestra el muro Pro (igual que el CRM) */}
+        {origin === 'directo' && isPro === false ? (
+          <div className="w-full">
+            <ProGate
+              title="Espot Directo es de Espot Pro"
+              description="Registra y cobra los eventos que cierras fuera de Espot, lleva su pipeline y míralos junto a tus reservas."
+              features={['Eventos y reservas externas', 'Pagos y abonos por evento', 'Captación con tu micrositio y tarjeta digital', 'Todo unificado con tus reservas de Espot']}
+            />
+          </div>
+        ) : (
         <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <div className="overflow-x-auto scrollbar-hide">
             <div className="hidden md:grid gap-3 px-5 py-3 text-xs font-semibold uppercase tracking-widest text-gray-400 md:min-w-[520px]"
@@ -573,6 +588,7 @@ export default function AgendaPage() {
             <Pagination page={page} total={filtered.length} pageSize={PAGE_SIZE} onChange={p => { setPage(p); setSelected(null) }} className="px-5 pb-4" />
           </div>
         </div>
+        )}
 
         {/* Detail panel */}
         <div ref={detailRef}>
