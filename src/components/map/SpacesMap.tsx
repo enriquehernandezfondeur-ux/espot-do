@@ -154,7 +154,9 @@ const MAP_STYLES: google.maps.MapTypeStyle[] = [
 ]
 
 function buildSvgIcon(g: typeof google, active: boolean): google.maps.Icon {
-  const color = active ? '#0F1623' : 'var(--brand)'
+  // Hex literal a propósito: var(--brand) NO resuelve dentro de un SVG cargado
+  // como data:image (igual que en las OG images). Verde marca / navy al hover.
+  const color = active ? '#03313C' : '#35C493'
   const svg = `<svg width="28" height="36" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 0C6.3 0 0 6.3 0 14c0 5.2 2.8 9.7 7 12.2L14 36l7-9.8C25.2 23.7 28 19.2 28 14 28 6.3 21.7 0 14 0z" fill="${color}"/><circle cx="14" cy="13" r="6" fill="white"/></svg>`
   return {
     url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
@@ -179,10 +181,12 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
   const onHoverRef    = useRef(onSpaceHover)
   const hoveredIdRef  = useRef(hoveredId)
   const firstLoadRef  = useRef(true)
+  const cityFilterRef = useRef(cityFilter)
 
-  useEffect(() => { spacesRef.current    = spaces },       [spaces])
-  useEffect(() => { onHoverRef.current   = onSpaceHover }, [onSpaceHover])
-  useEffect(() => { hoveredIdRef.current = hoveredId },    [hoveredId])
+  useEffect(() => { spacesRef.current     = spaces },       [spaces])
+  useEffect(() => { onHoverRef.current    = onSpaceHover }, [onSpaceHover])
+  useEffect(() => { hoveredIdRef.current  = hoveredId },    [hoveredId])
+  useEffect(() => { cityFilterRef.current = cityFilter },   [cityFilter])
 
   // ── Inicializar mapa una sola vez ────────────────────────
   useEffect(() => {
@@ -262,6 +266,34 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
     })
 
     if (firstLoadRef.current) firstLoadRef.current = false
+    frameMap(g, map)
+  }
+
+  // Encuadra el mapa a los marcadores para que no queden zonas vacías.
+  // Sin resultados → vista de la ciudad. 1 resultado → zoom cómodo.
+  // Varios → fitBounds con padding, con tope de acercamiento.
+  function frameMap(g: any, map: any) {
+    const markers = Array.from(markersRef.current.values()) as any[]
+    if (markers.length === 0) {
+      const cf   = (cityFilterRef.current ?? '').toLowerCase()
+      const key  = Object.keys(CITY_VIEW).find(k => k !== 'default' && cf.includes(k))
+      const view = CITY_VIEW[key ?? 'default']
+      map.panTo({ lat: view.center[0], lng: view.center[1] })
+      map.setZoom(view.zoom)
+      return
+    }
+    if (markers.length === 1) {
+      const pos = markers[0].getPosition()
+      if (pos) { map.panTo(pos); map.setZoom(15) }
+      return
+    }
+    const bounds = new g.maps.LatLngBounds()
+    markers.forEach(m => { const p = m.getPosition(); if (p) bounds.extend(p) })
+    map.fitBounds(bounds, { top: 64, right: 48, bottom: 64, left: 48 })
+    // Tope de zoom: con resultados muy juntos, fitBounds se acercaría demasiado.
+    g.maps.event.addListenerOnce(map, 'idle', () => {
+      if (map.getZoom() > 16) map.setZoom(16)
+    })
   }
 
   // ── Actualizar marcadores cuando cambian los espacios ────
@@ -283,14 +315,12 @@ export default function SpacesMap({ spaces, hoveredId, cityFilter, onSpaceHover 
     })
   }, [hoveredId])
 
-  // ── Re-centrar cuando cambia la ciudad ───────────────────
+  // ── Re-encuadrar cuando cambia la ciudad ─────────────────
   useEffect(() => {
-    const map = mapRef.current
-    if (!map) return
-    const key  = Object.keys(CITY_VIEW).find(k => k !== 'default' && (cityFilter ?? '').toLowerCase().includes(k))
-    const view = CITY_VIEW[key ?? 'default']
-    ;(map as any).panTo({ lat: view.center[0], lng: view.center[1] })
-    ;(map as any).setZoom(view.zoom)
+    const g = googleRef.current, map = mapRef.current
+    if (!g || !map) return
+    frameMap(g as any, map)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cityFilter])
 
   return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
