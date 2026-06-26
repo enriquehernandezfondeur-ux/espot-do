@@ -97,16 +97,27 @@ export function emailBase({
 
   const footer = `
     <div style="text-align:center;margin-top:32px;padding:24px 20px;border-top:1px solid #E8ECF0;">
-      <!-- Logo pequeño en footer -->
-      <div style="margin-bottom:12px;">
-        <span style="font-family:'Poppins',Arial,sans-serif;font-size:15px;font-weight:900;color:#03313C;letter-spacing:-0.04em;">espot</span><span style="font-family:'Poppins',Arial,sans-serif;font-size:15px;font-weight:900;color:#35C493;letter-spacing:-0.04em;">.do</span>
+      <!-- Logo oficial (PNG) en footer, con fallback de texto via alt -->
+      <div style="margin-bottom:10px;">
+        <a href="${SITE}" style="text-decoration:none;">
+          <img src="${SITE}/email-logo.png" alt="espot" width="92"
+            style="width:92px;height:auto;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;" />
+        </a>
       </div>
-      <p style="color:#9CA3AF;font-size:12px;margin:0 0 6px;font-family:'Poppins',Arial,sans-serif;">
+      <p style="color:#9CA3AF;font-size:12px;margin:0 0 10px;font-family:'Poppins',Arial,sans-serif;">
         Espacios para eventos en Rep&uacute;blica Dominicana
+      </p>
+      <!-- Enlaces útiles -->
+      <p style="font-size:12px;margin:0 0 8px;font-family:'Poppins',Arial,sans-serif;">
+        <a href="${SITE}/buscar" style="color:#35C493;text-decoration:none;font-weight:600;">Explorar espacios</a>
+        <span style="color:#E2E8F0;">&nbsp;&middot;&nbsp;</span>
+        <a href="${SITE}/dashboard" style="color:#35C493;text-decoration:none;font-weight:600;">Mi panel</a>
+        <span style="color:#E2E8F0;">&nbsp;&middot;&nbsp;</span>
+        <a href="mailto:contacto@${DOMAIN}" style="color:#35C493;text-decoration:none;font-weight:600;">Ayuda</a>
       </p>
       <p style="color:#CBD5E1;font-size:11px;margin:0 0 6px;font-family:'Poppins',Arial,sans-serif;">
         &copy; 2026 ESPOT, S.R.L. &middot;
-        <a href="mailto:contacto@${DOMAIN}" style="color:#35C493;text-decoration:none;">contacto@${DOMAIN}</a>
+        <a href="mailto:contacto@${DOMAIN}" style="color:#9CA3AF;text-decoration:none;">contacto@${DOMAIN}</a>
         &middot; <a href="${SITE}" style="color:#9CA3AF;text-decoration:none;">${DOMAIN}</a>
       </p>
       ${unsubscribeUrl ? `

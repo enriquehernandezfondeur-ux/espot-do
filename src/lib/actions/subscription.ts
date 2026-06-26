@@ -23,7 +23,7 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 async function notifyHostPlanChange(
   svc: ReturnType<typeof createServiceClient>,
   hostId: string,
-  kind: 'activated' | 'extended' | 'cancelled',
+  kind: 'requested' | 'activated' | 'extended' | 'cancelled',
   periodEndISO?: string | null,
 ) {
   try {
@@ -36,6 +36,20 @@ async function notifyHostPlanChange(
     if (!email) return
     const name = escapeHtml(prof?.full_name ?? '')
     const cta = { text: 'Ver mi plan', url: `${SITE}/dashboard/host/pro` }
+
+    if (kind === 'requested') {
+      await sendEmail({
+        to: email,
+        subject: 'Recibimos tu solicitud de Espot Pro',
+        html: emailBase({
+          title: 'Recibimos tu solicitud',
+          accentColor: '#B8860B',
+          body: `<p style="color:#374151;margin:0 0 16px;">Hola <strong>${name}</strong>, recibimos tu solicitud para pasar a <strong>Espot Pro</strong>. La estamos procesando y te avisaremos por este medio en cuanto quede activa. Si tienes dudas, respóndenos a este correo.</p>`,
+          cta,
+        }),
+      })
+      return
+    }
 
     if (kind === 'cancelled') {
       await sendEmail({
@@ -166,6 +180,7 @@ export async function startProRequest(): Promise<{ ok: true; status: string } | 
     price_amount: 499,
   })
   if (error) return { error: error.message }
+  await notifyHostPlanChange(svc, hostId, 'requested')
   return { ok: true, status: 'pending_payment' }
 }
 
