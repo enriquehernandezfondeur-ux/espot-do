@@ -25,16 +25,16 @@ function sanitizeBookingData<T extends Record<string, unknown>>(d: T): T {
   return result
 }
 
-// ── Logo de texto — funciona en TODOS los clientes de email ──
-// No depende de imágenes externas que pueden bloquearse
+// ── Logo oficial (PNG del wordmark) con fallback de texto ──
+// PNG porque los clientes de email no renderizan SVG. El `alt` muestra la marca
+// si el cliente bloquea imágenes; debajo, la barrita degradada de acento.
 
 function logo() {
   return `
     <div style="text-align:center;margin-bottom:28px;">
-      <div style="display:inline-block;">
-        <span style="font-family:'Poppins',Arial,sans-serif;font-size:26px;font-weight:900;color:#03313C;letter-spacing:-0.05em;line-height:1;">espot</span><span style="font-family:'Poppins',Arial,sans-serif;font-size:26px;font-weight:900;color:#35C493;letter-spacing:-0.05em;line-height:1;">.do</span>
-      </div>
-      <div style="width:32px;height:3px;background:linear-gradient(90deg,#35C493,#03313C);border-radius:2px;margin:6px auto 0;"></div>
+      <img src="${SITE}/email-logo.png" alt="espot" width="150"
+        style="display:inline-block;width:150px;height:auto;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;" />
+      <div style="width:32px;height:3px;background:linear-gradient(90deg,#35C493,#03313C);border-radius:2px;margin:8px auto 0;"></div>
     </div>`
 }
 

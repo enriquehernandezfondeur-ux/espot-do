@@ -4,12 +4,73 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { resolveHostId } from './_resolveHost'
 import { resolvePlan, subscriptionSummary, type PlanType, type SubscriptionSummary } from '@/lib/plans'
+import { sendEmail } from '@/lib/email/send'
+import { emailBase, infoBox } from '@/lib/email/templates'
+import { formatDate, escapeHtml } from '@/lib/utils'
 
 // Estados "vivos": una sola suscripción por host puede estar en uno de estos
 // (refleja el índice único parcial). Incluye prueba y suspensión.
 const LIVE_STATUSES = ['trialing', 'active', 'pending_payment', 'past_due', 'suspended'] as const
 const DAY_MS = 86_400_000
 const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
+const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
+
+/**
+ * Avisa por email al host cuando su plan cambia por acción de admin. El cron solo
+ * mandaba recordatorios de vencimiento; activación/renovación/cancelación quedaban
+ * sin notificar. Best-effort: no bloquea la acción si el email falla.
+ */
+async function notifyHostPlanChange(
+  svc: ReturnType<typeof createServiceClient>,
+  hostId: string,
+  kind: 'activated' | 'extended' | 'cancelled',
+  periodEndISO?: string | null,
+) {
+  try {
+    const { data: prof } = await svc
+      .from('profiles')
+      .select('email, full_name')
+      .eq('id', hostId)
+      .maybeSingle()
+    const email = prof?.email as string | undefined
+    if (!email) return
+    const name = escapeHtml(prof?.full_name ?? '')
+    const cta = { text: 'Ver mi plan', url: `${SITE}/dashboard/host/pro` }
+
+    if (kind === 'cancelled') {
+      await sendEmail({
+        to: email,
+        subject: 'Tu Espot Pro fue cancelado',
+        html: emailBase({
+          title: 'Tu Espot Pro fue cancelado',
+          accentColor: '#6B7280',
+          body: `<p style="color:#374151;margin:0 0 16px;">Hola <strong>${name}</strong>, tu plan Espot Pro fue cancelado. Tus datos (clientes, reservas externas, calendario) se conservan; las funciones Pro quedan en solo lectura. Puedes volver a Pro cuando quieras sin perder nada.</p>`,
+          cta,
+        }),
+      })
+      return
+    }
+
+    const isExt = kind === 'extended'
+    await sendEmail({
+      to: email,
+      subject: isExt ? 'Tu Espot Pro fue renovado' : '¡Ya eres Espot Pro! 🎉',
+      html: emailBase({
+        title: isExt ? 'Tu Espot Pro fue renovado' : '¡Bienvenido a Espot Pro!',
+        accentColor: '#B8860B',
+        body:
+          `<p style="color:#374151;margin:0 0 16px;">Hola <strong>${name}</strong>, ${isExt ? 'renovamos tu plan Espot Pro' : 'tu cuenta ya es Espot Pro'}. Tienes acceso al CRM de clientes, reservas externas (Espot Directo), calendario y más.</p>` +
+          infoBox([
+            { label: 'Plan', value: 'Espot Pro' },
+            { label: 'Vigente hasta', value: periodEndISO ? formatDate(periodEndISO) : '—' },
+          ]),
+        cta,
+      }),
+    })
+  } catch (e) {
+    console.error('[notifyHostPlanChange] error:', e)
+  }
+}
 
 /** Plan efectivo del host del usuario autenticado (resuelve equipo → dueño). */
 export async function getMyPlan(): Promise<PlanType> {
@@ -152,6 +213,7 @@ export async function adminSetHostPlan(
       host_id: hostId, subscription_id: existing?.id ?? null, admin_id: user.id,
       action: 'cancelar_ahora', old_status: existing?.status ?? null, new_status: 'cancelled', note: null,
     })
+    await notifyHostPlanChange(svc, hostId, 'cancelled')
     return { ok: true }
   }
 
@@ -194,5 +256,6 @@ export async function adminSetHostPlan(
     action: action === 'extend' ? 'extender' : 'activar_pro',
     old_status: existing?.status ?? null, new_status: 'active', note: null,
   })
+  await notifyHostPlanChange(svc, hostId, action === 'extend' ? 'extended' : 'activated', periodEndISO)
   return { ok: true }
 }
