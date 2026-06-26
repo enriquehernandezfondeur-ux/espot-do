@@ -3,6 +3,13 @@
 > El push a Vercel **no** aplica SQL. Estos cambios deben correrse manualmente en el
 > SQL Editor de Supabase del proyecto Espot. Revisar antes de aplicar.
 
+> **✅ APLICADA 2026-06-26 (auditoría CRM, escala ~500 hosts):**
+> `supabase/migrations/042_host_clients_indexes.sql` corrida en prod — índice por
+> `host_id` y unicidad case-insensitive `(host_id, lower(email))` en `host_clients`.
+> Sin duplicados previos. Los arreglos de código asociados (cuello de botella de
+> `getClientWithHistory`, de-dup case-insensitive y saneo de `searchClients`) ya
+> están en el repo.
+
 > **Actualización 2026-06-25 (re-auditoría — verificada contra la DB de prod):**
 > Se corrió `supabase/VERIFICACION_2026-06-25.sql` en producción. Resultado:
 > - ✅ **Punto 1 (021 RLS WITH CHECK) — RESUELTO.** Aplicada completa (Parte A y B). Los 4

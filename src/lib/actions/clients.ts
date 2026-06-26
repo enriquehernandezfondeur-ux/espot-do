@@ -29,45 +29,48 @@ export async function getClientWithHistory(clientId: string) {
   if (!user) return null
   const { hostId, db } = await resolveHostAccess(supabase, user.id)
 
-  // Pre-cargar IDs de espacios del host para filtrar bookings por pertenencia
-  // (bookings.host_id no existe, la pertenencia se valida via space.host_id)
-  const { data: spaces } = await db
-    .from('spaces')
-    .select('id')
+  const { data: client } = await db
+    .from('host_clients')
+    .select('*')
+    .eq('id', clientId)
     .eq('host_id', hostId)
-  const spaceIds = (spaces ?? []).map((s: any) => s.id)
-
-  const [{ data: client }, { data: events }, { data: allBookings }] = await Promise.all([
-    db
-      .from('host_clients')
-      .select('*')
-      .eq('id', clientId)
-      .eq('host_id', hostId)
-      .single(),
-    db
-      .from('external_events')
-      .select('id, title, event_date, status, total_amount, paid_amount, event_type')
-      .eq('client_id', clientId)
-      .eq('host_id', hostId)
-      .order('event_date', { ascending: false }),
-    spaceIds.length === 0
-      ? Promise.resolve({ data: [] })
-      : db
-          .from('bookings')
-          .select('id, event_date, event_type, total_amount, status, guest:profiles!guest_id(email)')
-          .in('space_id', spaceIds)
-          .order('event_date', { ascending: false }),
-  ])
+    .maybeSingle()
 
   if (!client) return null
 
   // Vincular reservas del marketplace por EMAIL. bookings.client_id no se puebla
   // al reservar, así que el vínculo real con el CRM es el email del huésped
   // (mismo criterio que el de-dup de getUnifiedClients). Sin email no hay match.
-  const clientEmail = (client as any).email?.toLowerCase() ?? null
-  const bookings = clientEmail
-    ? (allBookings ?? []).filter((b: any) => ((b.guest as any)?.email ?? '').toLowerCase() === clientEmail)
-    : []
+  const clientEmail = (client as any).email?.trim().toLowerCase() || null
+
+  const [{ data: events }, bookings] = await Promise.all([
+    db
+      .from('external_events')
+      .select('id, title, event_date, status, total_amount, paid_amount, event_type')
+      .eq('client_id', clientId)
+      .eq('host_id', hostId)
+      .order('event_date', { ascending: false }),
+    // Antes se traían TODAS las reservas de TODOS los espacios del host y se
+    // filtraban por email en JS (escaneo sin límite en cada apertura de ficha).
+    // Ahora el match por email del huésped se hace en la base con un inner join
+    // y un tope; el filtro exacto en JS sólo neutraliza comodines `_`/`%`.
+    (async (): Promise<any[]> => {
+      if (!clientEmail) return []
+      const { data: spaces } = await db.from('spaces').select('id').eq('host_id', hostId)
+      const spaceIds = (spaces ?? []).map((s: any) => s.id)
+      if (!spaceIds.length) return []
+      const { data } = await db
+        .from('bookings')
+        .select('id, event_date, event_type, total_amount, status, guest:profiles!guest_id!inner(email)')
+        .in('space_id', spaceIds)
+        .ilike('guest.email', clientEmail)
+        .order('event_date', { ascending: false })
+        .limit(200)
+      return (data ?? []).filter(
+        (b: any) => ((b.guest as any)?.email ?? '').toLowerCase() === clientEmail,
+      )
+    })(),
+  ])
 
   // Solo cuenta como facturado lo concretado (no canceladas/pendientes/rechazadas)
   const totalRevenue =
@@ -204,7 +207,10 @@ export async function searchClients(query: string): Promise<HostClient[]> {
   if (!user) return []
   const { hostId, db } = await resolveHostAccess(supabase, user.id)
 
-  const q = query.trim().toLowerCase()
+  // Sanear: en un filtro PostgREST `.or()`, las comas/paréntesis son estructura
+  // y `%` es comodín; sin esto una búsqueda con esos caracteres rompe la query
+  // (mismo criterio que space.ts).
+  const q = query.trim().toLowerCase().replace(/[%,()]/g, '')
   if (!q) return []
 
   const { data } = await db
@@ -227,15 +233,18 @@ export async function createClient_(payload: CreateClientPayload) {
   const { hostId, db, canManageClients } = await resolveHostAccess(supabase, user.id)
   if (!canManageClients) return { error: 'No tienes permiso para gestionar clientes' }
 
-  // Verificar si ya existe un cliente con ese email para este host
-  if (payload.email) {
+  // Verificar si ya existe un cliente con ese email para este host. Comparación
+  // insensible a mayúsculas (ilike + verificación exacta en JS para neutralizar
+  // comodines `_`/`%`); `.single()` lanzaba un 406 en el caso común sin match.
+  const emailNorm = payload.email?.trim().toLowerCase() || null
+  if (emailNorm) {
     const { data: existing } = await db
       .from('host_clients')
-      .select('id, full_name')
+      .select('id, full_name, email')
       .eq('host_id', hostId)
-      .eq('email', payload.email)
-      .single()
-    if (existing) return { error: `Ya existe un cliente con ese email: ${existing.full_name}` }
+      .ilike('email', emailNorm)
+    const dup = (existing ?? []).find((c: any) => (c.email ?? '').trim().toLowerCase() === emailNorm)
+    if (dup) return { error: `Ya existe un cliente con ese email: ${dup.full_name}` }
   }
 
   const { data, error } = await db
