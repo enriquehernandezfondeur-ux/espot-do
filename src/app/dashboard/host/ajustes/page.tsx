@@ -6,6 +6,7 @@ import { getClientProfile, updateClientProfile } from '@/lib/actions/client'
 import NotificationSettings from '@/components/dashboard/NotificationSettings'
 import { getOrCreateIcalToken, regenerateIcalToken, getGoogleCalendarStatus, disconnectGoogleCalendar, getBankAccount, saveBankAccount, generateHostSlug } from '@/lib/actions/host'
 import { createClient } from '@/lib/supabase/client'
+import { validateUpload, IMAGE_MIME } from '@/lib/upload-validate'
 import { useSearchParams, useRouter } from 'next/navigation'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
@@ -122,14 +123,15 @@ function AjustesInner() {
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    const check = validateUpload(file, IMAGE_MIME, 5)
+    if (!check.ok) { setError(check.error ?? 'Imagen inválida'); if (fileRef.current) fileRef.current.value = ''; return }
     setUploading(true)
     setError('')
     try {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('No autenticado')
-      const ext  = file.name.split('.').pop() ?? 'jpg'
-      const path = `avatars/${user.id}.${ext}`
+      const path = `avatars/${user.id}.${check.ext}`
       const { error: upErr } = await supabase.storage
         .from('space-images').upload(path, file, { upsert: true, contentType: file.type })
       if (upErr) throw upErr

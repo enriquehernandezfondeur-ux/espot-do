@@ -2,7 +2,9 @@
 
 import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
-import { getBaseFromSub } from '@/lib/activities'
+import { getBaseFromSub, BASE_ACTIVITIES } from '@/lib/activities'
+
+const BASE_ACTIVITY_KEYS = new Set(BASE_ACTIVITIES.map((b) => b.key))
 
 // ── Helpers internos ──────────────────────────────────────
 
@@ -170,8 +172,8 @@ export async function getPublishedSpaces(filters?: {
     }
   }
 
-  // Filtro directo por categoría base
-  if (filters?.baseActivity) {
+  // Filtro directo por categoría base — allowlist (se interpola en el filtro PostgREST)
+  if (filters?.baseActivity && BASE_ACTIVITY_KEYS.has(filters.baseActivity as never)) {
     query = query.or(`primary_activity.eq.${filters.baseActivity},secondary_activities.cs.{${filters.baseActivity}}`)
   }
 

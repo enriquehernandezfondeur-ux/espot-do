@@ -142,7 +142,7 @@ export default function CotizacionesPage() {
     const supabase = createClient()
     const ext  = file.name.split('.').pop()?.toLowerCase() ?? 'bin'
     const path = `chat/${selected!.space_id}/${chatUserId}/${Date.now()}.${ext}`
-    const { error } = await supabase.storage.from('space-images').upload(path, file, { cacheControl: '3600', upsert: false })
+    const { error } = await supabase.storage.from('space-images').upload(path, file, { cacheControl: '3600', upsert: false, contentType: file.type })
     if (error) { setChatError(`Error al subir: ${error.message}`); setUploading(false); return null }
     const { data: { publicUrl } } = supabase.storage.from('space-images').getPublicUrl(path)
     setUploading(false)

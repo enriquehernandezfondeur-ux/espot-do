@@ -23,6 +23,7 @@ import { ProUpsell } from '@/components/ProUpsell'
 import { ProGate } from '@/components/ProGate'
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/bookingConfig'
 import { createClient } from '@/lib/supabase/client'
+import { validateUpload, DOC_MIME } from '@/lib/upload-validate'
 import DatePicker from '@/components/ui/DatePicker'
 import { useConfirm } from '@/components/ui/ConfirmDialog'
 import type { ExternalEvent, ExternalEventStatus, ExternalPaymentMethod } from '@/types'
@@ -863,14 +864,15 @@ function DirectPanel({ event, onClose, onUpdated, onDeleted, showToast }: {
     // Upload receipt if provided
     let receipt_url: string | undefined
     if (receiptFile) {
+      const check = validateUpload(receiptFile, DOC_MIME, 10)
+      if (!check.ok) { showToast(check.error ?? 'Archivo inválido', false); setSaving(false); return }
       const supabase = supabaseRef.current
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const ext  = receiptFile.name.split('.').pop()
-        const path = `${user.id}/receipts/${event.id}/${Date.now()}.${ext}`
+        const path = `${user.id}/receipts/${event.id}/${Date.now()}.${check.ext}`
         const { data: uploaded } = await supabase.storage
           .from('host-documents')
-          .upload(path, receiptFile, { upsert: true })
+          .upload(path, receiptFile, { upsert: true, contentType: receiptFile.type })
         if (uploaded) {
           const { data: { publicUrl } } = supabase.storage.from('host-documents').getPublicUrl(path)
           receipt_url = publicUrl

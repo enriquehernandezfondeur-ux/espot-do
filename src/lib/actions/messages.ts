@@ -2,12 +2,17 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { sendEmailIfEnabled } from '@/lib/email/send'
+import { isUuid } from '@/lib/validate'
 
 // Obtener la conversación entre el usuario actual y OTRO participante sobre un
 // espacio. `otherId` evita que se mezclen hilos de distintos clientes del mismo
 // espacio (el host puede tener varias conversaciones por espacio). Si no se pasa
 // (lado cliente, que solo habla con el host) se devuelven los mensajes del usuario.
 export async function getConversation(spaceId: string, otherId?: string) {
+  // Validar IDs: se interpolan en el filtro `.or()` de PostgREST (evita inyección de filtro).
+  if (!isUuid(spaceId)) return null
+  if (otherId !== undefined && !isUuid(otherId)) return null
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
@@ -47,6 +52,8 @@ export async function sendMessage(
   body: string,
   attachment?: MessageAttachment,
 ) {
+  if (!isUuid(spaceId) || !isUuid(receiverId)) return { error: 'Destino inválido' }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Debes iniciar sesión para enviar mensajes' }
@@ -192,6 +199,8 @@ export async function getMyConversations() {
 // otherId identifica la conversación concreta (el otro participante) para no ocultar
 // todas las conversaciones del mismo espacio.
 export async function hideConversation(spaceId: string, otherId?: string) {
+  if (!isUuid(spaceId)) return { error: 'Conversación inválida' }
+  if (otherId !== undefined && !isUuid(otherId)) return { error: 'Conversación inválida' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
@@ -207,6 +216,8 @@ export async function hideConversation(spaceId: string, otherId?: string) {
 // Marcar mensajes como leídos. Si se pasa `otherId`, solo los recibidos de ese
 // participante (evita marcar leídos los de otro cliente del mismo espacio).
 export async function markMessagesRead(spaceId: string, otherId?: string) {
+  if (!isUuid(spaceId)) return
+  if (otherId !== undefined && !isUuid(otherId)) return
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return

@@ -6,7 +6,7 @@ import { sendEmail } from '@/lib/email/send'
 import { tplEventoDirectoConfirmado, tplEventoDirectoCancelado, tplNuevaSolicitudDirectaHost, tplSolicitudDirectaCliente } from '@/lib/email/templates'
 import { createServiceClient } from '@/lib/supabase/service'
 import { createBookingEvent, deleteBookingEvent, isGoogleCalendarConfigured } from '@/lib/google-calendar'
-import { formatDate } from '@/lib/utils'
+import { formatDate, escapeHtml } from '@/lib/utils'
 import type { ExternalEvent, ExternalEventStatus, ExternalEventSource, ExternalPaymentMethod } from '@/types'
 import { resolveHostId } from './_resolveHost'
 import { requirePro, isHostProById } from './subscription'
@@ -589,12 +589,12 @@ export async function notifyPaymentMade(eventId: string, clientNote?: string) {
         <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px">
           <h2 style="color:#0F1623;margin-bottom:8px">Notificación de pago recibida</h2>
           <p style="color:#374151">
-            <strong>${(event as any).client_name ?? 'Tu cliente'}</strong>
+            <strong>${escapeHtml((event as any).client_name ?? 'Tu cliente')}</strong>
             indica que realizó una transferencia para el evento
-            <strong>${(event as any).title}</strong>
-            (${(event as any).event_date}).
+            <strong>${escapeHtml((event as any).title)}</strong>
+            (${escapeHtml((event as any).event_date)}).
           </p>
-          ${clientNote ? `<p style="background:#F3F4F6;padding:12px 16px;border-radius:8px;color:#374151">"${clientNote}"</p>` : ''}
+          ${clientNote ? `<p style="background:#F3F4F6;padding:12px 16px;border-radius:8px;color:#374151">"${escapeHtml(clientNote)}"</p>` : ''}
           <a href="${SITE}/dashboard/host/eventos/${eventId}"
             style="display:inline-block;margin-top:16px;background:var(--brand);color:#fff;padding:12px 24px;border-radius:50px;text-decoration:none;font-weight:700">
             Ver evento →

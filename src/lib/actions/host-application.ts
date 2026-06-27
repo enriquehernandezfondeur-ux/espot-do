@@ -46,9 +46,10 @@ export async function getMyApplication(): Promise<HostApplication | null> {
 }
 
 export async function getApplication(id: string): Promise<HostApplication | null> {
+  // Solo admin: estas lecturas exponen PII (nombre, email, teléfono) del aplicante.
+  const admin = await assertAdmin()
+  if (!admin) return null
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
 
   const { data } = await supabase
     .from('host_applications')
@@ -62,9 +63,10 @@ export async function getApplication(id: string): Promise<HostApplication | null
 export async function getApplications(
   filter: ApplicationStatus | 'all' = 'all'
 ): Promise<HostApplication[]> {
+  // Solo admin: enumera PII de todos los aplicantes.
+  const admin = await assertAdmin()
+  if (!admin) return []
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return []
 
   let query = supabase
     .from('host_applications')
@@ -105,6 +107,13 @@ export async function submitApplication(
   }
   if (payload.description.length < 50) {
     return { success: false, error: 'La descripción debe tener al menos 50 caracteres' }
+  }
+  if (payload.description.length > 5000) {
+    return { success: false, error: 'La descripción es demasiado larga (máx. 5000 caracteres)' }
+  }
+  if (payload.capacity_estimate != null &&
+      (!Number.isFinite(payload.capacity_estimate) || payload.capacity_estimate < 0 || payload.capacity_estimate > 100000)) {
+    return { success: false, error: 'La capacidad estimada no es válida' }
   }
 
   // Check if user already has an active application

@@ -15,6 +15,7 @@ import { createInstallments } from '@/lib/actions/installments'
 import { sendWhatsAppToUser, wa } from '@/lib/whatsapp/send'
 import { resolveHostId } from '@/lib/actions/_resolveHost'
 import { computeBasePrice, computePlatformFee } from '@/lib/pricing'
+import { isTime } from '@/lib/validate'
 export type { BookingStatus } from '@/lib/bookingConfig'
 
 const SITE        = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
@@ -41,6 +42,11 @@ export interface CreateBookingPayload {
 }
 
 export async function createBooking(payload: CreateBookingPayload) {
+  // Validar formato de hora: startTime/endTime se interpolan en el filtro `.or()`
+  // de solapamiento (fallback). Rechaza valores que no sean HH:MM.
+  if (payload.startTime && !isTime(payload.startTime)) return { error: 'Hora de inicio inválida' }
+  if (payload.endTime && !isTime(payload.endTime)) return { error: 'Hora de fin inválida' }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Debes iniciar sesión para hacer una reserva' }

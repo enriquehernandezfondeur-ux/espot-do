@@ -8,6 +8,7 @@ import { formatCurrency, formatDate, formatTime, cn } from '@/lib/utils'
 import { CalendarDays, Plus, Search, Loader2, Check, X, CalendarCheck, Paperclip, Copy, Link2 } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { validateUpload, DOC_MIME } from '@/lib/upload-validate'
 import type { ExternalEvent, ExternalEventStatus, ExternalPaymentMethod } from '@/types'
 import { EXTERNAL_EVENT_STATUS } from '@/lib/statusConfig'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -253,14 +254,15 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
 
     let receipt_url: string | undefined
     if (receiptFile) {
+      const check = validateUpload(receiptFile, DOC_MIME, 10)
+      if (!check.ok) { alert(check.error); setSaving(false); return }
       const supabase = supabaseRef.current
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const ext  = receiptFile.name.split('.').pop()
-        const path = `${user.id}/receipts/${event.id}/${Date.now()}.${ext}`
+        const path = `${user.id}/receipts/${event.id}/${Date.now()}.${check.ext}`
         const { data: uploaded } = await supabase.storage
           .from('host-documents')
-          .upload(path, receiptFile, { upsert: true })
+          .upload(path, receiptFile, { upsert: true, contentType: receiptFile.type })
         if (uploaded) {
           const { data: { publicUrl } } = supabase.storage.from('host-documents').getPublicUrl(path)
           receipt_url = publicUrl
