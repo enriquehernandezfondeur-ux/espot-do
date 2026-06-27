@@ -7,6 +7,7 @@ import { tplEventoDirectoConfirmado, tplEventoDirectoCancelado, tplNuevaSolicitu
 import { createServiceClient } from '@/lib/supabase/service'
 import { createBookingEvent, deleteBookingEvent, isGoogleCalendarConfigured } from '@/lib/google-calendar'
 import { formatDate, escapeHtml } from '@/lib/utils'
+import { isUuid } from '@/lib/validate'
 import type { ExternalEvent, ExternalEventStatus, ExternalEventSource, ExternalPaymentMethod } from '@/types'
 import { resolveHostId } from './_resolveHost'
 import { requirePro, isHostProById } from './subscription'
@@ -550,7 +551,10 @@ export async function createFromPublicForm(payload: PublicFormPayload) {
 }
 
 // ── Datos públicos de evento para link de pago ────────────────
-export async function getExternalEventForPayment(eventId: string) {
+// A-1: la llave del enlace público es `payment_token` (no adivinable), NO el id
+// crudo del evento. Service-role + sin auth → solo se accede con el token correcto.
+export async function getExternalEventForPayment(token: string) {
+  if (!isUuid(token)) return null
   const sb = createServiceClient()
   const { data } = await sb
     .from('external_events')
@@ -562,19 +566,20 @@ export async function getExternalEventForPayment(eventId: string) {
       space:spaces(name, city),
       bank:host_bank_accounts(account_holder, bank_name, account_type, account_number, cedula_or_rnc)
     `)
-    .eq('id', eventId)
+    .eq('payment_token', token)
     .single()
   return data ?? null
 }
 
 // ── Cliente notifica que realizó transferencia ────────────────
-export async function notifyPaymentMade(eventId: string, clientNote?: string) {
+export async function notifyPaymentMade(token: string, clientNote?: string) {
+  if (!isUuid(token)) return { error: 'Enlace inválido' }
   const sb = createServiceClient()
 
   const { data: event } = await sb
     .from('external_events')
     .select('id, title, event_date, client_name, host_id, host:profiles!host_id(email, full_name)')
-    .eq('id', eventId)
+    .eq('payment_token', token)
     .single()
 
   if (!event) return { error: 'Evento no encontrado' }
@@ -595,7 +600,7 @@ export async function notifyPaymentMade(eventId: string, clientNote?: string) {
             (${escapeHtml((event as any).event_date)}).
           </p>
           ${clientNote ? `<p style="background:#F3F4F6;padding:12px 16px;border-radius:8px;color:#374151">"${escapeHtml(clientNote)}"</p>` : ''}
-          <a href="${SITE}/dashboard/host/eventos/${eventId}"
+          <a href="${SITE}/dashboard/host/eventos/${(event as any).id}"
             style="display:inline-block;margin-top:16px;background:var(--brand);color:#fff;padding:12px 24px;border-radius:50px;text-decoration:none;font-weight:700">
             Ver evento →
           </a>

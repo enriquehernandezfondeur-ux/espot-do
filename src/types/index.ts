@@ -246,6 +246,8 @@ export interface ExternalEvent {
   paid_amount: number
   notes?: string
   source: ExternalEventSource
+  /** Token no adivinable para el enlace público de pago (/pago/evento/[token]). */
+  payment_token?: string
   created_at: string
   updated_at: string
   // joins opcionales

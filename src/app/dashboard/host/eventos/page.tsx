@@ -381,7 +381,7 @@ function EventDetailPanel({ event, onClose, onUpdated, onDeleted }: {
         {(event.total_amount ?? 0) > 0 && (event.paid_amount ?? 0) < (event.total_amount ?? 0) && (
           <button
             onClick={() => {
-              const url = `${SITE}/pago/evento/${event.id}`
+              const url = `${SITE}/pago/evento/${event.payment_token ?? event.id}`
               navigator.clipboard.writeText(url)
               setLinkCopied(true)
               setTimeout(() => setLinkCopied(false), 2500)

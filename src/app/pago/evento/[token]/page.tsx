@@ -6,19 +6,19 @@ import { formatCurrency, formatDate } from '@/lib/utils'
 import { CheckCircle2 } from 'lucide-react'
 
 interface Props {
-  params: Promise<{ eventId: string }>
+  params: Promise<{ token: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { eventId } = await params
-  const event = await getExternalEventForPayment(eventId)
+  const { token } = await params
+  const event = await getExternalEventForPayment(token)
   if (!event) return { title: 'No encontrado' }
   return { title: `Pago — ${(event as any).title} — Espot` }
 }
 
 export default async function DirectEventPaymentPage({ params }: Props) {
-  const { eventId } = await params
-  const event = await getExternalEventForPayment(eventId)
+  const { token } = await params
+  const event = await getExternalEventForPayment(token)
   if (!event) notFound()
 
   const ev = event as any
@@ -99,7 +99,7 @@ export default async function DirectEventPaymentPage({ params }: Props) {
         {/* Payment options */}
         {remaining > 0 && (
           <PaymentClient
-            eventId={eventId}
+            token={token}
             bank={bank}
             remaining={remaining}
             hostName={host.full_name ?? 'el organizador'}

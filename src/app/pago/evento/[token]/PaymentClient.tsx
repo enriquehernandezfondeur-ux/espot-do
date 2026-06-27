@@ -14,13 +14,13 @@ interface BankInfo {
 }
 
 interface Props {
-  eventId:  string
+  token:     string
   bank:     BankInfo | null
   remaining: number
   hostName: string
 }
 
-export default function PaymentClient({ eventId, bank, remaining, hostName }: Props) {
+export default function PaymentClient({ token, bank, remaining, hostName }: Props) {
   const [note,    setNote]    = useState('')
   const [loading, setLoading] = useState(false)
   const [sent,    setSent]    = useState(false)
@@ -35,7 +35,7 @@ export default function PaymentClient({ eventId, bank, remaining, hostName }: Pr
 
   async function handleNotify() {
     setLoading(true)
-    await notifyPaymentMade(eventId, note.trim() || undefined)
+    await notifyPaymentMade(token, note.trim() || undefined)
     setLoading(false)
     setSent(true)
   }
