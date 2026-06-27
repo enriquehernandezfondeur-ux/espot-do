@@ -27,6 +27,8 @@ type TableConfig = TableResponse | TableResponse[]
 export interface SupabaseMockOptions {
   user?: { id: string } | null
   tables?: Record<string, TableConfig>
+  /** Respuesta de supabase.rpc(...). Default { data: null, error: null }. */
+  rpc?: TableResponse
 }
 
 const CHAIN_METHODS = [
@@ -60,13 +62,17 @@ export interface SupabaseMock {
   client: {
     auth: { getUser: () => Promise<{ data: { user: { id: string } | null }; error: null }> }
     from: (table: string) => QueryBuilder
+    rpc: (...args: unknown[]) => Promise<TableResponse>
   }
   /** Tablas consultadas, en orden. */
   calls: string[]
+  /** Nombres de RPC invocados, en orden. */
+  rpcCalls: string[]
 }
 
 export function makeSupabaseMock(opts: SupabaseMockOptions = {}): SupabaseMock {
   const calls: string[] = []
+  const rpcCalls: string[] = []
   const counters: Record<string, number> = {}
 
   const resolveFor = (table: string): TableResponse => {
@@ -88,7 +94,11 @@ export function makeSupabaseMock(opts: SupabaseMockOptions = {}): SupabaseMock {
       calls.push(table)
       return new QueryBuilder(resolveFor(table))
     },
+    async rpc(...args: unknown[]) {
+      rpcCalls.push(String(args[0] ?? ''))
+      return opts.rpc ?? { data: null, error: null }
+    },
   }
 
-  return { client, calls }
+  return { client, calls, rpcCalls }
 }
