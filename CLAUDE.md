@@ -89,7 +89,7 @@ Prioriza: `/autoplan`, `/plan-ceo-review`, `/plan-eng-review`, `/review`, `/inve
 - Fondo oscuro → `logo-green.svg`; fondo claro → `logo-dark.svg`. Nunca distorsionar (`viewBox="0 0 1682.16 585.47"`). Altura mínima 22px navbar / 28px headers. No recrear en HTML/CSS.
 
 ## Tipografía oficial
-- **TypoGraphica Regular** — display/headlines (comercial, NO Google Font). ⚠️ PENDIENTE DE INSTALAR en `public/fonts/`. Variable objetivo `--font-typographica`; fallback `var(--font-poppins)` 800/900.
+- **TypoGraphica Regular** — display/headlines (comercial, NO Google Font). ✅ INSTALADA: `public/fonts/typographica.woff2` + `.woff`, cargada vía `@font-face` en `globals.css` y expuesta como `--font-display`/`.font-display`. Fallback `var(--font-poppins)` 800/900.
 - **Poppins** (Google Fonts) — UI y cuerpo, vía `next/font/google` en `src/app/layout.tsx` (`--font-poppins`). Medium (500) para UI; Light (300) para cuerpo.
 - `font-size: 16px` mínimo en inputs (anti-zoom iOS). `letter-spacing: -0.02em..-0.04em` en títulos. Nunca usar Inter/Geist.
 

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { resolveHostAccess } from './_resolveHost'
 import { requirePro } from './subscription'
+import { dedupeEspotGuests } from '@/lib/clients-dedup'
 import type { HostClient, ClientSource } from '@/types'
 
 export interface CreateClientPayload {
@@ -136,25 +137,14 @@ export async function getUnifiedClients() {
     .not('guest_id', 'is', null)
 
   // De-dup entre canales por email y por teléfono normalizado (últimos 10 dígitos).
-  const normPhone = (p: string | null | undefined) => (p ?? '').replace(/\D/g, '').slice(-10)
-  const directEmails = new Set(direct.map((c: any) => c.email?.toLowerCase()).filter(Boolean))
-  const directPhones = new Set(direct.map((c: any) => normPhone(c.phone)).filter((p) => p.length >= 7))
-  const seenGuestIds = new Set<string>()
-  const espotGuests: HostClient[] = []
-
-  for (const b of bookings ?? []) {
-    const g = (b as any).guest
-    if (!g || seenGuestIds.has(g.id)) continue
-    seenGuestIds.add(g.id)
-    if (g.email && directEmails.has(g.email.toLowerCase())) continue
-    const gp = normPhone(g.phone)
-    if (gp.length >= 7 && directPhones.has(gp)) continue
-    espotGuests.push({
+  // Lógica pura extraída a src/lib/clients-dedup.ts (testeable sin Supabase).
+  const espotGuests: HostClient[] = dedupeEspotGuests(direct as any[], (bookings ?? []) as any[])
+    .map((g) => ({
       id:        g.id,
       host_id:   hostId,
-      full_name: g.full_name ?? 'Cliente Espot',
-      email:     g.email ?? null,
-      phone:     g.phone ?? null,
+      full_name: g.full_name,
+      email:     g.email,
+      phone:     g.phone,
       company:   null,
       notes:     null,
       tags:      [],
@@ -163,8 +153,7 @@ export async function getUnifiedClients() {
       // por guest_id y para ocultar Editar/Eliminar en huéspedes Espot.
       _is_espot_guest: true,
       created_at: '',
-    } as any)
-  }
+    } as any))
 
   return [...direct, ...espotGuests.sort((a, b) => a.full_name.localeCompare(b.full_name))]
 }

@@ -88,7 +88,7 @@ Una plataforma marketplace completa donde:
 - [x] iCal + Google Calendar sync
 
 ### Próximo trimestre
-- [ ] Integración Google Maps API para geocoding preciso
+- [x] Integración Google Maps API para geocoding preciso (host: autocomplete Places + pin en `LocationPicker`). Pendiente menor: backfill de lat/lng en espacios legacy/seed sin coordenadas (hoy caen al centro de ciudad con jitter en `SpacesMap`).
 - [ ] App móvil (iOS + Android)
 - [ ] Programa de propietarios destacados ("Superhost")
 - [ ] Seguro de evento opcional
