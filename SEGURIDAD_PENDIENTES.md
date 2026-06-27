@@ -8,36 +8,30 @@ requieren una acción manual, una decisión, o pruebas en un entorno real.
 
 ---
 
-## 🟡 Pendientes de CÓDIGO (requieren tu validación antes de mergear)
+## 🟡 Pendiente de CÓDIGO
 
-### M-5 — CSP: quitar `'unsafe-inline'` y `'unsafe-eval'` de `script-src`
-- **Dónde:** `next.config.ts:53` (header estático).
-- **Por qué falta:** hacerlo bien exige migrar la CSP a **nonce vía middleware** (`proxy.ts`),
-  y deben seguir funcionando: scripts de hidratación de Next, el loader de Google Maps
-  (inyecta `<script>` dinámicamente), Places y el widget de behold.so.
-- **Riesgo:** un CSP mal puesto **tumba espot.do** (pantalla en blanco / mapas rotos),
-  de forma silenciosa. La API key de Maps suele estar restringida por dominio, así que
-  un test en localhost NO es concluyente.
+### M-5 — CSP: quitar `'unsafe-inline'`/`'unsafe-eval'` de `script-src` (NO trivial)
+- **Dónde:** `next.config.ts` (header estático).
+- **Intentado el 2026-06-26 y revertido con evidencia:** implementé CSP con nonce por
+  request en el middleware y lo probé en local. Resultado:
+  - Páginas **dinámicas** (`/buscar`): Next aplica el nonce a sus 28 scripts ✅.
+  - Páginas **estáticas** (`/terminos`, `/privacidad`, etc.): **0 scripts reciben el nonce**
+    (se prerenderan en build, sin nonce per-request) → con `'strict-dynamic'` quedarían
+    **bloqueadas** = páginas rotas. Además la CSP de respuesta no se emitía en ningún caso
+    (quedaba el sitio SIN CSP, peor que ahora).
 - **Plan correcto (otro día):**
-  1. Implementar CSP con nonce por request en `proxy.ts`:
-     `script-src 'self' 'nonce-<nonce>' 'strict-dynamic' https:` (sin unsafe-inline/eval).
-  2. Desplegar a un **preview de Vercel** (no a `main`).
-  3. Verificar en el navegador, en el preview: homepage, `/buscar` (mapa), detalle de
-     espacio (mapa), y `LocationPicker` del host (Places autocomplete). Revisar la consola
-     por violaciones de CSP y que los mapas carguen.
+  1. Forzar render **dinámico** en todas las páginas (o al menos las estáticas afectadas)
+     para que Next pueda estampar el nonce per-request — asumiendo el costo de perder la
+     optimización estática de las páginas de marketing.
+  2. Asegurar que la CSP de respuesta SÍ se emita (la integración del nonce de Next no la
+     setea sola).
+  3. Desplegar a un **preview de Vercel** y verificar en navegador: homepage, `/buscar`
+     (mapa), detalle de espacio (mapa), `LocationPicker` (Places), widget behold. Revisar
+     consola por violaciones de CSP.
   4. Solo si todo OK → merge a `main`.
-- **Severidad:** Media (defensa en profundidad). Hoy NO hay vector XSS activo: React escapa
-  por defecto, no hay `dangerouslySetInnerHTML`, y los sinks de email/uploads ya se taparon.
-
-### B-3 — Email superadmin: fail-closed en vez de fallback hardcodeado
-- **Dónde:** múltiples archivos con `process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'`
-  (p.ej. `admin/migrate`, `fix-pricing`, `cleanup-spaces`, `payments/confirm`, `host-application.ts`).
-- **Qué falta:** que el control de superadmin **falle cerrado** si la env var no está,
-  en vez de caer a un email hardcodeado.
-- **Por qué no se hizo:** si `SUPERADMIN_EMAIL` NO está en Vercel, activar el fail-closed
-  **te deja sin acceso admin**.
-- **Acción (otro día):** confirmar que `SUPERADMIN_EMAIL` está seteada en Vercel → avisar
-  y se activa el fail-closed (cambio de 1 minuto). **Severidad: Baja.**
+- **Severidad:** Media (defensa en profundidad). Hoy NO hay vector XSS activo: React escapa,
+  no hay `dangerouslySetInnerHTML`, y los sinks de email/uploads ya se taparon. Por eso es
+  defendible dejarlo como riesgo aceptado hasta poder hacerlo bien con preview.
 
 ---
 
@@ -62,5 +56,6 @@ requieren una acción manual, una decisión, o pruebas en un entorno real.
 - **M-4:** check de Origin (CSRF) en rutas mutantes (`src/lib/csrf.ts`).
 - **M-6:** `proxy.ts` lee `PREVIEW_HMAC_SECRET` (arregla bug latente del gate).
 - **B-1:** escapeHtml en `notifyPaymentMade`. **B-2:** no se loguea `azulParams` completo.
+- **B-3:** email superadmin centralizado en `src/lib/superadmin.ts` (saca el hardcode de ~15 archivos; case-insensitive; warning en prod si falta la env var).
 - **B-6:** validación `HH:MM` + allowlist `baseActivity`. **B-9:** rangos en `submitApplication`.
 - **Deps:** `npm audit fix` (vuln alta `ws` + moderada `uuid` resueltas).
