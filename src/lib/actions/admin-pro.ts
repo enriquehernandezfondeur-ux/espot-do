@@ -13,7 +13,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 // Todas gateadas por requireAdmin (servicio-rol, bypass RLS).
 // ============================================================
 
-const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
+import { SUPERADMIN_EMAIL } from '@/lib/superadmin'
 const LIVE = ['trialing', 'active', 'pending_payment', 'past_due', 'suspended']
 const DAY_MS = 86_400_000
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { forbiddenIfCrossOrigin } from '@/lib/csrf'
+import { isSuperadmin } from '@/lib/superadmin'
 
 const PLATFORM_FEE = 10
 const IMAGE_BUCKET = 'space-images'
@@ -50,7 +51,7 @@ export async function POST(req: NextRequest) {
 
   // Solo superadmin
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin' && user.email !== (process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'))
+  if (profile?.role !== 'admin' && !isSuperadmin(user.email))
     return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
 
   const { records = [], dryRun = false } = await req.json()

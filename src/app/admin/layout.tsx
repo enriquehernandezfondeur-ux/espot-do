@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import AdminSidebar from '@/components/admin/AdminSidebar'
+import { isSuperadmin } from '@/lib/superadmin'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -11,7 +12,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const { data: profile } = await supabase
     .from('profiles').select('role').eq('id', user.id).single()
 
-  const isSuperAdmin = user.email === (process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com')
+  const isSuperAdmin = isSuperadmin(user.email)
   if (!isSuperAdmin && profile?.role !== 'admin') redirect('/')
 
   return (

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import Sidebar from '@/components/dashboard/Sidebar'
 import MessageNotificationProvider from '@/components/providers/MessageNotificationProvider'
 import { resolveHostId } from '@/lib/actions/_resolveHost'
+import { isSuperadmin } from '@/lib/superadmin'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -23,7 +24,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     if (!hostProfile || hostProfile.role !== 'host') redirect('/auth')
   }
 
-  const isAdmin = user.email === (process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com')
+  const isAdmin = isSuperadmin(user.email)
 
   // Para usuarios de Google/Apple OAuth el nombre puede estar solo en
   // user_metadata (no en profiles.full_name) — usarlo como fallback.

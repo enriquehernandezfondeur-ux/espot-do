@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
-
-const SUPERADMIN = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
+import { isSuperadmin } from '@/lib/superadmin'
 
 // POST /api/admin/sync-avatars
 // Sincroniza avatar_url desde auth.users.raw_user_meta_data → profiles
@@ -10,7 +9,7 @@ const SUPERADMIN = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmai
 export async function POST() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user || user.email !== SUPERADMIN) {
+  if (!user || !isSuperadmin(user.email)) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
 

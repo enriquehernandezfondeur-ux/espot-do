@@ -11,7 +11,7 @@ import { resolvePlan } from '@/lib/plans'
 import { logAdminAction } from '@/lib/actions/admin-audit'
 import { startAutoTrialIfEnabled } from '@/lib/proTrial'
 
-const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
+import { SUPERADMIN_EMAIL } from '@/lib/superadmin'
 
 async function requireAdmin() {
   // Verificar identidad con cliente anon (lee la sesión del usuario)

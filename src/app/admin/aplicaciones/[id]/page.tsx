@@ -12,6 +12,7 @@ import Link from 'next/link'
 import { ArrowLeft, Phone, Check, X, Info } from 'lucide-react'
 import ConfirmSubmitButton from '@/components/admin/ConfirmSubmitButton'
 import { getCategoryLabel } from '@/lib/categories'
+import { isSuperadmin } from '@/lib/superadmin'
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
   pending_admin:  { label: 'Pendiente revisión', color: '#D97706', bg: 'rgba(234,179,8,0.1)' },
@@ -47,7 +48,7 @@ export default async function AplicacionDetailPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth')
 
-  const isSuperAdmin = user.email === (process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com')
+  const isSuperAdmin = isSuperadmin(user.email)
   if (!isSuperAdmin) {
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
     if (profile?.role !== 'admin') redirect('/admin')

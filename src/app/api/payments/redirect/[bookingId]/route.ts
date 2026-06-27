@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { buildPaymentPageFields } from '@/lib/azul/client'
 import { createClient } from '@/lib/supabase/server'
 import { escapeHtml } from '@/lib/utils'
+import { isSuperadmin } from '@/lib/superadmin'
 
 export const maxDuration = 30
 
 // GET /api/payments/redirect/[bookingId]?amount=1500
 // Verifica que la reserva pertenece al usuario autenticado antes de redirigir a Azul.
-const SUPERADMIN = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
 
 export async function GET(
   req: NextRequest,
@@ -124,7 +124,7 @@ export async function GET(
     // Modo test exacto: usa los valores del ejemplo oficial de Azul para verificar el hash
     // Solo disponible para el superadmin — nunca en producción ni para usuarios normales
     if (isTestExact) {
-      if (process.env.NODE_ENV === 'production' || currentUserEmail !== SUPERADMIN) {
+      if (process.env.NODE_ENV === 'production' || !isSuperadmin(currentUserEmail)) {
         return new NextResponse(errorHtml('No autorizado.'), {
           status: 403, headers: { 'Content-Type': 'text/html' },
         })
@@ -181,7 +181,7 @@ OrderNumber: <strong>${ORDER}</strong> · Amount: <strong>${AMT}</strong> · ITB
     // Modo debug: prueba todas las combinaciones de MerchantName y MerchantType
     // Solo disponible para el superadmin — nunca en producción
     if (isDebug) {
-      if (process.env.NODE_ENV === 'production' || currentUserEmail !== SUPERADMIN) {
+      if (process.env.NODE_ENV === 'production' || !isSuperadmin(currentUserEmail)) {
         return new NextResponse(errorHtml('No autorizado.'), {
           status: 403, headers: { 'Content-Type': 'text/html' },
         })

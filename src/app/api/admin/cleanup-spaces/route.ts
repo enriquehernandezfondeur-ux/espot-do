@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { forbiddenIfCrossOrigin } from '@/lib/csrf'
+import { isSuperadmin } from '@/lib/superadmin'
 
 // Los slugs que SÍ deben existir (migración oficial)
 const KEEP_SLUGS = [
@@ -49,8 +50,7 @@ export async function GET(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
 
-  const superadmin = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
-  if (user.email !== superadmin) return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+  if (!isSuperadmin(user.email)) return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
 
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!serviceKey) return NextResponse.json({ error: 'SUPABASE_SERVICE_ROLE_KEY no configurada' }, { status: 500 })
@@ -78,8 +78,7 @@ export async function DELETE(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
 
-  const superadmin = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
-  if (user.email !== superadmin) return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+  if (!isSuperadmin(user.email)) return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
 
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!serviceKey) return NextResponse.json({ error: 'SUPABASE_SERVICE_ROLE_KEY no configurada' }, { status: 500 })

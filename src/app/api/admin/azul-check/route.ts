@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { isSuperadmin } from '@/lib/superadmin'
 
 // GET /api/admin/azul-check
 // Solo accesible por el superadmin. Muestra el estado de las variables de Azul
@@ -7,7 +8,7 @@ import { createClient } from '@/lib/supabase/server'
 export async function GET() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user || user.email !== (process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com')) {
+  if (!user || !isSuperadmin(user.email)) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
   }
 

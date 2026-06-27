@@ -15,7 +15,7 @@ import {
 import type { HostApplication, ApplicationStatus } from '@/types'
 
 const ADMIN_EMAIL   = process.env.ADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
-const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
+import { SUPERADMIN_EMAIL } from '@/lib/superadmin'
 const SITE          = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 
 // Verifica que el usuario autenticado sea superadmin o tenga role='admin'.

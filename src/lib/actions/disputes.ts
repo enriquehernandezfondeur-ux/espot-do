@@ -5,6 +5,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { logAdminAction } from '@/lib/actions/admin-audit'
 import { sendEmail } from '@/lib/email/send'
 import { tplDisputaAbierta } from '@/lib/email/templates'
+import { isSuperadmin } from '@/lib/superadmin'
 
 const SITE        = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'contacto@espot.do'
@@ -345,8 +346,7 @@ export async function updateDisputeStatus(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
-  const SUPERADMIN = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
-  if (user.email !== SUPERADMIN) {
+  if (!isSuperadmin(user.email)) {
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
     if (profile?.role !== 'admin') return { error: 'No autorizado' }
   }

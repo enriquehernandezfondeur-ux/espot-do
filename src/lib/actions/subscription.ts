@@ -12,7 +12,7 @@ import { formatDate, escapeHtml } from '@/lib/utils'
 // (refleja el índice único parcial). Incluye prueba y suspensión.
 const LIVE_STATUSES = ['trialing', 'active', 'pending_payment', 'past_due', 'suspended'] as const
 const DAY_MS = 86_400_000
-const SUPERADMIN_EMAIL = process.env.SUPERADMIN_EMAIL ?? 'enriquehernandezfondeur@gmail.com'
+import { SUPERADMIN_EMAIL } from '@/lib/superadmin'
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://espot.do'
 
 /**
