@@ -9,11 +9,13 @@ import { markInstallmentPaid, getInstallments } from '@/lib/actions/installments
 import { computePlatformFee } from '@/lib/pricing'
 import { createBookingEvent } from '@/lib/google-calendar'
 import { sendWhatsAppToUser, wa } from '@/lib/whatsapp/send'
+import { forbiddenIfCrossOrigin } from '@/lib/csrf'
 
 // POST /api/payments/confirm
 // Body: los query params que Azul envió al ApprovedUrl
 // Verifica la firma HMAC y confirma la reserva en la base de datos.
 export async function POST(req: NextRequest) {
+  const bad = forbiddenIfCrossOrigin(req); if (bad) return bad
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })

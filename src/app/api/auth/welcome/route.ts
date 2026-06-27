@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/email/send'
 import { tplBienvenida } from '@/lib/email/templates'
+import { forbiddenIfCrossOrigin } from '@/lib/csrf'
 
 // POST /api/auth/welcome
 // Llamado desde el cliente después de un registro exitoso.
 // Requiere sesión autenticada para evitar spam.
 export async function POST(req: NextRequest) {
+  const bad = forbiddenIfCrossOrigin(req); if (bad) return bad
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()

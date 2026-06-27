@@ -4,6 +4,11 @@ import { createServerClient } from '@supabase/ssr'
 import { createHmac } from 'crypto'
 
 const SITE_PASSWORD   = process.env.SITE_PASSWORD
+// M-6: leer el secreto de la env var (igual que /api/acceso). Antes estaba el literal
+// hardcodeado, lo que además rompía el gate si se seteaba PREVIEW_HMAC_SECRET (acceso
+// lo usaba y proxy no → tokens incompatibles). El fallback conserva el comportamiento
+// actual cuando la env var no está definida.
+const HMAC_SECRET     = process.env.PREVIEW_HMAC_SECRET ?? 'espot-preview-v1'
 const COOKIE_NAME     = 'espot_preview_access'
 const ALLOWED_ORIGINS = [
   'https://espothub.com',
@@ -13,7 +18,7 @@ const ALLOWED_ORIGINS = [
 ]
 
 function buildAccessToken(password: string): string {
-  return createHmac('sha256', 'espot-preview-v1').update(password).digest('hex')
+  return createHmac('sha256', HMAC_SECRET).update(password).digest('hex')
 }
 const AUTH_ROUTES   = ['/dashboard', '/admin']
 

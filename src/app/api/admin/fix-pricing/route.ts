@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { forbiddenIfCrossOrigin } from '@/lib/csrf'
 
 // Mapa de slug → pricing correcto (extraído del JSON de migración oficial)
 const PRICING_MAP: Record<string, { type: string; price: number; min_hours?: number; session_hours?: number; package_hours?: number; package_name?: string }> = {
@@ -107,6 +108,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const bad = forbiddenIfCrossOrigin(req); if (bad) return bad
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })

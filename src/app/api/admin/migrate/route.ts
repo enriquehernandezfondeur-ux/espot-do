@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { forbiddenIfCrossOrigin } from '@/lib/csrf'
 
 const PLATFORM_FEE = 10
 const IMAGE_BUCKET = 'space-images'
@@ -42,6 +43,7 @@ async function downloadImage(url: string): Promise<{ buffer: Buffer; contentType
 // POST /api/admin/migrate
 // Body: { records: MigrationRecord[], dryRun?: boolean }
 export async function POST(req: NextRequest) {
+  const bad = forbiddenIfCrossOrigin(req); if (bad) return bad
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })

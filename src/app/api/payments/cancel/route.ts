@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { forbiddenIfCrossOrigin } from '@/lib/csrf'
 
 // POST /api/payments/cancel
 // Resetea el payment_status de 'processing' a 'payment_pending'
 // para que el usuario pueda reintentar el pago.
 export async function POST(req: NextRequest) {
+  const bad = forbiddenIfCrossOrigin(req); if (bad) return bad
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })

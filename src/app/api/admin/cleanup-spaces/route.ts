@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { forbiddenIfCrossOrigin } from '@/lib/csrf'
 
 // Los slugs que SÍ deben existir (migración oficial)
 const KEEP_SLUGS = [
@@ -72,6 +73,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  const bad = forbiddenIfCrossOrigin(req); if (bad) return bad
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
